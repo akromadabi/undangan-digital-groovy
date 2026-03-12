@@ -184,10 +184,10 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
     const livePct = liveStats.total > 0 ? Math.round((liveStats.checked_in / liveStats.total) * 100) : 0;
 
     const tabs = [
-        { key: 'tamu', label: 'Daftar Tamu', count: totalGuests },
+        { key: 'tamu', label: 'Daftar', count: totalGuests },
         { key: 'rsvp', label: 'RSVP', count: rsvpList.length },
-        { key: 'guestbook', label: 'Guestbook', count: wishList.length },
-        { key: 'live', label: 'Live Tamu', count: liveStats.checked_in },
+        { key: 'guestbook', label: 'Ucapan', count: wishList.length },
+        { key: 'live', label: 'Live', count: liveStats.checked_in },
     ];
 
     return (
@@ -201,36 +201,36 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                 )}
 
                 {/* ═══ Summary Counters ═══ */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                        <div className="text-2xl font-bold text-gray-800">{totalGuests}</div>
-                        <div className="text-xs text-gray-500 mt-1">Total Tamu</div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="bg-white rounded-xl border border-gray-200 p-3 text-center">
+                        <div className="text-xl font-bold text-gray-800">{totalGuests}</div>
+                        <div className="text-[10px] text-gray-500 mt-0.5">Total Tamu</div>
                     </div>
-                    <div className="bg-emerald-50 rounded-xl border border-emerald-100 p-4 text-center">
-                        <div className="text-2xl font-bold text-emerald-600">{rsvpStats?.hadir || 0}</div>
-                        <div className="text-xs text-emerald-500 mt-1">RSVP Hadir</div>
+                    <div className="bg-emerald-50 rounded-xl border border-emerald-100 p-3 text-center">
+                        <div className="text-xl font-bold text-emerald-600">{rsvpStats?.hadir || 0}</div>
+                        <div className="text-[10px] text-emerald-500 mt-0.5">RSVP Hadir</div>
                     </div>
-                    <div className="bg-blue-50 rounded-xl border border-blue-100 p-4 text-center">
-                        <div className="text-2xl font-bold text-blue-600">{sentGuests.length}</div>
-                        <div className="text-xs text-blue-500 mt-1">WA Terkirim</div>
+                    <div className="bg-blue-50 rounded-xl border border-blue-100 p-3 text-center">
+                        <div className="text-xl font-bold text-blue-600">{sentGuests.length}</div>
+                        <div className="text-[10px] text-blue-500 mt-0.5">WA Terkirim</div>
                     </div>
-                    <div className="bg-purple-50 rounded-xl border border-purple-100 p-4 text-center">
-                        <div className="text-2xl font-bold text-purple-600">{wishList.length}</div>
-                        <div className="text-xs text-purple-500 mt-1">Ucapan</div>
+                    <div className="bg-purple-50 rounded-xl border border-purple-100 p-3 text-center">
+                        <div className="text-xl font-bold text-purple-600">{wishList.length}</div>
+                        <div className="text-[10px] text-purple-500 mt-0.5">Ucapan</div>
                     </div>
                 </div>
 
                 {/* ═══ Tab Bar ═══ */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-1.5 flex gap-1">
+                <div className="bg-white rounded-xl border border-gray-200 p-1 flex gap-0.5">
                     {tabs.map(tab => (
                         <button key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all ${activeTab === tab.key
+                            className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all ${activeTab === tab.key
                                 ? 'bg-emerald-500 text-white shadow-sm'
                                 : 'text-gray-500 hover:bg-gray-50'
                                 }`}>
                             {tab.label}
-                            <span className={`ml-1.5 text-xs ${activeTab === tab.key ? 'text-emerald-100' : 'text-gray-400'}`}>
+                            <span className={`ml-1 text-[10px] ${activeTab === tab.key ? 'text-emerald-100' : 'text-gray-400'}`}>
                                 {tab.count}
                             </span>
                         </button>
@@ -256,7 +256,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                 <button onClick={() => setShowTemplateModal(true)}
                                     className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors inline-flex items-center gap-1.5">
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                    Template WA
+                                    Template
                                 </button>
                                 <button onClick={() => { setShowForm(!showForm); setShowImport(false); }}
                                     className="px-3 py-2 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600 transition-colors">
@@ -368,58 +368,54 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                     <table className="w-full text-sm">
                                         <thead className="bg-gray-50 border-b border-gray-200">
                                             <tr>
-                                                <th className="text-left px-4 py-3 font-semibold text-gray-600">Nama</th>
-                                                <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">No HP</th>
-                                                <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Grup</th>
-                                                <th className="text-center px-4 py-3 font-semibold text-gray-600">Status</th>
-                                                <th className="text-center px-4 py-3 font-semibold text-gray-600">Aksi</th>
+                                                <th className="text-left px-2 sm:px-4 py-2 font-semibold text-gray-600 text-xs">Nama</th>
+                                                <th className="text-left px-2 sm:px-4 py-2 font-semibold text-gray-600 text-xs hidden sm:table-cell">No HP</th>
+                                                <th className="text-left px-2 sm:px-4 py-2 font-semibold text-gray-600 text-xs hidden md:table-cell">Grup</th>
+                                                <th className="text-center px-2 sm:px-4 py-2 font-semibold text-gray-600 text-xs">Status</th>
+                                                <th className="text-center px-1 sm:px-4 py-2 font-semibold text-gray-600 text-xs">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
                                             {guestList.map((guest) => (
                                                 <tr key={guest.id} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-3">
-                                                        <div className="font-medium text-gray-800">{guest.name}</div>
-                                                        <div className="text-xs text-gray-400 sm:hidden">{guest.phone || '-'}</div>
+                                                    <td className="px-2 sm:px-4 py-2">
+                                                        <div className="font-medium text-gray-800 text-sm">{guest.name}</div>
+                                                        <div className="text-[10px] text-gray-400 sm:hidden">{guest.phone || '-'}</div>
                                                     </td>
-                                                    <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{guest.phone || '-'}</td>
-                                                    <td className="px-4 py-3 text-gray-500 hidden md:table-cell">
+                                                    <td className="px-2 sm:px-4 py-2 text-gray-600 text-sm hidden sm:table-cell">{guest.phone || '-'}</td>
+                                                    <td className="px-2 sm:px-4 py-2 text-gray-500 hidden md:table-cell">
                                                         {guest.group_name && (
                                                             <span className="bg-gray-100 px-2 py-0.5 rounded-full text-xs">{guest.group_name}</span>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-3 text-center">
+                                                    <td className="px-1 sm:px-4 py-2 text-center">
                                                         {guest.is_opened ? (
-                                                            <span className="text-emerald-500 text-xs font-medium">Dibuka</span>
+                                                            <span className="text-emerald-500 text-[10px] sm:text-xs font-medium">Dibuka</span>
                                                         ) : guest.wa_sent ? (
-                                                            <span className="text-blue-500 text-xs font-medium">Terkirim</span>
+                                                            <span className="text-blue-500 text-[10px] sm:text-xs font-medium">Terkirim</span>
                                                         ) : (
-                                                            <span className="text-gray-400 text-xs">Belum</span>
+                                                            <span className="text-gray-400 text-[10px] sm:text-xs">Belum</span>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex items-center justify-center gap-1.5">
-                                                            {/* Open invitation link */}
-                                                            <button onClick={() => openGuestLink(guest)} title="Buka Undangan"
-                                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                    <td className="px-1 sm:px-4 py-2">
+                                                        <div className="flex items-center justify-center gap-0.5 sm:gap-1.5">
+                                                            <button onClick={() => openGuestLink(guest)} title="Buka"
+                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
+                                                                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                                             </button>
-                                                            {/* Send WA */}
                                                             {guest.phone && (
-                                                                <button onClick={() => sendWaToGuest(guest)} title="Kirim WA"
-                                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-emerald-500 hover:bg-emerald-50 transition-colors">
-                                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.66 0-3.203-.51-4.484-1.375l-.316-.188-2.875.852.852-2.875-.188-.316A7.963 7.963 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" /></svg>
+                                                                <button onClick={() => sendWaToGuest(guest)} title="WA"
+                                                                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-emerald-500 hover:bg-emerald-50 transition-colors">
+                                                                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.66 0-3.203-.51-4.484-1.375l-.316-.188-2.875.852.852-2.875-.188-.316A7.963 7.963 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" /></svg>
                                                                 </button>
                                                             )}
-                                                            {/* Edit */}
                                                             <button onClick={() => { setEditGuest(guest); setShowEditModal(true); }} title="Edit"
-                                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-amber-500 hover:bg-amber-50 transition-colors">
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-amber-500 hover:bg-amber-50 transition-colors">
+                                                                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                             </button>
-                                                            {/* Delete */}
                                                             <button onClick={() => handleDelete(guest.id)} title="Hapus"
-                                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 transition-colors">
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 transition-colors">
+                                                                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                             </button>
                                                         </div>
                                                     </td>
@@ -616,7 +612,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                         {/* New Guest Alert */}
                         {liveNewGuest && (
                             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3 animate-pulse">
-                                <span className="text-2xl">🎉</span>
+                                <span className="text-2xl"><svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg></span>
                                 <div>
                                     <div className="font-bold text-emerald-800">{liveNewGuest.name} baru saja hadir!</div>
                                     <div className="text-xs text-emerald-600 mt-0.5">Check-in berhasil</div>
@@ -662,7 +658,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                             </div>
                             <button type="submit" disabled={liveForm.processing}
                                 className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
-                                {liveForm.processing ? 'Menyimpan...' : '💾 Simpan Pengaturan'}
+                                {liveForm.processing ? 'Menyimpan...' : 'Simpan Pengaturan'}
                             </button>
                         </form>
 
@@ -731,7 +727,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowTemplateModal(false); }}>
                         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
                             <div className="flex items-center justify-between">
-                                <h3 className="font-bold text-gray-800">Template Pesan WhatsApp</h3>
+                                <h3 className="font-bold text-gray-800">Template Pesan WA</h3>
                                 <button onClick={() => setShowTemplateModal(false)}
                                     className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>

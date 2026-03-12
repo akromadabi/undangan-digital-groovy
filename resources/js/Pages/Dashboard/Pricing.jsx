@@ -9,10 +9,10 @@ export default function Pricing({ plans, currentPlan, features }) {
     const formatCurrency = (a) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(a);
 
     const planMeta = {
-        free: { gradient: 'from-gray-100 to-gray-50', badgeBg: 'bg-gray-500', ring: 'ring-gray-300', btn: 'from-gray-400 to-gray-500', glow: 'shadow-gray-200/50', emoji: '🌱' },
-        silver: { gradient: 'from-slate-100 to-slate-50', badgeBg: 'bg-slate-500', ring: 'ring-slate-300', btn: 'from-slate-500 to-slate-600', glow: 'shadow-slate-200/50', emoji: '🥈' },
-        gold: { gradient: 'from-amber-50 to-yellow-50', badgeBg: 'bg-amber-500', ring: 'ring-amber-300', btn: 'from-amber-400 to-orange-500', glow: 'shadow-amber-200/50', emoji: '🥇' },
-        platinum: { gradient: 'from-violet-50 to-purple-50', badgeBg: 'bg-violet-500', ring: 'ring-violet-300', btn: 'from-violet-500 to-purple-600', glow: 'shadow-violet-200/50', emoji: '💎' },
+        free: { gradient: 'from-gray-100 to-gray-50', badgeBg: 'bg-gray-500', ring: 'ring-gray-300', btn: 'from-gray-400 to-gray-500', glow: 'shadow-gray-200/50', icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6' },
+        silver: { gradient: 'from-slate-100 to-slate-50', badgeBg: 'bg-slate-500', ring: 'ring-slate-300', btn: 'from-slate-500 to-slate-600', glow: 'shadow-slate-200/50', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
+        gold: { gradient: 'from-amber-50 to-yellow-50', badgeBg: 'bg-amber-500', ring: 'ring-amber-300', btn: 'from-amber-400 to-orange-500', glow: 'shadow-amber-200/50', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
+        platinum: { gradient: 'from-violet-50 to-purple-50', badgeBg: 'bg-violet-500', ring: 'ring-violet-300', btn: 'from-violet-500 to-purple-600', glow: 'shadow-violet-200/50', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
     };
 
     const handleUpgrade = (planId) => {
@@ -45,10 +45,10 @@ export default function Pricing({ plans, currentPlan, features }) {
             <Head title="Upgrade Paket" />
             <div className="max-w-5xl mx-auto space-y-8 pb-12">
                 {flash?.error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">❌ {flash.error}</div>
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{flash.error}</div>
                 )}
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* Header */}
@@ -66,7 +66,8 @@ export default function Pricing({ plans, currentPlan, features }) {
                     {plans.map(plan => {
                         const meta = planMeta[plan.slug] || planMeta.silver;
                         const isCurrent = currentPlan?.id === plan.id;
-                        const isUpgrade = !currentPlan || plan.price > (currentPlan?.price || 0);
+                        const displayPrice = plan.display_price ?? plan.price;
+                        const isUpgrade = !currentPlan || displayPrice > (currentPlan?.price || 0);
                         const isGold = plan.slug === 'gold';
                         const enabledCount = Object.values(planFeatureMap[plan.id] || {}).filter(v => v).length;
 
@@ -83,7 +84,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                                 {isCurrent && (
                                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
                                         <span className="bg-emerald-500 text-white text-[10px] font-bold px-4 py-1 rounded-full shadow-md whitespace-nowrap">
-                                            ✨ PAKET SAAT INI
+                                            PAKET SAAT INI
                                         </span>
                                     </div>
                                 )}
@@ -91,7 +92,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                                 {isGold && !isCurrent && (
                                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
                                         <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-bold px-4 py-1 rounded-full shadow-md whitespace-nowrap">
-                                            🔥 POPULER
+                                            POPULER
                                         </span>
                                     </div>
                                 )}
@@ -108,8 +109,13 @@ export default function Pricing({ plans, currentPlan, features }) {
                                     {/* Price */}
                                     <div className="text-center mb-5">
                                         <div className="text-3xl font-black text-gray-900 leading-none">
-                                            {plan.price > 0 ? formatCurrency(plan.price) : 'Gratis'}
+                                            {displayPrice > 0 ? formatCurrency(displayPrice) : 'Gratis'}
                                         </div>
+                                        {plan.original_price && plan.original_price !== displayPrice && (
+                                            <div className="text-xs text-gray-400 mt-1 line-through">
+                                                {formatCurrency(plan.original_price)}
+                                            </div>
+                                        )}
                                         {plan.duration_days > 0 && (
                                             <div className="text-xs text-gray-400 mt-1.5 font-medium">{plan.duration_days} hari</div>
                                         )}
@@ -158,7 +164,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                                     </div>
 
                                     {/* CTA Button */}
-                                    {plan.price > 0 && !isCurrent && isUpgrade ? (
+                                    {displayPrice > 0 && !isCurrent && isUpgrade ? (
                                         <button onClick={() => handleUpgrade(plan.id)}
                                             className={`w-full py-3 text-white rounded-xl text-sm font-bold bg-gradient-to-r ${meta.btn} hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2`}>
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -173,7 +179,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                                             </svg>
                                             Aktif
                                         </div>
-                                    ) : plan.price === 0 ? (
+                                    ) : plan.price === 0 || displayPrice === 0 ? (
                                         <div className="w-full py-3 text-center bg-gray-50 text-gray-400 rounded-xl text-sm font-medium border border-gray-100">
                                             Paket Dasar
                                         </div>

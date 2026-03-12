@@ -19,12 +19,17 @@ class Event extends Model
         'gmaps_link',
         'gmaps_embed',
         'sort_order',
+        'is_primary',
+        'streaming_platform',
+        'streaming_url',
+        'streamings',
     ];
-
     protected function casts(): array
     {
         return [
             'event_date' => 'date',
+            'is_primary' => 'boolean',
+            'streamings' => 'array',
         ];
     }
 

@@ -15,8 +15,17 @@ class AdminUserController extends Controller
 {
     public function index(Request $request)
     {
-        $users = User::where('role', 'user')
-            ->with('activeSubscription.plan')
+        $user = auth()->user();
+
+        $query = User::where('role', 'user')
+            ->with('activeSubscription.plan');
+
+        // Reseller only sees their own users
+        if ($user->isReseller()) {
+            $query->where('reseller_id', $user->id);
+        }
+
+        $users = $query
             ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"))
             ->latest()
             ->paginate(20);

@@ -140,6 +140,23 @@ class XenditService
                 'status' => 'active',
             ]);
 
+            // Credit reseller wallet if user belongs to a reseller
+            $user = $payment->user;
+            if ($user && $user->reseller_id) {
+                $basePrice = (float)$payment->plan->price;
+                $paidAmount = (float)$payment->amount;
+                $profit = $paidAmount - $basePrice;
+
+                if ($profit > 0) {
+                    \App\Models\ResellerWallet::creditProfit(
+                        $user->reseller_id,
+                        $payment->id,
+                        $profit,
+                        "Profit dari {$user->name} - Paket {$payment->plan->name}"
+                    );
+                }
+            }
+
             Log::info('Xendit Webhook: payment successful', ['payment_id' => $payment->id]);
             return true;
         }

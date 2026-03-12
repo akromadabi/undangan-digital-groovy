@@ -22,14 +22,25 @@ class ContentController extends Controller
     public function teksSambutan(Request $request)
     {
         $invitation = $this->getUserInvitation($request);
+        $religion = $invitation->religion ?? 'islam';
+        $quoteTemplates = \App\Models\QuoteTemplate::active()
+            ->orderBy('religion')
+            ->orderBy('sort_order')
+            ->get(['id', 'religion', 'title', 'ayat', 'translation', 'source']);
+
         return Inertia::render('Dashboard/Content/TeksSambutan', [
             'invitation' => $invitation?->only([
                 'opening_title',
                 'opening_text',
                 'opening_ayat',
+                'opening_ayat_translation',
+                'opening_ayat_source',
                 'closing_title',
                 'closing_text',
+                'turut_mengundang_text',
+                'religion',
             ]),
+            'quoteTemplates' => $quoteTemplates,
         ]);
     }
 
@@ -39,10 +50,13 @@ class ContentController extends Controller
             'opening_title' => 'nullable|string|max:200',
             'opening_text' => 'nullable|string',
             'opening_ayat' => 'nullable|string',
+            'opening_ayat_translation' => 'nullable|string',
+            'opening_ayat_source' => 'nullable|string|max:200',
+            'religion' => 'nullable|in:islam,kristen,hindu,buddha,umum',
         ]);
 
         $invitation = $this->getUserInvitation($request);
-        $invitation->update($request->only(['opening_title', 'opening_text', 'opening_ayat']));
+        $invitation->update($request->only(['opening_title', 'opening_text', 'opening_ayat', 'opening_ayat_translation', 'opening_ayat_source', 'religion']));
 
         return back()->with('success', 'Opening berhasil disimpan.');
     }
@@ -108,15 +122,31 @@ class ContentController extends Controller
             'events.*.venue_name' => 'nullable|string|max:200',
             'events.*.venue_address' => 'nullable|string',
             'events.*.gmaps_link' => 'nullable|string|max:500',
+            'events.*.is_primary' => 'nullable|boolean',
+            'events.*.streaming_platform' => 'nullable|string|max:50',
+            'events.*.streaming_url' => 'nullable|string|max:500',
+            'events.*.streamings' => 'nullable|array',
+            'events.*.streamings.*.platform' => 'required_with:events.*.streamings|string|max:50',
+            'events.*.streamings.*.url' => 'required_with:events.*.streamings|string|max:500',
         ]);
 
         $invitation = $this->getUserInvitation($request);
         $invitation->events()->delete();
 
+        $hasPrimary = collect($request->events)->contains(fn($e) => !empty($e['is_primary']));
+
         foreach ($request->events as $index => $data) {
+            // Filter out empty streamings
+            $streamings = collect($data['streamings'] ?? [])->filter(fn($s) => !empty($s['platform']) && !empty($s['url']))->values()->toArray();
+
             Event::create(array_merge($data, [
                 'invitation_id' => $invitation->id,
                 'sort_order' => $index,
+                'is_primary' => !empty($data['is_primary']) || (!$hasPrimary && $index === 0),
+                'streamings' => !empty($streamings) ? $streamings : null,
+                // Keep backward compat: first streaming goes to old fields
+                'streaming_platform' => $streamings[0]['platform'] ?? ($data['streaming_platform'] ?? null),
+                'streaming_url' => $streamings[0]['url'] ?? ($data['streaming_url'] ?? null),
             ]));
         }
 
@@ -247,10 +277,11 @@ class ContentController extends Controller
         $request->validate([
             'closing_title' => 'nullable|string|max:200',
             'closing_text' => 'nullable|string',
+            'turut_mengundang_text' => 'nullable|string',
         ]);
 
         $invitation = $this->getUserInvitation($request);
-        $invitation->update($request->only(['closing_title', 'closing_text']));
+        $invitation->update($request->only(['closing_title', 'closing_text', 'turut_mengundang_text']));
 
         return back()->with('success', 'Penutup berhasil disimpan.');
     }

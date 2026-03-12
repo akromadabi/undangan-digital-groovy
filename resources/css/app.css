@@ -1,3 +1,200 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ═══ Page Transition Animations ═══ */
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInBottom {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Page enter animation */
+.page-enter {
+    animation: pageEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Staggered children animation */
+.stagger-children > * {
+    opacity: 0;
+    animation: fadeInUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.04s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.08s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.12s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.16s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.20s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.24s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.28s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.32s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.36s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.40s; }
+
+/* Scale-in for cards */
+.card-enter {
+    animation: scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Menu sheet slide-up */
+.animate-in.slide-in-from-bottom {
+    animation: slideInBottom 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Sidebar fade */
+.sidebar-enter {
+    animation: fadeIn 0.3s ease both;
+}
+
+/* ═══ Mobile Compact Overrides (< lg breakpoint) ═══ */
+@media (max-width: 1023px) {
+    /* Cards: p-6 → p-4, rounded-2xl → rounded-xl */
+    main .bg-white.rounded-2xl {
+        padding: 1rem;
+        border-radius: 0.75rem;
+    }
+
+    /* Card headers */
+    main h3.text-lg {
+        font-size: 0.9375rem;
+        line-height: 1.4;
+    }
+
+    /* Stat numbers: text-2xl/3xl → text-xl */
+    main .text-2xl {
+        font-size: 1.125rem;
+    }
+    main .text-3xl {
+        font-size: 1.25rem;
+    }
+
+    /* Space between sections */
+    main .space-y-6 > * + * {
+        margin-top: 1rem;
+    }
+    main .space-y-5 > * + * {
+        margin-top: 0.875rem;
+    }
+    main .space-y-4 > * + * {
+        margin-top: 0.75rem;
+    }
+
+    /* Form inputs: make compact */
+    main input[type="text"],
+    main input[type="email"],
+    main input[type="tel"],
+    main input[type="number"],
+    main input[type="url"],
+    main input[type="password"],
+    main input[type="date"],
+    main input[type="time"],
+    main select,
+    main textarea {
+        padding: 0.4rem 0.65rem;
+        font-size: 0.8125rem;
+        border-radius: 0.5rem;
+    }
+
+    /* Buttons: compact padding and font */
+    main button,
+    main a[class*="rounded"] {
+        font-size: max(0.75rem, inherit);
+    }
+
+    /* Primary/action buttons (those with bg color) */
+    main button[class*="bg-emerald"],
+    main button[class*="bg-blue"],
+    main button[class*="bg-gradient"],
+    main a[class*="bg-emerald"],
+    main a[class*="bg-blue"] {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+    }
+
+    /* Smaller gap in grids */
+    main .gap-6 {
+        gap: 1rem;
+    }
+    main .gap-4 {
+        gap: 0.625rem;
+    }
+    main .gap-3 {
+        gap: 0.5rem;
+    }
+
+    /* Form labels */
+    main label.text-sm {
+        font-size: 0.75rem;
+    }
+
+    /* Description text */
+    main .text-sm.text-gray-500,
+    main .text-sm.text-gray-400 {
+        font-size: 0.75rem;
+    }
+
+    /* Card section inner padding when p-6 used inline */
+    main .p-6 {
+        padding: 1rem;
+    }
+
+    /* Gradient cards */
+    main .bg-gradient-to-br.rounded-2xl,
+    main .bg-gradient-to-r.rounded-2xl {
+        padding: 1rem;
+        border-radius: 0.75rem;
+    }
+
+    /* Modals: compact inner */
+    .fixed .bg-white.rounded-2xl.shadow-2xl {
+        padding: 1rem;
+    }
+
+    /* Dashed upload zones */
+    main .border-dashed.p-6 {
+        padding: 1rem;
+    }
+}

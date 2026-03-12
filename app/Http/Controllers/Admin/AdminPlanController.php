@@ -57,7 +57,7 @@ class AdminPlanController extends Controller
             }
         }
 
-        return redirect()->route('admin.plans.index')->with('success', 'Paket berhasil dibuat.');
+        return redirect()->back()->with('success', 'Paket berhasil dibuat.');
     }
 
     public function edit(SubscriptionPlan $plan)
@@ -98,12 +98,12 @@ class AdminPlanController extends Controller
             }
         }
 
-        return redirect()->route('admin.plans.index')->with('success', 'Paket berhasil diupdate.');
+        return redirect()->back()->with('success', 'Paket berhasil diupdate.');
     }
 
     public function destroy(SubscriptionPlan $plan)
     {
         $plan->delete();
-        return redirect()->route('admin.plans.index')->with('success', 'Paket berhasil dihapus.');
+        return redirect()->back()->with('success', 'Paket berhasil dihapus.');
     }
 }

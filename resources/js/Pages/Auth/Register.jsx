@@ -2,13 +2,14 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { Phone, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 
-export default function Register() {
+export default function Register({ reseller }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         phone: '',
         password: '',
         password_confirmation: '',
+        ref: reseller?.ref || '',
     });
 
     const [showPass, setShowPass] = useState(false);
@@ -28,11 +29,17 @@ export default function Register() {
                 <div className="w-full max-w-md">
                     {/* Logo / Header */}
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-[#E5654B] to-[#d4523a] rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-[#E5654B]/20 mb-4">
-                            <span className="text-white text-2xl font-bold">G</span>
-                        </div>
+                        {reseller?.brand_logo ? (
+                            <img src={reseller.brand_logo} alt={reseller.brand_name} className="w-16 h-16 rounded-2xl mx-auto shadow-lg mb-4 object-contain" />
+                        ) : (
+                            <div className="w-16 h-16 bg-gradient-to-br from-[#E5654B] to-[#d4523a] rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-[#E5654B]/20 mb-4">
+                                <span className="text-white text-2xl font-bold">{reseller?.brand_name?.charAt(0) || 'G'}</span>
+                            </div>
+                        )}
                         <h1 className="text-2xl font-bold text-[#1a1a1a]">Buat Akun Baru</h1>
-                        <p className="text-sm text-[#999] mt-1">Buat undangan digital impian Anda</p>
+                        <p className="text-sm text-[#999] mt-1">
+                            {reseller ? `Daftar di ${reseller.brand_name}` : 'Buat undangan digital impian Anda'}
+                        </p>
                     </div>
 
                     {/* Form Card */}

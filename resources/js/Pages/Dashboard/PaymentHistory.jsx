@@ -6,9 +6,9 @@ export default function PaymentHistory({ payments }) {
     const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     const statusBadge = (status) => ({
-        paid: { text: '✅ Berhasil', cls: 'bg-emerald-100 text-emerald-700' },
-        pending: { text: '⏳ Menunggu', cls: 'bg-amber-100 text-amber-700' },
-        failed: { text: '❌ Gagal', cls: 'bg-red-100 text-red-700' },
+        paid: { text: 'Berhasil', cls: 'bg-emerald-100 text-emerald-700' },
+        pending: { text: 'Menunggu', cls: 'bg-amber-100 text-amber-700' },
+        failed: { text: 'Gagal', cls: 'bg-red-100 text-red-700' },
         expired: { text: '⏰ Expired', cls: 'bg-gray-100 text-gray-500' },
     })[status] || { text: status, cls: 'bg-gray-100 text-gray-500' };
 
@@ -39,7 +39,7 @@ export default function PaymentHistory({ payments }) {
                     </div>
                 ) : (
                     <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                        <div className="text-5xl mb-3">💳</div>
+                        <div className="text-5xl mb-3"><svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></div>
                         <div className="text-gray-500 font-medium">Belum ada riwayat pembayaran</div>
                     </div>
                 )}

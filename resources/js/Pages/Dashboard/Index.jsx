@@ -91,9 +91,9 @@ export default function Index({ invitation, stats, features, subscription, lates
         <DashboardLayout title="Dashboard">
             <Head title="Dashboard" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {/* ═══ Welcome Card ═══ */}
-                <div className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 rounded-2xl p-6 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 rounded-xl lg:rounded-2xl p-4 lg:p-6 text-white relative overflow-hidden">
                     {/* Decorative circles */}
                     <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/5" />
                     <div className="absolute -bottom-8 -right-12 w-40 h-40 rounded-full bg-white/5" />
@@ -105,7 +105,7 @@ export default function Index({ invitation, stats, features, subscription, lates
                                 <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm">
                                     <Icon d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" className="w-4.5 h-4.5 text-white" />
                                 </div>
-                                <h2 className="text-xl font-bold">{invitation?.title || 'Selamat Datang'}</h2>
+                                <h2 className="text-base lg:text-xl font-bold">{invitation?.title || 'Selamat Datang'}</h2>
                             </div>
                             <p className="text-emerald-100 text-sm mt-1 flex items-center gap-1.5">
                                 <Icon d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-6.364-6.364L4.5 8.5" className="w-3.5 h-3.5 flex-shrink-0" />
@@ -168,25 +168,25 @@ export default function Index({ invitation, stats, features, subscription, lates
                             <Icon d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" className="w-4 h-4" />
                             Statistik
                         </h3>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                             {/* Total Tamu */}
-                            <div className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
-                                        <Icon d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" className="w-5 h-5 text-blue-600" />
+                            <div className="bg-white border border-gray-100 rounded-xl p-3 hover:shadow-md transition-shadow">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+                                        <Icon d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" className="w-4 h-4 text-blue-600" />
                                     </div>
                                     <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{openRate}% buka</span>
                                 </div>
-                                <div className="text-2xl font-bold text-gray-800">{stats.total_guests || 0}</div>
+                                <div className="text-xl font-bold text-gray-800">{stats.total_guests || 0}</div>
                                 <div className="text-xs text-gray-500 mt-0.5">Total Tamu</div>
                                 <MiniBar value={stats.total_opened || 0} max={stats.total_guests || 1} color="#3b82f6" />
                             </div>
 
                             {/* RSVP Hadir */}
-                            <div className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center">
-                                        <Icon d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-5 h-5 text-emerald-600" />
+                            <div className="bg-white border border-gray-100 rounded-xl p-3 hover:shadow-md transition-shadow">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
+                                        <Icon d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-4 h-4 text-emerald-600" />
                                     </div>
                                     {totalRsvp > 0 && (
                                         <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
@@ -194,42 +194,42 @@ export default function Index({ invitation, stats, features, subscription, lates
                                         </span>
                                     )}
                                 </div>
-                                <div className="text-2xl font-bold text-gray-800">{stats.rsvp_hadir || 0}</div>
+                                <div className="text-xl font-bold text-gray-800">{stats.rsvp_hadir || 0}</div>
                                 <div className="text-xs text-gray-500 mt-0.5">RSVP Hadir</div>
                                 <MiniBar value={stats.rsvp_hadir || 0} max={totalRsvp || 1} color="#10b981" />
                             </div>
 
                             {/* Tidak Hadir */}
-                            <div className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center">
-                                        <Icon d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" className="w-5 h-5 text-red-500" />
+                            <div className="bg-white border border-gray-100 rounded-xl p-3 hover:shadow-md transition-shadow">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center">
+                                        <Icon d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" className="w-4 h-4 text-red-500" />
                                     </div>
                                 </div>
-                                <div className="text-2xl font-bold text-gray-800">{stats.rsvp_tidak || 0}</div>
+                                <div className="text-xl font-bold text-gray-800">{stats.rsvp_tidak || 0}</div>
                                 <div className="text-xs text-gray-500 mt-0.5">Tidak Hadir</div>
                                 <MiniBar value={stats.rsvp_tidak || 0} max={totalRsvp || 1} color="#ef4444" />
                             </div>
 
                             {/* Ucapan */}
-                            <div className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center">
-                                        <Icon d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" className="w-5 h-5 text-purple-600" />
+                            <div className="bg-white border border-gray-100 rounded-xl p-3 hover:shadow-md transition-shadow">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center">
+                                        <Icon d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" className="w-4 h-4 text-purple-600" />
                                     </div>
                                 </div>
-                                <div className="text-2xl font-bold text-gray-800">{stats.total_wishes || 0}</div>
+                                <div className="text-xl font-bold text-gray-800">{stats.total_wishes || 0}</div>
                                 <div className="text-xs text-gray-500 mt-0.5">Ucapan</div>
                             </div>
 
                             {/* Dibuka */}
-                            <div className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
-                                        <Icon d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-5 h-5 text-amber-600" />
+                            <div className="bg-white border border-gray-100 rounded-xl p-3 hover:shadow-md transition-shadow">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center">
+                                        <Icon d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-4 h-4 text-amber-600" />
                                     </div>
                                 </div>
-                                <div className="text-2xl font-bold text-gray-800">{stats.total_opened || 0}</div>
+                                <div className="text-xl font-bold text-gray-800">{stats.total_opened || 0}</div>
                                 <div className="text-xs text-gray-500 mt-0.5">Dibuka</div>
                             </div>
                         </div>
@@ -273,7 +273,7 @@ export default function Index({ invitation, stats, features, subscription, lates
                         <Icon d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" className="w-4 h-4" />
                         Menu Cepat
                     </h3>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                    <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                         {features?.map((feature) => {
                             const colors = featureColors[feature.slug] || { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-100' };
                             const iconPath = featureIcons[feature.slug] || 'M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z';
@@ -282,20 +282,20 @@ export default function Index({ invitation, stats, features, subscription, lates
                                     key={feature.id}
                                     href={feature.is_locked ? '#' : (featureRoutes[feature.slug] || '/dashboard')}
                                     onClick={feature.is_locked ? (e) => e.preventDefault() : undefined}
-                                    className={`group relative p-4 rounded-xl text-center transition-all duration-200 ${feature.is_locked
+                                    className={`group relative p-2.5 rounded-xl text-center transition-all duration-200 ${feature.is_locked
                                         ? 'bg-gray-50 text-gray-400 cursor-not-allowed border border-gray-100'
                                         : `bg-white border border-gray-100 text-gray-700 hover:shadow-lg hover:border-emerald-200 hover:-translate-y-1`
                                         }`}
                                 >
                                     {feature.is_locked && (
-                                        <div className="absolute top-2 right-2">
-                                            <Icon d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" className="w-3.5 h-3.5 text-amber-400" />
+                                        <div className="absolute top-1.5 right-1.5">
+                                            <Icon d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" className="w-3 h-3 text-amber-400" />
                                         </div>
                                     )}
-                                    <div className={`w-10 h-10 rounded-xl ${feature.is_locked ? 'bg-gray-100' : colors.bg} flex items-center justify-center mx-auto mb-2 transition-transform duration-200 group-hover:scale-110`}>
-                                        <Icon d={iconPath} className={`w-5 h-5 ${feature.is_locked ? 'text-gray-400' : colors.text}`} />
+                                    <div className={`w-9 h-9 rounded-lg ${feature.is_locked ? 'bg-gray-100' : colors.bg} flex items-center justify-center mx-auto mb-1.5 transition-transform duration-200 group-hover:scale-110`}>
+                                        <Icon d={iconPath} className={`w-4.5 h-4.5 ${feature.is_locked ? 'text-gray-400' : colors.text}`} />
                                     </div>
-                                    <div className="text-xs font-medium leading-tight">{feature.name}</div>
+                                    <div className="text-[10px] font-medium leading-tight">{feature.name}</div>
                                 </Link>
                             );
                         })}

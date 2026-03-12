@@ -25,7 +25,7 @@ class AdminFeatureController extends Controller
         ]);
 
         Feature::create($request->only(['name', 'slug', 'category', 'description', 'icon']));
-        return redirect()->route('admin.features.index')->with('success', 'Fitur berhasil ditambahkan.');
+        return redirect()->back()->with('success', 'Fitur berhasil ditambahkan.');
     }
 
     public function update(Request $request, Feature $feature)
@@ -36,12 +36,12 @@ class AdminFeatureController extends Controller
         ]);
 
         $feature->update($request->only(['name', 'category', 'description', 'icon']));
-        return redirect()->route('admin.features.index')->with('success', 'Fitur berhasil diupdate.');
+        return redirect()->back()->with('success', 'Fitur berhasil diupdate.');
     }
 
     public function destroy(Feature $feature)
     {
         $feature->delete();
-        return redirect()->route('admin.features.index')->with('success', 'Fitur berhasil dihapus.');
+        return redirect()->back()->with('success', 'Fitur berhasil dihapus.');
     }
 }

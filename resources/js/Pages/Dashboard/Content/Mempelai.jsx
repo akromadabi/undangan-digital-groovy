@@ -18,6 +18,7 @@ const emptyBrideGroom = {
 
 export default function Mempelai({ brideGrooms }) {
     const { flash } = usePage().props;
+    const [activeTab, setActiveTab] = useState(0);
 
     const initial = brideGrooms?.length === 2
         ? brideGrooms
@@ -29,7 +30,6 @@ export default function Mempelai({ brideGrooms }) {
 
     const [uploading, setUploading] = useState([false, false]);
 
-    // Track which social media fields are visible per person
     const [visibleSocmed, setVisibleSocmed] = useState(() =>
         initial.map(bg => SOCMED_OPTIONS.filter(opt => bg[opt.key]).map(opt => opt.key))
     );
@@ -87,152 +87,168 @@ export default function Mempelai({ brideGrooms }) {
         post(route('content.mempelai.save'));
     };
 
+    const tabs = [
+        { idx: 0, label: 'Mempelai 1', icon: '💍' },
+        { idx: 1, label: 'Mempelai 2', icon: '💍' },
+    ];
+
+    const idx = activeTab;
+
     return (
         <DashboardLayout title="Mempelai">
             <Head title="Mempelai" />
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="max-w-2xl mx-auto space-y-3">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        {flash.success}
+                    </div>
                 )}
 
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
-                    <span className="text-xl">💡</span>
-                    <div>
-                        <div className="font-medium text-blue-800 text-sm">Data Mempelai</div>
-                        <div className="text-blue-600 text-xs mt-0.5">Isi data kedua mempelai. Data ini akan ditampilkan di section mempelai pada undangan.</div>
-                    </div>
+                {/* Tab Bar */}
+                <div className="bg-white rounded-xl border border-gray-200 p-1 flex gap-0.5">
+                    {tabs.map((tab) => (
+                        <button key={tab.idx} type="button"
+                            onClick={() => setActiveTab(tab.idx)}
+                            className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${activeTab === tab.idx
+                                ? 'bg-emerald-500 text-white shadow-sm'
+                                : 'text-gray-500 hover:bg-gray-50'
+                            }`}>
+                            <span className="text-sm">{tab.icon}</span>
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
 
+                {/* Form */}
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {[0, 1].map((idx) => (
-                            <div key={idx} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-xl">{data.bride_grooms[idx].gender === 'wanita' ? '👰' : '🤵'}</span>
-                                    <h3 className="text-lg font-bold text-gray-800">
-                                        {data.bride_grooms[idx].gender === 'wanita' ? 'Mempelai Wanita' : 'Mempelai Pria'}
-                                    </h3>
-                                </div>
+                    <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-3">
+                        {/* Photo */}
+                        <div className="flex items-center gap-3">
+                            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 bg-gray-50 flex-shrink-0">
+                                {data.bride_grooms[idx].photo ? (
+                                    <img src={data.bride_grooms[idx].photo} alt="Foto" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-2xl text-gray-300">
+                                        {data.bride_grooms[idx].gender === 'wanita' ? '♀' : '♂'}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="text-xs font-semibold text-gray-700 mb-1">Foto Mempelai</div>
+                                <label className="inline-block px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-[11px] font-medium text-gray-600 cursor-pointer transition-colors">
+                                    {uploading[idx] ? 'Uploading...' : 'Upload Foto'}
+                                    <input type="file" accept="image/*" className="hidden"
+                                        onChange={(e) => handlePhotoUpload(idx, e.target.files[0])} />
+                                </label>
+                            </div>
+                        </div>
 
-                                {/* Photo */}
-                                <div className="text-center">
-                                    <div className="w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-gray-100 bg-gray-50 mb-3">
-                                        {data.bride_grooms[idx].photo ? (
-                                            <img src={data.bride_grooms[idx].photo} alt="Foto" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-4xl text-gray-300">
-                                                {data.bride_grooms[idx].gender === 'wanita' ? '👰' : '🤵'}
+                        {/* Name fields */}
+                        <div className="grid grid-cols-2 gap-2">
+                            <Field label="Nama Lengkap *" value={data.bride_grooms[idx].full_name}
+                                onChange={(v) => update(idx, 'full_name', v)} required />
+                            <Field label="Nama Panggilan" value={data.bride_grooms[idx].nickname}
+                                onChange={(v) => update(idx, 'nickname', v)} />
+                        </div>
+
+                        {/* Gender toggle */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Jenis Kelamin</label>
+                            <div className="flex gap-1.5">
+                                {['pria', 'wanita'].map((g) => (
+                                    <button key={g} type="button" onClick={() => update(idx, 'gender', g)}
+                                        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${data.bride_grooms[idx].gender === g
+                                            ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}>{g === 'pria' ? 'Pria' : 'Wanita'}</button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Parent info */}
+                        <div className="grid grid-cols-3 gap-2">
+                            <Field label="Putra/Putri ke-" value={data.bride_grooms[idx].child_order}
+                                onChange={(v) => update(idx, 'child_order', v)} placeholder="Pertama" />
+                            <Field label="Nama Ayah" value={data.bride_grooms[idx].father_name}
+                                onChange={(v) => update(idx, 'father_name', v)} />
+                            <Field label="Nama Ibu" value={data.bride_grooms[idx].mother_name}
+                                onChange={(v) => update(idx, 'mother_name', v)} />
+                        </div>
+
+                        {/* Bio */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Bio Singkat</label>
+                            <textarea value={data.bride_grooms[idx].bio || ''}
+                                onChange={(e) => update(idx, 'bio', e.target.value)}
+                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none"
+                                rows={2} placeholder="Sedikit tentang diri Anda..." />
+                        </div>
+
+                        {/* Social Media */}
+                        <div className="pt-2 border-t border-gray-100">
+                            <p className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Sosial Media</p>
+
+                            <div className="space-y-1.5">
+                                {visibleSocmed[idx].map(key => {
+                                    const opt = SOCMED_OPTIONS.find(o => o.key === key);
+                                    if (!opt) return null;
+                                    const Icon = opt.icon;
+                                    return (
+                                        <div key={key} className="flex items-center gap-1.5">
+                                            <div className={`w-7 h-7 flex items-center justify-center rounded-lg bg-gray-50 ${opt.color}`}>
+                                                <Icon size={14} />
                                             </div>
-                                        )}
-                                    </div>
-                                    <label className="inline-block px-4 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-600 cursor-pointer transition-colors">
-                                        {uploading[idx] ? 'Uploading...' : '📷 Upload Foto'}
-                                        <input type="file" accept="image/*" className="hidden"
-                                            onChange={(e) => handlePhotoUpload(idx, e.target.files[0])} />
-                                    </label>
-                                </div>
-
-                                {/* Name fields */}
-                                <Field label="Nama Lengkap *" value={data.bride_grooms[idx].full_name}
-                                    onChange={(v) => update(idx, 'full_name', v)} required />
-                                <Field label="Nama Panggilan" value={data.bride_grooms[idx].nickname}
-                                    onChange={(v) => update(idx, 'nickname', v)} />
-
-                                {/* Gender toggle */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600 mb-1.5">Jenis Kelamin</label>
-                                    <div className="flex gap-2">
-                                        {['pria', 'wanita'].map((g) => (
-                                            <button key={g} type="button" onClick={() => update(idx, 'gender', g)}
-                                                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${data.bride_grooms[idx].gender === g
-                                                    ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                                    }`}>{g === 'pria' ? '🤵 Pria' : '👰 Wanita'}</button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <Field label="Putra/Putri ke-" value={data.bride_grooms[idx].child_order}
-                                    onChange={(v) => update(idx, 'child_order', v)} placeholder="Contoh: Pertama" />
-                                <Field label="Nama Ayah" value={data.bride_grooms[idx].father_name}
-                                    onChange={(v) => update(idx, 'father_name', v)} />
-                                <Field label="Nama Ibu" value={data.bride_grooms[idx].mother_name}
-                                    onChange={(v) => update(idx, 'mother_name', v)} />
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600 mb-1.5">Bio Singkat</label>
-                                    <textarea value={data.bride_grooms[idx].bio || ''}
-                                        onChange={(e) => update(idx, 'bio', e.target.value)}
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none"
-                                        rows={2} placeholder="Sedikit tentang diri Anda..." />
-                                </div>
-
-                                {/* Social Media with + button */}
-                                <div className="pt-3 border-t border-gray-100">
-                                    <p className="text-xs font-semibold text-gray-400 mb-3 uppercase tracking-wider">Sosial Media</p>
-
-                                    <div className="space-y-2">
-                                        {visibleSocmed[idx].map(key => {
-                                            const opt = SOCMED_OPTIONS.find(o => o.key === key);
-                                            if (!opt) return null;
-                                            const Icon = opt.icon;
-                                            return (
-                                                <div key={key} className="flex items-center gap-2">
-                                                    <div className={`w-8 h-8 flex items-center justify-center rounded-lg bg-gray-50 ${opt.color}`}>
-                                                        <Icon size={16} />
-                                                    </div>
-                                                    <input
-                                                        type="text"
-                                                        value={data.bride_grooms[idx][key] || ''}
-                                                        onChange={(e) => update(idx, key, e.target.value)}
-                                                        placeholder={opt.placeholder}
-                                                        className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
-                                                    />
-                                                    <button type="button" onClick={() => removeSocmed(idx, key)}
-                                                        className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                                                        <XIcon size={14} />
-                                                    </button>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {getAvailableSocmed(idx).length > 0 && (
-                                        <div className="relative mt-2">
-                                            <button type="button"
-                                                onClick={() => {
-                                                    const updated = [...showSocmedPicker];
-                                                    updated[idx] = !updated[idx];
-                                                    setShowSocmedPicker(updated);
-                                                }}
-                                                className="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold hover:text-emerald-700 py-1.5">
-                                                <Plus size={14} /> Tambah Media Sosial
+                                            <input
+                                                type="text"
+                                                value={data.bride_grooms[idx][key] || ''}
+                                                onChange={(e) => update(idx, key, e.target.value)}
+                                                placeholder={opt.placeholder}
+                                                className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
+                                            />
+                                            <button type="button" onClick={() => removeSocmed(idx, key)}
+                                                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                                <XIcon size={12} />
                                             </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
 
-                                            {showSocmedPicker[idx] && (
-                                                <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 py-1 min-w-[200px]">
-                                                    {getAvailableSocmed(idx).map(opt => {
-                                                        const Icon = opt.icon;
-                                                        return (
-                                                            <button key={opt.key} type="button"
-                                                                onClick={() => addSocmed(idx, opt.key)}
-                                                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-left transition-colors">
-                                                                <Icon size={16} className={opt.color} />
-                                                                <span className="text-sm text-gray-700">{opt.label}</span>
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
+                            {getAvailableSocmed(idx).length > 0 && (
+                                <div className="relative mt-1.5">
+                                    <button type="button"
+                                        onClick={() => {
+                                            const updated = [...showSocmedPicker];
+                                            updated[idx] = !updated[idx];
+                                            setShowSocmedPicker(updated);
+                                        }}
+                                        className="flex items-center gap-1 text-[11px] text-emerald-600 font-semibold hover:text-emerald-700 py-1">
+                                        <Plus size={12} /> Tambah Sosmed
+                                    </button>
+
+                                    {showSocmedPicker[idx] && (
+                                        <div className="absolute left-0 top-full mt-0.5 bg-white border border-gray-200 rounded-lg shadow-lg z-10 py-0.5 min-w-[180px]">
+                                            {getAvailableSocmed(idx).map(opt => {
+                                                const Icon = opt.icon;
+                                                return (
+                                                    <button key={opt.key} type="button"
+                                                        onClick={() => addSocmed(idx, opt.key)}
+                                                        className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 text-left transition-colors">
+                                                        <Icon size={14} className={opt.color} />
+                                                        <span className="text-xs text-gray-700">{opt.label}</span>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                        ))}
+                            )}
+                        </div>
                     </div>
 
                     <button type="submit" disabled={processing}
-                        className="w-full mt-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
-                        {processing ? 'Menyimpan...' : '💾 Simpan Data Mempelai'}
+                        className="w-full mt-3 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all disabled:opacity-50">
+                        {processing ? 'Menyimpan...' : 'Simpan Data Mempelai'}
                     </button>
                 </form>
             </div>
@@ -240,13 +256,13 @@ export default function Mempelai({ brideGrooms }) {
     );
 }
 
-function Field({ label, value, onChange, required, placeholder, small }) {
+function Field({ label, value, onChange, required, placeholder }) {
     return (
         <div>
-            <label className={`block font-medium text-gray-600 mb-1 ${small ? 'text-xs' : 'text-sm'}`}>{label}</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
             <input type="text" value={value || ''} onChange={(e) => onChange(e.target.value)} required={required}
                 placeholder={placeholder}
-                className={`w-full border border-gray-200 rounded-xl px-4 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 ${small ? 'py-2' : 'py-2.5'}`} />
+                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
         </div>
     );
 }

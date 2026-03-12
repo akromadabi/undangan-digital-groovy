@@ -41,6 +41,7 @@ class HandleInertiaRequests extends Middleware
                     'onboarding_step' => $user->onboarding_step,
                     'locale' => $user->locale,
                     'avatar' => $user->avatar,
+                    'invitation_slug' => $user->invitation?->slug,
                 ] : null,
             ],
             'subscription' => $user && !$user->isAdmin() ? [
@@ -50,6 +51,8 @@ class HandleInertiaRequests extends Middleware
             ] : null,
             'features' => $featureAccess,
             'appName' => config('app.name'),
+            'adminRoutePrefix' => str_starts_with($request->path(), 'super-admin') ? '/super-admin' : '/admin',
+            'resellerSubdomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->subdomain : null,
             'locale' => app()->getLocale(),
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),

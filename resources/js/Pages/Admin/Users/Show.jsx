@@ -14,7 +14,7 @@ export default function Show({ user, stats, siteUrl }) {
                 <div className="flex items-center justify-between">
                     <Link href="/admin/users" className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali ke Users</Link>
                     <Link href={`/admin/users/${user.id}/edit`} className="px-4 py-2 bg-[#E5654B] hover:bg-[#c94f3a] text-white text-sm rounded-xl font-medium transition-colors shadow-sm">
-                        ✏️ Edit User & Undangan
+                        Edit User & Undangan
                     </Link>
                 </div>
 
@@ -45,7 +45,7 @@ export default function Show({ user, stats, siteUrl }) {
                 {invitation && (
                     <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-4">
                         <div className="flex items-center justify-between">
-                            <h3 className="font-bold text-[#1a1a1a] text-lg">📋 Undangan</h3>
+                            <h3 className="font-bold text-[#1a1a1a] text-lg">Undangan</h3>
                             <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${invitation.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
                                 {invitation.is_active ? 'Aktif' : 'Nonaktif'}
                             </span>
@@ -64,11 +64,11 @@ export default function Show({ user, stats, siteUrl }) {
                                     className="flex-1 bg-white border border-[#e8e5e0] text-[#333] text-sm rounded-lg px-3 py-2 focus:ring-1 focus:ring-[#E5654B] focus:border-[#E5654B]" />
                                 <button onClick={() => navigator.clipboard.writeText(invitationUrl)}
                                     className="px-3 py-2 bg-[#E5654B] hover:bg-[#c94f3a] text-white text-xs rounded-lg transition-colors whitespace-nowrap font-medium">
-                                    📋 Copy
+                                    Copy
                                 </button>
                                 <a href={invitationUrl} target="_blank" rel="noopener"
                                     className="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs rounded-lg transition-colors whitespace-nowrap font-medium">
-                                    🔗 Buka
+                                    Buka
                                 </a>
                             </div>
                         </div>
@@ -80,7 +80,7 @@ export default function Show({ user, stats, siteUrl }) {
                                 <div className="flex gap-3">
                                     {invitation.bride_grooms.map(bg => (
                                         <div key={bg.id} className="flex-1 bg-[#f8f7f4] rounded-xl p-4 text-center border border-[#e8e5e0]">
-                                            <div className="text-3xl mb-2">{bg.gender === 'wanita' ? '👰' : '🤵'}</div>
+                                            <div className="text-3xl mb-2">{bg.gender === 'wanita' ? '♀' : '♂'}</div>
                                             <div className="text-[#333] text-sm font-semibold">{bg.full_name}</div>
                                             <div className="text-[#999] text-xs">{bg.nickname}</div>
                                         </div>
@@ -114,7 +114,7 @@ export default function Show({ user, stats, siteUrl }) {
                 {/* Payments */}
                 {user.payments?.length > 0 && (
                     <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6">
-                        <h3 className="font-bold text-[#1a1a1a] text-lg mb-4">💳 Riwayat Pembayaran</h3>
+                        <h3 className="font-bold text-[#1a1a1a] text-lg mb-4">Riwayat Pembayaran</h3>
                         <div className="space-y-2">
                             {user.payments.map(p => (
                                 <div key={p.id} className="flex items-center justify-between py-3 border-b border-[#f0ede8] last:border-0 text-sm">

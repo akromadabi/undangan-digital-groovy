@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 class AdminMiddleware
 {
+    /**
+     * Allow both admin (reseller) and super_admin.
+     * isAdmin() returns true for both roles.
+     */
     public function handle(Request $request, Closure $next)
     {
         if (!$request->user() || !$request->user()->isAdmin()) {

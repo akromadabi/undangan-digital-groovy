@@ -1,7 +1,8 @@
-import { Head, useForm, Link } from '@inertiajs/react';
-import AdminLayout from '@/Layouts/AdminLayout';
+import { Head, useForm, Link, usePage } from '@inertiajs/react';
+import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 
 export default function Form({ plan, features }) {
+    const { adminRoutePrefix } = usePage().props;
     const isEdit = !!plan;
     const featureAccess = {};
     plan?.feature_access?.forEach(fa => { featureAccess[fa.feature_id] = fa.is_enabled; });
@@ -15,7 +16,7 @@ export default function Form({ plan, features }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (isEdit) { put(`/admin/plans/${plan.id}`); } else { post('/admin/plans'); }
+        if (isEdit) { put(`${adminRoutePrefix}/plans/${plan.id}`); } else { post(`${adminRoutePrefix}/plans`); }
     };
 
     const toggleFeature = (id) => {
@@ -26,10 +27,10 @@ export default function Form({ plan, features }) {
     const labelClass = 'text-xs font-semibold text-[#999] mb-1.5 block tracking-wide';
 
     return (
-        <AdminLayout title={isEdit ? `Edit: ${plan.name}` : 'Tambah Paket'}>
+        <DynamicAdminLayout title={isEdit ? `Edit: ${plan.name}` : 'Tambah Paket'}>
             <Head title={isEdit ? 'Edit Paket' : 'Tambah Paket'} />
             <div className="max-w-2xl space-y-6">
-                <Link href="/admin/plans" className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali</Link>
+                <Link href={`${adminRoutePrefix}/plans`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali</Link>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-5">
@@ -80,6 +81,6 @@ export default function Form({ plan, features }) {
                     </button>
                 </form>
             </div>
-        </AdminLayout>
+        </DynamicAdminLayout>
     );
 }

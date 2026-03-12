@@ -1,8 +1,9 @@
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import AdminLayout from '@/Layouts/AdminLayout';
+import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 
 export default function Index({ features }) {
+    const { adminRoutePrefix } = usePage().props;
     const [editId, setEditId] = useState(null);
     const { data, setData, post, put, processing, reset } = useForm({ name: '', slug: '', category: 'content', description: '', icon: '' });
 
@@ -11,22 +12,22 @@ export default function Index({ features }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (editId) { put(`/admin/features/${editId}`, { onSuccess: cancelEdit }); }
-        else { post('/admin/features', { onSuccess: () => reset() }); }
+        if (editId) { put(`${adminRoutePrefix}/features/${editId}`, { onSuccess: cancelEdit }); }
+        else { post(`${adminRoutePrefix}/features`, { onSuccess: () => reset() }); }
     };
 
-    const handleDelete = (id) => { if (confirm('Hapus fitur?')) router.delete(`/admin/features/${id}`); };
+    const handleDelete = (id) => { if (confirm('Hapus fitur?')) router.delete(`${adminRoutePrefix}/features/${id}`); };
 
     const categoryColors = { content: 'bg-blue-50 text-blue-600', settings: 'bg-emerald-50 text-emerald-600', other: 'bg-[#f0ede8] text-[#777]' };
     const inputClass = 'bg-white border border-[#e8e5e0] rounded-xl px-3 py-2.5 text-sm text-[#333] placeholder-[#bbb] focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B]';
 
     return (
-        <AdminLayout title="Manajemen Fitur">
+        <DynamicAdminLayout title="Manajemen Fitur">
             <Head title="Admin - Features" />
             <div className="max-w-3xl space-y-6">
                 {/* Add/Edit Form */}
                 <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-[#e8e5e0] p-5">
-                    <h4 className="font-bold text-[#1a1a1a] text-sm mb-3">{editId ? '✏️ Edit Fitur' : '+ Tambah Fitur'}</h4>
+                    <h4 className="font-bold text-[#1a1a1a] text-sm mb-3">{editId ? 'Edit Fitur' : '+ Tambah Fitur'}</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <input type="text" value={data.name} onChange={(e) => setData('name', e.target.value)} placeholder="Nama"
                             className={inputClass} required />
@@ -75,6 +76,6 @@ export default function Index({ features }) {
                     </table>
                 </div>
             </div>
-        </AdminLayout>
+        </DynamicAdminLayout>
     );
 }

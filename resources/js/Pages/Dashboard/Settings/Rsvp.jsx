@@ -15,29 +15,29 @@ export default function Rsvp({ rsvps, stats }) {
         belum_pasti: 'bg-amber-100 text-amber-700',
     };
 
-    const statusLabels = { hadir: '✅ Hadir', tidak_hadir: '❌ Tidak Hadir', belum_pasti: '🤔 Belum Pasti' };
+    const statusLabels = { hadir: 'Hadir', tidak_hadir: 'Tidak Hadir', belum_pasti: 'Belum Pasti' };
 
     return (
         <DashboardLayout title="RSVP">
             <Head title="RSVP" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-3">
                     <div className="bg-emerald-50 rounded-xl p-4 text-center">
                         <div className="text-3xl font-bold text-emerald-600">{stats?.hadir || 0}</div>
-                        <div className="text-xs text-emerald-500 mt-1 font-medium">✅ Total Hadir</div>
+                        <div className="text-xs text-emerald-500 mt-1 font-medium"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Total Hadir</div>
                     </div>
                     <div className="bg-red-50 rounded-xl p-4 text-center">
                         <div className="text-3xl font-bold text-red-600">{stats?.tidak_hadir || 0}</div>
-                        <div className="text-xs text-red-500 mt-1 font-medium">❌ Tidak Hadir</div>
+                        <div className="text-xs text-red-500 mt-1 font-medium">Tidak Hadir</div>
                     </div>
                     <div className="bg-amber-50 rounded-xl p-4 text-center">
                         <div className="text-3xl font-bold text-amber-600">{stats?.belum_pasti || 0}</div>
-                        <div className="text-xs text-amber-500 mt-1 font-medium">🤔 Belum Pasti</div>
+                        <div className="text-xs text-amber-500 mt-1 font-medium">Belum Pasti</div>
                     </div>
                 </div>
 
@@ -84,7 +84,7 @@ export default function Rsvp({ rsvps, stats }) {
                     </div>
                 ) : (
                     <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                        <div className="text-5xl mb-3">📭</div>
+                        <div className="text-5xl mb-3"><svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
                         <div className="text-gray-500 font-medium">Belum ada RSVP</div>
                         <div className="text-gray-400 text-sm mt-1">RSVP dari tamu akan muncul setelah undangan dibuka</div>
                     </div>

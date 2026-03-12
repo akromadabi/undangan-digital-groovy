@@ -1,8 +1,9 @@
-import { Head, useForm, Link, router } from '@inertiajs/react';
+import { Head, useForm, Link, router, usePage } from '@inertiajs/react';
 import { useState, useRef } from 'react';
-import AdminLayout from '@/Layouts/AdminLayout';
+import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 
 export default function Form({ theme }) {
+    const { adminRoutePrefix } = usePage().props;
     const isEdit = !!theme;
     const fileInputRef = useRef(null);
     const [thumbnailPreview, setThumbnailPreview] = useState(theme?.thumbnail || '');
@@ -50,17 +51,17 @@ export default function Form({ theme }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         const payload = { ...data, color_scheme: JSON.parse(data.color_scheme), font_config: JSON.parse(data.font_config) };
-        if (isEdit) { put(`/admin/themes/${theme.id}`, payload); } else { post('/admin/themes', payload); }
+        if (isEdit) { put(`${adminRoutePrefix}/themes/${theme.id}`, payload); } else { post(`${adminRoutePrefix}/themes`, payload); }
     };
 
     const inputClass = 'w-full bg-white border border-[#e8e5e0] rounded-xl px-4 py-2.5 text-sm text-[#333] placeholder-[#ccc] focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] disabled:opacity-50 disabled:bg-[#f8f7f4]';
     const labelClass = 'text-xs font-semibold text-[#999] block mb-1.5 tracking-wide';
 
     return (
-        <AdminLayout title={isEdit ? `Edit: ${theme.name}` : 'Tambah Tema'}>
+        <DynamicAdminLayout title={isEdit ? `Edit: ${theme.name}` : 'Tambah Tema'}>
             <Head title={isEdit ? 'Edit Tema' : 'Tambah Tema'} />
             <div className="max-w-2xl space-y-6">
-                <Link href="/admin/themes" className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali</Link>
+                <Link href={`${adminRoutePrefix}/themes`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali</Link>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-5">
@@ -159,6 +160,6 @@ export default function Form({ theme }) {
                     </button>
                 </form>
             </div>
-        </AdminLayout>
+        </DynamicAdminLayout>
     );
 }

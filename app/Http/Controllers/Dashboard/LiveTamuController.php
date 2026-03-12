@@ -19,6 +19,15 @@ class LiveTamuController extends Controller
         ]);
     }
 
+    public function qrScanner(Request $request)
+    {
+        $invitation = $request->user()->invitation;
+
+        return Inertia::render('Dashboard/QrScanner', [
+            'invitation' => $invitation?->only(['id', 'slug']),
+        ]);
+    }
+
     public function saveSettings(Request $request)
     {
         $request->validate([

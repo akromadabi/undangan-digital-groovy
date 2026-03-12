@@ -38,11 +38,11 @@ export default function Bank({ bankAccounts }) {
             <Head title="Amplop Digital" />
             <div className="max-w-2xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
-                    <span className="text-xl">🏦</span>
+                    <span className="text-xl"><svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></span>
                     <div>
                         <div className="font-medium text-amber-800 text-sm">Amplop Digital / E-Wallet</div>
                         <div className="text-amber-600 text-xs mt-0.5">Tambahkan rekening bank atau e-wallet untuk menerima amplop digital dari tamu Anda.</div>
@@ -113,7 +113,7 @@ export default function Bank({ bankAccounts }) {
 
                     <button type="submit" disabled={processing}
                         className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
-                        {processing ? 'Menyimpan...' : '💾 Simpan Rekening'}
+                        {processing ? 'Menyimpan...' : 'Simpan Rekening'}
                     </button>
                 </form>
             </div>

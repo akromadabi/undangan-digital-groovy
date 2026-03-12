@@ -1,8 +1,8 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import AdminLayout from '@/Layouts/AdminLayout';
+import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 
 export default function Index({ settings }) {
-    const { flash } = usePage().props;
+    const { flash, adminRoutePrefix } = usePage().props;
 
     const allSettings = [];
     if (settings) {
@@ -23,7 +23,7 @@ export default function Index({ settings }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('admin.settings.update'));
+        post(`${adminRoutePrefix}/settings`);
     };
 
     const categories = settings ? Object.keys(settings) : [];
@@ -31,11 +31,11 @@ export default function Index({ settings }) {
     const inputClass = 'w-full bg-white border border-[#e8e5e0] rounded-xl px-4 py-2.5 text-sm text-[#333] placeholder-[#ccc] focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-colors';
 
     return (
-        <AdminLayout title="Global Settings">
+        <DynamicAdminLayout title="Global Settings">
             <Head title="Admin - Settings" />
             <div className="max-w-2xl space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -79,10 +79,10 @@ export default function Index({ settings }) {
 
                     <button type="submit" disabled={processing}
                         className="w-full py-3.5 bg-[#E5654B] text-white rounded-xl font-semibold hover:bg-[#c94f3a] disabled:opacity-50 transition-colors shadow-sm text-sm">
-                        {processing ? 'Menyimpan...' : '💾 Simpan Settings'}
+                        {processing ? 'Menyimpan...' : 'Simpan Settings'}
                     </button>
                 </form>
             </div>
-        </AdminLayout>
+        </DynamicAdminLayout>
     );
 }

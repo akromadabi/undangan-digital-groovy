@@ -17,11 +17,11 @@ export default function Hadiah({ gifts }) {
             <Head title="Hadiah" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
-                    <span className="text-xl">🎁</span>
+                    <span className="text-xl"><svg className="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a4 4 0 00-4-4 4 4 0 004 4zm0 0V6a4 4 0 014-4 4 4 0 01-4 4zm-8 4h16m-8 0v9m-8-9h16" /></svg></span>
                     <div>
                         <div className="font-medium text-amber-800 text-sm">Tracking Hadiah</div>
                         <div className="text-amber-600 text-xs mt-0.5">Pantau hadiah yang diterima dari tamu. Data ini bersifat privat dan hanya bisa dilihat oleh Anda.</div>
@@ -47,13 +47,13 @@ export default function Hadiah({ gifts }) {
                             <div key={gift.id} className="bg-white rounded-2xl border border-gray-200 p-5 flex items-start gap-4">
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${gift.gift_type === 'uang' ? 'bg-emerald-100' : 'bg-amber-100'
                                     }`}>
-                                    {gift.gift_type === 'uang' ? '💰' : '📦'}
+                                    {gift.gift_type === 'uang' ? 'Uang' : 'Barang'}
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between">
                                         <div className="font-semibold text-gray-800 text-sm">{gift.sender_name}</div>
                                         {gift.confirmed && (
-                                            <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full">✅ Dikonfirmasi</span>
+                                            <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Dikonfirmasi</span>
                                         )}
                                     </div>
                                     {gift.gift_type === 'uang' ? (
@@ -71,7 +71,7 @@ export default function Hadiah({ gifts }) {
                     </div>
                 ) : (
                     <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                        <div className="text-5xl mb-3">🎁</div>
+                        <div className="text-5xl mb-3"><svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a4 4 0 00-4-4 4 4 0 004 4zm0 0V6a4 4 0 014-4 4 4 0 01-4 4zm-8 4h16m-8 0v9m-8-9h16" /></svg></div>
                         <div className="text-gray-500 font-medium">Belum ada hadiah</div>
                         <div className="text-gray-400 text-sm mt-1">Data hadiah akan muncul saat tamu memberikan hadiah</div>
                     </div>

@@ -61,7 +61,7 @@ export default function Login({ status, canResetPassword, autoLoginUsers }) {
                             >
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold text-white ${user.role === 'admin' ? 'bg-violet-500' : 'bg-emerald-500'
                                     }`}>
-                                    {user.role === 'admin' ? '👑' : '👤'}
+                                    {user.role === 'admin' ? 'A' : 'U'}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="font-semibold text-gray-800 text-sm">{user.name}</div>

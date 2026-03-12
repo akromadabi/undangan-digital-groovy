@@ -33,7 +33,7 @@ class AdminThemeController extends Controller
         ]);
 
         Theme::create($request->all());
-        return redirect()->route('admin.themes.index')->with('success', 'Tema berhasil ditambahkan.');
+        return redirect()->back()->with('success', 'Tema berhasil ditambahkan.');
     }
 
     public function edit(Theme $theme)
@@ -51,12 +51,12 @@ class AdminThemeController extends Controller
         ]);
 
         $theme->update($request->all());
-        return redirect()->route('admin.themes.index')->with('success', 'Tema berhasil diupdate.');
+        return redirect()->back()->with('success', 'Tema berhasil diupdate.');
     }
 
     public function destroy(Theme $theme)
     {
         $theme->delete();
-        return redirect()->route('admin.themes.index')->with('success', 'Tema berhasil dihapus.');
+        return redirect()->back()->with('success', 'Tema berhasil dihapus.');
     }
 }

@@ -1,6 +1,6 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { useState, useRef } from 'react';
-import AdminLayout from '@/Layouts/AdminLayout';
+import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 import {
     Music, Play, Pause, Plus, X, Trash2, Pencil, Tag,
     Upload, CheckCircle, XCircle, Heart, Moon, Mic, Piano,
@@ -29,7 +29,7 @@ function CatIcon({ name, size = 14, className = '' }) {
 }
 
 export default function MusicPage({ tracks, categories: serverCategories = [] }) {
-    const { flash } = usePage().props;
+    const { flash, adminRoutePrefix } = usePage().props;
     const [showForm, setShowForm] = useState(false);
     const [editId, setEditId] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -58,12 +58,12 @@ export default function MusicPage({ tracks, categories: serverCategories = [] })
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editId) {
-            router.put(route('admin.music.update', editId), data, {
+            router.put(`${adminRoutePrefix}/music/${editId}`, data, {
                 preserveScroll: true,
                 onSuccess: () => { resetForm(); },
             });
         } else {
-            post(route('admin.music.store'), {
+            post(`${adminRoutePrefix}/music`, {
                 preserveScroll: true,
                 onSuccess: () => { resetForm(); },
             });
@@ -83,7 +83,7 @@ export default function MusicPage({ tracks, categories: serverCategories = [] })
     const handleDelete = (id) => {
         if (confirmDeleteId === id) {
             // Second click — actually delete
-            router.delete(route('admin.music.destroy', id), {
+            router.delete(`${adminRoutePrefix}/music/${id}`, {
                 preserveScroll: true,
                 onSuccess: () => { setConfirmDeleteId(null); },
                 onError: (err) => { console.error('Delete error:', err); setConfirmDeleteId(null); },
@@ -96,7 +96,7 @@ export default function MusicPage({ tracks, categories: serverCategories = [] })
     };
 
     const handleToggle = (id) => {
-        router.post(route('admin.music.toggle', id), {}, { preserveScroll: true });
+        router.post(`${adminRoutePrefix}/music/${id}/toggle`, {}, { preserveScroll: true });
     };
 
     const handleUpload = async (file) => {
@@ -120,7 +120,7 @@ export default function MusicPage({ tracks, categories: serverCategories = [] })
         formData.append('file', file);
         formData.append('folder', 'music');
         try {
-            const res = await fetch(route('admin.upload'), {
+            const res = await fetch(`${adminRoutePrefix}/upload`, {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
                 body: formData,
@@ -164,7 +164,7 @@ export default function MusicPage({ tracks, categories: serverCategories = [] })
         if (categories.find(c => c.value === slug)) { alert('Kategori sudah ada!'); return; }
         const updated = [...categories, { value: slug, label: newCat.label, icon: newCat.icon }];
         setCategories(updated);
-        router.post(route('admin.music.saveCategories'), { categories: updated }, {
+        router.post(`${adminRoutePrefix}/music/categories`, { categories: updated }, {
             preserveScroll: true,
             onSuccess: () => { setNewCat({ value: '', label: '', icon: 'Music' }); setShowCategoryForm(false); },
         });
@@ -174,14 +174,14 @@ export default function MusicPage({ tracks, categories: serverCategories = [] })
         if (!confirm(`Hapus kategori "${val}"?`)) return;
         const updated = categories.filter(c => c.value !== val);
         setCategories(updated);
-        router.post(route('admin.music.saveCategories'), { categories: updated }, { preserveScroll: true });
+        router.post(`${adminRoutePrefix}/music/categories`, { categories: updated }, { preserveScroll: true });
     };
 
     const filtered = filter === 'all' ? tracks : tracks.filter(t => t.category === filter);
     const ICON_OPTIONS = ['Heart', 'Moon', 'Mic', 'Piano', 'Theater', 'Music', 'Tag'];
 
     return (
-        <AdminLayout title="Musik">
+        <DynamicAdminLayout title="Musik">
             <Head title="Musik — Admin" />
             <div className="space-y-6">
                 {flash?.success && (
@@ -404,6 +404,6 @@ export default function MusicPage({ tracks, categories: serverCategories = [] })
                     )}
                 </div>
             </div>
-        </AdminLayout>
+        </DynamicAdminLayout>
     );
 }

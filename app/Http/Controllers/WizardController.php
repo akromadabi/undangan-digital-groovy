@@ -171,6 +171,9 @@ class WizardController extends Controller
             'events.*.venue_name' => 'nullable|string|max:200',
             'events.*.venue_address' => 'nullable|string',
             'events.*.gmaps_link' => 'nullable|url|max:500',
+            'events.*.is_primary' => 'nullable|boolean',
+            'events.*.streaming_platform' => 'nullable|string|max:50',
+            'events.*.streaming_url' => 'nullable|string|max:500',
         ]);
 
         $user = $request->user();
@@ -179,10 +182,15 @@ class WizardController extends Controller
         // Remove existing events and re-create
         $invitation->events()->delete();
 
+        // Check if any event is marked as primary
+        $hasPrimary = collect($request->events)->contains(fn($e) => !empty($e['is_primary']));
+
         foreach ($request->events as $index => $data) {
             Event::create(array_merge($data, [
                 'invitation_id' => $invitation->id,
                 'sort_order' => $index,
+                // If no event is explicitly marked primary, default first event as primary
+                'is_primary' => !empty($data['is_primary']) || (!$hasPrimary && $index === 0),
             ]));
         }
 

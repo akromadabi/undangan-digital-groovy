@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\ResellerPlanPrice;
 use App\Models\SubscriptionPlan;
 use App\Services\XenditService;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ class PaymentController extends Controller
 {
     /**
      * Show pricing / upgrade page.
+     * Uses reseller custom prices if user belongs to a reseller.
      */
     public function pricing()
     {
@@ -22,8 +24,28 @@ class PaymentController extends Controller
         $currentPlan = $user->activeSubscription?->plan;
         $features = \App\Models\Feature::orderBy('category')->orderBy('name')->get();
 
+        // If user belongs to a reseller, overlay custom prices
+        $resellerPrices = [];
+        if ($user->reseller_id) {
+            $resellerPrices = ResellerPlanPrice::where('reseller_id', $user->reseller_id)
+                ->pluck('reseller_price', 'plan_id')
+                ->toArray();
+        }
+
+        // Override plan prices with reseller prices for display
+        $plansData = $plans->map(function ($plan) use ($resellerPrices) {
+            $planArray = $plan->toArray();
+            if (isset($resellerPrices[$plan->id])) {
+                $planArray['display_price'] = (float)$resellerPrices[$plan->id];
+                $planArray['original_price'] = (float)$plan->price;
+            } else {
+                $planArray['display_price'] = (float)$plan->price;
+            }
+            return $planArray;
+        });
+
         return Inertia::render('Dashboard/Pricing', [
-            'plans' => $plans,
+            'plans' => $plansData,
             'currentPlan' => $currentPlan,
             'features' => $features,
         ]);
@@ -31,6 +53,7 @@ class PaymentController extends Controller
 
     /**
      * Create payment and redirect to Xendit invoice.
+     * Uses reseller custom price if applicable.
      */
     public function checkout(Request $request)
     {
@@ -39,7 +62,18 @@ class PaymentController extends Controller
         $plan = SubscriptionPlan::findOrFail($request->plan_id);
         $user = auth()->user();
 
-        if ($plan->price <= 0) {
+        // Determine actual price: reseller price or base price
+        $price = (float)$plan->price;
+        if ($user->reseller_id) {
+            $resellerPrice = ResellerPlanPrice::where('reseller_id', $user->reseller_id)
+                ->where('plan_id', $plan->id)
+                ->first();
+            if ($resellerPrice) {
+                $price = (float)$resellerPrice->reseller_price;
+            }
+        }
+
+        if ($price <= 0) {
             return back()->with('error', 'Paket ini gratis, tidak perlu pembayaran.');
         }
 
@@ -54,11 +88,11 @@ class PaymentController extends Controller
             return Inertia::location($existingPending->metadata['invoice_url']);
         }
 
-        // Create payment record
+        // Create payment record with reseller price
         $payment = Payment::create([
             'user_id' => $user->id,
             'plan_id' => $plan->id,
-            'amount' => $plan->price,
+            'amount' => $price,
             'payment_gateway' => 'xendit',
             'status' => 'pending',
         ]);

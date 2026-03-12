@@ -68,7 +68,7 @@ export default function LinkStep({ step, currentSlug, domain }) {
 
                     {available !== null && (
                         <p className={`mt-3 text-sm font-medium ${available ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {available ? '✅ Link is available' : '❌ Link sudah dipakai'}
+                            {available ? 'Link is available' : 'Link sudah dipakai'}
                         </p>
                     )}
 

@@ -14,6 +14,8 @@ class Invitation extends Model
         'opening_title',
         'opening_text',
         'opening_ayat',
+        'opening_ayat_translation',
+        'opening_ayat_source',
         'closing_title',
         'closing_text',
         'cover_image',
@@ -42,6 +44,11 @@ class Invitation extends Model
         'enable_rsvp',
         'enable_wishes',
         'language',
+        'religion',
+        'particle_type',
+        'particle_count',
+        'particle_speed',
+        'menu_position',
     ];
 
     protected function casts(): array

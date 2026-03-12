@@ -18,6 +18,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'avatar',
         'role',
+        'reseller_id',
         'is_active',
         'onboarding_step',
         'locale',
@@ -70,9 +71,45 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Payment::class);
     }
 
+    /** Reseller yang menaungi user ini */
+    public function reseller()
+    {
+        return $this->belongsTo(User::class, 'reseller_id');
+    }
+
+    /** User-user di bawah reseller ini */
+    public function resellerUsers()
+    {
+        return $this->hasMany(User::class, 'reseller_id');
+    }
+
+    /** Setting branding reseller */
+    public function resellerSettings()
+    {
+        return $this->hasOne(ResellerSetting::class, 'user_id');
+    }
+
+    /** Harga kustom per plan untuk reseller */
+    public function resellerPlanPrices()
+    {
+        return $this->hasMany(ResellerPlanPrice::class, 'reseller_id');
+    }
+
     // ── Helpers ──
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    /** Admin = reseller (backward compatible, juga true untuk super_admin) */
     public function isAdmin(): bool
+    {
+        return in_array($this->role, ['admin', 'super_admin']);
+    }
+
+    /** Alias: apakah user ini adalah reseller */
+    public function isReseller(): bool
     {
         return $this->role === 'admin';
     }

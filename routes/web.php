@@ -44,6 +44,9 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+// Reseller Landing Page (public)
+Route::get('/r/{subdomain}', [\App\Http\Controllers\ResellerLandingPageController::class, 'show'])->name('reseller.landing');
+
 // ═══════════════════════════════════════
 // Public Invitation (no auth needed)
 // ═══════════════════════════════════════
@@ -175,21 +178,53 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/live-tamu', [LiveTamuController::class, 'index'])->name('live-tamu');
     Route::post('/live-tamu/save', [LiveTamuController::class, 'saveSettings'])->name('live-tamu.save');
     Route::get('/live-tamu/data', [LiveTamuController::class, 'data'])->name('live-tamu.data');
+    Route::get('/qr-scanner', [LiveTamuController::class, 'qrScanner'])->name('qr-scanner');
 });
 
 // ═══════════════════════════════════════
-// Admin Panel
+// Admin Panel (Reseller + Super Admin)
 // ═══════════════════════════════════════
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', AdminUserController::class);
+    Route::get('/live-tamu', [AdminLiveTamuController::class, 'index'])->name('live-tamu');
+    Route::get('/live-tamu/data', [AdminLiveTamuController::class, 'data'])->name('live-tamu.data');
+
+    // File Upload (admin)
+    Route::post('/upload', [\App\Http\Controllers\Dashboard\DashboardController::class, 'upload'])->name('upload');
+
+    // User Management Actions
+    Route::post('/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.resetPassword');
+    Route::post('/users/{user}/change-plan', [AdminUserController::class, 'changePlan'])->name('users.changePlan');
+    Route::post('/users/{user}/extend-subscription', [AdminUserController::class, 'extendSubscription'])->name('users.extendSubscription');
+
+    // Reseller Settings (branding, landing page, domain)
+    Route::get('/branding', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'branding'])->name('branding');
+    Route::post('/branding', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'updateBranding'])->name('branding.update');
+    Route::get('/landing-page', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'landingPage'])->name('landing-page');
+    Route::post('/landing-page', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'updateLandingPage'])->name('landing-page.update');
+    Route::get('/domain', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'domain'])->name('domain');
+    Route::post('/domain', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'updateDomain'])->name('domain.update');
+
+    // Reseller Revenue
+    Route::get('/pendapatan', [\App\Http\Controllers\Admin\ResellerRevenueController::class, 'index'])->name('pendapatan');
+});
+
+// ═══════════════════════════════════════
+// Super Admin Panel
+// ═══════════════════════════════════════
+Route::middleware(['auth', 'verified', 'super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\SuperAdmin\SuperAdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Reseller Management
+    Route::resource('resellers', \App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class);
+    Route::post('/resellers/{reseller}/prices', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'updatePrices'])->name('resellers.prices');
+
+    // Global Management (themes, plans, music, quotes, settings)
     Route::resource('plans', AdminPlanController::class);
-    Route::resource('features', AdminFeatureController::class);
     Route::resource('themes', AdminThemeController::class);
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
-    Route::get('/live-tamu', [AdminLiveTamuController::class, 'index'])->name('live-tamu');
-    Route::get('/live-tamu/data', [AdminLiveTamuController::class, 'data'])->name('live-tamu.data');
 
     // Music Library
     Route::get('/music', [AdminMusicController::class, 'index'])->name('music.index');
@@ -199,13 +234,18 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::post('/music/{id}/toggle', [AdminMusicController::class, 'toggleActive'])->name('music.toggle');
     Route::post('/music/categories', [AdminMusicController::class, 'saveCategories'])->name('music.saveCategories');
 
-    // File Upload (admin)
-    Route::post('/upload', [\App\Http\Controllers\Dashboard\DashboardController::class, 'upload'])->name('upload');
+    // Quote Templates
+    Route::get('/quotes', [\App\Http\Controllers\Admin\AdminQuoteController::class, 'index'])->name('quotes.index');
+    Route::post('/quotes', [\App\Http\Controllers\Admin\AdminQuoteController::class, 'store'])->name('quotes.store');
+    Route::put('/quotes/{id}', [\App\Http\Controllers\Admin\AdminQuoteController::class, 'update'])->name('quotes.update');
+    Route::delete('/quotes/{id}', [\App\Http\Controllers\Admin\AdminQuoteController::class, 'destroy'])->name('quotes.destroy');
 
-    // User Management Actions
-    Route::post('/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.resetPassword');
-    Route::post('/users/{user}/change-plan', [AdminUserController::class, 'changePlan'])->name('users.changePlan');
-    Route::post('/users/{user}/extend-subscription', [AdminUserController::class, 'extendSubscription'])->name('users.extendSubscription');
+    // All Users (super admin can see all)
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+
+    // File Upload
+    Route::post('/upload', [\App\Http\Controllers\Dashboard\DashboardController::class, 'upload'])->name('upload');
 });
 
 // ═══════════════════════════════════════

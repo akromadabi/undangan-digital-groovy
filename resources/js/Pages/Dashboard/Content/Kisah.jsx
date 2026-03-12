@@ -37,11 +37,11 @@ export default function Kisah({ stories }) {
             <Head title="Kisah Cinta" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-pink-50 border border-pink-100 rounded-xl p-4 flex items-start gap-3">
-                    <span className="text-xl">💕</span>
+                    <span className="text-xl"><svg className="w-5 h-5 text-rose-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg></span>
                     <div>
                         <div className="font-medium text-pink-800 text-sm">Kisah Cinta / Timeline</div>
                         <div className="text-pink-600 text-xs mt-0.5">Ceritakan perjalanan cinta Anda berdua. Tambahkan momen-momen spesial yang ingin Anda bagikan.</div>
@@ -102,7 +102,7 @@ export default function Kisah({ stories }) {
 
                     <button type="submit" disabled={processing}
                         className="w-full py-3.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
-                        {processing ? 'Menyimpan...' : '💾 Simpan Kisah Cinta'}
+                        {processing ? 'Menyimpan...' : 'Simpan Kisah Cinta'}
                     </button>
                 </form>
             </div>

@@ -53,10 +53,10 @@ export default function Whatsapp({ guests, logs }) {
 
     const statusIcon = (status) => {
         switch (status) {
-            case 'sent': return '✅';
-            case 'failed': return '❌';
-            case 'pending': return '⏳';
-            default: return '📤';
+            case 'sent': return '';
+            case 'failed': return '';
+            case 'pending': return '';
+            default: return '';
         }
     };
 
@@ -65,7 +65,7 @@ export default function Whatsapp({ guests, logs }) {
             <Head title="WhatsApp" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* Stats */}
@@ -86,7 +86,7 @@ export default function Whatsapp({ guests, logs }) {
 
                 {/* Message Template */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h3 className="font-bold text-gray-800 text-sm mb-3">📝 Template Pesan</h3>
+                    <h3 className="font-bold text-gray-800 text-sm mb-3"><svg className="w-4 h-4 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg> Template Pesan</h3>
                     <p className="text-xs text-gray-400 mb-2">
                         Gunakan <code className="bg-gray-100 px-1 rounded">{'{nama}'}</code> untuk nama tamu dan <code className="bg-gray-100 px-1 rounded">{'{link}'}</code> untuk link undangan
                     </p>
@@ -124,7 +124,7 @@ export default function Whatsapp({ guests, logs }) {
 
                         <button onClick={handleSend} disabled={sending || selectedIds.length === 0}
                             className="w-full mt-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
-                            {sending ? '⏳ Mengirim...' : `💬 Kirim ke ${selectedIds.length} Tamu`}
+                            {sending ? 'Mengirim...' : `Kirim ke ${selectedIds.length} Tamu`}
                         </button>
                     </div>
                 )}
@@ -132,7 +132,7 @@ export default function Whatsapp({ guests, logs }) {
                 {/* Sending Logs */}
                 {logList.length > 0 && (
                     <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                        <h3 className="font-bold text-gray-800 text-sm mb-3">📋 Riwayat Pengiriman</h3>
+                        <h3 className="font-bold text-gray-800 text-sm mb-3"><svg className="w-4 h-4 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg> Riwayat Pengiriman</h3>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
                             {logList.map((log) => (
                                 <div key={log.id} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0 text-sm">

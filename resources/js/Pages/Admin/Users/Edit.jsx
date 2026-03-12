@@ -38,8 +38,8 @@ export default function Edit({ user, plans }) {
         setPwProcessing(true);
         router.post(route('admin.users.resetPassword', user.id), pw, {
             preserveScroll: true,
-            onSuccess: () => { setPw({ password: '', password_confirmation: '' }); setPwMsg('✅ Password berhasil direset!'); },
-            onError: (errs) => { setPwMsg('❌ ' + Object.values(errs).flat().join(', ')); },
+            onSuccess: () => { setPw({ password: '', password_confirmation: '' }); setPwMsg('Password berhasil direset!'); },
+            onError: (errs) => { setPwMsg('' + Object.values(errs).flat().join(', ')); },
             onFinish: () => setPwProcessing(false),
         });
     };
@@ -53,8 +53,8 @@ export default function Edit({ user, plans }) {
         setPlanProcessing(true);
         router.post(route('admin.users.changePlan', user.id), { plan_id: selectedPlan }, {
             preserveScroll: true,
-            onSuccess: () => setPlanMsg('✅ Paket berhasil diubah!'),
-            onError: (errs) => setPlanMsg('❌ ' + Object.values(errs).flat().join(', ')),
+            onSuccess: () => setPlanMsg('Paket berhasil diubah!'),
+            onError: (errs) => setPlanMsg('' + Object.values(errs).flat().join(', ')),
             onFinish: () => setPlanProcessing(false),
         });
     };
@@ -68,8 +68,8 @@ export default function Edit({ user, plans }) {
         setExtProcessing(true);
         router.post(route('admin.users.extendSubscription', user.id), { expires_at: expiresAt }, {
             preserveScroll: true,
-            onSuccess: () => setExtMsg('✅ Masa aktif berhasil diperpanjang!'),
-            onError: (errs) => setExtMsg('❌ ' + Object.values(errs).flat().join(', ')),
+            onSuccess: () => setExtMsg('Masa aktif berhasil diperpanjang!'),
+            onError: (errs) => setExtMsg('' + Object.values(errs).flat().join(', ')),
             onFinish: () => setExtProcessing(false),
         });
     };
@@ -292,7 +292,7 @@ export default function Edit({ user, plans }) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {invitation.bride_grooms.map(bg => (
                                     <div key={bg.id} className="bg-[#f8f7f4] rounded-xl p-4 border border-[#e8e5e0]">
-                                        <div className="text-3xl mb-2">{bg.gender === 'wanita' ? '👰' : '🤵'}</div>
+                                        <div className="text-3xl mb-2">{bg.gender === 'wanita' ? '♀' : '♂'}</div>
                                         <div className="text-[#333] font-semibold">{bg.full_name}</div>
                                         <div className="text-[#999] text-sm">{bg.nickname}</div>
                                         {bg.father_name && <div className="text-[#bbb] text-xs mt-2">Ayah: {bg.father_name}</div>}

@@ -1,4 +1,4 @@
-import { Head, useForm, usePage, router } from '@inertiajs/react';
+import { Head, useForm, usePage, router, Link } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
@@ -62,7 +62,7 @@ export default function LiveTamu({ invitation, liveUrl }) {
             <Head title="Live Tamu" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* ═══ Live Link ═══ */}
@@ -78,17 +78,24 @@ export default function LiveTamu({ invitation, liveUrl }) {
                         </div>
                     </div>
                     {liveUrl && (
-                        <div className="mt-4 flex items-center gap-3">
-                            <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono text-white/70 truncate border border-white/10">
+                        <div className="mt-4 flex items-center gap-3 flex-wrap">
+                            <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono text-white/70 truncate border border-white/10 min-w-0">
                                 {liveUrl}
                             </div>
                             <button onClick={() => { navigator.clipboard.writeText(liveUrl); }}
                                 className="px-4 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-semibold transition-all border border-white/10">
                                 Salin
                             </button>
+                            <Link href="/qr-scanner"
+                                className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-500/25 whitespace-nowrap inline-flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                                </svg>
+                                Scan QR
+                            </Link>
                             <a href={liveUrl} target="_blank" rel="noopener noreferrer"
                                 className="px-5 py-3 bg-[#E5654B] hover:bg-[#d4523a] rounded-xl text-sm font-bold transition-all shadow-lg shadow-[#E5654B]/25 whitespace-nowrap">
-                                Buka Fullscreen →
+                                Fullscreen →
                             </a>
                         </div>
                     )}
@@ -197,7 +204,7 @@ export default function LiveTamu({ invitation, liveUrl }) {
                     <div className="divide-y divide-gray-50">
                         {guests.length === 0 && (
                             <div className="px-6 py-12 text-center">
-                                <div className="text-5xl mb-3">👥</div>
+                                <div className="text-5xl mb-3"><svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div>
                                 <p className="text-gray-400 font-medium">Belum ada tamu yang hadir</p>
                                 <p className="text-xs text-gray-300 mt-1">Tamu akan muncul otomatis saat scan QR Code</p>
                             </div>

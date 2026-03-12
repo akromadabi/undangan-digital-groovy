@@ -29,6 +29,10 @@ class ThemeSettingsController extends Controller
                 'is_private' => $invitation->is_private,
                 'enable_qr' => $invitation->enable_qr,
                 'hide_photos' => $invitation->hide_photos,
+                'particle_type' => $invitation->particle_type,
+                'particle_count' => $invitation->particle_count ?? 30,
+                'particle_speed' => $invitation->particle_speed ?? 'normal',
+                'menu_position' => $invitation->menu_position ?? 'none',
             ] : null,
             'currentTheme' => $invitation?->theme,
             'themes' => $themes,
@@ -40,16 +44,27 @@ class ThemeSettingsController extends Controller
     public function updateLayout(Request $request)
     {
         $request->validate([
-            'layout_mode' => 'sometimes|required|in:scroll,slide,tab',
-            'show_side_menu' => 'sometimes|boolean',
+            'layout_mode' => 'sometimes|required|in:scroll,slide-h,slide-v',
+            'menu_position' => 'sometimes|required|in:none,bottom,left,right',
+            'particle_type' => 'sometimes|nullable|string|max:20',
+            'particle_count' => 'sometimes|integer|min:5|max:100',
+            'particle_speed' => 'sometimes|in:slow,normal,fast',
         ]);
 
         $invitation = $request->user()->invitation;
-        $data = $request->only(['layout_mode', 'show_side_menu']);
+
+        if (!$invitation) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Undangan belum dibuat'], 404);
+            }
+            return back()->with('error', 'Undangan belum dibuat.');
+        }
+
+        $data = $request->only(['layout_mode', 'menu_position', 'particle_type', 'particle_count', 'particle_speed']);
         $invitation->update($data);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'layout_mode' => $invitation->layout_mode, 'show_side_menu' => $invitation->show_side_menu]);
+            return response()->json(['success' => true, 'layout_mode' => $invitation->layout_mode, 'menu_position' => $invitation->menu_position]);
         }
 
         return back()->with('success', 'Layout berhasil diubah.');

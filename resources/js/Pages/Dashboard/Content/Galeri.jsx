@@ -64,11 +64,11 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
             <Head title="Galeri" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
-                    <span className="text-xl">💡</span>
+                    <span className="text-xl"><svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg></span>
                     <div>
                         <div className="font-medium text-blue-800 text-sm">Galeri Foto</div>
                         <div className="text-blue-600 text-xs mt-0.5">
@@ -122,10 +122,10 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
                             <label className="block cursor-pointer">
                                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-emerald-400 hover:bg-emerald-50/50 transition-all">
                                     {uploading ? (
-                                        <div className="text-emerald-500 font-medium">⏳ Uploading...</div>
+                                        <div className="text-emerald-500 font-medium"><svg className="w-4 h-4 inline mr-1 -mt-0.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Uploading...</div>
                                     ) : (
                                         <>
-                                            <div className="text-4xl mb-2">📸</div>
+                                            <div className="text-4xl mb-2"><svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
                                             <div className="text-sm font-medium text-gray-600">Klik untuk upload foto</div>
                                             <div className="text-xs text-gray-400 mt-1">JPG, PNG, WEBP • Max 5MB</div>
                                         </>
@@ -139,7 +139,7 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
                     </div>
                 ) : (
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
-                        <span className="text-xl">⚠️</span>
+                        <span className="text-xl"><svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></span>
                         <div>
                             <div className="font-medium text-amber-800 text-sm">Kuota foto penuh</div>
                             <div className="text-amber-600 text-xs">Hapus foto lama atau upgrade paket untuk menambah kuota.</div>
@@ -162,7 +162,7 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <button onClick={() => handleDelete(photo.id)}
                                         className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors">
-                                        🗑️ Hapus
+                                        Hapus
                                     </button>
                                 </div>
                             </div>
@@ -170,7 +170,7 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
                     </div>
                 ) : (
                     <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                        <div className="text-5xl mb-3">🖼️</div>
+                        <div className="text-5xl mb-3"><svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
                         <div className="text-gray-500 font-medium">Belum ada foto</div>
                         <div className="text-gray-400 text-sm mt-1">Upload foto pertama Anda di atas</div>
                     </div>

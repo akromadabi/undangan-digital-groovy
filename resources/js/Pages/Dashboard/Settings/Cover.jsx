@@ -40,11 +40,11 @@ export default function Cover({ invitation }) {
             <Head title="Cover" />
             <div className="max-w-2xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">✅ {flash.success}</div>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
-                    <span className="text-xl">🎨</span>
+                    <span className="text-xl"><svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.486M7 17h.01" /></svg></span>
                     <div>
                         <div className="font-medium text-blue-800 text-sm">Pengaturan Cover</div>
                         <div className="text-blue-600 text-xs mt-0.5">Cover adalah halaman pertama yang dilihat tamu saat membuka undangan Anda.</div>
@@ -60,7 +60,7 @@ export default function Cover({ invitation }) {
                                 <img src={data.cover_image} alt="Cover" className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                                    <div className="text-6xl mb-2">📸</div>
+                                    <div className="text-6xl mb-2"><svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
                                     <div className="text-sm">Belum ada gambar</div>
                                 </div>
                             )}
@@ -73,7 +73,7 @@ export default function Cover({ invitation }) {
                         </div>
                         <div className="text-center mt-4">
                             <label className="inline-block px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-medium cursor-pointer transition-colors">
-                                {uploading ? '⏳ Uploading...' : '📷 Upload Gambar Cover'}
+                                {uploading ? 'Uploading...' : 'Upload Gambar Cover'}
                                 <input type="file" accept="image/*" className="hidden"
                                     onChange={(e) => handleImageUpload(e.target.files[0])} disabled={uploading} />
                             </label>
@@ -101,7 +101,7 @@ export default function Cover({ invitation }) {
 
                     <button type="submit" disabled={processing}
                         className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
-                        {processing ? 'Menyimpan...' : '💾 Simpan Cover'}
+                        {processing ? 'Menyimpan...' : 'Simpan Cover'}
                     </button>
                 </form>
             </div>

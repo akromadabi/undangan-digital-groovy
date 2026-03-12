@@ -2,10 +2,10 @@ import { Head, Link, usePage } from '@inertiajs/react';
 
 const steps = [
     { number: 1, label: 'Verification', icon: '✓' },
-    { number: 2, label: 'Link', icon: '🔗' },
-    { number: 3, label: 'Profile', icon: '👤' },
-    { number: 4, label: 'Events', icon: '📅' },
-    { number: 5, label: 'Template', icon: '🎨' },
+    { number: 2, label: 'Link', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
+    { number: 3, label: 'Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+    { number: 4, label: 'Events', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+    { number: 5, label: 'Template', icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.486M7 17h.01' },
 ];
 
 export default function WizardLayout({ children, currentStep, title }) {
