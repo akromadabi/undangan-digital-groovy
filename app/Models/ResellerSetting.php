@@ -14,6 +14,9 @@ class ResellerSetting extends Model
         'custom_domain',
         'landing_page_template',
         'is_active',
+        'bank_name',
+        'bank_account',
+        'bank_holder',
     ];
 
     protected function casts(): array

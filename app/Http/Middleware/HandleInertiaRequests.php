@@ -19,7 +19,7 @@ class HandleInertiaRequests extends Middleware
         $user = $request->user();
         $featureAccess = [];
 
-        if ($user && !$user->isAdmin()) {
+        if ($user && !$user->isAdmin() && !$user->isSuperAdmin()) {
             $plan = $user->currentPlan();
             if ($plan) {
                 $featureAccess = $plan->featureAccess()
@@ -44,7 +44,7 @@ class HandleInertiaRequests extends Middleware
                     'invitation_slug' => $user->invitation?->slug,
                 ] : null,
             ],
-            'subscription' => $user && !$user->isAdmin() ? [
+            'subscription' => $user && !$user->isAdmin() && !$user->isSuperAdmin() ? [
                 'plan' => $user->currentPlan()?->only(['name', 'slug', 'max_guests', 'max_galleries']),
                 'status' => $user->activeSubscription?->status,
                 'expires_at' => $user->activeSubscription?->expires_at?->toISOString(),

@@ -208,6 +208,15 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 
     // Reseller Revenue
     Route::get('/pendapatan', [\App\Http\Controllers\Admin\ResellerRevenueController::class, 'index'])->name('pendapatan');
+
+    // Reseller Pricing (markup harga paket)
+    Route::get('/pricing', [\App\Http\Controllers\Admin\ResellerPricingController::class, 'index'])->name('pricing');
+    Route::post('/pricing', [\App\Http\Controllers\Admin\ResellerPricingController::class, 'update'])->name('pricing.update');
+
+    // Reseller Withdrawal (pencairan)
+    Route::get('/pencairan', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'index'])->name('pencairan');
+    Route::post('/pencairan/request', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'requestWithdrawal'])->name('pencairan.request');
+    Route::post('/pencairan/bank', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'updateBank'])->name('pencairan.bank');
 });
 
 // ═══════════════════════════════════════
@@ -246,6 +255,10 @@ Route::middleware(['auth', 'verified', 'super_admin'])->prefix('super-admin')->n
 
     // File Upload
     Route::post('/upload', [\App\Http\Controllers\Dashboard\DashboardController::class, 'upload'])->name('upload');
+
+    // Withdrawal Management
+    Route::get('/withdrawals', [\App\Http\Controllers\SuperAdmin\WithdrawalManagementController::class, 'index'])->name('withdrawals.index');
+    Route::post('/withdrawals/{id}', [\App\Http\Controllers\SuperAdmin\WithdrawalManagementController::class, 'updateStatus'])->name('withdrawals.update');
 });
 
 // ═══════════════════════════════════════

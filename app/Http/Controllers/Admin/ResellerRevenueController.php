@@ -28,18 +28,19 @@ class ResellerRevenueController extends Controller
             ->pluck('reseller_price', 'plan_id');
 
         // Calculate revenue and profit
+        // Use the actual payment amount (what was charged at the time of sale)
+        // NOT the current reseller_plan_prices (which may have changed since)
         $totalRevenue = 0;
         $totalProfit = 0;
         $transactions = [];
 
         foreach ($payments as $payment) {
-            $basePrice = $payment->plan ? $payment->plan->price : 0;
-            $resellerPrice = isset($resellerPrices[$payment->plan_id])
-                ? (float)$resellerPrices[$payment->plan_id]
-                : (float)$payment->amount;
+            $basePrice = $payment->plan ? (float)$payment->plan->price : 0;
+            // payment->amount = the actual price charged to user at time of purchase
+            $actualPaid = (float)$payment->amount;
+            $profit = $actualPaid - $basePrice;
 
-            $profit = $resellerPrice - (float)$basePrice;
-            $totalRevenue += $resellerPrice;
+            $totalRevenue += $actualPaid;
             $totalProfit += max($profit, 0);
 
             $transactions[] = [
@@ -47,9 +48,9 @@ class ResellerRevenueController extends Controller
                 'user_name' => $payment->user->name ?? '-',
                 'user_email' => $payment->user->email ?? '-',
                 'plan_name' => $payment->plan->name ?? '-',
-                'amount' => (float)$payment->amount,
-                'base_price' => (float)$basePrice,
-                'reseller_price' => $resellerPrice,
+                'amount' => $actualPaid,
+                'base_price' => $basePrice,
+                'reseller_price' => $actualPaid,
                 'profit' => max($profit, 0),
                 'paid_at' => $payment->paid_at?->format('d M Y'),
                 'created_at' => $payment->created_at->format('d M Y'),
@@ -68,9 +69,9 @@ class ResellerRevenueController extends Controller
             $monthProfit = 0;
             foreach ($monthPayments as $mp) {
                 $bp = $mp->plan ? (float)$mp->plan->price : 0;
-                $rp = isset($resellerPrices[$mp->plan_id]) ? (float)$resellerPrices[$mp->plan_id] : (float)$mp->amount;
-                $monthRevenue += $rp;
-                $monthProfit += max($rp - $bp, 0);
+                $paid = (float)$mp->amount;
+                $monthRevenue += $paid;
+                $monthProfit += max($paid - $bp, 0);
             }
 
             $monthlyStats[] = [

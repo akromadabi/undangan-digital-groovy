@@ -48,37 +48,48 @@ export default function Login({ status, canResetPassword, autoLoginUsers }) {
                 <div className="mb-6">
                     <p className="text-xs text-gray-400 mb-3 text-center uppercase tracking-wider font-semibold">⚡ Quick Login (Testing)</p>
                     <div className="space-y-2">
-                        {autoLoginUsers.map((user) => (
+                        {autoLoginUsers.map((user) => {
+                            const isSuperAdmin = user.role === 'super_admin';
+                            const isReseller = user.role === 'admin';
+                            const roleLabel = isSuperAdmin ? 'SUPER ADMIN' : isReseller ? 'RESELLER' : (user.plan || 'FREE');
+                            const borderClass = isSuperAdmin
+                                ? 'border-amber-200 bg-amber-50 hover:border-amber-400'
+                                : isReseller
+                                    ? 'border-violet-200 bg-violet-50 hover:border-violet-400'
+                                    : 'border-emerald-200 bg-emerald-50 hover:border-emerald-400';
+                            const avatarClass = isSuperAdmin ? 'bg-amber-500' : isReseller ? 'bg-violet-500' : 'bg-emerald-500';
+                            const avatarLetter = isSuperAdmin ? 'S' : isReseller ? 'A' : 'U';
+                            const badgeClass = isSuperAdmin
+                                ? 'bg-amber-200 text-amber-700'
+                                : isReseller
+                                    ? 'bg-violet-200 text-violet-700'
+                                    : user.plan
+                                        ? 'bg-blue-200 text-blue-700'
+                                        : 'bg-gray-200 text-gray-600';
+
+                            return (
                             <button
                                 key={user.email}
                                 type="button"
                                 onClick={() => autoLogin(user.email)}
                                 disabled={!!loggingIn}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all hover:shadow-md disabled:opacity-50 ${user.role === 'admin'
-                                    ? 'border-violet-200 bg-violet-50 hover:border-violet-400'
-                                    : 'border-emerald-200 bg-emerald-50 hover:border-emerald-400'
-                                    }`}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all hover:shadow-md disabled:opacity-50 ${borderClass}`}
                             >
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold text-white ${user.role === 'admin' ? 'bg-violet-500' : 'bg-emerald-500'
-                                    }`}>
-                                    {user.role === 'admin' ? 'A' : 'U'}
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold text-white ${avatarClass}`}>
+                                    {avatarLetter}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="font-semibold text-gray-800 text-sm">{user.name}</div>
                                     <div className="text-xs text-gray-400 truncate">{user.email}</div>
                                 </div>
                                 <div>
-                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${user.role === 'admin'
-                                        ? 'bg-violet-200 text-violet-700'
-                                        : user.plan
-                                            ? 'bg-amber-200 text-amber-700'
-                                            : 'bg-gray-200 text-gray-600'
-                                        }`}>
-                                        {user.role === 'admin' ? 'ADMIN' : user.plan || 'FREE'}
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeClass}`}>
+                                        {roleLabel}
                                     </span>
                                 </div>
                             </button>
-                        ))}
+                            );
+                        })}
                     </div>
                     <div className="relative my-5">
                         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>

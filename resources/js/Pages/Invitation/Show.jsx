@@ -56,7 +56,9 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
     const themeSlug = invitation.theme?.slug || '';
     const isJawa = themeSlug === 'adat-jawa';
     const isSunda = themeSlug === 'adat-sunda';
+    const isSpesial02 = themeSlug === 'spesial-02';
     const isTraditional = isJawa || isSunda;
+    const isDecorated = isTraditional || isSpesial02;
 
     const visibleSections = sections.filter(s => s.is_visible).sort((a, b) => a.sort_order - b.sort_order);
 
@@ -79,6 +81,19 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
         brL: '/themes/adat-sunda/branch-left.png',
         cornerR: '/themes/adat-sunda/corner-right.png',
         cornerL: '/themes/adat-sunda/corner-left.png',
+    } : null;
+
+    // Ornament paths for Spesial 02 theme
+    const S = isSpesial02 ? {
+        bouquet: '/themes/spesial-02/bouquet.png',
+        b1: '/themes/spesial-02/bunga-01.webp',
+        b2: '/themes/spesial-02/bunga-02.webp',
+        b3: '/themes/spesial-02/bunga-03.webp',
+        b4: '/themes/spesial-02/bunga-04.webp',
+        b5: '/themes/spesial-02/bunga-05.webp',
+        b6: '/themes/spesial-02/bunga-06.webp',
+        gradasi: '/themes/spesial-02/gradasi.png',
+        frame: '/themes/spesial-02/frame-ornament.webp',
     } : null;
 
     const handleOpen = () => {
@@ -194,14 +209,30 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
             <img src={O.swirlL} alt="" className="w-20 sm:w-28 h-auto opacity-70" />
             <img src={O.swirlR} alt="" className="w-20 sm:w-28 h-auto opacity-70" />
         </div>
+    ) : isSpesial02 ? (
+        <div className="flex items-center justify-center gap-3 my-4">
+            <div className="h-px flex-1 max-w-20" style={{ backgroundColor: colors.primary + '40' }} />
+            <div className="w-2 h-2 rotate-45 rounded-sm" style={{ backgroundColor: colors.primary + '60' }} />
+            <div className="h-px flex-1 max-w-20" style={{ backgroundColor: colors.primary + '40' }} />
+        </div>
     ) : null;
 
     const BungaTop = () => isTraditional ? (
         <img src={O.bunga} alt="" className="w-full h-auto pointer-events-none relative z-10" style={{ opacity: 0.85 }} />
+    ) : isSpesial02 ? (
+        <div className="relative w-full pointer-events-none z-10">
+            <img src={S.b6} alt="" className="absolute top-0 left-0 w-28 sm:w-36 opacity-85 sp02-float" />
+            <img src={S.b3} alt="" className="absolute top-0 right-0 w-20 sm:w-28 opacity-70 sp02-float" style={{ animationDelay: '1.5s' }} />
+        </div>
     ) : null;
 
     const WayangBottom = () => isTraditional ? (
         <img src={O.wayang} alt="" className="w-full h-auto mt-auto pointer-events-none relative z-10" style={{ opacity: 0.8 }} />
+    ) : isSpesial02 ? (
+        <div className="relative w-full pointer-events-none z-10 mt-auto">
+            <img src={S.b2} alt="" className="absolute bottom-0 right-0 w-24 sm:w-32 opacity-70" />
+            <img src={S.b5} alt="" className="absolute bottom-0 left-0 w-16 sm:w-24 opacity-50" style={{ transform: 'scaleX(-1)' }} />
+        </div>
     ) : null;
 
     const Branch = ({ side = 'right', size = 'w-10 sm:w-14' }) => isTraditional ? (
@@ -211,6 +242,8 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
     // Google Fonts
     const googleFonts = isTraditional
         ? 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Poppins:wght@300;400;500;600&family=Great+Vibes&display=swap'
+        : isSpesial02
+        ? 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&family=Great+Vibes&display=swap'
         : 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&family=Great+Vibes&display=swap';
 
     // Section icons for navigation
@@ -251,6 +284,15 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                 <img src={O.swirlR} alt="" className="w-16 sm:w-24 h-auto opacity-70" />
             </div>
         </div>
+    ) : isSpesial02 ? (
+        <div className="mb-6 mt-2">
+            <h2 className="text-2xl sm:text-3xl" style={{ fontFamily: fonts.script, color: colors.primary }}>{title}</h2>
+            <div className="flex items-center justify-center gap-3 mt-2">
+                <div className="h-px flex-1 max-w-16" style={{ backgroundColor: colors.primary + '40' }} />
+                <div className="w-2 h-2 rotate-45 rounded-sm" style={{ backgroundColor: colors.primary + '50' }} />
+                <div className="h-px flex-1 max-w-16" style={{ backgroundColor: colors.primary + '40' }} />
+            </div>
+        </div>
     ) : (
         <h2 className="text-xs uppercase tracking-[0.3em] mb-4" style={{ color: colors.primary }}>{title}</h2>
     );
@@ -274,6 +316,10 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                 .ani-fadeRight { animation: fadeRight var(--dur, 700ms) cubic-bezier(0.22,1,0.36,1) both; }
                 .ani-scaleIn { animation: scaleIn var(--dur, 700ms) cubic-bezier(0.22,1,0.36,1) both; }
                 .ani-fadeIn { animation: fadeIn var(--dur, 700ms) cubic-bezier(0.22,1,0.36,1) both; }
+                @keyframes sp02Float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+                @keyframes sp02Breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+                .sp02-float { animation: sp02Float 5s ease-in-out infinite; }
+                .sp02-breathe { animation: sp02Breathe 6s ease-in-out infinite; }
             `}} />
             {invitation.music_url && <audio ref={audioRef} src={invitation.music_url} loop />}
 
@@ -296,6 +342,16 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                 <img src={O.bunga} alt="" className="w-full h-auto" style={{ opacity: invitation.cover_image ? 0.6 : 0.85 }} />
                             </div>
                         )}
+                        {isSpesial02 && (
+                            <>
+                                <img src={S.b6} alt="" className="absolute top-0 left-0 w-32 sm:w-44 z-10 pointer-events-none sp02-float" />
+                                <img src={S.b3} alt="" className="absolute top-0 right-0 w-24 sm:w-36 z-10 pointer-events-none sp02-float" style={{ animationDelay: '1.5s' }} />
+                                <img src={S.b2} alt="" className="absolute bottom-0 right-0 w-28 sm:w-40 z-10 pointer-events-none" />
+                                <img src={S.b4} alt="" className="absolute bottom-0 left-0 w-20 sm:w-28 z-10 pointer-events-none" />
+                                {/* Watercolor gradasi background */}
+                                {!invitation.cover_image && <img src={S.gradasi} alt="" className="absolute inset-0 w-full h-full object-cover z-0 opacity-30" />}
+                            </>
+                        )}
                         {invitation.cover_image && <div className="flex-1" />}
                         <div className="text-center px-8 max-w-sm mx-auto relative z-20" style={invitation.cover_image ? { paddingBottom: '8vh' } : {}}>
                             {isTraditional ? (
@@ -306,6 +362,27 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                     </h1>
                                     <Swirl />
                                     <p className="text-sm" style={{ color: colors.primary }}>
+                                        {events?.[0]?.event_date ? formatDate(events[0].event_date) : ''}
+                                    </p>
+                                </>
+                            ) : isSpesial02 ? (
+                                <>
+                                    <p className="text-xs uppercase tracking-[0.35em] mb-2" style={{ color: colors.primary, fontFamily: fonts.heading }}>THE WEDDING OF</p>
+                                    {/* Circular couple photo */}
+                                    {showPhotos && invitation.cover_image && (
+                                        <div className="relative w-40 h-40 mx-auto mb-4 sp02-breathe">
+                                            <div className="w-full h-full rounded-full overflow-hidden" style={{ border: `3px solid ${colors.primary}30`, boxShadow: `0 4px 30px ${colors.primary}15` }}>
+                                                <img src={invitation.cover_image} alt="" className="w-full h-full object-cover" />
+                                            </div>
+                                            <img src={S.frame} alt="" className="absolute -right-4 bottom-2 w-20 pointer-events-none" />
+                                        </div>
+                                    )}
+                                    <h1 className="text-3xl sm:text-4xl" style={{ fontFamily: fonts.script, color: colors.primary }}>
+                                        {brideGrooms?.[0]?.nickname || brideGrooms?.[0]?.full_name || 'Bride'} & {brideGrooms?.[1]?.nickname || brideGrooms?.[1]?.full_name || 'Groom'}
+                                    </h1>
+                                    <p className="text-sm mt-2" style={{ color: colors.text, opacity: 0.7 }}>We invite you to celebrate our wedding</p>
+                                    <Swirl />
+                                    <p className="text-sm" style={{ color: colors.text, opacity: 0.7 }}>
                                         {events?.[0]?.event_date ? formatDate(events[0].event_date) : ''}
                                     </p>
                                 </>
@@ -341,7 +418,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
 
                 {/* ═══════ MAIN CONTENT ═══════ */}
                 {isOpen && (
-                    <div className="relative" style={{ paddingBottom: (isTraditional || layoutMode === 'tab') ? '3.5rem' : '0' }}>
+                    <div className="relative" style={{ paddingBottom: (isDecorated || layoutMode === 'tab') ? '3.5rem' : '0' }}>
                         {/* QR Code button removed from here — now in left sidebar */}
                         {/* Music toggle removed from here — now in left sidebar */}
 
@@ -386,14 +463,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                     >
                                         {/* ──── OPENING ──── */}
                                         {section.section_key === 'opening' && (
-                                            <div className={`text-center ${isTraditional ? 'min-h-screen flex flex-col' : ''}`}>
-                                                {isTraditional && <BungaTop />}
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto">
-                                                        {isTraditional && (
+                                                        {(isTraditional || isSpesial02) && (
                                                             <AnimateIn type="fadeIn" delay={100}>
                                                                 <p className="text-base font-bold tracking-wider" style={{ fontFamily: fonts.heading, color: colors.primary }}>
-                                                                    بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
+                                                                    بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ
                                                                 </p>
                                                             </AnimateIn>
                                                         )}
@@ -412,14 +489,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                         <AnimateIn type="scaleIn" delay={600}><Swirl /></AnimateIn>
                                                     </div>
                                                 </div>
-                                                {isTraditional && <WayangBottom />}
+                                                {isDecorated && <WayangBottom />}
                                             </div>
                                         )}
 
                                         {/* ──── BRIDE & GROOM ──── */}
                                         {section.section_key === 'bride_groom' && brideGrooms?.length >= 2 && (
-                                            <div className={`text-center ${isTraditional ? 'min-h-screen flex flex-col' : ''}`}>
-                                                {isTraditional && <BungaTop />}
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
@@ -431,10 +508,13 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                             <div key={i}>
                                                                 {showPhotos && bg.photo && (
                                                                     <AnimateIn type="scaleIn" delay={300 + i * 400}>
-                                                                        <div className="w-32 h-32 mx-auto rounded-full overflow-hidden mb-3"
-                                                                            style={{ border: `3px solid ${colors.primary}`, boxShadow: `0 0 20px ${colors.primary}25` }}>
+                                                                        <div className={`mx-auto rounded-full overflow-hidden mb-3 relative ${isSpesial02 ? 'w-36 h-36' : 'w-32 h-32'}`}
+                                                                            style={{ border: `3px solid ${colors.primary}${isSpesial02 ? '30' : ''}`, boxShadow: `0 0 20px ${colors.primary}${isSpesial02 ? '15' : '25'}` }}>
                                                                             <img src={bg.photo} alt={bg.full_name} className="w-full h-full object-cover" />
                                                                         </div>
+                                                                        {isSpesial02 && (
+                                                                            <img src={S.frame} alt="" className="absolute -right-2 bottom-4 w-16 pointer-events-none" style={{ zIndex: 10 }} />
+                                                                        )}
                                                                     </AnimateIn>
                                                                 )}
                                                                 <AnimateIn type="fadeUp" delay={400 + i * 400}>
@@ -466,14 +546,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                         ))}
                                                     </div>
                                                 </div>
-                                                {isTraditional && <WayangBottom />}
+                                                {isDecorated && <WayangBottom />}
                                             </div>
                                         )}
 
                                         {/* ──── EVENTS ──── */}
                                         {section.section_key === 'event' && (
-                                            <div className={`text-center ${isTraditional ? 'min-h-screen flex flex-col' : ''}`}>
-                                                {isTraditional && <BungaTop />}
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
@@ -514,14 +594,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                         ))}
                                                     </div>
                                                 </div>
-                                                {isTraditional && <WayangBottom />}
+                                                {isDecorated && <WayangBottom />}
                                             </div>
                                         )}
 
                                         {/* ──── GALLERY ──── */}
                                         {section.section_key === 'gallery' && galleries?.length > 0 && (
-                                            <div className={`text-center ${isTraditional ? 'min-h-screen flex flex-col' : ''}`}>
-                                                {isTraditional && <BungaTop />}
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
@@ -541,14 +621,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                         </div>
                                                     </div>
                                                 </div>
-                                                {isTraditional && <WayangBottom />}
+                                                {isDecorated && <WayangBottom />}
                                             </div>
                                         )}
 
                                         {/* ──── LOVE STORY ──── */}
                                         {section.section_key === 'love_story' && loveStories?.length > 0 && (
-                                            <div className={`text-center ${isTraditional ? 'min-h-screen flex flex-col' : ''}`}>
-                                                {isTraditional && <BungaTop />}
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto space-y-3 w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
@@ -572,14 +652,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                         ))}
                                                     </div>
                                                 </div>
-                                                {isTraditional && <WayangBottom />}
+                                                {isDecorated && <WayangBottom />}
                                             </div>
                                         )}
 
                                         {/* ──── AMPLOP DIGITAL ──── */}
                                         {section.section_key === 'bank' && bankAccounts?.length > 0 && (
-                                            <div className={`text-center ${isTraditional ? 'min-h-screen flex flex-col' : ''}`}>
-                                                {isTraditional && <BungaTop />}
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto space-y-4 w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
@@ -656,14 +736,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
 
                                                     </div>
                                                 </div>
-                                                {isTraditional && <WayangBottom />}
+                                                {isDecorated && <WayangBottom />}
                                             </div>
                                         )}
 
                                         {/* ──── RSVP ──── */}
                                         {section.section_key === 'rsvp' && enableRsvp && (
-                                            <div className={`text-center ${isTraditional ? 'min-h-screen flex flex-col' : ''}`}>
-                                                {isTraditional && <BungaTop />}
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto space-y-3 w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
@@ -698,14 +778,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                         </AnimateIn>
                                                     </div>
                                                 </div>
-                                                {isTraditional && <WayangBottom />}
+                                                {isDecorated && <WayangBottom />}
                                             </div>
                                         )}
 
                                         {/* ──── WISHES ──── */}
                                         {section.section_key === 'wishes' && enableWishes && (
-                                            <div className={`text-center ${isTraditional ? 'min-h-screen flex flex-col' : ''}`}>
-                                                {isTraditional && <BungaTop />}
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto space-y-3 w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
@@ -747,14 +827,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                         )}
                                                     </div>
                                                 </div>
-                                                {isTraditional && <WayangBottom />}
+                                                {isDecorated && <WayangBottom />}
                                             </div>
                                         )}
 
                                         {/* ──── CLOSING ──── */}
                                         {section.section_key === 'closing' && (
-                                            <div className={`text-center ${isTraditional ? 'min-h-screen flex flex-col' : ''}`}>
-                                                {isTraditional && <BungaTop />}
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto space-y-3">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
@@ -819,7 +899,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                         )}
 
                         {/* ═══ Left Sidebar: Nav + QR + Music ═══ */}
-                        {(layoutMode === 'tab' || invitation.show_side_menu) && (
+                        {(layoutMode === 'tab' || isDecorated || invitation.show_side_menu) && (
                             <div className="fixed left-3 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2">
                                 {/* Section navigation */}
                                 <nav className="flex flex-col items-center gap-1 px-1.5 py-2 rounded-full"

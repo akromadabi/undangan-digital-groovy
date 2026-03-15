@@ -15,8 +15,8 @@ class CheckOnboarding
             return redirect()->route('login');
         }
 
-        // Admin bypasses onboarding
-        if ($user->isAdmin()) {
+        // Admin & Super Admin bypass onboarding
+        if ($user->isAdmin() || $user->isSuperAdmin()) {
             return $next($request);
         }
 

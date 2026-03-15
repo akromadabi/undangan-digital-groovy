@@ -47,6 +47,13 @@ class ResellerLandingPageController extends Controller
             ];
         });
 
+        // Get themes for gallery
+        $themes = \App\Models\Theme::where('is_active', true)
+            ->select('id', 'name', 'thumbnail', 'category', 'is_premium')
+            ->latest()
+            ->take(8)
+            ->get();
+
         return Inertia::render('ResellerLanding', [
             'reseller' => [
                 'brand_name' => $setting->brand_name ?: $reseller->name,
@@ -55,6 +62,7 @@ class ResellerLandingPageController extends Controller
                 'template' => $setting->landing_page_template ?: 'default',
             ],
             'plans' => $plansData,
+            'themes' => $themes,
         ]);
     }
 }

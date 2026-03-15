@@ -102,10 +102,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'super_admin';
     }
 
-    /** Admin = reseller (backward compatible, juga true untuk super_admin) */
+    /** Admin = reseller saja (strict separation) */
     public function isAdmin(): bool
     {
-        return in_array($this->role, ['admin', 'super_admin']);
+        return $this->role === 'admin';
     }
 
     /** Alias: apakah user ini adalah reseller */

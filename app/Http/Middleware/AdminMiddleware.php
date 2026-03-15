@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 class AdminMiddleware
 {
     /**
-     * Allow both admin (reseller) and super_admin.
-     * isAdmin() returns true for both roles.
+     * Allow only admin (reseller) role.
+     * Super admin has separate middleware.
      */
     public function handle(Request $request, Closure $next)
     {

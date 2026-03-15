@@ -122,7 +122,11 @@ export default function MusicPage({ tracks, categories: serverCategories = [] })
         try {
             const res = await fetch(`${adminRoutePrefix}/upload`, {
                 method: 'POST',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
                 body: formData,
             });
             if (!res.ok) {

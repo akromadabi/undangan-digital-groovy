@@ -97,13 +97,13 @@ class AdminUserController extends Controller
             $user->invitation->update($request->input('invitation'));
         }
 
-        return redirect()->route('admin.users.show', $user)->with('success', 'User berhasil diupdate.');
+        return redirect()->back()->with('success', 'User berhasil diupdate.');
     }
 
     public function destroy(User $user)
     {
         $user->delete();
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
+        return redirect()->back()->with('success', 'User berhasil dihapus.');
     }
 
     public function resetPassword(Request $request, User $user)
