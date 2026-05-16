@@ -1,5 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState, useRef } from 'react';
+import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import {
     Music, Play, Pause, Upload, Volume2, Heart, Moon, Mic, Piano, Theater,
@@ -64,30 +65,19 @@ export default function Musik({ invitation, platformMusic = [] }) {
         formData.append('file', file);
         formData.append('folder', 'music');
         try {
-            const res = await fetch(route('upload'), {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
-                body: formData,
+            // Gunakan axios agar CSRF token (XSRF-TOKEN cookie) ditangani otomatis
+            const response = await axios.post(route('upload'), formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-            if (!res.ok) {
-                const errText = await res.text();
-                // Parse Laravel validation errors
-                try {
-                    const errJson = JSON.parse(errText);
-                    const msg = errJson.errors ? Object.values(errJson.errors).flat().join(', ') : errJson.message || 'Upload gagal';
-                    throw new Error(msg);
-                } catch (pe) {
-                    if (pe.message !== 'Upload gagal') throw pe;
-                    throw new Error(errText.substring(0, 200));
-                }
-            }
-            const result = await res.json();
-            setData('music_url', result.url);
+            setData('music_url', response.data.url);
             setPreviewKey(k => k + 1);
             showNotif('success', `File "${file.name}" berhasil diupload!`);
         } catch (e) {
             console.error(e);
-            showNotif('error', `Upload gagal: ${e.message}`);
+            const msg = e.response?.data?.errors
+                ? Object.values(e.response.data.errors).flat().join(', ')
+                : e.response?.data?.message || e.message || 'Upload gagal';
+            showNotif('error', `Upload gagal: ${msg}`);
         }
         setUploading(false);
     };

@@ -1,5 +1,6 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { useState } from 'react';
+import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Instagram, Youtube, Facebook, Twitter, Plus, X as XIcon, Globe } from 'lucide-react';
 
@@ -69,13 +70,10 @@ export default function Mempelai({ brideGrooms }) {
         formData.append('folder', 'mempelai');
 
         try {
-            const res = await fetch(route('upload'), {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
-                body: formData,
+            const response = await axios.post(route('upload'), formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-            const result = await res.json();
-            update(index, 'photo', result.url);
+            update(index, 'photo', response.data.url);
         } catch (e) {
             console.error(e);
         }

@@ -1,5 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
 export default function Cover({ invitation }) {
@@ -19,13 +20,10 @@ export default function Cover({ invitation }) {
         formData.append('file', file);
         formData.append('folder', 'covers');
         try {
-            const res = await fetch(route('upload'), {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
-                body: formData,
+            const response = await axios.post(route('upload'), formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-            const result = await res.json();
-            setData('cover_image', result.url);
+            setData('cover_image', response.data.url);
         } catch (e) { console.error(e); }
         setUploading(false);
     };

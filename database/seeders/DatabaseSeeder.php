@@ -17,13 +17,23 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // ═══════════════════════════════════════
-        // 1. ADMIN USER
+        // 1. ADMIN USERS (Super Admin & Reseller)
         // ═══════════════════════════════════════
         User::create([
-            'name' => 'Administrator',
-            'email' => 'admin@groovy.com',
+            'name' => 'Super Admin',
+            'email' => 'superadmin@groovy.com',
             'password' => Hash::make('password'),
-            'role' => 'admin',
+            'role' => 'super_admin',
+            'is_active' => true,
+            'onboarding_step' => 6,
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'name' => 'Reseller Groovy',
+            'email' => 'reseller@groovy.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin', // Role 'admin' di sistem ini berfungsi sebagai Reseller
             'is_active' => true,
             'onboarding_step' => 6,
             'email_verified_at' => now(),

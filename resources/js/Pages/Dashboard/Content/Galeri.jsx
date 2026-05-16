@@ -1,5 +1,6 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { useState } from 'react';
+import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
 export default function Galeri({ galleries, maxGalleries, galleryMode }) {
@@ -18,15 +19,12 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
         formData.append('folder', 'galeri');
 
         try {
-            const res = await fetch(route('upload'), {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
-                body: formData,
+            const response = await axios.post(route('upload'), formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-            const result = await res.json();
 
             router.post(route('content.galeri.save'), {
-                image_url: result.url,
+                image_url: response.data.url,
                 caption: caption,
             }, { preserveScroll: true });
             setCaption('');

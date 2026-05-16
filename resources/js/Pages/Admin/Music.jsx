@@ -1,5 +1,6 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { useState, useRef } from 'react';
+import axios from 'axios';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 import {
     Music, Play, Pause, Plus, X, Trash2, Pencil, Tag,
@@ -119,34 +120,21 @@ export default function MusicPage({ tracks, categories: serverCategories = [] })
         const formData = new FormData();
         formData.append('file', file);
         formData.append('folder', 'music');
+
         try {
-            const res = await fetch(`${adminRoutePrefix}/upload`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: formData,
+            // Gunakan axios (sudah dikonfigurasi Laravel untuk handle X-XSRF-TOKEN cookie otomatis)
+            const response = await axios.post(`${adminRoutePrefix}/upload`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-            if (!res.ok) {
-                const errText = await res.text();
-                try {
-                    const errJson = JSON.parse(errText);
-                    const msg = errJson.errors ? Object.values(errJson.errors).flat().join(', ') : errJson.message || 'Upload gagal';
-                    throw new Error(msg);
-                } catch (pe) {
-                    if (pe.message !== 'Upload gagal') throw pe;
-                    throw new Error(errText.substring(0, 200));
-                }
-            }
-            const result = await res.json();
-            setData('url', result.url);
+            setData('url', response.data.url);
             setData('source_type', 'upload');
             showNotif('success', `File "${file.name}" berhasil diupload!`);
         } catch (e) {
             console.error(e);
-            showNotif('error', `Upload gagal: ${e.message}`);
+            const msg = e.response?.data?.errors
+                ? Object.values(e.response.data.errors).flat().join(', ')
+                : e.response?.data?.message || e.message || 'Upload gagal';
+            showNotif('error', `Upload gagal: ${msg}`);
         }
         setUploading(false);
     };

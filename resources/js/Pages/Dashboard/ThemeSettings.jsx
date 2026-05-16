@@ -1,5 +1,6 @@
 import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
+import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PARTICLE_MAP } from '@/Components/ParticleEffect';
 
@@ -68,6 +69,13 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const [particleCount, setParticleCount] = useState(invitation?.particle_count ?? 30);
     const [particleSpeed, setParticleSpeed] = useState(invitation?.particle_speed || 'normal');
 
+    // Helper CSRF token dari cookie (fresh di Inertia SPA)
+    const getCsrfToken = () => {
+        const m = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        if (m) return decodeURIComponent(m[1]);
+        return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    };
+
     const handleCoverImageUpload = async (file) => {
         if (!file) return;
         setCoverUploading(true);
@@ -75,13 +83,11 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
         formData.append('file', file);
         formData.append('folder', 'covers');
         try {
-            const res = await fetch(route('upload'), {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
-                body: formData,
+            // axios otomatis handle XSRF-TOKEN cookie
+            const response = await axios.post(route('upload'), formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-            const result = await res.json();
-            setCoverImage(result.url);
+            setCoverImage(response.data.url);
         } catch (e) { console.error(e); }
         setCoverUploading(false);
     };
