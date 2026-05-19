@@ -1226,10 +1226,23 @@
   transform-origin: center;
 }
 
-/* Standard straight hamburger lines */
-.utary-nav-toggle__line.line-1 { width: 20px; animation: none; }
-.utary-nav-toggle__line.line-2 { width: 20px; animation: none; }
-.utary-nav-toggle__line.line-3 { width: 20px; animation: none; }
+/* Animated staggered-width hamburger lines */
+.utary-nav-toggle__line.line-1 { width: 20px; animation: utaryHamburgerLine1 3s ease-in-out infinite; }
+.utary-nav-toggle__line.line-2 { width: 14px; animation: utaryHamburgerLine2 3s ease-in-out infinite; }
+.utary-nav-toggle__line.line-3 { width: 18px; animation: utaryHamburgerLine3 3s ease-in-out infinite; }
+
+@keyframes utaryHamburgerLine1 {
+  0%, 100% { width: 20px; }
+  50% { width: 14px; }
+}
+@keyframes utaryHamburgerLine2 {
+  0%, 100% { width: 14px; }
+  50% { width: 20px; }
+}
+@keyframes utaryHamburgerLine3 {
+  0%, 100% { width: 18px; }
+  50% { width: 12px; }
+}
 
 .utary-floating {
   position: absolute;
@@ -1442,4 +1455,195 @@
   height: 100%;
   z-index: 0;
   pointer-events: none;
+}
+
+/* ═══════════════════════════════════════
+   ORNAMENT GUARD (Curved bracket borders)
+   Used on RSVP & Gift sections
+   ═══════════════════════════════════════ */
+.utary-ornament-guard {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  line-height: 0;
+}
+
+.utary-ornament-guard--bottom {
+  margin-top: 0;
+}
+
+.utary-guard-content {
+  border-left: 1px solid var(--utary-border-gold);
+  border-right: 1px solid var(--utary-border-gold);
+  padding: 32px 20px;
+}
+
+/* ═══════════════════════════════════════
+   COUNTDOWN - DIAMOND FRAME VARIANT
+   ═══════════════════════════════════════ */
+.utary-countdown--diamond {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 28px auto 32px;
+  max-width: 380px;
+}
+
+.utary-countdown__item--diamond {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+}
+
+.utary-countdown__diamond-wrap {
+  position: relative;
+  width: 76px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.utary-countdown__diamond {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.utary-countdown__item--diamond .utary-countdown__num {
+  position: relative;
+  z-index: 2;
+  font-family: var(--utary-font-display);
+  font-size: 28px;
+  color: var(--utary-gold);
+  line-height: 1;
+}
+
+.utary-countdown__item--diamond .utary-countdown__label {
+  font-family: var(--utary-font-body);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--utary-text-muted);
+  text-transform: uppercase;
+  margin-top: 8px;
+  font-weight: 300;
+}
+
+/* ═══════════════════════════════════════
+   VIDEO SECTION (YouTube Embed)
+   ═══════════════════════════════════════ */
+.utary-video__wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  margin: 12px 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.utary-video__wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 6px;
+}
+
+/* ═══════════════════════════════════════
+   DRESS CODE
+   ═══════════════════════════════════════ */
+.utary-dresscode__palette {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.utary-dresscode__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.utary-dresscode__circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--utary-border-gold);
+  transition: transform 0.3s ease;
+}
+
+.utary-dresscode__circle:hover {
+  transform: scale(1.1);
+}
+
+.utary-dresscode__name {
+  font-family: var(--utary-font-body);
+  font-size: 10px;
+  color: var(--utary-text-muted);
+  letter-spacing: 1px;
+  font-weight: 300;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════
+   LIVE STREAMING
+   ═══════════════════════════════════════ */
+.utary-livestream__photo {
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════
+   GALLERY QUOTE (closing gallery text)
+   ═══════════════════════════════════════ */
+.utary-gallery__quote {
+  font-family: var(--utary-font-body);
+  font-size: 12px;
+  color: var(--utary-text-muted);
+  line-height: 2;
+  font-style: italic;
+  font-weight: 300;
+  max-width: 360px;
+  margin: 28px auto 0;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE ADJUSTMENTS
+   ═══════════════════════════════════════ */
+@media (max-width: 400px) {
+  .utary-countdown--diamond {
+    gap: 6px;
+  }
+
+  .utary-countdown__diamond-wrap {
+    width: 64px;
+    height: 44px;
+  }
+
+  .utary-countdown__item--diamond .utary-countdown__num {
+    font-size: 22px;
+  }
+
+  .utary-countdown__item--diamond {
+    min-width: 60px;
+  }
+
+  .utary-dresscode__circle {
+    width: 50px;
+    height: 50px;
+  }
 }

@@ -42,6 +42,42 @@ function MonogramShield({ width = 134, height = 200 }) {
 }
 
 /* ─────────────────────────────────────────────
+   Ornament Guard SVG (for RSVP & Gift sections)
+   Curved bracket/arch border from reference
+   ───────────────────────────────────────────── */
+function OrnamentGuardTop() {
+    return (
+        <div className="utary-ornament-guard">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 407.46 29.54" style={{ width: '100%', display: 'block' }}>
+                <path fill="#c8b680" d="M2,29.54c14.94-.52,27-12.59,27.52-27.54h348.42c.52,14.95,12.58,27.02,27.52,27.54h2v-.98c0-.55-.45-1-1-1-14.63,0-26.54-11.91-26.54-26.56,0-.55-.45-1-1-1H28.54c-.55,0-1,.45-1,1,0,14.64-11.9,26.56-26.54,26.56-.55,0-1,.45-1,1v.98h2Z" />
+            </svg>
+        </div>
+    );
+}
+
+function OrnamentGuardBottom() {
+    return (
+        <div className="utary-ornament-guard utary-ornament-guard--bottom">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 407.46 29.54" style={{ width: '100%', display: 'block', transform: 'scaleY(-1)' }}>
+                <path fill="#c8b680" d="M2,29.54c14.94-.52,27-12.59,27.52-27.54h348.42c.52,14.95,12.58,27.02,27.52,27.54h2v-.98c0-.55-.45-1-1-1-14.63,0-26.54-11.91-26.54-26.56,0-.55-.45-1-1-1H28.54c-.55,0-1,.45-1,1,0,14.64-11.9,26.56-26.54,26.56-.55,0-1,.45-1,1v.98h2Z" />
+            </svg>
+        </div>
+    );
+}
+
+/* ─────────────────────────────────────────────
+   Diamond Frame SVG for Countdown Items
+   ───────────────────────────────────────────── */
+function CountdownDiamondFrame() {
+    return (
+        <svg className="utary-countdown__diamond" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 70" preserveAspectRatio="xMidYMid meet">
+            <path fill="none" stroke="#cdbb83" strokeWidth="1"
+                d="M55,2 C65,2,75,8,80,16 C85,8,95,2,105,7 L105,7 C100,18,98,30,98,35 C98,40,100,52,105,63 L105,63 C95,68,85,62,80,54 C75,62,65,68,55,68 C45,68,35,62,30,54 C25,62,15,68,5,63 L5,63 C10,52,12,40,12,35 C12,30,10,18,5,7 L5,7 C15,2,25,8,30,16 C35,8,45,2,55,2 Z" />
+        </svg>
+    );
+}
+
+/* ─────────────────────────────────────────────
    Particle Canvas Component
    ───────────────────────────────────────────── */
 function ParticleCanvas() {
@@ -256,7 +292,7 @@ function CoupleSection() {
                 <RevealDiv className="utary-profile">
                     <div className="utary-profile__frame-wrap">
                         <img src={frameProfile} alt="" className="utary-profile__frame" />
-                        <div className="utary-profile__photo" style={{ background: 'linear-gradient(135deg, var(--utary-bg-secondary), var(--utary-bg-dark))' }} />
+                        <img src={couplePhoto} alt="Utary Adhita" className="utary-profile__photo" />
                     </div>
                     <h3 className="utary-profile__name">Utary Adhita</h3>
                     <p className="utary-profile__role">Putri Kedua dari</p>
@@ -279,7 +315,7 @@ function CoupleSection() {
                 <RevealDiv className="utary-profile">
                     <div className="utary-profile__frame-wrap">
                         <img src={frameProfile} alt="" className="utary-profile__frame" />
-                        <div className="utary-profile__photo" style={{ background: 'linear-gradient(135deg, var(--utary-bg-secondary), var(--utary-bg-dark))' }} />
+                        <img src={couplePhoto} alt="Fachrul Rozi" className="utary-profile__photo" />
                     </div>
                     <h3 className="utary-profile__name">Fachrul Rozi</h3>
                     <p className="utary-profile__role">Putra Kedua dari</p>
@@ -335,7 +371,7 @@ function TimelineSection() {
     );
 }
 
-/* ── Event ── */
+/* ── Event (Save The Date) ── Reordered to match reference */
 function EventSection() {
     const countdown = useCountdown('2026-12-20T08:00:00');
 
@@ -351,6 +387,26 @@ function EventSection() {
                 <RevealDiv>
                     <div className="utary-event__quote">
                         &ldquo;Pernikahan adalah ibadah, dan setiap ibadah bermuara pada cinta-Nya sebagai tujuan. Sudah sewajarnya setiap upaya meraih cinta-Nya dilakukan dengan sukacita.&rdquo;
+                    </div>
+                </RevealDiv>
+
+                {/* Countdown with diamond frames - BEFORE save button per reference */}
+                <RevealDiv>
+                    <div className="utary-countdown utary-countdown--diamond">
+                        {[
+                            { val: countdown.days, label: 'Hari' },
+                            { val: countdown.hours, label: 'Jam' },
+                            { val: countdown.minutes, label: 'Menit' },
+                            { val: countdown.seconds, label: 'Detik' },
+                        ].map((item, i) => (
+                            <div key={i} className="utary-countdown__item utary-countdown__item--diamond">
+                                <div className="utary-countdown__diamond-wrap">
+                                    <CountdownDiamondFrame />
+                                    <div className="utary-countdown__num">{item.val}</div>
+                                </div>
+                                <div className="utary-countdown__label">{item.label}</div>
+                            </div>
+                        ))}
                     </div>
                 </RevealDiv>
 
@@ -397,27 +453,93 @@ function EventSection() {
                 <RevealDiv>
                     <img src={eventFrameBottom} alt="" style={{ width: '100%', marginTop: '-1px' }} />
                 </RevealDiv>
+            </div>
+        </section>
+    );
+}
 
-                {/* Countdown */}
+/* ── Dress Code ── */
+function DressCodeSection() {
+    const colors = [
+        { name: 'Sage Green', hex: '#8B9E7E' },
+        { name: 'Dust Green', hex: '#6B7F6B' },
+        { name: 'Mustard Gold', hex: '#C5A55A' },
+        { name: 'Copper Brown', hex: '#9E6B4A' },
+    ];
+    return (
+        <section className="utary-section utary-section--padded" id="dresscode">
+            <div className="utary-section__inner">
                 <RevealDiv>
-                    <div className="utary-countdown">
-                        <div className="utary-countdown__item">
-                            <div className="utary-countdown__num">{countdown.days}</div>
-                            <div className="utary-countdown__label">Hari</div>
-                        </div>
-                        <div className="utary-countdown__item">
-                            <div className="utary-countdown__num">{countdown.hours}</div>
-                            <div className="utary-countdown__label">Jam</div>
-                        </div>
-                        <div className="utary-countdown__item">
-                            <div className="utary-countdown__num">{countdown.minutes}</div>
-                            <div className="utary-countdown__label">Menit</div>
-                        </div>
-                        <div className="utary-countdown__item">
-                            <div className="utary-countdown__num">{countdown.seconds}</div>
-                            <div className="utary-countdown__label">Detik</div>
-                        </div>
+                    <h2 className="utary-couple__title">A Guide To<br />Dress Codes</h2>
+                    <p className="utary-gift__desc">
+                        Kami mengundang tamu undangan untuk mengenakan palet warna berikut untuk keseragaman foto:
+                    </p>
+                </RevealDiv>
+                <RevealDiv>
+                    <div className="utary-dresscode__palette">
+                        {colors.map((c, i) => (
+                            <div key={i} className="utary-dresscode__item">
+                                <div className="utary-dresscode__circle" style={{ backgroundColor: c.hex }} />
+                            </div>
+                        ))}
                     </div>
+                </RevealDiv>
+            </div>
+        </section>
+    );
+}
+
+/* ── Live Streaming ── */
+function LiveStreamingSection() {
+    return (
+        <section className="utary-section utary-section--padded" id="livestream">
+            <div className="utary-section__inner">
+                <RevealDiv>
+                    <img src={couplePhoto} alt="Live Streaming" className="utary-livestream__photo" />
+                </RevealDiv>
+                <RevealDiv>
+                    <h2 className="utary-couple__title">Join Our Wedding<br />Live Streaming</h2>
+                </RevealDiv>
+                <RevealDiv>
+                    <div className="utary-hero__date-text" style={{ marginBottom: '4px' }}>Sabtu, 20 Desember 2026</div>
+                    <div className="utary-hero__venue" style={{ marginBottom: '16px' }}>08.00 - 10.00 WIB</div>
+                </RevealDiv>
+                <RevealDiv>
+                    <p className="utary-gift__desc" style={{ marginBottom: '16px' }}>
+                        Kami akan menyiarkan momen bahagia prosesi pernikahan kami secara virtual melalui platform berikut.
+                    </p>
+                </RevealDiv>
+                <RevealDiv>
+                    <button className="utary-event__save-btn" onClick={() => window.open('https://www.instagram.com/', '_blank')}>
+                        Join Live
+                    </button>
+                </RevealDiv>
+            </div>
+        </section>
+    );
+}
+
+/* ── Video YouTube ── */
+function VideoSection() {
+    return (
+        <section className="utary-section" id="video">
+            <div className="utary-section__inner" style={{ maxWidth: '100%', padding: '0 24px' }}>
+                <RevealDiv>
+                    <DividerSection />
+                </RevealDiv>
+                <RevealDiv>
+                    <div className="utary-video__wrapper">
+                        <iframe
+                            src="https://www.youtube.com/embed/ncaok-mSlro?autoplay=1&mute=1&loop=1&playlist=ncaok-mSlro&controls=1&playsinline=1"
+                            title="Wedding Video"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                    </div>
+                </RevealDiv>
+                <RevealDiv>
+                    <DividerSection />
                 </RevealDiv>
             </div>
         </section>
@@ -428,18 +550,55 @@ function EventSection() {
 function GallerySection() {
     return (
         <section className="utary-section utary-section--padded" id="gallery">
-            <img src={flowerLeft} alt="" className="utary-ornament utary-ornament--flower-left" />
-            <img src={flowerRight} alt="" className="utary-ornament utary-ornament--flower-right" />
+            <img src={ornamentLeft} alt="" className="utary-ornament utary-ornament--left" />
+            <img src={ornamentRight} alt="" className="utary-ornament utary-ornament--right" />
             <div className="utary-section__inner">
                 <RevealDiv>
-                    <h2 className="utary-gallery__title">Wedding Frame</h2>
+                    <h2 className="utary-gallery__title">Our Moment</h2>
+                    <p className="utary-gift__desc" style={{ fontStyle: 'italic' }}>
+                        &ldquo;I was created in time to fill your time, and I use all the time in my life to love you.&rdquo;
+                    </p>
+                    <p className="utary-hero__venue" style={{ marginBottom: '20px' }}>Photo Video by Tary &amp; Fachrul</p>
                 </RevealDiv>
                 <RevealDiv className="utary-gallery__grid">
-                    {[couplePhoto, couplePhoto, couplePhoto, couplePhoto].map((src, i) => (
+                    {[couplePhoto, couplePhoto, couplePhoto, couplePhoto, couplePhoto, couplePhoto].map((src, i) => (
                         <div key={i} className="utary-gallery__item">
                             <img src={src} alt={`Gallery ${i + 1}`} />
                         </div>
                     ))}
+                </RevealDiv>
+                <RevealDiv>
+                    <div className="utary-gallery__quote">
+                        <p>&ldquo;I love you, I am who I am because of you. You are every reason, every hope and every dream. I&rsquo;ve ever had and no matter what happens to us in the future, every day we are together is the greatest day of my life. I will always be yours.&rdquo;</p>
+                        <p style={{ marginTop: '10px', fontWeight: '400' }}>TARY &amp; FACHRUL</p>
+                    </div>
+                </RevealDiv>
+            </div>
+        </section>
+    );
+}
+
+/* ── Wedding Frame Section ── */
+function WeddingFrameSection() {
+    return (
+        <section className="utary-section utary-section--padded" id="weddingframe">
+            <div className="utary-section__inner">
+                <RevealDiv>
+                    <div className="utary-timeline__pretitle">Capture Your Moment</div>
+                    <h2 className="utary-gallery__title">WEDDING FRAME</h2>
+                    <p className="utary-gift__desc">
+                        Unggah dan abadikan momen kamu saat menghadiri pernikahan kami dengan menggunakan Wedding Frame di bawah ini.
+                    </p>
+                </RevealDiv>
+                <RevealDiv>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button className="utary-event__save-btn" onClick={() => window.open('https://www.instagram.com/', '_blank')}>
+                            <i className="fab fa-instagram" style={{ marginRight: '8px' }} /> Open Frame
+                        </button>
+                    </div>
+                    <p className="utary-gift__desc" style={{ marginTop: '16px', fontStyle: 'italic', fontSize: '11px' }}>
+                        *Disarankan untuk memperbarui aplikasi Instagram ke versi terbaru.
+                    </p>
                 </RevealDiv>
             </div>
         </section>
@@ -459,60 +618,66 @@ function GiftSection() {
 
     return (
         <section className="utary-section utary-section--padded" id="gift">
-            <img src={flowerLeft} alt="" className="utary-ornament utary-ornament--flower-left" />
-            <img src={flowerRight} alt="" className="utary-ornament utary-ornament--flower-right" />
             <div className="utary-section__inner">
-                <RevealDiv>
-                    <h2 className="utary-gift__title">Wedding Gift</h2>
-                    <p className="utary-gift__desc">
-                        Doa restu Anda merupakan karunia yang sangat berarti bagi kami. Namun jika memberi adalah ungkapan tanda kasih Anda, kami akan senang hati menerimanya yang tentu akan semakin melengkapi kebahagiaan kami.
-                    </p>
-                </RevealDiv>
+                {/* Ornament Guard Top */}
+                <OrnamentGuardTop />
 
-                <RevealDiv>
-                    <div className="utary-gift__tabs">
-                        <button className={`utary-gift__tab ${giftTab === 'amplop' ? 'is-active' : ''}`} onClick={() => setGiftTab('amplop')}>E-Amplop</button>
-                        <button className={`utary-gift__tab ${giftTab === 'registry' ? 'is-active' : ''}`} onClick={() => setGiftTab('registry')}>Gift Registry</button>
-                    </div>
-                </RevealDiv>
-
-                {giftTab === 'amplop' && (
-                    <>
-                        <RevealDiv>
-                            <div className="utary-gift__card">
-                                <div className="utary-gift__bank-name">BCA</div>
-                                <div className="utary-gift__account">0123 456 789</div>
-                                <div className="utary-gift__holder">Nama Penerima</div>
-                                <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('0123456789', 'bca')}>
-                                    {copied === 'bca' ? 'Tersalin!' : 'Salin'}
-                                </button>
-                            </div>
-                        </RevealDiv>
-
-                        <RevealDiv>
-                            <div className="utary-gift__card">
-                                <div className="utary-gift__bank-name">GOPAY</div>
-                                <div className="utary-gift__account">0123 456 789</div>
-                                <div className="utary-gift__holder">Nama Penerima</div>
-                                <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('0123456789', 'gopay')}>
-                                    {copied === 'gopay' ? 'Tersalin!' : 'Salin'}
-                                </button>
-                            </div>
-                        </RevealDiv>
-                    </>
-                )}
-
-                {giftTab === 'registry' && (
+                <div className="utary-guard-content">
                     <RevealDiv>
-                        <div className="utary-gift__card">
-                            <div className="utary-gift__bank-name">KIRIM KADO</div>
-                            <div className="utary-gift__holder" style={{ marginBottom: '8px' }}>Jl. Lorem Ipsum No. 01, RT01 RW01, Kel. Dolor, Kec. Sit Amet, Kota Bandung</div>
-                            <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('Jl. Lorem Ipsum No. 01, RT01 RW01, Kel. Dolor, Kec. Sit Amet, Kota Bandung', 'address')}>
-                                {copied === 'address' ? 'Tersalin!' : 'Salin'}
-                            </button>
+                        <h2 className="utary-gift__title">Wedding Gift</h2>
+                        <p className="utary-gift__desc">
+                            Doa restu Anda merupakan karunia yang sangat berarti bagi kami. Namun jika memberi adalah ungkapan tanda kasih Anda, kami akan senang hati menerimanya yang tentu akan semakin melengkapi kebahagiaan kami.
+                        </p>
+                    </RevealDiv>
+
+                    <RevealDiv>
+                        <div className="utary-gift__tabs">
+                            <button className={`utary-gift__tab ${giftTab === 'amplop' ? 'is-active' : ''}`} onClick={() => setGiftTab('amplop')}>E-Amplop</button>
+                            <button className={`utary-gift__tab ${giftTab === 'registry' ? 'is-active' : ''}`} onClick={() => setGiftTab('registry')}>Gift Registry</button>
                         </div>
                     </RevealDiv>
-                )}
+
+                    {giftTab === 'amplop' && (
+                        <>
+                            <RevealDiv>
+                                <div className="utary-gift__card">
+                                    <div className="utary-gift__bank-name">BCA</div>
+                                    <div className="utary-gift__account">0123 456 789</div>
+                                    <div className="utary-gift__holder">Nama Penerima</div>
+                                    <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('0123456789', 'bca')}>
+                                        {copied === 'bca' ? 'Tersalin!' : 'Salin'}
+                                    </button>
+                                </div>
+                            </RevealDiv>
+
+                            <RevealDiv>
+                                <div className="utary-gift__card">
+                                    <div className="utary-gift__bank-name">GOPAY</div>
+                                    <div className="utary-gift__account">0123 456 789</div>
+                                    <div className="utary-gift__holder">Nama Penerima</div>
+                                    <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('0123456789', 'gopay')}>
+                                        {copied === 'gopay' ? 'Tersalin!' : 'Salin'}
+                                    </button>
+                                </div>
+                            </RevealDiv>
+                        </>
+                    )}
+
+                    {giftTab === 'registry' && (
+                        <RevealDiv>
+                            <div className="utary-gift__card">
+                                <div className="utary-gift__bank-name">KIRIM KADO</div>
+                                <div className="utary-gift__holder" style={{ marginBottom: '8px' }}>Jl. Lorem Ipsum No. 01, RT01 RW01, Kel. Dolor, Kec. Sit Amet, Kota Bandung</div>
+                                <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('Jl. Lorem Ipsum No. 01, RT01 RW01, Kel. Dolor, Kec. Sit Amet, Kota Bandung', 'address')}>
+                                    {copied === 'address' ? 'Tersalin!' : 'Salin'}
+                                </button>
+                            </div>
+                        </RevealDiv>
+                    )}
+                </div>
+
+                {/* Ornament Guard Bottom */}
+                <OrnamentGuardBottom />
             </div>
         </section>
     );
@@ -536,63 +701,72 @@ function RsvpSection() {
 
     return (
         <section className="utary-section utary-section--padded" id="rsvp">
-            <img src={ornamentLeft} alt="" className="utary-ornament utary-ornament--left" />
-            <img src={ornamentRight} alt="" className="utary-ornament utary-ornament--right" />
             <div className="utary-section__inner">
-                <RevealDiv>
-                    <h2 className="utary-rsvp__title">RSVP &amp; Wishes</h2>
-                </RevealDiv>
+                {/* Ornament Guard Top */}
+                <OrnamentGuardTop />
 
-                <RevealDiv>
-                    <form className="utary-rsvp__form" onSubmit={handleSubmit}>
-                        <div className="utary-rsvp__field">
-                            <label className="utary-rsvp__label">Nama</label>
-                            <input className="utary-rsvp__input" type="text" placeholder="Masukkan nama Anda"
-                                value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-                        </div>
-                        <div className="utary-rsvp__field">
-                            <label className="utary-rsvp__label">Konfirmasi Kehadiran</label>
-                            <div className="utary-rsvp__radio-group">
-                                <label className="utary-rsvp__radio-label">
-                                    <input type="radio" name="attendance" value="hadir"
-                                        checked={form.attendance === 'hadir'} onChange={e => setForm({ ...form, attendance: e.target.value })} />
-                                    Hadir
-                                </label>
-                                <label className="utary-rsvp__radio-label">
-                                    <input type="radio" name="attendance" value="tidak"
-                                        checked={form.attendance === 'tidak'} onChange={e => setForm({ ...form, attendance: e.target.value })} />
-                                    Tidak Hadir
-                                </label>
-                            </div>
-                        </div>
-                        <div className="utary-rsvp__field">
-                            <label className="utary-rsvp__label">Jumlah Tamu</label>
-                            <select className="utary-rsvp__select" value={form.guests} onChange={e => setForm({ ...form, guests: e.target.value })}>
-                                <option value="1">1 Orang</option>
-                                <option value="2">2 Orang</option>
-                                <option value="3">3 Orang</option>
-                            </select>
-                        </div>
-                        <div className="utary-rsvp__field">
-                            <label className="utary-rsvp__label">Ucapan &amp; Doa</label>
-                            <textarea className="utary-rsvp__textarea" placeholder="Tulis ucapan untuk kedua mempelai..."
-                                value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} />
-                        </div>
-                        <button type="submit" className="utary-rsvp__submit">Kirim Konfirmasi</button>
-                    </form>
-                </RevealDiv>
+                <div className="utary-guard-content">
+                    <RevealDiv>
+                        <h2 className="utary-rsvp__title">RSVP &amp; Wishes</h2>
+                        <p className="utary-gift__desc">
+                            Bagi tamu undangan yang akan menghadiri acara pernikahan kami, mohon mengirimkan konfirmasi kehadiran dengan mengisi formulir berikut ini:
+                        </p>
+                    </RevealDiv>
 
-                <div style={{ marginTop: '32px' }}>
-                    {wishes.map((w, i) => (
-                        <RevealDiv key={i}>
-                            <div className="utary-wish">
-                                <div className="utary-wish__name">{w.name}</div>
-                                <div className="utary-wish__text">{w.text}</div>
-                                <div className="utary-wish__time">{w.time}</div>
+                    <RevealDiv>
+                        <form className="utary-rsvp__form" onSubmit={handleSubmit}>
+                            <div className="utary-rsvp__field">
+                                <label className="utary-rsvp__label">Nama</label>
+                                <input className="utary-rsvp__input" type="text" placeholder="Masukkan nama Anda"
+                                    value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                             </div>
-                        </RevealDiv>
-                    ))}
+                            <div className="utary-rsvp__field">
+                                <label className="utary-rsvp__label">Konfirmasi Kehadiran</label>
+                                <div className="utary-rsvp__radio-group">
+                                    <label className="utary-rsvp__radio-label">
+                                        <input type="radio" name="attendance" value="hadir"
+                                            checked={form.attendance === 'hadir'} onChange={e => setForm({ ...form, attendance: e.target.value })} />
+                                        Hadir
+                                    </label>
+                                    <label className="utary-rsvp__radio-label">
+                                        <input type="radio" name="attendance" value="tidak"
+                                            checked={form.attendance === 'tidak'} onChange={e => setForm({ ...form, attendance: e.target.value })} />
+                                        Tidak Hadir
+                                    </label>
+                                </div>
+                            </div>
+                            <div className="utary-rsvp__field">
+                                <label className="utary-rsvp__label">Jumlah Tamu</label>
+                                <select className="utary-rsvp__select" value={form.guests} onChange={e => setForm({ ...form, guests: e.target.value })}>
+                                    <option value="1">1 Orang</option>
+                                    <option value="2">2 Orang</option>
+                                    <option value="3">3 Orang</option>
+                                </select>
+                            </div>
+                            <div className="utary-rsvp__field">
+                                <label className="utary-rsvp__label">Ucapan &amp; Doa</label>
+                                <textarea className="utary-rsvp__textarea" placeholder="Tulis ucapan untuk kedua mempelai..."
+                                    value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} />
+                            </div>
+                            <button type="submit" className="utary-rsvp__submit">Kirim Konfirmasi</button>
+                        </form>
+                    </RevealDiv>
+
+                    <div style={{ marginTop: '32px' }}>
+                        {wishes.map((w, i) => (
+                            <RevealDiv key={i}>
+                                <div className="utary-wish">
+                                    <div className="utary-wish__name">{w.name}</div>
+                                    <div className="utary-wish__text">{w.text}</div>
+                                    <div className="utary-wish__time">{w.time}</div>
+                                </div>
+                            </RevealDiv>
+                        ))}
+                    </div>
                 </div>
+
+                {/* Ornament Guard Bottom */}
+                <OrnamentGuardBottom />
             </div>
         </section>
     );
@@ -669,7 +843,7 @@ function Navigation({ isOpened, isPlaying, onToggleMusic }) {
                 </ul>
             </div>
 
-            {/* Top Right Hamburger */}
+            {/* Top Right Hamburger with animation */}
             <div className={`utary-top-nav ${isMenuOpen ? 'is-hidden' : ''}`}>
                 <button className="utary-nav-toggle" onClick={handleOpenMenu} title="Menu">
                     <span className="utary-nav-toggle__line line-1" />
@@ -726,12 +900,13 @@ export default function Utary() {
     }, []);
 
     const toggleMusic = useCallback(() => {
-        if (!audioRef.current) return;
+        const audio = audioRef.current;
+        if (!audio) return;
         if (isPlaying) {
-            audioRef.current.pause();
+            audio.pause();
             setIsPlaying(false);
         } else {
-            audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+            audio.play().then(() => setIsPlaying(true)).catch(() => {});
         }
     }, [isPlaying]);
 
@@ -744,8 +919,8 @@ export default function Utary() {
 
             <ParticleCanvas />
 
-            {/* Background Music (silent default) */}
-            <audio ref={audioRef} loop preload="auto">
+            {/* Background Music */}
+            <audio ref={audioRef} loop preload="auto" playsInline>
                 <source src="https://attarivitation.com/wp-content/uploads/2024/10/backsound-attari-1.mp3" type="audio/mpeg" />
             </audio>
 
@@ -775,12 +950,16 @@ export default function Utary() {
                     <TimelineSection />
                     <DividerSection />
                     <EventSection />
-                    <DividerSection />
+                    <DressCodeSection />
+                    <LiveStreamingSection />
+                    <VideoSection />
                     <GallerySection />
                     <DividerSection />
-                    <GiftSection />
+                    <WeddingFrameSection />
                     <DividerSection />
                     <RsvpSection />
+                    <DividerSection />
+                    <GiftSection />
                     <FooterSection />
                 </div>
             </div>
