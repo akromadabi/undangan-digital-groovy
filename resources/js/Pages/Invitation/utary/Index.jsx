@@ -8,10 +8,17 @@ import ornamentRight from './asset/ornament-right.webp';
 import dividerPattern from './asset/divider-pattern.webp';
 import frameProfile from './asset/frame-profile.webp';
 import couplePhoto from './asset/couple-photo.webp';
+import maskProfile from './asset/mask-profile.webp';
 import flowerLeft from './asset/flower-left.webp';
 import flowerRight from './asset/flower-right.webp';
 import eventFrameTop from './asset/event-frame-top.webp';
 import eventFrameBottom from './asset/event-frame-bottom.webp';
+import utary1 from './asset/utary-1.webp';
+import utary2 from './asset/utary-2.webp';
+import utary3 from './asset/utary-3.webp';
+import utary4 from './asset/utary-4.webp';
+import utary5 from './asset/utary-5.webp';
+import utary6 from './asset/utary-6.webp';
 
 /* ─────────────────────────────────────────────
    SVG Monogram Shield (gold outline, TF inside)
@@ -292,7 +299,21 @@ function CoupleSection() {
                 <RevealDiv className="utary-profile">
                     <div className="utary-profile__frame-wrap">
                         <img src={frameProfile} alt="" className="utary-profile__frame" />
-                        <img src={couplePhoto} alt="Utary Adhita" className="utary-profile__photo" />
+                        <img 
+                            src={utary1} 
+                            alt="Utary Adhita" 
+                            className="utary-profile__photo" 
+                            style={{
+                                WebkitMaskImage: `url(${maskProfile})`,
+                                maskImage: `url(${maskProfile})`,
+                                WebkitMaskSize: 'cover',
+                                maskSize: 'cover',
+                                WebkitMaskPosition: 'center',
+                                maskPosition: 'center',
+                                WebkitMaskRepeat: 'no-repeat',
+                                maskRepeat: 'no-repeat'
+                            }}
+                        />
                     </div>
                     <h3 className="utary-profile__name">UTARY ADHITA</h3>
                     <p className="utary-profile__role">PUTRI KEDUA DARI</p>
@@ -315,7 +336,21 @@ function CoupleSection() {
                 <RevealDiv className="utary-profile">
                     <div className="utary-profile__frame-wrap">
                         <img src={frameProfile} alt="" className="utary-profile__frame" />
-                        <img src={couplePhoto} alt="Fachrul Rozi" className="utary-profile__photo" />
+                        <img 
+                            src={utary2} 
+                            alt="Fachrul Rozi" 
+                            className="utary-profile__photo" 
+                            style={{
+                                WebkitMaskImage: `url(${maskProfile})`,
+                                maskImage: `url(${maskProfile})`,
+                                WebkitMaskSize: 'cover',
+                                maskSize: 'cover',
+                                WebkitMaskPosition: 'center',
+                                maskPosition: 'center',
+                                WebkitMaskRepeat: 'no-repeat',
+                                maskRepeat: 'no-repeat'
+                            }}
+                        />
                     </div>
                     <h3 className="utary-profile__name">FACHRUL ROZI</h3>
                     <p className="utary-profile__role">PUTRA KEDUA DARI</p>
@@ -342,27 +377,21 @@ function TimelineSection() {
 
     return (
         <section className="utary-section utary-section--padded" id="story">
-            <img src={flowerLeft} alt="" className="utary-ornament utary-ornament--flower-left" />
-            <img src={flowerRight} alt="" className="utary-ornament utary-ornament--flower-right" />
             <div className="utary-section__inner">
                 <RevealDiv className="utary-timeline__header">
-                    <div className="utary-timeline__pretitle">A story of</div>
-                    <h2 className="utary-timeline__title">Journey of Love</h2>
-                    <p className="utary-timeline__desc">
-                        &ldquo;Marriage is not a race, it&rsquo;s not about fast or slow.
+                    <div className="utary-timeline__pretitle" style={{ fontFamily: 'var(--utary-font-display)', fontSize: '18px', color: 'var(--utary-gold)' }}>A Story of</div>
+                    <h2 className="utary-timeline__title" style={{ color: 'var(--utary-gold)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '32px' }}>JOURNEY OF LOVE</h2>
+                    <p className="utary-timeline__desc" style={{ color: 'var(--utary-gold)', fontStyle: 'italic', maxWidth: '340px', margin: '0 auto 40px', lineHeight: '2', fontWeight: '300' }}>
+                        &ldquo;Marriage is not a race, it&rsquo;s not about fast or slow.<br/>
                         But, who is ready to carry out a great mandate.&rdquo;
                     </p>
                 </RevealDiv>
 
-                <div className="utary-timeline__track">
-                    <div className="utary-timeline__line" />
+                <div className="utary-timeline__track--alt" style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
                     {stories.map((s, i) => (
-                        <RevealDiv key={i} className="utary-timeline__item">
-                            <div className="utary-timeline__dot" />
-                            <div className="utary-timeline__card">
-                                <div className="utary-timeline__card-title">{s.title}</div>
-                                <div className="utary-timeline__card-text">{s.text}</div>
-                            </div>
+                        <RevealDiv key={i} className={`utary-timeline__item`} style={{ textAlign: i % 2 === 0 ? 'left' : 'right' }}>
+                            <div className="utary-timeline__chapter" style={{ fontFamily: 'var(--utary-font-display)', fontSize: '20px', color: 'var(--utary-gold)', marginBottom: '8px' }}>{s.title}</div>
+                            <div className="utary-timeline__text" style={{ fontFamily: 'var(--utary-font-body)', fontSize: '13px', color: 'var(--utary-gold)', lineHeight: '1.9', fontWeight: '300' }}>{s.text}</div>
                         </RevealDiv>
                     ))}
                 </div>
@@ -548,6 +577,14 @@ function VideoSection() {
 
 /* ── Gallery ── */
 function GallerySection() {
+    const images = [utary1, utary2, utary3, utary4, utary5, utary6];
+    const [lightboxIndex, setLightboxIndex] = useState(-1);
+
+    const openLightbox = (index) => setLightboxIndex(index);
+    const closeLightbox = () => setLightboxIndex(-1);
+    const prevImage = (e) => { e.stopPropagation(); setLightboxIndex((prev) => (prev - 1 + images.length) % images.length); };
+    const nextImage = (e) => { e.stopPropagation(); setLightboxIndex((prev) => (prev + 1) % images.length); };
+
     return (
         <section className="utary-section utary-section--padded" id="gallery">
             <img src={ornamentLeft} alt="" className="utary-ornament utary-ornament--left" />
@@ -561,9 +598,12 @@ function GallerySection() {
                     <p className="utary-hero__venue" style={{ marginBottom: '20px' }}>Photo Video by Tary &amp; Fachrul</p>
                 </RevealDiv>
                 <RevealDiv className="utary-gallery__grid">
-                    {[couplePhoto, couplePhoto, couplePhoto, couplePhoto, couplePhoto, couplePhoto].map((src, i) => (
-                        <div key={i} className="utary-gallery__item">
+                    {images.map((src, i) => (
+                        <div key={i} className="utary-gallery__item" onClick={() => openLightbox(i)}>
                             <img src={src} alt={`Gallery ${i + 1}`} />
+                            <div className="utary-gallery__zoom-icon">
+                                <i className="fas fa-search-plus" />
+                            </div>
                         </div>
                     ))}
                 </RevealDiv>
@@ -574,6 +614,34 @@ function GallerySection() {
                     </div>
                 </RevealDiv>
             </div>
+            
+            {/* Lightbox / Carousel Elementor Style */}
+            {lightboxIndex >= 0 && (
+                <div className="utary-lightbox" onClick={closeLightbox}>
+                    <div className="utary-lightbox__header" onClick={(e) => e.stopPropagation()}>
+                        <div className="utary-lightbox__counter">{lightboxIndex + 1} / {images.length}</div>
+                        <div className="utary-lightbox__actions">
+                            <button className="utary-lightbox__btn" title="Fullscreen"><i className="fas fa-expand" /></button>
+                            <button className="utary-lightbox__btn" title="Zoom in"><i className="fas fa-search-plus" /></button>
+                            <button className="utary-lightbox__btn" title="Share"><i className="fas fa-share" /></button>
+                            <button className="utary-lightbox__btn" onClick={closeLightbox} title="Close"><i className="fas fa-times" /></button>
+                        </div>
+                    </div>
+                    <div className="utary-lightbox__content" onClick={(e) => e.stopPropagation()}>
+                        <button className="utary-lightbox__nav utary-lightbox__nav--prev" onClick={prevImage}>
+                            <i className="fas fa-chevron-left" />
+                        </button>
+                        <img 
+                            src={images[lightboxIndex]} 
+                            alt="Zoomed Gallery" 
+                            className="utary-lightbox__img" 
+                        />
+                        <button className="utary-lightbox__nav utary-lightbox__nav--next" onClick={nextImage}>
+                            <i className="fas fa-chevron-right" />
+                        </button>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
