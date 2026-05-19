@@ -501,22 +501,22 @@
 .utary-profile {
   position: relative;
   margin: 40px auto;
-  max-width: 320px;
+  max-width: 300px;
 }
 
 .utary-profile__frame-wrap {
   position: relative;
-  width: 250px;       /* Portrait ratio */
-  height: 335px;
-  margin: 0 auto 28px;
+  width: 240px;
+  height: 240px;
+  margin: 0 auto 30px;
 }
 
 .utary-profile__frame {
   position: absolute;
-  top: -12px;
-  left: -12px;
-  width: calc(100% + 24px);
-  height: calc(100% + 24px);
+  top: -22px;
+  left: -22px;
+  width: calc(100% + 44px);
+  height: calc(100% + 44px);
   z-index: 2;
   pointer-events: none;
 }
@@ -524,37 +524,34 @@
 .utary-profile__photo {
   width: 100%;
   height: 100%;
-  border-radius: 24px;
+  border-radius: 36px;
   object-fit: cover;
-  border: 1px solid var(--utary-border-gold);
 }
 
 .utary-profile__name {
   font-family: var(--utary-font-display);
-  font-size: 42px;
+  font-size: 38px;
   color: var(--utary-gold);
   margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
 .utary-profile__role {
   font-family: var(--utary-font-body);
-  font-size: 11px;
-  color: var(--utary-gold);
+  font-size: 10px;
+  color: var(--utary-text-muted);
   letter-spacing: 2px;
-  font-weight: 400;
-  margin-bottom: 8px;
-  text-transform: uppercase;
+  font-weight: 300;
+  margin-bottom: 6px;
 }
 
 .utary-profile__parents {
   font-family: var(--utary-font-body);
   font-size: 13px;
-  color: var(--utary-text-white);
+  color: var(--utary-text-body);
   line-height: 1.8;
   font-weight: 300;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .utary-profile__social {
@@ -566,17 +563,16 @@
   border: none;
   border-radius: 100px;
   font-family: var(--utary-font-body);
-  font-size: 12px;
+  font-size: 11px;
   color: var(--utary-btn-text);
   font-weight: 500;
   transition: all 0.3s ease;
-  text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .utary-profile__social:hover {
   background: var(--utary-gold-dark);
-  color: #fff;
+  transform: scale(0.97);
 }
 
 .utary-ampersand {
@@ -1461,13 +1457,14 @@
 
 /* ── Particle Canvas ── */
 .utary-particles {
-  position: fixed;
+  position: absolute; /* Set to absolute inside a relative container or fixed with low z-index */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  opacity: 0.15; /* Reduced opacity to prevent obscuring text */
 }
 
 /* ═══════════════════════════════════════

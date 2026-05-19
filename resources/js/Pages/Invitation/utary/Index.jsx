@@ -294,13 +294,13 @@ function CoupleSection() {
                         <img src={frameProfile} alt="" className="utary-profile__frame" />
                         <img src={couplePhoto} alt="Utary Adhita" className="utary-profile__photo" />
                     </div>
-                    <h3 className="utary-profile__name">Utary Adhita</h3>
-                    <p className="utary-profile__role">Putri Kedua dari</p>
+                    <h3 className="utary-profile__name">UTARY ADHITA</h3>
+                    <p className="utary-profile__role">PUTRI KEDUA DARI</p>
                     <p className="utary-profile__parents">
                         Bapak Nama_Bapak<br />&amp; Ibu Nama_Ibu
                     </p>
                     <a href="https://www.instagram.com/" className="utary-profile__social" target="_blank" rel="noopener noreferrer">
-                        <i className="fab fa-instagram" /> @USERNAME
+                        <i className="fab fa-instagram" /> USERNAME
                     </a>
                 </RevealDiv>
 
@@ -317,13 +317,13 @@ function CoupleSection() {
                         <img src={frameProfile} alt="" className="utary-profile__frame" />
                         <img src={couplePhoto} alt="Fachrul Rozi" className="utary-profile__photo" />
                     </div>
-                    <h3 className="utary-profile__name">Fachrul Rozi</h3>
-                    <p className="utary-profile__role">Putra Kedua dari</p>
+                    <h3 className="utary-profile__name">FACHRUL ROZI</h3>
+                    <p className="utary-profile__role">PUTRA KEDUA DARI</p>
                     <p className="utary-profile__parents">
                         Bapak Nama_Bapak<br />&amp; Ibu Nama_Ibu
                     </p>
                     <a href="https://www.instagram.com/" className="utary-profile__social" target="_blank" rel="noopener noreferrer">
-                        <i className="fab fa-instagram" /> @USERNAME
+                        <i className="fab fa-instagram" /> USERNAME
                     </a>
                 </RevealDiv>
             </div>
