@@ -281,35 +281,39 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 40px 32px;
-  background: linear-gradient(to top, rgba(15,33,25,0.95) 0%, rgba(15,33,25,0.6) 60%, transparent 100%);
+  padding: 60px 48px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
   z-index: 2;
 }
 
 .utary-main__left-pretitle {
-  font-family: var(--utary-font-body);
-  font-size: 10px;
-  letter-spacing: 3px;
-  color: var(--utary-text-muted);
+  font-family: var(--utary-font-display);
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: #fff;
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 0px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
 .utary-main__left-title {
   font-family: var(--utary-font-display);
-  font-size: 30px;
-  color: var(--utary-gold);
+  font-size: 58px;
+  color: #fff;
   letter-spacing: 1px;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
+  line-height: 1.1;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .utary-main__left-quote {
-  font-family: var(--utary-font-serif);
+  font-family: var(--utary-font-body);
   font-size: 13px;
-  color: var(--utary-text-muted);
-  line-height: 1.8;
-  font-style: italic;
-  max-width: 400px;
+  color: #fff;
+  line-height: 2;
+  font-style: normal;
+  max-width: 500px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
 .utary-main__right {

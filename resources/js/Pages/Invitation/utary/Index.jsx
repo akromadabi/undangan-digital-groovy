@@ -933,10 +933,10 @@ export default function Utary() {
                 <div className="utary-main__left">
                     <img src={couplePhoto} alt="Tary & Fachrul" className="utary-main__left-img" />
                     <div className="utary-main__left-overlay">
-                        <div className="utary-main__left-pretitle">The Wedding Of</div>
-                        <div className="utary-main__left-title">Tary &amp; Fachrul</div>
+                        <div className="utary-main__left-pretitle">THE WEDDING OF</div>
+                        <div className="utary-main__left-title">TARY &amp; FACHRUL</div>
                         <div className="utary-main__left-quote">
-                            &ldquo;I love you, I am who I am because of you. You are every reason, every hope and every dream I&rsquo;ve ever had.&rdquo;
+                            &ldquo;I love you, I am who I am because of you. You are every reason, every hope and every dream. I&rsquo;ve ever had and no matter what happens to us in the future, every day we are together is the greatest day of my life. I will always be yours.&rdquo;
                         </div>
                     </div>
                 </div>
