@@ -109,24 +109,28 @@
   pointer-events: none;
 }
 
-/* Monogram Area */
 .aruna-cover__monogram {
   position: relative;
-  width: 134px;
-  height: 200px;
+  width: 140px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
-  animation: arunaFadeIn 1.2s ease both;
+  margin-bottom: 32px;
+  animation: arunaFadeIn 1.5s ease both;
 }
 
-.aruna-cover__monogram-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
+.aruna-cover__wax-seal {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+  animation: arunaRotate 12s linear infinite;
+}
+
+@keyframes arunaRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .aruna-cover__monogram-inner {
@@ -208,10 +212,15 @@
 }
 
 .aruna-cover__guest-name {
-  font-family: var(--aruna-font-display);
-  font-size: 24px;
-  color: var(--aruna-text-white);
-  font-weight: 400;
+  font-family: var(--aruna-font-body);
+  font-size: 18px;
+  color: #ebede6;
+  font-weight: 700;
+  background-color: var(--aruna-gold-btn);
+  padding: 8px 24px;
+  border-radius: 4px;
+  display: inline-block;
+  letter-spacing: 1px;
 }
 
 .aruna-cover__desc {
@@ -502,32 +511,44 @@
 
 .aruna-profile {
   position: relative;
-  margin: 40px auto;
-  max-width: 300px;
+  margin: 60px auto;
+  max-width: 320px;
 }
 
-.aruna-profile__frame-wrap {
+.aruna-profile__frame-container {
   position: relative;
-  width: 240px;
-  height: 240px;
+  width: 280px;
+  height: 380px;
   margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.aruna-profile__frame {
+.aruna-profile__frame-bg {
   position: absolute;
-  top: -22px;
-  left: -22px;
-  width: calc(100% + 44px);
-  height: calc(100% + 44px);
-  z-index: 2;
-  pointer-events: none;
-}
-
-.aruna-profile__photo {
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 36px;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+.aruna-profile__photo-wrap {
+  width: 75%;
+  height: 75%;
+  overflow: hidden;
+  border-radius: 120px;
+  z-index: 1;
+}
+
+.aruna-profile__photo-symmetric {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  transform: scale(1.05);
 }
 
 .aruna-profile__name {
@@ -723,6 +744,33 @@
 .aruna-event__save-btn:hover {
   background: var(--aruna-gold-dark);
   transform: scale(0.97);
+}
+
+.aruna-event-ornament {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.aruna-event-ornament--rambat {
+  top: 15%;
+  left: -20px;
+  width: 100px;
+}
+
+.aruna-event-ornament--janur {
+  bottom: 10%;
+  right: -10px;
+  width: 80px;
+}
+
+.aruna-divider-star {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 24px 0;
+  opacity: 0.8;
 }
 
 .aruna-event__subtitle {
@@ -1772,4 +1820,146 @@
     width: 50px;
     height: 50px;
   }
+}
+
+/* ═══════════════════════════════════════
+   RSVP & WISHES SECTION
+   ═══════════════════════════════════════ */
+.aruna-rsvp__title {
+  font-family: var(--aruna-font-display);
+  font-size: 32px;
+  color: var(--aruna-gold);
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  text-align: center;
+}
+
+.aruna-rsvp__form {
+  text-align: left;
+  margin-top: 32px;
+}
+
+.aruna-rsvp__label {
+  display: block;
+  font-family: var(--aruna-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--aruna-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+}
+
+.aruna-rsvp__input,
+.aruna-rsvp__select,
+.aruna-rsvp__textarea {
+  width: 100%;
+  padding: 14px 18px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--aruna-border-gold);
+  border-radius: 40px;
+  color: var(--aruna-text-white);
+  font-family: var(--aruna-font-body);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.aruna-rsvp__textarea {
+  border-radius: 12px;
+  height: 140px;
+  resize: none;
+}
+
+.aruna-rsvp__input:focus,
+.aruna-rsvp__select:focus,
+.aruna-rsvp__textarea:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: var(--aruna-gold);
+  box-shadow: 0 0 0 4px rgba(178, 148, 93, 0.08);
+}
+
+.aruna-rsvp__attendance-btns {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.aruna-rsvp__attendance-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 40px;
+  border: 1.5px solid var(--aruna-gold-btn);
+  background: transparent;
+  color: var(--aruna-gold-btn);
+  font-family: var(--aruna-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.aruna-rsvp__attendance-btn.is-active {
+  background: var(--aruna-gold-btn);
+  color: #ffffff;
+}
+
+.aruna-rsvp__submit {
+  width: 100%;
+  margin-top: 24px;
+  padding: 16px;
+  background-color: var(--aruna-gold-btn);
+  color: #ffffff;
+  border: none;
+  border-radius: 40px;
+  font-family: var(--aruna-font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(92, 110, 78, 0.25);
+}
+
+.aruna-rsvp__submit:hover {
+  background-color: var(--aruna-gold-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(92, 110, 78, 0.35);
+}
+
+.aruna-wish {
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 24px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(178, 148, 93, 0.12);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  animation: arunaFadeIn 0.8s ease both;
+}
+
+.aruna-wish__name {
+  font-family: var(--aruna-font-display);
+  font-size: 20px;
+  color: var(--aruna-gold);
+  margin-bottom: 10px;
+}
+
+.aruna-wish__text {
+  font-family: var(--aruna-font-body);
+  font-size: 13px;
+  color: var(--aruna-text-body);
+  line-height: 1.9;
+}
+
+.aruna-wish__time {
+  font-family: var(--aruna-font-body);
+  font-size: 10px;
+  color: var(--aruna-text-muted);
+  margin-top: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
 }

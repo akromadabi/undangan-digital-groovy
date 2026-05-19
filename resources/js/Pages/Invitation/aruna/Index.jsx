@@ -6,44 +6,43 @@ import './style.css';
 import ornamentLeft from './asset/Aruna-Tree-6-1-150x150.webp';
 import ornamentRight from './asset/Aruna-Tree-6-1-150x150.webp';
 import dividerPattern from './asset/Aruna-Engraving.webp';
-import frameProfile from './asset/aa252722-1997-4918-b3f8-382d7ec74f62-768x768.webp';
+import frameProfile from './asset/Aruna-Frame-Mempelai.webp';
 import couplePhoto from './asset/Bagas-Naila-LIBLOP-PICTURE-2620927.webp';
-import maskProfile from './asset/mask-profile.webp'; // Kept as fallback or need Aruna specific mask
+import maskProfile from './asset/mask-profile.webp'; 
 import flowerLeft from './asset/Aruna-Bunga-7-1-188x300.webp';
 import flowerRight from './asset/Aruna-Bunga-300x287.webp';
 import eventFrameTop from './asset/Aruna-LACE-2-1-768x1137.webp';
 import eventFrameBottom from './asset/Aruna-LACE-2-1-768x1137.webp';
+import waxSeal from './asset/Aruna-WAX-SEAL-3-1.webp';
 import aruna1 from './asset/Bagas-Naila-LIBLOP-PICTURE-2620927.webp';
 import aruna2 from './asset/Bagas-Naila-LIBLOP-PICTURE-2630245.webp';
 import aruna3 from './asset/Bagas-Naila-LIBLOP-PICTURE-2620927.webp';
 import aruna4 from './asset/Bagas-Naila-LIBLOP-PICTURE-2630245.webp';
 import aruna5 from './asset/Bagas-Naila-LIBLOP-PICTURE-2620927.webp';
 import aruna6 from './asset/Bagas-Naila-LIBLOP-PICTURE-2630245.webp';
+import rambatOrnament from './asset/Aruna-Rambat-1.webp';
+import janurOrnament from './asset/Aruna-Janur-2.webp';
 
 /* ─────────────────────────────────────────────
-   SVG Monogram Shield (gold outline, TF inside)
-   Extracted from original demo
+   Monogram Seal (Wax Seal)
    ───────────────────────────────────────────── */
-function MonogramShield({ width = 134, height = 200 }) {
+function MonogramShield() {
     return (
-        <div className="aruna-cover__monogram" style={{ width, height }}>
-            <svg
-                className="aruna-cover__monogram-svg"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 145.39 216.259"
-                style={{ color: '#ccba82' }}
-            >
-                {/* Outer frame - stroke only */}
-                <path fill="none" stroke="currentColor" strokeWidth="1.5" d="m72.695,0C60.326,0,48.46,5.461,40.137,14.984c-3.082,3.527-7.524,5.432-12.188,5.227l-.077-.004c-7.28-.322-14.371,2.629-19.449,8.094C2.966,34.176.387,42.202,1.346,50.319c1.561,13.195,2.595,26.733,3.076,40.238.003.099.002.204.002.306,0,7.497-1.18,12.936-3.508,16.171-.303.422-.611.786-.916,1.099,2.181,2.259,4.445,7.117,4.424,17.506,0,.021,0,.042-.001.063-.481,13.505-1.516,27.043-3.076,40.238-.957,8.117,1.62,16.143,7.077,22.018,5.077,5.465,12.168,8.415,19.455,8.093l.07-.003c4.664-.205,9.107,1.7,12.189,5.227,8.322,9.523,20.189,14.984,32.558,14.984s24.236-5.461,32.558-14.984c3.082-3.527,7.525-5.432,12.189-5.227l.07.003c7.287.322,14.377-2.628,19.455-8.093,5.458-5.874,8.038-13.897,7.077-22.018-1.56-13.188-2.595-26.726-3.076-40.237-.002-.104-.001-.205-.002-.307,0-7.496,1.18-12.936,3.508-16.171.303-.422.611-.786.916-1.099-2.164-2.241-4.424-7.034-4.424-17.269,0-.1-.001-.199.002-.3.481-13.511,1.517-27.049,3.076-40.237.96-8.116-1.619-16.143-7.076-22.017-5.077-5.465-12.168-8.416-19.455-8.094l-.063.003c-4.671.205-9.114-1.7-12.196-5.226C96.931,5.461,85.064,0,72.695,0Z" />
-                {/* Inner frame */}
-                <path fill="none" stroke="currentColor" strokeWidth="1" d="m72.695,208.264c-10.061,0-19.733-4.465-26.538-12.25-4.43-5.069-10.817-7.976-17.525-7.976-.344,0-.687.007-1.014.022-.341.015-.593.02-.844.02-4.336,0-8.502-1.701-11.73-4.789-4.329-4.143-6.481-10.278-5.757-16.412,1.585-13.408,2.637-27.167,3.126-40.893l.007-.605c0-7.009-.91-12.526-2.782-16.854l-.172-.397.172-.397c1.872-4.326,2.782-9.861,2.782-16.922l-.008-.563c-.488-13.702-1.54-27.459-3.125-40.868-.725-6.133,1.428-12.268,5.758-16.412,3.229-3.088,7.393-4.79,11.728-4.79.249,0,.499.005.815.019.367.016.714.023,1.058.023,6.699,0,13.082-2.907,17.513-7.977,6.804-7.785,16.476-12.25,26.537-12.25s19.734,4.465,26.539,12.25c4.429,5.069,10.815,7.977,17.521,7.977.346,0,.691-.007,1.032-.022.349-.015.598-.021.847-.021,4.324,0,8.484,1.702,11.713,4.791,4.33,4.143,6.481,10.278,5.757,16.412-1.586,13.417-2.638,27.175-3.126,40.893l-.007.605c0,7.012.91,12.528,2.782,16.854l.172.397-.172.397c-1.872,4.326-2.782,9.861-2.782,16.921l.008.564c.487,13.694,1.539,27.451,3.125,40.869.726,6.131-1.426,12.266-5.757,16.411-3.229,3.089-7.395,4.79-11.73,4.79-.249,0-.497-.005-.826-.02-7.104-.324-13.9,2.625-18.557,7.953-6.806,7.785-16.479,12.25-26.539,12.25Z" />
+        <div className="aruna-cover__monogram">
+            <img src={waxSeal} alt="Wax Seal" className="aruna-cover__wax-seal" />
+        </div>
+    );
+}
+
+function StarDivider() {
+    return (
+        <div className="aruna-divider-star">
+            <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 200 200" width="40px" height="40px">
+                <path fill="#847d4a" d="m63.275,107.786c2.14-11.952,4.129-17.968,5.965-6.016c1.688,11.008,1.488,4.122,2.029,5.707c0.588,0.582,1.035-1.53,5.459-4.312c9.135-7.418,12.347-3.032,3.318-7.619c4.421-11.522,6.497-3.903,2.077-7.868c4.066-11.895,5.961-12.855,5.296,5.115-13.036Z"/>
+                <path fill="#847d4a" d="m136.725,92.214c-2.14,11.952-4.129,17.968-5.965,6.016c-1.688-11.008-1.488-4.122-2.029-5.707c-0.588-0.582-1.035,1.53-5.459,4.312c-9.135,7.418,12.347,3.032-3.318,7.619c-4.421,11.522-6.497,3.903-2.077,7.868c-4.066,11.895-5.961,12.855-5.296-5.115,13.036Z"/>
+                <path fill="#847d4a" d="m107.786,136.725c-11.952-2.14-17.968-4.129-6.016-5.965c11.008-1.688,4.122-1.488,5.707-2.029c0.582-0.588-1.53-1.035-4.312-5.459c-7.418-9.135-3.032-12.347-7.619-3.318c-11.522-4.421-3.903-6.497-7.868-2.077c-11.895-4.066-12.855-5.961,5.115-5.296,13.036,13.036Z"/>
+                <path fill="#847d4a" d="m92.214,63.275c11.952,2.14,17.968,4.129,6.016,5.965c-11.008,1.688-4.122,1.488-5.707,2.029c-0.582,0.588,1.53,1.035,4.312,5.459c7.418,9.135,3.032,12.347,7.619,3.318c11.522,4.421,3.903,6.497,7.868,2.077c11.895,4.066,12.855,5.961-5.115,5.296-13.036-13.036Z"/>
             </svg>
-            {/* Text overlaid on top of the SVG */}
-            <div className="aruna-cover__monogram-inner">
-                <span className="aruna-cover__monogram-year-top">20</span>
-                <span className="aruna-cover__monogram-initials">T<sub className="aruna-cover__monogram-initial-sub">F</sub></span>
-                <span className="aruna-cover__monogram-year-bottom">26</span>
-            </div>
         </div>
     );
 }
@@ -224,11 +223,11 @@ function CoverSection({ onOpen, guestName }) {
             <div className="aruna-cover__names">Ila &amp; Fachrul</div>
             <div className="aruna-cover__date">May 2025</div>
             <div className="aruna-cover__guest-box">
-                <div className="aruna-cover__guest-label">Tamu Undangan</div>
+                <div className="aruna-cover__guest-label">Kepada Bapak/Ibu/Saudara/i</div>
                 <div className="aruna-cover__guest-name">{guestName || 'Tamu Undangan'}</div>
             </div>
             <div className="aruna-cover__desc">
-                Kami mengundang Anda untuk menghadiri<br />acara pernikahan kami.
+                Kami mengundang Anda untuk hadir di momen istimewa kami.
             </div>
             <button className="aruna-cover__btn" onClick={onOpen}>
                 BUKA UNDANGAN
@@ -276,7 +275,7 @@ function HeroSection() {
 function DividerSection() {
     return (
         <RevealDiv variant="zoom" className="aruna-divider">
-            <img src={dividerPattern} alt="" className="aruna-divider__img" />
+            <StarDivider />
         </RevealDiv>
     );
 }
@@ -297,23 +296,11 @@ function CoupleSection() {
 
                 {/* Bride */}
                 <RevealDiv className="aruna-profile">
-                    <div className="aruna-profile__frame-wrap">
-                        <img src={frameProfile} alt="" className="aruna-profile__frame" />
-                        <img 
-                            src={aruna1} 
-                            alt="Aruna Adhita" 
-                            className="aruna-profile__photo" 
-                            style={{
-                                WebkitMaskImage: `url(${maskProfile})`,
-                                maskImage: `url(${maskProfile})`,
-                                WebkitMaskSize: 'cover',
-                                maskSize: 'cover',
-                                WebkitMaskPosition: 'center',
-                                maskPosition: 'center',
-                                WebkitMaskRepeat: 'no-repeat',
-                                maskRepeat: 'no-repeat'
-                            }}
-                        />
+                    <div className="aruna-profile__frame-container">
+                        <img src={frameProfile} alt="" className="aruna-profile__frame-bg" />
+                        <div className="aruna-profile__photo-wrap">
+                            <img src={aruna1} alt="Aruna Adhita" className="aruna-profile__photo-symmetric" />
+                        </div>
                     </div>
                     <h3 className="aruna-profile__name">ARUNA ADHITA</h3>
                     <p className="aruna-profile__role">PUTRI KEDUA DARI</p>
@@ -334,23 +321,11 @@ function CoupleSection() {
 
                 {/* Groom */}
                 <RevealDiv className="aruna-profile">
-                    <div className="aruna-profile__frame-wrap">
-                        <img src={frameProfile} alt="" className="aruna-profile__frame" />
-                        <img 
-                            src={aruna2} 
-                            alt="Fachrul Rozi" 
-                            className="aruna-profile__photo" 
-                            style={{
-                                WebkitMaskImage: `url(${maskProfile})`,
-                                maskImage: `url(${maskProfile})`,
-                                WebkitMaskSize: 'cover',
-                                maskSize: 'cover',
-                                WebkitMaskPosition: 'center',
-                                maskPosition: 'center',
-                                WebkitMaskRepeat: 'no-repeat',
-                                maskRepeat: 'no-repeat'
-                            }}
-                        />
+                    <div className="aruna-profile__frame-container">
+                        <img src={frameProfile} alt="" className="aruna-profile__frame-bg" />
+                        <div className="aruna-profile__photo-wrap">
+                            <img src={aruna2} alt="Fachrul Rozi" className="aruna-profile__photo-symmetric" />
+                        </div>
                     </div>
                     <h3 className="aruna-profile__name">FACHRUL ROZI</h3>
                     <p className="aruna-profile__role">PUTRA KEDUA DARI</p>
@@ -408,6 +383,10 @@ function EventSection() {
         <section className="aruna-section aruna-section--padded" id="event">
             <img src={flowerLeft} alt="" className="aruna-ornament aruna-ornament--flower-left" />
             <img src={flowerRight} alt="" className="aruna-ornament aruna-ornament--flower-right" />
+            
+            <img src={rambatOrnament} alt="" className="aruna-event-ornament aruna-event-ornament--rambat" />
+            <img src={janurOrnament} alt="" className="aruna-event-ornament aruna-event-ornament--janur" />
+
             <div className="aruna-section__inner">
                 <RevealDiv>
                     <h2 className="aruna-event__title">Save The Date</h2>
@@ -796,17 +775,21 @@ function RsvpSection() {
                             </div>
                             <div className="aruna-rsvp__field">
                                 <label className="aruna-rsvp__label">Konfirmasi Kehadiran</label>
-                                <div className="aruna-rsvp__radio-group">
-                                    <label className="aruna-rsvp__radio-label">
-                                        <input type="radio" name="attendance" value="hadir"
-                                            checked={form.attendance === 'hadir'} onChange={e => setForm({ ...form, attendance: e.target.value })} />
+                                <div className="aruna-rsvp__attendance-btns">
+                                    <button 
+                                        type="button" 
+                                        className={`aruna-rsvp__attendance-btn ${form.attendance === 'hadir' ? 'is-active' : ''}`}
+                                        onClick={() => setForm({ ...form, attendance: 'hadir' })}
+                                    >
                                         Hadir
-                                    </label>
-                                    <label className="aruna-rsvp__radio-label">
-                                        <input type="radio" name="attendance" value="tidak"
-                                            checked={form.attendance === 'tidak'} onChange={e => setForm({ ...form, attendance: e.target.value })} />
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className={`aruna-rsvp__attendance-btn ${form.attendance === 'tidak' ? 'is-active' : ''}`}
+                                        onClick={() => setForm({ ...form, attendance: 'tidak' })}
+                                    >
                                         Tidak Hadir
-                                    </label>
+                                    </button>
                                 </div>
                             </div>
                             <div className="aruna-rsvp__field">
