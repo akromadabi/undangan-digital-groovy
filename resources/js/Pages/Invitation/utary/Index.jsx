@@ -585,6 +585,18 @@ function GallerySection() {
     const prevImage = (e) => { e.stopPropagation(); setLightboxIndex((prev) => (prev - 1 + images.length) % images.length); };
     const nextImage = (e) => { e.stopPropagation(); setLightboxIndex((prev) => (prev + 1) % images.length); };
 
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        };
+        if (lightboxIndex >= 0) {
+            window.addEventListener('keydown', handleKeyDown);
+        }
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [lightboxIndex]);
+
     return (
         <section className="utary-section utary-section--padded" id="gallery">
             <img src={ornamentLeft} alt="" className="utary-ornament utary-ornament--left" />

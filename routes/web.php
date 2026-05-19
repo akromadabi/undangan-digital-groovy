@@ -58,6 +58,9 @@ Route::get('/u/{slug}/checkin', [InvitationController::class, 'checkin'])->name(
 Route::get('/demo-utary', function () {
     return Inertia::render('Invitation/utary/Index');
 });
+Route::get('/demo-aruna', function () {
+    return Inertia::render('Invitation/aruna/Index');
+});
 
 // Public Live Tamu fullscreen (no auth)
 Route::get('/live/{slug}', [LiveTamuController::class, 'fullscreen'])->name('live.fullscreen');
