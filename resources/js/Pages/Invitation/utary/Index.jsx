@@ -921,7 +921,7 @@ export default function Utary() {
 
             {/* Background Music */}
             <audio ref={audioRef} loop preload="auto" playsInline>
-                <source src="https://attarivitation.com/wp-content/uploads/2024/10/backsound-attari-1.mp3" type="audio/mpeg" />
+                <source src="/audio/backsound.mp3" type="audio/mpeg" />
             </audio>
 
             {/* Cover */}
