@@ -592,21 +592,80 @@ function FooterSection() {
     );
 }
 
-/* ── Floating Controls ── */
-function FloatingControls({ isPlaying, onToggleMusic }) {
+/* ── Navigation Menu & Controls ── */
+function Navigation({ isOpened, isPlaying, onToggleMusic }) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const menuItems = [
+        { id: 'home', label: 'Home' },
+        { id: 'couple', label: 'Bride and Groom' },
+        { id: 'event', label: 'Wedding Event' },
+        { id: 'gallery', label: 'Gallery' },
+        { id: 'rsvp', label: 'RSVP' },
+        { id: 'gift', label: 'Gift' },
+        { id: 'gift', label: 'Souvenir Card' } // Based on screenshot
+    ];
+
     const scrollToSection = (id) => {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        setIsMenuOpen(false);
     };
 
+    if (!isOpened) return null;
+
     return (
-        <div className="utary-floating">
-            <button className={`utary-floating__btn ${isPlaying ? 'is-playing' : ''}`} onClick={onToggleMusic} title="Music">
-                <i className={isPlaying ? 'fas fa-music' : 'fas fa-volume-mute'} />
-            </button>
-            <button className="utary-floating__btn" onClick={() => scrollToSection('rsvp')} title="RSVP">
-                <i className="fas fa-envelope" />
-            </button>
-        </div>
+        <>
+            {/* Overlay Navigation Menu */}
+            <div className={`utary-nav-drawer ${isMenuOpen ? 'is-open' : ''}`}>
+                <div className="utary-nav-drawer__top">
+                    <button className="utary-nav-drawer__close" onClick={() => setIsMenuOpen(false)} title="Close" style={{
+                        width: '44px', height: '44px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <ul className="utary-nav-drawer__list">
+                    {menuItems.map((item) => (
+                        <li key={item.label} className="utary-nav-drawer__item">
+                            <button onClick={() => scrollToSection(item.id)}>{item.label}</button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Bottom Controls */}
+            <div className={`utary-bottom-controls ${isMenuOpen ? 'is-hidden' : ''}`}>
+                <div className="utary-floating" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    
+                    <button className="utary-nav-toggle" onClick={() => setIsMenuOpen(true)} title="Menu">
+                        <span className="utary-nav-toggle__line line-1" />
+                        <span className="utary-nav-toggle__line line-2" />
+                        <span className="utary-nav-toggle__line line-3" />
+                    </button>
+
+                    <button className="utary-floating__btn" onClick={() => scrollToSection('rsvp')} title="RSVP">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </button>
+                    <button className="utary-floating__btn" onClick={onToggleMusic} title="Music">
+                        {isPlaying ? (
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/>
+                            </svg>
+                        ) : (
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                                <line x1="23" y1="1" x2="1" y2="23" />
+                            </svg>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </>
     );
 }
 
@@ -691,8 +750,8 @@ export default function Utary() {
                 </div>
             </div>
 
-            {/* Floating Controls */}
-            {isOpened && <FloatingControls isPlaying={isPlaying} onToggleMusic={toggleMusic} />}
+            {/* Navigation and Floating Controls */}
+            <Navigation isOpened={isOpened} isPlaying={isPlaying} onToggleMusic={toggleMusic} />
         </div>
     );
 }

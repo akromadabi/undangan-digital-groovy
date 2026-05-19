@@ -354,13 +354,19 @@
   position: absolute;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.4;
+  opacity: 0.65;
+  animation: utaryFloatOrnament 8s ease-in-out infinite;
 }
 
-.utary-ornament--left { left: 0; top: 0; width: 100px; }
-.utary-ornament--right { right: 0; top: 0; width: 100px; }
-.utary-ornament--flower-left { left: 0; bottom: 0; width: 55px; }
-.utary-ornament--flower-right { right: 0; bottom: 0; width: 55px; }
+@keyframes utaryFloatOrnament {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.utary-ornament--left { left: 0; top: 0; width: 45%; max-width: 300px; }
+.utary-ornament--right { right: 0; top: 0; width: 45%; max-width: 300px; animation-delay: -4s; }
+.utary-ornament--flower-left { left: 0; bottom: 0; width: 30%; max-width: 180px; animation-delay: -2s; }
+.utary-ornament--flower-right { right: 0; bottom: 0; width: 30%; max-width: 180px; animation-delay: -6s; }
 
 /* ═══════════════════════════════════════
    HERO
@@ -1038,41 +1044,202 @@
 }
 
 /* ═══════════════════════════════════════
-   FLOATING CONTROLS
+   NAVIGATION AND CONTROLS
    ═══════════════════════════════════════ */
-.utary-floating {
+.utary-bottom-controls {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 100;
+  bottom: 25px;
+  right: 0;
+  left: 0;
+  width: 100%;
+  z-index: 110;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+@media (min-width: 769px) {
+  .utary-bottom-controls {
+    left: 50%;
+    width: 50%;
+  }
+}
+
+.utary-bottom-controls.is-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+/* Hamburger toggle matching exactly */
+.utary-nav-toggle {
+  pointer-events: auto;
+  width: 48px;
+  height: 48px;
+  background-color: rgba(28, 60, 46, 0.85); /* same as background */
+  border-radius: 50%;
+  border: 1px solid var(--utary-gold);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.utary-nav-toggle:hover {
+  transform: scale(0.95);
+  background-color: var(--utary-gold);
+}
+
+.utary-nav-toggle:hover .utary-nav-toggle__line {
+  background-color: var(--utary-bg);
+}
+
+.utary-nav-toggle__line {
+  height: 2px;
+  background-color: #ccba82;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+/* Standard straight hamburger lines for exact match */
+.utary-nav-toggle__line.line-1 { width: 20px; animation: none; }
+.utary-nav-toggle__line.line-2 { width: 20px; animation: none; }
+.utary-nav-toggle__line.line-3 { width: 20px; animation: none; }
+
+.utary-floating {
+  position: absolute;
+  right: 25px;
+  bottom: 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: auto;
 }
 
 .utary-floating__btn {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(28, 60, 46, 0.85);
-  border: 1px solid var(--utary-border-gold);
-  color: var(--utary-gold);
+  background-color: rgba(28, 60, 46, 0.85);
+  border: 1px solid var(--utary-gold);
+  color: #ccba82;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 15px;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  backdrop-filter: blur(5px);
 }
 
 .utary-floating__btn:hover {
-  background: var(--utary-gold);
-  color: var(--utary-btn-text);
+  transform: scale(0.95);
+  background-color: var(--utary-gold);
+  color: var(--utary-bg);
 }
 
-.utary-floating__btn.is-playing {
-  animation: utaryRotate 3s linear infinite;
+.utary-nav-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background-color: #3a4f3b; /* Dark green matching demo */
+  background-image: url('./asset/cover-bg.webp');
+  background-blend-mode: overlay;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+@media (min-width: 769px) {
+  .utary-nav-drawer {
+    left: 50%;
+    width: 50%;
+  }
+}
+
+.utary-nav-drawer.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.utary-nav-drawer__top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 40px;
+}
+
+.utary-nav-drawer__close {
+  background-color: #2b3d2b;
+  color: #ccba82;
+  border: 1px solid rgba(204, 186, 130, 0.2);
+  padding: 8px 24px;
+  border-radius: 20px;
+  font-family: var(--utary-font-serif);
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.utary-nav-drawer__close:hover {
+  background-color: #1e2b1e;
+}
+
+.utary-nav-drawer__list {
+  list-style: none;
+  padding: 0;
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.utary-nav-drawer__item button {
+  background: none;
+  border: none;
+  color: #ccba82;
+  font-family: var(--utary-font-display);
+  font-size: 28px;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  padding: 0;
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.utary-nav-drawer.is-open .utary-nav-drawer__item button {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.utary-nav-drawer.is-open .utary-nav-drawer__item:nth-child(1) button { transition-delay: 0.1s; }
+.utary-nav-drawer.is-open .utary-nav-drawer__item:nth-child(2) button { transition-delay: 0.15s; }
+.utary-nav-drawer.is-open .utary-nav-drawer__item:nth-child(3) button { transition-delay: 0.2s; }
+.utary-nav-drawer.is-open .utary-nav-drawer__item:nth-child(4) button { transition-delay: 0.25s; }
+.utary-nav-drawer.is-open .utary-nav-drawer__item:nth-child(5) button { transition-delay: 0.3s; }
+.utary-nav-drawer.is-open .utary-nav-drawer__item:nth-child(6) button { transition-delay: 0.35s; }
+.utary-nav-drawer.is-open .utary-nav-drawer__item:nth-child(7) button { transition-delay: 0.4s; }
+
+.utary-nav-drawer__item button:hover {
+  color: #ffffff;
+  transform: translateX(10px) !important;
 }
 
 /* ═══════════════════════════════════════
