@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposal Estimasi Tema - Undangan Digital</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary: #1e293b;
+            --secondary: #475569;
+            --accent: #2563eb;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f5f9;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .document-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 50px 60px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-top: 6px solid var(--accent);
+        }
+
+        header {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 25px;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .doc-title {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .doc-subtitle {
+            margin: 8px 0 0;
+            font-size: 15px;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .doc-meta {
+            text-align: right;
+            font-size: 13px;
+            color: var(--secondary);
+        }
+
+        .intro-text {
+            font-size: 15px;
+            color: #334155;
+            margin-bottom: 40px;
+            text-align: justify;
+        }
+
+        .tier-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            page-break-inside: avoid;
+        }
+
+        .tier-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .tier-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .tier-desc {
+            font-size: 14px;
+            color: var(--secondary);
+            margin: 5px 0 0 0;
+        }
+
+        .spec-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+
+        .spec-list li {
+            position: relative;
+            padding-left: 20px;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--secondary);
+        }
+
+        .spec-list li::before {
+            content: "•";
+            color: var(--accent);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        code {
+            background-color: var(--bg-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            color: #b91c1c;
+        }
+
+        .pricing-box {
+            background-color: var(--bg-light);
+            padding: 15px 20px;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .pricing-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .pricing-row:last-child {
+            margin-bottom: 0;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+            margin-top: 4px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .stars {
+            color: #f59e0b;
+            letter-spacing: 2px;
+        }
+
+        .recommendation {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+
+        .recommendation h4 {
+            margin: 0 0 10px 0;
+            color: #166534;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recommendation p {
+            margin: 0;
+            font-size: 14px;
+            color: #15803d;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        @media print {
+            body {
+                background: transparent;
+                margin: 0;
+            }
+
+            .document-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                border-top: none;
+                max-width: 100%;
+            }
+
+            .print-btn {
+                display: none !important;
+            }
+
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button class="print-btn" onclick="window.print()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        Export PDF
+    </button>
+
+    <div class="document-container">
+        <header>
+            <div>
+                <h1 class="doc-title">Estimasi & Analisis Biaya</h1>
+                <h2 class="doc-subtitle">Pengembangan Tema Undangan Digital</h2>
+            </div>
+            <div class="doc-meta">
+                <div><strong>Proposal by:</strong> Bhaktiaji Ilham</div>
+                <div><strong>Tanggal Dokumen:</strong> 17 Mei 2026</div>
+                <div><strong>Kerahasiaan:</strong> Internal / Klien Pak Akrom17</div>
+            </div>
+        </header>
+
+        <p class="intro-text">
+            Berdasarkan hasil audit teknis pada source code infrastruktur sistem
+            <strong>undangan-digital-groovy</strong>, proses pembuatan tema baru sangat dipengaruhi oleh desain
+            arsitektur database dan struktur komponen antarmuka (Frontend React). Untuk memudahkan estimasi bagi klien,
+            pembuatan layanan tema dibagi menjadi tiga (3) tingkatan klasifikasi teknis (Tiers) sebagai panduan *order*
+            sistematis.
+        </p>
+
+        <!-- TIER 1 -->
+        <div class="tier-card">
+            <div class="tier-header">
+                <div>
+                    <h3 class="tier-title">Tier 1: Basic Theme (Minimalis)</h3>
+                    <p class="tier-desc">Implementasi menggunakan layout default dengan penyesuaian khusus pada palet
+                        warna dan tipografi.</p>
+                </div>
+            </div>
+
+            <ul class="spec-list">
+                <li><strong>Infrastruktur Teknis:</strong> Tidak membutuhkan modifikasi source code. Bekerja secara
+                    otomatis melalui 1 baris konfigurasi JSON pada skema tabel <code>themes</code> dan
+                    <code>theme_sections</code>.</li>
+                <li><strong>Skup Modifikasi:</strong> Penentuan Hex Code Color & Integrasi font melalui CDN (Google
+                    Fonts).</li>
+                <li><strong>Tingkat Kesulitan:</strong> Sangat Mudah <span class="stars">⭐</span></li>
+            </ul>
+
+            <div class="pricing-box">
+                <div class="pricing-row">
+                    <span>Estimasi Waktu Integrasi (per tema)</span>
+                    <span class="value">± 10 Menit</span>
+                </div>
+                <div class="pricing-row">
+                    <span>Harga Wajar (per tema)</span>
+                    <span class="value">Rp 15.000</span>
+                </div>
+                <div class="pricing-row">
+                    <span>Penawaran Bundling Paket (5 Tema)</span>
+                    <span class="value" style="color: var(--accent)">Rp 70.000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TIER 2 -->
+        <div class="tier-card">
+            <div class="tier-header">
+                <div>
+                    <h3 class="tier-title">Tier 2: Premium Theme (Custom Decoration)</h3>
+                    <p class="tier-desc">Penyesuaian tata letak lanjut menggunakan injeksi ornamen grafis spesifik
+                        (seperti motif Adat Jawa, Sunda, dll).</p>
+                </div>
+            </div>
+
+            <ul class="spec-list">
+                <li><strong>Infrastruktur Teknis:</strong> Memerlukan injeksi tata letak aset grafis transparan
+                    (.png/.webp).</li>
+                <li><strong>Modifikasi DOM:</strong> Membutuhkan manipulasi statis pada source code frontend di dalam
+                    file induk pendakian <code>resources/js/Pages/Invitation/Show.jsx</code> untuk mengondisikan logic
+                    ornamen tambahan di setiap titik scroll (mobile/desktop).</li>
+                <li><strong>Tingkat Kesulitan:</strong> Menengah <span class="stars">⭐⭐⭐</span></li>
+            </ul>
+
+            <div class="pricing-box">
+                <div class="pricing-row">
+                    <span>Estimasi Waktu Integrasi (per tema)</span>
+                    <span class="value">±1 - 2 Jam</span>
+                </div>
+                <div class="pricing-row">
+                    <span>Harga Wajar (per tema)*</span>
+                    <span class="value">Rp 50.000 </span>
+                </div>
+                <div class="pricing-row">
+                    <span>Penawaran Bundling Paket (5 Tema)</span>
+                    <span class="value" style="color: var(--accent)">Rp 235.000</span>
+                </div>
+                <p style="font-size: 11px; color: var(--secondary); margin: 6px 0 0 0; text-align: right;"><i>*Tidak
+                        termasuk biaya pembuatan IP (Intellectual Property) jika dilakukan ilustrasi kustom dari 0.</i>
+                </p>
+            </div>
+        </div>
+
+        <!-- TIER 3 -->
+        <div class="tier-card">
+            <div class="tier-header">
+                <div>
+                    <h3 class="tier-title">Tier 3: Exclusive Theme (Custom Layout Total)</h3>
+                    <p class="tier-desc">Rancang bangun tema berbasis independensi tata letak secara 100%, lepas dari
+                        batasan tema reguler.</p>
+                </div>
+            </div>
+
+            <ul class="spec-list">
+                <li><strong>Infrastruktur Teknis:</strong> Restrukturisasi DOM, inisasialisasi script khusus (Parallax,
+                    Advanced Transitions, dll).</li>
+                <li><strong>Modifikasi Root:</strong> Pembuatan Page rendering baru secara utuh terpisah dari layout
+                    master (contoh pola referensi: <code>HeritageShow.jsx</code>).</li>
+                <li><strong>Konfigurasi Backend:</strong> Merombak arsitektur routing theme di dalam
+                    <code>InvitationController.php</code> berbasis slug identifier.</li>
+                <li><strong>Tingkat Kesulitan:</strong> Sangat Tinggi <span class="stars">⭐⭐⭐⭐⭐</span></li>
+            </ul>
+
+            <div class="pricing-box">
+                <div class="pricing-row">
+                    <span>Estimasi Waktu Integrasi (per tema)</span>
+                    <span class="value">±1 Hari Kerja</span>
+                </div>
+                <div class="pricing-row">
+                    <span>Harga Wajar (per tema)</span>
+                    <span class="value">Rp 135.000</span>
+                </div>
+                <div class="pricing-row">
+                    <span>Penawaran Bundling Paket (5 Tema)</span>
+                    <span class="value" style="color: var(--accent)">Rp 650.000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class="recommendation">
+            <h4>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                Rekomendasi Bisnis (Best Value Strategy)
+            </h4>
+            <p>
+                Jika kebutuhan klien berada dalam ruang lingkup implementasi dekorasi ornamen grafikal khusus (seperti tema Adat), paket penawaran <strong>Tier 2 Bundling (5 Tema) senilai ± Rp 1.250.000</strong> adalah skema dengan margin efisiensi <i>resource</i> yang paling superior, meninjau perombakan <i>backend logic</i> dapat sepenuhnya dihindari.
+            </p>
+        </div> -->
+
+        <footer>
+            <p>Dokumen ini dirumuskan berdasar analisis sistem per 17 Mei 2026. Harga di atas adalah indikator kewajaran
+                teknis dan dapat disesuaikan dengan nilai komersial operasional startup.</p>
+        </footer>
+    </div>
+</body>
+
+</html>

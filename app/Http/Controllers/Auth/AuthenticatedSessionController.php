@@ -24,7 +24,7 @@ class AuthenticatedSessionController extends Controller
         if (app()->environment('local', 'staging', 'testing')) {
             $autoLoginUsers = \App\Models\User::select('name', 'email', 'role')
                 ->with(['activeSubscription.plan:id,name,slug'])
-                ->orderByRaw("FIELD(role, 'super_admin', 'admin', 'user')")
+                ->orderByRaw("CASE role WHEN 'super_admin' THEN 1 WHEN 'admin' THEN 2 WHEN 'user' THEN 3 ELSE 4 END")
                 ->limit(5)
                 ->get()
                 ->map(fn($u) => [

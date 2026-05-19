@@ -10,7 +10,9 @@ return new class extends Migration {
     {
         // 1. Change role enum: add super_admin
         // MySQL doesn't support ALTER ENUM easily, so we use raw SQL
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('super_admin', 'admin', 'user') DEFAULT 'user'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('super_admin', 'admin', 'user') DEFAULT 'user'");
+        }
 
         // 2. Add reseller_id FK
         Schema::table('users', function (Blueprint $table) {
@@ -31,6 +33,8 @@ return new class extends Migration {
             $table->dropColumn('reseller_id');
         });
 
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'user') DEFAULT 'user'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'user') DEFAULT 'user'");
+        }
     }
 };

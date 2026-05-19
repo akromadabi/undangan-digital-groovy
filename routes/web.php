@@ -55,6 +55,9 @@ Route::post('/u/{slug}/rsvp', [InvitationController::class, 'submitRsvp'])->name
 Route::post('/u/{slug}/wish', [InvitationController::class, 'submitWish'])->name('invitation.wish');
 Route::post('/u/{slug}/opened', [InvitationController::class, 'markOpened'])->name('invitation.opened');
 Route::get('/u/{slug}/checkin', [InvitationController::class, 'checkin'])->name('invitation.checkin');
+Route::get('/demo-utary', function () {
+    return Inertia::render('Invitation/utary/Index');
+});
 
 // Public Live Tamu fullscreen (no auth)
 Route::get('/live/{slug}', [LiveTamuController::class, 'fullscreen'])->name('live.fullscreen');
