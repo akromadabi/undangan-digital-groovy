@@ -12,7 +12,6 @@ import flowerLeft from './asset/flower-left.webp';
 import flowerRight from './asset/flower-right.webp';
 import eventFrameTop from './asset/event-frame-top.webp';
 import eventFrameBottom from './asset/event-frame-bottom.webp';
-import souvenirCard from './asset/souvenir-card.webp';
 
 /* ─────────────────────────────────────────────
    SVG Monogram Shield (gold outline, TF inside)
@@ -342,9 +341,27 @@ function EventSection() {
 
     return (
         <section className="utary-section utary-section--padded" id="event">
+            <img src={flowerLeft} alt="" className="utary-ornament utary-ornament--flower-left" />
+            <img src={flowerRight} alt="" className="utary-ornament utary-ornament--flower-right" />
             <div className="utary-section__inner">
                 <RevealDiv>
                     <h2 className="utary-event__title">Save The Date</h2>
+                </RevealDiv>
+
+                <RevealDiv>
+                    <div className="utary-event__quote">
+                        &ldquo;Pernikahan adalah ibadah, dan setiap ibadah bermuara pada cinta-Nya sebagai tujuan. Sudah sewajarnya setiap upaya meraih cinta-Nya dilakukan dengan sukacita.&rdquo;
+                    </div>
+                </RevealDiv>
+
+                <RevealDiv>
+                    <button className="utary-event__save-btn" onClick={() => window.open('https://www.google.com/calendar/render?action=TEMPLATE&text=The+Wedding+of+Tary+%26+Fachrul&dates=20261220T010000Z%2F20261220T070000Z', '_blank')}>
+                        Simpan Tanggal
+                    </button>
+                </RevealDiv>
+
+                <RevealDiv>
+                    <div className="utary-event__subtitle">Date &amp; Place</div>
                 </RevealDiv>
 
                 <RevealDiv>
@@ -353,42 +370,26 @@ function EventSection() {
 
                 <RevealDiv>
                     <div className="utary-event__card" style={{ borderRadius: 0 }}>
-                        <div className="utary-event__card-title">Akad Nikah</div>
-                        <div className="utary-event__card-item">
-                            <span className="utary-event__card-icon"><i className="fas fa-calendar-alt" /></span>
-                            <span className="utary-event__card-label">Sabtu, 20 Desember 2026</span>
-                        </div>
-                        <div className="utary-event__card-item">
-                            <span className="utary-event__card-icon"><i className="fas fa-clock" /></span>
-                            <span className="utary-event__card-label">Pukul 08:00 - 10:00 WIB</span>
-                        </div>
-                        <div className="utary-event__card-item">
-                            <span className="utary-event__card-icon"><i className="fas fa-map-marker-alt" /></span>
-                            <span className="utary-event__card-label">Club House Jakarta Garden City, Jl. Jakarta Garden City, Cakung</span>
-                        </div>
-                        <button className="utary-event__map-btn" onClick={() => window.open('https://maps.google.com', '_blank')}>
-                            <i className="fas fa-map" /> Lihat Lokasi
+                        <div className="utary-event__card-title">AKAD</div>
+                        <div className="utary-event__card-detail">SABTU, 20 DESEMBER 2026</div>
+                        <div className="utary-event__card-detail">08.00 - 10.00 WIB</div>
+                        <div className="utary-event__card-venue">VUE PALACE HOTEL</div>
+                        <div className="utary-event__card-address">Jl. Otto Iskandar Dinata No. 3, Babakan Ciamis, Kec. Sumur Bandung, Kota Bandung</div>
+                        <button className="utary-event__map-btn" onClick={() => window.open('https://maps.app.goo.gl/', '_blank')}>
+                            GOOGLE MAPS
                         </button>
                     </div>
                 </RevealDiv>
 
                 <RevealDiv>
                     <div className="utary-event__card" style={{ borderRadius: 0, marginBottom: 0 }}>
-                        <div className="utary-event__card-title">Resepsi</div>
-                        <div className="utary-event__card-item">
-                            <span className="utary-event__card-icon"><i className="fas fa-calendar-alt" /></span>
-                            <span className="utary-event__card-label">Sabtu, 20 Desember 2026</span>
-                        </div>
-                        <div className="utary-event__card-item">
-                            <span className="utary-event__card-icon"><i className="fas fa-clock" /></span>
-                            <span className="utary-event__card-label">Pukul 11:00 - 14:00 WIB</span>
-                        </div>
-                        <div className="utary-event__card-item">
-                            <span className="utary-event__card-icon"><i className="fas fa-map-marker-alt" /></span>
-                            <span className="utary-event__card-label">Club House Jakarta Garden City, Jl. Jakarta Garden City, Cakung</span>
-                        </div>
-                        <button className="utary-event__map-btn" onClick={() => window.open('https://maps.google.com', '_blank')}>
-                            <i className="fas fa-map" /> Lihat Lokasi
+                        <div className="utary-event__card-title">RESEPSI</div>
+                        <div className="utary-event__card-detail">SABTU, 20 DESEMBER 2026</div>
+                        <div className="utary-event__card-detail">08.00 - 10.00 WIB</div>
+                        <div className="utary-event__card-venue">VUE PALACE HOTEL</div>
+                        <div className="utary-event__card-address">Jl. Otto Iskandar Dinata No. 3, Babakan Ciamis, Kec. Sumur Bandung, Kota Bandung</div>
+                        <button className="utary-event__map-btn" onClick={() => window.open('https://maps.app.goo.gl/', '_blank')}>
+                            GOOGLE MAPS
                         </button>
                     </div>
                 </RevealDiv>
@@ -448,6 +449,7 @@ function GallerySection() {
 /* ── Gift ── */
 function GiftSection() {
     const [copied, setCopied] = useState(null);
+    const [giftTab, setGiftTab] = useState('amplop');
 
     const copyToClipboard = (text, id) => {
         navigator.clipboard.writeText(text);
@@ -457,41 +459,60 @@ function GiftSection() {
 
     return (
         <section className="utary-section utary-section--padded" id="gift">
+            <img src={flowerLeft} alt="" className="utary-ornament utary-ornament--flower-left" />
+            <img src={flowerRight} alt="" className="utary-ornament utary-ornament--flower-right" />
             <div className="utary-section__inner">
                 <RevealDiv>
                     <h2 className="utary-gift__title">Wedding Gift</h2>
                     <p className="utary-gift__desc">
-                        Doa Restu Anda merupakan karunia yang sangat berarti bagi kami. Dan jika memberi adalah ungkapan tanda kasih Anda, Anda dapat memberi kado secara cashless.
+                        Doa restu Anda merupakan karunia yang sangat berarti bagi kami. Namun jika memberi adalah ungkapan tanda kasih Anda, kami akan senang hati menerimanya yang tentu akan semakin melengkapi kebahagiaan kami.
                     </p>
                 </RevealDiv>
 
                 <RevealDiv>
-                    <img src={souvenirCard} alt="Souvenir" style={{ width: '100%', borderRadius: '4px', marginBottom: '24px' }} />
-                </RevealDiv>
-
-                <RevealDiv>
-                    <div className="utary-gift__card">
-                        <div className="utary-gift__bank-name">Bank BCA</div>
-                        <div className="utary-gift__account">1234 5678 9012</div>
-                        <div className="utary-gift__holder">a/n Utary Adhita</div>
-                        <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('123456789012', 'bca')}>
-                            <i className={copied === 'bca' ? 'fas fa-check' : 'fas fa-copy'} />
-                            {copied === 'bca' ? 'Tersalin!' : 'Salin Rekening'}
-                        </button>
+                    <div className="utary-gift__tabs">
+                        <button className={`utary-gift__tab ${giftTab === 'amplop' ? 'is-active' : ''}`} onClick={() => setGiftTab('amplop')}>E-Amplop</button>
+                        <button className={`utary-gift__tab ${giftTab === 'registry' ? 'is-active' : ''}`} onClick={() => setGiftTab('registry')}>Gift Registry</button>
                     </div>
                 </RevealDiv>
 
-                <RevealDiv>
-                    <div className="utary-gift__card">
-                        <div className="utary-gift__bank-name">Bank Mandiri</div>
-                        <div className="utary-gift__account">9876 5432 1098</div>
-                        <div className="utary-gift__holder">a/n Fachrul Rozi</div>
-                        <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('987654321098', 'mandiri')}>
-                            <i className={copied === 'mandiri' ? 'fas fa-check' : 'fas fa-copy'} />
-                            {copied === 'mandiri' ? 'Tersalin!' : 'Salin Rekening'}
-                        </button>
-                    </div>
-                </RevealDiv>
+                {giftTab === 'amplop' && (
+                    <>
+                        <RevealDiv>
+                            <div className="utary-gift__card">
+                                <div className="utary-gift__bank-name">BCA</div>
+                                <div className="utary-gift__account">0123 456 789</div>
+                                <div className="utary-gift__holder">Nama Penerima</div>
+                                <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('0123456789', 'bca')}>
+                                    {copied === 'bca' ? 'Tersalin!' : 'Salin'}
+                                </button>
+                            </div>
+                        </RevealDiv>
+
+                        <RevealDiv>
+                            <div className="utary-gift__card">
+                                <div className="utary-gift__bank-name">GOPAY</div>
+                                <div className="utary-gift__account">0123 456 789</div>
+                                <div className="utary-gift__holder">Nama Penerima</div>
+                                <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('0123456789', 'gopay')}>
+                                    {copied === 'gopay' ? 'Tersalin!' : 'Salin'}
+                                </button>
+                            </div>
+                        </RevealDiv>
+                    </>
+                )}
+
+                {giftTab === 'registry' && (
+                    <RevealDiv>
+                        <div className="utary-gift__card">
+                            <div className="utary-gift__bank-name">KIRIM KADO</div>
+                            <div className="utary-gift__holder" style={{ marginBottom: '8px' }}>Jl. Lorem Ipsum No. 01, RT01 RW01, Kel. Dolor, Kec. Sit Amet, Kota Bandung</div>
+                            <button className="utary-gift__copy-btn" onClick={() => copyToClipboard('Jl. Lorem Ipsum No. 01, RT01 RW01, Kel. Dolor, Kec. Sit Amet, Kota Bandung', 'address')}>
+                                {copied === 'address' ? 'Tersalin!' : 'Salin'}
+                            </button>
+                        </div>
+                    </RevealDiv>
+                )}
             </div>
         </section>
     );
@@ -583,9 +604,12 @@ function FooterSection() {
         <footer className="utary-footer">
             <RevealDiv>
                 <DividerSection />
-                <div className="utary-footer__initial">T &amp; F</div>
-                <div className="utary-footer__hashtag">#TaryFachrulWedding</div>
-                <div className="utary-footer__thankyou">Thank You</div>
+                <MonogramShield width={120} height={180} />
+                <div className="utary-footer__initial">TARY &amp; FACHRUL</div>
+                <div className="utary-footer__thankyou">THANK YOU</div>
+                <div className="utary-footer__message">
+                    Merupakan suatu kehormatan dan kebahagiaan bagi kami, apabila Bapak/Ibu, Saudara/i berkenan hadir di hari bahagia kami.
+                </div>
                 <div className="utary-footer__credit">Powered by Groovy Digital</div>
             </RevealDiv>
         </footer>
@@ -595,6 +619,7 @@ function FooterSection() {
 /* ── Navigation Menu & Controls ── */
 function Navigation({ isOpened, isPlaying, onToggleMusic }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
 
     const menuItems = [
         { id: 'home', label: 'Home' },
@@ -603,12 +628,25 @@ function Navigation({ isOpened, isPlaying, onToggleMusic }) {
         { id: 'gallery', label: 'Gallery' },
         { id: 'rsvp', label: 'RSVP' },
         { id: 'gift', label: 'Gift' },
-        { id: 'gift', label: 'Souvenir Card' } // Based on screenshot
+        { id: 'gift', label: 'Souvenir Card' }
     ];
+
+    const handleOpenMenu = () => {
+        setIsClosing(false);
+        setIsMenuOpen(true);
+    };
+
+    const handleCloseMenu = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsMenuOpen(false);
+            setIsClosing(false);
+        }, 500);
+    };
 
     const scrollToSection = (id) => {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-        setIsMenuOpen(false);
+        handleCloseMenu();
     };
 
     if (!isOpened) return null;
@@ -616,15 +654,10 @@ function Navigation({ isOpened, isPlaying, onToggleMusic }) {
     return (
         <>
             {/* Overlay Navigation Menu */}
-            <div className={`utary-nav-drawer ${isMenuOpen ? 'is-open' : ''}`}>
+            <div className={`utary-nav-drawer ${isMenuOpen ? 'is-open' : ''} ${isClosing ? 'is-closing' : ''}`}>
                 <div className="utary-nav-drawer__top">
-                    <button className="utary-nav-drawer__close" onClick={() => setIsMenuOpen(false)} title="Close" style={{
-                        width: '44px', height: '44px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
+                    <button className="utary-nav-drawer__close" onClick={handleCloseMenu} title="Close">
+                        CLOSE
                     </button>
                 </div>
                 <ul className="utary-nav-drawer__list">
@@ -636,16 +669,18 @@ function Navigation({ isOpened, isPlaying, onToggleMusic }) {
                 </ul>
             </div>
 
+            {/* Top Right Hamburger */}
+            <div className={`utary-top-nav ${isMenuOpen ? 'is-hidden' : ''}`}>
+                <button className="utary-nav-toggle" onClick={handleOpenMenu} title="Menu">
+                    <span className="utary-nav-toggle__line line-1" />
+                    <span className="utary-nav-toggle__line line-2" />
+                    <span className="utary-nav-toggle__line line-3" />
+                </button>
+            </div>
+
             {/* Bottom Controls */}
             <div className={`utary-bottom-controls ${isMenuOpen ? 'is-hidden' : ''}`}>
                 <div className="utary-floating" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    
-                    <button className="utary-nav-toggle" onClick={() => setIsMenuOpen(true)} title="Menu">
-                        <span className="utary-nav-toggle__line line-1" />
-                        <span className="utary-nav-toggle__line line-2" />
-                        <span className="utary-nav-toggle__line line-3" />
-                    </button>
-
                     <button className="utary-floating__btn" onClick={() => scrollToSection('rsvp')} title="RSVP">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
