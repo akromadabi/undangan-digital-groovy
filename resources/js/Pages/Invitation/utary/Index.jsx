@@ -903,10 +903,15 @@ export default function Utary() {
         const audio = audioRef.current;
         if (!audio) return;
         if (isPlaying) {
-            audio.pause();
+            audio.muted = true;
             setIsPlaying(false);
         } else {
-            audio.play().then(() => setIsPlaying(true)).catch(() => {});
+            audio.muted = false;
+            // Handle if it hasn't actually started playing yet
+            if (audio.paused) {
+                audio.play().catch(() => {});
+            }
+            setIsPlaying(true);
         }
     }, [isPlaying]);
 
