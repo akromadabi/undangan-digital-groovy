@@ -380,7 +380,7 @@ function TimelineSection() {
             <div className="utary-section__inner">
                 <RevealDiv className="utary-timeline__header">
                     <div className="utary-timeline__pretitle" style={{ fontFamily: 'var(--utary-font-display)', fontSize: '18px', color: 'var(--utary-gold)' }}>A Story of</div>
-                    <h2 className="utary-timeline__title" style={{ color: 'var(--utary-gold)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '32px' }}>JOURNEY OF LOVE</h2>
+                    <h2 className="utary-timeline__title">JOURNEY OF LOVE</h2>
                     <p className="utary-timeline__desc" style={{ color: 'var(--utary-gold)', fontStyle: 'italic', maxWidth: '340px', margin: '0 auto 40px', lineHeight: '2', fontWeight: '300' }}>
                         &ldquo;Marriage is not a race, it&rsquo;s not about fast or slow.<br/>
                         But, who is ready to carry out a great mandate.&rdquo;
@@ -618,15 +618,9 @@ function GallerySection() {
             {/* Lightbox / Carousel Elementor Style */}
             {lightboxIndex >= 0 && (
                 <div className="utary-lightbox" onClick={closeLightbox}>
-                    <div className="utary-lightbox__header" onClick={(e) => e.stopPropagation()}>
-                        <div className="utary-lightbox__counter">{lightboxIndex + 1} / {images.length}</div>
-                        <div className="utary-lightbox__actions">
-                            <button className="utary-lightbox__btn" title="Fullscreen"><i className="fas fa-expand" /></button>
-                            <button className="utary-lightbox__btn" title="Zoom in"><i className="fas fa-search-plus" /></button>
-                            <button className="utary-lightbox__btn" title="Share"><i className="fas fa-share" /></button>
-                            <button className="utary-lightbox__btn" onClick={closeLightbox} title="Close"><i className="fas fa-times" /></button>
-                        </div>
-                    </div>
+                    <button className="utary-lightbox__close" onClick={closeLightbox} title="Close">
+                        <i className="fas fa-times" />
+                    </button>
                     <div className="utary-lightbox__content" onClick={(e) => e.stopPropagation()}>
                         <button className="utary-lightbox__nav utary-lightbox__nav--prev" onClick={prevImage}>
                             <i className="fas fa-chevron-left" />
