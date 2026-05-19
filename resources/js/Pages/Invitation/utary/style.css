@@ -501,22 +501,22 @@
 .utary-profile {
   position: relative;
   margin: 40px auto;
-  max-width: 300px;
+  max-width: 320px;
 }
 
 .utary-profile__frame-wrap {
   position: relative;
-  width: 200px;
-  height: 200px;
-  margin: 0 auto 20px;
+  width: 250px;       /* Portrait ratio */
+  height: 335px;
+  margin: 0 auto 28px;
 }
 
 .utary-profile__frame {
   position: absolute;
-  top: -18px;
-  left: -18px;
-  width: calc(100% + 36px);
-  height: calc(100% + 36px);
+  top: -12px;
+  left: -12px;
+  width: calc(100% + 24px);
+  height: calc(100% + 24px);
   z-index: 2;
   pointer-events: none;
 }
@@ -524,52 +524,59 @@
 .utary-profile__photo {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 24px;
   object-fit: cover;
-  border: 2px solid var(--utary-border-gold);
+  border: 1px solid var(--utary-border-gold);
 }
 
 .utary-profile__name {
   font-family: var(--utary-font-display);
-  font-size: 30px;
+  font-size: 42px;
   color: var(--utary-gold);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
 .utary-profile__role {
   font-family: var(--utary-font-body);
   font-size: 11px;
-  color: var(--utary-text-muted);
-  letter-spacing: 1px;
-  font-weight: 300;
-  margin-bottom: 4px;
+  color: var(--utary-gold);
+  letter-spacing: 2px;
+  font-weight: 400;
+  margin-bottom: 8px;
+  text-transform: uppercase;
 }
 
 .utary-profile__parents {
   font-family: var(--utary-font-body);
   font-size: 13px;
-  color: var(--utary-text-body);
+  color: var(--utary-text-white);
   line-height: 1.8;
   font-weight: 300;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .utary-profile__social {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 20px;
-  border: 1px solid var(--utary-border-gold);
+  padding: 10px 24px;
+  background: var(--utary-gold-btn);
+  border: none;
   border-radius: 100px;
   font-family: var(--utary-font-body);
   font-size: 12px;
-  color: var(--utary-gold);
-  font-weight: 300;
+  color: var(--utary-btn-text);
+  font-weight: 500;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .utary-profile__social:hover {
-  background: rgba(204, 186, 130, 0.1);
+  background: var(--utary-gold-dark);
+  color: #fff;
 }
 
 .utary-ampersand {

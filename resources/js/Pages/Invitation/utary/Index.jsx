@@ -300,7 +300,7 @@ function CoupleSection() {
                         Bapak Nama_Bapak<br />&amp; Ibu Nama_Ibu
                     </p>
                     <a href="https://www.instagram.com/" className="utary-profile__social" target="_blank" rel="noopener noreferrer">
-                        <i className="fab fa-instagram" /> username
+                        <i className="fab fa-instagram" /> @USERNAME
                     </a>
                 </RevealDiv>
 
@@ -323,7 +323,7 @@ function CoupleSection() {
                         Bapak Nama_Bapak<br />&amp; Ibu Nama_Ibu
                     </p>
                     <a href="https://www.instagram.com/" className="utary-profile__social" target="_blank" rel="noopener noreferrer">
-                        <i className="fab fa-instagram" /> username
+                        <i className="fab fa-instagram" /> @USERNAME
                     </a>
                 </RevealDiv>
             </div>
