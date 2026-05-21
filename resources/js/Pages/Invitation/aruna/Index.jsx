@@ -226,7 +226,7 @@ function CoverSection({ onOpen, guestName }) {
         <div className="aruna-cover" id="aruna-cover">
             {/* Left Panel - Desktop Only */}
             <div className="aruna-cover__left">
-                <img src={aruna1} alt="" className="aruna-cover__left-img" />
+                <img src={aruna2} alt="" className="aruna-cover__left-img" />
                 <div className="aruna-cover__left-overlay">
                     <div className="aruna-cover__left-pretitle">THE WEDDING OF</div>
                     <h1 className="aruna-cover__left-title">Ila &amp; Fachrul</h1>
@@ -242,7 +242,7 @@ function CoverSection({ onOpen, guestName }) {
                 <img src={floralTL} className="aruna-cover__top-floral aruna-cover__top-floral--left" alt="" />
                 <img src={floralTR} className="aruna-cover__top-floral aruna-cover__top-floral--right" alt="" />
 
-                {/* Hanging Janur Pairs */}
+                {/* Hanging Janur Pairs - Refined Scale */}
                 <div className="aruna-cover__janur-wrap">
                     <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--1" alt="" />
                     <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--2" alt="" />
@@ -250,10 +250,9 @@ function CoverSection({ onOpen, guestName }) {
                     <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--4" alt="" />
                 </div>
                 
-                {/* Center Bottom Layering */}
+                {/* Subtle Center Bottom Layering */}
                 <img src={heritageTreeGold} className="aruna-cover__heritage-tree" alt="" />
                 <img src={floralBottomLarge} className="aruna-cover__bottom-floral-1" alt="" />
-                <img src={floralTR} className="aruna-cover__bottom-floral-2" alt="" />
 
                 <div className="aruna-cover__content">
                     <div className="aruna-cover__pretitle">THE WEDDING OF</div>

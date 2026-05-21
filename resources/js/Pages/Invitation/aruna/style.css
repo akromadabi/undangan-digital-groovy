@@ -14,8 +14,8 @@
   --aruna-bg-card: rgba(255, 255, 255, 0.08);
   --aruna-gold: #847d4a; /* Reference Golden Tan */
   --aruna-gold-light: #b2945d;
-  --aruna-crimson: #a54141; /* Reference Button Color */
-  --aruna-bg-mint: #d4e0dc; /* Reference Pane BG */
+  --aruna-btn-gold: #8b824b; /* Corrected Button Color */
+  --aruna-bg-mint: rgba(212, 224, 220, 0.95); /* Reference Pane BG */
   --aruna-text-white: #ffffff;
   --aruna-text-muted: rgba(255, 255, 255, 0.65);
   --aruna-text-body: rgba(255, 255, 255, 0.85);
@@ -87,7 +87,7 @@
   width: 50%;
   height: 100%;
   overflow: hidden;
-  background-color: var(--aruna-bg); /* fallback */
+  background-color: #000;
 }
 
 .aruna-cover__left-img {
@@ -111,11 +111,11 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%);
+  background: linear-gradient(210deg, transparent 50%, #000000 100%);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 60px 80px;
+  justify-content: flex-end;
+  padding: 80px;
   z-index: 2;
   pointer-events: none;
 }
@@ -294,7 +294,7 @@
 }
 
 .aruna-cover__btn {
-  background: var(--aruna-crimson);
+  background: var(--aruna-btn-gold);
   color: #fff;
   border-radius: 50px;
   border: none;
