@@ -22,6 +22,11 @@ import aruna5 from './asset/Bagas-Naila-LIBLOP-PICTURE-2620927.webp';
 import aruna6 from './asset/Bagas-Naila-LIBLOP-PICTURE-2630245.webp';
 import rambatOrnament from './asset/Aruna-Rambat-1.webp';
 import janurOrnament from './asset/Aruna-Janur-2.webp';
+import coverBg from './asset/Aruna-BACKGROUND-PARRALAX-1.webp';
+import floralTL from './asset/Aruna-Group-Floral-4-2.webp';
+import floralTR from './asset/Aruna-Group-Floral-7.webp';
+import floralBottomLarge from './asset/Aruna-Group-Floral-3-HD-New.webp';
+import heritageTreeGold from './asset/Heritage-Tree-Gold.webp';
 
 /* ─────────────────────────────────────────────
    Monogram Seal (Wax Seal)
@@ -219,19 +224,51 @@ function RevealDiv({ children, className = '', variant = '' }) {
 function CoverSection({ onOpen, guestName }) {
     return (
         <div className="aruna-cover" id="aruna-cover">
-            <MonogramShield />
-            <div className="aruna-cover__names">Ila &amp; Fachrul</div>
-            <div className="aruna-cover__date">May 2025</div>
-            <div className="aruna-cover__guest-box">
-                <div className="aruna-cover__guest-label">Kepada Bapak/Ibu/Saudara/i</div>
-                <div className="aruna-cover__guest-name">{guestName || 'Tamu Undangan'}</div>
+            {/* Left Panel - Desktop Only */}
+            <div className="aruna-cover__left">
+                <img src={aruna1} alt="" className="aruna-cover__left-img" />
+                <div className="aruna-cover__left-overlay">
+                    <div className="aruna-cover__left-pretitle">THE WEDDING OF</div>
+                    <h1 className="aruna-cover__left-title">Ila &amp; Fachrul</h1>
+                    <div className="aruna-cover__left-quote">
+                        &ldquo;I love you, I am who I am because of you. You are every reason, every hope and every dream. I&rsquo;ve ever had and no matter what happens to us in the future, every day we are together is the greatest day of my life. I will always be yours.&rdquo;
+                    </div>
+                </div>
             </div>
-            <div className="aruna-cover__desc">
-                Kami mengundang Anda untuk hadir di momen istimewa kami.
+
+            {/* Right Panel - Main Content */}
+            <div className="aruna-cover__right" style={{ backgroundImage: `url(${coverBg})` }}>
+                {/* Top Corner Ornaments */}
+                <img src={floralTL} className="aruna-cover__top-floral aruna-cover__top-floral--left" alt="" />
+                <img src={floralTL} className="aruna-cover__top-floral aruna-cover__top-floral--right" alt="" />
+
+                {/* Hanging Janur Pairs */}
+                <div className="aruna-cover__janur-wrap">
+                    <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--1" alt="" />
+                    <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--2" alt="" />
+                    <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--3" alt="" />
+                    <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--4" alt="" />
+                </div>
+                
+                {/* Center Bottom Layering */}
+                <img src={heritageTreeGold} className="aruna-cover__heritage-tree" alt="" />
+                <img src={floralBottomLarge} className="aruna-cover__bottom-floral-1" alt="" />
+                <img src={floralTR} className="aruna-cover__bottom-floral-2" alt="" />
+
+                <div className="aruna-cover__content">
+                    <div className="aruna-cover__pretitle">THE WEDDING OF</div>
+                    <div className="aruna-cover__names">Ila &amp; Fachrul</div>
+                    
+                    <div className="aruna-cover__guest-box">
+                        <div className="aruna-cover__guest-label">Yth. Bapak/Ibu/Saudara/i</div>
+                        <div className="aruna-cover__guest-name">{guestName || 'Tamu Undangan'}</div>
+                    </div>
+
+                    <button className="aruna-cover__btn" onClick={onOpen}>
+                        BUKA UNDANGAN
+                    </button>
+                </div>
             </div>
-            <button className="aruna-cover__btn" onClick={onOpen}>
-                BUKA UNDANGAN
-            </button>
         </div>
     );
 }
