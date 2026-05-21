@@ -164,17 +164,18 @@
   background-color: var(--aruna-bg-mint);
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .aruna-cover__top-floral {
   position: absolute;
   top: 0;
-  width: 35%;
-  max-width: 280px;
-  height: 160px;
+  width: 25%;
+  max-width: 220px;
+  height: 140px;
   z-index: 5;
   pointer-events: none;
-  opacity: 1;
+  opacity: 0.9;
   object-fit: contain;
 }
 
@@ -186,6 +187,7 @@
 .aruna-cover__top-floral--right {
     right: 0;
     object-position: top right;
+    transform: scaleX(-1);
 }
 
 .aruna-cover__janur-wrap {
@@ -195,7 +197,7 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 6;
+    z-index: 4;
 }
 
 .aruna-cover__janur-item {
@@ -203,10 +205,10 @@
     object-fit: contain;
 }
 
-.aruna-cover__janur--1 { top: 40px; right: 10%; width: 70px; }
-.aruna-cover__janur--2 { top: 10px; right: 22%; width: 50px; }
-.aruna-cover__janur--3 { top: 40px; left: 10%; width: 70px; transform: scaleX(-1); }
-.aruna-cover__janur--4 { top: 10px; left: 22%; width: 50px; transform: scaleX(-1); }
+.aruna-cover__janur--1 { top: 40px; right: 5%; width: 55px; }
+.aruna-cover__janur--2 { top: 15px; right: 18%; width: 40px; }
+.aruna-cover__janur--3 { top: 40px; left: 5%; width: 55px; transform: scaleX(-1); }
+.aruna-cover__janur--4 { top: 15px; left: 18%; width: 40px; transform: scaleX(-1); }
 
 .aruna-cover__heritage-tree {
   position: absolute;
@@ -214,9 +216,9 @@
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 200px;
+  max-width: 160px;
   z-index: 2;
-  opacity: 0.9;
+  opacity: 0.8;
   pointer-events: none;
 }
 
@@ -225,22 +227,24 @@
   bottom: 0px;
   left: 0px;
   width: 100%;
-  height: 250px;
+  height: 180px;
   z-index: 3;
   pointer-events: none;
   object-fit: contain;
   object-position: bottom center;
+  opacity: 0.9;
 }
 
 .aruna-cover__bottom-floral-2 {
   position: absolute;
-  bottom: -40px;
-  right: -50px;
-  width: 120%;
-  max-width: 450px;
+  bottom: -20px;
+  right: -30px;
+  width: 100%;
+  max-width: 350px;
   z-index: 4;
   pointer-events: none;
   object-fit: contain;
+  opacity: 0.8;
 }
 
 .aruna-cover__content {
@@ -263,10 +267,11 @@
 
 .aruna-cover__names {
   font-family: var(--aruna-font-display);
-  font-size: clamp(50px, 6vw, 65px);
+  font-size: clamp(45px, 5vw, 55px);
   color: var(--aruna-gold);
   margin-bottom: 30px;
   line-height: 1.1;
+  text-shadow: none;
   animation: arunaFadeInUp 1.5s ease 0.3s both;
 }
 

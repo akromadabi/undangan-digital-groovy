@@ -240,7 +240,7 @@ function CoverSection({ onOpen, guestName }) {
             <div className="aruna-cover__right" style={{ backgroundImage: `url(${coverBg})` }}>
                 {/* Top Corner Ornaments */}
                 <img src={floralTL} className="aruna-cover__top-floral aruna-cover__top-floral--left" alt="" />
-                <img src={floralTL} className="aruna-cover__top-floral aruna-cover__top-floral--right" alt="" />
+                <img src={floralTR} className="aruna-cover__top-floral aruna-cover__top-floral--right" alt="" />
 
                 {/* Hanging Janur Pairs */}
                 <div className="aruna-cover__janur-wrap">
