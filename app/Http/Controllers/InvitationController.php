@@ -41,7 +41,14 @@ class InvitationController extends Controller
             ->take(50)
             ->get();
 
-        return Inertia::render('Invitation/Show', [
+        // THEME ADDED BY BHAKTIAJI ILHAM
+        $page = 'Invitation/Show';
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'aruna'])) {
+            $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
+        }
+
+
+        return Inertia::render($page, [
             'invitation' => $invitation,
             'sections' => $invitation->sections,
             'brideGrooms' => $invitation->brideGrooms,
@@ -52,6 +59,7 @@ class InvitationController extends Controller
             'guest' => $guest,
             'wishes' => $wishes,
         ]);
+
     }
 
     /**

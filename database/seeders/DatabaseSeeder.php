@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         // ═══════════════════════════════════════
         // 1. ADMIN USERS (Super Admin & Reseller)
         // ═══════════════════════════════════════
-        User::create([
+        $superAdmin = User::create([
             'name' => 'Super Admin',
             'email' => 'superadmin@groovy.com',
             'password' => Hash::make('password'),
@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
-        User::create([
+        $reseller = User::create([
             'name' => 'Reseller Groovy',
             'email' => 'reseller@groovy.com',
             'password' => Hash::make('password'),
@@ -153,6 +153,27 @@ class DatabaseSeeder extends Seeder
                     'is_enabled' => true,
                 ]);
             }
+        }
+
+        // ── Give Super Admin & Reseller Gold Subscription ──
+        foreach ([$superAdmin, $reseller] as $adminUser) {
+            $payment = \App\Models\Payment::create([
+                'user_id' => $adminUser->id,
+                'plan_id' => $gold->id,
+                'amount' => $gold->price,
+                'payment_gateway' => 'manual',
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
+
+            \App\Models\Subscription::create([
+                'user_id' => $adminUser->id,
+                'plan_id' => $gold->id,
+                'payment_id' => $payment->id,
+                'starts_at' => now(),
+                'expires_at' => now()->addYears(10), // Long duration for admin
+                'status' => 'active',
+            ]);
         }
 
         // ═══════════════════════════════════════
@@ -283,6 +304,12 @@ class DatabaseSeeder extends Seeder
                 ThemeSection::create(array_merge($section, ['theme_id' => $theme->id]));
             }
         }
+
+        // Run theme-specific seeders
+        $this->call([
+            UtaryThemeSeeder::class,
+            QuoteTemplateSeeder::class,
+        ]);
 
         // ═══════════════════════════════════════
         // 6. GLOBAL SETTINGS

@@ -3,9 +3,17 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\BankAccount;
+use App\Models\BrideGroom;
+use App\Models\Event;
+use App\Models\Gallery;
+use App\Models\Guest;
 use App\Models\InvitationSection;
+use App\Models\LoveStory;
 use App\Models\Theme;
+use App\Models\Wish;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ThemeSettingsController extends Controller
@@ -107,6 +115,7 @@ class ThemeSettingsController extends Controller
 
         $theme = Theme::findOrFail($request->theme_id);
 
+        // THEME ADDED BY BHAKTIAJI ILHAM
         $invitation->update(['theme_id' => $theme->id]);
 
         // Re-initialize sections from new theme while preserving visibility
@@ -123,15 +132,24 @@ class ThemeSettingsController extends Controller
             ]);
         }
 
+        // ── THEME ADDED BY BHAKTIAJI ILHAM ──
+        // Auto-seed default data from theme's default_data JSON
+        // This populates all menu content (mempelai, events, gallery, love story, bank, opening, music)
+        // so the user only needs to replace demo data with their own
+        if ($theme->default_data) {
+            $this->seedDefaultData($invitation, $theme->default_data);
+        }
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'theme' => $theme,
                 'sections' => $invitation->sections()->orderBy('sort_order')->get(),
+                'seeded' => !empty($theme->default_data),
             ]);
         }
 
-        return back()->with('success', 'Tema berhasil diubah.');
+        return back()->with('success', 'Tema berhasil diubah dan data default telah dimuat.');
     }
 
     public function updateSections(Request $request)
@@ -166,6 +184,109 @@ class ThemeSettingsController extends Controller
         }
 
         return back()->with('success', 'Pengaturan section berhasil disimpan.');
+    }
+
+    /**
+     * THEME ADDED BY BHAKTIAJI ILHAM
+     * Seed default data dari theme ke invitation saat user memilih theme.
+     * Data yang di-seed: invitation fields, mempelai, kisah cinta, acara, galeri, dan amplop digital.
+     */
+    private function seedDefaultData($invitation, array $defaultData): void
+    {
+        try {
+            // ── 1) Update invitation fields (opening, closing, music, cover, dll) ──
+            if (!empty($defaultData['invitation'])) {
+                $invitationFields = $defaultData['invitation'];
+                $allowedFields = [
+                    'opening_title', 'opening_text', 'opening_ayat', 'opening_ayat_translation',
+                    'opening_ayat_source', 'closing_title', 'closing_text', 'turut_mengundang_text',
+                    'religion', 'music_url', 'music_autoplay', 'cover_title', 'cover_subtitle',
+                    'countdown_target_date', 'save_the_date_enabled', 'particle_type',
+                    'gallery_mode', 'enable_rsvp', 'enable_wishes', 'show_countdown',
+                    'show_qr_code', 'show_guest_name',
+                ];
+
+                $fieldsToUpdate = array_intersect_key($invitationFields, array_flip($allowedFields));
+                if (!empty($fieldsToUpdate)) {
+                    $invitation->update($fieldsToUpdate);
+                }
+            }
+
+            // ── 2) Seed Mempelai (Bride & Groom) ──
+            if (!empty($defaultData['bride_grooms'])) {
+                // Hapus data mempelai lama, ganti dengan default theme
+                $invitation->brideGrooms()->delete();
+                foreach ($defaultData['bride_grooms'] as $bg) {
+                    BrideGroom::create(array_merge($bg, [
+                        'invitation_id' => $invitation->id,
+                    ]));
+                }
+            }
+
+            // ── 3) Seed Kisah Cinta (Love Stories) ──
+            if (!empty($defaultData['love_stories'])) {
+                $invitation->loveStories()->delete();
+                foreach ($defaultData['love_stories'] as $story) {
+                    LoveStory::create(array_merge($story, [
+                        'invitation_id' => $invitation->id,
+                    ]));
+                }
+            }
+
+            // ── 4) Seed Acara (Events) ──
+            if (!empty($defaultData['events'])) {
+                $invitation->events()->delete();
+                foreach ($defaultData['events'] as $event) {
+                    Event::create(array_merge($event, [
+                        'invitation_id' => $invitation->id,
+                    ]));
+                }
+            }
+
+            // ── 5) Seed Galeri (Galleries) ──
+            if (!empty($defaultData['galleries'])) {
+                $invitation->galleries()->delete();
+                foreach ($defaultData['galleries'] as $gallery) {
+                    Gallery::create(array_merge($gallery, [
+                        'invitation_id' => $invitation->id,
+                    ]));
+                }
+            }
+
+            // ── 6) Seed Amplop Digital (Bank Accounts) ──
+            if (!empty($defaultData['bank_accounts'])) {
+                $invitation->bankAccounts()->delete();
+                foreach ($defaultData['bank_accounts'] as $bank) {
+                    BankAccount::create(array_merge($bank, [
+                        'invitation_id' => $invitation->id,
+                    ]));
+                }
+            }
+
+            // ── 7) Seed Tamu (Guests) ──
+            if (!empty($defaultData['guests'])) {
+                $invitation->guests()->delete();
+                foreach ($defaultData['guests'] as $guest) {
+                    Guest::create(array_merge($guest, [
+                        'invitation_id' => $invitation->id,
+                    ]));
+                }
+            }
+
+            // ── 8) Seed Ucapan (Wishes) ──
+            if (!empty($defaultData['wishes'])) {
+                $invitation->wishes()->delete();
+                foreach ($defaultData['wishes'] as $wish) {
+                    Wish::create(array_merge($wish, [
+                        'invitation_id' => $invitation->id,
+                    ]));
+                }
+            }
+
+            Log::info('Theme default data seeded for invitation #' . $invitation->id);
+        } catch (\Exception $e) {
+            Log::error('Failed to seed theme default data: ' . $e->getMessage());
+        }
     }
 
     private function getPreviewData($invitation)

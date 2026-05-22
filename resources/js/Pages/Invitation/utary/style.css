@@ -1278,10 +1278,16 @@
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-@media (min-width: 769px) {
-  .utary-top-nav {
-    right: calc(25px);
-  }
+.utary-top-nav.utary-top-nav--left {
+  right: auto;
+  left: 25px;
+}
+
+.utary-top-nav.utary-top-nav--bottom {
+  top: auto;
+  right: 50%;
+  bottom: 25px;
+  transform: translateX(50%);
 }
 
 .utary-top-nav.is-hidden {
@@ -1461,7 +1467,19 @@
 .utary-nav-drawer__top {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 40px;
+  padding-bottom: 40px;
+}
+
+.utary-nav-drawer__top.utary-top-nav--left {
+  justify-content: flex-start;
+}
+
+.utary-nav-drawer__top.utary-top-nav--bottom {
+  justify-content: center;
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  width: 100%;
 }
 
 .utary-nav-drawer__close {
@@ -1771,5 +1789,43 @@
   .utary-dresscode__circle {
     width: 50px;
     height: 50px;
+  }
+}
+/* ── WhatsApp Float ── */
+.utary-whatsapp-float {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #25d366;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 999;
+  transition: all 0.3s ease;
+}
+
+.utary-whatsapp-float:hover {
+  transform: scale(1.1);
+  background-color: #128c7e;
+}
+
+/* ── Turut Mengundang ── */
+.utary-turut-mengundang__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+/* Responsive adjustments for Nav */
+@media (max-width: 768px) {
+  .utary-whatsapp-float {
+    bottom: 90px;
   }
 }

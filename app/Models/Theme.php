@@ -14,6 +14,7 @@ class Theme extends Model
         'category',
         'color_scheme',
         'font_config',
+        'default_data',
         'css_file',
         'supports_scroll',
         'supports_slide',
@@ -28,6 +29,7 @@ class Theme extends Model
         return [
             'color_scheme' => 'array',
             'font_config' => 'array',
+            'default_data' => 'array',
             'supports_scroll' => 'boolean',
             'supports_slide' => 'boolean',
             'supports_tab' => 'boolean',
