@@ -24,9 +24,10 @@ import rambatOrnament from './asset/Aruna-Rambat-1.webp';
 import janurOrnament from './asset/Aruna-Janur-2.webp';
 import coverBg from './asset/Aruna-BACKGROUND-PARRALAX-1.webp';
 import floralTL from './asset/Aruna-Group-Floral-4-2.webp';
-import floralTR from './asset/Aruna-Group-Floral-7.webp';
 import floralBottomLarge from './asset/Aruna-Group-Floral-3-HD-New.webp';
 import heritageTreeGold from './asset/Heritage-Tree-Gold.webp';
+import coverTreeLeft from './asset/Aruna-Tree-5-1.webp';
+import batikOrnament from './asset/Aruna-Batik-2-1.webp';
 
 /* ─────────────────────────────────────────────
    Monogram Seal (Wax Seal)
@@ -238,23 +239,37 @@ function CoverSection({ onOpen, guestName }) {
 
             {/* Right Panel - Main Content */}
             <div className="aruna-cover__right" style={{ backgroundImage: `url(${coverBg})` }}>
-                {/* Top Corner Ornaments */}
-                <img src={floralTL} className="aruna-cover__top-floral aruna-cover__top-floral--left" alt="" />
-                <img src={floralTR} className="aruna-cover__top-floral aruna-cover__top-floral--right" alt="" />
 
-                {/* Hanging Janur Pairs - Refined Scale */}
-                <div className="aruna-cover__janur-wrap">
-                    <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--1" alt="" />
-                    <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--2" alt="" />
-                    <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--3" alt="" />
-                    <img src={janurOrnament} className="aruna-cover__janur-item aruna-cover__janur--4" alt="" />
+                {/* Left Side Frame: Rambat (white jasmine) garlands */}
+                <div className="aruna-cover__side-frame aruna-cover__side-frame--left">
+                    <img src={rambatOrnament} className="aruna-cover__rambat-img" alt="" />
+                    <img src={rambatOrnament} className="aruna-cover__rambat-img" alt="" />
+                    <img src={rambatOrnament} className="aruna-cover__rambat-img" alt="" />
                 </div>
-                
-                {/* Subtle Center Bottom Layering */}
-                <img src={heritageTreeGold} className="aruna-cover__heritage-tree" alt="" />
-                <img src={floralBottomLarge} className="aruna-cover__bottom-floral-1" alt="" />
+
+                {/* Right Side Frame: Mirrored */}
+                <div className="aruna-cover__side-frame aruna-cover__side-frame--right">
+                    <img src={rambatOrnament} className="aruna-cover__rambat-img" alt="" />
+                    <img src={rambatOrnament} className="aruna-cover__rambat-img" alt="" />
+                    <img src={rambatOrnament} className="aruna-cover__rambat-img" alt="" />
+                </div>
+
+                {/* Arched Janur Penjor - Independent positioning for better arching */}
+                <img src={janurOrnament} className="aruna-cover__janur-arch aruna-cover__janur-arch--left" alt="" />
+                <img src={janurOrnament} className="aruna-cover__janur-arch aruna-cover__janur-arch--right" alt="" />
+
+                {/* Bottom Floral Arrangement - single, not mirrored */}
+                <img src={floralBottomLarge} className="aruna-cover__bottom-floral" alt="" />
 
                 <div className="aruna-cover__content">
+                    {/* Golden Batik Icons - Matching Reference */}
+                    <div className="aruna-cover__batik-row">
+                        <img src={batikOrnament} alt="" />
+                        <img src={batikOrnament} alt="" />
+                        <img src={batikOrnament} alt="" />
+                        <img src={batikOrnament} alt="" />
+                    </div>
+
                     <div className="aruna-cover__pretitle">THE WEDDING OF</div>
                     <div className="aruna-cover__names">Ila &amp; Fachrul</div>
                     

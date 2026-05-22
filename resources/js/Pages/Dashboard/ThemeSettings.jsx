@@ -95,49 +95,35 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const saveCover = async () => {
         setCoverSaving(true);
         try {
-            await fetch(route('settings.cover.save'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    cover_image: coverImage,
-                    cover_title: coverTitle,
-                    cover_subtitle: coverSubtitle,
-                    is_private: coverPrivate,
-                    enable_qr: coverQr,
-                    hide_photos: coverHidePhotos,
-                }),
+            await axios.post(route('settings.cover.save'), {
+                cover_image: coverImage,
+                cover_title: coverTitle,
+                cover_subtitle: coverSubtitle,
+                is_private: coverPrivate,
+                enable_qr: coverQr,
+                hide_photos: coverHidePhotos,
             });
             setSaveMsg('Cover tersimpan!');
-        } catch (e) { console.error(e); setSaveMsg('Gagal menyimpan cover'); }
+        } catch (e) {
+            console.error(e);
+            setSaveMsg('Gagal menyimpan cover');
+        }
         setCoverSaving(false);
         setTimeout(() => setSaveMsg(''), 3000);
     };
 
     const isLocked = (key) => LOCKED_KEYS.includes(key);
 
-    // Real-time layout mode change
+    // real-time layout mode change (bug fixed by Bhaktiaji Ilham)
     const handleLayoutChange = useCallback(async (mode) => {
         setLayoutMode(mode);
         try {
-            const res = await fetch(route('theme.layout'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ layout_mode: mode }),
-            });
-            if (res.ok) {
+            const res = await axios.post(route('theme.layout'), { layout_mode: mode });
+            if (res.status === 200) {
                 showToast('success', 'Tersimpan');
                 setTimeout(() => setPreviewKey(k => k + 1), 800);
             } else {
-                showToast('error', 'Gagal menyimpan');
-                setLayoutMode(invitation?.layout_mode || 'scroll');
+                throw new Error('Save failed');
             }
         } catch (e) {
             console.error(e);
@@ -150,21 +136,12 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const handleMenuPositionChange = useCallback(async (pos) => {
         setMenuPosition(pos);
         try {
-            const res = await fetch(route('theme.layout'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ menu_position: pos }),
-            });
-            if (res.ok) {
+            const res = await axios.post(route('theme.layout'), { menu_position: pos });
+            if (res.status === 200) {
                 showToast('success', 'Tersimpan');
                 setTimeout(() => setPreviewKey(k => k + 1), 800);
             } else {
-                showToast('error', 'Gagal menyimpan');
-                setMenuPosition(invitation?.menu_position || 'none');
+                throw new Error('Save failed');
             }
         } catch (e) {
             console.error(e);
@@ -176,41 +153,32 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     // Save particle settings
     const handleParticleSave = useCallback(async (data) => {
         const payload = {
-            particle_type: data.type ?? particleType,
+            particle_type: data.type !== undefined ? data.type : particleType,
             particle_count: data.count ?? particleCount,
             particle_speed: data.speed ?? particleSpeed,
         };
         try {
-            await fetch(route('theme.layout'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
-        } catch (e) { console.error(e); }
+            await axios.post(route('theme.layout'), payload);
+        } catch (e) {
+            console.error(e);
+        }
     }, [particleType, particleCount, particleSpeed]);
 
     // Change theme
     const handleThemeChange = useCallback(async (themeId) => {
         setSelectedThemeId(themeId);
         try {
-            const res = await fetch(route('theme.change'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ theme_id: themeId }),
-            });
-            const data = await res.json();
-            if (data.sections) setSectionList(data.sections);
+            const res = await axios.post(route('theme.change'), { theme_id: themeId });
+            if (res.data.sections) {
+                setSectionList(res.data.sections);
+            }
             setShowThemePanel(false);
-        } catch (e) { console.error(e); }
-    }, []);
+            setPreviewKey(k => k + 1);
+        } catch (e) {
+            console.error(e);
+            showToast('error', 'Gagal mengganti tema');
+        }
+    }, [showToast]);
 
     // Toggle section visibility (only non-locked)
     const toggleSection = useCallback((sectionId, sectionKey) => {
@@ -248,36 +216,17 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                     is_visible: Boolean(s.is_visible),
                 })),
             };
-            const res = await fetch(route('theme.sections'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: JSON.stringify(payload),
-            });
+            const res = await axios.post(route('theme.sections'), payload);
 
-            if (!res.ok) {
-                const errText = await res.text();
-                console.error('Save failed:', res.status, errText);
-                setSaveMsg('Gagal menyimpan');
-                setSaving(false);
-                setTimeout(() => setSaveMsg(''), 3000);
-                return;
-            }
-
-            const data = await res.json();
-            if (data.success) {
+            if (res.data.success) {
                 setSaveMsg('Tersimpan!');
-                if (data.sections) setSectionList(data.sections);
+                if (res.data.sections) setSectionList(res.data.sections);
             } else {
                 setSaveMsg('Gagal menyimpan');
             }
         } catch (e) {
             console.error('Save error:', e);
-            setSaveMsg('Terjadi kesalahan');
+            setSaveMsg('Gagal menyimpan');
         }
         setSaving(false);
         setTimeout(() => setSaveMsg(''), 3000);

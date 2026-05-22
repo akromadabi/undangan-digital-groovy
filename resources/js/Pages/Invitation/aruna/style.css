@@ -161,157 +161,213 @@
   justify-content: center;
   flex-direction: column;
   overflow: hidden;
-  background-color: var(--aruna-bg-mint);
+  background-color: #F0E5CC; /* Traditional cream fallback */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-.aruna-cover__top-floral {
+.aruna-cover__right::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Stronger traditional overlay to hide pattern and focus text - matching reference exactly */
+  background-color: #D4E0DC;
+  opacity: 0.7;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Specific radial mask to keep center clean and focused */
+.aruna-cover__right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(at center center, rgba(212, 224, 220, 0.74) 45%, rgba(255, 255, 255, 0) 80%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── Side Frame Ornaments (Rambat + Janur) - Matching Reference ── */
+.aruna-cover__side-frame {
   position: absolute;
   top: 0;
-  width: 25%;
-  max-width: 220px;
-  height: 140px;
+  bottom: 0;
+  width: 140px;
+  z-index: 4;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+}
+
+.aruna-cover__side-frame--left {
+  left: 0;
+}
+
+.aruna-cover__side-frame--right {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.aruna-cover__rambat-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  opacity: 0.9;
+  margin-bottom: -40px;
+  animation: arunaFadeIn 1.5s ease both;
+}
+
+.aruna-cover__janur-arch {
+  position: absolute;
+  width: 120px;
+  height: auto;
   z-index: 5;
   pointer-events: none;
-  opacity: 0.9;
   object-fit: contain;
+  animation: arunaJanurFloat 6s ease-in-out infinite;
 }
 
-.aruna-cover__top-floral--left {
-    left: 0;
-    object-position: top left;
+.aruna-cover__janur-arch--left {
+  top: -10px;
+  left: -20px;
 }
 
-.aruna-cover__top-floral--right {
-    right: 0;
-    object-position: top right;
-    transform: scaleX(-1);
+.aruna-cover__janur-arch--right {
+  top: -10px;
+  right: -20px;
+  transform: scaleX(-1);
 }
 
-.aruna-cover__janur-wrap {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 4;
+@keyframes arunaJanurFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
-.aruna-cover__janur-item {
-    position: absolute;
-    object-fit: contain;
+.aruna-cover__janur-arch--right {
+  animation: arunaJanurFloatRight 6s ease-in-out infinite;
 }
 
-.aruna-cover__janur--1 { top: 40px; right: 5%; width: 55px; }
-.aruna-cover__janur--2 { top: 15px; right: 18%; width: 40px; }
-.aruna-cover__janur--3 { top: 40px; left: 5%; width: 55px; transform: scaleX(-1); }
-.aruna-cover__janur--4 { top: 15px; left: 18%; width: 40px; transform: scaleX(-1); }
-
-.aruna-cover__heritage-tree {
-  position: absolute;
-  bottom: 0px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 160px;
-  z-index: 2;
-  opacity: 0.8;
-  pointer-events: none;
+@keyframes arunaJanurFloatRight {
+  0%, 100% { transform: scaleX(-1) translateY(0px); }
+  50% { transform: scaleX(-1) translateY(-10px); }
 }
 
-.aruna-cover__bottom-floral-1 {
-  position: absolute;
-  bottom: 0px;
-  left: 0px;
-  width: 100%;
-  height: 180px;
-  z-index: 3;
-  pointer-events: none;
+/* ── Golden Batik Icons Row ── */
+.aruna-cover__batik-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  animation: arunaFadeIn 1.5s ease both;
+}
+
+.aruna-cover__batik-row img {
+  width: 45px;
+  height: 45px;
   object-fit: contain;
-  object-position: bottom center;
   opacity: 0.9;
 }
 
-.aruna-cover__bottom-floral-2 {
+/* ── Bottom Floral Arrangement ── */
+.aruna-cover__bottom-floral {
   position: absolute;
-  bottom: -20px;
-  right: -30px;
+  bottom: 0;
+  left: 0;
   width: 100%;
-  max-width: 350px;
+  min-height: 200px;
+  max-height: 250px;
   z-index: 4;
   pointer-events: none;
   object-fit: contain;
-  opacity: 0.8;
+  object-position: bottom center;
+  animation: arunaFadeIn 1.5s ease 0.5s both;
 }
 
+/* ── Cover Content - Matching Reference Layout ── */
 .aruna-cover__content {
   position: relative;
-  z-index: 10;
+  z-index: 20;
   text-align: center;
   width: 100%;
   padding: 0 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: -100px; /* Reference uses negative margin to shift content up */
 }
 
 .aruna-cover__pretitle {
   font-family: var(--aruna-font-heading);
-  font-size: 22px;
+  font-size: 24px;
   letter-spacing: 2px;
-  color: var(--aruna-gold);
-  margin-bottom: 5px;
+  color: #847D4A;
+  margin-bottom: 0;
   text-transform: uppercase;
-  animation: arunaFadeInUp 1.5s ease both;
+  animation: arunaFadeInUp 1.2s ease both;
+  font-weight: 400;
+  line-height: 1em;
 }
 
 .aruna-cover__names {
   font-family: var(--aruna-font-display);
-  font-size: clamp(45px, 5vw, 55px);
-  color: var(--aruna-gold);
+  font-size: 52px;
+  color: #847D4A;
   margin-bottom: 30px;
-  line-height: 1.1;
+  line-height: 1;
   text-shadow: none;
-  animation: arunaFadeInUp 1.5s ease 0.3s both;
+  animation: arunaFadeInUp 1.2s ease 0.3s both;
 }
 
 .aruna-cover__guest-box {
-  margin-bottom: 35px;
-  animation: arunaFadeIn 1.5s ease 0.6s both;
+  margin-bottom: 20px;
+  animation: arunaFadeInUp 1.2s ease 0.6s both;
 }
 
 .aruna-cover__guest-label {
   font-family: var(--aruna-font-heading);
-  font-size: 22px;
-  color: var(--aruna-gold);
-  margin-bottom: 5px;
+  font-size: 24px;
+  color: #847D4A;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  font-weight: 400;
+  line-height: 1.1em;
 }
 
 .aruna-cover__guest-name {
   font-family: var(--aruna-font-heading);
-  font-size: 26px;
-  color: var(--aruna-gold);
+  font-size: 35px;
+  color: #8F8C5E;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
 .aruna-cover__btn {
-  background: var(--aruna-btn-gold);
+  background: #A54141;
   color: #fff;
   border-radius: 50px;
   border: none;
   font-family: var(--aruna-font-heading);
-  font-size: 20px;
+  font-size: 22px;
   letter-spacing: 0.5px;
-  padding: 10px 45px;
+  padding: 8px 40px 10px;
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.3s ease;
   box-shadow: 2px 6px 10px rgba(0,0,0,0.2);
-  animation: arunaFadeInUp 1.5s ease 0.9s both;
+  animation: arunaFadeInUp 1.2s ease 0.9s both;
+  margin-top: 10px;
+  font-weight: 400;
 }
 
 .aruna-cover__btn:hover {
   transform: scale(0.96);
   opacity: 0.9;
+  border: 1px solid #fff;
 }
 
 /* ── Cover Responsive ── */
@@ -1133,6 +1189,11 @@
 /* ── Animations ── */
 @keyframes arunaFadeIn {
   from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes arunaFadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 

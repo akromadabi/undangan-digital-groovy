@@ -14,6 +14,32 @@ class ThemeSettingsController extends Controller
     {
         $user = $request->user();
         $invitation = $user->invitation;
+
+        // bug fixed by Bhaktiaji Ilham
+        // auto-create default invitation for Admin/Superadmin if missing
+        if (!$invitation && ($user->isSuperAdmin() || $user->isAdmin())) {
+            $invitation = \App\Models\Invitation::create([
+                'user_id' => $user->id,
+                'slug' => 'preview-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6)),
+                'opening_title' => 'The Wedding Of',
+                'opening_text' => "Assalamu'alaikum...",
+                'theme_id' => \App\Models\Theme::active()->first()?->id ?? 1,
+            ]);
+            
+            // Initialize default sections
+            if ($invitation->theme) {
+                foreach ($invitation->theme->sections as $ts) {
+                    \App\Models\InvitationSection::create([
+                        'invitation_id' => $invitation->id,
+                        'section_key' => $ts->section_key,
+                        'section_name' => $ts->section_name,
+                        'sort_order' => $ts->default_order,
+                        'is_visible' => $ts->is_default,
+                    ]);
+                }
+            }
+        }
+
         $themes = Theme::active()->orderBy('sort_order')->get();
 
         return Inertia::render('Dashboard/ThemeSettings', [
@@ -54,10 +80,7 @@ class ThemeSettingsController extends Controller
         $invitation = $request->user()->invitation;
 
         if (!$invitation) {
-            if ($request->wantsJson()) {
-                return response()->json(['error' => 'Undangan belum dibuat'], 404);
-            }
-            return back()->with('error', 'Undangan belum dibuat.');
+            return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
         }
 
         $data = $request->only(['layout_mode', 'menu_position', 'particle_type', 'particle_count', 'particle_speed']);
@@ -77,6 +100,11 @@ class ThemeSettingsController extends Controller
         ]);
 
         $invitation = $request->user()->invitation;
+        
+        if (!$invitation) {
+            return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
+        }
+
         $theme = Theme::findOrFail($request->theme_id);
 
         $invitation->update(['theme_id' => $theme->id]);
@@ -116,6 +144,10 @@ class ThemeSettingsController extends Controller
         ]);
 
         $invitation = $request->user()->invitation;
+
+        if (!$invitation) {
+            return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
+        }
 
         foreach ($request->sections as $sectionData) {
             InvitationSection::where('id', $sectionData['id'])
