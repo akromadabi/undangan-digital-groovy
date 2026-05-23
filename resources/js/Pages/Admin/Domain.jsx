@@ -7,7 +7,7 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
     </svg>
 );
 
-export default function Domain({ settings }) {
+export default function Domain({ settings, centralHost = 'undangan.com' }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
         subdomain: settings?.subdomain || '',
@@ -46,7 +46,7 @@ export default function Domain({ settings }) {
                                 className="flex-1 px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-l-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
                                 placeholder="namareseller"
                             />
-                            <span className="px-4 py-2.5 bg-[#f5f3f0] border border-l-0 border-[#e8e5e0] rounded-r-xl text-sm text-[#999] whitespace-nowrap">.undangan.com</span>
+                            <span className="px-4 py-2.5 bg-[#f5f3f0] border border-l-0 border-[#e8e5e0] rounded-r-xl text-sm text-[#999] whitespace-nowrap">.{centralHost}</span>
                         </div>
                         {errors.subdomain && <p className="text-xs text-red-500 mt-1">{errors.subdomain}</p>}
                         <p className="text-xs text-[#bbb] mt-1.5">Hanya huruf kecil, angka, dan tanda hubung (-)</p>
@@ -54,7 +54,7 @@ export default function Domain({ settings }) {
                         {data.subdomain && (
                             <div className="mt-3 bg-[#faf9f6] rounded-xl px-4 py-3 border border-[#e8e5e0] flex items-center gap-2">
                                 <Icon d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3" className="w-4 h-4 text-[#999]" />
-                                <span className="text-sm text-[#555]">URL Anda: <strong className="text-[#E5654B]">{data.subdomain}.undangan.com</strong></span>
+                                <span className="text-sm text-[#555]">URL Anda: <strong className="text-[#E5654B]">{data.subdomain}.{centralHost}</strong></span>
                             </div>
                         )}
                     </div>
@@ -87,7 +87,7 @@ export default function Domain({ settings }) {
                                 <div className="mt-1 bg-blue-100 rounded-lg px-3 py-2 font-mono text-xs">
                                     <div className="flex justify-between"><span className="text-blue-500">Type:</span> <span>CNAME</span></div>
                                     <div className="flex justify-between"><span className="text-blue-500">Name:</span> <span>undangan (atau subdomain Anda)</span></div>
-                                    <div className="flex justify-between"><span className="text-blue-500">Target:</span> <span>app.undangan.com</span></div>
+                                    <div className="flex justify-between"><span className="text-blue-500">Target:</span> <span>{centralHost}</span></div>
                                 </div>
                             </li>
                             <li>Tunggu propagasi DNS (biasanya 5-30 menit)</li>

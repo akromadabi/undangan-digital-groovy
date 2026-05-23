@@ -31,10 +31,20 @@ class SettingsController extends Controller
             'cover_image' => 'nullable|string|max:500',
             'cover_title' => 'nullable|string|max:200',
             'cover_subtitle' => 'nullable|string|max:200',
+            'is_private' => 'nullable|boolean',
+            'enable_qr' => 'nullable|boolean',
+            'hide_photos' => 'nullable|boolean',
         ]);
 
         $invitation = $this->getUserInvitation($request);
-        $invitation->update($request->only(['cover_image', 'cover_title', 'cover_subtitle']));
+        $invitation->update($request->only([
+            'cover_image',
+            'cover_title',
+            'cover_subtitle',
+            'is_private',
+            'enable_qr',
+            'hide_photos'
+        ]));
 
         return back()->with('success', 'Cover berhasil disimpan.');
     }
@@ -284,8 +294,11 @@ class SettingsController extends Controller
     public function pengaturan(Request $request)
     {
         $invitation = $this->getUserInvitation($request);
+        $centralHost = parse_url(config('app.url'), PHP_URL_HOST);
+
         return Inertia::render('Dashboard/Settings/PengaturanUndangan', [
             'invitation' => $invitation?->only([
+                'id',
                 'show_photos',
                 'show_animations',
                 'show_guest_name',
@@ -294,48 +307,63 @@ class SettingsController extends Controller
                 'enable_rsvp',
                 'enable_wishes',
                 'music_autoplay',
+                'enable_auto_scroll',
                 'language',
+                'religion',
                 'is_private',
                 'enable_qr',
                 'hide_photos',
+                'menu_position',
+                'custom_domain',
             ]),
+            'centralHost' => $centralHost ?: 'undangan.com',
         ]);
     }
 
     public function savePengaturan(Request $request)
     {
+        $invitation = $this->getUserInvitation($request);
+
         $request->validate([
             'show_photos' => 'boolean',
             'show_animations' => 'boolean',
             'show_guest_name' => 'boolean',
             'show_countdown' => 'boolean',
-            'show_qr_code' => 'boolean',
             'enable_rsvp' => 'boolean',
             'enable_wishes' => 'boolean',
             'music_autoplay' => 'boolean',
+            'enable_auto_scroll' => 'boolean',
             'language' => 'in:id,en',
             'religion' => 'in:islam,kristen,hindu,buddha,umum',
             'is_private' => 'boolean',
             'enable_qr' => 'boolean',
             'hide_photos' => 'boolean',
+            'menu_position' => 'sometimes|required|in:none,bottom,left,right',
+            'custom_domain' => 'nullable|string|max:255|unique:invitations,custom_domain,' . $invitation->id,
         ]);
 
-        $invitation = $this->getUserInvitation($request);
-        $invitation->update($request->only([
+        $data = $request->only([
             'show_photos',
             'show_animations',
             'show_guest_name',
             'show_countdown',
-            'show_qr_code',
             'enable_rsvp',
             'enable_wishes',
             'music_autoplay',
+            'enable_auto_scroll',
             'language',
             'religion',
             'is_private',
             'enable_qr',
             'hide_photos',
-        ]));
+            'menu_position',
+            'custom_domain',
+        ]);
+
+        // Sync both QR code fields to the same value
+        $data['show_qr_code'] = $request->input('enable_qr', true);
+
+        $invitation->update($data);
 
         return back()->with('success', 'Pengaturan undangan berhasil disimpan.');
     }

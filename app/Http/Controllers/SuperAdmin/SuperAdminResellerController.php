@@ -33,8 +33,10 @@ class SuperAdminResellerController extends Controller
 
     public function create()
     {
+        $centralHost = parse_url(config('app.url'), PHP_URL_HOST);
         return Inertia::render('SuperAdmin/Resellers/Create', [
             'plans' => SubscriptionPlan::orderBy('sort_order')->get(),
+            'centralHost' => $centralHost ?: 'undangan.com',
         ]);
     }
 
@@ -47,6 +49,7 @@ class SuperAdminResellerController extends Controller
             'phone' => 'nullable|string|max:20',
             'brand_name' => 'nullable|string|max:100',
             'subdomain' => 'nullable|string|max:50|unique:reseller_settings,subdomain|alpha_dash',
+            'custom_domain' => 'nullable|string|max:255|unique:reseller_settings,custom_domain',
         ]);
 
         $reseller = User::create([
@@ -65,6 +68,7 @@ class SuperAdminResellerController extends Controller
             'user_id' => $reseller->id,
             'brand_name' => $request->brand_name ?? $request->name,
             'subdomain' => $request->subdomain ?? Str::slug($request->name),
+            'custom_domain' => $request->custom_domain,
             'is_active' => true,
         ]);
 
@@ -90,11 +94,14 @@ class SuperAdminResellerController extends Controller
                 ->where('status', 'paid')->sum('amount'),
         ];
 
+        $centralHost = parse_url(config('app.url'), PHP_URL_HOST);
+
         return Inertia::render('SuperAdmin/Resellers/Show', [
             'reseller' => $reseller,
             'users' => $users,
             'stats' => $stats,
             'plans' => SubscriptionPlan::orderBy('sort_order')->get(),
+            'centralHost' => $centralHost ?: 'undangan.com',
         ]);
     }
 
@@ -103,9 +110,12 @@ class SuperAdminResellerController extends Controller
         abort_if($reseller->role !== 'admin', 404);
         $reseller->load(['resellerSettings', 'resellerPlanPrices.plan']);
 
+        $centralHost = parse_url(config('app.url'), PHP_URL_HOST);
+
         return Inertia::render('SuperAdmin/Resellers/Edit', [
             'reseller' => $reseller,
             'plans' => SubscriptionPlan::orderBy('sort_order')->get(),
+            'centralHost' => $centralHost ?: 'undangan.com',
         ]);
     }
 
@@ -120,6 +130,7 @@ class SuperAdminResellerController extends Controller
             'is_active' => 'boolean',
             'brand_name' => 'nullable|string|max:100',
             'subdomain' => 'nullable|string|max:50|alpha_dash|unique:reseller_settings,subdomain,' . $reseller->resellerSettings?->id,
+            'custom_domain' => 'nullable|string|max:255|unique:reseller_settings,custom_domain,' . $reseller->resellerSettings?->id,
         ]);
 
         $reseller->update($request->only(['name', 'email', 'phone', 'is_active']));
@@ -129,6 +140,7 @@ class SuperAdminResellerController extends Controller
             [
                 'brand_name' => $request->brand_name,
                 'subdomain' => $request->subdomain,
+                'custom_domain' => $request->custom_domain,
             ]
         );
 

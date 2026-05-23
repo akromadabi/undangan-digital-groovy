@@ -23,6 +23,7 @@ class InvitationController extends Controller
                 'loveStories',
                 'bankAccounts',
                 'sections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
+                'user.reseller.resellerSettings',
             ])
             ->firstOrFail();
 
@@ -43,7 +44,7 @@ class InvitationController extends Controller
 
         // THEME ADDED BY BHAKTIAJI ILHAM
         $page = 'Invitation/Show';
-        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'aruna'])) {
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03'])) {
             $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
         }
 

@@ -7,7 +7,7 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
     </svg>
 );
 
-export default function Create() {
+export default function Create({ centralHost = 'undangan.com' }) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
@@ -15,6 +15,7 @@ export default function Create() {
         phone: '',
         brand_name: '',
         subdomain: '',
+        custom_domain: '',
     });
 
     const submit = (e) => {
@@ -65,7 +66,7 @@ export default function Create() {
 
                     {/* Branding */}
                     <div>
-                        <h3 className="text-sm font-bold text-[#1a1a1a] mb-4 pb-2 border-b border-[#f0ede8]">Branding</h3>
+                        <h3 className="text-sm font-bold text-[#1a1a1a] mb-4 pb-2 border-b border-[#f0ede8]">Branding & Domain</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-medium text-[#999] mb-1.5">Nama Brand</label>
@@ -74,11 +75,16 @@ export default function Create() {
                             <div>
                                 <label className="block text-xs font-medium text-[#999] mb-1.5">Subdomain</label>
                                 <div className="flex items-center">
-                                    <input type="text" value={data.subdomain} onChange={e => setData('subdomain', e.target.value)}
+                                    <input type="text" value={data.subdomain} onChange={e => setData('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                                         className={`${inputClass('subdomain')} rounded-r-none`} placeholder="namareseller" />
-                                    <span className="px-3 py-2.5 bg-[#f5f3f0] border border-l-0 border-[#e8e5e0] rounded-r-xl text-xs text-[#999] whitespace-nowrap">.domain.com</span>
+                                    <span className="px-3 py-2.5 bg-[#f5f3f0] border border-l-0 border-[#e8e5e0] rounded-r-xl text-xs text-[#999] whitespace-nowrap">.{centralHost}</span>
                                 </div>
                                 {errors.subdomain && <p className="text-xs text-red-500 mt-1">{errors.subdomain}</p>}
+                            </div>
+                            <div className="sm:col-span-2">
+                                <label className="block text-xs font-medium text-[#999] mb-1.5">Custom Domain (Opsional)</label>
+                                <input type="text" value={data.custom_domain} onChange={e => setData('custom_domain', e.target.value)} className={inputClass('custom_domain')} placeholder="undangan.domainanda.com" />
+                                {errors.custom_domain && <p className="text-xs text-red-500 mt-1">{errors.custom_domain}</p>}
                             </div>
                         </div>
                     </div>

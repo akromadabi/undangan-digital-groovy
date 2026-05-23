@@ -22,10 +22,19 @@ class RegisteredUserController extends Controller
     public function create(Request $request): Response
     {
         $resellerData = null;
+        $ref = $request->ref;
 
-        // Check for reseller referral via ?ref=subdomain
-        if ($request->has('ref')) {
-            $setting = ResellerSetting::where('subdomain', $request->ref)
+        // Auto-resolve reseller from domain if not provided in request query
+        if (!$ref) {
+            $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+            if ($resellerSetting) {
+                $ref = $resellerSetting->subdomain;
+            }
+        }
+
+        // Check for reseller referral via ?ref=subdomain or dynamic domain resolution
+        if ($ref) {
+            $setting = ResellerSetting::where('subdomain', $ref)
                 ->where('is_active', true)
                 ->first();
 
@@ -35,7 +44,7 @@ class RegisteredUserController extends Controller
                     'id' => $reseller->id,
                     'brand_name' => $setting->brand_name ?: $reseller->name,
                     'brand_logo' => $setting->brand_logo ? '/storage/' . $setting->brand_logo : null,
-                    'ref' => $request->ref,
+                    'ref' => $ref,
                 ];
             }
         }
@@ -60,10 +69,19 @@ class RegisteredUserController extends Controller
             'ref' => 'nullable|string',
         ]);
 
-        // Resolve reseller_id from ref code
+        // Resolve reseller_id from ref code or current host
         $resellerId = null;
-        if ($request->ref) {
-            $setting = ResellerSetting::where('subdomain', $request->ref)
+        $ref = $request->ref;
+
+        if (!$ref) {
+            $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+            if ($resellerSetting) {
+                $ref = $resellerSetting->subdomain;
+            }
+        }
+
+        if ($ref) {
+            $setting = ResellerSetting::where('subdomain', $ref)
                 ->where('is_active', true)
                 ->first();
             if ($setting) {

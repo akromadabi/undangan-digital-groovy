@@ -96,8 +96,10 @@ class ResellerSettingsController extends Controller
 
     public function domain()
     {
+        $centralHost = parse_url(config('app.url'), PHP_URL_HOST);
         return Inertia::render('Admin/Domain', [
             'settings' => $this->getSettings(),
+            'centralHost' => $centralHost ?: 'undangan.com',
         ]);
     }
 

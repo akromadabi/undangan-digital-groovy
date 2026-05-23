@@ -7,7 +7,7 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
     </svg>
 );
 
-export default function Show({ reseller, users, stats, plans }) {
+export default function Show({ reseller, users, stats, plans, centralHost = 'undangan.com' }) {
     const formatCurrency = (a) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(a);
     const settings = reseller.reseller_settings;
 
@@ -58,7 +58,7 @@ export default function Show({ reseller, users, stats, plans }) {
                         <h3 className="font-bold text-[#1a1a1a] text-sm border-b border-[#f0ede8] pb-3">Info Branding</h3>
                         {[
                             ['Brand Name', settings?.brand_name || '-'],
-                            ['Subdomain', settings?.subdomain ? `${settings.subdomain}.domain.com` : '-'],
+                            ['Subdomain', settings?.subdomain ? `${settings.subdomain}.${centralHost}` : '-'],
                             ['Custom Domain', settings?.custom_domain || '-'],
                             ['Landing Page', settings?.landing_page_template || 'default'],
                             ['Status', settings?.is_active !== false ? '✅ Aktif' : '❌ Nonaktif'],

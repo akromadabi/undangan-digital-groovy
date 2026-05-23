@@ -192,12 +192,14 @@ class UtaryThemeSeeder extends Seeder
             ['key' => 'cover', 'name' => 'Cover', 'order' => 1, 'removable' => false],
             ['key' => 'opening', 'name' => 'Opening', 'order' => 2, 'removable' => true],
             ['key' => 'bride_groom', 'name' => 'Mempelai', 'order' => 3, 'removable' => true],
-            ['key' => 'love_story', 'name' => 'Kisah Cinta', 'order' => 4, 'removable' => true],
-            ['key' => 'event', 'name' => 'Acara', 'order' => 5, 'removable' => true],
-            ['key' => 'gallery', 'name' => 'Galeri', 'order' => 6, 'removable' => true],
-            ['key' => 'rsvp', 'name' => 'RSVP', 'order' => 7, 'removable' => true],
-            ['key' => 'bank', 'name' => 'Amplop Digital', 'order' => 8, 'removable' => true],
-            ['key' => 'closing', 'name' => 'Penutup', 'order' => 9, 'removable' => false],
+            ['key' => 'countdown', 'name' => 'Save The Date', 'order' => 4, 'removable' => true],
+            ['key' => 'love_story', 'name' => 'Kisah Cinta', 'order' => 5, 'removable' => true],
+            ['key' => 'event', 'name' => 'Acara', 'order' => 6, 'removable' => true],
+            ['key' => 'gallery', 'name' => 'Galeri', 'order' => 7, 'removable' => true],
+            ['key' => 'rsvp', 'name' => 'RSVP', 'order' => 8, 'removable' => true],
+            ['key' => 'wishes', 'name' => 'Ucapan', 'order' => 9, 'removable' => true],
+            ['key' => 'bank', 'name' => 'Amplop Digital', 'order' => 10, 'removable' => true],
+            ['key' => 'closing', 'name' => 'Penutup', 'order' => 11, 'removable' => false],
         ];
 
         foreach ($sections as $s) {
@@ -211,6 +213,21 @@ class UtaryThemeSeeder extends Seeder
                     'is_default' => true,
                 ]
             );
+        }
+
+        // Ensure all existing invitations using this theme have these sections
+        $invitations = \App\Models\Invitation::where('theme_id', $theme->id)->get();
+        foreach ($invitations as $invitation) {
+            foreach ($theme->sections as $ts) {
+                $invitation->sections()->firstOrCreate(
+                    ['section_key' => $ts->section_key],
+                    [
+                        'section_name' => $ts->section_name,
+                        'sort_order' => $ts->default_order,
+                        'is_visible' => $ts->is_default,
+                    ]
+                );
+            }
         }
     }
 }

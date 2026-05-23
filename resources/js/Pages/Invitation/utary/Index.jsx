@@ -865,9 +865,13 @@ function FooterSection() {
 }
 
 /* ── Navigation Menu & Controls ── */
-function Navigation({ isOpened, isPlaying, onToggleMusic }) {
+function Navigation({ guest, isOpened, isPlaying, onToggleMusic }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [showQr, setShowQr] = useState(false);
+
+    const enableQr = true; // Enabled by default in static demo
+    const activeGuest = guest || { name: 'Tamu Undangan', slug: 'demo-guest' };
 
     const menuItems = [
         { id: 'home', label: 'Home' },
@@ -929,6 +933,14 @@ function Navigation({ isOpened, isPlaying, onToggleMusic }) {
             {/* Bottom Controls */}
             <div className={`utary-bottom-controls ${isMenuOpen ? 'is-hidden' : ''}`}>
                 <div className="utary-floating" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {enableQr && activeGuest && (
+                        <button className="utary-floating__btn" onClick={() => setShowQr(true)} title="QR Check-in">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.875 12h.75m-.75 3h.75m-.75 3h.75m3-6v.008h.008v-.008h-.008zm0 3v.008h.008v-.008h-.008zm0 3v.008h.008v-.008h-.008zm-6-6h.008v.008H13.5V12zm0 3h.008v.008H13.5v-.008zm0 3h.008v.008H13.5v-.008z" />
+                            </svg>
+                        </button>
+                    )}
                     <button className="utary-floating__btn" onClick={() => scrollToSection('rsvp')} title="RSVP">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -948,6 +960,43 @@ function Navigation({ isOpened, isPlaying, onToggleMusic }) {
                     </button>
                 </div>
             </div>
+
+            {/* QR Code Modal Overlay */}
+            {enableQr && showQr && activeGuest && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-sm" onClick={() => setShowQr(false)}>
+                    <div 
+                        className="rounded-2xl p-6 max-w-xs w-full mx-4 text-center shadow-2xl border animate-[scaleIn_0.3s_ease-out]" 
+                        style={{ 
+                            backgroundColor: 'var(--utary-bg-dark)', 
+                            borderColor: 'var(--utary-border-gold)',
+                            color: 'var(--utary-text-white)',
+                            fontFamily: 'var(--utary-font-body)'
+                        }} 
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--utary-gold)', fontFamily: 'var(--utary-font-display)' }}>QR Code Check-in</h3>
+                        <p className="text-xs mb-4" style={{ color: 'var(--utary-text-muted)' }}>{activeGuest.name}</p>
+                        <div className="p-4 rounded-xl inline-block mb-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--utary-border-gold)' }}>
+                            <img 
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=ccba82&data=${encodeURIComponent(window.location.origin+'/u/demo-utary/checkin?to='+activeGuest.slug)}`} 
+                                alt="QR Code" 
+                                className="w-48 h-48 mx-auto" 
+                            />
+                        </div>
+                        <button 
+                            onClick={() => setShowQr(false)} 
+                            className="w-full py-2.5 rounded-full text-sm font-semibold transition-all hover:brightness-110" 
+                            style={{ 
+                                backgroundColor: 'var(--utary-gold-btn)', 
+                                color: 'var(--utary-btn-text)', 
+                                fontFamily: 'var(--utary-font-serif)' 
+                            }}
+                        >
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
@@ -1044,7 +1093,7 @@ export default function Utary() {
             </div>
 
             {/* Navigation and Floating Controls */}
-            <Navigation isOpened={isOpened} isPlaying={isPlaying} onToggleMusic={toggleMusic} />
+            <Navigation guest={{ name: guestName, slug: 'demo-guest' }} isOpened={isOpened} isPlaying={isPlaying} onToggleMusic={toggleMusic} />
         </div>
     );
 }

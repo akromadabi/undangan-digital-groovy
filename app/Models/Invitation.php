@@ -24,6 +24,7 @@ class Invitation extends Model
         'layout_mode',
         'music_url',
         'music_autoplay',
+        'enable_auto_scroll',
         'save_the_date_enabled',
         'countdown_target_date',
         'turut_mengundang_text',
@@ -49,12 +50,14 @@ class Invitation extends Model
         'particle_count',
         'particle_speed',
         'menu_position',
+        'custom_domain',
     ];
 
     protected function casts(): array
     {
         return [
             'music_autoplay' => 'boolean',
+            'enable_auto_scroll' => 'boolean',
             'save_the_date_enabled' => 'boolean',
             'countdown_target_date' => 'datetime',
             'is_published' => 'boolean',

@@ -1,8 +1,10 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from '@/i18n';
 
 // ═══ Scroll-triggered animation component (re-triggers on every viewport entry) ═══
 const AnimateIn = ({ children, type = 'fadeUp', delay = 0, className = '', duration = 700 }) => {
+    const { t } = useTranslation();
     const ref = useRef(null);
     const [visible, setVisible] = useState(false);
     useEffect(() => {
@@ -32,12 +34,28 @@ const AnimateIn = ({ children, type = 'fadeUp', delay = 0, className = '', durat
 };
 
 export default function Show({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
+    const { t } = useTranslation(invitation?.language || 'id');
+    const getSectionName = (sec) => {
+        const key = sec.section_key;
+        const name = sec.section_name || '';
+        if (key === 'opening') return t('nav.opening');
+        if (key === 'bride_groom') return t('nav.mempelai');
+        if (key === 'event') return t('nav.acara');
+        if (key === 'gallery') return t('nav.galeri');
+        if (key === 'love_story') return t('nav.kisah');
+        if (key === 'bank') return t('nav.hadiah');
+        if (key === 'rsvp') return t('nav.rsvp');
+        if (key === 'wishes') return t('invitation.wishes_title');
+        if (key === 'closing') return t('nav.penutup');
+        return name;
+    };
     const [isOpen, setIsOpen] = useState(false);
     const [musicPlaying, setMusicPlaying] = useState(false);
     const [activeNav, setActiveNav] = useState('home');
     const [activeSlideIdx, setActiveSlideIdx] = useState(0);
     const [copiedIdx, setCopiedIdx] = useState(null);
     const [showQr, setShowQr] = useState(false);
+    const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
     const audioRef = useRef(null);
     const layoutMode = invitation.layout_mode || 'scroll';
     const enableQr = invitation.enable_qr !== false && invitation.show_qr_code !== false;
@@ -202,6 +220,38 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
         return () => window.removeEventListener('scroll', handleScroll);
     }, [isOpen]);
 
+    // Auto scroll logic
+    useEffect(() => {
+        if (!isOpen || !autoScrollEnabled) return;
+
+        const isSlideMode = layoutMode === 'slide' || layoutMode === 'tab';
+        let timer = null;
+
+        if (isSlideMode) {
+            timer = setInterval(() => {
+                setActiveSlideIdx(prev => {
+                    const count = visibleSections.length;
+                    if (prev >= count - 1) {
+                        return 0; // loop back to first slide
+                    }
+                    return prev + 1;
+                });
+            }, 4000);
+        } else {
+            timer = setInterval(() => {
+                window.scrollBy(0, 1);
+                const isBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 5;
+                if (isBottom) {
+                    setAutoScrollEnabled(false);
+                }
+            }, 25);
+        }
+
+        return () => {
+            if (timer) clearInterval(timer);
+        };
+    }, [isOpen, autoScrollEnabled, layoutMode, visibleSections.length]);
+
     // ═══ Reusable ornament components ═══
 
     const Swirl = () => isTraditional ? (
@@ -268,7 +318,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
         if (s.section_key === 'gallery' && !(galleries?.length > 0)) return false;
         if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return false;
         if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return false;
-        if (s.section_key === 'bride_groom' && !(brideGrooms?.length >= 2)) return false;
+        if (s.section_key === 'bride_groom' && !(brideGrooms?.length >= 1)) return false;
         if (s.section_key === 'countdown' && !invitation.save_the_date_enabled) return false;
         if (s.section_key === 'rsvp' && !enableRsvp) return false;
         if (s.section_key === 'wishes' && !enableWishes) return false;
@@ -356,7 +406,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                         <div className="text-center px-8 max-w-sm mx-auto relative z-20" style={invitation.cover_image ? { paddingBottom: '8vh' } : {}}>
                             {isTraditional ? (
                                 <>
-                                    <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: colors.primary, fontFamily: fonts.heading }}>The Wedding Of</p>
+                                    <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: colors.primary, fontFamily: fonts.heading }}>{t('invitation.wedding_of')}</p>
                                     <h1 className="text-3xl sm:text-4xl font-bold" style={{ fontFamily: fonts.script, color: colors.primary }}>
                                         {brideGrooms?.[0]?.nickname || brideGrooms?.[0]?.full_name || 'Bride'} & {brideGrooms?.[1]?.nickname || brideGrooms?.[1]?.full_name || 'Groom'}
                                     </h1>
@@ -367,7 +417,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                 </>
                             ) : isSpesial02 ? (
                                 <>
-                                    <p className="text-xs uppercase tracking-[0.35em] mb-2" style={{ color: colors.primary, fontFamily: fonts.heading }}>THE WEDDING OF</p>
+                                    <p className="text-xs uppercase tracking-[0.35em] mb-2" style={{ color: colors.primary, fontFamily: fonts.heading }}>{t('invitation.wedding_of').toUpperCase()}</p>
                                     {/* Circular couple photo */}
                                     {showPhotos && invitation.cover_image && (
                                         <div className="relative w-40 h-40 mx-auto mb-4 sp02-breathe">
@@ -388,7 +438,9 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                 </>
                             ) : (
                                 <>
-                                    <p className="text-xs uppercase tracking-[0.3em] mb-2" style={{ color: colors.primary }}>{invitation.cover_title || 'The Wedding Of'}</p>
+                                    <p className="text-xs uppercase tracking-[0.3em] mb-2" style={{ color: colors.primary }}>
+                                        {(!invitation.cover_title || invitation.cover_title.toUpperCase() === 'THE WEDDING OF' || invitation.cover_title.toUpperCase() === 'PERNIKAHAN') ? t('invitation.wedding_of') : invitation.cover_title}
+                                    </p>
                                     <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: fonts.script, color: colors.primary }}>
                                         {brideGrooms?.[0]?.nickname || brideGrooms?.[0]?.full_name || 'Bride'} & {brideGrooms?.[1]?.nickname || brideGrooms?.[1]?.full_name || 'Groom'}
                                     </h1>
@@ -396,16 +448,16 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                             )}
                             {showGuestName && guest && (
                                 <div className="mt-5 mb-1">
-                                    <p className="text-xs uppercase tracking-[0.2em] opacity-50">Kepada Yang Terhormat</p>
+                                    <p className="text-xs uppercase tracking-[0.2em] opacity-50">{t('invitation.to')}</p>
                                     <p className="text-lg font-bold mt-1" style={{ fontFamily: fonts.heading, color: colors.primary }}>{guest.name}</p>
-                                    <p className="text-[10px] opacity-40 mt-1 italic">Mohon maaf apabila ada kesalahan penulisan nama atau gelar.</p>
+                                    <p className="text-[10px] opacity-40 mt-1 italic">{t('invitation.dear_guest_desc')}</p>
                                 </div>
                             )}
                             <button onClick={handleOpen}
                                 className="mt-6 px-8 py-3 rounded-full text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg inline-flex items-center gap-2"
                                 style={{ backgroundColor: colors.primary }}>
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                Buka Undangan
+                                {t('invitation.open')}
                             </button>
                         </div>
                         {isTraditional && (
@@ -494,14 +546,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                         )}
 
                                         {/* ──── BRIDE & GROOM ──── */}
-                                        {section.section_key === 'bride_groom' && brideGrooms?.length >= 2 && (
+                                        {section.section_key === 'bride_groom' && brideGrooms?.length >= 1 && (
                                             <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
                                                 {isDecorated && <BungaTop />}
                                                 <div className="flex-1 flex items-center justify-center px-4 py-6">
                                                     <div className="max-w-lg mx-auto">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
                                                         <AnimateIn type="fadeUp" delay={100}>
-                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>Mempelai</h2>
+                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>{t('invitation.mempelai')}</h2>
                                                         </AnimateIn>
                                                         <AnimateIn type="scaleIn" delay={200}><Swirl /></AnimateIn>
                                                         {brideGrooms.map((bg, i) => (
@@ -530,7 +582,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                 </AnimateIn>
                                                                 <AnimateIn type="fadeUp" delay={500 + i * 400}>
                                                                     <p className="text-sm opacity-70 mt-2">
-                                                                        {bg.gender === 'wanita' ? 'Putri' : 'Putra'} {bg.child_order && `ke-${bg.child_order}`} dari<br />
+                                                                        {bg.gender === 'wanita' ? t('invitation.daughter') : t('invitation.son')} {bg.child_order && (t('invitation.save_the_date') === 'Save The Date' ? `No. ${bg.child_order}` : `ke-${bg.child_order}`)} {t('invitation.save_the_date') === 'Save The Date' ? 'of' : 'dari'}<br />
                                                                         Bapak {bg.father_name} & Ibu {bg.mother_name}
                                                                     </p>
                                                                 </AnimateIn>
@@ -558,14 +610,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                     <div className="max-w-lg mx-auto w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
                                                         <AnimateIn type="fadeUp" delay={100}>
-                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>Acara</h2>
+                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>{t('nav.acara')}</h2>
                                                         </AnimateIn>
                                                         <AnimateIn type="scaleIn" delay={200}><Swirl /></AnimateIn>
                                                         {/* Countdown */}
                                                         {showCountdown && (
                                                             <AnimateIn type="fadeUp" delay={300}>
                                                                 <div className="flex justify-center gap-3 mb-4">
-                                                                    {[['d', 'Hari'], ['h', 'Jam'], ['m', 'Menit'], ['s', 'Detik']].map(([k, l]) => (
+                                                                    {[['d', t('invitation.days')], ['h', t('invitation.hours')], ['m', t('invitation.minutes')], ['s', t('invitation.seconds')]].map(([k, l]) => (
                                                                         <div key={k} className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex flex-col items-center justify-center border"
                                                                             style={{ backgroundColor: colors.primary + '12', borderColor: colors.primary + '30' }}>
                                                                             <span className="text-lg sm:text-xl font-bold" style={{ color: colors.primary }}>{countdown[k]}</span>
@@ -606,7 +658,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                     <div className="max-w-lg mx-auto w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
                                                         <AnimateIn type="fadeUp" delay={100}>
-                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>Galeri</h2>
+                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>{t('invitation.gallery')}</h2>
                                                         </AnimateIn>
                                                         <AnimateIn type="scaleIn" delay={200}><Swirl /></AnimateIn>
                                                         <div className="grid grid-cols-2 gap-2">
@@ -633,7 +685,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                     <div className="max-w-lg mx-auto space-y-3 w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
                                                         <AnimateIn type="fadeUp" delay={100}>
-                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>Kisah Cinta</h2>
+                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>{t('invitation.love_story')}</h2>
                                                         </AnimateIn>
                                                         <AnimateIn type="scaleIn" delay={200}><Swirl /></AnimateIn>
                                                         {loveStories.map((story, i) => (
@@ -664,11 +716,11 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                     <div className="max-w-lg mx-auto space-y-4 w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
                                                         <AnimateIn type="fadeUp" delay={100}>
-                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>Amplop Digital</h2>
+                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>{t('nav.bank')}</h2>
                                                         </AnimateIn>
                                                         <AnimateIn type="scaleIn" delay={200}><Swirl /></AnimateIn>
                                                         <AnimateIn type="fadeUp" delay={300}>
-                                                            <p className="text-xs opacity-60">Doa dan restu Anda sudah cukup. Namun jika ingin memberi tanda kasih, bisa melalui:</p>
+                                                            <p className="text-xs opacity-60">{t('invitation.gift_desc')}</p>
                                                         </AnimateIn>
                                                         {bankAccounts.map((acc, i) => {
                                                             const bankColors = {
@@ -715,7 +767,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                         {/* Bottom: name + copy */}
                                                                         <div className="mt-2 sm:mt-3 flex justify-between items-end relative">
                                                                             <div>
-                                                                                <div className="text-[9px] uppercase tracking-wider opacity-60">Atas Nama</div>
+                                                                                <div className="text-[9px] uppercase tracking-wider opacity-60">{invitation?.language === 'en' ? 'On Behalf Of' : 'Atas Nama'}</div>
                                                                                 <div className="text-xs sm:text-sm font-semibold tracking-wide">{acc.account_name}</div>
                                                                             </div>
                                                                             <button onClick={() => { navigator.clipboard.writeText(acc.account_number); setCopiedIdx(i); setTimeout(() => setCopiedIdx(null), 2000); }}
@@ -724,9 +776,9 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                                 {copiedIdx === i ? (
                                                                                     <>
                                                                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                                                                                        Berhasil disalin
+                                                                                        {t('invitation.gift_copied')}
                                                                                     </>
-                                                                                ) : 'Salin'}
+                                                                                ) : t('invitation.gift_copy')}
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -748,7 +800,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                     <div className="max-w-lg mx-auto space-y-3 w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
                                                         <AnimateIn type="fadeUp" delay={100}>
-                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>Konfirmasi Kehadiran</h2>
+                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>{t('invitation.rsvp_title')}</h2>
                                                         </AnimateIn>
                                                         <AnimateIn type="scaleIn" delay={200}><Swirl /></AnimateIn>
                                                         <AnimateIn type="fadeUp" delay={300}>
@@ -758,13 +810,13 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                         <button key={opt} type="button" onClick={() => rsvpForm.setData('attendance', opt)}
                                                                             className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${rsvpForm.data.attendance === opt ? 'text-white' : 'opacity-50'}`}
                                                                             style={{ backgroundColor: rsvpForm.data.attendance === opt ? colors.primary : colors.primary + '15', color: rsvpForm.data.attendance === opt ? '#fff' : colors.text }}>
-                                                                            {opt === 'hadir' ? 'Hadir' : opt === 'tidak_hadir' ? 'Tidak Hadir' : 'Belum Pasti'}
+                                                                            {opt === 'hadir' ? t('invitation.rsvp_hadir') : opt === 'tidak_hadir' ? t('invitation.rsvp_tidak_hadir') : t('invitation.rsvp_belum_pasti')}
                                                                         </button>
                                                                     ))}
                                                                 </div>
                                                                 {rsvpForm.data.attendance === 'hadir' && (
                                                                     <div>
-                                                                        <label className="text-sm font-medium">Jumlah Hadir</label>
+                                                                        <label className="text-sm font-medium">{t('invitation.rsvp_count')}</label>
                                                                         <input type="number" value={rsvpForm.data.number_of_guests} min={1} max={5}
                                                                             onChange={(e) => rsvpForm.setData('number_of_guests', parseInt(e.target.value))}
                                                                             className="w-full border rounded-xl px-4 py-2.5 text-sm mt-1 focus:ring-2 outline-none" style={{ borderColor: colors.primary + '40' }} />
@@ -772,7 +824,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                 )}
                                                                 <button type="submit" disabled={rsvpForm.processing}
                                                                     className="w-full py-3 rounded-xl text-white font-semibold text-sm" style={{ backgroundColor: colors.primary }}>
-                                                                    {rsvpForm.processing ? 'Mengirim...' : 'Kirim RSVP'}
+                                                                    {rsvpForm.processing ? t('common.saving') : t('invitation.send_rsvp')}
                                                                 </button>
                                                             </form>
                                                         </AnimateIn>
@@ -790,7 +842,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                     <div className="max-w-lg mx-auto space-y-3 w-full">
                                                         <AnimateIn type="scaleIn"><Swirl /></AnimateIn>
                                                         <AnimateIn type="fadeUp" delay={100}>
-                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>Ucapan & Doa</h2>
+                                                            <h2 className="text-xs uppercase tracking-[0.3em]" style={{ color: colors.primary }}>{t('invitation.wishes_title')}</h2>
                                                         </AnimateIn>
                                                         <AnimateIn type="scaleIn" delay={200}><Swirl /></AnimateIn>
                                                         {isTraditional && (
@@ -803,15 +855,15 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                             <form onSubmit={handleWish} className="space-y-3 text-left">
                                                                 <input type="text" value={wishForm.data.sender_name}
                                                                     onChange={(e) => wishForm.setData('sender_name', e.target.value)}
-                                                                    placeholder="Nama Anda" required
+                                                                    placeholder={t('invitation.wishes_name')} required
                                                                     className="w-full border rounded-xl px-4 py-2.5 text-sm outline-none" style={{ borderColor: colors.primary + '40' }} />
                                                                 <textarea value={wishForm.data.message}
                                                                     onChange={(e) => wishForm.setData('message', e.target.value)}
-                                                                    placeholder="Tulis ucapan & doa..." required rows={3}
+                                                                    placeholder={t('invitation.wishes_msg')} required rows={3}
                                                                     className="w-full border rounded-xl px-4 py-2.5 text-sm resize-none outline-none" style={{ borderColor: colors.primary + '40' }} />
                                                                 <button type="submit" disabled={wishForm.processing}
                                                                     className="w-full py-3 rounded-xl text-white font-semibold text-sm" style={{ backgroundColor: colors.primary }}>
-                                                                    {wishForm.processing ? 'Mengirim...' : 'Kirim Ucapan'}
+                                                                    {wishForm.processing ? t('common.saving') : t('invitation.send_wish')}
                                                                 </button>
                                                             </form>
                                                         </AnimateIn>
@@ -894,7 +946,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                         {/* Footer (scroll mode only) */}
                         {layoutMode === 'scroll' && (
                             <footer className="text-center py-6 opacity-40 text-xs">
-                                <p>Powered by Undangan Digital Groovy</p>
+                                <p>Powered by {invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'Undangan Digital Groovy'}</p>
                             </footer>
                         )}
 
@@ -921,7 +973,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                 </button>
                                                 <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none text-white"
                                                     style={{ backgroundColor: colors.primary, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-                                                    {s.section_name}
+                                                    {getSectionName(s)}
                                                     <span className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 rotate-45" style={{ backgroundColor: colors.primary }} />
                                                 </span>
                                             </div>
@@ -946,6 +998,33 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                             <span className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 rotate-45" style={{ backgroundColor: colors.primary }} />
                                         </span>
                                     </div>
+                                )}
+                                {/* Auto Scroll control — separate circle above Music */}
+                                {invitation.enable_auto_scroll !== false && (
+                                <div className="relative group">
+                                    <button onClick={() => setAutoScrollEnabled(prev => !prev)}
+                                        className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-300"
+                                        style={{
+                                            backgroundColor: autoScrollEnabled ? colors.primary : '#fff',
+                                            color: autoScrollEnabled ? '#fff' : colors.primary,
+                                            boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
+                                        }}>
+                                        {autoScrollEnabled ? (
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none text-white"
+                                        style={{ backgroundColor: colors.primary, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+                                        {autoScrollEnabled ? 'Matikan Auto Scroll' : 'Auto Scroll'}
+                                        <span className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 rotate-45" style={{ backgroundColor: colors.primary }} />
+                                    </span>
+                                </div>
                                 )}
 
                                 {/* Music control — separate circle below QR */}

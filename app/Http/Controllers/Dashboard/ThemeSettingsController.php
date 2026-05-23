@@ -48,6 +48,26 @@ class ThemeSettingsController extends Controller
             }
         }
 
+        $sections = [];
+        if ($invitation) {
+            $sections = $invitation->sections()->orderBy('sort_order')->get();
+            if ($sections->isEmpty()) {
+                $theme = $invitation->theme;
+                if ($theme && $theme->sections()->count() > 0) {
+                    foreach ($theme->sections as $ts) {
+                        \App\Models\InvitationSection::create([
+                            'invitation_id' => $invitation->id,
+                            'section_key' => $ts->section_key,
+                            'section_name' => $ts->section_name,
+                            'sort_order' => $ts->default_order,
+                            'is_visible' => $ts->is_default,
+                        ]);
+                    }
+                    $sections = $invitation->sections()->orderBy('sort_order')->get();
+                }
+            }
+        }
+
         $themes = Theme::active()->orderBy('sort_order')->get();
 
         return Inertia::render('Dashboard/ThemeSettings', [
@@ -70,7 +90,7 @@ class ThemeSettingsController extends Controller
             ] : null,
             'currentTheme' => $invitation?->theme,
             'themes' => $themes,
-            'sections' => $invitation?->sections()->orderBy('sort_order')->get() ?? [],
+            'sections' => $sections,
             'previewData' => $this->getPreviewData($invitation),
         ]);
     }

@@ -53,6 +53,8 @@ class HandleInertiaRequests extends Middleware
             'appName' => config('app.name'),
             'adminRoutePrefix' => str_starts_with($request->path(), 'super-admin') ? '/super-admin' : '/admin',
             'resellerSubdomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->subdomain : null,
+            'resellerCustomDomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->custom_domain : null,
+            'appUrl' => config('app.url'),
             'locale' => app()->getLocale(),
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),

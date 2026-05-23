@@ -21,23 +21,25 @@ const ToggleSwitch = ({ checked, onChange, label, desc, icon }) => (
     </div>
 );
 
-export default function PengaturanUndangan({ invitation }) {
+export default function PengaturanUndangan({ invitation, centralHost = 'undangan.com' }) {
     const { flash } = usePage().props;
 
-    const { data, setData, post, processing } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         show_photos: invitation?.show_photos ?? true,
         show_animations: invitation?.show_animations ?? true,
         show_guest_name: invitation?.show_guest_name ?? true,
         show_countdown: invitation?.show_countdown ?? true,
-        show_qr_code: invitation?.show_qr_code ?? true,
         enable_rsvp: invitation?.enable_rsvp ?? true,
         enable_wishes: invitation?.enable_wishes ?? true,
         music_autoplay: invitation?.music_autoplay ?? true,
+        enable_auto_scroll: invitation?.enable_auto_scroll ?? true,
         language: invitation?.language || 'id',
         religion: invitation?.religion || 'islam',
         is_private: invitation?.is_private ?? false,
         enable_qr: invitation?.enable_qr ?? true,
         hide_photos: invitation?.hide_photos ?? false,
+        menu_position: invitation?.menu_position || 'none',
+        custom_domain: invitation?.custom_domain || '',
     });
 
     const handleSubmit = (e) => {
@@ -69,15 +71,25 @@ export default function PengaturanUndangan({ invitation }) {
                             <span className="w-6 h-6 bg-rose-100 rounded-lg flex items-center justify-center text-xs"><svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg></span>
                             Privasi & Fitur
                         </h3>
-                        <p className="text-xs text-gray-400 mb-3">Kontrol visibilitas dan fitur undangan Anda</p>
+                        <p className="text-xs text-gray-400 mb-3">Kontrol visibilitas dan fitur aktif pada undangan Anda</p>
 
                         <div className="divide-y divide-gray-100">
                             <ToggleSwitch icon="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" label="Privasi" desc="Undangan tidak muncul di Google"
                                 checked={data.is_private} onChange={(v) => setData('is_private', v)} />
-                            <ToggleSwitch icon="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" label="QR Code" desc="Tampilkan QR Code check-in"
+                            <ToggleSwitch icon="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" label="QR Code" desc="Tampilkan QR Code check-in untuk tamu"
                                 checked={data.enable_qr} onChange={(v) => setData('enable_qr', v)} />
                             <ToggleSwitch icon="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" label="Tanpa Foto" desc="Mode undangan tanpa foto"
                                 checked={data.hide_photos} onChange={(v) => setData('hide_photos', v)} />
+                            <ToggleSwitch icon="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" label="RSVP" desc="Form konfirmasi kehadiran untuk tamu"
+                                checked={data.enable_rsvp} onChange={(v) => setData('enable_rsvp', v)} />
+                            <ToggleSwitch icon="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" label="Ucapan & Doa" desc="Section ucapan dan doa dari tamu"
+                                checked={data.enable_wishes} onChange={(v) => setData('enable_wishes', v)} />
+                            <ToggleSwitch icon="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" label="Musik Autoplay" desc="Putar musik otomatis saat membuka undangan"
+                                checked={data.music_autoplay} onChange={(v) => setData('music_autoplay', v)} />
+                            <ToggleSwitch icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" label="Tombol Auto Scroll" desc="Tampilkan tombol auto scroll di undangan"
+                                checked={data.enable_auto_scroll} onChange={(v) => setData('enable_auto_scroll', v)} />
+                            <ToggleSwitch icon="M4 6h16M4 12h16M4 18h16" label="Menu Navigasi" desc="Tampilkan menu navigasi halaman di undangan"
+                                checked={data.menu_position !== 'none'} onChange={(v) => setData('menu_position', v ? 'bottom' : 'none')} />
                         </div>
                     </div>
 
@@ -98,26 +110,6 @@ export default function PengaturanUndangan({ invitation }) {
                                 checked={data.show_guest_name} onChange={(v) => setData('show_guest_name', v)} />
                             <ToggleSwitch icon="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" label="Countdown Timer" desc="Hitung mundur menuju hari acara"
                                 checked={data.show_countdown} onChange={(v) => setData('show_countdown', v)} />
-                        </div>
-                    </div>
-
-                    {/* Fitur */}
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-2">
-                            <span className="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center text-xs"><svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></span>
-                            Fitur
-                        </h3>
-                        <p className="text-xs text-gray-400 mb-3">Aktifkan atau nonaktifkan fitur undangan</p>
-
-                        <div className="divide-y divide-gray-100">
-                            <ToggleSwitch icon="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" label="QR Code Scan" desc="Tampilkan QR Code untuk scan undangan"
-                                checked={data.show_qr_code} onChange={(v) => setData('show_qr_code', v)} />
-                            <ToggleSwitch icon="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" label="RSVP" desc="Form konfirmasi kehadiran untuk tamu"
-                                checked={data.enable_rsvp} onChange={(v) => setData('enable_rsvp', v)} />
-                            <ToggleSwitch icon="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" label="Ucapan & Doa" desc="Section ucapan dan doa dari tamu"
-                                checked={data.enable_wishes} onChange={(v) => setData('enable_wishes', v)} />
-                            <ToggleSwitch icon="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" label="Musik Autoplay" desc="Putar musik otomatis saat membuka undangan"
-                                checked={data.music_autoplay} onChange={(v) => setData('music_autoplay', v)} />
                         </div>
                     </div>
 
@@ -148,6 +140,53 @@ export default function PengaturanUndangan({ invitation }) {
                                 <option value="buddha">☸️ Buddha</option>
                                 <option value="umum">🌐 Umum</option>
                             </select>
+                        </div>
+                    </div>
+
+                    {/* Custom Domain */}
+                    <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+                        <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                                <span className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center text-xs">
+                                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                                    </svg>
+                                </span>
+                                Custom Domain
+                            </h3>
+                            <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-semibold">Opsional</span>
+                        </div>
+                        <p className="text-xs text-gray-400">Gunakan domain kustom sendiri untuk undangan pernikahan Anda (misal: budi-ratih.wedding)</p>
+                        
+                        <input
+                            type="text"
+                            value={data.custom_domain}
+                            onChange={e => setData('custom_domain', e.target.value)}
+                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 outline-none"
+                            placeholder="nama-pengantin.wedding"
+                        />
+                        {errors.custom_domain && <p className="text-xs text-red-500 mt-1">{errors.custom_domain}</p>}
+
+                        {/* DNS Instructions */}
+                        <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 space-y-3 mt-4">
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <h4 className="text-sm font-bold text-blue-800">Cara Setting Custom Domain Klien</h4>
+                            </div>
+                            <ol className="text-xs text-blue-700 space-y-2 pl-4 list-decimal">
+                                <li>Login ke panel DNS domain Anda (Cloudflare, IDwebhost, Niagahoster, dll.)</li>
+                                <li>Tambahkan record <strong>CNAME</strong> dengan nilai:
+                                    <div className="mt-1 bg-blue-100 rounded-lg px-3 py-2 font-mono text-[10px]">
+                                        <div className="flex justify-between"><span className="text-blue-500">Type:</span> <span>CNAME</span></div>
+                                        <div className="flex justify-between"><span className="text-blue-500">Name:</span> <span>@ (atau subdomain Anda)</span></div>
+                                        <div className="flex justify-between"><span className="text-blue-500">Target:</span> <span>{centralHost}</span></div>
+                                    </div>
+                                </li>
+                                <li>Tunggu propagasi DNS (biasanya 5-30 menit)</li>
+                                <li>Masukkan domain di kolom di atas dan klik Simpan</li>
+                            </ol>
                         </div>
                     </div>
 

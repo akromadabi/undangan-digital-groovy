@@ -1,6 +1,8 @@
+import { useTranslation } from '@/i18n';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Head } from '@inertiajs/react';
 import './style.css';
+import ParticleEffect from '@/Components/ParticleEffect';
 
 // Asset imports
 import ornamentLeft from './asset/ornament-left.webp';
@@ -25,6 +27,7 @@ import utary6 from './asset/utary-6.webp';
    Extracted from original demo
    ───────────────────────────────────────────── */
 function MonogramShield({ width = 134, height = 200, initials = 'TF', year = '2812' }) {
+    const { t } = useTranslation();
     const first = initials?.charAt(0)?.toUpperCase() || 'T';
     const second = initials?.split('&')?.[1]?.trim()?.charAt(0)?.toUpperCase() || 
                    initials?.split(' ')?.find(s => s.length > 0 && s !== '&' && s !== first)?.charAt(0)?.toUpperCase() || 
@@ -86,9 +89,9 @@ function OrnamentGuardBottom() {
    ───────────────────────────────────────────── */
 function CountdownDiamondFrame() {
     return (
-        <svg className="utary-countdown__diamond" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 70" preserveAspectRatio="xMidYMid meet">
-            <path fill="none" stroke="#cdbb83" strokeWidth="1"
-                d="M55,2 C65,2,75,8,80,16 C85,8,95,2,105,7 L105,7 C100,18,98,30,98,35 C98,40,100,52,105,63 L105,63 C95,68,85,62,80,54 C75,62,65,68,55,68 C45,68,35,62,30,54 C25,62,15,68,5,63 L5,63 C10,52,12,40,12,35 C12,30,10,18,5,7 L5,7 C15,2,25,8,30,16 C35,8,45,2,55,2 Z" />
+        <svg className="utary-countdown__diamond" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+            <path fill="var(--utary-bg)" stroke="#cdbb83" strokeWidth="1"
+                d="M 50 15 A 25 25 0 0 1 85 50 A 25 25 0 0 1 50 85 A 25 25 0 0 1 15 50 A 25 25 0 0 1 50 15 Z" />
         </svg>
     );
 }
@@ -108,72 +111,6 @@ const THEME_DEFAULTS = {
     countdown_target_date: '2026-12-20T08:00:00',
     music_url: '/audio/backsound.mp3'
 };
-
-function ParticleCanvas() {
-    const canvasRef = useRef(null);
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let animId;
-        let particles = [];
-
-        const resize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        };
-        resize();
-        window.addEventListener('resize', resize);
-
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedX = (Math.random() - 0.5) * 0.3;
-                this.speedY = (Math.random() - 0.5) * 0.3;
-                this.opacity = Math.random() * 0.4 + 0.1;
-                this.life = Math.random() * 300 + 100;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.life--;
-                if (this.life <= 0 || this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-                    this.reset();
-                }
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(197, 168, 128, ${this.opacity})`;
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < 40; i++) {
-            particles.push(new Particle());
-        }
-
-        const animate = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            animId = requestAnimationFrame(animate);
-        };
-        animate();
-
-        return () => {
-            cancelAnimationFrame(animId);
-            window.removeEventListener('resize', resize);
-        };
-    }, []);
-
-    return <canvas ref={canvasRef} className="utary-particles" />;
-}
 
 /* ─────────────────────────────────────────────
    Countdown Hook
@@ -202,6 +139,27 @@ function useCountdown(targetDate) {
     }, [targetDate]);
 
     return timeLeft;
+}
+
+/* ═══════════════════════════════════════
+   ERROR BOUNDARY
+   ═══════════════════════════════════════ */
+class ErrorBoundary extends React.Component {
+    constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+    static getDerivedStateFromError(e) { return { hasError: true, error: e }; }
+    render() {
+        if (this.state.hasError) return (
+            <div style={{ padding: 20, color: '#fff', background: '#111', minHeight: '100vh', fontFamily: 'monospace' }}>
+                <h2 style={{ color: '#ff4d4d' }}>Terjadi kesalahan pada tema Utary.</h2>
+                <pre style={{ fontSize: '0.75rem', whiteSpace: 'pre-wrap', color: '#ccc', marginTop: 10 }}>
+                    {this.state.error?.toString()}
+                    {"\n\nStack Trace:\n"}
+                    {this.state.error?.stack}
+                </pre>
+            </div>
+        );
+        return this.props.children;
+    }
 }
 
 /* ─────────────────────────────────────────────
@@ -260,6 +218,7 @@ const formatShortDate = (dateStr) => {
 
 /* ── Cover ── */
 function CoverSection({ onOpen, guestName, invitation, brideGrooms, isOpened }) {
+    const { t } = useTranslation();
     const bride = brideGrooms?.find(bg => bg.gender === 'wanita') || brideGrooms?.[0];
     const groom = brideGrooms?.find(bg => bg.gender === 'pria') || brideGrooms?.[1];
     
@@ -276,14 +235,15 @@ function CoverSection({ onOpen, guestName, invitation, brideGrooms, isOpened }) 
             <div className="utary-cover__names">{names}</div>
             <div className="utary-cover__date">{subtitle}</div>
             <div className="utary-cover__guest-box">
-                <div className="utary-cover__guest-label">Tamu Undangan</div>
+                <div className="utary-cover__guest-label">{t('invitation.to')}</div>
                 <div className="utary-cover__guest-name">{guestName || 'Tamu Undangan'}</div>
+                <p className="utary-cover__apology">{t('invitation.dear_guest_desc')}</p>
             </div>
             <div className="utary-cover__desc">
                 {invitation?.cover_subtitle || THEME_DEFAULTS.opening_text.split('\n')[0]}
             </div>
             <button className="utary-cover__btn" onClick={onOpen}>
-                BUKA UNDANGAN
+                {t('invitation.open').toUpperCase()}
             </button>
         </div>
     );
@@ -291,6 +251,7 @@ function CoverSection({ onOpen, guestName, invitation, brideGrooms, isOpened }) 
 
 /* ── Hero ── */
 function HeroSection({ invitation, brideGrooms }) {
+    const { t } = useTranslation();
     const bride = brideGrooms?.find(bg => bg.gender === 'wanita') || brideGrooms?.[0];
     const groom = brideGrooms?.find(bg => bg.gender === 'pria') || brideGrooms?.[1];
     
@@ -306,7 +267,11 @@ function HeroSection({ invitation, brideGrooms }) {
             <img src={ornamentRight} alt="" className="utary-ornament utary-ornament--right" />
             <div className="utary-section__inner">
                 <RevealDiv>
-                    <div className="utary-hero__pretitle">{invitation?.opening_title || THEME_DEFAULTS.opening_title}</div>
+                    <div className="utary-hero__pretitle">
+                        {(!invitation?.opening_title || invitation.opening_title.toUpperCase() === 'THE WEDDING OF' || invitation.opening_title.toUpperCase() === 'PERNIKAHAN') 
+                            ? t('invitation.wedding_of') 
+                            : invitation.opening_title}
+                    </div>
                 </RevealDiv>
                 <RevealDiv>
                     <h1 className="utary-hero__title" style={{ whiteSpace: 'pre-line' }}>
@@ -344,9 +309,23 @@ function DividerSection() {
 
 /* ── Couple ── */
 function CoupleSection({ brideGrooms }) {
+    const { t } = useTranslation();
     // Determine groom and bride
     const groom = brideGrooms?.find(bg => bg.gender === 'pria') || brideGrooms?.[1] || {};
     const bride = brideGrooms?.find(bg => bg.gender === 'wanita') || brideGrooms?.[0] || {};
+
+    const childOfText = (person, gender) => {
+        const raw = person.child_order || '';
+        if (!raw || raw.toUpperCase() === 'PUTRI KEDUA DARI' || raw.toUpperCase() === 'PUTRA KEDUA DARI' || raw.toUpperCase() === 'PUTRI KEDUA' || raw.toUpperCase() === 'PUTRA KEDUA') {
+            const isEn = t('invitation.save_the_date') === 'Save The Date';
+            if (gender === 'wanita') {
+                return isEn ? 'SECOND DAUGHTER OF' : 'PUTRI KEDUA DARI';
+            } else {
+                return isEn ? 'SECOND SON OF' : 'PUTRA KEDUA DARI';
+            }
+        }
+        return raw.toUpperCase();
+    };
 
     return (
         <section className="utary-section utary-section--padded" id="couple">
@@ -354,9 +333,11 @@ function CoupleSection({ brideGrooms }) {
             <img src={ornamentRight} alt="" className="utary-ornament utary-ornament--right" />
             <div className="utary-section__inner">
                 <RevealDiv className="utary-couple__header">
-                    <h2 className="utary-couple__title">Bride &amp; Groom</h2>
+                    <h2 className="utary-couple__title">{t('invitation.mempelai')}</h2>
                     <p className="utary-couple__desc">
-                        Dengan segala puji bagi Allah yang telah menciptakan mahluk-Nya berpasang-pasangan, Ya Allah izinkanlah kami merangkai cinta yang Engkau berikan dalam ikatan pernikahan.
+                        {t('invitation.save_the_date') === 'Save The Date' 
+                            ? 'In the name of Allah, the Most Gracious, the Most Merciful. Under His guidance, we invite you to celebrate our union in holy matrimony.' 
+                            : 'Dengan segala puji bagi Allah yang telah menciptakan mahluk-Nya berpasang-pasangan, Ya Allah izinkanlah kami merangkai cinta yang Engkau berikan dalam ikatan pernikahan.'}
                     </p>
                 </RevealDiv>
 
@@ -381,9 +362,9 @@ function CoupleSection({ brideGrooms }) {
                         />
                     </div>
                     <h3 className="utary-profile__name">{bride.nickname || 'UTARY ADHITA'}</h3>
-                    <p className="utary-profile__role">{bride.child_order || 'PUTRI KEDUA DARI'}</p>
+                    <p className="utary-profile__role">{childOfText(bride, 'wanita')}</p>
                     <p className="utary-profile__parents">
-                        Bapak {bride.father_name || 'Nama Bapak'}<br />&amp; Ibu {bride.mother_name || 'Nama Ibu'}
+                        {t('invitation.save_the_date') === 'Save The Date' ? 'Mr.' : 'Bapak'} {bride.father_name || 'Nama Bapak'}<br />&amp; {t('invitation.save_the_date') === 'Save The Date' ? 'Mrs.' : 'Ibu'} {bride.mother_name || 'Nama Ibu'}
                     </p>
                     {bride.instagram_username && (
                         <a href={`https://www.instagram.com/${bride.instagram_username}`} className="utary-profile__social" target="_blank" rel="noopener noreferrer">
@@ -420,9 +401,9 @@ function CoupleSection({ brideGrooms }) {
                         />
                     </div>
                     <h3 className="utary-profile__name">{groom.nickname || 'FACHRUL ROZI'}</h3>
-                    <p className="utary-profile__role">{groom.child_order || 'PUTRA KEDUA DARI'}</p>
+                    <p className="utary-profile__role">{childOfText(groom, 'pria')}</p>
                     <p className="utary-profile__parents">
-                        Bapak {groom.father_name || 'Nama Bapak'}<br />&amp; Ibu {groom.mother_name || 'Nama Ibu'}
+                        {t('invitation.save_the_date') === 'Save The Date' ? 'Mr.' : 'Bapak'} {groom.father_name || 'Nama Bapak'}<br />&amp; {t('invitation.save_the_date') === 'Save The Date' ? 'Mrs.' : 'Ibu'} {groom.mother_name || 'Nama Ibu'}
                     </p>
                     {groom.instagram_username && (
                         <a href={`https://www.instagram.com/${groom.instagram_username}`} className="utary-profile__social" target="_blank" rel="noopener noreferrer">
@@ -437,17 +418,18 @@ function CoupleSection({ brideGrooms }) {
 
 /* ── Timeline ── */
 function TimelineSection({ loveStories }) {
+    const { t } = useTranslation();
     const stories = loveStories?.length > 0 ? loveStories : [
-        { title: 'Chapter One: Awal Bertemu', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nulla facilisi cras fermentum odio eu feugiat pretium nibh ipsum.' },
-        { title: 'Chapter Two: Menjalin Hubungan', text: 'Facilisis sed odio morbi quis commodo odio. Condimentum mattis pellentesque id nibh tortor id aliquet. Quis imperdiet massa tincidunt nunc pulvinar sapien et ligula.' },
+        { title: t('invitation.save_the_date') === 'Save The Date' ? 'Chapter One: First Meeting' : 'Chapter One: Awal Bertemu', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nulla facilisi cras fermentum odio eu feugiat pretium nibh ipsum.' },
+        { title: t('invitation.save_the_date') === 'Save The Date' ? 'Chapter Two: In Relationship' : 'Chapter Two: Menjalin Hubungan', text: 'Facilisis sed odio morbi quis commodo odio. Condimentum mattis pellentesque id nibh tortor id aliquet. Quis imperdiet massa tincidunt nunc pulvinar sapien et ligula.' },
     ];
 
     return (
         <section className="utary-section utary-section--padded" id="story">
             <div className="utary-section__inner">
                 <RevealDiv className="utary-timeline__header">
-                    <div className="utary-timeline__pretitle" style={{ fontFamily: 'var(--utary-font-display)', fontSize: '18px', color: 'var(--utary-gold)' }}>A Story of</div>
-                    <h2 className="utary-timeline__title">JOURNEY OF LOVE</h2>
+                    <div className="utary-timeline__pretitle" style={{ fontFamily: 'var(--utary-font-display)', fontSize: '18px', color: 'var(--utary-gold)' }}>{t('invitation.save_the_date') === 'Save The Date' ? 'A Story of' : 'Kisah Perjalanan'}</div>
+                    <h2 className="utary-timeline__title">{t('invitation.love_journey').toUpperCase()}</h2>
                 </RevealDiv>
 
                 <div className="utary-timeline__track--alt" style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
@@ -465,6 +447,7 @@ function TimelineSection({ loveStories }) {
 
 /* ── Event (Save The Date) ── */
 function EventSection({ invitation, events }) {
+    const { t } = useTranslation();
     const countdown = useCountdown(invitation?.countdown_target_date || THEME_DEFAULTS.countdown_target_date);
 
     return (
@@ -473,7 +456,7 @@ function EventSection({ invitation, events }) {
             <img src={flowerRight} alt="" className="utary-ornament utary-ornament--flower-right" />
             <div className="utary-section__inner">
                 <RevealDiv>
-                    <h2 className="utary-event__title">Save The Date</h2>
+                    <h2 className="utary-event__title">{t('invitation.save_the_date')}</h2>
                 </RevealDiv>
 
                 <RevealDiv>
@@ -486,10 +469,10 @@ function EventSection({ invitation, events }) {
                 <RevealDiv>
                     <div className="utary-countdown utary-countdown--diamond">
                         {[
-                            { val: countdown.days, label: 'Hari' },
-                            { val: countdown.hours, label: 'Jam' },
-                            { val: countdown.minutes, label: 'Menit' },
-                            { val: countdown.seconds, label: 'Detik' },
+                            { val: countdown.days, label: t('invitation.days') },
+                            { val: countdown.hours, label: t('invitation.hours') },
+                            { val: countdown.minutes, label: t('invitation.minutes') },
+                            { val: countdown.seconds, label: t('invitation.seconds') },
                         ].map((item, i) => (
                             <div key={i} className="utary-countdown__item utary-countdown__item--diamond">
                                 <div className="utary-countdown__diamond-wrap">
@@ -504,12 +487,12 @@ function EventSection({ invitation, events }) {
 
                 <RevealDiv>
                     <button className="utary-event__save-btn" onClick={() => window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=The+Wedding+of+${invitation?.cover_title}&dates=20261220T010000Z%2F20261220T070000Z`, '_blank')}>
-                        Simpan Tanggal
+                        {t('invitation.save_the_date')}
                     </button>
                 </RevealDiv>
 
                 <RevealDiv>
-                    <div className="utary-event__subtitle">Date &amp; Place</div>
+                    <div className="utary-event__subtitle">{t('invitation.save_the_date') === 'Save The Date' ? 'Date & Place' : 'Tanggal & Tempat'}</div>
                 </RevealDiv>
 
                 <RevealDiv>
@@ -636,6 +619,7 @@ function VideoSection() {
 
 /* ── Gallery ── */
 function GallerySection({ invitation, galleries, brideGrooms }) {
+    const { t } = useTranslation();
     const bride = brideGrooms?.find(bg => bg.gender === 'wanita') || brideGrooms?.[0];
     const groom = brideGrooms?.find(bg => bg.gender === 'pria') || brideGrooms?.[1];
     const displayNames = (bride?.nickname && groom?.nickname) 
@@ -656,7 +640,7 @@ function GallerySection({ invitation, galleries, brideGrooms }) {
             <img src={ornamentRight} alt="" className="utary-ornament utary-ornament--right" />
             <div className="utary-section__inner">
                 <RevealDiv>
-                    <h2 className="utary-gallery__title">Our Moment</h2>
+                    <h2 className="utary-gallery__title">{t('invitation.gallery')}</h2>
                     <p className="utary-gift__desc" style={{ fontStyle: 'italic' }}>
                         &ldquo;I was created in time to fill your time, and I use all the time in my life to love you.&rdquo;
                     </p>
@@ -707,12 +691,13 @@ function GallerySection({ invitation, galleries, brideGrooms }) {
 
 /* ── Wedding Frame Section ── */
 function WeddingFrameSection() {
+    const { t } = useTranslation();
     return (
         <section className="utary-section utary-section--padded" id="weddingframe">
             <div className="utary-section__inner">
                 <RevealDiv>
                     <div className="utary-timeline__pretitle">Capture Your Moment</div>
-                    <h2 className="utary-gallery__title">WEDDING FRAME</h2>
+                    <h2 className="utary-gallery__title">{t('invitation.save_the_date') === 'Save The Date' ? 'WEDDING FRAME' : 'BINGKAI FOTO'}</h2>
                     <p className="utary-gift__desc">
                         Unggah dan abadikan momen kamu saat menghadiri pernikahan kami dengan menggunakan Wedding Frame di bawah ini.
                     </p>
@@ -734,13 +719,61 @@ function WeddingFrameSection() {
 
 /* ── Gift ── */
 function GiftSection({ bankAccounts }) {
+    const { t } = useTranslation();
     const [copied, setCopied] = useState(null);
     const [giftTab, setGiftTab] = useState('amplop');
 
     const copyToClipboard = (text, id) => {
-        navigator.clipboard.writeText(text);
-        setCopied(id);
-        setTimeout(() => setCopied(null), 2000);
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                setCopied(id);
+                setTimeout(() => setCopied(null), 2000);
+            }).catch(() => {
+                fallbackCopy(text, id);
+            });
+        } else {
+            fallbackCopy(text, id);
+        }
+    };
+
+    const fallbackCopy = (text, id) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.width = "2em";
+        textArea.style.height = "2em";
+        textArea.style.padding = "0";
+        textArea.style.border = "none";
+        textArea.style.outline = "none";
+        textArea.style.boxShadow = "none";
+        textArea.style.background = "transparent";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        // Extra range selection compatibility for iOS Safari / Instagram webview
+        const range = document.createRange();
+        range.selectNodeContents(textArea);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        textArea.setSelectionRange(0, 999999);
+
+        try {
+            const successful = document.execCommand('copy');
+            selection.removeAllRanges();
+            document.body.removeChild(textArea);
+            if (successful) {
+                setCopied(id);
+                setTimeout(() => setCopied(null), 2000);
+            }
+        } catch (err) {
+            console.error('Fallback copy failed', err);
+            selection.removeAllRanges();
+            document.body.removeChild(textArea);
+        }
     };
 
     return (
@@ -751,7 +784,7 @@ function GiftSection({ bankAccounts }) {
 
                 <div className="utary-guard-content">
                     <RevealDiv>
-                        <h2 className="utary-gift__title">Wedding Gift</h2>
+                        <h2 className="utary-gift__title">{t('invitation.gift_title')}</h2>
                         <p className="utary-gift__desc">
                             Doa restu Anda merupakan karunia yang sangat berarti bagi kami. Namun jika memberi adalah ungkapan tanda kasih Anda, kami akan senang hati menerimanya yang tentu akan semakin melengkapi kebahagiaan kami.
                         </p>
@@ -815,6 +848,7 @@ function GiftSection({ bankAccounts }) {
 
 /* ── RSVP ── */
 function RsvpSection({ wishes: initialWishes }) {
+    const { t } = useTranslation();
     const [form, setForm] = useState({ name: '', attendance: 'hadir', guests: '1', message: '' });
     const [wishes, setWishes] = useState([]);
 
@@ -846,7 +880,7 @@ function RsvpSection({ wishes: initialWishes }) {
 
                 <div className="utary-guard-content">
                     <RevealDiv>
-                        <h2 className="utary-rsvp__title">RSVP &amp; Wishes</h2>
+                        <h2 className="utary-rsvp__title">{t('nav.rsvp')} &amp; {t('invitation.wishes_title')}</h2>
                         <p className="utary-gift__desc">
                             Bagi tamu undangan yang akan menghadiri acara pernikahan kami, mohon mengirimkan konfirmasi kehadiran dengan mengisi formulir berikut ini:
                         </p>
@@ -855,39 +889,39 @@ function RsvpSection({ wishes: initialWishes }) {
                     <RevealDiv>
                         <form className="utary-rsvp__form" onSubmit={handleSubmit}>
                             <div className="utary-rsvp__field">
-                                <label className="utary-rsvp__label">Nama</label>
-                                <input className="utary-rsvp__input" type="text" placeholder="Masukkan nama Anda"
+                                <label className="utary-rsvp__label">{t('invitation.wishes_name')}</label>
+                                <input className="utary-rsvp__input" type="text" placeholder={t('invitation.wishes_name')}
                                     value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                             </div>
                             <div className="utary-rsvp__field">
-                                <label className="utary-rsvp__label">Konfirmasi Kehadiran</label>
+                                <label className="utary-rsvp__label">{t('invitation.rsvp_attendance')}</label>
                                 <div className="utary-rsvp__radio-group">
                                     <label className="utary-rsvp__radio-label">
                                         <input type="radio" name="attendance" value="hadir"
                                             checked={form.attendance === 'hadir'} onChange={e => setForm({ ...form, attendance: e.target.value })} />
-                                        Hadir
+                                        {t('invitation.rsvp_hadir')}
                                     </label>
                                     <label className="utary-rsvp__radio-label">
                                         <input type="radio" name="attendance" value="tidak"
                                             checked={form.attendance === 'tidak'} onChange={e => setForm({ ...form, attendance: e.target.value })} />
-                                        Tidak Hadir
+                                        {t('invitation.rsvp_tidak_hadir')}
                                     </label>
                                 </div>
                             </div>
                             <div className="utary-rsvp__field">
-                                <label className="utary-rsvp__label">Jumlah Tamu</label>
+                                <label className="utary-rsvp__label">{t('invitation.rsvp_count')}</label>
                                 <select className="utary-rsvp__select" value={form.guests} onChange={e => setForm({ ...form, guests: e.target.value })}>
-                                    <option value="1">1 Orang</option>
-                                    <option value="2">2 Orang</option>
-                                    <option value="3">3 Orang</option>
+                                    <option value="1">1 {invitation?.language === 'en' ? 'Person' : 'Orang'}</option>
+                                    <option value="2">2 {invitation?.language === 'en' ? 'People' : 'Orang'}</option>
+                                    <option value="3">3 {invitation?.language === 'en' ? 'People' : 'Orang'}</option>
                                 </select>
                             </div>
                             <div className="utary-rsvp__field">
-                                <label className="utary-rsvp__label">Ucapan &amp; Doa</label>
-                                <textarea className="utary-rsvp__textarea" placeholder="Tulis ucapan untuk kedua mempelai..."
+                                <label className="utary-rsvp__label">{t('invitation.wishes_title')}</label>
+                                <textarea className="utary-rsvp__textarea" placeholder={t('invitation.wishes_msg')}
                                     value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} />
                             </div>
-                            <button type="submit" className="utary-rsvp__submit">Kirim Konfirmasi</button>
+                            <button type="submit" className="utary-rsvp__submit">{t('invitation.send_rsvp')}</button>
                         </form>
                     </RevealDiv>
 
@@ -932,7 +966,7 @@ function FooterSection({ invitation, brideGrooms }) {
                 <div className="utary-footer__message">
                     {invitation?.closing_text || THEME_DEFAULTS.closing_text}
                 </div>
-                <div className="utary-footer__credit">Powered by Groovy Digital</div>
+                <div className="utary-footer__credit">Powered by {invitation?.user?.reseller?.reseller_settings?.brand_name || 'Groovy Digital'}</div>
             </RevealDiv>
         </footer>
     );
@@ -940,6 +974,7 @@ function FooterSection({ invitation, brideGrooms }) {
 
 /* ── Turut Mengundang ── */
 function TurutMengundangSection({ invitation }) {
+    const { t } = useTranslation();
     if (!invitation?.turut_mengundang_text) return null;
 
     const names = invitation.turut_mengundang_text.split('\n').filter(n => n.trim() !== '');
@@ -948,7 +983,7 @@ function TurutMengundangSection({ invitation }) {
         <section className="utary-section utary-section--padded" id="turut-mengundang">
             <div className="utary-section__inner">
                 <RevealDiv>
-                    <h2 className="utary-couple__title">Turut Mengundang</h2>
+                    <h2 className="utary-couple__title">{t('invitation.also_inviting')}</h2>
                 </RevealDiv>
                 <RevealDiv>
                     <div className="utary-turut-mengundang__list" style={{ color: 'var(--utary-gold)', fontSize: '14px', lineHeight: '2', fontWeight: '300' }}>
@@ -963,21 +998,37 @@ function TurutMengundangSection({ invitation }) {
 }
 
 /* ── Navigation Menu & Controls ── */
-function Navigation({ invitation, isOpened, isPlaying, onToggleMusic }) {
+function Navigation({ 
+    invitation, 
+    guest, 
+    isOpened, 
+    isPlaying, 
+    onToggleMusic, 
+    scrollToSection, 
+    activeMenuId, 
+    isSlideMode,
+    autoScrollEnabled,
+    setAutoScrollEnabled 
+}) {
+    const { t } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [showQr, setShowQr] = useState(false);
+
+    const enableQr = invitation?.enable_qr !== false && invitation?.show_qr_code !== false;
+    const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
 
     const pos = invitation?.menu_position || 'right';
     if (pos === 'none' || !isOpened) return null;
 
     const menuItems = [
-        { label: 'HOME', id: 'hero' },
-        { label: 'COUPLE', id: 'couple' },
-        { label: 'STORY', id: 'love_story' },
-        { label: 'EVENT', id: 'event' },
-        { label: 'GALLERY', id: 'gallery' },
-        { label: 'RSVP', id: 'rsvp' },
-        { label: 'GIFT', id: 'bank' },
+        { label: t('nav.opening').toUpperCase(), id: 'hero' },
+        { label: t('nav.mempelai').toUpperCase(), id: 'couple' },
+        { label: t('nav.kisah').toUpperCase(), id: 'love_story' },
+        { label: t('nav.acara').toUpperCase(), id: 'event' },
+        { label: t('nav.galeri').toUpperCase(), id: 'gallery' },
+        { label: t('nav.rsvp').toUpperCase(), id: 'rsvp' },
+        { label: t('nav.hadiah').toUpperCase(), id: 'bank' },
     ];
 
     const handleOpenMenu = () => {
@@ -993,8 +1044,13 @@ function Navigation({ invitation, isOpened, isPlaying, onToggleMusic }) {
         }, 500);
     };
 
-    const scrollToSection = (id) => {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    const handleNavItemClick = (id) => {
+        setAutoScrollEnabled(false);
+        if (scrollToSection) {
+            scrollToSection(id);
+        } else {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
         handleCloseMenu();
     };
 
@@ -1010,11 +1066,19 @@ function Navigation({ invitation, isOpened, isPlaying, onToggleMusic }) {
                     </button>
                 </div>
                 <ul className="utary-nav-drawer__list">
-                    {menuItems.map((item) => (
-                        <li key={item.label} className="utary-nav-drawer__item">
-                            <button onClick={() => scrollToSection(item.id)}>{item.label}</button>
-                        </li>
-                    ))}
+                    {menuItems.map((item) => {
+                        const isActive = isSlideMode && activeMenuId === item.id;
+                        return (
+                            <li key={item.label} className="utary-nav-drawer__item">
+                                <button 
+                                    onClick={() => handleNavItemClick(item.id)}
+                                    style={isActive ? { color: 'var(--utary-gold)', fontWeight: 'bold' } : {}}
+                                >
+                                    {item.label}
+                                </button>
+                            </li>
+                        );
+                    })}
                 </ul>
             </div>
 
@@ -1028,13 +1092,39 @@ function Navigation({ invitation, isOpened, isPlaying, onToggleMusic }) {
             </div>
 
             {/* Bottom Controls */}
-            <div className={`utary-bottom-controls ${isMenuOpen ? 'is-hidden' : ''}`}>
+            <div className={`utary-bottom-controls ${isMenuOpen ? 'is-hidden' : ''} ${pos === 'bottom' ? 'utary-bottom-controls--raised' : ''}`}>
                 <div className="utary-floating" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <button className="utary-floating__btn" onClick={() => scrollToSection('rsvp')} title="RSVP">
+                    {enableQr && activeGuest && (
+                        <button className="utary-floating__btn" onClick={() => setShowQr(true)} title="QR Check-in">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.875 12h.75m-.75 3h.75m-.75 3h.75m3-6v.008h.008v-.008h-.008zm0 3v.008h.008v-.008h-.008zm0 3v.008h.008v-.008h-.008zm-6-6h.008v.008H13.5V12zm0 3h.008v.008H13.5v-.008zm0 3h.008v.008H13.5v-.008z" />
+                            </svg>
+                        </button>
+                    )}
+                    <button className="utary-floating__btn" onClick={() => handleNavItemClick('rsvp')} title="RSVP">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
                     </button>
+                    {invitation?.enable_auto_scroll !== false && (
+                    <button
+                        className="utary-floating__btn"
+                        onClick={() => setAutoScrollEnabled(prev => !prev)}
+                        style={autoScrollEnabled ? { backgroundColor: 'var(--uty-primary, #8a6e53)', color: '#fff', boxShadow: '0 0 10px var(--uty-primary)' } : {}}
+                        title={autoScrollEnabled ? "Matikan Auto Scroll" : "Auto Scroll"}
+                    >
+                        {autoScrollEnabled ? (
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+                            </svg>
+                        ) : (
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        )}
+                    </button>
+                    )}
                     <button className="utary-floating__btn" onClick={onToggleMusic} title="Music">
                         {isPlaying ? (
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -1049,6 +1139,43 @@ function Navigation({ invitation, isOpened, isPlaying, onToggleMusic }) {
                     </button>
                 </div>
             </div>
+
+            {/* QR Code Modal Overlay */}
+            {enableQr && showQr && activeGuest && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-sm" onClick={() => setShowQr(false)}>
+                    <div 
+                        className="rounded-2xl p-6 max-w-xs w-full mx-4 text-center shadow-2xl border animate-[scaleIn_0.3s_ease-out]" 
+                        style={{ 
+                            backgroundColor: 'var(--utary-bg-dark)', 
+                            borderColor: 'var(--utary-border-gold)',
+                            color: 'var(--utary-text-white)',
+                            fontFamily: 'var(--utary-font-body)'
+                        }} 
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--utary-gold)', fontFamily: 'var(--utary-font-display)' }}>QR Code Check-in</h3>
+                        <p className="text-xs mb-4" style={{ color: 'var(--utary-text-muted)' }}>{activeGuest.name}</p>
+                        <div className="p-4 rounded-xl inline-block mb-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--utary-border-gold)' }}>
+                            <img 
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=ccba82&data=${encodeURIComponent(window.location.origin+'/u/'+invitation.slug+'/checkin?to='+activeGuest.slug)}`} 
+                                alt="QR Code" 
+                                className="w-48 h-48 mx-auto" 
+                            />
+                        </div>
+                        <button 
+                            onClick={() => setShowQr(false)} 
+                            className="w-full py-2.5 rounded-full text-sm font-semibold transition-all hover:brightness-110" 
+                            style={{ 
+                                backgroundColor: 'var(--utary-gold-btn)', 
+                                color: 'var(--utary-btn-text)', 
+                                fontFamily: 'var(--utary-font-serif)' 
+                            }}
+                        >
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
@@ -1057,11 +1184,17 @@ function Navigation({ invitation, isOpened, isPlaying, onToggleMusic }) {
    MAIN PAGE COMPONENT
    ═══════════════════════════════════════ */
 export default function Utary({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, guest, wishes }) {
+    const { t } = useTranslation(invitation?.language || 'id');
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [activeSlideIdx, setActiveSlideIdx] = useState(0);
     const audioRef = useRef(null);
+    const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
 
     const guestName = guest?.name || new URLSearchParams(window.location.search).get('to');
+    
+    const layoutMode = invitation?.layout_mode || 'scroll';
+    const isSlideMode = layoutMode === 'slide-h' || layoutMode === 'slide-v';
 
     const handleOpen = () => {
         setIsOpened(true);
@@ -1078,6 +1211,37 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
         }
     }, []);
 
+    // Auto scroll logic
+    useEffect(() => {
+        if (!isOpened || !autoScrollEnabled) return;
+
+        let timer = null;
+
+        if (isSlideMode) {
+            timer = setInterval(() => {
+                setActiveSlideIdx(prev => {
+                    const count = sortedSections.length;
+                    if (prev >= count - 1) {
+                        return 0; // loop back to first slide
+                    }
+                    return prev + 1;
+                });
+            }, 4000);
+        } else {
+            timer = setInterval(() => {
+                window.scrollBy(0, 1);
+                const isBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 5;
+                if (isBottom) {
+                    setAutoScrollEnabled(false);
+                }
+            }, 25);
+        }
+
+        return () => {
+            if (timer) clearInterval(timer);
+        };
+    }, [isOpened, autoScrollEnabled, isSlideMode, sortedSections.length]);
+
     const toggleMusic = useCallback(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -1093,6 +1257,170 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
         }
     }, [isPlaying]);
 
+    const validKeys = [
+        'hero', 'opening', 'couple', 'bride_groom', 'love_story', 
+        'event', 'livestream', 'gallery', 'video', 'dresscode', 
+        'wedding_frame', 'rsvp', 'bank', 'closing', 'footer'
+    ];
+
+    const sortedSections = (sections || [])
+        .filter(s => s.is_visible && validKeys.includes(s.section_key))
+        .sort((a, b) => a.sort_order - b.sort_order);
+
+    // ── Slide Navigation Functions ──
+    const nextSlide = () => {
+        setActiveSlideIdx(prev => Math.min(prev + 1, sortedSections.length - 1));
+    };
+
+    const prevSlide = () => {
+        setActiveSlideIdx(prev => Math.max(prev - 1, 0));
+    };
+
+    // ── Mapping Menu Item IDs to Section Indices ──
+    const findSectionIndex = (id) => {
+        const idToKeys = {
+            'hero': ['hero', 'opening'],
+            'couple': ['couple', 'bride_groom'],
+            'love_story': ['love_story'],
+            'event': ['event', 'livestream'],
+            'gallery': ['gallery'],
+            'rsvp': ['rsvp'],
+            'bank': ['bank']
+        };
+        const targetKeys = idToKeys[id] || [id];
+        const idx = sortedSections.findIndex(s => targetKeys.includes(s.section_key));
+        return idx !== -1 ? idx : 0;
+    };
+
+    // ── Mapping Active Index to Menu Item ID ──
+    const getActiveMenuId = () => {
+        const activeSection = sortedSections[activeSlideIdx];
+        if (!activeSection) return 'hero';
+        const key = activeSection.section_key;
+        if (key === 'hero' || key === 'opening') return 'hero';
+        if (key === 'couple' || key === 'bride_groom') return 'couple';
+        if (key === 'love_story') return 'love_story';
+        if (key === 'event' || key === 'livestream') return 'event';
+        if (key === 'gallery') return 'gallery';
+        if (key === 'rsvp') return 'rsvp';
+        if (key === 'bank') return 'bank';
+        if (key === 'closing' || key === 'footer') return 'rsvp';
+        return 'hero';
+    };
+
+    const scrollToSection = (id) => {
+        setAutoScrollEnabled(false);
+        if (isSlideMode) {
+            const idx = findSectionIndex(id);
+            setActiveSlideIdx(idx);
+        } else {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    // ── Mouse & Touch Gesture Handlers for Swipe ──
+    const touchStart = useRef({ x: 0, y: 0, time: 0 });
+    const isDragging = useRef(false);
+    const scrollTimeout = useRef(null);
+
+    const handlePointerDown = (clientX, clientY, target) => {
+        isDragging.current = true;
+        
+        let atTop = false;
+        let atBottom = false;
+        
+        if (target && typeof target.closest === 'function') {
+            const scrollable = target.closest('.utary-slide-container');
+            if (scrollable) {
+                atTop = scrollable.scrollTop <= 5;
+                atBottom = scrollable.scrollHeight - scrollable.clientHeight - scrollable.scrollTop <= 5;
+            }
+        }
+        
+        touchStart.current = { x: clientX, y: clientY, time: Date.now(), atTop, atBottom };
+    };
+
+    const handlePointerUp = (clientX, clientY, target) => {
+        if (!isSlideMode || !isDragging.current) return;
+        isDragging.current = false;
+        
+        const diffX = clientX - touchStart.current.x;
+        const diffY = clientY - touchStart.current.y;
+        const timeDiff = Date.now() - touchStart.current.time;
+        const threshold = 50;
+
+        // If it's a very fast swipe, lower the threshold
+        const isFastSwipe = timeDiff < 300 && (Math.abs(diffX) > 30 || Math.abs(diffY) > 30);
+
+        if (layoutMode === 'slide-h') {
+            if ((Math.abs(diffX) > Math.abs(diffY)) && (Math.abs(diffX) > threshold || isFastSwipe)) {
+                if (diffX < 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        } else if (layoutMode === 'slide-v') {
+            if ((Math.abs(diffY) > Math.abs(diffX)) && (Math.abs(diffY) > threshold || isFastSwipe)) {
+                // Check if target is a scrollable element that hasn't reached its boundary
+                const scrollable = target && typeof target.closest === 'function' ? target.closest('.utary-slide-container') : null;
+                if (scrollable) {
+                    // Use the state from BEFORE the swipe started
+                    const isAtTop = touchStart.current.atTop;
+                    const isAtBottom = touchStart.current.atBottom;
+                    
+                    if (diffY < 0 && isAtBottom) {
+                        nextSlide();
+                    } else if (diffY > 0 && isAtTop) {
+                        prevSlide();
+                    }
+                } else {
+                    if (diffY < 0) nextSlide();
+                    else prevSlide();
+                }
+            }
+        }
+    };
+
+    // Touch Events
+    const handleTouchStart = (e) => handlePointerDown(e.touches[0].clientX, e.touches[0].clientY, e.target);
+    const handleTouchEnd = (e) => handlePointerUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY, e.target);
+
+    // Mouse Events for PC
+    const handleMouseDown = (e) => handlePointerDown(e.clientX, e.clientY, e.target);
+    const handleMouseUp = (e) => handlePointerUp(e.clientX, e.clientY, e.target);
+    const handleMouseLeave = () => { isDragging.current = false; };
+
+    // Wheel Event for PC (Debounced)
+    const handleWheel = (e) => {
+        if (!isSlideMode) return;
+        
+        // Ensure we aren't rapidly switching slides
+        if (scrollTimeout.current) return;
+
+        const target = e.target.closest('.utary-slide-container');
+        
+        // Let the internal scroll handle it first if there is content to scroll
+        if (target && target.scrollHeight > target.clientHeight) {
+            // Add a small buffer of 2px to account for fractional scrolling values
+            const isAtTop = target.scrollTop <= 2;
+            const isAtBottom = target.scrollHeight - target.clientHeight - target.scrollTop <= 2;
+            
+            if (e.deltaY > 0 && !isAtBottom) return; // Still scrolling down internally
+            if (e.deltaY < 0 && !isAtTop) return; // Still scrolling up internally
+        }
+
+        scrollTimeout.current = setTimeout(() => {
+            scrollTimeout.current = null;
+        }, 800); // 800ms cooldown between slide switches via wheel
+
+        if (e.deltaY > 0) {
+            nextSlide();
+        } else if (e.deltaY < 0) {
+            prevSlide();
+        }
+    };
+
     // ── Dynamic Section Mapping ──
     const renderSection = (section, index, total) => {
         const key = section.section_key;
@@ -1106,6 +1434,9 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
             'event': <EventSection key={key} invitation={invitation} events={events} />,
             'livestream': <LiveStreamingSection key={key} invitation={invitation} events={events} />,
             'gallery': <GallerySection key={key} invitation={invitation} galleries={galleries} brideGrooms={brideGrooms} />,
+            'video': <VideoSection key={key} />,
+            'dresscode': <DressCodeSection key={key} />,
+            'wedding_frame': <WeddingFrameSection key={key} />,
             'rsvp': <RsvpSection key={key} wishes={wishes} />,
             'bank': <GiftSection key={key} bankAccounts={bankAccounts} />,
             'closing': <FooterSection key={key} invitation={invitation} brideGrooms={brideGrooms} />,
@@ -1114,6 +1445,24 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
 
         const component = componentMap[key];
         if (!component) return null;
+
+        if (isSlideMode) {
+            let slideClass = 'utary-slide-container';
+            if (index === activeSlideIdx) {
+                slideClass += ' is-active';
+            } else if (index > activeSlideIdx) {
+                slideClass += ' is-next';
+            } else {
+                slideClass += ' is-prev';
+            }
+
+            return (
+                <div key={key} className={slideClass}>
+                    {component}
+                    {key === 'couple' && <TurutMengundangSection invitation={invitation} />}
+                </div>
+            );
+        }
 
         return (
             <React.Fragment key={key}>
@@ -1124,18 +1473,21 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
         );
     };
 
-    const sortedSections = (sections || [])
-        .filter(s => s.is_visible)
-        .sort((a, b) => a.sort_order - b.sort_order);
-
     return (
-        <div className="utary-page">
+        <ErrorBoundary>
+            <div className="utary-page">
             <Head>
                 <title>{invitation?.title || 'Undangan Pernikahan'}</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             </Head>
 
-            <ParticleCanvas />
+            {invitation?.particle_type && invitation.particle_type !== 'none' && (
+                <ParticleEffect 
+                    type={invitation.particle_type} 
+                    count={invitation.particle_count || 30} 
+                    speed={invitation.particle_speed || 'normal'} 
+                />
+            )}
 
             {/* Background Music */}
             <audio ref={audioRef} loop preload="auto" playsInline>
@@ -1151,7 +1503,11 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
                 <div className="utary-main__left">
                     <img src={galleries?.[0]?.image_url || couplePhoto} alt={invitation?.cover_title} className="utary-main__left-img" />
                     <div className="utary-main__left-overlay">
-                        <div className="utary-main__left-pretitle">{invitation?.opening_title || THEME_DEFAULTS.opening_title}</div>
+                        <div className="utary-main__left-pretitle">
+                            {(!invitation?.opening_title || invitation.opening_title.toUpperCase() === 'THE WEDDING OF' || invitation.opening_title.toUpperCase() === 'PERNIKAHAN') 
+                                ? t('invitation.wedding_of') 
+                                : invitation.opening_title}
+                        </div>
                         <div className="utary-main__left-title">
                             {(brideGrooms?.find(bg => bg.gender === 'wanita')?.nickname && brideGrooms?.find(bg => bg.gender === 'pria')?.nickname) 
                                 ? `${brideGrooms.find(bg => bg.gender === 'wanita').nickname} & ${brideGrooms.find(bg => bg.gender === 'pria').nickname}`
@@ -1164,7 +1520,15 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
                 </div>
 
                 {/* Right Scrollable Panel */}
-                <div className="utary-main__right">
+                <div 
+                    className={`utary-main__right ${isSlideMode ? 'utary-main__right--slide' : ''} ${layoutMode === 'slide-h' ? 'utary-main__right--slide-h' : ''} ${layoutMode === 'slide-v' ? 'utary-main__right--slide-v' : ''}`}
+                    onTouchStart={isSlideMode ? handleTouchStart : undefined}
+                    onTouchEnd={isSlideMode ? handleTouchEnd : undefined}
+                    onMouseDown={isSlideMode ? handleMouseDown : undefined}
+                    onMouseUp={isSlideMode ? handleMouseUp : undefined}
+                    onMouseLeave={isSlideMode ? handleMouseLeave : undefined}
+                    onWheel={isSlideMode ? handleWheel : undefined}
+                >
                     {sortedSections.map((section, index) => renderSection(section, index, sortedSections.length))}
                 </div>
             </div>
@@ -1173,7 +1537,7 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
             {(brideGrooms?.[0]?.phone || brideGrooms?.[1]?.phone) && (
                 <a 
                     href={`https://wa.me/${brideGrooms?.find(bg => bg.gender === 'pria')?.phone || brideGrooms?.[0]?.phone}`} 
-                    className="utary-whatsapp-float"
+                    className={`utary-whatsapp-float ${invitation?.menu_position === 'bottom' ? 'utary-whatsapp-float--left' : ''}`}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -1182,7 +1546,19 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
             )}
 
             {/* Navigation and Floating Controls */}
-            <Navigation invitation={invitation} isOpened={isOpened} isPlaying={isPlaying} onToggleMusic={toggleMusic} />
-        </div>
+            <Navigation 
+                invitation={invitation} 
+                guest={guest} 
+                isOpened={isOpened} 
+                isPlaying={isPlaying} 
+                onToggleMusic={toggleMusic} 
+                scrollToSection={scrollToSection}
+                activeMenuId={getActiveMenuId()}
+                isSlideMode={isSlideMode}
+                autoScrollEnabled={autoScrollEnabled}
+                setAutoScrollEnabled={setAutoScrollEnabled}
+            />
+            </div>
+        </ErrorBoundary>
     );
 }

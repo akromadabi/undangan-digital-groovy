@@ -25,6 +25,12 @@ use Inertia\Inertia;
 // Landing Page
 // ═══════════════════════════════════════
 Route::get('/', function () {
+    // Check if accessing via reseller subdomain or custom domain
+    $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
+    if ($resellerSetting) {
+        return app(\App\Http\Controllers\ResellerLandingPageController::class)->show($resellerSetting->subdomain);
+    }
+
     $themes = \App\Models\Theme::where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'slug', 'thumbnail', 'preview_url', 'category', 'is_premium']);
 
     $recentInvitations = \App\Models\Invitation::where('is_active', true)

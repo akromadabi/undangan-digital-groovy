@@ -48,6 +48,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const [toast, setToast] = useState(null); // { type: 'success'|'error', msg: '' }
     const [previewKey, setPreviewKey] = useState(0);
     const [activeTab, setActiveTab] = useState('tampilan');
+    const [selectedCategory, setSelectedCategory] = useState('Semua');
 
     const showToast = useCallback((type, msg) => {
         setToast({ type, msg });
@@ -58,9 +59,6 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const [coverImage, setCoverImage] = useState(invitation?.cover_image || '');
     const [coverTitle, setCoverTitle] = useState(invitation?.cover_title || 'The Wedding Of');
     const [coverSubtitle, setCoverSubtitle] = useState(invitation?.cover_subtitle || '');
-    const [coverPrivate, setCoverPrivate] = useState(invitation?.is_private ?? false);
-    const [coverQr, setCoverQr] = useState(invitation?.enable_qr ?? true);
-    const [coverHidePhotos, setCoverHidePhotos] = useState(invitation?.hide_photos ?? false);
     const [coverUploading, setCoverUploading] = useState(false);
     const [coverSaving, setCoverSaving] = useState(false);
 
@@ -99,11 +97,9 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                 cover_image: coverImage,
                 cover_title: coverTitle,
                 cover_subtitle: coverSubtitle,
-                is_private: coverPrivate,
-                enable_qr: coverQr,
-                hide_photos: coverHidePhotos,
             });
             setSaveMsg('Cover tersimpan!');
+            setTimeout(() => setPreviewKey(k => k + 1), 800);
         } catch (e) {
             console.error(e);
             setSaveMsg('Gagal menyimpan cover');
@@ -301,18 +297,6 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         </div>
                                         <div><label className="block text-xs font-medium text-gray-600 mb-1">Teks Atas Cover</label><input type="text" value={coverTitle} onChange={(e) => setCoverTitle(e.target.value)} placeholder="The Wedding Of" className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-emerald-300" /></div>
                                         <div><label className="block text-xs font-medium text-gray-600 mb-1">Nama Pasangan</label><input type="text" value={coverSubtitle} onChange={(e) => setCoverSubtitle(e.target.value)} placeholder="Mira & Randi" className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-emerald-300" /></div>
-                                        <div className="divide-y divide-gray-100 text-sm">
-                                            {[
-                                                { label: 'Privasi', desc: 'Tidak muncul di Google', checked: coverPrivate, set: setCoverPrivate },
-                                                { label: 'QR Code', desc: 'QR Code check-in', checked: coverQr, set: setCoverQr },
-                                                { label: 'Tanpa Foto', desc: 'Mode tanpa foto', checked: coverHidePhotos, set: setCoverHidePhotos },
-                                            ].map(t => (
-                                                <div key={t.label} className="flex items-center justify-between py-2">
-                                                    <div><div className="font-medium text-gray-700 text-xs">{t.label}</div><div className="text-[10px] text-gray-400">{t.desc}</div></div>
-                                                    <button type="button" onClick={() => t.set(!t.checked)} className={`relative w-9 h-5 rounded-full transition-colors ${t.checked ? 'bg-emerald-500' : 'bg-gray-300'}`}><span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${t.checked ? 'translate-x-4' : ''}`} /></button>
-                                                </div>
-                                            ))}
-                                        </div>
                                         <button onClick={saveCover} disabled={coverSaving} className="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all disabled:opacity-50">{coverSaving ? 'Menyimpan...' : 'Simpan Cover'}</button>
                                     </div>
                                 )}
@@ -325,7 +309,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         <span className="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center"><svg className="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg></span>
                                         Tema Aktif
                                     </h3>
-                                    <button onClick={() => setShowThemePanel(!showThemePanel)} className="text-xs text-emerald-600 hover:underline font-medium">{showThemePanel ? 'Tutup' : 'Ganti Tema'}</button>
+                                    <button onClick={() => setShowThemePanel(true)} className="text-xs text-emerald-600 hover:underline font-medium">Ganti Tema</button>
                                 </div>
                                 {activeTheme && (
                                     <div className="flex items-center gap-3 p-2.5 rounded-xl" style={{ backgroundColor: colors.primary + '12' }}>
@@ -337,19 +321,6 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                             <div className="text-xs text-gray-500">{activeTheme.category}</div>
                                             <div className="flex gap-1 mt-1">{Object.entries(colors).map(([key, val]) => <div key={key} className="w-3.5 h-3.5 rounded-full border border-white shadow-sm" style={{ backgroundColor: val }} title={key} />)}</div>
                                         </div>
-                                    </div>
-                                )}
-                                {showThemePanel && (
-                                    <div className="mt-2 grid grid-cols-3 gap-1.5 max-h-56 overflow-y-auto p-1">
-                                        {themes?.map(theme => (
-                                            <button key={theme.id} onClick={() => handleThemeChange(theme.id)}
-                                                className={`rounded-xl overflow-hidden transition-all ${selectedThemeId === theme.id ? 'ring-2 ring-emerald-500 shadow-md scale-[1.02]' : 'border border-gray-200 hover:shadow-sm'}`}>
-                                                <div className="aspect-[9/16] bg-gray-100">
-                                                    {theme.thumbnail ? <img src={theme.thumbnail} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: theme.color_scheme?.bg || '#f5f5f5' }}><svg className="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>}
-                                                </div>
-                                                <div className="p-1 text-[10px] font-medium text-center truncate">{theme.name}</div>
-                                            </button>
-                                        ))}
                                     </div>
                                 )}
                             </div>
@@ -376,33 +347,6 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                             <div className="mb-0.5"><Icon /></div>
                                             <div className="text-xs font-semibold">{label}</div>
                                             <div className="text-[9px] opacity-70">{desc}</div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* 4. Menu Navigasi */}
-                            <div className="bg-white rounded-2xl border border-gray-200 px-4 py-3">
-                                <h3 className="font-semibold text-gray-800 mb-2 text-sm flex items-center gap-2">
-                                    <span className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center">
-                                        <svg className="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" /></svg>
-                                    </span>
-                                    Menu Navigasi
-                                </h3>
-                                <div className="grid grid-cols-4 gap-1.5">
-                                    {[
-                                        { pos: 'none', label: 'Tanpa', Icon: () => <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg> },
-                                        { pos: 'bottom', label: 'Bawah', Icon: () => <svg className="w-5 h-5 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="18" x2="21" y2="18" /></svg> },
-                                        { pos: 'left', label: 'Kiri', Icon: () => <svg className="w-5 h-5 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="8" y1="3" x2="8" y2="21" /></svg> },
-                                        { pos: 'right', label: 'Kanan', Icon: () => <svg className="w-5 h-5 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="16" y1="3" x2="16" y2="21" /></svg> },
-                                    ].map(({ pos, label, Icon }) => (
-                                        <button key={pos} onClick={() => handleMenuPositionChange(pos)}
-                                            className={`p-2.5 rounded-xl text-center transition-all ${menuPosition === pos
-                                                ? 'bg-indigo-50 border-2 border-indigo-500 text-indigo-700 shadow-sm'
-                                                : 'bg-gray-50 border-2 border-transparent text-gray-600 hover:bg-gray-100'
-                                            }`}>
-                                            <div className="mb-0.5"><Icon /></div>
-                                            <div className="text-[10px] font-semibold">{label}</div>
                                         </button>
                                     ))}
                                 </div>
@@ -515,7 +459,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                 {/* Right Panel: Phone Preview (Real iframe) */}
                 <div className="hidden lg:flex flex-1 items-start justify-center">
                     <div className="sticky top-4">
-                        <div className="w-[360px] h-[680px] bg-white rounded-[2.5rem] shadow-2xl border-[8px] border-gray-800 overflow-hidden relative">
+                        <div className="w-[360px] h-[762px] bg-white rounded-[2.5rem] shadow-2xl border-[8px] border-gray-800 overflow-hidden relative">
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-800 rounded-b-2xl z-10" />
                             <div className="w-full h-full overflow-hidden relative">
                                 <iframe
@@ -535,7 +479,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                         <div className="text-center mt-3 flex items-center justify-center gap-2">
                             <span className="text-xs text-gray-400">
                                 <span className="font-semibold text-gray-600 capitalize">{layoutMode === 'slide-h' ? 'Horizontal' : layoutMode === 'slide-v' ? 'Vertikal' : 'Scroll'}</span>
-                                {menuPosition !== 'none' && <> · Menu <span className="font-semibold text-gray-600 capitalize">{menuPosition === 'bottom' ? 'Bawah' : menuPosition === 'left' ? 'Kiri' : 'Kanan'}</span></>}
+                                {menuPosition !== 'none' && <> · Menu <span className="font-semibold text-gray-600">Aktif</span></>}
                             </span>
                             <button onClick={() => setPreviewKey(k => k + 1)}
                                 className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
@@ -548,6 +492,121 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                     </div>
                 </div>
             </div>
+
+            {/* Modal Popup Pemilihan Tema */}
+            {showThemePanel && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
+                    <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl animate-[scaleIn_0.2s_ease-out] border border-gray-100">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <div>
+                                <h3 className="font-bold text-gray-800 text-lg flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                        </svg>
+                                    </span>
+                                    Pilih Tema Undangan
+                                </h3>
+                                <p className="text-xs text-gray-500 mt-1">Silakan pilih desain tema terbaik untuk undangan pernikahan digital Anda.</p>
+                            </div>
+                            <button 
+                                onClick={() => setShowThemePanel(false)}
+                                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
+                                title="Tutup"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Category Tabs */}
+                        {(() => {
+                            const uniqueCategories = ['Semua', ...Array.from(new Set(themes?.map(t => t.category?.toUpperCase()).filter(Boolean)))];
+                            return (
+                                <div className="px-6 py-3 bg-gray-50/30 border-b border-gray-100 flex items-center gap-2 overflow-x-auto scrollbar-thin">
+                                    {uniqueCategories.map(cat => (
+                                        <button
+                                            key={cat}
+                                            onClick={() => setSelectedCategory(cat)}
+                                            className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+                                                selectedCategory === cat
+                                                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-100 scale-105'
+                                                    : 'bg-white hover:bg-gray-100 text-gray-600 border border-gray-200'
+                                            }`}
+                                        >
+                                            {cat}
+                                        </button>
+                                    ))}
+                                </div>
+                            );
+                        })()}
+
+                        {/* Grid Tema */}
+                        <div className="overflow-y-auto p-6 md:p-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 bg-white flex-1">
+                            {(() => {
+                                const filteredThemes = selectedCategory === 'Semua'
+                                    ? themes
+                                    : themes?.filter(t => t.category?.toUpperCase() === selectedCategory);
+                                return filteredThemes?.map(theme => (
+                                    <button key={theme.id} onClick={() => handleThemeChange(theme.id)}
+                                        className={`group relative rounded-2xl overflow-hidden border-2 text-left transition-all duration-300 ${
+                                            selectedThemeId === theme.id 
+                                                ? 'border-emerald-500 ring-4 ring-emerald-100 shadow-lg scale-[1.02]' 
+                                                : 'border-gray-100 hover:border-emerald-300 hover:shadow-md'
+                                        }`}>
+                                        {/* Card Image */}
+                                        <div className="aspect-[3/4] w-full bg-gray-100 overflow-hidden relative">
+                                            {theme.thumbnail ? (
+                                                <img src={theme.thumbnail} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt={theme.name} />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                                                    <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                </div>
+                                            )}
+                                            {/* Category tag */}
+                                            <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-[9px] text-white px-2 py-0.5 rounded-full font-medium tracking-wide uppercase">
+                                                {theme.category || 'Premium'}
+                                            </div>
+                                            {/* Selected overlay checkmark */}
+                                            {selectedThemeId === theme.id && (
+                                                <div className="absolute inset-0 bg-emerald-500/10 backdrop-blur-[1px] flex items-center justify-center">
+                                                    <div className="bg-emerald-500 text-white rounded-full p-2 shadow-lg transform scale-110">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {/* Card Info */}
+                                        <div className="p-3 bg-white border-t border-gray-50">
+                                            <div className="font-bold text-gray-800 text-sm truncate group-hover:text-emerald-600 transition-colors">{theme.name}</div>
+                                            <div className="text-[10px] text-gray-400 mt-0.5 capitalize">{theme.slug?.replace(/-/g, ' ')}</div>
+                                            
+                                            {/* Color Scheme Dots */}
+                                            <div className="flex gap-1 mt-2">
+                                                {theme.color_scheme && Object.entries(theme.color_scheme).slice(0, 4).map(([key, val]) => (
+                                                    <div key={key} className="w-3 h-3 rounded-full border border-white shadow-sm ring-1 ring-gray-100" style={{ backgroundColor: val }} title={key} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </button>
+                                ));
+                            })()}
+                        </div>
+
+                        {/* Footer Action */}
+                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+                            <button 
+                                onClick={() => setShowThemePanel(false)}
+                                className="px-5 py-2 bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-all hover:shadow-sm"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Toast notification */}
             {toast && (
@@ -562,7 +621,11 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                     {toast.msg}
                 </div>
             )}
-            <style>{`@keyframes slideUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }`}</style>
+            <style>{`
+                @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+            `}</style>
         </DashboardLayout>
     );
 }
