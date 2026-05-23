@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
+import axios from 'axios';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -11,11 +12,27 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
 
 export default function Domain({ settings, centralHost = 'undangan.com' }) {
     const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+    const [checkingSubdomain, setCheckingSubdomain] = useState(false);
+    const [subdomainStatus, setSubdomainStatus] = useState(null);
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
         subdomain: settings?.subdomain || '',
         custom_domain: settings?.custom_domain || '',
     });
+
+    const handleCheckSubdomain = async () => {
+        if (!data.subdomain) return;
+        setCheckingSubdomain(true);
+        setSubdomainStatus(null);
+        try {
+            const response = await axios.get(`/api/check-subdomain?subdomain=${data.subdomain}`);
+            setSubdomainStatus(response.data);
+        } catch (error) {
+            setSubdomainStatus({ available: false, message: 'Gagal memeriksa ketersediaan.' });
+        } finally {
+            setCheckingSubdomain(false);
+        }
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -45,14 +62,55 @@ export default function Domain({ settings, centralHost = 'undangan.com' }) {
                             <input
                                 type="text"
                                 value={data.subdomain}
-                                onChange={e => setData('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                                onChange={e => { 
+                                    setData('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); 
+                                    setSubdomainStatus(null); 
+                                }}
                                 className="flex-1 px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-l-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
                                 placeholder="namareseller"
                             />
                             <span className="px-4 py-2.5 bg-[#f5f3f0] border border-l-0 border-[#e8e5e0] rounded-r-xl text-sm text-[#999] whitespace-nowrap">.{centralHost}</span>
                         </div>
                         {errors.subdomain && <p className="text-xs text-red-500 mt-1">{errors.subdomain}</p>}
-                        <p className="text-xs text-[#bbb] mt-1.5">Hanya huruf kecil, angka, dan tanda hubung (-)</p>
+                        
+                        <div className="mt-2 flex items-center justify-between">
+                            <p className="text-xs text-[#bbb]">Hanya huruf kecil, angka, dan tanda hubung (-)</p>
+                            <button
+                                type="button"
+                                onClick={handleCheckSubdomain}
+                                disabled={checkingSubdomain || !data.subdomain}
+                                className="text-xs font-semibold text-[#E5654B] hover:text-[#d55a42] transition-colors disabled:opacity-50 inline-flex items-center gap-1 bg-transparent border-none cursor-pointer"
+                            >
+                                {checkingSubdomain ? (
+                                    <>
+                                        <svg className="animate-spin h-3.5 w-3.5 text-[#E5654B]" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Memeriksa...
+                                    </>
+                                ) : 'Cek Ketersediaan'}
+                            </button>
+                        </div>
+
+                        {subdomainStatus && (
+                            <div className={`mt-2.5 text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2 ${
+                                subdomainStatus.available 
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
+                                    : 'bg-red-50 text-red-700 border border-red-100'
+                            }`}>
+                                {subdomainStatus.available ? (
+                                    <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-4 h-4 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                )}
+                                <span>{subdomainStatus.message}</span>
+                            </div>
+                        )}
 
                         {data.subdomain && (
                             <div className="mt-3 bg-[#faf9f6] rounded-xl px-4 py-3 border border-[#e8e5e0] flex items-center gap-2">

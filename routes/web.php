@@ -79,6 +79,40 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/verify-otp', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'show'])->name('verification.otp.show');
     Route::post('/verify-otp/send', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'send'])->name('verification.otp.send');
     Route::post('/verify-otp/check', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'verify'])->name('verification.otp.verify');
+    
+    // Subdomain Availability Check
+    Route::get('/api/check-subdomain', function (\Illuminate\Http\Request $request) {
+        $subdomain = strtolower($request->query('subdomain'));
+        
+        if (empty($subdomain) || !preg_match('/^[a-z0-9-]+$/', $subdomain)) {
+            return response()->json(['available' => false, 'message' => 'Subdomain tidak valid. Hanya huruf, angka, dan tanda hubung (-)']);
+        }
+        
+        $reserved = ['admin', 'super-admin', 'www', 'api', 'assets', 'dashboard', 'reseller', 'customer', 'login', 'register', 'u', 'r'];
+        if (in_array($subdomain, $reserved)) {
+            return response()->json(['available' => false, 'message' => 'Subdomain tidak dapat digunakan (kata terpesan)']);
+        }
+        
+        $query = \App\Models\ResellerSetting::where('subdomain', $subdomain);
+        
+        if ($excludeUserId = $request->query('exclude_user_id')) {
+            $query->where('user_id', '!=', $excludeUserId);
+        } elseif ($excludeResellerSettingId = $request->query('exclude_setting_id')) {
+            $query->where('id', '!=', $excludeResellerSettingId);
+        } elseif (auth()->check() && auth()->user()->role === 'admin') {
+            $currentSettings = \App\Models\ResellerSetting::where('user_id', auth()->id())->first();
+            if ($currentSettings) {
+                $query->where('id', '!=', $currentSettings->id);
+            }
+        }
+        
+        $exists = $query->exists();
+        
+        return response()->json([
+            'available' => !$exists,
+            'message' => $exists ? 'Subdomain sudah digunakan' : 'Subdomain tersedia!'
+        ]);
+    })->name('subdomain.check');
 });
 
 // ═══════════════════════════════════════
