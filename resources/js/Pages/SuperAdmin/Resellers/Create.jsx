@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
+import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -8,6 +10,7 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
 );
 
 export default function Create({ centralHost = 'undangan.com' }) {
+    const [isTutorialOpen, setIsTutorialOpen] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
@@ -81,13 +84,31 @@ export default function Create({ centralHost = 'undangan.com' }) {
                                 </div>
                                 {errors.subdomain && <p className="text-xs text-red-500 mt-1">{errors.subdomain}</p>}
                             </div>
-                            <div className="sm:col-span-2">
-                                <label className="block text-xs font-medium text-[#999] mb-1.5">Custom Domain (Opsional)</label>
-                                <input type="text" value={data.custom_domain} onChange={e => setData('custom_domain', e.target.value)} className={inputClass('custom_domain')} placeholder="undangan.domainanda.com" />
-                                {errors.custom_domain && <p className="text-xs text-red-500 mt-1">{errors.custom_domain}</p>}
-                            </div>
-                        </div>
-                    </div>
+                             <div className="sm:col-span-2">
+                                 <label className="block text-xs font-medium text-[#999] mb-1.5">Custom Domain (Opsional)</label>
+                                 <input type="text" value={data.custom_domain} onChange={e => setData('custom_domain', e.target.value)} className={inputClass('custom_domain')} placeholder="undangan.domainanda.com" />
+                                 {errors.custom_domain && <p className="text-xs text-red-500 mt-1">{errors.custom_domain}</p>}
+                                 <div className="mt-2">
+                                     <button 
+                                         type="button" 
+                                         onClick={() => setIsTutorialOpen(true)} 
+                                         className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                                     >
+                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
+                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                         </svg>
+                                         Lihat Tutorial Custom Domain
+                                     </button>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+
+                     <CustomDomainTutorialModal 
+                         isOpen={isTutorialOpen} 
+                         onClose={() => setIsTutorialOpen(false)} 
+                         centralHost={centralHost} 
+                     />
 
                     {/* Submit */}
                     <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#f0ede8]">

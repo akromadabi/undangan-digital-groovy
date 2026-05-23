@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -8,6 +10,7 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
 );
 
 export default function Domain({ settings, centralHost = 'undangan.com' }) {
+    const [isTutorialOpen, setIsTutorialOpen] = useState(false);
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
         subdomain: settings?.subdomain || '',
@@ -73,27 +76,25 @@ export default function Domain({ settings, centralHost = 'undangan.com' }) {
                             placeholder="undangan.domainanda.com"
                         />
                         {errors.custom_domain && <p className="text-xs text-red-500 mt-1">{errors.custom_domain}</p>}
+                        <div className="mt-2">
+                            <button 
+                                type="button" 
+                                onClick={() => setIsTutorialOpen(true)} 
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                </svg>
+                                Lihat Tutorial Custom Domain
+                            </button>
+                        </div>
                     </div>
 
-                    {/* DNS Instructions */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4 space-y-3">
-                        <div className="flex items-center gap-2">
-                            <Icon d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                            <h4 className="text-sm font-bold text-blue-800">Cara Setting Custom Domain</h4>
-                        </div>
-                        <ol className="text-sm text-blue-700 space-y-2 pl-4 list-decimal">
-                            <li>Login ke panel DNS domain Anda (Cloudflare, Namecheap, dll.)</li>
-                            <li>Tambahkan record <strong>CNAME</strong> dengan nilai:
-                                <div className="mt-1 bg-blue-100 rounded-lg px-3 py-2 font-mono text-xs">
-                                    <div className="flex justify-between"><span className="text-blue-500">Type:</span> <span>CNAME</span></div>
-                                    <div className="flex justify-between"><span className="text-blue-500">Name:</span> <span>undangan (atau subdomain Anda)</span></div>
-                                    <div className="flex justify-between"><span className="text-blue-500">Target:</span> <span>{centralHost}</span></div>
-                                </div>
-                            </li>
-                            <li>Tunggu propagasi DNS (biasanya 5-30 menit)</li>
-                            <li>Masukkan domain di kolom di atas dan simpan</li>
-                        </ol>
-                    </div>
+                    <CustomDomainTutorialModal 
+                        isOpen={isTutorialOpen} 
+                        onClose={() => setIsTutorialOpen(false)} 
+                        centralHost={centralHost} 
+                    />
 
                     {/* Submit */}
                     <div className="flex justify-end pt-2">
