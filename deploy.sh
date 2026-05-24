@@ -1,55 +1,49 @@
 #!/bin/bash
-# Matikan eksekusi jika ada eror
-set -e
+# Script Deployment untuk Undangan Digital
 
-echo "========================================="
-echo "   MEMULAI DEPLOYMENT DARI GITHUB        "
-echo "========================================="
+echo "=========================================="
+echo "🚀 MEMULAI DEPLOYMENT UNDANGAN DIGITAL"
+echo "=========================================="
 
-# Masuk ke folder project
+# Pindah ke direktori aplikasi
 cd /www/wwwroot/undangan-digital
 
 # Daftarkan direktori sebagai safe directory git
 git config --global --add safe.directory /www/wwwroot/undangan-digital || true
 
-echo "1. Menarik pembaruan kode terbaru dari GitHub..."
+echo "⬇️ 1. Menarik pembaruan terbaru dari GitHub..."
+git stash
 git pull origin main
 
-echo "2. Memperbarui dependensi PHP (Composer)..."
-# Jalankan composer install tanpa paket development
-composer install --no-dev --optimize-autoloader
+echo "📦 2. Menginstall dependensi PHP (Composer)..."
+composer install --no-interaction --prefer-dist --optimize-autoloader
 
-echo "3. Melakukan migrasi database (jika ada struktur baru)..."
-php artisan migrate --force
-
-echo "4. Membangun aset frontend (Vite)..."
+echo "📦 3. Menginstall dependensi Node.js (NPM)..."
 npm install
+
+echo "🛠️ 4. Membangun aset frontend (Vite)..."
 npm run build
 
-echo "5. Membersihkan cache aplikasi..."
-php artisan cache:clear
-php artisan route:clear
-php artisan config:clear
-php artisan view:clear
+echo "🗄️ 5. Menjalankan migrasi database..."
+php artisan migrate --force
 
-echo "6. Mengatur ulang perizinan folder (Permissions)..."
-# Lepas atribut immutable pada .user.ini sementara jika ada
+echo "🧹 6. Membersihkan dan menyusun cache aplikasi..."
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+echo "🔒 7. Mengatur perizinan folder (Permissions)..."
 if [ -f "public/.user.ini" ]; then
     chattr -i public/.user.ini || true
 fi
-
-# Ubah owner ke user web server (www)
 chown -R www:www /www/wwwroot/undangan-digital
-
-# Set chmod folder storage & cache agar writable
 chmod -R 775 /www/wwwroot/undangan-digital/storage
 chmod -R 775 /www/wwwroot/undangan-digital/bootstrap/cache
-
-# Kunci kembali file .user.ini demi keamanan
 if [ -f "public/.user.ini" ]; then
     chattr +i public/.user.ini || true
 fi
 
-echo "========================================="
-echo "   ✓ DEPLOYMENT SELESAI DENGAN SUKSES!   "
-echo "========================================="
+echo "=========================================="
+echo "✅ DEPLOYMENT SELESAI DENGAN SUKSES!"
+echo "=========================================="
