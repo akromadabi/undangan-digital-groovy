@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
@@ -10,6 +10,12 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
 export default function Show({ reseller, users, stats, plans, centralHost = 'undangan.com' }) {
     const formatCurrency = (a) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(a);
     const settings = reseller.reseller_settings;
+
+    const handleDelete = () => {
+        if (confirm(`Apakah Anda yakin ingin menghapus reseller "${reseller.name}"? Semua user di bawah reseller ini akan dialihkan menjadi tanpa reseller.`)) {
+            router.delete(`/super-admin/resellers/${reseller.id}`);
+        }
+    };
 
     return (
         <SuperAdminLayout title="Detail Reseller">
@@ -24,10 +30,18 @@ export default function Show({ reseller, users, stats, plans, centralHost = 'und
                         <h2 className="text-xl font-bold text-[#1a1a1a]">{reseller.name}</h2>
                         <p className="text-[#999] text-sm">{reseller.email}</p>
                     </div>
-                    <Link href={`/super-admin/resellers/${reseller.id}/edit`}
-                        className="px-4 py-2 bg-[#E5654B] text-white text-sm font-medium rounded-xl hover:bg-[#d55a42] transition-colors">
-                        Edit
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link href={`/super-admin/resellers/${reseller.id}/edit`}
+                            className="px-4 py-2 bg-[#E5654B] text-white text-sm font-medium rounded-xl hover:bg-[#d55a42] transition-colors">
+                            Edit
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">
+                            Hapus
+                        </button>
+                    </div>
                 </div>
 
                 {/* Stats */}

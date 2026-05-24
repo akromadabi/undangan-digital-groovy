@@ -15,7 +15,8 @@ export default function Edit({ reseller, centralHost = 'undangan.com' }) {
     const [checkingSubdomain, setCheckingSubdomain] = useState(false);
     const [subdomainStatus, setSubdomainStatus] = useState(null);
     const settings = reseller.reseller_settings;
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
+        _method: 'PUT',
         name: reseller.name || '',
         email: reseller.email || '',
         phone: reseller.phone || '',
@@ -41,7 +42,7 @@ export default function Edit({ reseller, centralHost = 'undangan.com' }) {
 
     const submit = (e) => {
         e.preventDefault();
-        put(`/super-admin/resellers/${reseller.id}`);
+        post(`/super-admin/resellers/${reseller.id}`);
     };
 
     const inputClass = (field) => `w-full px-4 py-2.5 bg-white border ${errors[field] ? 'border-red-400' : 'border-[#e8e5e0]'} rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none`;
