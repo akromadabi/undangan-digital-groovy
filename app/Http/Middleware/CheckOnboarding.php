@@ -23,15 +23,14 @@ class CheckOnboarding
         // If onboarding not complete, redirect to wizard
         if (!$user->onboardingComplete()) {
             $steps = [
-                1 => 'wizard.verification',
                 2 => 'wizard.link',
                 3 => 'wizard.profile',
                 4 => 'wizard.events',
                 5 => 'wizard.template',
             ];
 
-            $step = max(1, $user->onboarding_step);
-            $routeName = $steps[$step] ?? 'wizard.verification';
+            $step = max(2, $user->onboarding_step);
+            $routeName = $steps[$step] ?? 'wizard.link';
 
             if (!$request->routeIs('wizard.*')) {
                 return redirect()->route($routeName);

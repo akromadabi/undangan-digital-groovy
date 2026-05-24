@@ -63,7 +63,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
+            'email' => 'nullable|string|lowercase|email|max:255|unique:' . User::class,
             'phone' => 'required|string|max:20',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'ref' => 'nullable|string',
@@ -95,12 +95,14 @@ class RegisteredUserController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'reseller_id' => $resellerId,
+            'email_verified_at' => now(),
+            'onboarding_step' => 2,
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->route('verification.otp.show');
+        return redirect()->route('wizard.link');
     }
 }

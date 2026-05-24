@@ -18,22 +18,11 @@ class WizardController extends Controller
     // Step 1: Verification
     public function verification(Request $request)
     {
-        $user = $request->user();
-
-        return Inertia::render('Wizard/Verification', [
-            'step' => 1,
-            'isVerified' => $user->hasVerifiedEmail(),
-        ]);
+        return redirect()->route('wizard.link');
     }
 
     public function completeVerification(Request $request)
     {
-        $user = $request->user();
-
-        if ($user->onboarding_step < 1) {
-            $user->update(['onboarding_step' => 1]);
-        }
-
         return redirect()->route('wizard.link');
     }
 
@@ -44,7 +33,7 @@ class WizardController extends Controller
         $invitation = $user->invitation;
 
         return Inertia::render('Wizard/Link', [
-            'step' => 2,
+            'step' => 1,
             'currentSlug' => $invitation?->slug,
         ]);
     }
@@ -92,8 +81,8 @@ class WizardController extends Controller
             ]);
         }
 
-        if ($user->onboarding_step < 2) {
-            $user->update(['onboarding_step' => 2]);
+        if ($user->onboarding_step < 3) {
+            $user->update(['onboarding_step' => 3]);
         }
 
         return redirect()->route('wizard.profile');
@@ -107,7 +96,7 @@ class WizardController extends Controller
         $brideGrooms = $invitation ? $invitation->brideGrooms : [];
 
         return Inertia::render('Wizard/Profile', [
-            'step' => 3,
+            'step' => 2,
             'brideGrooms' => $brideGrooms,
         ]);
     }
@@ -138,8 +127,8 @@ class WizardController extends Controller
             );
         }
 
-        if ($user->onboarding_step < 3) {
-            $user->update(['onboarding_step' => 3]);
+        if ($user->onboarding_step < 4) {
+            $user->update(['onboarding_step' => 4]);
         }
 
         return redirect()->route('wizard.events');
@@ -153,7 +142,7 @@ class WizardController extends Controller
         $events = $invitation ? $invitation->events : [];
 
         return Inertia::render('Wizard/Events', [
-            'step' => 4,
+            'step' => 3,
             'events' => $events,
         ]);
     }
@@ -194,8 +183,8 @@ class WizardController extends Controller
             ]));
         }
 
-        if ($user->onboarding_step < 4) {
-            $user->update(['onboarding_step' => 4]);
+        if ($user->onboarding_step < 5) {
+            $user->update(['onboarding_step' => 5]);
         }
 
         return redirect()->route('wizard.template');
@@ -209,7 +198,7 @@ class WizardController extends Controller
         $themes = Theme::active()->orderBy('sort_order')->get();
 
         return Inertia::render('Wizard/Template', [
-            'step' => 5,
+            'step' => 4,
             'themes' => $themes,
             'selectedThemeId' => $invitation?->theme_id,
         ]);

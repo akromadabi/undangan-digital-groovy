@@ -57,19 +57,6 @@ export default function Register({ reseller }) {
                             {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
                         </div>
 
-                        {/* Email */}
-                        <div>
-                            <label className="block text-sm font-semibold text-[#333] mb-1.5">Email</label>
-                            <div className="relative">
-                                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#bbb]" />
-                                <input type="email" value={data.email} onChange={e => setData('email', e.target.value)}
-                                    placeholder="nama@email.com"
-                                    className="w-full pl-10 pr-4 py-3 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-sm focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] transition-all"
-                                    required />
-                            </div>
-                            {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
-                        </div>
-
                         {/* Phone */}
                         <div>
                             <label className="block text-sm font-semibold text-[#333] mb-1.5">No. WhatsApp</label>
@@ -80,8 +67,20 @@ export default function Register({ reseller }) {
                                     className="w-full pl-10 pr-4 py-3 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-sm focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] transition-all"
                                     required />
                             </div>
-                            <p className="text-xs text-[#bbb] mt-1">Untuk verifikasi akun via WhatsApp</p>
                             {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
+                        </div>
+
+                        {/* Email */}
+                        <div>
+                            <label className="block text-sm font-semibold text-[#333] mb-1.5">Email (Opsional)</label>
+                            <div className="relative">
+                                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#bbb]" />
+                                <input type="email" value={data.email} onChange={e => setData('email', e.target.value)}
+                                    placeholder="nama@email.com"
+                                    className="w-full pl-10 pr-4 py-3 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-sm focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] transition-all"
+                                     />
+                            </div>
+                            {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
                         </div>
 
                         {/* Password */}
