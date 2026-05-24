@@ -238,32 +238,145 @@ class InvitationController extends Controller
         $invitation->title = $defaultData['invitation']['cover_title'] ?? $theme->name;
         $invitation->slug = $slug;
         $invitation->opening_title = $defaultData['invitation']['opening_title'] ?? 'The Wedding Of';
-        $invitation->opening_text = $defaultData['invitation']['opening_text'] ?? '';
-        $invitation->opening_ayat = $defaultData['invitation']['opening_ayat'] ?? '';
-        $invitation->opening_ayat_translation = $defaultData['invitation']['opening_ayat_translation'] ?? '';
-        $invitation->opening_ayat_source = $defaultData['invitation']['opening_ayat_source'] ?? '';
+        $invitation->opening_text = $defaultData['invitation']['opening_text'] ?? "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan kami.";
+        $invitation->opening_ayat = $defaultData['invitation']['opening_ayat'] ?? 'Dan segala sesuatu Kami ciptakan berpasang-pasangan agar kamu mengingat (kebesaran Allah).';
+        $invitation->opening_ayat_translation = $defaultData['invitation']['opening_ayat_translation'] ?? 'Dan segala sesuatu Kami ciptakan berpasang-pasangan agar kamu mengingat (kebesaran Allah).';
+        $invitation->opening_ayat_source = $defaultData['invitation']['opening_ayat_source'] ?? 'Adz-Dzariyat: 49';
         $invitation->closing_title = $defaultData['invitation']['closing_title'] ?? 'THANK YOU';
-        $invitation->closing_text = $defaultData['invitation']['closing_text'] ?? '';
+        $invitation->closing_text = $defaultData['invitation']['closing_text'] ?? 'Merupakan suatu kehormatan dan kebahagiaan bagi kami, apabila Bapak/Ibu, Saudara/i berkenan hadir di hari bahagia kami.';
         $invitation->cover_title = $defaultData['invitation']['cover_title'] ?? 'Bimo & Raras';
-        $invitation->cover_subtitle = $defaultData['invitation']['cover_subtitle'] ?? '';
+        $invitation->cover_subtitle = $defaultData['invitation']['cover_subtitle'] ?? 'Kami mengundang Anda untuk menghadiri acara pernikahan kami.';
         $invitation->countdown_target_date = $defaultData['invitation']['countdown_target_date'] ?? now()->addDays(30)->toDateTimeString();
-        $invitation->music_url = $defaultData['invitation']['music_url'] ?? '';
-        $invitation->music_autoplay = $defaultData['invitation']['music_autoplay'] ?? true;
-        $invitation->enable_rsvp = $defaultData['invitation']['enable_rsvp'] ?? true;
-        $invitation->enable_wishes = $defaultData['invitation']['enable_wishes'] ?? true;
+        $invitation->music_url = $defaultData['invitation']['music_url'] ?? '/audio/backsound.mp3';
+        $invitation->music_autoplay = true;
+        
+        // Force full features active
+        $invitation->enable_rsvp = true;
+        $invitation->enable_wishes = true;
         $invitation->show_countdown = true;
         $invitation->show_animations = true;
         $invitation->save_the_date_enabled = true;
+        $invitation->enable_auto_scroll = true;
+        $invitation->show_qr_code = true;
+        $invitation->enable_qr = true;
         $invitation->particle_type = $defaultData['invitation']['particle_type'] ?? 'gold-dust';
+        
+        // Override cover image with korea demo photo
+        $invitation->cover_image = '/images/demo/korea-11-768x512.jpg';
         
         $invitation->setRelation('theme', $theme);
 
-        $brideGrooms = collect($defaultData['bride_grooms'] ?? [])->map(fn($bg) => new \App\Models\BrideGroom($bg));
-        $events = collect($defaultData['events'] ?? [])->map(fn($ev) => new \App\Models\Event($ev));
-        $loveStories = collect($defaultData['love_stories'] ?? [])->map(fn($ls) => new \App\Models\LoveStory($ls));
-        $galleries = collect($defaultData['galleries'] ?? [])->map(fn($gl) => new \App\Models\Gallery($gl));
-        $bankAccounts = collect($defaultData['bank_accounts'] ?? [])->map(fn($bk) => new \App\Models\BankAccount($bk));
-        $wishes = collect($defaultData['wishes'] ?? [])->map(fn($ws) => new Wish($ws));
+        // Map and override brideGrooms photos
+        $brideGroomsData = $defaultData['bride_grooms'] ?? [
+            [
+                'order_number' => 1,
+                'full_name' => 'Bimo Wicaksono',
+                'nickname' => 'Bimo',
+                'father_name' => 'H. Joko Wicaksono',
+                'mother_name' => 'Hj. Endang Sri Lestari',
+                'gender' => 'pria',
+                'bio' => 'Putra pertama yang siap membangun bahtera rumah tangga.',
+                'instagram' => 'bimo',
+                'child_order' => 'Pertama',
+            ],
+            [
+                'order_number' => 2,
+                'full_name' => 'Raras Sekar Ayu',
+                'nickname' => 'Raras',
+                'father_name' => 'H. Bambang Sunarto',
+                'mother_name' => 'Hj. Wahyu Ningsih',
+                'gender' => 'wanita',
+                'bio' => 'Putri kedua yang siap mendampingi dengan ketulusan hati.',
+                'instagram' => 'raras',
+                'child_order' => 'Kedua',
+            ]
+        ];
+
+        $brideGrooms = collect($brideGroomsData)->map(function ($bg) {
+            $model = new \App\Models\BrideGroom($bg);
+            $model->photo = $model->gender === 'wanita' ? '/images/demo/korea-3.jpg' : '/images/demo/korea-8.jpg';
+            return $model;
+        });
+
+        // Map events
+        $eventsData = $defaultData['events'] ?? [
+            [
+                'event_type' => 'akad',
+                'event_name' => 'Akad Nikah',
+                'event_date' => now()->addDays(30)->toDateString(),
+                'start_time' => '08:00',
+                'end_time' => '10:00',
+                'timezone' => 'WIB',
+                'venue_name' => 'Gedung Kesenian Jogja',
+                'venue_address' => 'Jl. Panembahan Senopati No. 2, Yogyakarta',
+                'gmaps_link' => 'https://maps.google.com/?q=Gedung+Kesenian+Yogyakarta',
+                'sort_order' => 0,
+                'is_primary' => true,
+            ],
+            [
+                'event_type' => 'resepsi',
+                'event_name' => 'Resepsi Pernikahan',
+                'event_date' => now()->addDays(30)->toDateString(),
+                'start_time' => '11:00',
+                'end_time' => '14:00',
+                'timezone' => 'WIB',
+                'venue_name' => 'Gedung Kesenian Jogja',
+                'venue_address' => 'Jl. Panembahan Senopati No. 2, Yogyakarta',
+                'gmaps_link' => 'https://maps.google.com/?q=Gedung+Kesenian+Yogyakarta',
+                'sort_order' => 1,
+                'is_primary' => false,
+            ]
+        ];
+        $events = collect($eventsData)->map(fn($ev) => new \App\Models\Event($ev));
+
+        // Map love stories
+        $loveStoriesData = $defaultData['love_stories'] ?? [
+            [
+                'title' => 'Awal Bertemu',
+                'story_date' => '2023-11-20',
+                'description' => 'Pertama kali dipertemukan oleh takdir di Yogyakarta. Awal kisah indah yang membawa kami ke arah yang sama.',
+                'sort_order' => 0,
+            ],
+            [
+                'title' => 'Membangun Komitmen',
+                'story_date' => '2024-11-20',
+                'description' => 'Setelah melewati berbagai perjalanan obrolan dan komitmen mendalam, kami memutuskan untuk mengakhiri masa pencarian.',
+                'sort_order' => 1,
+            ]
+        ];
+        $loveStories = collect($loveStoriesData)->map(fn($ls) => new \App\Models\LoveStory($ls));
+
+        // Map galleries with the requested demo photos
+        $galleries = collect([
+            ['image_url' => '/images/demo/korea-7-768x512.jpg', 'caption' => 'Kisah Bahagia', 'sort_order' => 0],
+            ['image_url' => '/images/demo/korea-11-768x512.jpg', 'caption' => 'Prewedding Day', 'sort_order' => 1],
+            ['image_url' => '/images/demo/korea-12-768x512.jpg', 'caption' => 'Momen Bersama', 'sort_order' => 2],
+            ['image_url' => '/images/demo/korea-4-768x528.jpg', 'caption' => 'Dua Hati', 'sort_order' => 3],
+        ])->map(fn($gl) => new \App\Models\Gallery($gl));
+
+        // Map bank accounts
+        $bankAccountsData = $defaultData['bank_accounts'] ?? [
+            [
+                'bank_name' => 'BCA',
+                'account_name' => 'Bimo Wicaksono',
+                'account_number' => '1234567890',
+                'sort_order' => 0,
+            ],
+            [
+                'bank_name' => 'Mandiri',
+                'account_name' => 'Raras Sekar Ayu',
+                'account_number' => '0987654321',
+                'sort_order' => 1,
+            ]
+        ];
+        $bankAccounts = collect($bankAccountsData)->map(fn($bk) => new \App\Models\BankAccount($bk));
+
+        // Map wishes
+        $wishesData = $defaultData['wishes'] ?? [
+            ['sender_name' => 'Ahmad Saputra', 'message' => 'Selamat menempuh hidup baru! Semoga sakinah mawaddah wa rahmah selalu.'],
+            ['sender_name' => 'Siti Aminah', 'message' => 'Selamat berbahagia ya! Berkah dunia akhirat untuk kedua mempelai.'],
+        ];
+        $wishes = collect($wishesData)->map(fn($ws) => new Wish($ws));
 
         $sections = $theme->sections()->orderBy('default_order')->get()->map(function($ts) {
             return new \App\Models\InvitationSection([
