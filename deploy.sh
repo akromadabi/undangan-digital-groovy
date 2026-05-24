@@ -11,9 +11,17 @@ cd /www/wwwroot/undangan-digital
 # Daftarkan direktori sebagai safe directory git
 git config --global --add safe.directory /www/wwwroot/undangan-digital || true
 
+# Buka kunci file keamanan .user.ini sebelum git stash/pull
+if [ -f "public/.user.ini" ]; then
+    chattr -i public/.user.ini || true
+fi
+
 echo "⬇️ 1. Menarik pembaruan terbaru dari GitHub..."
 git stash
 git pull origin main
+
+# Jalankan perbaikan otomatis typo domain di .env jika ada
+php fix_env.php
 
 echo "📦 2. Menginstall dependensi PHP (Composer)..."
 composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -34,12 +42,11 @@ php artisan route:cache
 php artisan view:cache
 
 echo "🔒 7. Mengatur perizinan folder (Permissions)..."
-if [ -f "public/.user.ini" ]; then
-    chattr -i public/.user.ini || true
-fi
 chown -R www:www /www/wwwroot/undangan-digital
 chmod -R 775 /www/wwwroot/undangan-digital/storage
 chmod -R 775 /www/wwwroot/undangan-digital/bootstrap/cache
+
+# Kunci kembali file keamanan .user.ini
 if [ -f "public/.user.ini" ]; then
     chattr +i public/.user.ini || true
 fi
