@@ -21,8 +21,8 @@ class DatabaseSeeder extends Seeder
         // ═══════════════════════════════════════
         $superAdmin = User::create([
             'name' => 'Super Admin',
-            'email' => 'superadmin@groovy.com',
-            'password' => Hash::make('password'),
+            'email' => 'akromadabi@gmail.com',
+            'password' => Hash::make('akromadabi'),
             'role' => 'super_admin',
             'is_active' => true,
             'onboarding_step' => 6,

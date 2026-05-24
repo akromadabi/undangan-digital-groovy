@@ -20,21 +20,6 @@ class AuthenticatedSessionController extends Controller
     {
         $autoLoginUsers = [];
 
-        // Only show auto-login in non-production
-        if (app()->environment('local', 'staging', 'testing')) {
-            $autoLoginUsers = \App\Models\User::select('name', 'email', 'role')
-                ->with(['activeSubscription.plan:id,name,slug'])
-                ->orderByRaw("CASE role WHEN 'super_admin' THEN 1 WHEN 'admin' THEN 2 WHEN 'user' THEN 3 ELSE 4 END")
-                ->limit(5)
-                ->get()
-                ->map(fn($u) => [
-                    'name' => $u->name,
-                    'email' => $u->email,
-                    'role' => $u->role,
-                    'plan' => $u->activeSubscription?->plan?->name,
-                ]);
-        }
-
         // Detect reseller branding from subdomain / custom domain
         $resellerData = null;
         $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
