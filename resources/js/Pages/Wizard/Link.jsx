@@ -1,38 +1,74 @@
 import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import WizardLayout from '@/Layouts/WizardLayout';
 
-export default function LinkStep({ step, currentSlug, domain }) {
-    const [slug, setSlug] = useState(currentSlug || '');
+export default function LinkStep({ step, currentSlug }) {
+    const { data, setData, post, processing, errors } = useForm({
+        slug: currentSlug || '',
+    });
+    
     const [checking, setChecking] = useState(false);
     const [available, setAvailable] = useState(null);
 
-    const { post, processing } = useForm();
-
-    const checkAvailability = async () => {
-        if (slug.length < 3) return;
-        setChecking(true);
-        try {
-            const res = await fetch(route('wizard.link.check'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
-                body: JSON.stringify({ slug }),
-            });
-            const data = await res.json();
-            setAvailable(data.available);
-            setSlug(data.slug);
-        } catch (e) {
+    // Auto check availability as user types
+    useEffect(() => {
+        if (data.slug.length < 3) {
             setAvailable(null);
+            return;
         }
-        setChecking(false);
-    };
 
-    const handleSubmit = (e) => {
+        const timer = setTimeout(async () => {
+            setChecking(true);
+            try {
+                const res = await fetch(route('wizard.link.check'), {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content 
+                    },
+                    body: JSON.stringify({ slug: data.slug }),
+                });
+                const resData = await res.json();
+                setAvailable(resData.available);
+            } catch (e) {
+                setAvailable(null);
+            } finally {
+                setChecking(false);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [data.slug]);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!available && available !== null) return;
+        if (data.slug.length < 3 || processing) return;
 
-        const form = useForm({ slug });
-        form.post(route('wizard.link.save'));
+        // If not already verified as available, check now
+        if (available === null) {
+            setChecking(true);
+            try {
+                const res = await fetch(route('wizard.link.check'), {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content 
+                    },
+                    body: JSON.stringify({ slug: data.slug }),
+                });
+                const resData = await res.json();
+                setAvailable(resData.available);
+                if (resData.available) {
+                    post(route('wizard.link.save'));
+                }
+            } catch (e) {
+                setAvailable(false);
+            } finally {
+                setChecking(false);
+            }
+        } else if (available) {
+            post(route('wizard.link.save'));
+        }
     };
 
     return (
@@ -46,57 +82,48 @@ export default function LinkStep({ step, currentSlug, domain }) {
                 <form onSubmit={handleSubmit}>
                     <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden focus-within:border-emerald-400 transition-colors">
                         <span className="bg-gray-50 px-4 py-3 text-sm text-gray-400 border-r whitespace-nowrap">
-                            {window.location.origin.replace(/https?:\/\//, '')}/u/
+                            {typeof window !== 'undefined' ? window.location.origin.replace(/https?:\/\//, '') : 'undangan-digital.test'}/u/
                         </span>
                         <input
                             type="text"
-                            value={slug}
-                            onChange={(e) => { setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); setAvailable(null); }}
+                            value={data.slug}
+                            onChange={(e) => {
+                                const cleanValue = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                                setData('slug', cleanValue);
+                                setAvailable(null);
+                            }}
                             placeholder="nama-pasangan"
                             className="flex-1 px-4 py-3 text-sm outline-none border-none focus:ring-0"
+                            required
                         />
                     </div>
 
+                    {/* Auto-check status info */}
+                    <div className="min-h-[24px] mt-2 px-1">
+                        {checking && (
+                            <p className="text-xs text-gray-400 flex items-center gap-1">
+                                <span className="w-3.5 h-3.5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+                                Memeriksa ketersediaan...
+                            </p>
+                        )}
+                        {!checking && available === true && (
+                            <p className="text-xs text-emerald-600 font-medium">✓ Link tersedia!</p>
+                        )}
+                        {!checking && available === false && (
+                            <p className="text-xs text-red-500 font-medium">✗ Link sudah dipakai. Silakan gunakan kombinasi nama lain.</p>
+                        )}
+                        {errors.slug && (
+                            <p className="text-xs text-red-500 font-medium">✗ {errors.slug}</p>
+                        )}
+                    </div>
+
                     <button
-                        type="button"
-                        onClick={checkAvailability}
-                        disabled={checking || slug.length < 3}
-                        className="w-full mt-4 py-3 bg-emerald-500 text-white rounded-xl font-semibold hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                        type="submit"
+                        disabled={processing || checking || data.slug.length < 3 || available === false}
+                        className="w-full mt-2 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                        {checking ? 'Mengecek...' : 'Check Link'}
+                        {processing ? 'Menyimpan...' : checking ? 'Memeriksa...' : 'Lanjutkan →'}
                     </button>
-
-                    {available !== null && (
-                        <p className={`mt-3 text-sm font-medium ${available ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {available ? 'Link is available' : 'Link sudah dipakai'}
-                        </p>
-                    )}
-
-                    {available && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                const formEl = document.createElement('form');
-                                formEl.method = 'POST';
-                                formEl.action = route('wizard.link.save');
-                                const csrf = document.createElement('input');
-                                csrf.type = 'hidden';
-                                csrf.name = '_token';
-                                csrf.value = document.querySelector('meta[name="csrf-token"]')?.content;
-                                const slugInput = document.createElement('input');
-                                slugInput.type = 'hidden';
-                                slugInput.name = 'slug';
-                                slugInput.value = slug;
-                                formEl.appendChild(csrf);
-                                formEl.appendChild(slugInput);
-                                document.body.appendChild(formEl);
-                                formEl.submit();
-                            }}
-                            className="w-full mt-3 py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
-                        >
-                            Buat Undangan <span>→</span>
-                        </button>
-                    )}
                 </form>
             </div>
         </WizardLayout>
