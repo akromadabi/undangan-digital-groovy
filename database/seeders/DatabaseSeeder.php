@@ -232,6 +232,8 @@ class DatabaseSeeder extends Seeder
             ArunaThemeSeeder::class,
             Luxury04ThemeSeeder::class,
             WayangThemeSeeder::class,
+            ShopeeThemeSeeder::class,
+            ManchesterThemeSeeder::class,
         ]);
 
         // ═══════════════════════════════════════

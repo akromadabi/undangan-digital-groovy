@@ -1,0 +1,1455 @@
+/*
+   MANCHESTER UNITED FOOTBALL THEME STYLE
+   Prefix: .mu-
+*/
+
+:root {
+  --mu-primary: #DA291C; /* Man Utd Red */
+  --mu-secondary: #0A0A0A; /* Black */
+  --mu-accent: #FBE122; /* Yellow/Gold */
+  --mu-bg: #080808; /* Dark Stadium */
+  --mu-bg-card: #141414; /* Dark Card */
+  --mu-text: #FFFFFF;
+  --mu-text-secondary: #AAAAAA;
+  --mu-border: rgba(250, 41, 28, 0.2);
+  --mu-border-gold: rgba(251, 225, 34, 0.25);
+  --mu-grass: #122416; /* Dark Pitch Green */
+}
+
+/* 1. Global Reset & Layout */
+.mu-page {
+  font-family: 'Poppins', sans-serif;
+  color: var(--mu-text);
+  background-color: var(--mu-bg);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Pitch line background watermark */
+.mu-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(18, 36, 22, 0.4) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(18, 36, 22, 0.4) 1.5px, transparent 1.5px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Global No Animations Override */
+.mu-no-animations *,
+.mu-no-animations *::before,
+.mu-no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+  transition-delay: 0s !important;
+  animation-delay: 0s !important;
+}
+
+/* Scroll Reveal */
+.mu-reveal--up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mu-reveal--up.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mu-reveal--left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mu-reveal--left.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.mu-reveal--right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mu-reveal--right.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.mu-reveal--zoom {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mu-reveal--zoom.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 2. Slide Layout Mode Engine (Horizontal & Vertical) */
+.mu-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--mu-bg);
+  box-shadow: 0 0 30px rgba(0,0,0,0.8);
+  z-index: 1;
+}
+
+.mu-main {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.mu-main--slide {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+.mu-slide-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1;
+  padding-bottom: 70px;
+  box-sizing: border-box;
+}
+
+/* horizontal slide transitions */
+.mu-main--slide-h .mu-slide-container.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  z-index: 2;
+}
+.mu-main--slide-h .mu-slide-container.is-next {
+  transform: translateX(100%);
+}
+.mu-main--slide-h .mu-slide-container.is-prev {
+  transform: translateX(-100%);
+}
+
+/* vertical slide transitions */
+.mu-main--slide-v .mu-slide-container.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  z-index: 2;
+}
+.mu-main--slide-v .mu-slide-container.is-next {
+  transform: translateY(100%);
+}
+.mu-main--slide-v .mu-slide-container.is-prev {
+  transform: translateY(-100%);
+}
+
+/* 3. Cover Section (Match Poster) */
+.mu-cover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s ease;
+}
+
+.mu-cover.is-opened {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mu-cover__bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+}
+
+.mu-cover__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(218, 41, 28, 0.15) 0%, rgba(8, 8, 8, 0.95) 85%);
+  z-index: 2;
+}
+
+.mu-cover__content {
+  position: relative;
+  z-index: 3;
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 20px;
+  box-sizing: border-box;
+}
+
+.mu-cover__badge {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #DA291C 30%, #0A0A0A 100%);
+  border: 3px solid var(--mu-accent);
+  box-shadow: 0 0 25px rgba(250, 41, 28, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Jura', sans-serif;
+  font-weight: 800;
+  font-size: 1.8rem;
+  color: var(--mu-text);
+  margin-bottom: 24px;
+  position: relative;
+  animation: mu-pulse 2s infinite ease-in-out;
+}
+
+@keyframes mu-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(250, 41, 28, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 35px rgba(251, 225, 34, 0.7); }
+}
+
+.mu-cover__matchday {
+  background-color: var(--mu-primary);
+  color: #fff;
+  font-family: 'Jura', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  border: 1px solid var(--mu-accent);
+}
+
+.mu-cover__couple {
+  font-family: 'Jura', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--mu-text);
+  text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+  margin: 10px 0 20px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mu-cover__dear {
+  font-size: 0.8rem;
+  color: var(--mu-accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 0 4px 0;
+}
+
+.mu-cover__guest {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px 24px;
+  border-radius: 30px;
+  border: 1px dashed var(--mu-border);
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.mu-cover__apology {
+  font-size: 0.68rem;
+  color: var(--mu-text-secondary);
+  font-style: italic;
+  margin-bottom: 30px;
+  max-width: 280px;
+}
+
+.mu-cover__btn {
+  background: linear-gradient(135deg, var(--mu-primary) 0%, #a81c12 100%);
+  color: #ffffff;
+  border: 2px solid var(--mu-accent);
+  padding: 14px 36px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  font-family: 'Jura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(218, 41, 28, 0.4);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mu-cover__btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 5px rgba(218, 41, 28, 0.2);
+}
+
+/* 4. Section Basics & Headings */
+.mu-section {
+  padding: 60px 24px;
+  box-sizing: border-box;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 1;
+}
+
+.mu-section-title {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--mu-primary);
+  text-align: center;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.mu-section-subtitle {
+  font-size: 0.72rem;
+  color: var(--mu-accent);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 6px 0 35px 0;
+}
+
+.mu-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.mu-divider::before,
+.mu-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, var(--mu-primary), transparent);
+}
+
+.mu-divider-icon {
+  margin: 0 14px;
+  color: var(--mu-accent);
+  font-size: 1.1rem;
+}
+
+/* 5. Hero Section (Slideshow & Countdown) */
+.mu-hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.mu-hero__bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.mu-hero__bg.is-active {
+  opacity: 0.15; /* Subdued image to allow stadium feel */
+}
+
+.mu-hero__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, transparent 20%, var(--mu-bg) 95%);
+  z-index: 2;
+}
+
+.mu-hero__content {
+  position: relative;
+  z-index: 3;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mu-hero__matchday {
+  color: var(--mu-accent);
+  font-family: 'Jura', sans-serif;
+  font-weight: 800;
+  letter-spacing: 4px;
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+}
+
+.mu-hero__couple {
+  font-family: 'Jura', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 10px 0;
+  text-shadow: 0 0 20px rgba(250, 41, 28, 0.4);
+}
+
+.mu-hero__date {
+  font-size: 0.85rem;
+  color: var(--mu-text-secondary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+
+/* 6. Countdown widget (Scoreboard Style) */
+.mu-scoreboard {
+  background: rgba(10, 10, 10, 0.85);
+  border: 2px solid var(--mu-primary);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 8px 30px rgba(218, 41, 28, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.mu-scoreboard__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 55px;
+}
+
+.mu-scoreboard__num {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--mu-accent);
+  background: #000;
+  border-radius: 6px;
+  padding: 4px 8px;
+  min-width: 44px;
+  text-align: center;
+  box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+.mu-scoreboard__label {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--mu-text-secondary);
+  margin-top: 4px;
+}
+
+.mu-scoreboard__divider {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--mu-primary);
+  animation: mu-blink 1s infinite;
+}
+
+@keyframes mu-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.mu-hero__arrow {
+  position: absolute;
+  bottom: 25px;
+  color: var(--mu-primary);
+  font-size: 1.5rem;
+  animation: mu-bounce 2s infinite;
+  cursor: pointer;
+  z-index: 5;
+}
+
+@keyframes mu-bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+/* 7. Opening Section (The Kick-Off) */
+.mu-opening {
+  text-align: center;
+}
+
+.mu-opening__initials {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2px solid var(--mu-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Jura', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--mu-accent);
+  margin: 0 auto 24px auto;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.mu-opening__ayat {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--mu-text-secondary);
+  font-style: italic;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.mu-opening__source {
+  font-size: 0.72rem;
+  color: var(--mu-accent);
+  margin-top: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.mu-opening__text {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #e0e0e0;
+  margin: 20px auto 0 auto;
+  max-width: 320px;
+}
+
+/* 8. Mempelai Section (Starting Lineup) */
+.mu-couple-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  align-items: center;
+}
+
+.mu-player-card {
+  background: var(--mu-bg-card);
+  border: 1px solid var(--mu-border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 340px;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+}
+
+/* FUT Card Style Player Info Badge */
+.mu-player-card__badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--mu-accent);
+  border-radius: 8px;
+  padding: 6px;
+  z-index: 3;
+}
+
+.mu-player-card__number {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--mu-accent);
+  line-height: 1;
+}
+
+.mu-player-card__pos {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.mu-player-photo-wrap {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #222;
+  position: relative;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--mu-primary);
+}
+
+.mu-player-photo {
+  width: 100%;
+  height: 100%;
+  object-cover: cover;
+  object-position: center;
+}
+
+.mu-player-info {
+  text-align: center;
+}
+
+.mu-player-name {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--mu-primary);
+  margin: 0 0 6px 0;
+  letter-spacing: 0.5px;
+}
+
+.mu-player-parent-label {
+  font-size: 0.68rem;
+  color: var(--mu-accent);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0 0 2px 0;
+}
+
+.mu-player-parents {
+  font-size: 0.8rem;
+  color: var(--mu-text-secondary);
+  margin: 0 0 10px 0;
+}
+
+.mu-player-ig {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(250, 41, 28, 0.1);
+  border: 1px solid var(--mu-primary);
+  color: var(--mu-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.mu-player-ig:hover {
+  background: var(--mu-primary);
+  color: #fff;
+}
+
+/* Mempelai stats box - funny soccer stats */
+.mu-player-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 14px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+.mu-stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.mu-stat-val {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--mu-accent);
+}
+
+.mu-stat-label {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  color: var(--mu-text-secondary);
+}
+
+.mu-couple-vs {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--mu-accent);
+  text-align: center;
+  margin: 10px 0;
+}
+
+/* 9. Match Details Section (Acara) */
+.mu-event-card {
+  background: var(--mu-bg-card);
+  border-left: 4px solid var(--mu-primary);
+  border-radius: 0 12px 12px 0;
+  padding: 20px;
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.mu-event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.mu-event-name {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  color: var(--mu-primary);
+  margin: 0;
+}
+
+.mu-event-badge {
+  background-color: rgba(251, 225, 34, 0.1);
+  color: var(--mu-accent);
+  border: 1px solid var(--mu-accent);
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.mu-event-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+}
+
+.mu-event-icon {
+  color: var(--mu-accent);
+  font-size: 0.9rem;
+  margin-top: 2px;
+  width: 14px;
+}
+
+.mu-event-venue {
+  font-weight: 700;
+  color: #fff;
+}
+
+.mu-event-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--mu-border);
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: none;
+  margin-top: 8px;
+  transition: all 0.3s;
+}
+
+.mu-event-btn:hover {
+  background: var(--mu-primary);
+  border-color: var(--mu-primary);
+}
+
+/* 10. Kisah Cinta (Match Highlights) */
+.mu-timeline {
+  position: relative;
+  max-width: 380px;
+  margin: 0 auto;
+  padding: 10px 0;
+}
+
+.mu-timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--mu-primary) 10%, var(--mu-primary) 90%, transparent);
+}
+
+.mu-timeline-node {
+  position: relative;
+  padding-left: 45px;
+  margin-bottom: 30px;
+}
+
+.mu-timeline-marker {
+  position: absolute;
+  left: 10px;
+  top: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--mu-bg);
+  border: 2px solid var(--mu-accent);
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--mu-accent);
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+
+.mu-timeline-card {
+  background: var(--mu-bg-card);
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.mu-timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mu-timeline-time {
+  font-family: 'Jura', sans-serif;
+  font-weight: 900;
+  color: var(--mu-primary);
+  font-size: 0.95rem;
+}
+
+.mu-timeline-date {
+  font-size: 0.62rem;
+  color: var(--mu-text-secondary);
+  text-transform: uppercase;
+}
+
+.mu-timeline-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 6px 0;
+}
+
+.mu-timeline-desc {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--mu-text-secondary);
+  margin: 0;
+}
+
+/* 11. Galeri Section (Match Gallery) */
+.mu-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.mu-gallery-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.mu-gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.mu-gallery-item:hover .mu-gallery-img {
+  transform: scale(1.05);
+}
+
+/* 12. RSVP & Wishes (Match Day Pass Ticket & Fan Chants) */
+.mu-ticket {
+  background: var(--mu-bg-card);
+  border: 2px solid var(--mu-primary);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  position: relative;
+}
+
+/* Ticket tear design */
+.mu-ticket::before,
+.mu-ticket::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background-color: var(--mu-bg);
+  border-radius: 50%;
+  z-index: 3;
+}
+.mu-ticket::before {
+  left: -8px;
+  box-shadow: inset -2px 0 0 rgba(250, 41, 28, 0.2);
+}
+.mu-ticket::after {
+  right: -8px;
+  box-shadow: inset 2px 0 0 rgba(250, 41, 28, 0.2);
+}
+
+.mu-ticket-header {
+  background: linear-gradient(90deg, var(--mu-primary) 0%, #a81c12 100%);
+  padding: 14px;
+  text-align: center;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.15);
+}
+
+.mu-ticket-title {
+  font-family: 'Jura', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff;
+  margin: 0;
+}
+
+.mu-ticket-body {
+  padding: 20px;
+}
+
+.mu-field {
+  margin-bottom: 16px;
+}
+
+.mu-label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: var(--mu-accent);
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.mu-input {
+  width: 100%;
+  background: #000;
+  border: 1px solid var(--mu-border);
+  border-radius: 6px;
+  color: #fff;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  font-size: 0.8rem;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.mu-input:focus {
+  border-color: var(--mu-accent);
+  box-shadow: 0 0 5px rgba(251, 225, 34, 0.2);
+}
+
+.mu-rsvp-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.mu-rsvp-btn {
+  background: #000;
+  border: 1px solid var(--mu-border);
+  color: var(--mu-text-secondary);
+  padding: 8px 4px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mu-rsvp-btn.is-active {
+  background: var(--mu-primary);
+  border-color: var(--mu-primary);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(250, 41, 28, 0.3);
+}
+
+/* Qty control stepper */
+.mu-qty {
+  display: flex;
+  align-items: center;
+  background: #000;
+  border: 1px solid var(--mu-border);
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.mu-qty-btn {
+  background: transparent;
+  border: none;
+  color: var(--mu-primary);
+  width: 32px;
+  height: 32px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mu-qty-val {
+  width: 36px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.mu-submit-btn {
+  background: linear-gradient(135deg, var(--mu-primary) 0%, #a81c12 100%);
+  color: #fff;
+  border: 1px solid var(--mu-accent);
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Jura', sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(218, 41, 28, 0.3);
+  transition: all 0.3s;
+}
+
+.mu-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Chants (Wishes List) */
+.mu-chants {
+  margin-top: 35px;
+}
+
+.mu-chants-title {
+  font-family: 'Jura', sans-serif;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  color: var(--mu-accent);
+  letter-spacing: 1.5px;
+  margin: 0 0 14px 0;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 8px;
+}
+
+.mu-chants-list {
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Custom scrollbar for chants list */
+.mu-chants-list::-webkit-scrollbar {
+  width: 4px;
+}
+.mu-chants-list::-webkit-scrollbar-thumb {
+  background-color: var(--mu-primary);
+  border-radius: 2px;
+}
+
+.mu-chant-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+
+.mu-chant-sender {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--mu-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mu-chant-msg {
+  font-size: 0.74rem;
+  color: var(--mu-text-secondary);
+  line-height: 1.5;
+  margin: 4px 0 0 0;
+}
+
+/* 13. Amplop Section (Transfer Window / Sponsorship) */
+.mu-bank-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.mu-bank-card {
+  background: linear-gradient(135deg, #141414 0%, #050505 100%);
+  border: 1px solid var(--mu-border);
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  max-width: 320px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+.mu-bank-card::after {
+  content: "OFFICIAL TRANSFER";
+  position: absolute;
+  bottom: -15px;
+  right: -10px;
+  font-family: 'Jura', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: rgba(250, 41, 28, 0.03);
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+.mu-bank-badge {
+  background-color: var(--mu-primary);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 0.55rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  letter-spacing: 1px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.mu-bank-acc {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1.5px;
+  margin: 0 0 4px 0;
+}
+
+.mu-bank-holder {
+  font-size: 0.72rem;
+  color: var(--mu-text-secondary);
+  text-transform: uppercase;
+  margin: 0 0 16px 0;
+}
+
+.mu-bank-copy-btn {
+  background: transparent;
+  border: 1px solid var(--mu-primary);
+  color: var(--mu-primary);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mu-bank-copy-btn:hover {
+  background: var(--mu-primary);
+  color: #fff;
+}
+
+/* 14. Closing Section (Full-Time) */
+.mu-closing {
+  text-align: center;
+}
+
+.mu-closing__thanks {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--mu-primary);
+  text-transform: uppercase;
+}
+
+.mu-closing__text {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--mu-text-secondary);
+  margin: 14px auto 30px auto;
+  max-width: 320px;
+}
+
+.mu-closing__family {
+  font-size: 0.76rem;
+  color: var(--mu-accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.mu-watermark {
+  font-size: 0.62rem;
+  color: #555555;
+  margin-top: 40px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* 15. Fixed Floating Nav Bar & Audio controllers */
+.mu-float-nav {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 380px;
+  height: 54px;
+  background-color: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--mu-border);
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+  z-index: 998;
+  box-sizing: border-box;
+}
+
+.mu-nav-item {
+  background: transparent;
+  border: none;
+  color: var(--mu-text-secondary);
+  font-size: 1.15rem;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+  outline: none;
+}
+
+.mu-nav-item.is-active {
+  color: var(--mu-accent);
+  background-color: rgba(218, 41, 28, 0.15);
+  box-shadow: inset 0 0 5px rgba(250, 41, 28, 0.3);
+}
+
+.mu-float-audio {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 997;
+}
+
+.mu-float-audio-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--mu-border);
+  color: var(--mu-primary);
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  outline: none;
+  transition: all 0.3s;
+}
+
+.mu-float-audio-btn:active {
+  transform: scale(0.95);
+}
+
+/* WhatsApp Floater */
+.mu-whatsapp-float {
+  position: fixed;
+  bottom: 90px;
+  left: 20px;
+  z-index: 997;
+}
+
+.mu-whatsapp-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #25D366;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  text-decoration: none;
+  transition: transform 0.3s;
+}
+
+.mu-whatsapp-btn:active {
+  transform: scale(0.95);
+}
+
+/* 16. QR Code Check-in Modal */
+.mu-qr-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mu-qr-modal-card {
+  background-color: var(--mu-bg-card);
+  border: 2px solid var(--mu-primary);
+  border-radius: 18px;
+  padding: 24px;
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+  animation: mu-modal-fade 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes mu-modal-fade {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.mu-qr-modal-title {
+  font-family: 'Jura', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--mu-primary);
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+}
+
+.mu-qr-modal-guest-name {
+  font-size: 0.85rem;
+  color: var(--mu-accent);
+  margin: 0 0 18px 0;
+  font-weight: 700;
+}
+
+.mu-qr-code-box {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 14px;
+  display: inline-block;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.mu-qr-code-image {
+  width: 170px;
+  height: 170px;
+  display: block;
+}
+
+.mu-qr-modal-footer {
+  font-size: 0.7rem;
+  color: var(--mu-text-secondary);
+  margin: 0 0 20px 0;
+  line-height: 1.4;
+}
+
+.mu-qr-close-btn {
+  background: linear-gradient(135deg, var(--mu-primary) 0%, #a81c12 100%);
+  color: #ffffff;
+  border: 1px solid var(--mu-accent);
+  border-radius: 20px;
+  padding: 10px 24px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'Jura', sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: 100%;
+}
+
+.mu-qr-close-btn:active {
+  transform: translateY(1px);
+}
+
+.mu-search-qr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mu-search-qr-btn:active {
+  background-color: rgba(255,255,255,0.05);
+}
