@@ -118,10 +118,18 @@ class ThemeSettingsController extends Controller
             'particle_speed' => 'sometimes|in:slow,normal,fast',
         ]);
 
-        $invitation = $request->user()->invitation;
+        $user = $request->user();
+        $invitation = $user->invitation;
 
         if (!$invitation) {
             return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
+        }
+
+        // Keamanan: Validasi otorisasi Paket berlangganan untuk fitur Desain & Tema (template)
+        if ($request->hasAny(['layout_mode', 'menu_position', 'particle_type', 'particle_count', 'particle_speed'])) {
+            if (!$user->hasFeatureAccess('template')) {
+                return response()->json(['error' => 'Fitur Desain & Tema dikunci oleh Paket Anda.'], 403);
+            }
         }
 
         $data = $request->only(['layout_mode', 'menu_position', 'particle_type', 'particle_count', 'particle_speed']);
@@ -136,7 +144,8 @@ class ThemeSettingsController extends Controller
 
     public function updateSettings(Request $request)
     {
-        $invitation = $request->user()->invitation;
+        $user = $request->user();
+        $invitation = $user->invitation;
 
         if (!$invitation) {
             return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
@@ -158,6 +167,35 @@ class ThemeSettingsController extends Controller
             'menu_position' => 'sometimes|required|in:none,bottom,left,right',
             'custom_domain' => 'sometimes|nullable|string|max:255|unique:invitations,custom_domain,' . $invitation->id,
         ]);
+
+        // Keamanan: Validasi otorisasi Paket berlangganan untuk masing-masing toggle pengaturan
+        if ($request->has('show_photos') && !$user->hasFeatureAccess('bride_groom')) {
+            return response()->json(['error' => 'Fitur Mempelai dikunci oleh Paket Anda.'], 403);
+        }
+        if ($request->has('show_animations') && !$user->hasFeatureAccess('animasi')) {
+            return response()->json(['error' => 'Fitur Animasi dikunci oleh Paket Anda.'], 403);
+        }
+        if ($request->hasAny(['enable_auto_scroll', 'menu_position', 'custom_domain']) && !$user->hasFeatureAccess('template')) {
+            return response()->json(['error' => 'Fitur Desain & Tema dikunci oleh Paket Anda.'], 403);
+        }
+        if ($request->has('enable_qr') && !$user->hasFeatureAccess('qr_code')) {
+            return response()->json(['error' => 'Fitur QR Code dikunci oleh Paket Anda.'], 403);
+        }
+        if ($request->hasAny(['show_guest_name', 'is_private']) && !$user->hasFeatureAccess('guest')) {
+            return response()->json(['error' => 'Fitur Tamu dikunci oleh Paket Anda.'], 403);
+        }
+        if ($request->has('show_countdown') && !$user->hasFeatureAccess('save_the_date')) {
+            return response()->json(['error' => 'Fitur Save The Date dikunci oleh Paket Anda.'], 403);
+        }
+        if ($request->has('music_autoplay') && !$user->hasFeatureAccess('music')) {
+            return response()->json(['error' => 'Fitur Musik dikunci oleh Paket Anda.'], 403);
+        }
+        if ($request->has('enable_rsvp') && !$user->hasFeatureAccess('rsvp')) {
+            return response()->json(['error' => 'Fitur RSVP dikunci oleh Paket Anda.'], 403);
+        }
+        if ($request->has('enable_wishes') && !$user->hasFeatureAccess('guestbook')) {
+            return response()->json(['error' => 'Fitur Guestbook dikunci oleh Paket Anda.'], 403);
+        }
 
         $data = $request->only([
             'show_photos',
@@ -201,10 +239,16 @@ class ThemeSettingsController extends Controller
             'theme_id' => 'required|exists:themes,id',
         ]);
 
-        $invitation = $request->user()->invitation;
+        $user = $request->user();
+        $invitation = $user->invitation;
         
         if (!$invitation) {
             return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
+        }
+
+        // Keamanan: Validasi otorisasi Paket berlangganan untuk mengganti tema (template)
+        if (!$user->hasFeatureAccess('template')) {
+            return response()->json(['error' => 'Fitur Desain & Tema dikunci oleh Paket Anda.'], 403);
         }
 
         $theme = Theme::findOrFail($request->theme_id);
@@ -267,6 +311,25 @@ class ThemeSettingsController extends Controller
         ]);
     }
 
+    private function sectionKeyToFeatureSlug(string $sectionKey): ?string
+    {
+        $map = [
+            'cover' => 'cover',
+            'opening' => 'opening',
+            'closing' => 'closing',
+            'mempelai' => 'bride_groom',
+            'countdown' => 'save_the_date',
+            'love_story' => 'love_story',
+            'event' => 'event',
+            'gallery' => 'gallery',
+            'rsvp' => 'rsvp',
+            'wishes' => 'guestbook',
+            'bank' => 'bank',
+            'livestream' => 'event',
+        ];
+        return $map[$sectionKey] ?? null;
+    }
+
     public function updateSections(Request $request)
     {
         $request->validate([
@@ -276,10 +339,24 @@ class ThemeSettingsController extends Controller
             'sections.*.is_visible' => 'required|boolean',
         ]);
 
-        $invitation = $request->user()->invitation;
+        $user = $request->user();
+        $invitation = $user->invitation;
 
         if (!$invitation) {
             return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
+        }
+
+        // Keamanan: Validasi otorisasi Paket berlangganan untuk masing-masing section key
+        foreach ($request->sections as $sectionData) {
+            $section = InvitationSection::where('id', $sectionData['id'])
+                ->where('invitation_id', $invitation->id)
+                ->first();
+            if ($section) {
+                $featureSlug = $this->sectionKeyToFeatureSlug($section->section_key);
+                if ($featureSlug && $sectionData['is_visible'] && !$user->hasFeatureAccess($featureSlug)) {
+                    return response()->json(['error' => "Fitur {$section->section_name} dikunci oleh Paket Anda."], 403);
+                }
+            }
         }
 
         foreach ($request->sections as $sectionData) {

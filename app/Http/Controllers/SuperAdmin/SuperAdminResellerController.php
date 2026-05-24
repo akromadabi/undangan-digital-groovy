@@ -159,6 +159,19 @@ class SuperAdminResellerController extends Controller
         return redirect()->route('super-admin.resellers.index')->with('success', 'Reseller berhasil dihapus.');
     }
 
+    public function resetPassword(Request $request, User $reseller)
+    {
+        abort_if($reseller->role !== 'admin', 404);
+
+        $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $reseller->update(['password' => Hash::make($request->password)]);
+
+        return back()->with('success', 'Password reseller berhasil direset.');
+    }
+
     /**
      * Update harga plan per reseller
      */

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Key, RotateCw } from 'lucide-react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
 import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
 import axios from 'axios';
@@ -45,6 +46,21 @@ export default function Edit({ reseller, centralHost = 'undangan.com' }) {
         post(`/super-admin/resellers/${reseller.id}`);
     };
 
+    const [pw, setPw] = useState({ password: '', password_confirmation: '' });
+    const [pwProcessing, setPwProcessing] = useState(false);
+    const [pwMsg, setPwMsg] = useState('');
+
+    const handleResetPassword = (e) => {
+        e.preventDefault();
+        setPwProcessing(true);
+        router.post(`/super-admin/resellers/${reseller.id}/reset-password`, pw, {
+            preserveScroll: true,
+            onSuccess: () => { setPw({ password: '', password_confirmation: '' }); setPwMsg('Password berhasil direset!'); },
+            onError: (errs) => { setPwMsg('' + Object.values(errs).flat().join(', ')); },
+            onFinish: () => setPwProcessing(false),
+        });
+    };
+
     const inputClass = (field) => `w-full px-4 py-2.5 bg-white border ${errors[field] ? 'border-red-400' : 'border-[#e8e5e0]'} rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none`;
 
     return (
@@ -60,6 +76,32 @@ export default function Edit({ reseller, centralHost = 'undangan.com' }) {
                 </div>
 
                 <form onSubmit={submit} className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-5">
+                    {/* Reset Password */}
+                    <div>
+                        <h3 className="text-sm font-bold text-[#1a1a1a] mb-4 pb-2 border-b border-[#f0ede8] flex items-center gap-2">
+                            <Key size={16} className="text-amber-500" /> Reset Password
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-medium text-[#999] mb-1.5">Password Baru</label>
+                                <input type="password" value={pw.password} onChange={e => setPw({ ...pw, password: e.target.value })}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none" placeholder="Minimal 6 karakter" required minLength={6} />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-[#999] mb-1.5">Konfirmasi Password</label>
+                                <input type="password" value={pw.password_confirmation} onChange={e => setPw({ ...pw, password_confirmation: e.target.value })}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none" placeholder="Ulangi password" required />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 mt-4">
+                            <button type="button" onClick={handleResetPassword} disabled={pwProcessing || !pw.password}
+                                className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5">
+                                {pwProcessing ? <><RotateCw size={14} className="animate-spin" /> Mereset...</> : <><Key size={14} /> Reset Password</>}
+                            </button>
+                            {pwMsg && <span className="text-sm font-medium">{pwMsg}</span>}
+                        </div>
+                    </div>
+
                     {/* Account Info */}
                     <div>
                         <h3 className="text-sm font-bold text-[#1a1a1a] mb-4 pb-2 border-b border-[#f0ede8]">Info Akun</h3>

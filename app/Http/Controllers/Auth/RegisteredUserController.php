@@ -32,7 +32,6 @@ class RegisteredUserController extends Controller
             }
         }
 
-        // Check for reseller referral via ?ref=subdomain or dynamic domain resolution
         if ($ref) {
             $setting = ResellerSetting::where('subdomain', $ref)
                 ->where('is_active', true)
@@ -40,12 +39,14 @@ class RegisteredUserController extends Controller
 
             if ($setting) {
                 $reseller = $setting->reseller;
-                $resellerData = [
-                    'id' => $reseller->id,
-                    'brand_name' => $setting->brand_name ?: $reseller->name,
-                    'brand_logo' => $setting->brand_logo ? '/storage/' . $setting->brand_logo : null,
-                    'ref' => $ref,
-                ];
+                if ($reseller) {
+                    $resellerData = [
+                        'id' => $reseller->id,
+                        'brand_name' => $setting->brand_name ?: $reseller->name,
+                        'brand_logo' => $setting->brand_logo ? '/storage/' . $setting->brand_logo : null,
+                        'ref' => $ref,
+                    ];
+                }
             }
         }
 

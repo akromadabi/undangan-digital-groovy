@@ -42,12 +42,67 @@ class InvitationController extends Controller
             ->take(50)
             ->get();
 
-        // THEME ADDED BY BHAKTIAJI ILHAM
-        $page = 'Invitation/Show';
-        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang'])) {
-            $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
+        // Keamanan: Validasi otorisasi Paket berlangganan untuk live template & section
+        $owner = $invitation->user;
+        if ($owner) {
+            if (!$owner->hasFeatureAccess('qr_code')) {
+                $invitation->enable_qr = false;
+                $invitation->show_qr_code = false;
+            }
+            if (!$owner->hasFeatureAccess('rsvp')) {
+                $invitation->enable_rsvp = false;
+            }
+            if (!$owner->hasFeatureAccess('guestbook')) {
+                $invitation->enable_wishes = false;
+                $wishes = collect();
+            }
+            if (!$owner->hasFeatureAccess('music')) {
+                $invitation->music_autoplay = false;
+                $invitation->music_url = null;
+            }
+            if (!$owner->hasFeatureAccess('animasi')) {
+                $invitation->show_animations = false;
+            }
+            if (!$owner->hasFeatureAccess('save_the_date')) {
+                $invitation->show_countdown = false;
+            }
+            if (!$owner->hasFeatureAccess('template')) {
+                $invitation->enable_auto_scroll = false;
+                $invitation->particle_type = 'none';
+                $invitation->menu_position = 'none';
+            }
+
+            // Filter sections dynamically based on package feature access
+            $filteredSections = $invitation->sections->filter(function ($section) use ($owner) {
+                $map = [
+                    'cover' => 'cover',
+                    'opening' => 'opening',
+                    'closing' => 'closing',
+                    'mempelai' => 'bride_groom',
+                    'countdown' => 'save_the_date',
+                    'love_story' => 'love_story',
+                    'event' => 'event',
+                    'gallery' => 'gallery',
+                    'rsvp' => 'rsvp',
+                    'wishes' => 'guestbook',
+                    'bank' => 'bank',
+                    'livestream' => 'event',
+                ];
+                $featureSlug = $map[$section->section_key] ?? null;
+                if ($featureSlug) {
+                    return $owner->hasFeatureAccess($featureSlug);
+                }
+                return true;
+            })->values();
+
+            $invitation->setRelation('sections', $filteredSections);
         }
 
+        // THEME ADDED BY BHAKTIAJI ILHAM
+        $page = 'Invitation/Show';
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang', 'shopee'])) {
+            $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
+        }
 
         return Inertia::render($page, [
             'invitation' => $invitation,

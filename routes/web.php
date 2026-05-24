@@ -140,7 +140,7 @@ Route::middleware(['auth'])->group(function () {
 // ═══════════════════════════════════════
 // Onboarding Wizard
 // ═══════════════════════════════════════
-Route::middleware(['auth', 'verified'])->prefix('wizard')->name('wizard.')->group(function () {
+Route::middleware(['auth'])->prefix('wizard')->name('wizard.')->group(function () {
     Route::get('/verification', [WizardController::class, 'verification'])->name('verification');
     Route::post('/verification', [WizardController::class, 'completeVerification'])->name('verification.complete');
 
@@ -161,7 +161,7 @@ Route::middleware(['auth', 'verified'])->prefix('wizard')->name('wizard.')->grou
 // ═══════════════════════════════════════
 // User Dashboard
 // ═══════════════════════════════════════
-Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
+Route::middleware(['auth', 'onboarding'])->group(function () {
     // Main Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -250,7 +250,7 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
 // ═══════════════════════════════════════
 // Admin Panel (Reseller + Super Admin)
 // ═══════════════════════════════════════
-Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', AdminUserController::class)->only(['index', 'show']);
     Route::get('/live-tamu', [AdminLiveTamuController::class, 'index'])->name('live-tamu');
@@ -283,12 +283,13 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 // ═══════════════════════════════════════
 // Super Admin Panel
 // ═══════════════════════════════════════
-Route::middleware(['auth', 'verified', 'super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
+Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
     Route::get('/', [\App\Http\Controllers\SuperAdmin\SuperAdminDashboardController::class, 'index'])->name('dashboard');
 
     // Reseller Management
     Route::resource('resellers', \App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class);
     Route::post('/resellers/{reseller}/prices', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'updatePrices'])->name('resellers.prices');
+    Route::post('/resellers/{reseller}/reset-password', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'resetPassword'])->name('resellers.resetPassword');
 
     // Global Management (themes, plans, music, quotes, settings)
     Route::resource('plans', AdminPlanController::class);

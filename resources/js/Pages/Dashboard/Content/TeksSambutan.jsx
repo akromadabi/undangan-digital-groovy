@@ -4,6 +4,52 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 
 const religionLabels = { islam: '☪️ Islam', kristen: '✝️ Kristen', hindu: '🕉️ Hindu', buddha: '☸️ Buddha', umum: '🌐 Umum' };
 
+const defaultOpeningTemplates = {
+    islam: {
+        title: 'Bismillahirrahmanirrahim',
+        text: "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan putra-putri kami."
+    },
+    kristen: {
+        title: 'Puji dan Syukur kepada Tuhan Yesus',
+        text: "Shalom,\n\nDengan memohon kasih, karunia, dan kemurahan Tuhan Yesus Kristus, kami bermaksud menyelenggarakan ibadah pemberkatan pernikahan kudus kami."
+    },
+    hindu: {
+        title: 'Om Swastyastu',
+        text: "Om Swastyastu,\n\nAtas Asung Kertha Wara Nugraha Ida Sang Hyang Widhi Wasa, kami bermaksud menyelenggarakan upacara pawiwahan (pernikahan) putra-putri kami."
+    },
+    buddha: {
+        title: 'Namo Buddhaya',
+        text: "Namo Buddhaya,\n\nDengan memohon berkah Sang Tiratana dan diiringi rasa syukur, kami bermaksud menyelenggarakan upacara pernikahan putra-putri kami."
+    },
+    umum: {
+        title: 'Salam Sejahtera',
+        text: "Salam Sejahtera,\n\nDengan penuh rasa syukur dan kebahagiaan, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami."
+    }
+};
+
+const defaultClosingTemplates = {
+    islam: {
+        title: 'Terima Kasih',
+        text: "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.\n\nAtas kehadiran dan doa restunya, kami mengucapkan terima kasih.\n\nWassalamu'alaikum Warahmatullahi Wabarakatuh"
+    },
+    kristen: {
+        title: 'Terima Kasih',
+        text: "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.\n\nAtas kehadiran dan doa restu Bapak/Ibu/Saudara/i, kami mengucapkan terima kasih.\n\nTuhan Yesus memberkati."
+    },
+    hindu: {
+        title: 'Matur Suksma',
+        text: "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.\n\nAtas kehadiran dan doa restu Bapak/Ibu/Saudara/i, kami mengucapkan terima kasih.\n\nOm Shanti Shanti Shanti Om"
+    },
+    buddha: {
+        title: 'Terima Kasih',
+        text: "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.\n\nAtas kehadiran dan doa restu Bapak/Ibu/Saudara/i, kami mengucapkan terima kasih.\n\nSabbe Satta Bhavantu Sukhitatta (Semoga semua makhluk hidup berbahagia)."
+    },
+    umum: {
+        title: 'Terima Kasih',
+        text: "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.\n\nAtas kehadiran dan doa restunya, kami mengucapkan terima kasih."
+    }
+};
+
 export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
     const { flash } = usePage().props;
     const [activeTab, setActiveTab] = useState('opening');
@@ -40,7 +86,27 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
 
     const handleReligionChange = (val) => {
         setSelectedReligion(val);
-        openingForm.setData('religion', val);
+        
+        const oTemp = defaultOpeningTemplates[val];
+        if (oTemp) {
+            openingForm.setData(prev => ({
+                ...prev,
+                religion: val,
+                opening_title: oTemp.title,
+                opening_text: oTemp.text,
+            }));
+        } else {
+            openingForm.setData('religion', val);
+        }
+
+        const cTemp = defaultClosingTemplates[val];
+        if (cTemp) {
+            closingForm.setData(prev => ({
+                ...prev,
+                closing_title: cTemp.title,
+                closing_text: cTemp.text,
+            }));
+        }
     };
 
     const handleQuoteSelect = (quoteId) => {
