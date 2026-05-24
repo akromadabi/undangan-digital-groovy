@@ -25,16 +25,35 @@ class DomainHelper
             return null;
         }
 
-        // If host is a subdomain of central domain (e.g., brand.undangan.com)
+        $subdomain = null;
+
+        // 1. Direct check: if host ends with .centralHost
         if (str_ends_with($host, '.' . $centralHost)) {
             $subdomain = str_replace('.' . $centralHost, '', $host);
-            
+        } else {
+            // 2. Fallback check: in case centralHost has a prefix like 'u.siapp.in' but host is 'hello.u.siapp.in'
+            // or vice versa (centralHost is 'siapp.in' and host is 'hello.u.siapp.in')
+            $centralParts = explode('.', $centralHost);
+            if (count($centralParts) >= 2) {
+                // Get the root domain (e.g., 'siapp.in' from 'u.siapp.in' or 'siapp.in')
+                $rootDomain = implode('.', array_slice($centralParts, -2));
+                if (str_ends_with($host, '.' . $rootDomain)) {
+                    $subdomain = str_replace('.' . $rootDomain, '', $host);
+                }
+            }
+        }
+
+        if ($subdomain) {
+            // Extract the base subdomain part (e.g., 'hello' from 'hello.u')
+            $subdomainParts = explode('.', $subdomain);
+            $baseSubdomain = $subdomainParts[0];
+
             // Exclude system subdomains
-            if (in_array($subdomain, ['admin', 'superadmin', 'super-admin', 'www', 'api', 'localhost'])) {
+            if (in_array($baseSubdomain, ['admin', 'superadmin', 'super-admin', 'www', 'api', 'localhost', 'u'])) {
                 return null;
             }
 
-            return ResellerSetting::where('subdomain', $subdomain)
+            return ResellerSetting::where('subdomain', $baseSubdomain)
                 ->where('is_active', true)
                 ->first();
         }
