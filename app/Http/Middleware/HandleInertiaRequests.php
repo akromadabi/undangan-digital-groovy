@@ -55,6 +55,7 @@ class HandleInertiaRequests extends Middleware
             'resellerSubdomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->subdomain : null,
             'resellerCustomDomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->custom_domain : null,
             'appUrl' => config('app.url'),
+            'urlMismatch' => (str_contains($request->getHost(), 'siapp.in') && str_contains(config('app.url'), 'siap.in') && !str_contains(config('app.url'), 'siapp.in')),
             'locale' => app()->getLocale(),
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),

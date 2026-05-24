@@ -21,7 +21,7 @@ const menuItems = [
 ];
 
 export default function SuperAdminLayout({ children, title }) {
-    const { auth } = usePage().props;
+    const { auth, urlMismatch } = usePage().props;
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
     const [avatarOpen, setAvatarOpen] = useState(false);
     const avatarRef = useRef(null);
@@ -126,7 +126,7 @@ export default function SuperAdminLayout({ children, title }) {
                                     <div className="py-1">
                                         <Link href="/admin" className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#555] hover:bg-[#f5f3f0] transition-colors"
                                             onClick={() => setAvatarOpen(false)}>
-                                            <SvgIcon d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" className="w-4 h-4 text-[#999]" />
+                                            <SvgIcon d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" className="w-4 h-4 text-[#999]" />
                                             Admin Panel
                                         </Link>
                                         <Link href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#555] hover:bg-[#f5f3f0] transition-colors"
@@ -150,6 +150,21 @@ export default function SuperAdminLayout({ children, title }) {
 
                 {/* Page Content */}
                 <main className="flex-1 p-4 lg:p-8 pb-20 lg:pb-8 overflow-x-hidden page-enter">
+                    {urlMismatch && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                            <div className="flex items-start gap-2.5">
+                                <svg className="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <div>
+                                    <span className="font-bold text-red-700">Peringatan Mismatch Domain (Kritis):</span> Konfigurasi <code className="bg-red-100 px-1 py-0.5 rounded font-mono text-xs text-red-700">APP_URL</code> di berkas <code className="bg-red-100 px-1 py-0.5 rounded font-mono text-xs text-red-700">.env</code> server Anda masih menggunakan <strong className="font-semibold text-red-950">siap.in</strong> (satu p), sedangkan Anda saat ini mengakses melalui domain <strong className="font-semibold text-red-950">siapp.in</strong> (dua p). Hal ini yang menyebabkan error <strong className="font-bold text-red-750">419 Page Expired</strong> pada penambahan/pengeditan/penghapusan karena penolakan cookie oleh browser.
+                                </div>
+                            </div>
+                            <div className="text-xs font-semibold bg-red-600 text-white px-3 py-1.5 rounded-lg shrink-0 text-center">
+                                Silakan jalankan: bash deploy.sh
+                            </div>
+                        </div>
+                    )}
                     <div className="stagger-children">
                         {children}
                     </div>
