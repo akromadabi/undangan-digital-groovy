@@ -52,7 +52,11 @@ class ResellerLandingPageController extends Controller
             ->select('id', 'name', 'slug', 'thumbnail', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
             ->latest()
             ->take(8)
-            ->get();
+            ->get()
+            ->map(function ($theme) {
+                $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
+                return $theme;
+            });
  
         $appUrl = config('app.url');
         $parsed = parse_url($appUrl);
@@ -97,11 +101,14 @@ class ResellerLandingPageController extends Controller
  
         $reseller = $setting->reseller;
  
-        // Get all active themes
         $themes = \App\Models\Theme::where('is_active', true)
             ->select('id', 'name', 'slug', 'thumbnail', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
             ->orderBy('sort_order')
-            ->get();
+            ->get()
+            ->map(function ($theme) {
+                $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
+                return $theme;
+            });
  
         $appUrl = config('app.url');
         $parsed = parse_url($appUrl);

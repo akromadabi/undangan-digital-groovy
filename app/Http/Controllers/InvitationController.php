@@ -225,4 +225,71 @@ class InvitationController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function demo(Request $request, string $slug)
+    {
+        $theme = \App\Models\Theme::where('slug', $slug)->firstOrFail();
+        
+        $defaultData = $theme->default_data ?? [];
+        
+        $invitation = new Invitation();
+        $invitation->id = 0;
+        $invitation->theme_id = $theme->id;
+        $invitation->title = $defaultData['invitation']['cover_title'] ?? $theme->name;
+        $invitation->slug = $slug;
+        $invitation->opening_title = $defaultData['invitation']['opening_title'] ?? 'The Wedding Of';
+        $invitation->opening_text = $defaultData['invitation']['opening_text'] ?? '';
+        $invitation->opening_ayat = $defaultData['invitation']['opening_ayat'] ?? '';
+        $invitation->opening_ayat_translation = $defaultData['invitation']['opening_ayat_translation'] ?? '';
+        $invitation->opening_ayat_source = $defaultData['invitation']['opening_ayat_source'] ?? '';
+        $invitation->closing_title = $defaultData['invitation']['closing_title'] ?? 'THANK YOU';
+        $invitation->closing_text = $defaultData['invitation']['closing_text'] ?? '';
+        $invitation->cover_title = $defaultData['invitation']['cover_title'] ?? 'Bimo & Raras';
+        $invitation->cover_subtitle = $defaultData['invitation']['cover_subtitle'] ?? '';
+        $invitation->countdown_target_date = $defaultData['invitation']['countdown_target_date'] ?? now()->addDays(30)->toDateTimeString();
+        $invitation->music_url = $defaultData['invitation']['music_url'] ?? '';
+        $invitation->music_autoplay = $defaultData['invitation']['music_autoplay'] ?? true;
+        $invitation->enable_rsvp = $defaultData['invitation']['enable_rsvp'] ?? true;
+        $invitation->enable_wishes = $defaultData['invitation']['enable_wishes'] ?? true;
+        $invitation->show_countdown = true;
+        $invitation->show_animations = true;
+        $invitation->save_the_date_enabled = true;
+        $invitation->particle_type = $defaultData['invitation']['particle_type'] ?? 'gold-dust';
+        
+        $invitation->setRelation('theme', $theme);
+
+        $brideGrooms = collect($defaultData['bride_grooms'] ?? [])->map(fn($bg) => new \App\Models\BrideGroom($bg));
+        $events = collect($defaultData['events'] ?? [])->map(fn($ev) => new \App\Models\Event($ev));
+        $loveStories = collect($defaultData['love_stories'] ?? [])->map(fn($ls) => new \App\Models\LoveStory($ls));
+        $galleries = collect($defaultData['galleries'] ?? [])->map(fn($gl) => new \App\Models\Gallery($gl));
+        $bankAccounts = collect($defaultData['bank_accounts'] ?? [])->map(fn($bk) => new \App\Models\BankAccount($bk));
+        $wishes = collect($defaultData['wishes'] ?? [])->map(fn($ws) => new Wish($ws));
+
+        $sections = $theme->sections()->orderBy('default_order')->get()->map(function($ts) {
+            return new \App\Models\InvitationSection([
+                'section_key' => $ts->section_key,
+                'section_name' => $ts->section_name,
+                'sort_order' => $ts->default_order,
+                'is_visible' => true
+            ]);
+        });
+
+        $page = 'Invitation/Show';
+        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang', 'shopee', 'manchester-united'])) {
+            $page = 'Invitation/' . $theme->slug . '/DynamicIndex';
+        }
+
+        return Inertia::render($page, [
+            'invitation' => $invitation,
+            'sections' => $sections,
+            'brideGrooms' => $brideGrooms,
+            'events' => $events,
+            'galleries' => $galleries,
+            'loveStories' => $loveStories,
+            'bankAccounts' => $bankAccounts,
+            'guest' => new Guest(['name' => 'Tamu Kehormatan', 'slug' => 'tamu']),
+            'wishes' => $wishes,
+            'isDemo' => true,
+        ]);
+    }
 }

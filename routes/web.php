@@ -31,7 +31,13 @@ Route::get('/', function () {
         return app(\App\Http\Controllers\ResellerLandingPageController::class)->show($resellerSetting->subdomain);
     }
 
-    $themes = \App\Models\Theme::where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'slug', 'thumbnail', 'preview_url', 'category', 'is_premium']);
+    $themes = \App\Models\Theme::where('is_active', true)
+        ->orderBy('sort_order')
+        ->get(['id', 'name', 'slug', 'thumbnail', 'preview_url', 'category', 'is_premium'])
+        ->map(function ($theme) {
+            $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
+            return $theme;
+        });
 
     $recentInvitations = \App\Models\Invitation::where('is_active', true)
         ->where('is_private', false)
@@ -64,7 +70,11 @@ Route::get('/katalog-tema', function () {
     $themes = \App\Models\Theme::where('is_active', true)
         ->select('id', 'name', 'slug', 'thumbnail', 'category', 'is_premium', 'preview_url')
         ->orderBy('sort_order')
-        ->get();
+        ->get()
+        ->map(function ($theme) {
+            $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
+            return $theme;
+        });
 
     return Inertia::render('Themes', [
         'themes' => $themes,
@@ -80,6 +90,8 @@ Route::post('/u/{slug}/rsvp', [InvitationController::class, 'submitRsvp'])->name
 Route::post('/u/{slug}/wish', [InvitationController::class, 'submitWish'])->name('invitation.wish');
 Route::post('/u/{slug}/opened', [InvitationController::class, 'markOpened'])->name('invitation.opened');
 Route::get('/u/{slug}/checkin', [InvitationController::class, 'checkin'])->name('invitation.checkin');
+Route::get('/demo/{slug}', [InvitationController::class, 'demo'])->name('demo.theme');
+
 // Demo tema — hanya untuk user yang login (mencegah ekspos template ke publik)
 Route::middleware(['auth'])->group(function () {
     Route::get('/demo-utary', function () {
