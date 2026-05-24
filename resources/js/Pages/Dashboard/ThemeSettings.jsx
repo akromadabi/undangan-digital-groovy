@@ -923,7 +923,6 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         Lihat Tutorial Custom Domain
                                     </button>
                                 </div>
-                                />
 
                                 {/* Modal Pengaturan Partikel */}
                                 {isParticleModalOpen && (
