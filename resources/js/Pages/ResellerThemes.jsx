@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect, useMemo } from 'react';
+import AnimatedLikeButton from '@/Components/AnimatedLikeButton';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -41,8 +42,74 @@ const themeConfig = {
 export default function ResellerThemes({ reseller, themes = [] }) {
     const T = themeConfig[reseller.template] || themeConfig.default;
     const isDark = T.name !== 'minimal';
+
+    const getLikesCount = (theme) => {
+        const base = Number(theme.base_likes || 0);
+        const real = Number(theme.real_likes || 0);
+        return base + real;
+    };
+
+    const getThumbnailUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http') || path.startsWith('/') || path.startsWith('data:')) {
+            return path;
+        }
+        return `/storage/${path}`;
+    };
     const [scrolled, setScrolled] = useState(false);
     const [activeCategory, setActiveCategory] = useState('Semua');
+
+    // Likes State
+    const [likes, setLikes] = useState({});
+    const [likedThemes, setLikedThemes] = useState({});
+
+    useEffect(() => {
+        try {
+            const localLikes = JSON.parse(localStorage.getItem('likedThemes') || '{}');
+            setLikedThemes(localLikes);
+        } catch(e) {}
+    }, []);
+
+    const handleLike = async (theme) => {
+        const isLiked = likedThemes[theme.id];
+        
+        setLikedThemes(prev => {
+            const next = { ...prev };
+            if (isLiked) {
+                delete next[theme.id];
+            } else {
+                next[theme.id] = true;
+            }
+            localStorage.setItem('likedThemes', JSON.stringify(next));
+            return next;
+        });
+        
+        setLikes(prev => {
+            const currentLikes = prev[theme.id] ?? (theme.base_likes + theme.real_likes);
+            return {
+                ...prev,
+                [theme.id]: isLiked ? Math.max(0, currentLikes - 1) : currentLikes + 1
+            };
+        });
+
+        const endpoint = `/theme/${theme.id}/like`;
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ liked: !isLiked })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setLikes(prev => ({ ...prev, [theme.id]: data.likes }));
+            }
+        } catch(e) { console.error('Like toggle failed', e); }
+    };
 
     useEffect(() => {
         const h = () => setScrolled(window.scrollY > 20);
@@ -82,12 +149,12 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                         </span>
                     </Link>
                     <div className="flex items-center gap-3">
-                        <Link href="/login" className="px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                        <a href={`${reseller.reseller_url || ''}/login`} className="px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
                             Masuk
-                        </Link>
-                        <Link href={`/register?ref=${reseller.ref}`} className={`px-5 py-2.5 bg-gradient-to-r ${T.accentGradient} text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all`}>
+                        </a>
+                        <a href={`${reseller.reseller_url || ''}/register?ref=${reseller.ref}`} className={`px-5 py-2.5 bg-gradient-to-r ${T.accentGradient} text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all`}>
                             Buat Undangan
-                        </Link>
+                        </a>
                     </div>
                 </div>
             </nav>
@@ -124,7 +191,7 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                         <div key={theme.id} className={`group relative rounded-2xl border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${T.name === 'elegant' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
                             <div className="aspect-[3/4] bg-gray-100 overflow-hidden relative">
                                 {theme.thumbnail ? (
-                                    <img src={`/storage/${theme.thumbnail}`} alt={theme.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <img src={getThumbnailUrl(theme.thumbnail)} alt={theme.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                 ) : (
                                     <div className={`w-full h-full flex items-center justify-center ${T.name === 'elegant' ? 'bg-slate-700' : 'bg-gradient-to-br from-gray-100 to-gray-50'}`}>
                                         <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
@@ -137,13 +204,20 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                                     <a href={theme.preview_url || '#'} target="_blank" rel="noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-lg text-gray-700 hover:text-gray-900 hover:scale-110 transition-all" title="Lihat Contoh">
                                         <Icon d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-4 h-4" />
                                     </a>
-                                    <Link href={`/register?ref=${reseller.ref}&theme=${theme.slug}`} className={`w-9 h-9 flex items-center justify-center rounded-full text-white shadow-lg hover:scale-110 transition-all bg-gradient-to-tr ${T.accentGradient}`} title="Order Tema">
+                                    <a href={`${reseller.reseller_url || ''}/register?ref=${reseller.ref}&theme=${theme.slug}`} className={`w-9 h-9 flex items-center justify-center rounded-full text-white shadow-lg hover:scale-110 transition-all bg-gradient-to-tr ${T.accentGradient}`} title="Order Tema">
                                         <Icon d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" className="w-4 h-4" />
-                                    </Link>
+                                    </a>
                                 </div>
                             </div>
                             <div className="p-4 flex-1 flex flex-col">
-                                <h4 className={`font-semibold text-sm ${T.name === 'elegant' ? 'text-white' : 'text-[#1a1a1a]'}`}>{theme.name}</h4>
+                                <div className="flex items-start justify-between gap-2">
+                                    <h4 className={`font-semibold text-sm truncate flex-1 ${T.name === 'elegant' ? 'text-white' : 'text-[#1a1a1a]'}`} title={theme.name}>{theme.name}</h4>
+                                    <AnimatedLikeButton
+                                        count={likes[theme.id] ?? getLikesCount(theme)}
+                                        liked={!!likedThemes[theme.id]}
+                                        onClick={() => handleLike(theme)}
+                                    />
+                                </div>
                                 <div className="flex items-center justify-between mt-1.5">
                                     <span className={`text-xs capitalize ${T.name === 'elegant' ? 'text-slate-400' : 'text-gray-400'}`}>{theme.category || 'Umum'}</span>
                                     {theme.is_premium ? (

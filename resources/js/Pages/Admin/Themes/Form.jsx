@@ -34,7 +34,7 @@ export default function Form({ theme }) {
         formData.append('folder', 'themes');
 
         try {
-            const response = await fetch('/dashboard/upload', {
+            const response = await fetch(`${adminRoutePrefix}/upload`, {
                 method: 'POST',
                 body: formData,
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },

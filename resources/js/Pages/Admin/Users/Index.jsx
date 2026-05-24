@@ -1,18 +1,22 @@
-import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '@/Layouts/AdminLayout';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
+import { Eye, Pencil } from 'lucide-react';
 
 export default function Index({ users, filters }) {
+    const { auth, adminRoutePrefix } = usePage().props;
     const userList = users?.data || [];
     const pagination = users?.links;
 
+    const isSuperAdmin = auth.user.role === 'super_admin';
+
     return (
-        <AdminLayout title="Manajemen User">
+        <DynamicAdminLayout title="Manajemen User">
             <Head title="Admin - Users" />
             <div className="space-y-6">
                 {/* Search */}
                 <div className="flex items-center gap-3">
                     <input type="text" defaultValue={filters?.search || ''} placeholder="Cari nama / email..."
-                        onKeyDown={(e) => e.key === 'Enter' && router.get('/admin/users', { search: e.target.value }, { preserveState: true })}
+                        onKeyDown={(e) => e.key === 'Enter' && router.get(`${adminRoutePrefix}/users`, { search: e.target.value }, { preserveState: true })}
                         className="flex-1 bg-white border border-[#e8e5e0] rounded-xl px-4 py-2.5 text-sm text-[#333] placeholder-[#bbb] focus:ring-1 focus:ring-[#E5654B] focus:border-[#E5654B]" />
                 </div>
 
@@ -22,6 +26,9 @@ export default function Index({ users, filters }) {
                         <thead className="bg-[#f8f7f4]">
                             <tr>
                                 <th className="text-left px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide">User</th>
+                                {isSuperAdmin && (
+                                    <th className="text-left px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide">Reseller</th>
+                                )}
                                 <th className="text-left px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide hidden sm:table-cell">Email</th>
                                 <th className="text-center px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide">Paket</th>
                                 <th className="text-center px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide">Tanggal</th>
@@ -42,6 +49,11 @@ export default function Index({ users, filters }) {
                                             </div>
                                         </div>
                                     </td>
+                                    {isSuperAdmin && (
+                                        <td className="px-5 py-3.5 text-[#555] font-medium">
+                                            {user.reseller?.reseller_settings?.brand_name || user.reseller?.name || 'Super Admin / Utama'}
+                                        </td>
+                                    )}
                                     <td className="px-5 py-3.5 text-[#777] hidden sm:table-cell">{user.email}</td>
                                     <td className="px-5 py-3.5 text-center">
                                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${user.active_subscription?.plan?.slug === 'platinum' ? 'bg-violet-50 text-violet-600' :
@@ -56,7 +68,16 @@ export default function Index({ users, filters }) {
                                         {new Date(user.created_at).toLocaleDateString('id-ID')}
                                     </td>
                                     <td className="px-5 py-3.5 text-center">
-                                        <Link href={`/admin/users/${user.id}`} className="text-[#E5654B] hover:text-[#c94f3a] text-xs font-semibold">Detail</Link>
+                                        <div className="flex items-center justify-center gap-1.5">
+                                            <Link href={`${adminRoutePrefix}/users/${user.id}`} className="p-2 bg-[#fdfdfd] hover:bg-slate-50 text-slate-600 hover:text-slate-900 rounded-xl transition-all inline-flex items-center justify-center border border-slate-100 shadow-sm" title="Lihat Detail">
+                                                <Eye size={15} />
+                                            </Link>
+                                            {isSuperAdmin && (
+                                                <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="p-2 bg-[#fdfdfd] hover:bg-amber-50 text-amber-600 hover:text-amber-700 rounded-xl transition-all inline-flex items-center justify-center border border-amber-100 shadow-sm" title="Edit User">
+                                                    <Pencil size={15} />
+                                                </Link>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -75,6 +96,7 @@ export default function Index({ users, filters }) {
                     </div>
                 )}
             </div>
-        </AdminLayout>
+        </DynamicAdminLayout>
     );
 }
+

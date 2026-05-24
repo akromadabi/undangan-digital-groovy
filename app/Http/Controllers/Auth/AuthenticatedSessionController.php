@@ -16,7 +16,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
         $autoLoginUsers = [];
 
@@ -35,10 +35,23 @@ class AuthenticatedSessionController extends Controller
                 ]);
         }
 
+        // Detect reseller branding from subdomain / custom domain
+        $resellerData = null;
+        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+        if ($resellerSetting) {
+            $reseller = $resellerSetting->reseller;
+            $resellerData = [
+                'brand_name' => $resellerSetting->brand_name ?: $reseller->name,
+                'brand_logo' => $resellerSetting->brand_logo ? '/storage/' . $resellerSetting->brand_logo : null,
+                'subdomain'  => $resellerSetting->subdomain,
+            ];
+        }
+
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
             'autoLoginUsers' => $autoLoginUsers,
+            'reseller' => $resellerData,
         ]);
     }
 

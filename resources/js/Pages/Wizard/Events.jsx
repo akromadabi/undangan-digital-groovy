@@ -49,7 +49,7 @@ export default function Events({ step, events }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('wizard.events.save'));
+        post(route('wizard.events.save', undefined, false));
     };
 
     return (
@@ -228,7 +228,7 @@ export default function Events({ step, events }) {
                 </button>
 
                 <div className="flex gap-4 mt-6">
-                    <button type="button" onClick={() => router.visit(route('wizard.profile'))}
+                    <button type="button" onClick={() => router.visit(route('wizard.profile', undefined, false))}
                         className="flex-1 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-lg transition-all text-center">
                         ← Kembali
                     </button>

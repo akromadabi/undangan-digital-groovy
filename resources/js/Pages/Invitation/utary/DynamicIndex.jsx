@@ -390,13 +390,12 @@ function CoupleSection({ invitation, brideGrooms, id }) {
                     </p>
                 </RevealDiv>
 
-                {/* Bride */}
                 <RevealDiv className="utary-profile">
-                    {globalShowPhotos && (
+                    {globalShowPhotos && bride.photo && (
                         <div className="utary-profile__frame-wrap">
                             <img src={frameProfile} alt="" className="utary-profile__frame" />
                             <img 
-                                src={bride.photo || utary1} 
+                                src={bride.photo} 
                                 alt={bride.name || 'Utary Adhita'} 
                                 className="utary-profile__photo" 
                                 style={{
@@ -433,11 +432,11 @@ function CoupleSection({ invitation, brideGrooms, id }) {
 
                 {/* Groom */}
                 <RevealDiv className="utary-profile">
-                    {globalShowPhotos && (
+                    {globalShowPhotos && groom.photo && (
                         <div className="utary-profile__frame-wrap">
                             <img src={frameProfile} alt="" className="utary-profile__frame" />
                             <img 
-                                src={groom.photo || utary2} 
+                                src={groom.photo} 
                                 alt={groom.name || 'Fachrul Rozi'} 
                                 className="utary-profile__photo" 
                                 style={{
@@ -1536,6 +1535,9 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
                 if (!enableWishes) return false;
                 if (enableRsvp) return false; // unified into rsvp
             }
+            if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return false;
+            if (s.section_key === 'gallery' && !(galleries?.length > 0)) return false;
+            if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return false;
             return true;
         })
         .sort((a, b) => a.sort_order - b.sort_order);

@@ -18,7 +18,7 @@ class AdminUserController extends Controller
         $user = auth()->user();
 
         $query = User::where('role', 'user')
-            ->with('activeSubscription.plan');
+            ->with(['activeSubscription.plan', 'reseller.resellerSettings']);
 
         // Reseller only sees their own users
         if ($user->isReseller()) {
@@ -38,7 +38,14 @@ class AdminUserController extends Controller
 
     public function show(User $user)
     {
-        $user->load(['invitation.brideGrooms', 'invitation.events', 'invitation.guests', 'invitation.wishes', 'invitation.rsvps', 'invitation.galleries', 'activeSubscription.plan', 'payments.plan']);
+        // Reseller can only view their own users
+        if (!auth()->user()->isSuperAdmin()) {
+            if ($user->reseller_id !== auth()->id()) {
+                abort(403, 'Unauthorized action.');
+            }
+        }
+
+        $user->load(['invitation.brideGrooms', 'invitation.events', 'invitation.guests', 'invitation.wishes', 'invitation.rsvps', 'invitation.galleries', 'activeSubscription.plan', 'payments.plan', 'reseller.resellerSettings']);
 
         $stats = null;
         if ($user->invitation) {
@@ -62,6 +69,10 @@ class AdminUserController extends Controller
 
     public function edit(User $user)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $user->load(['invitation.brideGrooms', 'invitation.events', 'activeSubscription.plan']);
 
         return Inertia::render('Admin/Users/Edit', [
@@ -72,6 +83,10 @@ class AdminUserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -102,12 +117,20 @@ class AdminUserController extends Controller
 
     public function destroy(User $user)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $user->delete();
         return redirect()->back()->with('success', 'User berhasil dihapus.');
     }
 
     public function resetPassword(Request $request, User $user)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'password' => 'required|string|min:6|confirmed',
         ]);
@@ -119,6 +142,10 @@ class AdminUserController extends Controller
 
     public function changePlan(Request $request, User $user)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'plan_id' => 'required|exists:subscription_plans,id',
         ]);
@@ -144,6 +171,10 @@ class AdminUserController extends Controller
 
     public function extendSubscription(Request $request, User $user)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'expires_at' => 'required|date|after:today',
         ]);

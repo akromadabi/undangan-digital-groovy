@@ -17,7 +17,7 @@ export default function Register({ reseller }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('register'), {
+        post(route('register', undefined, false), {
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };
@@ -127,7 +127,7 @@ export default function Register({ reseller }) {
 
                         <div className="text-center">
                             <span className="text-sm text-[#999]">Sudah punya akun? </span>
-                            <Link href={route('login')} className="text-sm font-semibold text-[#E5654B] hover:text-[#c94f3a]">
+                            <Link href="/login" className="text-sm font-semibold text-[#E5654B] hover:text-[#c94f3a]">
                                 Masuk
                             </Link>
                         </div>

@@ -1,21 +1,26 @@
-import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '@/Layouts/AdminLayout';
+import { Head, Link, usePage } from '@inertiajs/react';
+import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 
 export default function Show({ user, stats, siteUrl }) {
+    const { auth, adminRoutePrefix } = usePage().props;
     const subscription = user?.active_subscription;
     const invitation = user?.invitation;
     const formatCurrency = (a) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(a);
     const invitationUrl = invitation ? `${siteUrl}/u/${invitation.slug}` : null;
 
+    const isSuperAdmin = auth.user.role === 'super_admin';
+
     return (
-        <AdminLayout title={`Detail: ${user.name}`}>
+        <DynamicAdminLayout title={`Detail: ${user.name}`}>
             <Head title={`Admin - ${user.name}`} />
             <div className="max-w-3xl space-y-6">
                 <div className="flex items-center justify-between">
-                    <Link href="/admin/users" className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali ke Users</Link>
-                    <Link href={`/admin/users/${user.id}/edit`} className="px-4 py-2 bg-[#E5654B] hover:bg-[#c94f3a] text-white text-sm rounded-xl font-medium transition-colors shadow-sm">
-                        Edit User & Undangan
-                    </Link>
+                    <Link href={`${adminRoutePrefix}/users`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali ke Users</Link>
+                    {isSuperAdmin && (
+                        <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="px-4 py-2 bg-[#E5654B] hover:bg-[#c94f3a] text-white text-sm rounded-xl font-medium transition-colors shadow-sm">
+                            Edit User & Undangan
+                        </Link>
+                    )}
                 </div>
 
                 {/* Profile Card */}
@@ -40,6 +45,27 @@ export default function Show({ user, stats, siteUrl }) {
                         <div><span className="text-xs text-[#999]">Onboarding</span><p className="text-[#333] text-sm font-medium">Step {user.onboarding_step || 1}/5</p></div>
                     </div>
                 </div>
+
+                {/* Reseller Info (for Super Admin only) */}
+                {isSuperAdmin && (
+                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-4">
+                        <h3 className="font-bold text-[#1a1a1a] text-lg">Informasi Reseller</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <span className="text-xs text-[#999] block mb-0.5">Reseller</span>
+                                <p className="text-[#333] text-sm font-semibold">{user.reseller?.name || 'Super Admin / Utama'}</p>
+                            </div>
+                            <div>
+                                <span className="text-xs text-[#999] block mb-0.5">Subdomain Brand</span>
+                                <p className="text-[#333] text-sm font-semibold">{user.reseller?.reseller_settings?.brand_name || user.reseller?.reseller_settings?.subdomain || '-'}</p>
+                            </div>
+                            <div>
+                                <span className="text-xs text-[#999] block mb-0.5">Email Reseller</span>
+                                <p className="text-[#333] text-sm font-semibold">{user.reseller?.email || '-'}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Invitation Info + Link */}
                 {invitation && (
@@ -129,6 +155,6 @@ export default function Show({ user, stats, siteUrl }) {
                     </div>
                 )}
             </div>
-        </AdminLayout>
+        </DynamicAdminLayout>
     );
 }

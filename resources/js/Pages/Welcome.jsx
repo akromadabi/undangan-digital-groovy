@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 
 const testimonials = [
@@ -17,7 +17,17 @@ const features = [
 ];
 
 export default function Welcome({ auth, canLogin, canRegister, appName, themes = [], recentInvitations = [] }) {
+    const { flash } = usePage().props;
     const [scrolled, setScrolled] = useState(false);
+    const [showFlash, setShowFlash] = useState(true);
+
+    useEffect(() => {
+        if (flash?.error || flash?.success) {
+            setShowFlash(true);
+            const timer = setTimeout(() => setShowFlash(false), 6000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -28,6 +38,37 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
     return (
         <>
             <Head title="Undangan Digital Premium — Buat Undangan Pernikahan Online" />
+
+            {/* Flash Messages */}
+            {showFlash && (flash?.error || flash?.success) && (
+                <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className={`p-4 rounded-2xl shadow-xl border flex items-start gap-3 backdrop-blur-md ${
+                        flash.error 
+                            ? 'bg-red-50/90 border-red-200/80 text-red-900' 
+                            : 'bg-emerald-50/90 border-emerald-200/80 text-emerald-900'
+                    }`}>
+                        {flash.error ? (
+                            <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        ) : (
+                            <svg className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        )}
+                        <div className="flex-1 text-sm font-medium leading-relaxed">
+                            {flash.error || flash.success}
+                        </div>
+                        <button onClick={() => setShowFlash(false)} className={`p-1 rounded-lg transition-colors ${
+                            flash.error ? 'hover:bg-red-100 text-red-500' : 'hover:bg-emerald-100 text-emerald-500'
+                        }`}>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* ═══ NAVBAR ═══ */}
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
@@ -87,9 +128,11 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                         Desain elegan, fitur lengkap, dan mudah dibagikan. Buat undangan pernikahan Anda dalam hitungan menit.
                     </p>
                     <div className="flex items-center justify-center gap-4 mt-10">
-                        <Link href={canRegister ? route('register') : '#'} className="px-8 py-4 bg-gradient-to-r from-[#E5654B] to-[#ff7b5e] text-white rounded-2xl text-sm font-bold hover:shadow-2xl hover:shadow-[#E5654B]/30 transition-all hover:-translate-y-0.5">
-                            Buat Undangan Gratis
-                        </Link>
+                        {canRegister && (
+                            <Link href={route('register')} className="px-8 py-4 bg-gradient-to-r from-[#E5654B] to-[#ff7b5e] text-white rounded-2xl text-sm font-bold hover:shadow-2xl hover:shadow-[#E5654B]/30 transition-all hover:-translate-y-0.5">
+                                Buat Undangan Gratis
+                            </Link>
+                        )}
                         <a href="#preview" className="px-6 py-4 bg-white/10 backdrop-blur-sm text-white rounded-2xl text-sm font-medium hover:bg-white/20 transition-all border border-white/10">
                             Lihat Contoh
                         </a>
@@ -295,9 +338,11 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                 <div className="relative z-10 max-w-2xl mx-auto px-6 text-center">
                     <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Mulai Buat Undangan Anda</h2>
                     <p className="text-white/50 mt-4 max-w-md mx-auto">Cukup 5 menit untuk membuat undangan digital yang elegan dan siap dibagikan ke semua tamu.</p>
-                    <Link href={canRegister ? route('register') : '#'} className="inline-block mt-8 px-10 py-4 bg-gradient-to-r from-[#E5654B] to-[#ff7b5e] text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-[#E5654B]/30 transition-all hover:-translate-y-0.5">
-                        Buat Undangan Sekarang — Gratis
-                    </Link>
+                    {canRegister && (
+                        <Link href={route('register')} className="inline-block mt-8 px-10 py-4 bg-gradient-to-r from-[#E5654B] to-[#ff7b5e] text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-[#E5654B]/30 transition-all hover:-translate-y-0.5">
+                            Buat Undangan Sekarang — Gratis
+                        </Link>
+                    )}
                 </div>
             </section>
 

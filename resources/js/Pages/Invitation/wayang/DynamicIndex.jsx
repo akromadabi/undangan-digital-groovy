@@ -385,7 +385,7 @@ function CoupleSection({ brideGrooms, language, id }) {
 
         return (
             <div className="wy-couple-card">
-                {globalShowPhotos && (
+                {globalShowPhotos && m.photo && (
                     <Reveal className="wy-profile-frame-wrap" variant="zoom">
                         <img src={finalPhoto} className="wy-profile-photo" alt={m.full_name} />
                         <img src={ASSETS.gunungan} className="wy-profile-wayang-overlay" alt="Wayang Ornament" />
@@ -1176,6 +1176,9 @@ export default function WayangTheme({
             .filter(s => s.is_visible && validKeys.includes(s.section_key))
             .filter(s => s.section_key !== 'livestream' || hasStreamUrl)
             .filter(s => globalShowPhotos ? true : s.section_key !== 'gallery')
+            .filter(s => s.section_key !== 'love_story' || (loveStories && loveStories.length > 0))
+            .filter(s => s.section_key !== 'gallery' || (galleries && galleries.length > 0))
+            .filter(s => s.section_key !== 'bank' || (bankAccounts && bankAccounts.length > 0))
             .sort((a, b) => a.sort_order - b.sort_order);
     }, [sections, invitation, events]);
 

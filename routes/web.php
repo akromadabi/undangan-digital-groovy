@@ -43,7 +43,7 @@ Route::get('/', function () {
 
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
+        'canRegister' => false,
         'appName' => config('app.name'),
         'themes' => $themes,
         'recentInvitations' => $recentInvitations,
@@ -52,6 +52,25 @@ Route::get('/', function () {
 
 // Reseller Landing Page (public)
 Route::get('/r/{subdomain}', [\App\Http\Controllers\ResellerLandingPageController::class, 'show'])->name('reseller.landing');
+Route::get('/r/{subdomain}/themes', [\App\Http\Controllers\ResellerLandingPageController::class, 'themes'])->name('reseller.themes');
+
+Route::get('/katalog-tema', function () {
+    $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
+    if ($resellerSetting) {
+        return app(\App\Http\Controllers\ResellerLandingPageController::class)->themes($resellerSetting->subdomain);
+    }
+
+    // Domain utama: tampilkan katalog semua tema global
+    $themes = \App\Models\Theme::where('is_active', true)
+        ->select('id', 'name', 'slug', 'thumbnail', 'category', 'is_premium', 'preview_url')
+        ->orderBy('sort_order')
+        ->get();
+
+    return Inertia::render('Themes', [
+        'themes' => $themes,
+        'appName' => config('app.name'),
+    ]);
+})->name('themes');
 
 // ═══════════════════════════════════════
 // Public Invitation (no auth needed)
@@ -61,11 +80,14 @@ Route::post('/u/{slug}/rsvp', [InvitationController::class, 'submitRsvp'])->name
 Route::post('/u/{slug}/wish', [InvitationController::class, 'submitWish'])->name('invitation.wish');
 Route::post('/u/{slug}/opened', [InvitationController::class, 'markOpened'])->name('invitation.opened');
 Route::get('/u/{slug}/checkin', [InvitationController::class, 'checkin'])->name('invitation.checkin');
-Route::get('/demo-utary', function () {
-    return Inertia::render('Invitation/utary/Index');
-});
-Route::get('/demo-aruna', function () {
-    return Inertia::render('Invitation/aruna/Index');
+// Demo tema — hanya untuk user yang login (mencegah ekspos template ke publik)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/demo-utary', function () {
+        return Inertia::render('Invitation/utary/Index');
+    });
+    Route::get('/demo-aruna', function () {
+        return Inertia::render('Invitation/aruna/Index');
+    });
 });
 
 // Public Live Tamu fullscreen (no auth)
@@ -230,17 +252,12 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
 // ═══════════════════════════════════════
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::resource('users', AdminUserController::class);
+    Route::resource('users', AdminUserController::class)->only(['index', 'show']);
     Route::get('/live-tamu', [AdminLiveTamuController::class, 'index'])->name('live-tamu');
     Route::get('/live-tamu/data', [AdminLiveTamuController::class, 'data'])->name('live-tamu.data');
 
     // File Upload (admin)
     Route::post('/upload', [\App\Http\Controllers\Dashboard\DashboardController::class, 'upload'])->name('upload');
-
-    // User Management Actions
-    Route::post('/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.resetPassword');
-    Route::post('/users/{user}/change-plan', [AdminUserController::class, 'changePlan'])->name('users.changePlan');
-    Route::post('/users/{user}/extend-subscription', [AdminUserController::class, 'extendSubscription'])->name('users.extendSubscription');
 
     // Reseller Settings (branding, landing page, domain)
     Route::get('/branding', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'branding'])->name('branding');
@@ -293,9 +310,11 @@ Route::middleware(['auth', 'verified', 'super_admin'])->prefix('super-admin')->n
     Route::put('/quotes/{id}', [\App\Http\Controllers\Admin\AdminQuoteController::class, 'update'])->name('quotes.update');
     Route::delete('/quotes/{id}', [\App\Http\Controllers\Admin\AdminQuoteController::class, 'destroy'])->name('quotes.destroy');
 
-    // All Users (super admin can see all)
-    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-    Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+    // All Users (super admin can manage all)
+    Route::resource('users', AdminUserController::class);
+    Route::post('/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.resetPassword');
+    Route::post('/users/{user}/change-plan', [AdminUserController::class, 'changePlan'])->name('users.changePlan');
+    Route::post('/users/{user}/extend-subscription', [AdminUserController::class, 'extendSubscription'])->name('users.extendSubscription');
 
     // File Upload
     Route::post('/upload', [\App\Http\Controllers\Dashboard\DashboardController::class, 'upload'])->name('upload');

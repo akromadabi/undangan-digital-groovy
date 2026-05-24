@@ -10,33 +10,40 @@ export default function LinkStep({ step, currentSlug }) {
     const [checking, setChecking] = useState(false);
     const [available, setAvailable] = useState(null);
 
-    // Auto check availability as user types
-    useEffect(() => {
-        if (data.slug.length < 3) {
+    // Slug tidak berubah dari currentSlug yang sudah disimpan = link milik sendiri
+    const isUnchanged = data.slug === currentSlug && !!currentSlug;
+    // Tombol aktif hanya jika: link milik sendiri, atau sudah dicek dan tersedia
+    const canSubmit = isUnchanged || available === true;
+
+    const doCheck = async (slugValue) => {
+        setChecking(true);
+        try {
+            const res = await fetch(route('wizard.link.check', undefined, false), {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content 
+                },
+                body: JSON.stringify({ slug: slugValue }),
+            });
+            if (!res.ok) throw new Error('Network error');
+            const resData = await res.json();
+            setAvailable(resData.available);
+            return resData.available;
+        } catch (e) {
             setAvailable(null);
-            return;
+            return null;
+        } finally {
+            setChecking(false);
         }
+    };
 
-        const timer = setTimeout(async () => {
-            setChecking(true);
-            try {
-                const res = await fetch(route('wizard.link.check'), {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content 
-                    },
-                    body: JSON.stringify({ slug: data.slug }),
-                });
-                const resData = await res.json();
-                setAvailable(resData.available);
-            } catch (e) {
-                setAvailable(null);
-            } finally {
-                setChecking(false);
-            }
-        }, 500);
+    // Auto check availability as user types (debounced 500ms)
+    useEffect(() => {
+        if (isUnchanged) { setAvailable(null); return; }
+        if (data.slug.length < 3) { setAvailable(null); return; }
 
+        const timer = setTimeout(() => doCheck(data.slug), 500);
         return () => clearTimeout(timer);
     }, [data.slug]);
 
@@ -44,31 +51,29 @@ export default function LinkStep({ step, currentSlug }) {
         e.preventDefault();
         if (data.slug.length < 3 || processing) return;
 
-        // If not already verified as available, check now
+        if (isUnchanged) { post(route('wizard.link.save', undefined, false)); return; }
+
         if (available === null) {
-            setChecking(true);
-            try {
-                const res = await fetch(route('wizard.link.check'), {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content 
-                    },
-                    body: JSON.stringify({ slug: data.slug }),
-                });
-                const resData = await res.json();
-                setAvailable(resData.available);
-                if (resData.available) {
-                    post(route('wizard.link.save'));
-                }
-            } catch (e) {
-                setAvailable(false);
-            } finally {
-                setChecking(false);
-            }
+            const ok = await doCheck(data.slug);
+            if (ok) post(route('wizard.link.save', undefined, false));
         } else if (available) {
-            post(route('wizard.link.save'));
+            post(route('wizard.link.save', undefined, false));
         }
+    };
+
+    // Tentukan warna border input berdasarkan status
+    const borderClass = checking
+        ? 'border-gray-300'
+        : isUnchanged || available === true
+            ? 'border-emerald-400 focus-within:border-emerald-500'
+            : available === false
+                ? 'border-red-400 focus-within:border-red-500'
+                : 'border-gray-200 focus-within:border-emerald-400';
+
+    // Buat saran nama alternatif jika tidak tersedia
+    const makeSuggestion = (slug) => {
+        const suffix = Math.floor(Math.random() * 900 + 100);
+        return `${slug}-${suffix}`;
     };
 
     return (
@@ -80,7 +85,7 @@ export default function LinkStep({ step, currentSlug }) {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden focus-within:border-emerald-400 transition-colors">
+                    <div className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors ${borderClass}`}>
                         <span className="bg-gray-50 px-4 py-3 text-sm text-gray-400 border-r whitespace-nowrap">
                             {typeof window !== 'undefined' ? window.location.origin.replace(/https?:\/\//, '') : 'undangan-digital.test'}/u/
                         </span>
@@ -98,32 +103,63 @@ export default function LinkStep({ step, currentSlug }) {
                         />
                     </div>
 
-                    {/* Auto-check status info */}
-                    <div className="min-h-[24px] mt-2 px-1">
+                    {/* Status ketersediaan */}
+                    <div className="min-h-[44px] mt-2 px-1">
+                        {/* Minimal 3 karakter */}
+                        {!checking && data.slug.length > 0 && data.slug.length < 3 && (
+                            <p className="text-xs text-amber-600 font-medium">⚠ Link minimal 3 karakter</p>
+                        )}
+                        {/* Sedang memeriksa */}
                         {checking && (
-                            <p className="text-xs text-gray-400 flex items-center gap-1">
-                                <span className="w-3.5 h-3.5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+                            <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                                <span className="w-3.5 h-3.5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin inline-block"></span>
                                 Memeriksa ketersediaan...
                             </p>
                         )}
-                        {!checking && available === true && (
-                            <p className="text-xs text-emerald-600 font-medium">✓ Link tersedia!</p>
+                        {/* Link milik sendiri */}
+                        {!checking && isUnchanged && (
+                            <p className="text-xs text-emerald-600 font-medium">✓ Ini link undangan Anda saat ini</p>
                         )}
-                        {!checking && available === false && (
-                            <p className="text-xs text-red-500 font-medium">✗ Link sudah dipakai. Silakan gunakan kombinasi nama lain.</p>
+                        {/* Tersedia */}
+                        {!checking && !isUnchanged && available === true && (
+                            <p className="text-xs text-emerald-600 font-medium">✓ Link tersedia! Klik Lanjutkan untuk menggunakannya.</p>
+                        )}
+                        {/* Tidak tersedia */}
+                        {!checking && !isUnchanged && available === false && (
+                            <div className="space-y-1">
+                                <p className="text-xs text-red-500 font-medium">
+                                    ✗ Link <strong>"{data.slug}"</strong> sudah digunakan. Silakan pilih nama lain.
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                    Coba misalnya: <button
+                                        type="button"
+                                        onClick={() => { setData('slug', makeSuggestion(data.slug)); setAvailable(null); }}
+                                        className="text-emerald-600 font-semibold hover:underline"
+                                    >{makeSuggestion(data.slug)}</button>
+                                </p>
+                            </div>
+                        )}
+                        {/* Belum dicek (sudah 3+ karakter tapi masih waiting) */}
+                        {!checking && !isUnchanged && available === null && data.slug.length >= 3 && (
+                            <p className="text-xs text-gray-300">Menunggu pengecekan...</p>
                         )}
                         {errors.slug && (
-                            <p className="text-xs text-red-500 font-medium">✗ {errors.slug}</p>
+                            <p className="text-xs text-red-500 font-medium mt-1">✗ {errors.slug}</p>
                         )}
                     </div>
 
                     <button
                         type="submit"
-                        disabled={processing || checking || data.slug.length < 3 || available === false}
-                        className="w-full mt-2 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        disabled={processing || checking || data.slug.length < 3 || !canSubmit}
+                        className="w-full mt-2 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {processing ? 'Menyimpan...' : checking ? 'Memeriksa...' : 'Lanjutkan →'}
                     </button>
+
+                    <div className="mt-5 p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-100/60 text-left text-xs text-emerald-800 leading-relaxed">
+                        <p className="font-semibold flex items-center gap-1.5 mb-1">💡 Info</p>
+                        <p>Anda bisa mengubah nama link ini nanti di dashboard. Anda juga bisa mengubah dengan domain nama Anda sendiri.</p>
+                    </div>
                 </form>
             </div>
         </WizardLayout>

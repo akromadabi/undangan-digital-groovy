@@ -466,7 +466,7 @@ function BrideGroomSection({ brideGrooms }) {
 
             {/* Groom */}
             <Reveal className="lx4-mempelai-card" variant="left">
-                {globalShowPhotos && (
+                {globalShowPhotos && groom.photo && (
                     <div className="lx4-mempelai-photo-wrap">
                         <img src={groomPhoto} alt={groom.full_name || 'Groom'} className="lx4-mempelai-photo" />
                     </div>
@@ -501,7 +501,7 @@ function BrideGroomSection({ brideGrooms }) {
 
             {/* Bride */}
             <Reveal className="lx4-mempelai-card" variant="right">
-                {globalShowPhotos && (
+                {globalShowPhotos && bride.photo && (
                     <div className="lx4-mempelai-photo-wrap">
                         <img src={bridePhoto} alt={bride.full_name || 'Bride'} className="lx4-mempelai-photo" />
                     </div>

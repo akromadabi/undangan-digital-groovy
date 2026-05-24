@@ -19,7 +19,7 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(Request $request): Response
+    public function create(Request $request)
     {
         $resellerData = null;
         $ref = $request->ref;
@@ -47,6 +47,10 @@ class RegisteredUserController extends Controller
                     'ref' => $ref,
                 ];
             }
+        }
+
+        if (!$resellerData) {
+            return redirect('/')->with('error', 'Pendaftaran tidak dapat dilakukan melalui domain utama. Silakan mendaftar melalui website reseller kami.');
         }
 
         return Inertia::render('Auth/Register', [
@@ -89,6 +93,10 @@ class RegisteredUserController extends Controller
             }
         }
 
+        if (!$resellerId) {
+            return redirect('/')->with('error', 'Pendaftaran tidak dapat dilakukan melalui domain utama. Silakan mendaftar melalui website reseller kami.');
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -109,3 +117,4 @@ class RegisteredUserController extends Controller
         return redirect()->route('wizard.link');
     }
 }
+

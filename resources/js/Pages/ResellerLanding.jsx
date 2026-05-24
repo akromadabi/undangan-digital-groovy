@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import AnimatedLikeButton from '@/Components/AnimatedLikeButton';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -130,6 +131,79 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
     const isDark = T.name !== 'minimal';
     const [scrolled, setScrolled] = useState(false);
 
+    const getLikesCount = (theme) => {
+        const base = Number(theme.base_likes || 0);
+        const real = Number(theme.real_likes || 0);
+        return base + real;
+    };
+
+    const getThumbnailUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http') || path.startsWith('/') || path.startsWith('data:')) {
+            return path;
+        }
+        return `/storage/${path}`;
+    };
+
+    const getThemesUrl = () => {
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/r/')) {
+            return `/r/${reseller.ref}/themes`;
+        }
+        return '/katalog-tema';
+    };
+
+    // Likes State
+    const [likes, setLikes] = useState({});
+    const [likedThemes, setLikedThemes] = useState({});
+
+    useEffect(() => {
+        try {
+            const localLikes = JSON.parse(localStorage.getItem('likedThemes') || '{}');
+            setLikedThemes(localLikes);
+        } catch(e) {}
+    }, []);
+
+    const handleLike = async (theme) => {
+        const isLiked = likedThemes[theme.id];
+        
+        setLikedThemes(prev => {
+            const next = { ...prev };
+            if (isLiked) {
+                delete next[theme.id];
+            } else {
+                next[theme.id] = true;
+            }
+            localStorage.setItem('likedThemes', JSON.stringify(next));
+            return next;
+        });
+        
+        setLikes(prev => {
+            const currentLikes = prev[theme.id] ?? (theme.base_likes + theme.real_likes);
+            return {
+                ...prev,
+                [theme.id]: isLiked ? Math.max(0, currentLikes - 1) : currentLikes + 1
+            };
+        });
+
+        const endpoint = `/theme/${theme.id}/like`;
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ liked: !isLiked })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setLikes(prev => ({ ...prev, [theme.id]: data.likes }));
+            }
+        } catch(e) { console.error('Like toggle failed', e); }
+    };
+
     useEffect(() => {
         const h = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', h);
@@ -156,12 +230,12 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
                         </span>
                     </Link>
                     <div className="flex items-center gap-3">
-                        <Link href="/login" className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${scrolled ? 'text-gray-700 hover:text-gray-900' : isDark ? 'text-white/80 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
+                        <a href={`${reseller.reseller_url || ''}/login`} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${scrolled ? 'text-gray-700 hover:text-gray-900' : isDark ? 'text-white/80 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
                             Masuk
-                        </Link>
-                        <Link href={`/register?ref=${reseller.ref}`} className={`px-5 py-2.5 bg-gradient-to-r ${T.accentGradient} text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all`}>
+                        </a>
+                        <a href={`${reseller.reseller_url || ''}/register?ref=${reseller.ref}`} className={`px-5 py-2.5 bg-gradient-to-r ${T.accentGradient} text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all`}>
                             Buat Undangan
-                        </Link>
+                        </a>
                     </div>
                 </div>
             </nav>
@@ -187,9 +261,9 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
                         Desain elegan, fitur lengkap, dan mudah dibagikan. Buat undangan pernikahan Anda dalam hitungan menit.
                     </p>
                     <div className="flex items-center justify-center gap-4 mt-10">
-                        <Link href={`/register?ref=${reseller.ref}`} className={`px-8 py-4 bg-gradient-to-r ${T.accentGradient} text-white rounded-2xl text-sm font-bold hover:shadow-2xl transition-all hover:-translate-y-0.5`}>
+                        <a href={`${reseller.reseller_url || ''}/register?ref=${reseller.ref}`} className={`px-8 py-4 bg-gradient-to-r ${T.accentGradient} text-white rounded-2xl text-sm font-bold hover:shadow-2xl transition-all hover:-translate-y-0.5`}>
                             Buat Undangan Gratis
-                        </Link>
+                        </a>
                         <a href="#preview" className={`px-6 py-4 backdrop-blur-sm rounded-2xl text-sm font-medium transition-all border ${isDark ? 'bg-white/10 text-white border-white/10 hover:bg-white/20' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}>
                             Lihat Contoh
                         </a>
@@ -252,15 +326,20 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
                             <p className={`mt-3 max-w-lg ${T.name === 'elegant' ? 'text-slate-400' : 'text-gray-500'}`}>Koleksi tema elegan dan modern yang siap digunakan</p>
                         </div>
                         {themes.length > 0 && (
-                            <div className="hidden sm:flex items-center gap-2">
-                                <button onClick={() => { document.getElementById('reseller-theme-scroll')?.scrollBy({ left: -280, behavior: 'smooth' }); }}
-                                    className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${T.name === 'elegant' ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-                                </button>
-                                <button onClick={() => { document.getElementById('reseller-theme-scroll')?.scrollBy({ left: 280, behavior: 'smooth' }); }}
-                                    className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${T.name === 'elegant' ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-                                </button>
+                            <div className="flex items-center gap-4">
+                                <Link href={getThemesUrl()} className={`inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ${T.accentText} hover:opacity-80`}>
+                                    Lihat Semua Tema <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                                </Link>
+                                <div className="hidden sm:flex items-center gap-2">
+                                    <button onClick={() => { document.getElementById('reseller-theme-scroll')?.scrollBy({ left: -280, behavior: 'smooth' }); }}
+                                        className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${T.name === 'elegant' ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                                    </button>
+                                    <button onClick={() => { document.getElementById('reseller-theme-scroll')?.scrollBy({ left: 280, behavior: 'smooth' }); }}
+                                        className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${T.name === 'elegant' ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -269,7 +348,7 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
                             <div key={theme.id} className={`group relative rounded-2xl border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex-shrink-0 w-[200px] sm:w-[240px] snap-start ${T.name === 'elegant' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
                                 <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
                                     {theme.thumbnail ? (
-                                        <img src={`/storage/${theme.thumbnail}`} alt={theme.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <img src={getThumbnailUrl(theme.thumbnail)} alt={theme.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
                                         <div className={`w-full h-full flex items-center justify-center ${T.name === 'elegant' ? 'bg-slate-700' : 'bg-gradient-to-br from-gray-100 to-gray-50'}`}>
                                             <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
@@ -279,7 +358,14 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
                                     )}
                                 </div>
                                 <div className="p-4">
-                                    <h4 className={`font-semibold text-sm ${T.name === 'elegant' ? 'text-white' : 'text-[#1a1a1a]'}`}>{theme.name}</h4>
+                                    <div className="flex items-start justify-between gap-2">
+                                        <h4 className={`font-semibold text-sm truncate flex-1 ${T.name === 'elegant' ? 'text-white' : 'text-[#1a1a1a]'}`} title={theme.name}>{theme.name}</h4>
+                                        <AnimatedLikeButton
+                                            count={likes[theme.id] ?? getLikesCount(theme)}
+                                            liked={!!likedThemes[theme.id]}
+                                            onClick={() => handleLike(theme)}
+                                        />
+                                    </div>
                                     <div className="flex items-center justify-between mt-1.5">
                                         <span className={`text-xs capitalize ${T.name === 'elegant' ? 'text-slate-400' : 'text-gray-400'}`}>{theme.category || 'Umum'}</span>
                                         {theme.is_premium ? (
@@ -363,9 +449,9 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
                                                 Max <strong className="mx-1">{plan.max_galleries}</strong> foto galeri
                                             </div>
                                         </div>
-                                        <Link href={`/register?ref=${reseller.ref}`} className={`w-full py-3 text-white rounded-xl text-sm font-bold bg-gradient-to-r ${colors.btn} hover:shadow-lg text-center transition-all`}>
+                                        <a href={`${reseller.reseller_url || ''}/register?ref=${reseller.ref}`} className={`w-full py-3 text-white rounded-xl text-sm font-bold bg-gradient-to-r ${colors.btn} hover:shadow-lg text-center transition-all`}>
                                             {plan.price > 0 ? 'Mulai Sekarang' : 'Daftar Gratis'}
-                                        </Link>
+                                        </a>
                                     </div>
                                 </div>
                             );
@@ -381,9 +467,9 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
                 <div className="relative z-10 max-w-2xl mx-auto px-6 text-center">
                     <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Mulai Buat Undangan Anda</h2>
                     <p className="text-white/50 mt-4 max-w-md mx-auto">Cukup 5 menit untuk membuat undangan digital yang elegan dan siap dibagikan ke semua tamu.</p>
-                    <Link href={`/register?ref=${reseller.ref}`} className={`inline-block mt-8 px-10 py-4 bg-gradient-to-r ${T.accentGradient} text-white rounded-2xl font-bold hover:shadow-2xl transition-all hover:-translate-y-0.5`}>
+                    <a href={`${reseller.reseller_url || ''}/register?ref=${reseller.ref}`} className={`inline-block mt-8 px-10 py-4 bg-gradient-to-r ${T.accentGradient} text-white rounded-2xl font-bold hover:shadow-2xl transition-all hover:-translate-y-0.5`}>
                         Buat Undangan Sekarang — Gratis
-                    </Link>
+                    </a>
                 </div>
             </section>
 

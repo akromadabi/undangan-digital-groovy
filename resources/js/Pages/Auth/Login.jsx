@@ -7,7 +7,7 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function Login({ status, canResetPassword, autoLoginUsers }) {
+export default function Login({ status, canResetPassword, autoLoginUsers, reseller = null }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -17,14 +17,14 @@ export default function Login({ status, canResetPassword, autoLoginUsers }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('login'), {
+        post(route('login', undefined, false), {
             onFinish: () => reset('password'),
         });
     };
 
     const autoLogin = (email) => {
         setLoggingIn(email);
-        router.post(route('login'), {
+        router.post(route('login', undefined, false), {
             email: email,
             password: 'password',
             remember: true,
@@ -35,7 +35,24 @@ export default function Login({ status, canResetPassword, autoLoginUsers }) {
 
     return (
         <GuestLayout>
-            <Head title="Log in" />
+            <Head title={reseller ? `Masuk — ${reseller.brand_name}` : 'Log in'} />
+
+            {/* Reseller Branding Banner */}
+            {reseller && (
+                <div className="mb-6 flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
+                    {reseller.brand_logo ? (
+                        <img src={reseller.brand_logo} alt={reseller.brand_name} className="h-12 w-auto object-contain" />
+                    ) : (
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E5654B] to-[#d4523a] flex items-center justify-center">
+                            <span className="text-white text-xl font-bold">{reseller.brand_name.charAt(0)}</span>
+                        </div>
+                    )}
+                    <div className="text-center">
+                        <p className="font-bold text-[#1a1a1a] text-base">{reseller.brand_name}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Masuk untuk mengelola undangan Anda</p>
+                    </div>
+                </div>
+            )}
 
             {status && (
                 <div className="mb-4 text-sm font-medium text-green-600">

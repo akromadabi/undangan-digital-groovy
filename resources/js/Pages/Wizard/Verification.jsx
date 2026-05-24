@@ -6,7 +6,7 @@ export default function Verification({ step, isVerified }) {
     const { post, processing } = useForm();
 
     const handleContinue = () => {
-        post(route('wizard.verification.complete'));
+        post(route('wizard.verification.complete', undefined, false));
     };
 
     return (
@@ -33,7 +33,7 @@ export default function Verification({ step, isVerified }) {
                     <>
                         <p className="text-gray-500 text-sm mb-6">Silakan verifikasi nomor WhatsApp Anda terlebih dahulu.</p>
                         <button
-                            onClick={() => router.visit(route('verification.otp.show'))}
+                            onClick={() => router.visit(route('verification.otp.show', undefined, false))}
                             className="w-full py-3 bg-emerald-500 text-white rounded-xl font-medium hover:bg-emerald-600 transition-colors"
                         >
                             Verifikasi via WhatsApp

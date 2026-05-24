@@ -13,7 +13,7 @@ const SOCMED_OPTIONS = [
 
 const defaultBrideGroom = {
     full_name: '', nickname: '', father_name: '', mother_name: '',
-    gender: 'wanita', instagram: '', tiktok: '', twitter: '', facebook: '', youtube: '',
+    gender: 'wanita', instagram: '', tiktok: '', twitter: '', facebook: '', youtube: '', child_order: '',
 };
 
 export default function Profile({ step, brideGrooms }) {
@@ -56,7 +56,7 @@ export default function Profile({ step, brideGrooms }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('wizard.profile.save'));
+        post(route('wizard.profile.save', undefined, false));
     };
 
     const getAvailableSocmed = (personIndex) =>
@@ -75,10 +75,14 @@ export default function Profile({ step, brideGrooms }) {
                                     onChange={(v) => updateField(index, 'full_name', v)} required />
                                 <InputField label="Nama Panggilan" value={data.bride_grooms[index].nickname}
                                     onChange={(v) => updateField(index, 'nickname', v)} />
-                                <InputField label="Nama Ayah" value={data.bride_grooms[index].father_name}
-                                    onChange={(v) => updateField(index, 'father_name', v)} />
-                                <InputField label="Nama Ibu" value={data.bride_grooms[index].mother_name}
-                                    onChange={(v) => updateField(index, 'mother_name', v)} />
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <InputField label="Putra/Putri ke-" value={data.bride_grooms[index].child_order}
+                                        placeholder="Pertama" onChange={(v) => updateField(index, 'child_order', v)} />
+                                    <InputField label="Nama Ayah" value={data.bride_grooms[index].father_name}
+                                        placeholder="Nama Ayah" onChange={(v) => updateField(index, 'father_name', v)} />
+                                    <InputField label="Nama Ibu" value={data.bride_grooms[index].mother_name}
+                                        placeholder="Nama Ibu" onChange={(v) => updateField(index, 'mother_name', v)} />
+                                </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 mb-1.5">Jenis Kelamin</label>
@@ -165,7 +169,7 @@ export default function Profile({ step, brideGrooms }) {
                 </div>
 
                 <div className="flex gap-4 mt-6">
-                    <button type="button" onClick={() => router.visit(route('wizard.link'))}
+                    <button type="button" onClick={() => router.visit(route('wizard.link', undefined, false))}
                         className="flex-1 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-lg transition-all text-center">
                         ← Kembali
                     </button>
@@ -179,11 +183,11 @@ export default function Profile({ step, brideGrooms }) {
     );
 }
 
-function InputField({ label, value, onChange, required, small }) {
+function InputField({ label, value, onChange, required, small, placeholder }) {
     return (
         <div>
             <label className={`block font-medium text-gray-600 mb-1 ${small ? 'text-xs' : 'text-sm'}`}>{label}</label>
-            <input type="text" value={value || ''} onChange={(e) => onChange(e.target.value)} required={required}
+            <input type="text" value={value || ''} onChange={(e) => onChange(e.target.value)} required={required} placeholder={placeholder || ''}
                 className={`w-full border border-gray-200 rounded-xl px-4 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 ${small ? 'py-2' : 'py-2.5'}`} />
         </div>
     );

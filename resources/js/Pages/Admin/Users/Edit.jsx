@@ -1,12 +1,13 @@
-import { Head, useForm, Link, router } from '@inertiajs/react';
+import { Head, useForm, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import AdminLayout from '@/Layouts/AdminLayout';
+import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 import {
     Key, Package, CalendarClock, User, FileText, Users as UsersIcon,
     Save, ArrowLeft, CheckCircle, XCircle, RotateCw
 } from 'lucide-react';
 
 export default function Edit({ user, plans }) {
+    const { auth, adminRoutePrefix } = usePage().props;
     const invitation = user?.invitation;
     const subscription = user?.active_subscription;
 
@@ -36,7 +37,7 @@ export default function Edit({ user, plans }) {
     const handleResetPassword = (e) => {
         e.preventDefault();
         setPwProcessing(true);
-        router.post(route('admin.users.resetPassword', user.id), pw, {
+        router.post(route('super-admin.users.resetPassword', user.id), pw, {
             preserveScroll: true,
             onSuccess: () => { setPw({ password: '', password_confirmation: '' }); setPwMsg('Password berhasil direset!'); },
             onError: (errs) => { setPwMsg('' + Object.values(errs).flat().join(', ')); },
@@ -51,7 +52,7 @@ export default function Edit({ user, plans }) {
 
     const handleChangePlan = () => {
         setPlanProcessing(true);
-        router.post(route('admin.users.changePlan', user.id), { plan_id: selectedPlan }, {
+        router.post(route('super-admin.users.changePlan', user.id), { plan_id: selectedPlan }, {
             preserveScroll: true,
             onSuccess: () => setPlanMsg('Paket berhasil diubah!'),
             onError: (errs) => setPlanMsg('' + Object.values(errs).flat().join(', ')),
@@ -66,7 +67,7 @@ export default function Edit({ user, plans }) {
 
     const handleExtend = () => {
         setExtProcessing(true);
-        router.post(route('admin.users.extendSubscription', user.id), { expires_at: expiresAt }, {
+        router.post(route('super-admin.users.extendSubscription', user.id), { expires_at: expiresAt }, {
             preserveScroll: true,
             onSuccess: () => setExtMsg('Masa aktif berhasil diperpanjang!'),
             onError: (errs) => setExtMsg('' + Object.values(errs).flat().join(', ')),
@@ -82,7 +83,7 @@ export default function Edit({ user, plans }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(`/admin/users/${user.id}`);
+        put(`${adminRoutePrefix}/users/${user.id}`);
     };
 
     const inputClass = 'w-full bg-white border border-[#e8e5e0] rounded-xl px-4 py-2.5 text-[#333] text-sm placeholder-[#ccc] focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-colors';
@@ -90,10 +91,10 @@ export default function Edit({ user, plans }) {
     const cardClass = 'bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-5';
 
     return (
-        <AdminLayout title={`Edit: ${user.name}`}>
+        <DynamicAdminLayout title={`Edit: ${user.name}`}>
             <Head title={`Edit - ${user.name}`} />
             <div className="max-w-3xl space-y-6">
-                <Link href={`/admin/users/${user.id}`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium flex items-center gap-1">
+                <Link href={`${adminRoutePrefix}/users/${user.id}`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium flex items-center gap-1">
                     <ArrowLeft size={14} /> Kembali ke Detail
                 </Link>
 
@@ -331,13 +332,13 @@ export default function Edit({ user, plans }) {
                             className="px-6 py-3 bg-[#E5654B] hover:bg-[#c94f3a] disabled:opacity-50 text-white rounded-xl font-semibold transition-colors shadow-sm flex items-center gap-1.5">
                             <Save size={16} /> {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </button>
-                        <Link href={`/admin/users/${user.id}`}
+                        <Link href={`${adminRoutePrefix}/users/${user.id}`}
                             className="px-6 py-3 bg-[#f0ede8] hover:bg-[#e8e5e0] text-[#555] rounded-xl font-semibold transition-colors">
                             Batal
                         </Link>
                     </div>
                 </form>
             </div>
-        </AdminLayout>
+        </DynamicAdminLayout>
     );
 }

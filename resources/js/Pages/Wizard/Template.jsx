@@ -13,7 +13,7 @@ export default function Template({ step, themes, selectedThemeId }) {
     const handleSubmit = () => {
         if (!selected) return;
         setSubmitting(true);
-        router.post(route('wizard.template.save'), { theme_id: selected });
+        router.post(route('wizard.template.save', undefined, false), { theme_id: selected });
     };
 
     return (
@@ -68,7 +68,7 @@ export default function Template({ step, themes, selectedThemeId }) {
             </div>
 
             <div className="flex gap-4 mt-8">
-                <button type="button" onClick={() => router.visit(route('wizard.events'))}
+                <button type="button" onClick={() => router.visit(route('wizard.events', undefined, false))}
                     className="flex-1 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-lg transition-all text-center">
                     ← Kembali
                 </button>

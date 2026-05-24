@@ -43,7 +43,13 @@ class WizardController extends Controller
         $request->validate(['slug' => 'required|string|min:3|max:50']);
 
         $slug = Str::slug($request->slug);
-        $exists = Invitation::where('slug', $slug)->exists();
+        $user = $request->user();
+
+        // Kecualikan invitation milik user sendiri agar tidak dianggap "sudah dipakai"
+        // ketika user kembali ke step ini setelah sebelumnya sudah menyimpan slug
+        $exists = Invitation::where('slug', $slug)
+            ->when($user, fn($q) => $q->where('user_id', '!=', $user->id))
+            ->exists();
 
         return response()->json([
             'slug' => $slug,
@@ -109,6 +115,7 @@ class WizardController extends Controller
             'bride_grooms.*.nickname' => 'nullable|string|max:50',
             'bride_grooms.*.father_name' => 'nullable|string|max:150',
             'bride_grooms.*.mother_name' => 'nullable|string|max:150',
+            'bride_grooms.*.child_order' => 'nullable|string|max:50',
             'bride_grooms.*.gender' => 'required|in:pria,wanita',
             'bride_grooms.*.bio' => 'nullable|string',
             'bride_grooms.*.instagram' => 'nullable|string|max:100',

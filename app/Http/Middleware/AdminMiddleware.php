@@ -20,6 +20,12 @@ class AdminMiddleware
             return redirect()->route('dashboard');
         }
 
+        // Domain Gating: Prevent reseller from accessing admin panel of another reseller's domain
+        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+        if ($resellerSetting && $resellerSetting->user_id !== $request->user()->id) {
+            abort(403, 'Akses ditolak. Anda tidak diperbolehkan mengelola reseller lain.');
+        }
+
         return $next($request);
     }
 }

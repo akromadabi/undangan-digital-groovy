@@ -81,7 +81,7 @@ const MiniBar = ({ value, max, color }) => {
     );
 };
 
-export default function Index({ invitation, stats, features, subscription, latestWishes }) {
+export default function Index({ invitation, stats, features, dashboardSubscription, latestWishes }) {
     const { appName } = usePage().props;
 
     const totalRsvp = (stats?.rsvp_hadir || 0) + (stats?.rsvp_tidak || 0);
@@ -115,15 +115,15 @@ export default function Index({ invitation, stats, features, subscription, lates
                                     'Undangan digital Anda belum dibuat'
                                 )}
                             </p>
-                            {subscription && (
-                                <span className={`inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold ${subscription.plan_slug === 'free' ? 'bg-white/15 text-white backdrop-blur-sm' : 'bg-white text-emerald-700'}`}>
-                                    {subscription.status === 'active' ? (
+                            {dashboardSubscription && (
+                                <span className={`inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold ${dashboardSubscription.plan_slug === 'free' ? 'bg-white/15 text-white backdrop-blur-sm' : 'bg-white text-emerald-700'}`}>
+                                    {dashboardSubscription.status === 'active' ? (
                                         <Icon d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-3.5 h-3.5" />
                                     ) : (
                                         <Icon d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" className="w-3.5 h-3.5" />
                                     )}
-                                    {subscription.plan_name}
-                                    {subscription.expires_at && ` · s/d ${subscription.expires_at}`}
+                                    {dashboardSubscription.plan_name}
+                                    {dashboardSubscription.expires_at && ` · s/d ${dashboardSubscription.expires_at}`}
                                 </span>
                             )}
                         </div>
@@ -143,7 +143,7 @@ export default function Index({ invitation, stats, features, subscription, lates
                 </div>
 
                 {/* ═══ Upgrade Banner ═══ */}
-                {subscription?.plan_slug === 'free' && (
+                {dashboardSubscription?.plan_slug === 'free' && (
                     <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white flex-shrink-0 shadow-sm">

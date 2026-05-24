@@ -44,7 +44,7 @@ class DashboardController extends Controller
             'invitation' => $invitation,
             'stats' => $stats,
             'features' => $features,
-            'subscription' => $subscription ? [
+            'dashboardSubscription' => $subscription ? [
                 'plan_name' => $subscription->plan->name,
                 'plan_slug' => $subscription->plan->slug,
                 'status' => $subscription->status,

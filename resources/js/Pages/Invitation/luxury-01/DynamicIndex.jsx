@@ -764,7 +764,7 @@ export default function DynamicIndex({
                         {groom && (
                             <div className="lx1-mempelai-card lx1-mempelai-groom">
                                 <Reveal variant="left">
-                                    {showPhotos && (
+                                    {showPhotos && groom.photo && (
                                         <div className="lx1-mempelai-photo-wrapper">
                                             <img 
                                                 src={getStorageUrl(groom.photo, ASSETS.groom)} 
@@ -792,7 +792,7 @@ export default function DynamicIndex({
                         {bride && (
                             <div className="lx1-mempelai-card lx1-mempelai-bride">
                                 <Reveal variant="right">
-                                    {showPhotos && (
+                                    {showPhotos && bride.photo && (
                                         <div className="lx1-mempelai-photo-wrapper">
                                             <img 
                                                 src={getStorageUrl(bride.photo, ASSETS.bride)} 

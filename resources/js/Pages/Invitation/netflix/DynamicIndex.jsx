@@ -328,7 +328,7 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
         const photo = getStorageUrl(person.photo, dummyPortrait);
         return (
             <Reveal className={`nf-couple__card nf-couple__card--${side}`} delay={side === 'left' ? 0 : 200}>
-                {globalShowPhotos && (
+                {globalShowPhotos && person.photo && (
                     <div className="nf-couple__photo-wrap">
                         <img src={photo} alt={person.full_name} className="nf-couple__photo" />
                     </div>

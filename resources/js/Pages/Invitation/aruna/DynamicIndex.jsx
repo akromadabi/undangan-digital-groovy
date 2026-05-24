@@ -418,7 +418,7 @@ function CoupleSection({ invitation, brideGrooms, id }) {
                 {/* Bride */}
                 {bride.full_name && (
                     <RevealDiv className="aruna-profile">
-                        {globalShowPhotos && (
+                        {globalShowPhotos && bride.photo && (
                             <div className="aruna-profile__frame-container">
                                 <img src={frameProfile} alt="" className="aruna-profile__frame-bg" />
                                 <div className="aruna-profile__photo-wrap">
@@ -449,7 +449,7 @@ function CoupleSection({ invitation, brideGrooms, id }) {
                 {/* Groom */}
                 {groom.full_name && (
                     <RevealDiv className="aruna-profile">
-                        {globalShowPhotos && (
+                        {globalShowPhotos && groom.photo && (
                             <div className="aruna-profile__frame-container">
                                 <img src={frameProfile} alt="" className="aruna-profile__frame-bg" />
                                 <div className="aruna-profile__photo-wrap">
