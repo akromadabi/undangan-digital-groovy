@@ -95,9 +95,12 @@ class RegisteredUserController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'reseller_id' => $resellerId,
-            'email_verified_at' => now(),
             'onboarding_step' => 2,
         ]);
+
+        $user->forceFill([
+            'email_verified_at' => now(),
+        ])->save();
 
         event(new Registered($user));
 
