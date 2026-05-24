@@ -34,29 +34,19 @@ export default function Login({ status, canResetPassword, autoLoginUsers, resell
     };
 
     return (
-        <GuestLayout>
-            <Head title={reseller ? `Masuk — ${reseller.brand_name}` : 'Log in'} />
+        <GuestLayout reseller={reseller}>
+            <Head title={reseller ? `Masuk — ${reseller.brand_name}` : 'Masuk - Groovy Invitation'} />
 
-            {/* Reseller Branding Banner */}
-            {reseller && (
-                <div className="mb-6 flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
-                    {reseller.brand_logo ? (
-                        <img src={reseller.brand_logo} alt={reseller.brand_name} className="h-12 w-auto object-contain" />
-                    ) : (
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E5654B] to-[#d4523a] flex items-center justify-center">
-                            <span className="text-white text-xl font-bold">{reseller.brand_name.charAt(0)}</span>
-                        </div>
-                    )}
-                    <div className="text-center">
-                        <p className="font-bold text-[#1a1a1a] text-base">{reseller.brand_name}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">Masuk untuk mengelola undangan Anda</p>
-                    </div>
+            {status && (
+                <div className="mb-4 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-xl border border-green-100">
+                    {status}
                 </div>
             )}
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
+            {!reseller && (
+                <div className="mb-6 text-center">
+                    <h3 className="text-xl font-bold text-gray-800">Selamat Datang</h3>
+                    <p className="text-xs text-gray-400 mt-1">Silakan masuk untuk mengelola undangan Anda</p>
                 </div>
             )}
 
@@ -115,65 +105,78 @@ export default function Login({ status, canResetPassword, autoLoginUsers, resell
                 </div>
             )}
 
-            <form onSubmit={submit}>
+            <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
-                    <TextInput
+                    <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">Email</label>
+                    <input
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#E5654B] focus:ring-[#E5654B] focus:ring-opacity-50 transition-all bg-gray-50/50 focus:bg-white text-sm shadow-sm"
                         autoComplete="username"
-                        isFocused={true}
+                        autoFocus
                         onChange={(e) => setData('email', e.target.value)}
+                        required
                     />
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-                    <TextInput
+                <div>
+                    <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">Password</label>
+                    <input
                         id="password"
                         type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#E5654B] focus:ring-[#E5654B] focus:ring-opacity-50 transition-all bg-gray-50/50 focus:bg-white text-sm shadow-sm"
                         autoComplete="current-password"
                         onChange={(e) => setData('password', e.target.value)}
+                        required
                     />
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1" />
                 </div>
 
-                <div className="mt-4 block">
-                    <label className="flex items-center">
+                <div className="flex items-center justify-between pt-1">
+                    <label className="flex items-center cursor-pointer select-none">
                         <Checkbox
                             name="remember"
                             checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
+                            onChange={(e) => setData('remember', e.target.checked)}
+                            className="rounded text-[#E5654B] border-gray-300 focus:ring-[#E5654B] focus:ring-opacity-50"
                         />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
+                        <span className="ms-2 text-xs text-gray-500 font-medium">
+                            Ingat saya
                         </span>
                     </label>
-                </div>
 
-                <div className="mt-4 flex items-center justify-end">
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            className="text-xs font-semibold text-gray-400 hover:text-[#E5654B] transition-colors"
                         >
-                            Forgot your password?
+                            Lupa password?
                         </Link>
                     )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
                 </div>
+
+                <button
+                    type="submit"
+                    disabled={processing}
+                    className="w-full mt-6 py-3 px-4 rounded-xl bg-gradient-to-r from-[#E5654B] to-[#d4523a] text-white font-bold text-sm shadow-lg shadow-[#E5654B]/20 hover:from-[#d4523a] hover:to-[#c2462f] focus:outline-none focus:ring-2 focus:ring-[#E5654B] focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                    {processing ? (
+                        <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            Memproses...
+                        </>
+                    ) : (
+                        'Masuk ke Akun'
+                    )}
+                </button>
             </form>
         </GuestLayout>
     );
