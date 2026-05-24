@@ -1,0 +1,187 @@
+import { Head, useForm } from '@inertiajs/react';
+import { useState, useEffect, useRef } from 'react';
+
+// ═══ Tool Animasi Bawaan ═══
+// Standard observer for scroll animations
+const AnimateIn = ({ children, type = 'fadeUp', delay = 0, className = '', duration = 700 }) => {
+    const ref = useRef(null);
+    const [visible, setVisible] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => { setVisible(entry.isIntersecting); }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+    const animations = { fadeUp: 'ani-fadeUp', fadeDown: 'ani-fadeDown', scaleIn: 'ani-scaleIn', fadeIn: 'ani-fadeIn' };
+    return <div ref={ref} className={`${className} ${visible ? animations[type] || animations.fadeUp : 'ani-hidden'}`} style={{ animationDelay: `${delay}ms`, animationDuration: `${duration}ms` }}>{children}</div>;
+};
+
+export default function {{ThemeName}}Show({ invitation, sections, brideGrooms, generalHosts, events, galleries, loveStories, bankAccounts, wishes, guest }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [musicPlaying, setMusicPlaying] = useState(false);
+    const audioRef = useRef(null);
+
+    // Variabel Setup Mode (Pernikahan atau Umum)
+    const enableRsvp = invitation.enable_rsvp !== false;
+    const enableWishes = invitation.enable_wishes !== false;
+    const isGeneral = invitation.type === 'general';
+    const activeProfile = isGeneral ? generalHosts : brideGrooms;
+
+    // Warna & Font bawaan tema (Akan otomatis override jika diatur dari CMS)
+    const colors = invitation.theme?.color_scheme || { primary: '#333333', secondary: '#666666', bg: '#FAFAFA', text: '#2D2D2D', accent: '#CCCCCC' };
+    const fonts = invitation.theme?.font_config || { heading: "'Playfair Display', serif", body: "'Poppins', sans-serif", script: "'Great Vibes', cursive" };
+
+    const visibleSections = sections.filter(s => s.is_visible).sort((a, b) => a.sort_order - b.sort_order);
+
+    // ═══ Assets/Ornamen Tema Ini ═══
+    // Ganti ini sesuai aset yang diletakkan di public/themes/{{theme_slug}}/
+    // const ORN_BUNGA_ATAS = '/themes/{{theme_slug}}/ornamen/bunga-atas.webp';
+    // const BG_PATTERN = '/themes/{{theme_slug}}/background/texture.webp';
+
+    const handleOpen = () => {
+        setIsOpen(true);
+        if (invitation.music_url && invitation.music_autoplay !== false && audioRef.current) {
+            audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => { });
+        }
+    };
+
+    const toggleMusic = () => {
+        if (!audioRef.current) return;
+        if (musicPlaying) audioRef.current.pause(); else audioRef.current.play();
+        setMusicPlaying(!musicPlaying);
+    };
+
+    const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+
+    return (
+        <>
+            <Head title={invitation.title || 'Undangan Acara'} />
+            <link href={`https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&family=Great+Vibes&display=swap`} rel="stylesheet" />
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .ani-hidden { opacity: 0; }
+                @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+                @keyframes scaleIn { from { opacity:0; transform:scale(0.85); } to { opacity:1; transform:scale(1); } }
+                @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+                .ani-fadeUp { animation: fadeUp var(--dur, 700ms) cubic-bezier(0.22,1,0.36,1) both; }
+                .ani-scaleIn { animation: scaleIn var(--dur, 700ms) cubic-bezier(0.22,1,0.36,1) both; }
+                .ani-fadeIn { animation: fadeIn var(--dur, 700ms) cubic-bezier(0.22,1,0.36,1) both; }
+            `}} />
+            
+            {invitation.music_url && <audio ref={audioRef} src={invitation.music_url} loop />}
+
+            <div style={{ backgroundColor: colors.bg, color: colors.text, fontFamily: fonts.body, minHeight: '100vh', position: 'relative', overflowX: 'hidden' }}>
+                
+                {/* ══════ BAGIAN DEPAN (COVER) ══════ */}
+                {!isOpen && (
+                    <div className="fixed inset-0 z-50 flex flex-col justify-center items-center overflow-hidden" style={{ backgroundColor: colors.bg }}>
+                        <div className="relative z-10 text-center px-4 w-full h-full flex flex-col justify-center items-center">
+                            
+                            {/* Tambahkan Cover Image atau Background Disini */}
+                            
+                            <AnimateIn type="fadeIn" delay={100}>
+                                <h1 style={{ fontFamily: fonts.script, color: colors.primary, fontSize: '3.5rem', lineHeight: '1.2' }}>
+                                    {isGeneral ? activeProfile?.[0]?.name : (
+                                        <>{activeProfile?.[0]?.nickname || 'Nama'} <br/>&<br/> {activeProfile?.[1]?.nickname || 'Nama'}</>
+                                    )}
+                                </h1>
+                            </AnimateIn>
+
+                            {guest && (
+                                <AnimateIn type="fadeUp" delay={300} className="mt-12">
+                                    <p className="text-[10px] uppercase tracking-[0.2em] font-medium opacity-60">Kepada Yth.</p>
+                                    <p className="text-xl font-bold mt-1" style={{ color: colors.primary, fontFamily: fonts.heading }}>{guest.name}</p>
+                                </AnimateIn>
+                            )}
+
+                            <AnimateIn type="scaleIn" delay={500}>
+                                <button onClick={handleOpen} className="mt-10 px-8 py-3 rounded-full text-white font-medium shadow-md transition-transform hover:scale-105" style={{ backgroundColor: colors.primary }}>
+                                    Buka Undangan
+                                </button>
+                            </AnimateIn>
+                        </div>
+                    </div>
+                )}
+
+                {/* ══════ ISI UNDANGAN ══════ */}
+                {isOpen && (
+                    <div className="pb-24">
+                        {visibleSections.filter(s => s.section_key !== 'cover').map((section) => (
+                            <section key={section.id} id={`section-${section.section_key}`} className="min-h-[60vh] flex flex-col justify-center py-16 px-6 relative">
+                                
+                                {/* --- PEMBUKA --- */}
+                                {section.section_key === 'opening' && (
+                                    <div className="max-w-md mx-auto text-center w-full z-10">
+                                        <AnimateIn type="fadeUp">
+                                            <h2 className="text-2xl font-bold mb-5" style={{ fontFamily: fonts.heading, color: colors.primary }}>{invitation.opening_title}</h2>
+                                            <p className="text-sm opacity-80 whitespace-pre-line leading-relaxed">{invitation.opening_text}</p>
+                                        </AnimateIn>
+                                    </div>
+                                )}
+
+                                {/* --- MEMPELAI / HOST --- */}
+                                {section.section_key === 'bride_groom' && (
+                                    <div className="max-w-md mx-auto text-center w-full z-10">
+                                        <AnimateIn type="scaleIn">
+                                            <h2 className="text-xs uppercase tracking-[0.2em] mb-8 font-medium" style={{ color: colors.primary }}>
+                                                {invitation.bride_title || (isGeneral ? 'Tuan Rumah' : 'Mempelai')}
+                                            </h2>
+                                        </AnimateIn>
+                                        {activeProfile?.map((profile, i) => (
+                                            <AnimateIn key={i} type="fadeUp" delay={i * 200} className="mb-10">
+                                                <h3 className="text-4xl mb-3" style={{ fontFamily: fonts.script, color: colors.primary }}>{isGeneral ? profile.name : profile.full_name}</h3>
+                                                <p className="text-xs opacity-70 mt-3 leading-relaxed">
+                                                    {isGeneral ? profile.description : `Putra/i dari Bapak ${profile.father_name} & Ibu ${profile.mother_name}`}
+                                                </p>
+                                            </AnimateIn>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* --- ACARA --- */}
+                                {section.section_key === 'event' && (
+                                    <div className="max-w-md mx-auto w-full z-10">
+                                        <AnimateIn type="fadeUp">
+                                            <h2 className="text-xs uppercase tracking-[0.2em] mb-8 font-medium text-center" style={{ color: colors.primary }}>Rangkaian Acara</h2>
+                                        </AnimateIn>
+                                        {events?.map((evt, i) => (
+                                            <div key={i} className="text-center mb-6 p-6 rounded-2xl relative overflow-hidden" style={{ backgroundColor: colors.primary + '08' }}>
+                                                <AnimateIn type="scaleIn">
+                                                    <h3 className="text-xl font-bold mb-3" style={{ fontFamily: fonts.heading, color: colors.primary }}>{evt.event_name}</h3>
+                                                    <p className="text-sm font-semibold mb-1">{formatDate(evt.event_date)}</p>
+                                                    <p className="text-sm opacity-70 mb-4">{evt.start_time?.substring(0, 5)} - {evt.end_time ? evt.end_time.substring(0, 5) : 'Selesai'} {evt.timezone}</p>
+                                                    
+                                                    <p className="text-sm font-medium">{evt.venue_name}</p>
+                                                    {evt.venue_address && <p className="text-xs opacity-60 mt-2">{evt.venue_address}</p>}
+                                                    
+                                                    {evt.gmaps_link && (
+                                                        <a href={evt.gmaps_link} target="_blank" className="inline-block mt-4 px-5 py-2 rounded-full text-xs font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: colors.primary }}>Buka Maps</a>
+                                                    )}
+                                                </AnimateIn>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Tambahkan blok Gallery, RSVP, Bank, Wishes secara logis disini atau sesuaikan styling seperlunya */}
+
+                            </section>
+                        ))}
+
+                        {/* Tombol Musik Float */}
+                        {invitation.music_url && (
+                            <button onClick={toggleMusic} className="fixed bottom-6 right-6 z-[60] w-12 h-12 rounded-full bg-white shadow-xl flex items-center justify-center border border-gray-100" style={{ color: colors.primary }}>
+                                {musicPlaying ? (
+                                    <svg className="w-5 h-5" style={{ animation: 'spin 3s linear infinite' }} viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M12 2v2a8 8 0 108 8h2a10 10 0 11-10-10z"/></svg>
+                                ) : (
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                )}
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
+        </>
+    );
+}

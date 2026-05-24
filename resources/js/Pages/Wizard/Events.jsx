@@ -172,10 +172,10 @@ export default function Events({ step, events }) {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             <div>
                                                 <label className="block text-xs font-medium text-emerald-700 mb-1">Platform</label>
-                                                <select value={stream.platform} onChange={(e) => {
+                                                <select value={String(stream.platform || 'youtube').toLowerCase()} onChange={(e) => {
                                                     const updated = [...data.events];
                                                     const streams = [...updated[index].streamings];
-                                                    streams[si] = { ...streams[si], platform: e.target.value };
+                                                    streams[si] = { ...streams[si], platform: e.target.value.toLowerCase() };
                                                     updated[index] = { ...updated[index], streamings: streams };
                                                     setData('events', updated);
                                                 }} className="w-full border border-emerald-200 bg-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300">

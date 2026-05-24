@@ -987,18 +987,31 @@
 
 .lx1-event-detail-item {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: center;
+  margin-bottom: 10px;
   font-size: 0.85rem;
   color: var(--lx1-text-dark);
-  gap: 4px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lx1-event-detail-item-address {
+  align-items: flex-start;
+}
+
+.lx1-event-detail-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .lx1-event-icon {
   font-size: 1rem;
   color: var(--lx1-slate-dark);
-  margin-bottom: 2px;
+  margin: 0;
 }
 
 .lx1-event-venue {
@@ -1082,6 +1095,17 @@
   border-left: 3px solid var(--lx1-slate-primary);
   padding: 20px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.55;
+  transform: scale(0.96);
+}
+
+.lx1-story-item:hover .lx1-story-card,
+.lx1-story-item.is-active .lx1-story-card {
+  border-left-color: var(--lx1-gold);
+  transform: scale(1) translateY(-3px);
+  opacity: 1;
+  box-shadow: 0 10px 25px rgba(197, 168, 128, 0.2);
 }
 
 .lx1-story-date {
@@ -1359,19 +1383,40 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+.lx1-wishes-scroll-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.lx1-wishes-scroll-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+  pointer-events: none;
+  z-index: 2;
+}
+
 .lx1-wishes-scroll {
   width: 100%;
   max-height: 320px;
   overflow-y: auto;
-  padding-right: 5px;
+  padding-right: 8px;
+  padding-bottom: 20px; /* offset for bottom fade */
 }
 
 .lx1-wishes-scroll::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
+}
+.lx1-wishes-scroll::-webkit-scrollbar-track {
+  background: transparent;
 }
 .lx1-wishes-scroll::-webkit-scrollbar-thumb {
-  background-color: #E2E8F0;
-  border-radius: 4px;
+  background-color: var(--lx1-gold, #c5a880);
+  border-radius: 3px;
 }
 
 .lx1-wish-card {
@@ -1516,4 +1561,53 @@
 @keyframes lx1-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* --- Live Streaming Section --- */
+.lx1-section-livestream {
+  background: var(--lx1-bg-radial);
+  color: var(--lx1-text-light);
+}
+
+.lx1-scroll-container .lx1-section-livestream {
+  min-height: auto !important;
+  padding: 45px 20px !important;
+}
+
+/* --- Mode Tanpa Foto Cover & Opening Fallbacks --- */
+.lx1-cover-overlay.lx1-no-photo-mode {
+  background: var(--lx1-bg-radial) !important;
+}
+
+.lx1-cover-overlay.lx1-no-photo-mode::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('./asset/Picture5-1-1-1.webp');
+  background-position: center;
+  background-size: min(380px, 90%) auto;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lx1-opening-photo-mode.lx1-no-photo-mode {
+  background-image: url('./asset/Picture5-1-1-1.webp') !important;
+  background-position: center !important;
+  background-size: min(380px, 95%) auto !important;
+  background-repeat: no-repeat !important;
+}
+
+/* --- Non-aktifkan Semua Animasi & Transisi --- */
+.lx1-page.lx1-no-animations *,
+.lx1-page.lx1-no-animations *::before,
+.lx1-page.lx1-no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+  transition-delay: 0s !important;
+  animation-delay: 0s !important;
 }

@@ -69,6 +69,7 @@ class ThemeSettingsController extends Controller
         }
 
         $themes = Theme::active()->orderBy('sort_order')->get();
+        $centralHost = parse_url(config('app.url'), PHP_URL_HOST) ?: 'undangan.com';
 
         return Inertia::render('Dashboard/ThemeSettings', [
             'invitation' => $invitation ? [
@@ -83,6 +84,17 @@ class ThemeSettingsController extends Controller
                 'is_private' => $invitation->is_private,
                 'enable_qr' => $invitation->enable_qr,
                 'hide_photos' => $invitation->hide_photos,
+                'show_photos' => !$invitation->hide_photos,
+                'show_animations' => $invitation->show_animations,
+                'show_guest_name' => $invitation->show_guest_name ?? true,
+                'show_countdown' => $invitation->show_countdown ?? true,
+                'enable_rsvp' => $invitation->enable_rsvp,
+                'enable_wishes' => $invitation->enable_wishes,
+                'music_autoplay' => $invitation->music_autoplay,
+                'enable_auto_scroll' => $invitation->enable_auto_scroll,
+                'language' => $invitation->language ?: 'id',
+                'religion' => $invitation->religion ?: 'islam',
+                'custom_domain' => $invitation->custom_domain,
                 'particle_type' => $invitation->particle_type,
                 'particle_count' => $invitation->particle_count ?? 30,
                 'particle_speed' => $invitation->particle_speed ?? 'normal',
@@ -92,6 +104,7 @@ class ThemeSettingsController extends Controller
             'themes' => $themes,
             'sections' => $sections,
             'previewData' => $this->getPreviewData($invitation),
+            'centralHost' => $centralHost,
         ]);
     }
 
@@ -119,6 +132,67 @@ class ThemeSettingsController extends Controller
         }
 
         return back()->with('success', 'Layout berhasil diubah.');
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $invitation = $request->user()->invitation;
+
+        if (!$invitation) {
+            return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
+        }
+
+        $request->validate([
+            'show_photos' => 'sometimes|boolean',
+            'show_animations' => 'sometimes|boolean',
+            'show_guest_name' => 'sometimes|boolean',
+            'show_countdown' => 'sometimes|boolean',
+            'enable_rsvp' => 'sometimes|boolean',
+            'enable_wishes' => 'sometimes|boolean',
+            'music_autoplay' => 'sometimes|boolean',
+            'enable_auto_scroll' => 'sometimes|boolean',
+            'language' => 'sometimes|in:id,en',
+            'religion' => 'sometimes|in:islam,kristen,hindu,buddha,umum',
+            'is_private' => 'sometimes|boolean',
+            'enable_qr' => 'sometimes|boolean',
+            'menu_position' => 'sometimes|required|in:none,bottom,left,right',
+            'custom_domain' => 'sometimes|nullable|string|max:255|unique:invitations,custom_domain,' . $invitation->id,
+        ]);
+
+        $data = $request->only([
+            'show_photos',
+            'show_animations',
+            'show_guest_name',
+            'show_countdown',
+            'enable_rsvp',
+            'enable_wishes',
+            'music_autoplay',
+            'enable_auto_scroll',
+            'language',
+            'religion',
+            'is_private',
+            'enable_qr',
+            'menu_position',
+            'custom_domain',
+        ]);
+
+        // Sync show_photos to hide_photos (inverse logic)
+        if ($request->has('show_photos')) {
+            $data['hide_photos'] = !$request->input('show_photos');
+        }
+
+        // Sync both QR code fields to the same value
+        if ($request->has('enable_qr')) {
+            $data['show_qr_code'] = $request->input('enable_qr');
+        }
+
+        $invitation->update($data);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'invitation' => $invitation]);
+        }
+
+        return back()->with('success', 'Pengaturan berhasil disimpan.');
     }
 
     public function changeTheme(Request $request)
@@ -170,6 +244,27 @@ class ThemeSettingsController extends Controller
         }
 
         return back()->with('success', 'Tema berhasil diubah dan data default telah dimuat.');
+    }
+
+    public function toggleLike(Request $request, Theme $theme)
+    {
+        $request->validate([
+            'liked' => 'required|boolean',
+        ]);
+
+        if ($request->input('liked')) {
+            $theme->increment('real_likes');
+        } else {
+            if ($theme->real_likes > 0) {
+                $theme->decrement('real_likes');
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'likes' => $theme->base_likes + $theme->real_likes,
+            'real_likes' => $theme->real_likes,
+        ]);
     }
 
     public function updateSections(Request $request)
@@ -233,9 +328,7 @@ class ThemeSettingsController extends Controller
             }
 
             // ── 2) Seed Mempelai (Bride & Groom) ──
-            if (!empty($defaultData['bride_grooms'])) {
-                // Hapus data mempelai lama, ganti dengan default theme
-                $invitation->brideGrooms()->delete();
+            if (!empty($defaultData['bride_grooms']) && $invitation->brideGrooms()->count() === 0) {
                 foreach ($defaultData['bride_grooms'] as $bg) {
                     BrideGroom::create(array_merge($bg, [
                         'invitation_id' => $invitation->id,
@@ -244,8 +337,7 @@ class ThemeSettingsController extends Controller
             }
 
             // ── 3) Seed Kisah Cinta (Love Stories) ──
-            if (!empty($defaultData['love_stories'])) {
-                $invitation->loveStories()->delete();
+            if (!empty($defaultData['love_stories']) && $invitation->loveStories()->count() === 0) {
                 foreach ($defaultData['love_stories'] as $story) {
                     LoveStory::create(array_merge($story, [
                         'invitation_id' => $invitation->id,
@@ -254,8 +346,7 @@ class ThemeSettingsController extends Controller
             }
 
             // ── 4) Seed Acara (Events) ──
-            if (!empty($defaultData['events'])) {
-                $invitation->events()->delete();
+            if (!empty($defaultData['events']) && $invitation->events()->count() === 0) {
                 foreach ($defaultData['events'] as $event) {
                     Event::create(array_merge($event, [
                         'invitation_id' => $invitation->id,
@@ -264,8 +355,7 @@ class ThemeSettingsController extends Controller
             }
 
             // ── 5) Seed Galeri (Galleries) ──
-            if (!empty($defaultData['galleries'])) {
-                $invitation->galleries()->delete();
+            if (!empty($defaultData['galleries']) && $invitation->galleries()->count() === 0) {
                 foreach ($defaultData['galleries'] as $gallery) {
                     Gallery::create(array_merge($gallery, [
                         'invitation_id' => $invitation->id,
@@ -274,8 +364,7 @@ class ThemeSettingsController extends Controller
             }
 
             // ── 6) Seed Amplop Digital (Bank Accounts) ──
-            if (!empty($defaultData['bank_accounts'])) {
-                $invitation->bankAccounts()->delete();
+            if (!empty($defaultData['bank_accounts']) && $invitation->bankAccounts()->count() === 0) {
                 foreach ($defaultData['bank_accounts'] as $bank) {
                     BankAccount::create(array_merge($bank, [
                         'invitation_id' => $invitation->id,
@@ -284,8 +373,7 @@ class ThemeSettingsController extends Controller
             }
 
             // ── 7) Seed Tamu (Guests) ──
-            if (!empty($defaultData['guests'])) {
-                $invitation->guests()->delete();
+            if (!empty($defaultData['guests']) && $invitation->guests()->count() === 0) {
                 foreach ($defaultData['guests'] as $guest) {
                     Guest::create(array_merge($guest, [
                         'invitation_id' => $invitation->id,
@@ -294,8 +382,7 @@ class ThemeSettingsController extends Controller
             }
 
             // ── 8) Seed Ucapan (Wishes) ──
-            if (!empty($defaultData['wishes'])) {
-                $invitation->wishes()->delete();
+            if (!empty($defaultData['wishes']) && $invitation->wishes()->count() === 0) {
                 foreach ($defaultData['wishes'] as $wish) {
                     Wish::create(array_merge($wish, [
                         'invitation_id' => $invitation->id,

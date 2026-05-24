@@ -198,18 +198,16 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
         Route::post('/musik', [SettingsController::class, 'saveMusik'])->middleware('feature:music')->name('musik.save');
 
         Route::get('/hadiah', [SettingsController::class, 'hadiah'])->middleware('feature:gift')->name('hadiah');
-
         Route::get('/whatsapp', [SettingsController::class, 'whatsapp'])->middleware('feature:whatsapp')->name('whatsapp');
         Route::post('/whatsapp/send', [SettingsController::class, 'sendWhatsapp'])->middleware('feature:whatsapp')->name('whatsapp.send');
-
-        Route::get('/pengaturan', [SettingsController::class, 'pengaturan'])->name('pengaturan');
-        Route::post('/pengaturan', [SettingsController::class, 'savePengaturan'])->name('pengaturan.save');
     });
 
     // Theme Settings (Dynamic)
     Route::get('/theme', [ThemeSettingsController::class, 'index'])->name('theme.index');
     Route::post('/theme/layout', [ThemeSettingsController::class, 'updateLayout'])->name('theme.layout');
+    Route::post('/theme/settings', [ThemeSettingsController::class, 'updateSettings'])->name('theme.settings.save');
     Route::post('/theme/change', [ThemeSettingsController::class, 'changeTheme'])->name('theme.change');
+    Route::post('/theme/{theme}/like', [ThemeSettingsController::class, 'toggleLike'])->name('theme.like');
     Route::post('/theme/sections', [ThemeSettingsController::class, 'updateSections'])->name('theme.sections');
 
     // File Upload

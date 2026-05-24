@@ -103,6 +103,20 @@ export default function Mempelai({ brideGrooms }) {
                     </div>
                 )}
 
+                {Object.keys(errors).length > 0 && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded-lg text-xs flex items-start gap-1.5 shadow-sm">
+                        <span className="text-sm">⚠️</span>
+                        <div>
+                            <div className="font-semibold text-red-800">Gagal menyimpan data mempelai. Silakan periksa kembali:</div>
+                            <ul className="list-disc list-inside text-[11px] mt-1 text-red-600 space-y-0.5">
+                                {Object.entries(errors).map(([key, val]) => (
+                                    <li key={key}>{val}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                )}
+
                 {/* Tab Bar */}
                 <div className="bg-white rounded-xl border border-gray-200 p-1 flex gap-0.5">
                     {tabs.map((tab) => (
@@ -139,15 +153,20 @@ export default function Mempelai({ brideGrooms }) {
                                     <input type="file" accept="image/*" className="hidden"
                                         onChange={(e) => handlePhotoUpload(idx, e.target.files[0])} />
                                 </label>
+                                {errors[`bride_grooms.${idx}.photo`] && (
+                                    <p className="text-[10px] text-red-500 mt-1">{errors[`bride_grooms.${idx}.photo`]}</p>
+                                )}
                             </div>
                         </div>
 
                         {/* Name fields */}
                         <div className="grid grid-cols-2 gap-2">
                             <Field label="Nama Lengkap *" value={data.bride_grooms[idx].full_name}
-                                onChange={(v) => update(idx, 'full_name', v)} required />
+                                onChange={(v) => update(idx, 'full_name', v)} required
+                                error={errors[`bride_grooms.${idx}.full_name`]} />
                             <Field label="Nama Panggilan" value={data.bride_grooms[idx].nickname}
-                                onChange={(v) => update(idx, 'nickname', v)} />
+                                onChange={(v) => update(idx, 'nickname', v)}
+                                error={errors[`bride_grooms.${idx}.nickname`]} />
                         </div>
 
                         {/* Gender toggle */}
@@ -166,11 +185,14 @@ export default function Mempelai({ brideGrooms }) {
                         {/* Parent info */}
                         <div className="grid grid-cols-3 gap-2">
                             <Field label="Putra/Putri ke-" value={data.bride_grooms[idx].child_order}
-                                onChange={(v) => update(idx, 'child_order', v)} placeholder="Pertama" />
+                                onChange={(v) => update(idx, 'child_order', v)} placeholder="Pertama"
+                                error={errors[`bride_grooms.${idx}.child_order`]} />
                             <Field label="Nama Ayah" value={data.bride_grooms[idx].father_name}
-                                onChange={(v) => update(idx, 'father_name', v)} />
+                                onChange={(v) => update(idx, 'father_name', v)}
+                                error={errors[`bride_grooms.${idx}.father_name`]} />
                             <Field label="Nama Ibu" value={data.bride_grooms[idx].mother_name}
-                                onChange={(v) => update(idx, 'mother_name', v)} />
+                                onChange={(v) => update(idx, 'mother_name', v)}
+                                error={errors[`bride_grooms.${idx}.mother_name`]} />
                         </div>
 
                         {/* Bio */}
@@ -254,13 +276,14 @@ export default function Mempelai({ brideGrooms }) {
     );
 }
 
-function Field({ label, value, onChange, required, placeholder }) {
+function Field({ label, value, onChange, required, placeholder, error }) {
     return (
         <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
             <input type="text" value={value || ''} onChange={(e) => onChange(e.target.value)} required={required}
                 placeholder={placeholder}
-                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                className={`w-full border rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 ${error ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} />
+            {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
         </div>
     );
 }

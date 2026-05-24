@@ -68,12 +68,15 @@ const parseBool = (val, defaultVal = true) => {
 /* ═══════════════════════════════════════
    SCROLL REVEAL COMPONENT (Exit & Re-entry Tracking)
    ═══════════════════════════════════════ */
+let globalShowAnimations = true;
+
 function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
     const { t } = useTranslation();
     const ref = useRef(null);
-    const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(!globalShowAnimations);
 
     useEffect(() => {
+        if (!globalShowAnimations) return;
         const el = ref.current;
         if (!el) return;
         const obs = new IntersectionObserver(([e]) => {
@@ -82,6 +85,14 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
         obs.observe(el);
         return () => obs.disconnect();
     }, []);
+
+    if (!globalShowAnimations) {
+        return (
+            <div className={className}>
+                {children}
+            </div>
+        );
+    }
 
     let baseClass = 'lx1-reveal--up';
     if (variant === 'zoom') baseClass = 'lx1-reveal--zoom';
@@ -158,6 +169,38 @@ function CountdownBlock({ targetDate }) {
     );
 }
 
+/* ─── TimelineCard (Intersection Observer Wrapper) ─── */
+function TimelineCard({ story, idx, formatDate, t }) {
+    const ref = useRef(null);
+    const [isActive, setIsActive] = useState(false);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+
+        const observer = new IntersectionObserver(([entry]) => {
+            setIsActive(entry.isIntersecting);
+        }, {
+            rootMargin: '-30% 0px -30% 0px', // Active when in center 40% of viewport
+            threshold: 0
+        });
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <div ref={ref} className={`lx1-story-item ${isActive ? 'is-active' : ''}`}>
+            <div className="lx1-story-badge" />
+            <Reveal variant={idx % 2 === 0 ? 'left' : 'right'} className="lx1-story-card">
+                <div className="lx1-story-date">{story.story_date || formatDate(story.created_at)}</div>
+                <h3 className="lx1-story-title">{story.title}</h3>
+                <p className="lx1-story-description">{story.description || story.story}</p>
+            </Reveal>
+        </div>
+    );
+}
+
 /* ═══════════════════════════════════════
    MAIN COMPONENT: DynamicIndex
    ═══════════════════════════════════════ */
@@ -188,12 +231,21 @@ export default function DynamicIndex({
 
     // Fallback guests
     const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
+    const guestName = activeGuest.name || new URLSearchParams(window.location.search).get('to') || '';
+    const [sharedName, setSharedName] = useState(guestName);
+    const [attendance, setAttendance] = useState('hadir');
+    const [numGuests, setNumGuests] = useState(1);
+    const [message, setMessage] = useState('');
+    const [success, setSuccess] = useState(false);
 
     // Boolean features
     const enableRsvp = parseBool(invitation?.enable_rsvp);
     const enableWishes = parseBool(invitation?.enable_wishes);
     const enableQr = parseBool(invitation?.enable_qr) && parseBool(invitation?.show_qr_code);
-    const showCountdown = parseBool(invitation?.show_countdown);
+    const showCountdown = true;
+    const showPhotos = parseBool(invitation?.show_photos, true);
+    const showAnimations = parseBool(invitation?.show_animations, true);
+    globalShowAnimations = showAnimations;
     const layoutMode = invitation?.layout_mode || 'scroll';
     const isSlideMode = layoutMode === 'slide-h' || layoutMode === 'slide-v' || layoutMode === 'slide';
 
@@ -306,11 +358,14 @@ export default function DynamicIndex({
     // Resolve Sections and Order
     const resolvedSections = useMemo(() => {
         const safeSections = safeArr(sections);
-        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing'];
+        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
         const resolved = [];
 
         // Prepend virtual hero/slideshow section
         resolved.push({ section_key: 'hero' });
+
+        const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+        const hasStream = primaryEvent?.streaming_url || safeArr(primaryEvent?.streamings).length > 0;
 
         if (safeSections.length > 0) {
             const dbSorted = safeSections
@@ -319,7 +374,7 @@ export default function DynamicIndex({
 
             dbSorted.forEach(s => {
                 if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return;
-                if (s.section_key === 'gallery' && !(galleries?.length > 0)) return;
+                if (s.section_key === 'gallery' && (!showPhotos || !(galleries?.length > 0))) return;
                 if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return;
                 if (s.section_key === 'rsvp' && !enableRsvp) return;
                 
@@ -333,6 +388,9 @@ export default function DynamicIndex({
                 }
 
                 resolved.push(s);
+                if (s.section_key === 'event' && hasStream) {
+                    resolved.push({ section_key: 'livestream' });
+                }
             });
         } else {
             // Fallback list
@@ -341,8 +399,13 @@ export default function DynamicIndex({
                 { section_key: 'bride_groom' },
                 { section_key: 'event' },
             ];
+            
+            if (hasStream) {
+                fallbacks.push({ section_key: 'livestream' });
+            }
+
             if (loveStories?.length > 0) fallbacks.push({ section_key: 'love_story' });
-            if (galleries?.length > 0) fallbacks.push({ section_key: 'gallery' });
+            if (showPhotos && galleries?.length > 0) fallbacks.push({ section_key: 'gallery' });
             if (enableRsvp) {
                 fallbacks.push({ section_key: 'rsvp' });
             } else if (enableWishes) {
@@ -355,7 +418,7 @@ export default function DynamicIndex({
         }
 
         return resolved;
-    }, [sections, loveStories, galleries, bankAccounts, enableRsvp, enableWishes]);
+    }, [sections, loveStories, galleries, bankAccounts, enableRsvp, enableWishes, events, showPhotos]);
 
     // Active navigation item tracking based on active slide or scroll positions
     useEffect(() => {
@@ -530,25 +593,39 @@ export default function DynamicIndex({
     const handleMouseLeave = () => { isDragging.current = false; };
 
     // Forms handling
-    const rsvpForm = useForm({ attendance: 'hadir', number_of_guests: 1, name: activeGuest.name });
-    const wishForm = useForm({ sender_name: activeGuest.name, message: '' });
+    const rsvpForm = useForm({ attendance: 'hadir', number_of_guests: 1, name: guestName });
+    const wishForm = useForm({ sender_name: guestName, message: '' });
 
-    const handleRsvpSubmit = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        rsvpForm.post(route('invitation.rsvp', invitation.slug), {
-            preserveScroll: true,
-            onSuccess: () => alert('Konfirmasi kehadiran berhasil dikirim.')
-        });
-    };
+        rsvpForm.setData('name', sharedName);
+        rsvpForm.setData('attendance', attendance);
+        rsvpForm.setData('number_of_guests', numGuests);
+        wishForm.setData('sender_name', sharedName);
+        wishForm.setData('message', message);
 
-    const handleWishSubmit = (e) => {
-        e.preventDefault();
-        wishForm.post(route('invitation.wish', invitation.slug), {
-            preserveScroll: true,
-            onSuccess: () => {
-                wishForm.reset('message');
+        const doWish = () => {
+            if (enableWishes && message.trim()) {
+                wishForm.post(route('invitation.wish', invitation.slug), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        setMessage('');
+                        setSuccess(true);
+                    },
+                });
+            } else {
+                setSuccess(true);
             }
-        });
+        };
+
+        if (enableRsvp) {
+            rsvpForm.post(route('invitation.rsvp', invitation.slug), {
+                preserveScroll: true,
+                onSuccess: doWish,
+            });
+        } else {
+            doWish();
+        }
     };
 
     // Shared Menu Item Generator
@@ -566,6 +643,8 @@ export default function DynamicIndex({
                 items.push({ id: 'bride_groom', label: t('nav.mempelai'), icon: 'fas fa-heart' });
             } else if (key === 'event') {
                 items.push({ id: 'event', label: t('nav.acara'), icon: 'far fa-calendar-alt' });
+            } else if (key === 'livestream') {
+                items.push({ id: 'livestream', label: 'Streaming', icon: 'fas fa-video' });
             } else if (key === 'love_story') {
                 items.push({ id: 'love_story', label: t('nav.kisah'), icon: 'fas fa-history' });
             } else if (key === 'gallery') {
@@ -615,61 +694,43 @@ export default function DynamicIndex({
         const coupleNames = couples.map(b => b.nickname).join(' & ');
         const dateStr = formatDate(invitation?.wedding_date || events?.[0]?.event_date);
 
-        if (hasCoverPhoto) {
-            return (
-                <section id="opening" className="lx1-section lx1-section-opening lx1-opening-photo-mode" style={{ backgroundImage: `url(${getStorageUrl(invitation.cover_image)})` }}>
-                    <div className="lx1-section-content">
-                        <Reveal variant="down">
-                            <h3 className="lx1-title-photo">{t('invitation.wedding_of')}</h3>
-                        </Reveal>
-                        <Reveal variant="zoom" delay={150}>
-                            <h1 className="lx1-names-photo">
-                                {couples[0]?.nickname || 'Habib'}
-                                {couples[1]?.nickname && (
-                                    <>
-                                        <br />
-                                        &amp; {couples[1].nickname}
-                                    </>
-                                )}
-                            </h1>
-                        </Reveal>
-                        <Reveal variant="up" delay={250}>
-                            <div className="lx1-date-photo">{dateStr}</div>
-                        </Reveal>
-                        <Reveal variant="up" delay={350}>
-                            <button className="lx1-btn-save-date" onClick={() => {
-                                const target = invitation?.countdown_target_date || '2026-12-20 08:00:00';
-                                const dateClean = target.replace(/[- :]/g, '');
-                                window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=The+Wedding+of+${encodeURIComponent(coupleNames)}&dates=${dateClean}Z%2F${dateClean}Z`, '_blank');
-                            }}>
-                                <i className="fas fa-envelope" />
-                                <span>{t('invitation.save_the_date')}</span>
-                            </button>
-                        </Reveal>
-                    </div>
-                </section>
-            );
-        } else {
-            return (
-                <section id="opening" className="lx1-section lx1-section-opening lx1-opening-watermark-mode">
-                    <div className="lx1-section-content">
-                        <Reveal variant="down">
-                            <h3 className="lx1-opening-title">{t('invitation.wedding_of').toUpperCase()}</h3>
-                        </Reveal>
-                        <Reveal variant="zoom" delay={150}>
-                            <h1 className="lx1-opening-names">{coupleNames}</h1>
-                        </Reveal>
-                        <div className="lx1-scroll-indicator">
-                            <span>{layoutMode === 'slide-h' ? 'Geser Kanan' : 'Gulir Bawah'}</span>
-                            <i className={layoutMode === 'slide-h' ? 'fas fa-chevron-right lx1-indicator-arrow-right' : 'fas fa-chevron-down lx1-indicator-arrow-down'} />
-                        </div>
-                        <Reveal variant="up" delay={250}>
-                            <div className="lx1-opening-date">{dateStr}</div>
-                        </Reveal>
-                    </div>
-                </section>
-            );
-        }
+        return (
+            <section 
+                id="opening" 
+                className={`lx1-section lx1-section-opening lx1-opening-photo-mode ${!showPhotos ? 'lx1-no-photo-mode' : ''}`}
+                style={showPhotos && hasCoverPhoto ? { backgroundImage: `url(${getStorageUrl(invitation.cover_image)})` } : undefined}
+            >
+                <div className="lx1-section-content">
+                    <Reveal variant="down">
+                        <h3 className="lx1-title-photo">{t('invitation.wedding_of')}</h3>
+                    </Reveal>
+                    <Reveal variant="zoom" delay={150}>
+                        <h1 className="lx1-names-photo">
+                            {couples[0]?.nickname || 'Habib'}
+                            {couples[1]?.nickname && (
+                                <>
+                                    <br />
+                                    &amp; {couples[1].nickname}
+                                </>
+                            )}
+                        </h1>
+                    </Reveal>
+                    <Reveal variant="up" delay={250}>
+                        <div className="lx1-date-photo">{dateStr}</div>
+                    </Reveal>
+                    <Reveal variant="up" delay={350}>
+                        <button className="lx1-btn-save-date" onClick={() => {
+                            const target = invitation?.countdown_target_date || '2026-12-20 08:00:00';
+                            const dateClean = target.replace(/[- :]/g, '');
+                            window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=The+Wedding+of+${encodeURIComponent(coupleNames)}&dates=${dateClean}Z%2F${dateClean}Z`, '_blank');
+                        }}>
+                            <i className="fas fa-envelope" />
+                            <span>{t('invitation.save_the_date')}</span>
+                        </button>
+                    </Reveal>
+                </div>
+            </section>
+        );
     };
 
     // Render 2. Mempelai (Bride & Groom)
@@ -703,13 +764,15 @@ export default function DynamicIndex({
                         {groom && (
                             <div className="lx1-mempelai-card lx1-mempelai-groom">
                                 <Reveal variant="left">
-                                    <div className="lx1-mempelai-photo-wrapper">
-                                        <img 
-                                            src={getStorageUrl(groom.photo, ASSETS.groom)} 
-                                            alt={groom.nickname} 
-                                            className="lx1-mempelai-photo" 
-                                        />
-                                    </div>
+                                    {showPhotos && (
+                                        <div className="lx1-mempelai-photo-wrapper">
+                                            <img 
+                                                src={getStorageUrl(groom.photo, ASSETS.groom)} 
+                                                alt={groom.nickname} 
+                                                className="lx1-mempelai-photo" 
+                                            />
+                                        </div>
+                                    )}
                                     <div className="lx1-mempelai-details">
                                         <h2 className="lx1-mempelai-fullname">{groom.full_name}</h2>
                                         <div className="lx1-mempelai-parents">
@@ -729,13 +792,15 @@ export default function DynamicIndex({
                         {bride && (
                             <div className="lx1-mempelai-card lx1-mempelai-bride">
                                 <Reveal variant="right">
-                                    <div className="lx1-mempelai-photo-wrapper">
-                                        <img 
-                                            src={getStorageUrl(bride.photo, ASSETS.bride)} 
-                                            alt={bride.nickname} 
-                                            className="lx1-mempelai-photo" 
-                                        />
-                                    </div>
+                                    {showPhotos && (
+                                        <div className="lx1-mempelai-photo-wrapper">
+                                            <img 
+                                                src={getStorageUrl(bride.photo, ASSETS.bride)} 
+                                                alt={bride.nickname} 
+                                                className="lx1-mempelai-photo" 
+                                            />
+                                        </div>
+                                    )}
                                     <div className="lx1-mempelai-details">
                                         <h2 className="lx1-mempelai-fullname">{bride.full_name}</h2>
                                         <div className="lx1-mempelai-parents">
@@ -782,11 +847,13 @@ export default function DynamicIndex({
                             return (
                                 <Reveal key={evt.id || idx} variant={isEven ? 'left' : 'right'} className="lx1-event-card">
                                     {/* Curved top card header image */}
-                                    <img 
-                                        src={evt.cover_image ? getStorageUrl(evt.cover_image) : (safeArr(galleries).length > 0 ? getStorageUrl(safeArr(galleries)[idx % safeArr(galleries).length].image_path || safeArr(galleries)[idx % safeArr(galleries).length].image_url) : ASSETS.cover)} 
-                                        alt={evt.event_name} 
-                                        className="lx1-event-card-header-img"
-                                    />
+                                    {showPhotos && (
+                                        <img 
+                                            src={evt.cover_image ? getStorageUrl(evt.cover_image) : (safeArr(galleries).length > 0 ? getStorageUrl(safeArr(galleries)[idx % safeArr(galleries).length].image_path || safeArr(galleries)[idx % safeArr(galleries).length].image_url) : ASSETS.cover)} 
+                                            alt={evt.event_name} 
+                                            className="lx1-event-card-header-img"
+                                        />
+                                    )}
                                     <div className="lx1-event-card-body">
                                         <h3 className="lx1-event-name">{evt.event_name}</h3>
                                         
@@ -800,13 +867,15 @@ export default function DynamicIndex({
                                             <span>Pukul {formatTime(evt.start_time)} - {evt.end_time === '23:59:00' ? 'Selesai' : formatTime(evt.end_time)}</span>
                                         </div>
 
-                                        <div className="lx1-event-detail-item">
+                                        <div className="lx1-event-detail-item lx1-event-detail-item-address">
                                             <i className="fas fa-map-marker-alt lx1-event-icon" />
-                                            <span className="lx1-event-venue">{evt.venue_name}</span>
-                                            <span className="lx1-event-address">{evt.venue_address}</span>
+                                            <div className="lx1-event-detail-text">
+                                                <span className="lx1-event-venue">{evt.venue_name}</span>
+                                                <span className="lx1-event-address">{evt.venue_address}</span>
+                                            </div>
                                         </div>
 
-                                        {evt.gmaps_link && (
+                                         {evt.gmaps_link && (
                                             <a 
                                                 href={evt.gmaps_link} 
                                                 target="_blank" 
@@ -827,6 +896,71 @@ export default function DynamicIndex({
         );
     };
 
+    // Render 3.5. Live Streaming
+    const renderLiveStreaming = () => {
+        const eventList = events || [];
+        const primaryEvent = eventList.find(e => e.is_primary) || eventList[0];
+        
+        const streamsList = [];
+        if (primaryEvent?.streaming_url) {
+            streamsList.push({ platform: primaryEvent.streaming_platform || 'Live', url: primaryEvent.streaming_url });
+        }
+        if (Array.isArray(primaryEvent?.streamings)) {
+            primaryEvent.streamings.forEach(s => {
+                if (s.url && !streamsList.some(item => item.url === s.url)) {
+                    streamsList.push({ platform: s.platform || 'Live', url: s.url });
+                }
+            });
+        }
+        
+        if (streamsList.length === 0) return null;
+        
+        const isEn = t('invitation.save_the_date') === 'Save The Date';
+
+        return (
+            <section id="livestream" className="lx1-section lx1-section-livestream" style={{ padding: '50px 20px !important' }}>
+                <div className="lx1-section-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                    <Reveal variant="down">
+                        <h2 style={{ color: 'var(--lx1-gold, #c5a880)', fontSize: '1.4rem', marginBottom: '16px', letterSpacing: '3px', fontWeight: '700', fontFamily: 'var(--lx1-font-heading)', textTransform: 'uppercase', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
+                            LIVE STREAMING
+                        </h2>
+                    </Reveal>
+                    <Reveal variant="up" delay={150}>
+                        <div style={{ fontSize: '1.05rem', color: '#ffffff', fontWeight: '600', marginBottom: '4px', letterSpacing: '1px' }}>
+                            {formatDate(primaryEvent?.event_date)}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '20px', letterSpacing: '0.5px' }}>
+                            {formatTime(primaryEvent?.start_time)} - {primaryEvent?.end_time === '23:59:00' ? 'Selesai' : formatTime(primaryEvent?.end_time)} {primaryEvent?.timezone || 'WIB'}
+                        </div>
+                    </Reveal>
+                    <Reveal variant="up" delay={200}>
+                        <p style={{ maxWidth: '340px', margin: '0 auto 20px', fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.75)', lineHeight: '1.6', fontStyle: 'normal' }}>
+                            {isEn 
+                                ? 'We will broadcast the happy moments of our wedding procession virtually through the following platforms.'
+                                : 'Kami akan menyiarkan momen bahagia prosesi pernikahan kami secara virtual melalui platform berikut.'}
+                        </p>
+                    </Reveal>
+                    <Reveal variant="up" delay={250}>
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', width: '100%' }}>
+                            {streamsList.map((stream, idx) => (
+                                <button 
+                                    key={idx}
+                                    type="button" 
+                                    className="lx1-btn-save-date" 
+                                    onClick={() => window.open(stream.url, '_blank')}
+                                    style={{ margin: 0, padding: '8px 20px', fontSize: '0.75rem', backgroundColor: 'transparent', border: '1.5px solid var(--lx1-gold-border, #d4af37)', color: '#ffffff', letterSpacing: '1px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                                >
+                                    <i className="fas fa-video" />
+                                    <span>JOIN {stream.platform.toUpperCase()}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </Reveal>
+                </div>
+            </section>
+        );
+    };
+
     // Render 4. Love Story
     const renderLoveStory = () => (
         <section id="love_story" className="lx1-section lx1-section-story">
@@ -837,14 +971,7 @@ export default function DynamicIndex({
 
                 <div className="lx1-story-timeline">
                     {safeArr(loveStories).map((story, idx) => (
-                        <div key={story.id || idx} className="lx1-story-item">
-                            <div className="lx1-story-badge" />
-                            <Reveal variant={idx % 2 === 0 ? 'left' : 'right'} className="lx1-story-card">
-                                <div className="lx1-story-date">{story.story_date || formatDate(story.created_at)}</div>
-                                <h3 className="lx1-story-title">{story.title}</h3>
-                                <p className="lx1-story-description">{story.description || story.story}</p>
-                            </Reveal>
-                        </div>
+                        <TimelineCard key={story.id || idx} story={story} idx={idx} formatDate={formatDate} t={t} />
                     ))}
                 </div>
             </div>
@@ -927,131 +1054,125 @@ export default function DynamicIndex({
         const sortedWishes = safeArr(wishes);
         const hasRsvp = resolvedSections.some(s => s.section_key === 'rsvp') || enableRsvp;
         const hasWishes = resolvedSections.some(s => s.section_key === 'wishes') || enableWishes;
+        const recentWishes = sortedWishes.slice(0, 5);
+
+        const formTitle = hasRsvp && hasWishes
+            ? (invitation?.language === 'en' ? 'Confirmation & Wishes' : 'Konfirmasi & Ucapan')
+            : hasRsvp
+                ? (invitation?.language === 'en' ? 'Attendance Confirmation' : 'Konfirmasi Kehadiran')
+                : (invitation?.language === 'en' ? 'Wishes & Blessings' : 'Ucapan & Doa Restu');
+
+        if (!hasRsvp && !hasWishes) return null;
+
+        const isSubmitting = rsvpForm.processing || wishForm.processing;
 
         return (
             <section id="rsvp" className="lx1-section lx1-section-rsvp">
                 <div className="lx1-section-content">
-                    {/* RSVP Form Widget */}
-                    {hasRsvp && (
-                        <Reveal variant="left" className="lx1-rsvp-form-container">
-                            <h2 className="lx1-form-title">{t('invitation.rsvp_title')}</h2>
-                            <form onSubmit={handleRsvpSubmit}>
-                                <div className="lx1-form-group">
-                                    <label className="lx1-form-label">{t('invitation.rsvp_name')}</label>
-                                    <input 
-                                        type="text" 
-                                        className="lx1-form-input" 
-                                        required 
-                                        value={rsvpForm.data.name} 
-                                        onChange={e => rsvpForm.setData('name', e.target.value)}
-                                    />
-                                </div>
+                    {/* Unified Form Widget */}
+                    <Reveal variant="left" className="lx1-rsvp-form-container">
+                        <h2 className="lx1-form-title">{formTitle}</h2>
+                        <form onSubmit={handleSubmit}>
+                            {/* Nama */}
+                            <div className="lx1-form-group">
+                                <label className="lx1-form-label">{invitation?.language === 'en' ? 'Your Name' : 'Nama Lengkap'}</label>
+                                <input 
+                                    type="text" 
+                                    className="lx1-form-input" 
+                                    required 
+                                    readOnly={!!activeGuest.name && activeGuest.name !== 'Tamu Undangan'}
+                                    value={sharedName} 
+                                    onChange={e => setSharedName(e.target.value)}
+                                />
+                            </div>
 
+                            {/* Konfirmasi Kehadiran */}
+                            {hasRsvp && (
                                 <div className="lx1-form-group">
                                     <label className="lx1-form-label">{t('invitation.rsvp_attendance')}</label>
                                     <select 
                                         className="lx1-form-select"
-                                        value={rsvpForm.data.attendance}
-                                        onChange={e => rsvpForm.setData('attendance', e.target.value)}
+                                        value={attendance}
+                                        onChange={e => setAttendance(e.target.value)}
                                     >
                                         <option value="hadir">{t('invitation.rsvp_hadir')}</option>
                                         <option value="tidak_hadir">{t('invitation.rsvp_tidak_hadir')}</option>
                                         <option value="belum_pasti">{t('invitation.rsvp_belum_pasti')}</option>
                                     </select>
                                 </div>
+                            )}
 
-                                {rsvpForm.data.attendance === 'hadir' && (
-                                    <div className="lx1-form-group">
-                                        <label className="lx1-form-label">{t('invitation.rsvp_count')}</label>
-                                        <select 
-                                            className="lx1-form-select"
-                                            value={rsvpForm.data.number_of_guests}
-                                            onChange={e => rsvpForm.setData('number_of_guests', parseInt(e.target.value))}
-                                        >
-                                            {[1, 2, 3, 4, 5].map(v => (
-                                                <option key={v} value={v}>{v} {invitation?.language === 'en' ? 'People' : 'Orang'}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-
-                                <button 
-                                    type="submit" 
-                                    className="lx1-btn-submit" 
-                                    disabled={rsvpForm.processing}
-                                >
-                                    {rsvpForm.processing ? (
-                                        <i className="fas fa-spinner fa-spin" />
-                                    ) : (
-                                        <i className="fas fa-paper-plane" />
-                                    )}
-                                    <span>{t('invitation.send_rsvp')}</span>
-                                </button>
-                            </form>
-                        </Reveal>
-                    )}
-
-                    {/* Wishes/Ucapan Form Widget */}
-                    {hasWishes && (
-                        <Reveal variant="right" className="lx1-rsvp-form-container">
-                            <h2 className="lx1-form-title">{t('invitation.wishes_title')}</h2>
-                            <form onSubmit={handleWishSubmit}>
+                            {/* Jumlah Tamu */}
+                            {hasRsvp && attendance === 'hadir' && (
                                 <div className="lx1-form-group">
-                                    <label className="lx1-form-label">{t('invitation.rsvp_name')}</label>
-                                    <input 
-                                        type="text" 
-                                        className="lx1-form-input" 
-                                        required 
-                                        value={wishForm.data.sender_name} 
-                                        onChange={e => wishForm.setData('sender_name', e.target.value)}
-                                    />
+                                    <label className="lx1-form-label">{t('invitation.rsvp_count')}</label>
+                                    <select 
+                                        className="lx1-form-select"
+                                        value={numGuests}
+                                        onChange={e => setNumGuests(parseInt(e.target.value) || 1)}
+                                    >
+                                        {[1, 2, 3, 4, 5].map(v => (
+                                            <option key={v} value={v}>{v} {invitation?.language === 'en' ? 'People' : 'Orang'}</option>
+                                        ))}
+                                    </select>
                                 </div>
+                            )}
 
+                            {/* Ucapan / Wishes */}
+                            {hasWishes && (
                                 <div className="lx1-form-group">
-                                    <label className="lx1-form-label">Pesan / Ucapan</label>
+                                    <label className="lx1-form-label">{invitation?.language === 'en' ? 'Wishes & Prayers' : 'Pesan / Ucapan'}</label>
                                     <textarea 
                                         className="lx1-form-textarea" 
-                                        required 
+                                        required={!hasRsvp}
                                         placeholder={t('invitation.wishes_msg')}
-                                        value={wishForm.data.message} 
-                                        onChange={e => wishForm.setData('message', e.target.value)}
+                                        value={message} 
+                                        onChange={e => setMessage(e.target.value)}
                                     />
                                 </div>
+                            )}
 
-                                <button 
-                                    type="submit" 
-                                    className="lx1-btn-submit" 
-                                    disabled={wishForm.processing}
-                                >
-                                    {wishForm.processing ? (
-                                        <i className="fas fa-spinner fa-spin" />
-                                    ) : (
-                                        <i className="fas fa-paper-plane" />
-                                    )}
-                                    <span>{t('invitation.send_wish')}</span>
-                                </button>
-                            </form>
-                        </Reveal>
-                    )}
+                            <button 
+                                type="submit" 
+                                className="lx1-btn-submit" 
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <i className="fas fa-spinner fa-spin" />
+                                ) : (
+                                    <i className="fas fa-paper-plane" />
+                                )}
+                                <span>{invitation?.language === 'en' ? 'Send' : 'Kirim'}</span>
+                            </button>
+
+                            {success && (
+                                <p style={{ color: 'var(--lx1-primary-gold)', marginTop: '12px', fontSize: '13px', textAlign: 'center' }}>
+                                    ✓ {invitation?.language === 'en' ? 'Successfully sent!' : 'Berhasil terkirim!'}
+                                </p>
+                            )}
+                        </form>
+                    </Reveal>
 
                     {/* Wishes Scrolling List */}
-                    {hasWishes && sortedWishes.length > 0 && (
+                    {hasWishes && recentWishes.length > 0 && (
                         <Reveal variant="up" className="lx1-wishes-list-container">
                             <div className="lx1-wishes-count">Doa Restu Tamu ({sortedWishes.length})</div>
-                            <div className="lx1-wishes-scroll">
-                                {sortedWishes.map((w, idx) => (
-                                    <div key={w.id || idx} className="lx1-wish-card">
-                                        <div className="lx1-wish-header">
-                                            <span className="lx1-wish-sender">{w.sender_name || w.name}</span>
-                                            {w.attendance && (
-                                                <span className={`lx1-wish-badge lx1-badge-${w.attendance.replace('_', '-')}`}>
-                                                    {w.attendance === 'hadir' ? 'Hadir' : w.attendance === 'tidak_hadir' ? 'Tidak Hadir' : 'Ragu-ragu'}
-                                                </span>
-                                            )}
+                            <div className="lx1-wishes-scroll-wrapper">
+                                <div className="lx1-wishes-scroll" style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                                    {recentWishes.map((w, idx) => (
+                                        <div key={w.id || idx} className="lx1-wish-card">
+                                            <div className="lx1-wish-header">
+                                                <span className="lx1-wish-sender">{w.sender_name || w.name}</span>
+                                                {w.attendance && (
+                                                    <span className={`lx1-wish-badge lx1-badge-${w.attendance.replace('_', '-')}`}>
+                                                        {w.attendance === 'hadir' ? 'Hadir' : w.attendance === 'tidak_hadir' ? 'Tidak Hadir' : 'Ragu-ragu'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="lx1-wish-message">{w.message}</p>
                                         </div>
-                                        <p className="lx1-wish-message">{w.message}</p>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         </Reveal>
                     )}
@@ -1062,16 +1183,45 @@ export default function DynamicIndex({
 
     // Render 8. Closing
     const renderClosing = () => {
+        const couples = safeArr(brideGrooms);
+        const bride = couples.find(bg => bg.gender === 'wanita' || bg.gender === 'female' || String(bg.gender).toLowerCase() === 'wanita' || String(bg.gender).toLowerCase() === 'female') || couples[0] || {};
+        const groom = couples.find(bg => bg.gender === 'pria' || bg.gender === 'male' || String(bg.gender).toLowerCase() === 'pria' || String(bg.gender).toLowerCase() === 'male') || couples[1] || couples[0] || {};
+
+        const groomFather = groom.father_name;
+        const groomMother = groom.mother_name;
+        const brideFather = bride.father_name;
+        const brideMother = bride.mother_name;
+
+        const hasGroomParents = groomFather || groomMother;
+        const hasBrideParents = brideFather || brideMother;
+
+        const defaultIdText = 'Merupakan suatu kebahagiaan dan kehormatan bagi kami sekeluarga, apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu kepada kedua mempelai.';
+        const defaultIdTitle = 'Thank You';
+
+        const currentClosingTitle = invitation?.closing_title || '';
+        const currentClosingText = invitation?.closing_text || '';
+
+        const isDefaultTitle = !currentClosingTitle || currentClosingTitle.trim().toLowerCase() === 'thank you' || currentClosingTitle.trim() === 'TERIMA KASIH';
+        const isDefaultText = !currentClosingText || currentClosingText.trim() === defaultIdText || currentClosingText.includes('kehormatan dan kebahagiaan');
+
+        const displayClosingTitle = isDefaultTitle
+            ? t('invitation.closing_title')
+            : currentClosingTitle;
+
+        const displayClosingText = isDefaultText
+            ? t('invitation.closing_text')
+            : currentClosingText;
+
         return (
             <section id="closing" className="lx1-section lx1-section-closing">
                 <div className="lx1-section-content">
                     <Reveal variant="down">
-                        <h4 className="lx1-closing-heading">Thank You</h4>
+                        <h4 className="lx1-closing-heading">{displayClosingTitle}</h4>
                     </Reveal>
 
                     <Reveal variant="zoom" delay={150}>
                         <p className="lx1-closing-text">
-                            Merupakan suatu kebahagiaan dan kehormatan bagi kami sekeluarga, apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu kepada kedua mempelai.
+                            {displayClosingText}
                         </p>
                     </Reveal>
 
@@ -1080,9 +1230,32 @@ export default function DynamicIndex({
                     </Reveal>
 
                     <Reveal variant="up" delay={300}>
-                        <div className="lx1-closing-wishes-title">Kami Yang Berbahagia</div>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 500 }}>Kel. Bapak Anas &amp; Ibu Kholifah</div>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 500 }}>Kel. Bapak M. Dawam &amp; Ibu Dewi Sudarwati</div>
+                        <div className="lx1-closing-wishes-title">
+                            {t('invitation.save_the_date') === 'Save The Date' ? 'We Who Are Joyful,' : 'Kami Yang Berbahagia'}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 500, display: 'flex', flexDirection: 'column', gap: '4px', fontStyle: 'normal' }}>
+                            {hasGroomParents && (
+                                <div>
+                                    {t('invitation.save_the_date') === 'Save The Date'
+                                        ? `Family of Mr. ${groomFather || '...'} & Mrs. ${groomMother || '...'}`
+                                        : `Kel. Bapak ${groomFather || '...'} & Ibu ${groomMother || '...'}`
+                                    }
+                                </div>
+                            )}
+                            {hasBrideParents && (
+                                <div>
+                                    {t('invitation.save_the_date') === 'Save The Date'
+                                        ? `Family of Mr. ${brideFather || '...'} & Mrs. ${brideMother || '...'}`
+                                        : `Kel. Bapak ${brideFather || '...'} & Ibu ${brideMother || '...'}`
+                                    }
+                                </div>
+                            )}
+                            {!hasGroomParents && !hasBrideParents && (
+                                <div>
+                                    {t('invitation.save_the_date') === 'Save The Date' ? 'Both Families of the Couple' : 'Keluarga Besar Kedua Mempelai'}
+                                </div>
+                            )}
+                        </div>
                     </Reveal>
 
                     <div className="lx1-closing-footer">
@@ -1159,6 +1332,8 @@ export default function DynamicIndex({
                 return wrapSection('bride_groom', renderBrideGroom());
             case 'event':
                 return wrapSection('event', renderEvent());
+            case 'livestream':
+                return wrapSection('livestream', renderLiveStreaming());
             case 'love_story':
                 return wrapSection('love_story', renderLoveStory());
             case 'gallery':
@@ -1181,7 +1356,7 @@ export default function DynamicIndex({
     };
 
     return (
-        <div className="lx1-page">
+        <div className={`lx1-page ${!showAnimations ? 'lx1-no-animations' : ''}`}>
             {/* Global Background Particle Effects */}
             {isOpened && invitation?.particle_type && invitation.particle_type !== 'none' && (
                 <ParticleEffect 
@@ -1198,8 +1373,8 @@ export default function DynamicIndex({
 
             {/* Buka Undangan Overlay Cover */}
             <div 
-                className={`lx1-cover-overlay ${isOpened ? 'lx1-opened' : ''}`}
-                style={{ backgroundImage: `url(${coverBgUrl})` }}
+                className={`lx1-cover-overlay ${isOpened ? 'lx1-opened' : ''} ${!showPhotos ? 'lx1-no-photo-mode' : ''}`}
+                style={showPhotos ? { backgroundImage: `url(${coverBgUrl})` } : undefined}
             >
                 <div className="lx1-cover-content">
                     <h3 className="lx1-cover-title">{t('invitation.wedding_of').toUpperCase()}</h3>

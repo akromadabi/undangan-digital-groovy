@@ -97,15 +97,19 @@ class ErrorBoundary extends React.Component {
     }
 }
 
+let globalShowPhotos = true;
+let globalShowAnimations = true;
+
 /* ═══════════════════════════════════════
    SCROLL REVEAL COMPONENT
    ═══════════════════════════════════════ */
 function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
     const { t } = useTranslation();
     const ref = useRef(null);
-    const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(!globalShowAnimations);
 
     useEffect(() => {
+        if (!globalShowAnimations) return;
         const el = ref.current;
         if (!el) return;
         const obs = new IntersectionObserver(([e]) => {
@@ -114,6 +118,14 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
         obs.observe(el);
         return () => obs.disconnect();
     }, []);
+
+    if (!globalShowAnimations) {
+        return (
+            <div className={className}>
+                {children}
+            </div>
+        );
+    }
 
     let baseClass = 'lx2-reveal--up';
     if (variant === 'zoom') baseClass = 'lx2-reveal--zoom';
@@ -172,8 +184,8 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
     const coverBg = getStorageUrl(invitation?.cover_image, ASSETS.cover);
 
     return (
-        <div className={`lx2-cover${isOpened ? ' is-opened' : ''}`}>
-            <div className="lx2-cover__bg" style={{ backgroundImage: `url(${coverBg})` }} />
+        <div className={`lx2-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'lx2-no-photo-mode' : ''}`}>
+            {globalShowPhotos && <div className="lx2-cover__bg" style={{ backgroundImage: `url(${coverBg})` }} />}
             <div className="lx2-cover__overlay" />
             <div className="lx2-cover__content">
                 {/* Circular Text Path Logo */}
@@ -281,7 +293,7 @@ function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode })
 
     return (
         <section id="hero" className="lx2-hero">
-            {pics.map((src, idx) => (
+            {globalShowPhotos && pics.map((src, idx) => (
                 <div
                     key={src}
                     className={`lx2-hero__bg ${idx === bgIdx ? 'is-active' : ''}`}
@@ -385,10 +397,59 @@ function OpeningSection({ invitation, brideGrooms }) {
    BRIDE & GROOM SECTION
    ═══════════════════════════════════════ */
 function BrideGroomSection({ brideGrooms }) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const bgs = safeArr(brideGrooms);
-    const groom = bgs.find(b => b.gender === 'pria') || bgs[0] || {};
-    const bride = bgs.find(b => b.gender === 'wanita') || bgs[1] || {};
+    const groom = bgs.find(b => b.gender === 'pria' || b.gender === 'male' || String(b.gender).toLowerCase() === 'pria' || String(b.gender).toLowerCase() === 'male') || bgs[0] || {};
+    const bride = bgs.find(b => b.gender === 'wanita' || b.gender === 'female' || String(b.gender).toLowerCase() === 'wanita' || String(b.gender).toLowerCase() === 'female') || bgs[1] || bgs[0] || {};
+
+    const translateChildOrder = (childOrder, gender) => {
+        if (!childOrder) return '';
+        const isEn = locale === 'en';
+        const raw = String(childOrder).trim().toLowerCase();
+        let matchedKey = null;
+        
+        if (raw.includes('tunggal') || raw.includes('satu-satunya') || raw.includes('only')) matchedKey = 'tunggal';
+        else if (raw.includes('bungsu') || raw.includes('terakhir') || raw.includes('youngest')) matchedKey = 'bungsu';
+        else if (raw.includes('10') || raw.includes('kesepuluh') || raw.includes('tenth')) matchedKey = '10';
+        else if (raw.includes('9') || raw.includes('kesembilan') || raw.includes('ninth')) matchedKey = '9';
+        else if (raw.includes('8') || raw.includes('kedelapan') || raw.includes('eighth')) matchedKey = '8';
+        else if (raw.includes('7') || raw.includes('ketujuh') || raw.includes('seventh')) matchedKey = '7';
+        else if (raw.includes('6') || raw.includes('keenam') || raw.includes('sixth')) matchedKey = '6';
+        else if (raw.includes('5') || raw.includes('kelima') || raw.includes('fifth')) matchedKey = '5';
+        else if (raw.includes('4') || raw.includes('keempat') || raw.includes('fourth')) matchedKey = '4';
+        else if (raw.includes('3') || raw.includes('ketiga') || raw.includes('third')) matchedKey = '3';
+        else if (raw.includes('2') || raw.includes('kedua') || raw.includes('second')) matchedKey = '2';
+        else if (raw.includes('1') || raw.includes('pertama') || raw.includes('kesatu') || raw.includes('first')) matchedKey = '1';
+        
+        const ordinalMap = {
+            '1': { id: 'Pertama', en: 'First' },
+            '2': { id: 'Kedua', en: 'Second' },
+            '3': { id: 'Ketiga', en: 'Third' },
+            '4': { id: 'Keempat', en: 'Fourth' },
+            '5': { id: 'Kelima', en: 'Fifth' },
+            '6': { id: 'Keenam', en: 'Sixth' },
+            '7': { id: 'Ketujuh', en: 'Seventh' },
+            '8': { id: 'Kedelapan', en: 'Eighth' },
+            '9': { id: 'Kesembilan', en: 'Ninth' },
+            '10': { id: 'Kesepuluh', en: 'Tenth' },
+            'bungsu': { id: 'Bungsu', en: 'Youngest' },
+            'tunggal': { id: 'Tunggal', en: 'Only' }
+        };
+        
+        const match = ordinalMap[matchedKey] || { id: childOrder, en: childOrder };
+        
+        const isWanita = gender === 'wanita' || gender === 'female' || String(gender).toLowerCase() === 'wanita' || String(gender).toLowerCase() === 'female';
+        
+        if (isEn) {
+            const noun = isWanita ? 'Daughter' : 'Son';
+            if (String(match.en).toLowerCase() === 'only') return `ONLY ${noun.toUpperCase()} OF`;
+            return `${String(match.en).toUpperCase()} ${noun.toUpperCase()} OF`;
+        } else {
+            const noun = isWanita ? 'Putri' : 'Putra';
+            if (String(match.id).toLowerCase() === 'tunggal') return `${noun.toUpperCase()} TUNGGAL DARI`;
+            return `${noun.toUpperCase()} ${String(match.id).toUpperCase()} DARI`;
+        }
+    };
 
     const groomPhoto = getStorageUrl(groom.photo, ASSETS.groom);
     const bridePhoto = getStorageUrl(bride.photo, ASSETS.bride);
@@ -402,18 +463,20 @@ function BrideGroomSection({ brideGrooms }) {
 
             {/* Groom */}
             <Reveal className="lx2-mempelai-card" variant="left">
-                <div className="lx2-mempelai-photo-wrap">
-                    <img src={groomPhoto} alt={groom.full_name || 'Groom'} className="lx2-mempelai-photo" />
-                </div>
+                {globalShowPhotos && (
+                    <div className="lx2-mempelai-photo-wrap">
+                        <img src={groomPhoto} alt={groom.full_name || 'Groom'} className="lx2-mempelai-photo" />
+                    </div>
+                )}
                 <div className="lx2-mempelai-details">
                     <h3 className="lx2-mempelai-name">{groom.full_name || 'Nama Lengkap Pria'}</h3>
                     <p className="lx2-mempelai-parent-label">
-                        {t('invitation.son')} {groom.child_order ? (t('invitation.save_the_date') === 'Save The Date' ? `No. ${groom.child_order} ` : `ke-${groom.child_order} `) : ''}{t('invitation.of')}:
+                        {translateChildOrder(groom.child_order, 'pria')}
                     </p>
                     <p className="lx2-mempelai-parents">
                         {groom.father_name && groom.mother_name
-                            ? `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`
-                            : (groom.father_name || groom.mother_name || 'Nama Orang Tua')}
+                            ? (locale === 'en' ? `Mr. ${groom.father_name} & Mrs. ${groom.mother_name}` : `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`)
+                            : (groom.father_name || groom.mother_name || (locale === 'en' ? 'Parents Name' : 'Nama Orang Tua'))}
                     </p>
                     {groom.instagram && (
                         <a
@@ -435,18 +498,20 @@ function BrideGroomSection({ brideGrooms }) {
 
             {/* Bride */}
             <Reveal className="lx2-mempelai-card" variant="right">
-                <div className="lx2-mempelai-photo-wrap">
-                    <img src={bridePhoto} alt={bride.full_name || 'Bride'} className="lx2-mempelai-photo" />
-                </div>
+                {globalShowPhotos && (
+                    <div className="lx2-mempelai-photo-wrap">
+                        <img src={bridePhoto} alt={bride.full_name || 'Bride'} className="lx2-mempelai-photo" />
+                    </div>
+                )}
                 <div className="lx2-mempelai-details">
                     <h3 className="lx2-mempelai-name">{bride.full_name || 'Nama Lengkap Wanita'}</h3>
                     <p className="lx2-mempelai-parent-label">
-                        {t('invitation.daughter')} {bride.child_order ? (t('invitation.save_the_date') === 'Save The Date' ? `No. ${bride.child_order} ` : `ke-${bride.child_order} `) : ''}{t('invitation.of')}:
+                        {translateChildOrder(bride.child_order, 'wanita')}
                     </p>
                     <p className="lx2-mempelai-parents">
                         {bride.father_name && bride.mother_name
-                            ? `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`
-                            : (bride.father_name || bride.mother_name || 'Nama Orang Tua')}
+                            ? (locale === 'en' ? `Mr. ${bride.father_name} & Mrs. ${bride.mother_name}` : `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`)
+                            : (bride.father_name || bride.mother_name || (locale === 'en' ? 'Parents Name' : 'Nama Orang Tua'))}
                     </p>
                     {bride.instagram && (
                         <a
@@ -519,7 +584,7 @@ function CountdownSection({ events, galleries }) {
 
     return (
         <div className="lx2-countdown-wrapper" style={{ position: 'relative', overflow: 'hidden', padding: '60px 24px', borderBottom: '1px solid rgba(197, 168, 128, 0.08)' }}>
-            {bgImg && (
+            {globalShowPhotos && bgImg && (
                 <>
                     <div className="lx2-section-bg" style={{ backgroundImage: `url(${bgImg})` }} />
                     <div className="lx2-section-overlay" />
@@ -636,7 +701,7 @@ function EventSection({ events, galleries, showCountdown }) {
 
                     return (
                         <Reveal key={evt.id || idx} variant={isEven ? 'left' : 'right'} className="lx2-event-card-ref">
-                            {eventImg && (
+                            {globalShowPhotos && eventImg && (
                                 <div className="lx2-event-banner-ref">
                                     <img src={eventImg} alt={evt.event_name} />
                                 </div>
@@ -692,6 +757,39 @@ function EventSection({ events, galleries, showCountdown }) {
 /* ═══════════════════════════════════════
    LOVE STORY SECTION
    ═══════════════════════════════════════ */
+/* ─── TimelineCard (Intersection Observer Wrapper) ─── */
+function TimelineCard({ story, idx, isEven }) {
+    const ref = useRef(null);
+    const [isActive, setIsActive] = useState(false);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+
+        const observer = new IntersectionObserver(([entry]) => {
+            setIsActive(entry.isIntersecting);
+        }, {
+            rootMargin: '-30% 0px -30% 0px', // Active when in center 40% of viewport
+            threshold: 0
+        });
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <div ref={ref} className={`lx2-story__node lx2-story__node--${isEven ? 'left' : 'right'} ${isActive ? 'is-active' : ''}`}>
+            <Reveal className="lx2-story__card">
+                <div className="lx2-story__date">
+                    {story.story_date ? (isNaN(new Date(story.story_date).getTime()) ? story.story_date : new Date(story.story_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long' })) : ''}
+                </div>
+                <h3 className="lx2-story__title">{story.title}</h3>
+                <p className="lx2-story__desc">{story.description || story.story}</p>
+            </Reveal>
+        </div>
+    );
+}
+
 function LoveStorySection({ loveStories }) {
     const { t } = useTranslation();
     const list = safeArr(loveStories).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
@@ -709,15 +807,7 @@ function LoveStorySection({ loveStories }) {
                 {list.map((story, idx) => {
                     const isEven = idx % 2 === 0;
                     return (
-                        <div key={story.id || idx} className={`lx2-story__node lx2-story__node--${isEven ? 'left' : 'right'}`}>
-                            <Reveal className="lx2-story__card">
-                                <div className="lx2-story__date">
-                                    {story.story_date ? new Date(story.story_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long' }) : ''}
-                                </div>
-                                <h3 className="lx2-story__title">{story.title}</h3>
-                                <p className="lx2-story__desc">{story.description || story.story}</p>
-                            </Reveal>
-                        </div>
+                        <TimelineCard key={story.id || idx} story={story} idx={idx} isEven={isEven} />
                     );
                 })}
             </div>
@@ -733,7 +823,7 @@ function GallerySection({ galleries }) {
     const list = safeArr(galleries).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     const [activeImg, setActiveImg] = useState(null);
 
-    if (list.length === 0) return null;
+    if (list.length === 0 || !globalShowPhotos) return null;
 
     return (
         <section id="gallery" className="lx2-section">
@@ -884,201 +974,276 @@ function BankSection({ bankAccounts, invitation }) {
 }
 
 /* ═══════════════════════════════════════
-   RSVP SECTION
-   ═══════════════════════════════════════ */
-function RsvpSection({ invitation, guest }) {
-    const { t } = useTranslation();
-    const form = useForm({
-        attendance: 'hadir',
-        number_of_guests: 1,
-        name: guest?.name || ''
-    });
-
-    const [submitted, setSubmitted] = useState(false);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        form.post(route('invitation.rsvp', invitation.slug), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setSubmitted(true);
-            }
-        });
-    };
-
-    return (
-        <div id="rsvp_container" className="lx2-card">
-            <h3 className="lx2-event-card__name" style={{ color: 'var(--lx2-gold)', fontSize: '18px', marginBottom: 15 }}>
-                Konfirmasi Kehadiran
-            </h3>
-
-            {submitted ? (
-                <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                    <i className="far fa-check-circle" style={{ fontSize: '40px', color: 'var(--lx2-gold)', marginBottom: '10px' }} />
-                    <p style={{ fontSize: '13px', color: '#fff' }}>Terima kasih atas konfirmasi kehadiran Anda.</p>
-                </div>
-            ) : (
-                <form onSubmit={handleSubmit} className="lx2-rsvp-form">
-                    <div className="lx2-form-group">
-                        <label htmlFor="rsvp_name">{t('invitation.rsvp_name')}</label>
-                        <input
-                            type="text"
-                            id="rsvp_name"
-                            className="lx2-input"
-                            value={form.data.name}
-                            onChange={e => form.setData('name', e.target.value)}
-                            placeholder={t('invitation.wishes_name')}
-                            required
-                        />
-                    </div>
-
-                    <div className="lx2-form-group">
-                        <label htmlFor="rsvp_attendance">Konfirmasi Kehadiran</label>
-                        <select
-                            id="rsvp_attendance"
-                            className="lx2-select"
-                            value={form.data.attendance}
-                            onChange={e => form.setData('attendance', e.target.value)}
-                        >
-                            <option value="hadir">{t('invitation.rsvp_hadir')}</option>
-                            <option value="tidak_hadir">Tidak {t('invitation.rsvp_hadir')}</option>
-                            <option value="belum_pasti">{t('invitation.rsvp_belum_pasti')}</option>
-                        </select>
-                    </div>
-
-                    {form.data.attendance === 'hadir' && (
-                        <div className="lx2-form-group">
-                            <label htmlFor="rsvp_guests">{t('invitation.rsvp_count')}</label>
-                            <select
-                                id="rsvp_guests"
-                                className="lx2-select"
-                                value={form.data.number_of_guests}
-                                onChange={e => form.setData('number_of_guests', parseInt(e.target.value))}
-                            >
-                                {[1, 2, 3, 4, 5].map(n => (
-                                    <option key={n} value={n}>{n} {invitation?.language === 'en' ? (n === 1 ? 'Person' : 'People') : 'Orang'}</option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-
-                    <button
-                        type="submit"
-                        className="lx2-form-btn"
-                        disabled={form.processing}
-                    >
-                        {form.processing ? 'Mengirim...' : 'Kirim Konfirmasi'}
-                    </button>
-                </form>
-            )}
-        </div>
-    );
-}
-
-/* ═══════════════════════════════════════
-   WISHES SECTION
-   ═══════════════════════════════════════ */
-function WishesSection({ invitation, wishes, guest }) {
-    const { t } = useTranslation();
-    const form = useForm({
-        sender_name: guest?.name || '',
-        message: ''
-    });
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        form.post(route('invitation.wish', invitation.slug), {
-            preserveScroll: true,
-            onSuccess: () => {
-                form.reset('message');
-            }
-        });
-    };
-
-    const wishList = safeArr(wishes);
-
-    return (
-        <div id="wishes_container" className="lx2-card" style={{ marginTop: '20px' }}>
-            <h3 className="lx2-event-card__name" style={{ color: 'var(--lx2-gold)', fontSize: '18px', marginBottom: 15 }}>
-                {t('invitation.send_wish')} &amp; Doa
-            </h3>
-
-            <form onSubmit={handleSubmit} className="lx2-rsvp-form">
-                <div className="lx2-form-group">
-                    <label htmlFor="wish_sender">Nama Pengirim</label>
-                    <input
-                        type="text"
-                        id="wish_sender"
-                        className="lx2-input"
-                        value={form.data.sender_name}
-                        onChange={e => form.setData('sender_name', e.target.value)}
-                        placeholder={t('invitation.wishes_name')}
-                        required
-                    />
-                </div>
-
-                <div className="lx2-form-group">
-                    <label htmlFor="wish_message">Pesan / Ucapan</label>
-                    <textarea
-                        id="wish_message"
-                        rows="3"
-                        className="lx2-textarea"
-                        value={form.data.message}
-                        onChange={e => form.setData('message', e.target.value)}
-                        placeholder="Tulis ucapan selamat dan doa terbaik..."
-                        required
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    className="lx2-form-btn"
-                    disabled={form.processing}
-                >
-                    {form.processing ? t('common.saving') : t('invitation.send_wish')}
-                </button>
-            </form>
-
-            {wishList.length > 0 && (
-                <div className="lx2-wishes-list">
-                    {wishList.map((w, idx) => (
-                        <div key={w.id || idx} className="lx2-wish-bubble">
-                            <div className="lx2-wish-bubble__header">
-                                <span className="lx2-wish-bubble__sender">{w.sender_name || w.name}</span>
-                                {w.attendance && (
-                                    <span className={`lx2-wish-bubble__badge ${w.attendance === 'hadir' ? 'lx2-wish-bubble__badge--hadir' : 'lx2-wish-bubble__badge--tidak'}`}>
-                                        {w.attendance === 'hadir' ? t('invitation.rsvp_hadir') : (invitation?.language === 'en' ? 'Not Attending' : 'Tidak Hadir')}
-                                    </span>
-                                )}
-                            </div>
-                            <p className="lx2-wish-bubble__message">{w.message}</p>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
-
-/* ═══════════════════════════════════════
    UNIFIED RSVP & WISHES CONTAINER
    ═══════════════════════════════════════ */
 function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes }) {
     const { t } = useTranslation();
+    const activeGuest = guest || { name: '', id: null };
+    const guestName = activeGuest.name || new URLSearchParams(window.location.search).get('to') || '';
+    const isEn = t('invitation.save_the_date') === 'Save The Date';
+
+    const [sharedName, setSharedName] = useState(guestName);
+    const [attendance, setAttendance] = useState('hadir');
+    const [numGuests, setNumGuests] = useState(1);
+    const [message, setMessage] = useState('');
+    const [success, setSuccess] = useState(false);
+
+    const rsvpForm = useForm({
+        sender_name: guestName,
+        attendance: 'hadir',
+        number_of_guests: 1,
+        guest_id: activeGuest.id || null,
+    });
+
+    const wishForm = useForm({
+        sender_name: guestName,
+        message: '',
+        guest_id: activeGuest.id || null,
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        rsvpForm.setData('sender_name', sharedName);
+        rsvpForm.setData('attendance', attendance);
+        rsvpForm.setData('number_of_guests', numGuests);
+        wishForm.setData('sender_name', sharedName);
+        wishForm.setData('message', message);
+
+        const doWish = () => {
+            if (enableWishes && message.trim()) {
+                wishForm.post(route('invitation.wish', invitation.slug), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        setMessage('');
+                        setSuccess(true);
+                    },
+                });
+            } else {
+                setSuccess(true);
+            }
+        };
+
+        if (enableRsvp) {
+            rsvpForm.post(route('invitation.rsvp', invitation.slug), {
+                preserveScroll: true,
+                onSuccess: doWish,
+            });
+        } else {
+            doWish();
+        }
+    };
+
+    const isSubmitting = rsvpForm.processing || wishForm.processing;
+    const wishList = safeArr(wishes);
+    const recentWishes = wishList.slice(0, 5);
+
+    const sectionTitle = enableRsvp && enableWishes
+        ? `${t('nav.rsvp')} & ${t('invitation.wishes_title')}`
+        : enableRsvp
+            ? t('invitation.rsvp_title')
+            : t('invitation.wishes_title');
+
+    if (!enableRsvp && !enableWishes) return null;
+
     return (
         <section id="rsvp" className="lx2-section">
             <Reveal>
-                <h2 className="lx2-section-title">{t('nav.rsvp')} &amp; {t('invitation.wishes_title')}</h2>
-                <p className="lx2-section-subtitle">Konfirmasi Kehadiran &amp; Doa Restu</p>
+                <h2 className="lx2-section-title">{sectionTitle}</h2>
+                <p className="lx2-section-subtitle">
+                    {isEn
+                        ? 'Please fill out the form below to send your confirmation and wishes.'
+                        : 'Mohon isi formulir berikut untuk mengirimkan konfirmasi dan ucapan Anda.'}
+                </p>
             </Reveal>
 
             <Reveal>
-                {enableRsvp && <RsvpSection invitation={invitation} guest={guest} />}
-                {enableWishes && <WishesSection invitation={invitation} wishes={wishes} guest={guest} />}
+                <div id="rsvp_container" className="lx2-card" style={{ maxWidth: '500px', margin: '0 auto' }}>
+                    <form onSubmit={handleSubmit} className="lx2-rsvp-form">
+                        {/* Nama */}
+                        <div className="lx2-form-group">
+                            <label htmlFor="rsvp_name">{isEn ? 'Your Name' : 'Nama Lengkap'}</label>
+                            <input
+                                type="text"
+                                id="rsvp_name"
+                                className="lx2-input"
+                                readOnly={!!activeGuest.name && activeGuest.name !== 'Tamu Undangan'}
+                                value={sharedName}
+                                onChange={e => setSharedName(e.target.value)}
+                                placeholder={isEn ? 'Your Name' : 'Nama Lengkap'}
+                                required
+                            />
+                        </div>
+
+                        {/* Konfirmasi Kehadiran */}
+                        {enableRsvp && (
+                            <div className="lx2-form-group">
+                                <label htmlFor="rsvp_attendance">{t('invitation.rsvp_attendance')}</label>
+                                <select
+                                    id="rsvp_attendance"
+                                    className="lx2-select"
+                                    value={attendance}
+                                    onChange={e => setAttendance(e.target.value)}
+                                >
+                                    <option value="hadir">{t('invitation.rsvp_hadir')}</option>
+                                    <option value="tidak_hadir">{t('invitation.rsvp_tidak_hadir')}</option>
+                                    <option value="belum_pasti">{t('invitation.rsvp_belum_pasti')}</option>
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Jumlah Tamu */}
+                        {enableRsvp && attendance === 'hadir' && (
+                            <div className="lx2-form-group">
+                                <label htmlFor="rsvp_guests">{t('invitation.rsvp_count')}</label>
+                                <select
+                                    id="rsvp_guests"
+                                    className="lx2-select"
+                                    value={numGuests}
+                                    onChange={e => setNumGuests(parseInt(e.target.value) || 1)}
+                                >
+                                    {[1, 2, 3, 4, 5].map(n => (
+                                        <option key={n} value={n}>{n} {isEn ? 'People' : 'Orang'}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Ucapan & Doa */}
+                        {enableWishes && (
+                            <div className="lx2-form-group">
+                                <label htmlFor="wish_message">{isEn ? 'Wishes & Prayers' : 'Pesan / Ucapan'}</label>
+                                <textarea
+                                    id="wish_message"
+                                    rows="3"
+                                    className="lx2-textarea"
+                                    value={message}
+                                    onChange={e => setMessage(e.target.value)}
+                                    placeholder={t('invitation.wishes_placeholder')}
+                                    required={!enableRsvp}
+                                />
+                            </div>
+                        )}
+
+                        <button
+                            type="submit"
+                            className="lx2-form-btn"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? t('common.saving') : (isEn ? 'Send' : 'Kirim')}
+                        </button>
+
+                        {success && (
+                            <p style={{ color: 'var(--lx2-gold)', marginTop: '12px', fontSize: '13px', textAlign: 'center' }}>
+                                ✓ {isEn ? 'Successfully sent!' : 'Berhasil terkirim!'}
+                            </p>
+                        )}
+                    </form>
+
+                    {/* Wishes list scrollable max 5 item */}
+                    {enableWishes && recentWishes.length > 0 && (
+                        <div className="lx2-wishes-list-wrapper" style={{ marginTop: '20px' }}>
+                            <div className="lx2-wishes-list" style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                                {recentWishes.map((w, idx) => (
+                                    <div key={w.id || idx} className="lx2-wish-bubble">
+                                        <div className="lx2-wish-bubble__header">
+                                            <span className="lx2-wish-bubble__sender">{w.sender_name || w.name}</span>
+                                            {w.attendance && (
+                                                <span className={`lx2-wish-bubble__badge ${w.attendance === 'hadir' ? 'lx2-wish-bubble__badge--hadir' : 'lx2-wish-bubble__badge--tidak'}`}>
+                                                    {w.attendance === 'hadir' ? t('invitation.rsvp_hadir') : t('invitation.rsvp_tidak_hadir')}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="lx2-wish-bubble__message">{w.message}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </Reveal>
         </section>
     );
 }
+
+/* ═══════════════════════════════════════
+   LIVE STREAMING SECTION
+   ═══════════════════════════════════════ */
+function LiveStreamingSection({ events, invitation }) {
+    const { t } = useTranslation();
+    const eventList = safeArr(events);
+    const primaryEvent = eventList.find(e => e.is_primary) || eventList[0];
+    
+    const streamsList = [];
+    if (primaryEvent?.streaming_url) {
+        streamsList.push({ platform: primaryEvent.streaming_platform || 'Live', url: primaryEvent.streaming_url });
+    }
+    if (Array.isArray(primaryEvent?.streamings)) {
+        primaryEvent.streamings.forEach(s => {
+            if (s.url && !streamsList.some(item => item.url === s.url)) {
+                streamsList.push({ platform: s.platform || 'Live', url: s.url });
+            }
+        });
+    }
+    
+    if (streamsList.length === 0) return null;
+    
+    const isEn = t('invitation.save_the_date') === 'Save The Date';
+    const { dayName, dayNum, monthName, year } = parseEventDate(primaryEvent?.event_date);
+
+    return (
+        <section id="livestream" className="lx2-section lx2-livestream-section" style={{ padding: '60px 24px' }}>
+            <Reveal>
+                <h2 className="lx2-section-title">LIVE STREAMING</h2>
+                <p className="lx2-section-subtitle">{isEn ? 'Virtual Wedding Celebration' : 'Prosesi Pernikahan Virtual'}</p>
+            </Reveal>
+
+            <Reveal className="lx2-card" style={{ maxWidth: '480px', margin: '0 auto', textAlign: 'center', padding: '30px 20px' }}>
+                <h3 className="lx2-event-card__name" style={{ color: 'var(--lx2-gold)', fontSize: '18px', marginBottom: 15 }}>
+                    {dayName}, {dayNum} {monthName} {year}
+                </h3>
+                <p style={{ fontSize: '13px', opacity: 0.8, color: '#fff', marginBottom: '20px' }}>
+                    {formatTime(primaryEvent?.start_time)} - {primaryEvent?.end_time === '23:59:00' ? 'Selesai' : formatTime(primaryEvent?.end_time)} {primaryEvent?.timezone || 'WIB'}
+                </p>
+                <p style={{ fontSize: '12px', color: 'var(--lx2-text-muted)', lineHeight: '1.6', marginBottom: '25px' }}>
+                    {isEn 
+                        ? 'We will broadcast the happy moments of our wedding procession virtually through the following platforms.'
+                        : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi pernikahan kami secara virtual melalui platform berikut.'}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+                    {streamsList.map((stream, idx) => (
+                        <a 
+                            key={idx}
+                            href={stream.url}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="lx2-event-btn-ref"
+                            style={{ 
+                                borderColor: 'rgba(197, 168, 128, 0.6)',
+                                backgroundColor: 'var(--lx2-gold, #c5a880)',
+                                color: '#000',
+                                fontWeight: '600',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '100%',
+                                maxWidth: '240px',
+                                gap: '8px',
+                                padding: '10px 20px',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                margin: '0'
+                            }}
+                        >
+                            <i className="fas fa-video" /> JOIN {stream.platform.toUpperCase()}
+                        </a>
+                    ))}
+                </div>
+            </Reveal>
+        </section>
+    );
+}
+
+
 
 /* ═══════════════════════════════════════
    CLOSING SECTION
@@ -1086,8 +1251,8 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
 function ClosingSection({ invitation, brideGrooms, galleries }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
-    const groom = bgs.find(b => b.gender === 'pria') || bgs[0];
-    const bride = bgs.find(b => b.gender === 'wanita') || bgs[1];
+    const bride = bgs.find(bg => bg.gender === 'wanita' || bg.gender === 'female' || String(bg.gender).toLowerCase() === 'wanita' || String(bg.gender).toLowerCase() === 'female') || bgs[0] || {};
+    const groom = bgs.find(bg => bg.gender === 'pria' || bg.gender === 'male' || String(bg.gender).toLowerCase() === 'pria' || String(bg.gender).toLowerCase() === 'male') || bgs[1] || bgs[0] || {};
 
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
@@ -1103,9 +1268,35 @@ function ClosingSection({ invitation, brideGrooms, galleries }) {
         }
     }, [galleries]);
 
+    const isEn = t('invitation.save_the_date') === 'Save The Date';
+    const groomFather = groom.father_name;
+    const groomMother = groom.mother_name;
+    const brideFather = bride.father_name;
+    const brideMother = bride.mother_name;
+
+    const hasGroomParents = groomFather || groomMother;
+    const hasBrideParents = brideFather || brideMother;
+
+    const defaultIdText = 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.';
+    const defaultIdTitle = 'Terima Kasih';
+
+    const currentClosingTitle = invitation?.closing_title || '';
+    const currentClosingText = invitation?.closing_text || '';
+
+    const isDefaultTitle = !currentClosingTitle || currentClosingTitle.trim() === 'Terima Kasih' || currentClosingTitle.trim().toLowerCase() === 'thank you' || currentClosingTitle.trim() === 'TERIMA KASIH';
+    const isDefaultText = !currentClosingText || currentClosingText.trim() === defaultIdText || currentClosingText.includes('kehormatan dan kebahagiaan');
+
+    const displayClosingTitle = isDefaultTitle
+        ? t('invitation.closing_title')
+        : currentClosingTitle;
+
+    const displayClosingText = isDefaultText
+        ? t('invitation.closing_text')
+        : currentClosingText;
+
     return (
         <section id="closing" className="lx2-section lx2-closing" style={{ position: 'relative', overflow: 'hidden' }}>
-            {bgImg && (
+            {globalShowPhotos && bgImg && (
                 <>
                     <div className="lx2-section-bg" style={{ backgroundImage: `url(${bgImg})` }} />
                     <div className="lx2-section-overlay" />
@@ -1113,11 +1304,42 @@ function ClosingSection({ invitation, brideGrooms, galleries }) {
             )}
             <div style={{ position: 'relative', zIndex: 2 }}>
                 <Reveal>
-                    <h2 className="lx2-closing__title">{invitation?.closing_title || 'Terima Kasih'}</h2>
+                    <h2 className="lx2-closing__title">{displayClosingTitle}</h2>
                     <p className="lx2-closing__text">
-                        {invitation?.closing_text || 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.'}
+                        {displayClosingText}
                     </p>
                     <HeartDivider />
+                    
+                    {/* Formal Tanda Tangan Penutup */}
+                    <div className="lx2-closing__signature" style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '25px' }}>
+                        <div style={{ fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.75rem', color: 'var(--lx2-gold)' }}>
+                            {isEn ? 'We Who Are Joyful,' : 'Kami Yang Berbahagia,'}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', opacity: 0.85, display: 'flex', flexDirection: 'column', gap: '4px', color: '#fff', fontStyle: 'normal' }}>
+                            {hasGroomParents && (
+                                <div>
+                                    {isEn 
+                                        ? `Family of Mr. ${groomFather || '...'} & Mrs. ${groomMother || '...'}`
+                                        : `Kel. Bapak ${groomFather || '...'} & Ibu ${groomMother || '...'}`
+                                    }
+                                </div>
+                            )}
+                            {hasBrideParents && (
+                                <div>
+                                    {isEn 
+                                        ? `Family of Mr. ${brideFather || '...'} & Mrs. ${brideMother || '...'}`
+                                        : `Kel. Bapak ${brideFather || '...'} & Ibu ${brideMother || '...'}`
+                                    }
+                                </div>
+                            )}
+                            {!hasGroomParents && !hasBrideParents && (
+                                <div>
+                                    {isEn ? 'Both Families of the Couple' : 'Keluarga Besar Kedua Mempelai'}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     <h3 className="lx2-closing__couple">{coupleName}</h3>
                     <p style={{ marginTop: 40, fontSize: 10, color: 'var(--lx2-text-muted)', letterSpacing: 1 }}>
                         POWERED BY {(invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'GROOVY DIGITAL').toUpperCase()}
@@ -1169,6 +1391,8 @@ function Navigation({
                 items.push({ id: 'bride_groom', label: t('nav.mempelai'), icon: 'fas fa-heart' });
             } else if (key === 'event') {
                 items.push({ id: 'event', label: t('nav.acara'), icon: 'far fa-calendar-alt' });
+            } else if (key === 'livestream') {
+                items.push({ id: 'livestream', label: 'Streaming', icon: 'fas fa-video' });
             } else if (key === 'love_story') {
                 items.push({ id: 'love_story', label: t('nav.kisah'), icon: 'fas fa-history' });
             } else if (key === 'gallery') {
@@ -1315,6 +1539,10 @@ export default function DynamicIndex({
     const enableWishes = parseBool(invitation?.enable_wishes);
     const showCountdown = parseBool(invitation?.show_countdown);
     const musicAutoplay = parseBool(invitation?.music_autoplay);
+    const showPhotos = parseBool(invitation?.show_photos, true);
+    const showAnimations = parseBool(invitation?.show_animations, true);
+    globalShowPhotos = showPhotos;
+    globalShowAnimations = showAnimations;
 
     const showCountdownInEvent = useMemo(() => {
         const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
@@ -1378,7 +1606,9 @@ export default function DynamicIndex({
     // Resolve active sections in database & fallback
     const resolvedSections = useMemo(() => {
         const safeSections = safeArr(sections);
-        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing'];
+        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
+        const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+        const hasStream = primaryEvent?.streaming_url || safeArr(primaryEvent?.streamings).length > 0;
 
         const resolved = [];
 
@@ -1406,6 +1636,9 @@ export default function DynamicIndex({
                 }
 
                 resolved.push(s);
+                if (s.section_key === 'event' && hasStream) {
+                    resolved.push({ section_key: 'livestream' });
+                }
             });
         } else {
             // Fallback list
@@ -1414,6 +1647,10 @@ export default function DynamicIndex({
                 { section_key: 'bride_groom' },
                 { section_key: 'event' },
             ];
+
+            if (hasStream) {
+                fallbacks.push({ section_key: 'livestream' });
+            }
 
             if (loveStories?.length > 0) fallbacks.push({ section_key: 'love_story' });
             if (galleries?.length > 0) fallbacks.push({ section_key: 'gallery' });
@@ -1629,6 +1866,7 @@ export default function DynamicIndex({
             'bride_groom': <BrideGroomSection key={key} brideGrooms={brideGrooms} />,
             'countdown': null, // Embedded in event section
             'event': <EventSection key={key} events={events} galleries={galleries} showCountdown={showCountdownInEvent} />,
+            'livestream': <LiveStreamingSection key={key} events={events} invitation={invitation} />,
             'love_story': <LoveStorySection key={key} loveStories={loveStories} />,
             'gallery': <GallerySection key={key} galleries={galleries} />,
             'bank': <BankSection key={key} bankAccounts={bankAccounts} invitation={invitation} />,
@@ -1668,7 +1906,7 @@ export default function DynamicIndex({
 
     return (
         <ErrorBoundary>
-            <div className="lx2-page">
+            <div className={`lx2-page ${!showAnimations ? 'lx2-no-animations' : ''}`}>
             {invitation?.particle_type && invitation.particle_type !== 'none' && isOpened && (
                 <ParticleEffect
                     type={invitation.particle_type}

@@ -67,21 +67,25 @@ class ErrorBoundary extends React.Component {
     }
 }
 
+let globalShowPhotos = true;
+let globalShowAnimations = true;
+
 /* ═══════════════════════════════════════
    SCROLL ANIMATION WRAPPER
    ═══════════════════════════════════════ */
 function Reveal({ children, className = '', delay = 0 }) {
     const { t } = useTranslation();
     const ref = useRef(null);
-    const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(!globalShowAnimations);
     useEffect(() => {
+        if (!globalShowAnimations) return;
         const el = ref.current; if (!el) return;
         const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true); }, { threshold: 0.1 });
         obs.observe(el);
         return () => obs.disconnect();
     }, []);
     return (
-        <div ref={ref} className={`${className} ${visible ? 'nf-reveal--in' : 'nf-reveal--out'}`}
+        <div ref={ref} className={`${className} ${!globalShowAnimations ? '' : (visible ? 'nf-reveal--in' : 'nf-reveal--out')}`}
             style={delay ? { animationDelay: `${delay}ms`, transitionDelay: `${delay}ms` } : undefined}>
             {children}
         </div>
@@ -104,8 +108,8 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
     const heroImg = getStorageUrl(invitation?.cover_image, null);
 
     return (
-        <div className={`nf-cover${isOpened ? ' is-opened' : ''}`}>
-            <div className="nf-cover__bg" style={{ backgroundImage: `url(${heroImg})` }} />
+        <div className={`nf-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'nf-no-photo-mode' : ''}`}>
+            {globalShowPhotos && <div className="nf-cover__bg" style={{ backgroundImage: `url(${heroImg})` }} />}
             <div className="nf-cover__overlay" />
             <div className="nf-cover__content">
                 <img src={ASSETS.logo} alt="THE WEDDING" className="nf-cover__logo" />
@@ -148,7 +152,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 /* ═══════════════════════════════════════
    OPENING SECTION
    ═══════════════════════════════════════ */
-function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories, galleries, enableRsvp, enableWishes, bankAccounts }) {
+function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories, galleries, enableRsvp, enableWishes, bankAccounts, id }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => b.gender === 'pria') || bgs[0];
@@ -159,7 +163,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
     const heroImg = getStorageUrl(invitation?.cover_image, null);
 
     return (
-        <section id="opening" className="nf-opening">
+        <section id={id || "opening"} className="nf-opening">
             <div className="nf-opening__bg" style={{ backgroundImage: `url(${heroImg})` }} />
             <div className="nf-opening__overlay" />
             <div className="nf-opening__content">
@@ -172,7 +176,9 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                     <p className="nf-opening__ayat-src">&mdash; {invitation.opening_ayat_source}</p>
                 )}
                 <p className="nf-opening__text">
-                    {invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami menyampaikan kabar bahagia kepada Bapak/Ibu/Saudara/i mengenai hari pernikahan kami.'}
+                    {invitation?.opening_text || (t('invitation.save_the_date') === 'Save The Date'
+                        ? 'By the grace of God Almighty, we are pleased to share the happy news of our wedding with you.'
+                        : 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami menyampaikan kabar bahagia kepada Bapak/Ibu/Saudara/i mengenai hari pernikahan kami.')}
                 </p>
 
                 {/* Nav buttons */}
@@ -261,26 +267,76 @@ function CountdownTimer({ targetDate }) {
 /* ═══════════════════════════════════════
    BRIDE & GROOM SECTION
    ═══════════════════════════════════════ */
-function BrideGroomSection({ invitation, brideGrooms, events }) {
-    const { t } = useTranslation();
+function BrideGroomSection({ invitation, brideGrooms, events, id }) {
+    const { t, locale } = useTranslation();
     const bgs = safeArr(brideGrooms);
-    const groom = bgs.find(b => b.gender === 'pria') || bgs[0];
-    const bride = bgs.find(b => b.gender === 'wanita') || bgs[1];
+    const groom = bgs.find(b => b.gender === 'pria' || b.gender === 'male' || String(b.gender).toLowerCase() === 'pria' || String(b.gender).toLowerCase() === 'male') || bgs[0] || {};
+    const bride = bgs.find(b => b.gender === 'wanita' || b.gender === 'female' || String(b.gender).toLowerCase() === 'wanita' || String(b.gender).toLowerCase() === 'female') || bgs[1] || bgs[0] || {};
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+
+    const translateChildOrder = (childOrder, gender) => {
+        if (!childOrder) return '';
+        const isEn = locale === 'en';
+        const raw = String(childOrder).trim().toLowerCase();
+        let matchedKey = null;
+        
+        if (raw.includes('tunggal') || raw.includes('satu-satunya') || raw.includes('only')) matchedKey = 'tunggal';
+        else if (raw.includes('bungsu') || raw.includes('terakhir') || raw.includes('youngest')) matchedKey = 'bungsu';
+        else if (raw.includes('10') || raw.includes('kesepuluh') || raw.includes('tenth')) matchedKey = '10';
+        else if (raw.includes('9') || raw.includes('kesembilan') || raw.includes('ninth')) matchedKey = '9';
+        else if (raw.includes('8') || raw.includes('kedelapan') || raw.includes('eighth')) matchedKey = '8';
+        else if (raw.includes('7') || raw.includes('ketujuh') || raw.includes('seventh')) matchedKey = '7';
+        else if (raw.includes('6') || raw.includes('keenam') || raw.includes('sixth')) matchedKey = '6';
+        else if (raw.includes('5') || raw.includes('kelima') || raw.includes('fifth')) matchedKey = '5';
+        else if (raw.includes('4') || raw.includes('keempat') || raw.includes('fourth')) matchedKey = '4';
+        else if (raw.includes('3') || raw.includes('ketiga') || raw.includes('third')) matchedKey = '3';
+        else if (raw.includes('2') || raw.includes('kedua') || raw.includes('second')) matchedKey = '2';
+        else if (raw.includes('1') || raw.includes('pertama') || raw.includes('kesatu') || raw.includes('first')) matchedKey = '1';
+        
+        const ordinalMap = {
+            '1': { id: 'Pertama', en: 'First' },
+            '2': { id: 'Kedua', en: 'Second' },
+            '3': { id: 'Ketiga', en: 'Third' },
+            '4': { id: 'Keempat', en: 'Fourth' },
+            '5': { id: 'Kelima', en: 'Fifth' },
+            '6': { id: 'Keenam', en: 'Sixth' },
+            '7': { id: 'Ketujuh', en: 'Seventh' },
+            '8': { id: 'Kedelapan', en: 'Eighth' },
+            '9': { id: 'Kesembilan', en: 'Ninth' },
+            '10': { id: 'Kesepuluh', en: 'Tenth' },
+            'bungsu': { id: 'Bungsu', en: 'Youngest' },
+            'tunggal': { id: 'Tunggal', en: 'Only' }
+        };
+        
+        const match = ordinalMap[matchedKey] || { id: childOrder, en: childOrder };
+        
+        const isWanita = gender === 'wanita' || gender === 'female' || String(gender).toLowerCase() === 'wanita' || String(gender).toLowerCase() === 'female';
+        
+        if (isEn) {
+            const noun = isWanita ? 'Daughter' : 'Son';
+            if (String(match.en).toLowerCase() === 'only') return `ONLY ${noun.toUpperCase()} OF`;
+            return `${String(match.en).toUpperCase()} ${noun.toUpperCase()} OF`;
+        } else {
+            const noun = isWanita ? 'Putri' : 'Putra';
+            if (String(match.id).toLowerCase() === 'tunggal') return `${noun.toUpperCase()} TUNGGAL DARI`;
+            return `${noun.toUpperCase()} ${String(match.id).toUpperCase()} DARI`;
+        }
+    };
 
     function Card({ person, side }) {
         if (!person) return null;
         const photo = getStorageUrl(person.photo, dummyPortrait);
         return (
             <Reveal className={`nf-couple__card nf-couple__card--${side}`} delay={side === 'left' ? 0 : 200}>
-                <div className="nf-couple__photo-wrap">
-                    <img src={photo} alt={person.full_name} className="nf-couple__photo" />
-                </div>
+                {globalShowPhotos && (
+                    <div className="nf-couple__photo-wrap">
+                        <img src={photo} alt={person.full_name} className="nf-couple__photo" />
+                    </div>
+                )}
                 <p className="nf-couple__full-name">{person.full_name}</p>
                 <p className="nf-couple__child-info">
-                    {person.child_order 
-                        ? `${person.child_order} ${t('invitation.of')}` 
-                        : (person.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of'))}
+                    {translateChildOrder(person.child_order, person.gender === 'wanita' ? 'wanita' : 'pria') || 
+                     (person.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of'))}
                 </p>
                 <p className="nf-couple__parents">
                     {[person.father_name, person.mother_name].filter(Boolean).join(' & ')
@@ -297,14 +353,18 @@ function BrideGroomSection({ invitation, brideGrooms, events }) {
     }
 
     return (
-        <section id="bride_groom" className="nf-couple">
+        <section id={id || "bride_groom"} className="nf-couple">
             <Reveal>
                 <div className="nf-section-header">
                     <p className="nf-section-header__quote">
-                        &ldquo;Dan di antara tanda-tanda kekuasaan-Nya diciptakan-Nya untukmu pasangan hidup dari jenismu sendiri supaya kamu dapat ketenangan hati dan dijadikannya kasih sayang di antara kamu.&rdquo;
+                        &ldquo;{t('invitation.save_the_date') === 'Save The Date'
+                            ? 'And of His signs is that He created for you from yourselves mates that you may find tranquility in them; and He placed between you affection and mercy. Indeed in that are signs for a people who give thought.'
+                            : 'Dan di antara tanda-tanda kekuasaan-Nya diciptakan-Nya untukmu pasangan hidup dari jenismu sendiri supaya kamu dapat ketenangan hati dan dijadikannya kasih sayang di antara kamu.'}&rdquo;
                     </p>
                     <p className="nf-section-header__source">
-                        <span className="nf-badge">Qur&apos;an Surah</span> Ar-Rum: 21
+                        {t('invitation.save_the_date') === 'Save The Date'
+                            ? <><span className="nf-badge">Holy Qur&apos;an Surah</span> Ar-Rum: 21</>
+                            : <><span className="nf-badge">Qur&apos;an Surah</span> Ar-Rum: 21</>}
                     </p>
                 </div>
             </Reveal>
@@ -374,7 +434,7 @@ function EventSection({ events, invitation, galleries }) {
                 <h3 className="nf-section-title">
                     {t('invitation.save_the_date') === 'Save The Date' ? <><span className="nf-badge">Wedding</span> Day</> : <><span className="nf-badge">Hari</span> Pernikahan</>}
                 </h3>
-                <p className="nf-section-subtitle">Yang akan dilaksanakan pada:</p>
+                <p className="nf-section-subtitle">{t('invitation.save_the_date') === 'Save The Date' ? 'To be held on:' : 'Yang akan dilaksanakan pada:'}</p>
             </Reveal>
 
             {safeEvents.map((ev, idx) => {
@@ -398,16 +458,16 @@ function EventSection({ events, invitation, galleries }) {
 
                 return (
                     <Reveal key={idx} delay={idx * 100} className="nf-event-item">
-                        <div className={`nf-event-item__inner${(idx % 2 !== 0 && eventImg) ? ' nf-event-item__inner--rev' : ''}`}>
-                            {eventImg && (
+                        <div className={`nf-event-item__inner${(idx % 2 !== 0 && globalShowPhotos && eventImg) ? ' nf-event-item__inner--rev' : ''}`}>
+                            {globalShowPhotos && eventImg && (
                                 <div className="nf-event-item__photo">
                                     <img src={eventImg} alt={ev.event_name} />
                                 </div>
                             )}
-                            <div className="nf-event-item__detail" style={!eventImg ? { padding: '32px 28px', textAlign: 'center' } : undefined}>
+                            <div className="nf-event-item__detail" style={!(globalShowPhotos && eventImg) ? { padding: '32px 28px', textAlign: 'center' } : undefined}>
 
                                 <p className="nf-event-item__type">
-                                    <span className="nf-badge">Acara:</span>{ev.event_name || 'Pernikahan'}
+                                    <span className="nf-badge">{t('invitation.save_the_date') === 'Save The Date' ? 'Event:' : 'Acara:'}</span>{ev.event_name || (t('invitation.save_the_date') === 'Save The Date' ? 'Wedding' : 'Pernikahan')}
                                 </p>
                                 {d && (
                                     <div className="nf-event-item__date-row">
@@ -425,14 +485,14 @@ function EventSection({ events, invitation, galleries }) {
                                 )}
                                 {ev.venue_name && <p className="nf-event-item__venue">{ev.venue_name}</p>}
                                 {ev.venue_address && <p className="nf-event-item__address">{ev.venue_address}</p>}
-                                <div className="nf-event-item__actions">
+                                 <div className="nf-event-item__actions">
                                     {(ev.gmaps_link || ev.map_url) && (
                                         <a href={ev.gmaps_link || ev.map_url} target="_blank" rel="noreferrer" className="nf-btn-map">
-                                            <i className="fas fa-map-marker-alt" /> Lihat Peta
+                                            <i className="fas fa-map-marker-alt" /> {t('invitation.save_the_date') === 'Save The Date' ? 'View Map' : 'Lihat Peta'}
                                         </a>
                                     )}
                                     <a href={getCalUrl(ev)} target="_blank" rel="noreferrer" className="nf-btn-cal">
-                                        <i className="far fa-calendar-check" /> Simpan di Kalender
+                                        <i className="far fa-calendar-check" /> {t('invitation.save_the_date') === 'Save The Date' ? 'Save to Calendar' : 'Simpan di Kalender'}
                                     </a>
                                 </div>
                             </div>
@@ -468,37 +528,61 @@ function CountdownSection({ events }) {
 /* ═══════════════════════════════════════
    LOVE STORY SECTION
    ═══════════════════════════════════════ */
-function LoveStorySection({ loveStories }) {
+/* ── Timeline Card with Scroll Observer (active/glow state when scrolled over) ── */
+function TimelineCard({ story, index }) {
+    const ref = useRef(null);
+    const [isActive, setIsActive] = useState(false);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+
+        const observer = new IntersectionObserver(([entry]) => {
+            setIsActive(entry.isIntersecting);
+        }, {
+            rootMargin: '-30% 0px -30% 0px', // Active when in center 40% of viewport
+            threshold: 0
+        });
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    const isEven = index % 2 === 0;
+    return (
+        <div ref={ref} className={`nf-story-item nf-story-item--${isEven ? 'left' : 'right'} ${isActive ? 'is-active' : ''}`}>
+            <div className="nf-story-item__inner">
+                <div className="nf-story-item__text">
+                    <p className="nf-story-item__part">
+                        <span className="nf-badge">Part {index + 1}</span>{story.title}
+                    </p>
+                    {(story.story_date || story.date) && (
+                        <p className="nf-story-item__date">{story.story_date || story.date}</p>
+                    )}
+                    <p className="nf-story-item__desc">{story.description || story.story}</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ── LOVE STORY SECTION ── */
+function LoveStorySection({ loveStories, id }) {
     const { t } = useTranslation();
     const stories = safeArr(loveStories);
     if (stories.length === 0) return null;
 
     return (
-        <section id="love_story" className="nf-lovestory">
+        <section id={id || "love_story"} className="nf-lovestory">
             <Reveal>
                 <h3 className="nf-section-title">
                     {t('invitation.save_the_date') === 'Save The Date' ? <><span className="nf-badge">Our Love</span> Story</> : <><span className="nf-badge">Kisah</span> Cinta Kami</>}
                 </h3>
             </Reveal>
 
-            {stories.map((s, idx) => {
-                const isEven = idx % 2 === 0;
-                return (
-                    <Reveal key={idx} delay={idx * 80} className={`nf-story-item nf-story-item--${isEven ? 'left' : 'right'}`}>
-                        <div className="nf-story-item__inner">
-                            <div className="nf-story-item__text">
-                                <p className="nf-story-item__part">
-                                    <span className="nf-badge">Part {idx + 1}</span>{s.title}
-                                </p>
-                                {(s.story_date || s.date) && (
-                                    <p className="nf-story-item__date">{s.story_date || s.date}</p>
-                                )}
-                                <p className="nf-story-item__desc">{s.description || s.story}</p>
-                            </div>
-                        </div>
-                    </Reveal>
-                );
-            })}
+            {stories.map((s, idx) => (
+                <TimelineCard key={idx} story={s} index={idx} />
+            ))}
         </section>
     );
 }
@@ -509,7 +593,7 @@ function LoveStorySection({ loveStories }) {
 function GallerySection({ galleries }) {
     const { t } = useTranslation();
     const safeGalleries = safeArr(galleries);
-    if (safeGalleries.length === 0) return null;
+    if (safeGalleries.length === 0 || !globalShowPhotos) return null;
 
     return (
         <section id="gallery" className="nf-gallery">
@@ -535,7 +619,7 @@ function GallerySection({ galleries }) {
 /* ═══════════════════════════════════════
    BANK / AMPLOP DIGITAL
    ═══════════════════════════════════════ */
-function BankSection({ bankAccounts }) {
+function BankSection({ bankAccounts, id }) {
     const { t } = useTranslation();
     const accounts = safeArr(bankAccounts);
     if (accounts.length === 0) return null;
@@ -595,13 +679,13 @@ function BankSection({ bankAccounts }) {
     };
 
     return (
-        <section id="bank" className="nf-gift">
+        <section id={id || "bank"} className="nf-gift">
             <Reveal>
                 <h3 className="nf-section-title">
                     {t('invitation.save_the_date') === 'Save The Date' ? <><span className="nf-badge">Digital</span> Envelope</> : <><span className="nf-badge">Amplop</span> Digital</>}
                 </h3>
                 <p className="nf-gift__desc">
-                    Doa restu Anda merupakan karunia yang sangat berarti bagi kami. Bagi yang ingin memberikan hadiah, dapat melalui rekening berikut:
+                    {t('invitation.gift_desc')}
                 </p>
             </Reveal>
             <div className="nf-gift__accounts">
@@ -611,7 +695,7 @@ function BankSection({ bankAccounts }) {
                         <p className="nf-gift__number">{acc.account_number}</p>
                         <p className="nf-gift__name">a.n. {acc.account_holder || acc.account_name}</p>
                         <button className="nf-gift__copy" onClick={() => copy(acc.account_number, idx)}>
-                            {copiedIdx === idx ? '✓ Disalin!' : 'Salin Nomor'}
+                            {copiedIdx === idx ? `✓ ${t('invitation.gift_copied')}` : t('invitation.gift_copy')}
                         </button>
                     </Reveal>
                 ))}
@@ -623,138 +707,151 @@ function BankSection({ bankAccounts }) {
 /* ═══════════════════════════════════════
    RSVP SECTION
    ═══════════════════════════════════════ */
-function RsvpSection({ invitation, guest }) {
+function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishes }) {
     const { t } = useTranslation();
-    const rsvpForm = useForm({ attendance: 'hadir', number_of_guests: 1, name: guest?.name || '' });
-    const handleRsvp = (e) => {
+    const activeGuest = guest || { name: '', id: null };
+    const isEn = t('invitation.save_the_date') === 'Save The Date';
+
+    const [sharedName, setSharedName] = useState(activeGuest.name || '');
+    const [attendance, setAttendance] = useState('hadir');
+    const [numGuests, setNumGuests] = useState(1);
+    const [message, setMessage] = useState('');
+    const [success, setSuccess] = useState(false);
+
+    const rsvpForm = useForm({
+        sender_name: activeGuest.name || '',
+        attendance: 'hadir',
+        number_of_guests: 1,
+        guest_id: activeGuest.id || null,
+    });
+    const wishForm = useForm({
+        sender_name: activeGuest.name || '',
+        message: '',
+        guest_id: activeGuest.id || null,
+    });
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-        rsvpForm.post(route('invitation.rsvp', invitation.slug), {
-            preserveScroll: true,
-            onSuccess: () => rsvpForm.reset('number_of_guests'),
-        });
+        rsvpForm.setData('sender_name', sharedName);
+        rsvpForm.setData('attendance', attendance);
+        rsvpForm.setData('number_of_guests', numGuests);
+        wishForm.setData('sender_name', sharedName);
+        wishForm.setData('message', message);
+
+        const doWish = () => {
+            if (enableWishes && message.trim()) {
+                wishForm.post(route('invitation.wish', invitation.slug), {
+                    preserveScroll: true,
+                    onSuccess: () => { setMessage(''); setSuccess(true); },
+                });
+            } else {
+                setSuccess(true);
+            }
+        };
+
+        if (enableRsvp) {
+            rsvpForm.post(route('invitation.rsvp', invitation.slug), {
+                preserveScroll: true,
+                onSuccess: doWish,
+            });
+        } else {
+            doWish();
+        }
     };
 
-    const opts = [
-        { value: 'hadir', label: 'Hadir' },
-        { value: 'tidak_hadir', label: 'Tidak Hadir' },
-        { value: 'masih_ragu', label: 'Masih Ragu' },
-    ];
+    const isSubmitting = rsvpForm.processing || wishForm.processing;
+    const recentWishes = safeArr(wishes).slice(0, 5);
+    const opts = ['hadir', 'tidak_hadir', 'masih_ragu'];
+    const optLabels = {
+        hadir: isEn ? 'Attending' : 'Hadir',
+        tidak_hadir: isEn ? 'Not Attending' : 'Tidak Hadir',
+        masih_ragu: isEn ? 'Maybe' : 'Belum Pasti',
+    };
+
+    if (!enableRsvp && !enableWishes) return null;
 
     return (
         <section id="rsvp" className="nf-rsvp">
             <Reveal>
                 <h3 className="nf-section-title">
-                    {t('invitation.save_the_date') === 'Save The Date' ? <><span className="nf-badge">RSVP</span> Confirmation</> : <><span className="nf-badge">Konfirmasi</span> Kehadiran</>}
+                    {enableRsvp && <span className="nf-badge">RSVP</span>}
+                    {enableRsvp && enableWishes && (isEn ? ' & Wishes' : ' & Ucapan')}
+                    {!enableRsvp && enableWishes && <><span className="nf-badge">{isEn ? 'Wishes' : 'Ucapan'}</span> {isEn ? '& Prayers' : '& Doa'}</>}
                 </h3>
-                <p className="nf-rsvp__desc">Mohon konfirmasi kehadiran Anda untuk memudahkan persiapan kami</p>
             </Reveal>
-            <Reveal delay={150}>
-                <form onSubmit={handleRsvp} className="nf-rsvp__form">
+
+            <Reveal delay={100}>
+                <form onSubmit={handleSubmit} className="nf-rsvp__form">
+                    {/* Nama */}
                     <input
-                        className="nf-input" type="text"
-                        placeholder={t('invitation.wishes_name')}
-                        value={rsvpForm.data.name}
-                        onChange={e => rsvpForm.setData('name', e.target.value)}
+                        className="nf-input"
+                        type="text"
+                        placeholder={isEn ? 'Your Name' : 'Nama Anda'}
+                        required
+                        readOnly={!!activeGuest.name}
+                        value={sharedName}
+                        onChange={e => setSharedName(e.target.value)}
                     />
-                    <div className="nf-rsvp__options">
-                        {opts.map(o => (
-                            <button key={o.value} type="button"
-                                className={`nf-rsvp__option${rsvpForm.data.attendance === o.value ? ' active' : ''}`}
-                                onClick={() => rsvpForm.setData('attendance', o.value)}>
-                                {o.label}
-                            </button>
-                        ))}
-                    </div>
-                    {rsvpForm.data.attendance === 'hadir' && (
-                        <div className="nf-rsvp__guests">
-                            <label className="nf-label">Jumlah tamu yang hadir:</label>
-                            <input className="nf-input" type="number" min={1} max={10}
-                                value={rsvpForm.data.number_of_guests}
-                                onChange={e => rsvpForm.setData('number_of_guests', parseInt(e.target.value) || 1)} />
+
+                    {/* Kehadiran - hanya jika RSVP aktif */}
+                    {enableRsvp && (
+                        <div className="nf-rsvp__options">
+                            {opts.map(o => (
+                                <button key={o} type="button"
+                                    className={`nf-rsvp__option${attendance === o ? ' active' : ''}`}
+                                    onClick={() => setAttendance(o)}>
+                                    {optLabels[o]}
+                                </button>
+                            ))}
                         </div>
                     )}
-                    <button type="submit" disabled={rsvpForm.processing} className="nf-submit-btn">
-                        {rsvpForm.processing ? t('common.saving') : t('invitation.send_rsvp')}
-                    </button>
-                    {rsvpForm.wasSuccessful && (
-                        <p className="nf-success-msg">✓ {t('invitation.rsvp_success') || 'Konfirmasi berhasil dikirim!'}</p>
+
+                    {/* Jumlah Tamu - hanya jika RSVP aktif DAN hadir */}
+                    {enableRsvp && attendance === 'hadir' && (
+                        <div className="nf-rsvp__guests">
+                            <label className="nf-label">{isEn ? 'Number of Guests' : 'Jumlah Tamu'}:</label>
+                            <input className="nf-input" type="number" min={1} max={10}
+                                value={numGuests}
+                                onChange={e => setNumGuests(parseInt(e.target.value) || 1)} />
+                        </div>
                     )}
-                </form>
-            </Reveal>
-        </section>
-    );
-}
 
-/* ═══════════════════════════════════════
-   WISHES SECTION
-   ═══════════════════════════════════════ */
-function WishesSection({ invitation, wishes, guest }) {
-    const { t } = useTranslation();
-    const safeWishes = safeArr(wishes);
-    const wishForm = useForm({ sender_name: guest?.name || '', message: '' });
-    const handleWish = (e) => {
-        e.preventDefault();
-        wishForm.post(route('invitation.wish', invitation.slug), {
-            preserveScroll: true,
-            onSuccess: () => wishForm.reset('message'),
-        });
-    };
+                    {/* Ucapan - hanya jika Wishes aktif */}
+                    {enableWishes && (
+                        <textarea
+                            className="nf-input nf-wishes__textarea"
+                            placeholder={isEn ? 'Write your wishes...' : 'Tulis ucapan untuk kedua mempelai...'}
+                            value={message}
+                            onChange={e => setMessage(e.target.value)}
+                            rows={3}
+                            required={!enableRsvp}
+                        />
+                    )}
 
-    const attendanceLabel = (a) => {
-        if (a === 'hadir') return '✓ Hadir';
-        if (a === 'tidak_hadir' || a === 'tidak hadir') return '✗ Tidak Hadir';
-        return '? Masih Ragu';
-    };
-    const attendanceClass = (a) => {
-        if (a === 'hadir') return 'nf-attend--hadir';
-        if (a === 'tidak_hadir' || a === 'tidak hadir') return 'nf-attend--tidak';
-        return 'nf-attend--ragu';
-    };
-
-    return (
-        <section id="wishes" className="nf-wishes">
-            <Reveal>
-                <h3 className="nf-section-title">
-                    {t('invitation.save_the_date') === 'Save The Date' ? <><span className="nf-badge">Wishes</span> &amp; Prayers</> : <><span className="nf-badge">Ucapan</span> &amp; Do&apos;a</>}
-                </h3>
-            </Reveal>
-            <Reveal delay={100}>
-                <form onSubmit={handleWish} className="nf-wishes__form">
-                    <input className="nf-input" type="text"
-                        placeholder={t('invitation.wishes_name')}
-                        value={wishForm.data.sender_name}
-                        onChange={e => wishForm.setData('sender_name', e.target.value)}
-                        required />
-                    <textarea className="nf-input nf-wishes__textarea"
-                        placeholder="Tulis ucapan & doa untuk mempelai..."
-                        value={wishForm.data.message}
-                        onChange={e => wishForm.setData('message', e.target.value)}
-                        rows={3} required />
-                    <button type="submit" disabled={wishForm.processing} className="nf-submit-btn">
-                        {wishForm.processing ? t('common.saving') : t('invitation.send_wish')}
+                    <button type="submit" disabled={isSubmitting} className="nf-submit-btn">
+                        {isSubmitting ? (isEn ? 'Sending...' : 'Mengirim...') : (isEn ? 'Send' : 'Kirim')}
                     </button>
-                    {wishForm.wasSuccessful && (
-                        <p className="nf-success-msg">✓ {t('invitation.wishes_success') || 'Ucapan berhasil dikirim!'}</p>
+
+                    {success && (
+                        <p className="nf-success-msg">✓ {isEn ? 'Successfully sent!' : 'Berhasil terkirim!'}</p>
                     )}
                 </form>
             </Reveal>
 
-            {safeWishes.length > 0 && (
-                <div className="nf-wishes__list">
-                    {safeWishes.map((w, idx) => (
-                        <Reveal key={idx} delay={Math.min(idx * 50, 400)} className="nf-wishes__item">
-                            <div className="nf-wishes__avatar"><i className="fas fa-user" /></div>
-                            <div className="nf-wishes__body">
-                                <p className="nf-wishes__name">{w.sender_name || w.name}</p>
-                                <p className="nf-wishes__message">{w.message}</p>
-                                {w.attendance && (
-                                    <span className={`nf-attend ${attendanceClass(w.attendance)}`}>
-                                        {attendanceLabel(w.attendance)}
-                                    </span>
-                                )}
-                            </div>
-                        </Reveal>
-                    ))}
+            {/* Daftar Ucapan - max 5, scrollable */}
+            {enableWishes && recentWishes.length > 0 && (
+                <div className="nf-wishes__list-wrapper">
+                    <div className="nf-wishes__list" style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                        {recentWishes.map((w, idx) => (
+                            <Reveal key={idx} delay={Math.min(idx * 50, 400)} className="nf-wishes__item">
+                                <div className="nf-wishes__avatar"><i className="fas fa-user" /></div>
+                                <div className="nf-wishes__body">
+                                    <p className="nf-wishes__name">{w.sender_name || w.name}</p>
+                                    <p className="nf-wishes__message">{w.message}</p>
+                                </div>
+                            </Reveal>
+                        ))}
+                    </div>
                 </div>
             )}
         </section>
@@ -762,32 +859,131 @@ function WishesSection({ invitation, wishes, guest }) {
 }
 
 /* ═══════════════════════════════════════
+   LIVESTREAM SECTION
+   ═══════════════════════════════════════ */
+function LiveStreamingSection({ events, invitation }) {
+    const { t } = useTranslation();
+    const safeEvents = safeArr(events);
+    const streamingEvents = safeEvents.filter(e => e.streaming_url || (Array.isArray(e.streamings) && e.streamings.length > 0));
+    if (streamingEvents.length === 0) return null;
+
+    return (
+        <section id="livestream" className="nf-livestream">
+            <Reveal>
+                <h3 className="nf-section-title">
+                    <span className="nf-badge">Live</span> Streaming
+                </h3>
+            </Reveal>
+            {streamingEvents.map((ev, idx) => {
+                const streams = [];
+                if (ev.streaming_url) streams.push({ platform: ev.streaming_platform || 'Live', url: ev.streaming_url });
+                if (Array.isArray(ev.streamings)) {
+                    ev.streamings.forEach(s => {
+                        if (s.url && !streams.some(x => x.url === s.url)) streams.push({ platform: s.platform || 'Live', url: s.url });
+                    });
+                }
+
+                return (
+                    <Reveal key={idx} delay={idx * 100} className="nf-livestream__item">
+                        <p className="nf-livestream__name">{ev.event_name}</p>
+                        <div className="nf-livestream__links">
+                            {streams.map((s, sIdx) => (
+                                <a key={sIdx} href={s.url} target="_blank" rel="noreferrer" className="nf-btn-map">
+                                    <i className="fas fa-video" /> {s.platform.toUpperCase()}
+                                </a>
+                            ))}
+                        </div>
+                    </Reveal>
+                );
+            })}
+        </section>
+    );
+}
+
+/* ═══════════════════════════════════════
    CLOSING SECTION
    ═══════════════════════════════════════ */
-function ClosingSection({ invitation, brideGrooms }) {
+function ClosingSection({ invitation, brideGrooms, id }) {
+    const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
-    const groom = bgs.find(b => b.gender === 'pria') || bgs[0];
-    const bride = bgs.find(b => b.gender === 'wanita') || bgs[1];
+    const bride = bgs.find(bg => bg.gender === 'wanita' || bg.gender === 'female' || String(bg.gender).toLowerCase() === 'wanita' || String(bg.gender).toLowerCase() === 'female') || bgs[0] || {};
+    const groom = bgs.find(bg => bg.gender === 'pria' || bg.gender === 'male' || String(bg.gender).toLowerCase() === 'pria' || String(bg.gender).toLowerCase() === 'male') || bgs[1] || bgs[0] || {};
+
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
         : (invitation?.cover_title || 'The Wedding');
 
+    const isEn = t('invitation.save_the_date') === 'Save The Date';
+    const groomFather = groom.father_name;
+    const groomMother = groom.mother_name;
+    const brideFather = bride.father_name;
+    const brideMother = bride.mother_name;
+
+    const hasGroomParents = groomFather || groomMother;
+    const hasBrideParents = brideFather || brideMother;
+
+    const defaultIdText = 'Merupakan suatu kehormatan dan kebahagiaan bagi kami, apabila Bapak/Ibu, Saudara/i berkenan hadir di hari bahagia kami.';
+    const defaultIdTitle = 'THANK YOU';
+
+    const currentClosingTitle = invitation?.closing_title || '';
+    const currentClosingText = invitation?.closing_text || '';
+
+    const isDefaultTitle = !currentClosingTitle || currentClosingTitle.trim() === defaultIdTitle || currentClosingTitle.trim() === 'TERIMA KASIH';
+    const isDefaultText = !currentClosingText || currentClosingText.trim() === defaultIdText;
+
+    const displayClosingTitle = isDefaultTitle
+        ? t('invitation.closing_title')
+        : currentClosingTitle;
+
+    const displayClosingText = isDefaultText
+        ? t('invitation.closing_text')
+        : currentClosingText;
+
     return (
-        <section id="closing" className="nf-closing">
+        <section id={id || "closing"} className="nf-closing">
             <div className="nf-closing__content">
                 <Reveal>
                     <img src={ASSETS.logo} alt="The Wedding" className="nf-closing__logo" />
                 </Reveal>
-                {invitation?.closing_title && (
-                    <Reveal delay={100}>
-                        <h3 className="nf-closing__title">{invitation.closing_title}</h3>
-                    </Reveal>
-                )}
-                {invitation?.closing_text && (
-                    <Reveal delay={200}>
-                        <p className="nf-closing__text">{invitation.closing_text}</p>
-                    </Reveal>
-                )}
+                <Reveal delay={100}>
+                    <h3 className="nf-closing__title">{displayClosingTitle}</h3>
+                </Reveal>
+                <Reveal delay={200}>
+                    <p className="nf-closing__text">{displayClosingText}</p>
+                </Reveal>
+                
+                {/* Formal Tanda Tangan Penutup */}
+                <Reveal delay={250}>
+                    <div className="nf-closing__signature" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', marginBottom: '20px' }}>
+                        <div style={{ fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.75rem', opacity: 0.6, color: '#e50914' }}>
+                            {isEn ? 'We Who Are Joyful,' : 'Kami Yang Berbahagia,'}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', opacity: 0.85, display: 'flex', flexDirection: 'column', gap: '4px', color: '#fff', fontStyle: 'normal' }}>
+                            {hasGroomParents && (
+                                <div>
+                                    {isEn 
+                                        ? `Family of Mr. ${groomFather || '...'} & Mrs. ${groomMother || '...'}`
+                                        : `Kel. Bapak ${groomFather || '...'} & Ibu ${groomMother || '...'}`
+                                    }
+                                </div>
+                            )}
+                            {hasBrideParents && (
+                                <div>
+                                    {isEn 
+                                        ? `Family of Mr. ${brideFather || '...'} & Mrs. ${brideMother || '...'}`
+                                        : `Kel. Bapak ${brideFather || '...'} & Ibu ${brideMother || '...'}`
+                                    }
+                                </div>
+                            )}
+                            {!hasGroomParents && !hasBrideParents && (
+                                <div>
+                                    {isEn ? 'Both Families of the Couple' : 'Keluarga Besar Kedua Mempelai'}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </Reveal>
+
                 <Reveal delay={300}>
                     <p className="nf-closing__couple">{coupleName}</p>
                     <p className="nf-closing__tagline">Powered by {invitation?.user?.reseller?.reseller_settings?.brand_name || 'TrueLove Invitation'}</p>
@@ -841,7 +1037,14 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
     const enableRsvp = parseBool(invitation?.enable_rsvp);
     const enableWishes = parseBool(invitation?.enable_wishes);
     const enableQr = parseBool(invitation?.enable_qr) && parseBool(invitation?.show_qr_code);
+    const showPhotos = parseBool(invitation?.show_photos, true);
+    const showAnimations = parseBool(invitation?.show_animations, true);
+    globalShowPhotos = showPhotos;
+    globalShowAnimations = showAnimations;
     const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
+    
+    // Check for streaming
+    const hasStream = safeArr(events).some(e => e.streaming_url || (Array.isArray(e.streamings) && e.streamings.length > 0));
     
     let menuPosition = invitation?.menu_position || 'none';
     if (isSlideMode && (menuPosition === 'none' || !menuPosition)) {
@@ -860,6 +1063,7 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
         opening: t('nav.opening'), bride_groom: t('nav.mempelai'), event: t('nav.acara'),
         countdown: t('invitation.save_the_date') === 'Save The Date' ? 'Start' : 'Mulai', love_story: t('nav.kisah'), gallery: t('nav.galeri'), rsvp: t('nav.rsvp'),
         wishes: t('invitation.wishes_title'), bank: t('nav.hadiah'), closing: t('nav.penutup'),
+        livestream: 'Streaming',
     };
 
     const navIcons = {
@@ -873,9 +1077,10 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
         rsvp: 'fas fa-envelope',
         wishes: 'fas fa-comments',
         closing: 'fas fa-star',
+        livestream: 'fas fa-video',
     };
 
-    const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing'];
+    const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
 
     // Resolve active sections (prioritize DB sections, fallback to dynamic sections list if empty)
     const resolvedSections = [];
@@ -892,8 +1097,12 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
             if (s.section_key === 'wishes' && !enableWishes) return;
             const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
             if (s.section_key === 'countdown' && !primaryEvent?.event_date) return;
+            if (s.section_key === 'livestream' && !hasStream) return;
 
             resolvedSections.push(s);
+            if (s.section_key === 'event' && hasStream) {
+                resolvedSections.push({ section_key: 'livestream' });
+            }
         });
     } else {
         const fallbacks = [
@@ -901,6 +1110,10 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
             { section_key: 'bride_groom' },
             { section_key: 'event' },
         ];
+
+        if (hasStream) {
+            fallbacks.push({ section_key: 'livestream' });
+        }
 
         const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
         if (primaryEvent?.event_date) {
@@ -972,26 +1185,30 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
                         enableRsvp={enableRsvp}
                         enableWishes={enableWishes}
                         bankAccounts={bankAccounts}
+                        id="opening"
                       />,
-        'bride_groom':<BrideGroomSection key="bride_groom" invitation={invitation} brideGrooms={brideGrooms} events={events} />,
+        'bride_groom':<BrideGroomSection key="bride_groom" invitation={invitation} brideGrooms={brideGrooms} events={events} id="bride_groom" />,
         'event':      <EventSection      key="event"      events={events} invitation={invitation} galleries={galleries} />,
         'countdown':  <CountdownSection  key="countdown"  events={events} />,
         'love_story': loveStories?.length > 0
-            ? <LoveStorySection key="love_story" loveStories={loveStories} invitation={invitation} />
+            ? <LoveStorySection key="love_story" loveStories={loveStories} invitation={invitation} id="love_story" />
             : null,
         'gallery':    galleries?.length > 0
             ? <GallerySection   key="gallery"    galleries={galleries} />
             : null,
         'bank':       bankAccounts?.length > 0
-            ? <BankSection      key="bank"       bankAccounts={bankAccounts} />
+            ? <BankSection      key="bank"       bankAccounts={bankAccounts} id="bank" />
             : null,
-        'rsvp':       enableRsvp
-            ? <RsvpSection      key="rsvp"       invitation={invitation} guest={guest} />
+        'livestream': hasStream
+            ? <LiveStreamingSection key="livestream" events={events} invitation={invitation} />
             : null,
-        'wishes':     enableWishes
-            ? <WishesSection    key="wishes"     invitation={invitation} wishes={wishes} guest={guest} />
+        'rsvp':       (enableRsvp || enableWishes)
+            ? <UnifiedFormSection key="rsvp" invitation={invitation} wishes={wishes} guest={guest} enableRsvp={enableRsvp} enableWishes={enableWishes} />
             : null,
-        'closing':    <ClosingSection    key="closing"    invitation={invitation} brideGrooms={brideGrooms} />,
+        'wishes':     enableRsvp ? null : (enableWishes
+            ? <UnifiedFormSection key="wishes" invitation={invitation} wishes={wishes} guest={guest} enableRsvp={false} enableWishes={enableWishes} />
+            : null),
+        'closing':    <ClosingSection    key="closing"    invitation={invitation} brideGrooms={brideGrooms} id="closing" />,
     };
 
     // Set document title
@@ -1202,7 +1419,7 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
 
 
     return (
-        <div className="nf-container" id="main-scroll-container">
+        <div className={`nf-container ${!showAnimations ? 'nf-no-animations' : ''}`} id="main-scroll-container">
             {/* Partikel */}
             {invitation?.particle_type && invitation.particle_type !== 'none' && (
                 <ParticleEffect

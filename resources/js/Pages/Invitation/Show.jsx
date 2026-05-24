@@ -34,7 +34,7 @@ const AnimateIn = ({ children, type = 'fadeUp', delay = 0, className = '', durat
 };
 
 export default function Show({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
-    const { t } = useTranslation(invitation?.language || 'id');
+    const { t, locale } = useTranslation(invitation?.language || 'id');
     const getSectionName = (sec) => {
         const key = sec.section_key;
         const name = sec.section_name || '';
@@ -48,6 +48,55 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
         if (key === 'wishes') return t('invitation.wishes_title');
         if (key === 'closing') return t('nav.penutup');
         return name;
+    };
+
+    const translateChildOrder = (childOrder, gender) => {
+        if (!childOrder) return '';
+        const isEn = locale === 'en';
+        const raw = String(childOrder).trim().toLowerCase();
+        let matchedKey = null;
+        
+        if (raw.includes('tunggal') || raw.includes('satu-satunya') || raw.includes('only')) matchedKey = 'tunggal';
+        else if (raw.includes('bungsu') || raw.includes('terakhir') || raw.includes('youngest')) matchedKey = 'bungsu';
+        else if (raw.includes('10') || raw.includes('kesepuluh') || raw.includes('tenth')) matchedKey = '10';
+        else if (raw.includes('9') || raw.includes('kesembilan') || raw.includes('ninth')) matchedKey = '9';
+        else if (raw.includes('8') || raw.includes('kedelapan') || raw.includes('eighth')) matchedKey = '8';
+        else if (raw.includes('7') || raw.includes('ketujuh') || raw.includes('seventh')) matchedKey = '7';
+        else if (raw.includes('6') || raw.includes('keenam') || raw.includes('sixth')) matchedKey = '6';
+        else if (raw.includes('5') || raw.includes('kelima') || raw.includes('fifth')) matchedKey = '5';
+        else if (raw.includes('4') || raw.includes('keempat') || raw.includes('fourth')) matchedKey = '4';
+        else if (raw.includes('3') || raw.includes('ketiga') || raw.includes('third')) matchedKey = '3';
+        else if (raw.includes('2') || raw.includes('kedua') || raw.includes('second')) matchedKey = '2';
+        else if (raw.includes('1') || raw.includes('pertama') || raw.includes('kesatu') || raw.includes('first')) matchedKey = '1';
+        
+        const ordinalMap = {
+            '1': { id: 'Pertama', en: 'First' },
+            '2': { id: 'Kedua', en: 'Second' },
+            '3': { id: 'Ketiga', en: 'Third' },
+            '4': { id: 'Keempat', en: 'Fourth' },
+            '5': { id: 'Kelima', en: 'Fifth' },
+            '6': { id: 'Keenam', en: 'Sixth' },
+            '7': { id: 'Ketujuh', en: 'Seventh' },
+            '8': { id: 'Kedelapan', en: 'Eighth' },
+            '9': { id: 'Kesembilan', en: 'Ninth' },
+            '10': { id: 'Kesepuluh', en: 'Tenth' },
+            'bungsu': { id: 'Bungsu', en: 'Youngest' },
+            'tunggal': { id: 'Tunggal', en: 'Only' }
+        };
+        
+        const match = ordinalMap[matchedKey] || { id: childOrder, en: childOrder };
+        
+        const isWanita = gender === 'wanita' || gender === 'female' || String(gender).toLowerCase() === 'wanita' || String(gender).toLowerCase() === 'female';
+        
+        if (isEn) {
+            const noun = isWanita ? 'Daughter' : 'Son';
+            if (String(match.en).toLowerCase() === 'only') return `ONLY ${noun.toUpperCase()} OF`;
+            return `${String(match.en).toUpperCase()} ${noun.toUpperCase()} OF`;
+        } else {
+            const noun = isWanita ? 'Putri' : 'Putra';
+            if (String(match.id).toLowerCase() === 'tunggal') return `${noun.toUpperCase()} TUNGGAL DARI`;
+            return `${noun.toUpperCase()} ${String(match.id).toUpperCase()} DARI`;
+        }
     };
     const [isOpen, setIsOpen] = useState(false);
     const [musicPlaying, setMusicPlaying] = useState(false);
@@ -582,7 +631,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                 </AnimateIn>
                                                                 <AnimateIn type="fadeUp" delay={500 + i * 400}>
                                                                     <p className="text-sm opacity-70 mt-2">
-                                                                        {bg.gender === 'wanita' ? t('invitation.daughter') : t('invitation.son')} {bg.child_order && (t('invitation.save_the_date') === 'Save The Date' ? `No. ${bg.child_order}` : `ke-${bg.child_order}`)} {t('invitation.save_the_date') === 'Save The Date' ? 'of' : 'dari'}<br />
+                                                                        {translateChildOrder(bg.child_order, bg.gender === 'wanita' ? 'wanita' : 'pria') || (bg.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of'))}<br />
                                                                         Bapak {bg.father_name} & Ibu {bg.mother_name}
                                                                     </p>
                                                                 </AnimateIn>

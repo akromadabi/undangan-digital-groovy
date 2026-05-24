@@ -22,6 +22,8 @@ class Theme extends Model
         'is_premium',
         'is_active',
         'sort_order',
+        'base_likes',
+        'real_likes',
     ];
 
     protected function casts(): array

@@ -229,6 +229,9 @@ class DatabaseSeeder extends Seeder
             Luxury01ThemeSeeder::class,
             Luxury02ThemeSeeder::class,
             Luxury03ThemeSeeder::class,
+            ArunaThemeSeeder::class,
+            Luxury04ThemeSeeder::class,
+            WayangThemeSeeder::class,
         ]);
 
         // ═══════════════════════════════════════

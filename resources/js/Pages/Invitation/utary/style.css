@@ -454,28 +454,33 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  animation: utaryBounce 2s ease-in-out infinite;
 }
 
-.utary-scroll-indicator__icon {
-  width: 22px;
-  height: 34px;
-  border: 1.5px solid var(--utary-gold);
-  border-radius: 11px;
-  position: relative;
-  opacity: 0.4;
+.utary-scroll-indicator__chevron {
+  font-size: 20px;
+  color: var(--utary-gold);
 }
 
-.utary-scroll-indicator__dot {
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 6px;
-  background: var(--utary-gold);
-  border-radius: 2px;
-  animation: utaryScrollDot 1.5s ease-in-out infinite;
+.fa-chevron-down.utary-scroll-indicator__chevron {
+  animation: utyBounceDown 1.5s ease-in-out infinite;
+}
+
+.fa-chevron-right.utary-scroll-indicator__chevron {
+  animation: utyBounceRight 1.5s ease-in-out infinite;
+}
+
+.utary-floating__btn:hover .utary-nav-toggle__line {
+  background-color: #ffffff;
+}
+
+@keyframes utyBounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+@keyframes utyBounceRight {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(8px); }
 }
 
 /* ── Divider ── */
@@ -523,7 +528,7 @@
   position: relative;
   width: 240px;
   height: 240px;
-  margin: 0 auto 30px;
+  margin: 0 auto 80px; /* 80px so name sits clearly below the ornamental frame bottom */
 }
 
 .utary-profile__frame {
@@ -545,10 +550,14 @@
 
 .utary-profile__name {
   font-family: var(--utary-font-display);
-  font-size: 38px;
+  font-size: 28px;
   color: var(--utary-gold);
+  margin-top: 0;          /* space handled by frame-wrap margin-bottom above */
   margin-bottom: 12px;
   letter-spacing: 1px;
+  text-align: center;
+  position: relative;
+  z-index: 3;
 }
 
 .utary-profile__role {
@@ -657,6 +666,15 @@
   position: relative;
   margin-bottom: 28px;
   text-align: left;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.55;
+  transform: scale(0.97);
+}
+
+.utary-timeline__item:hover,
+.utary-timeline__item.is-active {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .utary-timeline__dot {
@@ -668,13 +686,24 @@
   border: 1.5px solid var(--utary-gold);
   border-radius: 50%;
   background: var(--utary-bg);
+  transition: all 0.3s ease;
 }
 
 .utary-timeline__card {
-  background: rgba(204, 186, 130, 0.04);
+  background: rgba(204, 186, 130, 0.05);
   border: 1px solid var(--utary-border-gold);
-  border-radius: 4px;
-  padding: 16px 20px;
+  border-radius: 8px;
+  padding: 18px 22px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.utary-timeline__item:hover .utary-timeline__card,
+.utary-timeline__item.is-active .utary-timeline__card {
+  transform: translateY(-2px);
+  background: rgba(204, 186, 130, 0.08);
+  border-color: var(--utary-gold);
+  box-shadow: 0 8px 25px rgba(204, 186, 130, 0.15);
 }
 
 .utary-timeline__card-title {
@@ -690,6 +719,24 @@
   color: var(--utary-text-muted);
   line-height: 1.8;
   font-weight: 300;
+}
+
+.utary-timeline__item:hover .utary-timeline__dot,
+.utary-timeline__item.is-active .utary-timeline__dot {
+  background: var(--utary-gold);
+  box-shadow: 0 0 10px var(--utary-gold);
+}
+
+/* Date badge inside love-story card */
+.utary-timeline__card-date {
+  font-family: var(--utary-font-body);
+  font-size: 10px;
+  color: var(--utary-gold);
+  letter-spacing: 2px;
+  font-weight: 300;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  opacity: 0.75;
 }
 
 /* ═══════════════════════════════════════
@@ -1945,4 +1992,55 @@
   right: auto;
   left: 20px;
 }
+
+/* --- Non-aktifkan Semua Animasi & Transisi --- */
+.utary-page.utary-no-animations *,
+.utary-page.utary-no-animations *::before,
+.utary-page.utary-no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+  transition-delay: 0s !important;
+  animation-delay: 0s !important;
+}
+
+/* Premium Wishes Scroll List and Bottom Fade */
+.utary-wishes-list-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 32px;
+}
+
+.utary-wishes-list-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 45px;
+  background: linear-gradient(to bottom, rgba(28, 60, 46, 0), rgba(28, 60, 46, 1));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.utary-wishes-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 8px;
+  padding-bottom: 25px; /* offset for bottom fade */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Gold Scrollbar for Utary */
+.utary-wishes-list::-webkit-scrollbar {
+  width: 3px;
+}
+.utary-wishes-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.utary-wishes-list::-webkit-scrollbar-thumb {
+  background: #cdbb83;
+  border-radius: 3px;
+}
+
 

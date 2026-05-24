@@ -1219,7 +1219,9 @@
     background: #1a1a1a;
     width: 85%;
     max-width: 600px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.55;
+    transform: scale(0.96);
 }
 
 .nf-story-item--left .nf-story-item__inner {
@@ -1230,9 +1232,11 @@
     border-right: 4px solid var(--nf-red);
 }
 
+.nf-story-item.is-active .nf-story-item__inner,
 .nf-story-item__inner:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transform: scale(1) translateY(-2px);
+    opacity: 1;
+    box-shadow: 0 8px 25px rgba(229, 9, 20, 0.25);
 }
 
 .nf-story-item__text {
@@ -1414,12 +1418,45 @@
     min-height: 80px;
 }
 
+.nf-wishes__list-wrapper {
+    position: relative;
+    max-width: 540px;
+    margin: 20px auto 0;
+}
+
+.nf-wishes__list-wrapper::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45px;
+    background: linear-gradient(to bottom, rgba(20, 20, 20, 0), rgba(20, 20, 20, 1));
+    pointer-events: none;
+    z-index: 2;
+}
+
 .nf-wishes__list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-width: 540px;
-    margin: 20px auto 0;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 8px;
+    padding-bottom: 25px; /* offset for bottom fade */
+    margin: 0 auto;
+}
+
+/* Custom Netflix-red webkit scrollbar */
+.nf-wishes__list::-webkit-scrollbar {
+    width: 3px;
+}
+.nf-wishes__list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.nf-wishes__list::-webkit-scrollbar-thumb {
+    background: var(--nf-red, #E50914);
+    border-radius: 3px;
 }
 
 .nf-wishes__item {
@@ -1687,3 +1724,31 @@
   pointer-events: auto;
   z-index: 10;
 }
+
+/* --- Mode Tanpa Foto Cover Fallbacks --- */
+.nf-cover.nf-no-photo-mode {
+  background: var(--nf-black) !important;
+}
+
+.nf-cover.nf-no-photo-mode::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* --- Non-aktifkan Semua Animasi & Transisi --- */
+.nf-container.nf-no-animations *,
+.nf-container.nf-no-animations *::before,
+.nf-container.nf-no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+  transition-delay: 0s !important;
+  animation-delay: 0s !important;
+}
+

@@ -327,8 +327,6 @@ class SettingsController extends Controller
         $request->validate([
             'show_photos' => 'boolean',
             'show_animations' => 'boolean',
-            'show_guest_name' => 'boolean',
-            'show_countdown' => 'boolean',
             'enable_rsvp' => 'boolean',
             'enable_wishes' => 'boolean',
             'music_autoplay' => 'boolean',
@@ -337,7 +335,6 @@ class SettingsController extends Controller
             'religion' => 'in:islam,kristen,hindu,buddha,umum',
             'is_private' => 'boolean',
             'enable_qr' => 'boolean',
-            'hide_photos' => 'boolean',
             'menu_position' => 'sometimes|required|in:none,bottom,left,right',
             'custom_domain' => 'nullable|string|max:255|unique:invitations,custom_domain,' . $invitation->id,
         ]);
@@ -345,8 +342,6 @@ class SettingsController extends Controller
         $data = $request->only([
             'show_photos',
             'show_animations',
-            'show_guest_name',
-            'show_countdown',
             'enable_rsvp',
             'enable_wishes',
             'music_autoplay',
@@ -355,10 +350,16 @@ class SettingsController extends Controller
             'religion',
             'is_private',
             'enable_qr',
-            'hide_photos',
             'menu_position',
             'custom_domain',
         ]);
+
+        // Force countdown and guest name to be true
+        $data['show_countdown'] = true;
+        $data['show_guest_name'] = true;
+
+        // Sync show_photos to hide_photos (inverse logic)
+        $data['hide_photos'] = !$request->input('show_photos', true);
 
         // Sync both QR code fields to the same value
         $data['show_qr_code'] = $request->input('enable_qr', true);

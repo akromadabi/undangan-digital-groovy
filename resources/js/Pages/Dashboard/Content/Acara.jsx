@@ -25,7 +25,7 @@ export default function Acara({ events }) {
         { ...defaultEvent, event_type: 'resepsi', event_name: 'Resepsi', streamings: [] },
     ];
 
-    const { data, setData, post, processing } = useForm({ events: initial });
+    const { data, setData, post, processing, errors } = useForm({ events: initial });
 
     const updateEvent = (index, field, value) => {
         const updated = [...data.events];
@@ -64,6 +64,20 @@ export default function Acara({ events }) {
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
                     <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                )}
+
+                {Object.keys(errors).length > 0 && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-start gap-2.5 shadow-sm">
+                        <span className="text-lg">⚠️</span>
+                        <div>
+                            <div className="font-semibold text-red-800">Gagal menyimpan data acara. Silakan periksa kembali:</div>
+                            <ul className="list-disc list-inside text-xs mt-1 text-red-600 space-y-0.5">
+                                {Object.entries(errors).map(([key, val]) => (
+                                    <li key={key}>{val}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
                 )}
 
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
@@ -125,20 +139,29 @@ export default function Acara({ events }) {
                                     <label className="block text-sm font-medium text-gray-600 mb-1.5">Nama Acara *</label>
                                     <input type="text" value={event.event_name} onChange={(e) => updateEvent(index, 'event_name', e.target.value)}
                                         placeholder="Nama acara"
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" required />
+                                        className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.event_name`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} required />
+                                    {errors[`events.${index}.event_name`] && (
+                                        <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.event_name`]}</p>
+                                    )}
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 mb-1.5">Tanggal *</label>
                                     <input type="date" value={event.event_date?.split('T')[0] || ''} onChange={(e) => updateEvent(index, 'event_date', e.target.value)}
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" required />
+                                        className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.event_date`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} required />
+                                    {errors[`events.${index}.event_date`] && (
+                                        <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.event_date`]}</p>
+                                    )}
                                 </div>
 
                                 <div className="flex gap-2">
                                     <div className="flex-1">
                                         <label className="block text-sm font-medium text-gray-600 mb-1.5">Mulai *</label>
                                         <input type="time" value={event.start_time} onChange={(e) => updateEvent(index, 'start_time', e.target.value)}
-                                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" required />
+                                            className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.start_time`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} required />
+                                        {errors[`events.${index}.start_time`] && (
+                                            <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.start_time`]}</p>
+                                        )}
                                     </div>
                                     <div className="flex-1">
                                         <label className="block text-sm font-medium text-gray-600 mb-1.5">Selesai</label>
@@ -148,7 +171,10 @@ export default function Acara({ events }) {
                                             </div>
                                         ) : (
                                             <input type="time" value={event.end_time || ''} onChange={(e) => updateEvent(index, 'end_time', e.target.value)}
-                                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                                                className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.end_time`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} />
+                                        )}
+                                        {errors[`events.${index}.end_time`] && (
+                                            <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.end_time`]}</p>
                                         )}
                                         <label className="flex items-center gap-1.5 mt-1.5 cursor-pointer">
                                             <input type="checkbox"
@@ -192,7 +218,10 @@ export default function Acara({ events }) {
                                 </label>
                                 <input type="url" value={event.gmaps_link || ''} onChange={(e) => updateEvent(index, 'gmaps_link', e.target.value)}
                                     placeholder="https://maps.google.com/..."
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                                    className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.gmaps_link`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} />
+                                {errors[`events.${index}.gmaps_link`] && (
+                                    <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.gmaps_link`]}</p>
+                                )}
                             </div>
 
                             {/* Live Streaming - Multiple */}
@@ -216,10 +245,10 @@ export default function Acara({ events }) {
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
                                                     <label className="block text-xs font-medium text-emerald-700 mb-1">Platform</label>
-                                                    <select value={stream.platform} onChange={(e) => {
+                                                    <select value={String(stream.platform || 'youtube').toLowerCase()} onChange={(e) => {
                                                         const updated = [...data.events];
                                                         const streams = [...updated[index].streamings];
-                                                        streams[si] = { ...streams[si], platform: e.target.value };
+                                                        streams[si] = { ...streams[si], platform: e.target.value.toLowerCase() };
                                                         updated[index] = { ...updated[index], streamings: streams };
                                                         setData('events', updated);
                                                     }} className="w-full border border-emerald-200 bg-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300">
@@ -239,7 +268,10 @@ export default function Acara({ events }) {
                                                         updated[index] = { ...updated[index], streamings: streams };
                                                         setData('events', updated);
                                                     }} placeholder="https://..."
-                                                        className="w-full border border-emerald-200 bg-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300" />
+                                                        className={`w-full border bg-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.streamings.${si}.url`] ? 'border-red-300 focus:ring-red-300' : 'border-emerald-200 focus:ring-emerald-300'}`} />
+                                                    {errors[`events.${index}.streamings.${si}.url`] && (
+                                                        <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.streamings.${si}.url`]}</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

@@ -758,6 +758,17 @@
   width: 85%;
   max-width: 400px;
   position: relative;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.55;
+  transform: scale(0.96);
+}
+
+.lx3-story__node:hover .lx3-story__card,
+.lx3-story__node.is-active .lx3-story__card {
+  transform: scale(1) translateY(-3px);
+  opacity: 1;
+  box-shadow: 0 10px 25px rgba(220, 39, 67, 0.25);
+  border-color: var(--lx3-red);
 }
 
 .lx3-story__node--left .lx3-story__card {
@@ -1022,10 +1033,28 @@
 }
 
 /* Wishes List bubbles */
+.lx3-wishes-list-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.lx3-wishes-list-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 45px;
+  background: linear-gradient(to bottom, rgba(27, 4, 8, 0), rgba(27, 4, 8, 0.98));
+  pointer-events: none;
+  z-index: 2;
+}
+
 .lx3-wishes-list {
   max-height: 350px;
   overflow-y: auto;
-  padding-right: 6px;
+  padding-right: 8px;
+  padding-bottom: 25px; /* offset for bottom fade */
   margin-top: 30px;
   display: flex;
   flex-direction: column;
@@ -1040,7 +1069,7 @@
   background: transparent;
 }
 .lx3-wishes-list::-webkit-scrollbar-thumb {
-  background: var(--lx3-red-border);
+  background: var(--lx3-red);
   border-radius: 3px;
 }
 
@@ -1986,4 +2015,32 @@
   color: var(--lx3-red);
   text-align: center;
 }
+
+/* --- Mode Tanpa Foto Cover & Opening Fallbacks --- */
+.lx3-cover.lx3-no-photo-mode {
+  background: var(--lx3-bg-radial) !important;
+}
+
+.lx3-cover.lx3-no-photo-mode::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* --- Non-aktifkan Semua Animasi & Transisi --- */
+.lx3-page.lx3-no-animations *,
+.lx3-page.lx3-no-animations *::before,
+.lx3-page.lx3-no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+  transition-delay: 0s !important;
+  animation-delay: 0s !important;
+}
+
 
