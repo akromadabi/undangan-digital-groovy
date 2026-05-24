@@ -10,6 +10,8 @@ class ResellerSetting extends Model
         'user_id',
         'brand_name',
         'brand_logo',
+        'site_title',
+        'site_motto',
         'subdomain',
         'custom_domain',
         'landing_page_template',

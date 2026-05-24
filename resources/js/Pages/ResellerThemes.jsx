@@ -129,9 +129,22 @@ export default function ResellerThemes({ reseller, themes = [] }) {
         return themes.filter(t => t.category === activeCategory);
     }, [themes, activeCategory]);
 
+    const siteTitle = `Semua Tema — ${reseller.brand_name}`;
+    const siteMotto = reseller.site_motto || 'Pilih dari berbagai desain premium yang disesuaikan dengan kebutuhan acara Anda.';
+
     return (
         <div className={T.sectionBg + ' min-h-screen flex flex-col'}>
-            <Head title={`Semua Tema — ${reseller.brand_name}`} />
+            <Head>
+                <title>{siteTitle}</title>
+                <meta name="description" content={siteMotto} />
+                <meta property="og:title" content={siteTitle} />
+                <meta property="og:description" content={siteMotto} />
+                {reseller.brand_logo && <meta property="og:image" content={reseller.brand_logo} />}
+                <meta property="og:url" content={reseller.reseller_url + '/themes'} />
+                <meta name="twitter:title" content={siteTitle} />
+                <meta name="twitter:description" content={siteMotto} />
+                {reseller.brand_logo && <meta name="twitter:image" content={reseller.brand_logo} />}
+            </Head>
 
             {/* ═══ NAVBAR ═══ */}
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-white/50 backdrop-blur-sm border-b border-gray-100/10'}`}>

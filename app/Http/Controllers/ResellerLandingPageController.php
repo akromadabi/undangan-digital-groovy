@@ -49,23 +49,23 @@ class ResellerLandingPageController extends Controller
 
         // Get themes for gallery
         $themes = \App\Models\Theme::where('is_active', true)
-            ->select('id', 'name', 'thumbnail', 'category', 'is_premium', 'base_likes', 'real_likes')
+            ->select('id', 'name', 'slug', 'thumbnail', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
             ->latest()
             ->take(8)
             ->get();
-
+ 
         $appUrl = config('app.url');
         $parsed = parse_url($appUrl);
         $scheme = $parsed['scheme'] ?? 'http';
         $host = $parsed['host'] ?? 'undangan-digital.test';
         $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
-
+ 
         if ($setting->custom_domain) {
             $resellerUrl = $scheme . '://' . $setting->custom_domain . $port;
         } else {
             $resellerUrl = $scheme . '://' . $subdomain . '.' . $host . $port;
         }
-
+ 
         return Inertia::render('ResellerLanding', [
             'reseller' => [
                 'brand_name' => $setting->brand_name ?: $reseller->name,
@@ -73,12 +73,14 @@ class ResellerLandingPageController extends Controller
                 'ref' => $subdomain,
                 'reseller_url' => $resellerUrl,
                 'template' => $setting->landing_page_template ?: 'default',
+                'site_title' => $setting->site_title,
+                'site_motto' => $setting->site_motto,
             ],
             'plans' => $plansData,
             'themes' => $themes,
         ]);
     }
-
+ 
     /**
      * Show all themes with reseller context.
      * URL: /r/{subdomain}/themes
@@ -88,31 +90,31 @@ class ResellerLandingPageController extends Controller
         $setting = ResellerSetting::where('subdomain', $subdomain)
             ->where('is_active', true)
             ->first();
-
+ 
         if (!$setting) {
             abort(404, 'Reseller tidak ditemukan.');
         }
-
+ 
         $reseller = $setting->reseller;
-
+ 
         // Get all active themes
         $themes = \App\Models\Theme::where('is_active', true)
             ->select('id', 'name', 'slug', 'thumbnail', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
             ->orderBy('sort_order')
             ->get();
-
+ 
         $appUrl = config('app.url');
         $parsed = parse_url($appUrl);
         $scheme = $parsed['scheme'] ?? 'http';
         $host = $parsed['host'] ?? 'undangan-digital.test';
         $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
-
+ 
         if ($setting->custom_domain) {
             $resellerUrl = $scheme . '://' . $setting->custom_domain . $port;
         } else {
             $resellerUrl = $scheme . '://' . $subdomain . '.' . $host . $port;
         }
-
+ 
         return Inertia::render('ResellerThemes', [
             'reseller' => [
                 'brand_name' => $setting->brand_name ?: $reseller->name,
@@ -120,6 +122,8 @@ class ResellerLandingPageController extends Controller
                 'ref' => $subdomain,
                 'reseller_url' => $resellerUrl,
                 'template' => $setting->landing_page_template ?: 'default',
+                'site_title' => $setting->site_title,
+                'site_motto' => $setting->site_motto,
             ],
             'themes' => $themes,
         ]);

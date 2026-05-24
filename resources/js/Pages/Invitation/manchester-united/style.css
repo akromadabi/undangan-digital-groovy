@@ -7,41 +7,24 @@
   --mu-primary: #DA291C; /* Man Utd Red */
   --mu-secondary: #0A0A0A; /* Black */
   --mu-accent: #FBE122; /* Yellow/Gold */
-  --mu-bg: #080808; /* Dark Stadium */
-  --mu-bg-card: #141414; /* Dark Card */
+  --mu-bg: #070707; 
+  --mu-bg-card: rgba(20, 20, 20, 0.75); /* Dark Glassmorphism */
   --mu-text: #FFFFFF;
   --mu-text-secondary: #AAAAAA;
-  --mu-border: rgba(250, 41, 28, 0.2);
+  --mu-border: rgba(251, 225, 34, 0.25); /* Gold outline */
   --mu-border-gold: rgba(251, 225, 34, 0.25);
-  --mu-grass: #122416; /* Dark Pitch Green */
 }
 
 /* 1. Global Reset & Layout */
 .mu-page {
   font-family: 'Poppins', sans-serif;
   color: var(--mu-text);
-  background-color: var(--mu-bg);
+  background: radial-gradient(circle at center, #200403 0%, #070707 100%);
   min-height: 100vh;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   position: relative;
-}
-
-/* Pitch line background watermark */
-.mu-page::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    linear-gradient(rgba(18, 36, 22, 0.4) 1.5px, transparent 1.5px),
-    linear-gradient(90deg, rgba(18, 36, 22, 0.4) 1.5px, transparent 1.5px);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
 }
 
 /* Global No Animations Override */
@@ -571,16 +554,17 @@
 
 .mu-player-card {
   background: var(--mu-bg-card);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--mu-border);
   border-radius: 16px;
   width: 100%;
   max-width: 340px;
-  padding: 16px;
+  padding: 24px 20px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   position: relative;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
 /* FUT Card Style Player Info Badge */
@@ -722,12 +706,14 @@
 /* 9. Match Details Section (Acara) */
 .mu-event-card {
   background: var(--mu-bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--mu-border);
   border-left: 4px solid var(--mu-primary);
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 16px 16px 0;
   padding: 20px;
   box-sizing: border-box;
   margin-bottom: 24px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
 .mu-event-header {
@@ -914,10 +900,11 @@
 /* 12. RSVP & Wishes (Match Day Pass Ticket & Fan Chants) */
 .mu-ticket {
   background: var(--mu-bg-card);
-  border: 2px solid var(--mu-primary);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--mu-border);
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
   position: relative;
 }
 
@@ -935,11 +922,11 @@
 }
 .mu-ticket::before {
   left: -8px;
-  box-shadow: inset -2px 0 0 rgba(250, 41, 28, 0.2);
+  box-shadow: inset -2px 0 0 rgba(251, 225, 34, 0.2);
 }
 .mu-ticket::after {
   right: -8px;
-  box-shadow: inset 2px 0 0 rgba(250, 41, 28, 0.2);
+  box-shadow: inset 2px 0 0 rgba(251, 225, 34, 0.2);
 }
 
 .mu-ticket-header {
@@ -1142,7 +1129,8 @@
 }
 
 .mu-bank-card {
-  background: linear-gradient(135deg, #141414 0%, #050505 100%);
+  background: var(--mu-bg-card);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--mu-border);
   border-radius: 12px;
   padding: 20px;
@@ -1151,11 +1139,11 @@
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
 .mu-bank-card::after {
-  content: "OFFICIAL TRANSFER";
+  content: "DIGITAL GIFT";
   position: absolute;
   bottom: -15px;
   right: -10px;

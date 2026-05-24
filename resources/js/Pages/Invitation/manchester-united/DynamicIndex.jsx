@@ -123,12 +123,41 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
 }
 
 /* ═══════════════════════════════════════
-   PITCH-LINE SEPARATOR / FOOTBALL DIVIDER
+   ELEGANT CREST ICON / DIVIDER
    ═══════════════════════════════════════ */
+const CrestIcon = ({ className = '', size = 48 }) => (
+    <svg className={className} width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Shield background */}
+        <path d="M50 92C50 92 85 70 85 45V15L50 8L15 15V45C15 70 50 92 50 92Z" fill="url(#crest-bg-grad)" stroke="var(--mu-accent)" strokeWidth="3" />
+        {/* Inner border */}
+        <path d="M50 88C50 88 80 68 80 45V18L50 11.5L20 18V45C20 68 50 88 50 88Z" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+        
+        {/* Sailing Ship Silhouette on top half */}
+        <path d="M35 38C35 38 42 22 50 22C58 22 65 38 65 38H35Z" fill="var(--mu-accent)" opacity="0.85" />
+        <path d="M49 20V38" stroke="var(--mu-accent)" strokeWidth="2" />
+        <path d="M30 40H70L65 44H35L30 40Z" fill="var(--mu-accent)" />
+        
+        {/* Red Devil Pitchfork / Silhouette on bottom half */}
+        <path d="M46 54C46 52 48 50 50 50C52 50 54 52 54 54V76C54 78 52 80 50 80C48 80 46 78 46 76V54Z" fill="var(--mu-primary)" />
+        <path d="M40 58C42 60 45 61 50 61C55 61 58 60 60 58" stroke="var(--mu-primary)" strokeWidth="2" strokeLinecap="round" />
+        {/* Devil horns / pitchfork tips */}
+        <path d="M42 52L46 55M58 52L54 55" stroke="var(--mu-primary)" strokeWidth="2.5" strokeLinecap="round" />
+        
+        <defs>
+            <radialGradient id="crest-bg-grad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" transform="translate(50 50) rotate(90) scale(42)">
+                <stop stopColor="#DA291C" />
+                <stop offset="1" stopColor="#0A0A0A" />
+            </radialGradient>
+        </defs>
+    </svg>
+);
+
 function SoccerDivider() {
     return (
         <div className="mu-divider">
-            <span className="mu-divider-icon">⚽</span>
+            <span className="mu-divider-icon">
+                <CrestIcon size={24} />
+            </span>
         </div>
     );
 }
@@ -188,23 +217,24 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGu
             <div className="mu-cover__overlay" />
             <div className="mu-cover__content">
                 {/* Football Club Crest Logo */}
-                <div className="mu-cover__badge">
-                    <span>{initials}</span>
+                <div className="mu-cover__badge-wrapper" style={{ position: 'relative', width: '120px', height: '120px', marginBottom: '24px' }}>
+                    <CrestIcon size={120} />
+                    <span className="mu-cover__badge-initials" style={{ position: 'absolute', top: '48%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: "'Jura', sans-serif", fontSize: '1.4rem', fontWeight: '800', color: 'var(--mu-accent)', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{initials}</span>
                 </div>
 
-                <span className="mu-cover__matchday">{isEn ? "MATCH DAY: THE WEDDING" : "MATCH DAY: PERNIKAHAN"}</span>
+                <span className="mu-cover__matchday">{isEn ? "THE WEDDING OF" : "PERNIKAHAN DARI"}</span>
                 <h1 className="mu-cover__couple">{coupleName}</h1>
 
                 {showGuestName && guest && (
                     <>
-                        <p className="mu-cover__dear">{isEn ? "RECEIVER (TICKET HOLDER)" : "KEPADA YTH. PEMEGANG TIKET:"}</p>
+                        <p className="mu-cover__dear">{isEn ? "TO OUR HONORED GUEST:" : "KEPADA YTH. BAPAK/IBU/SAUDARA/I:"}</p>
                         <div className="mu-cover__guest">{guestName}</div>
                         <p className="mu-cover__apology">{t('invitation.dear_guest_desc')}</p>
                     </>
                 )}
 
                 <button type="button" onClick={onOpen} id="tombol-buka" className="mu-cover__btn">
-                    ⚽ {isEn ? "KICK-OFF (OPEN)" : "KICK-OFF (BUKA UNDANGAN)"}
+                    ✨ {isEn ? "OPEN INVITATION" : "BUKA UNDANGAN"}
                 </button>
             </div>
         </div>
@@ -297,13 +327,13 @@ function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode, s
             <div className="mu-hero__overlay" />
             <div className="mu-hero__content">
                 <Reveal delay={200}>
-                    <span className="mu-hero__matchday">{isEn ? "THEATRE OF DREAMS MARRIAGE" : "KICK-OFF LIGA PERNIKAHAN"}</span>
+                    <span className="mu-hero__matchday">{isEn ? "THE WEDDING CELEBRATION" : "PERAYAAN PERNIKAHAN"}</span>
                 </Reveal>
                 <Reveal delay={400}>
                     <h1 className="mu-hero__couple">{coupleName}</h1>
                 </Reveal>
                 <Reveal delay={600}>
-                    <span className="mu-hero__date">{formattedDate} | KICK-OFF: {formatTime(targetTime)} {primaryEvent?.timezone || 'WIB'}</span>
+                    <span className="mu-hero__date">{formattedDate} | {isEn ? "TIME" : "PUKUL"}: {formatTime(targetTime)} {primaryEvent?.timezone || 'WIB'}</span>
                 </Reveal>
                 
                 {showCountdown && (
@@ -441,17 +471,16 @@ function BrideGroomSection({ brideGrooms, invitation }) {
     return (
         <section id="bride_groom" className="mu-section">
             <Reveal>
-                <h2 className="mu-section-title">{isEn ? "STARTING LINEUP" : "STARTING XI"}</h2>
-                <p className="mu-section-subtitle">Key Players</p>
+                <h2 className="mu-section-title">{isEn ? "THE HAPPY COUPLE" : "KEDUA MEMPELAI"}</h2>
+                <p className="mu-section-subtitle">{isEn ? "Bride & Groom" : "Mempelai Pria & Wanita"}</p>
             </Reveal>
 
             <div className="mu-couple-grid">
                 {/* Groom Player Card */}
                 {groom.full_name && (
                     <Reveal variant="left" className="mu-player-card">
-                        <div className="mu-player-card__badge">
-                            <span className="mu-player-card__number">07</span>
-                            <span className="mu-player-card__pos">FWD</span>
+                        <div className="mu-player-card__badge" style={{ padding: '4px 8px' }}>
+                            <span className="mu-player-card__number">#07</span>
                         </div>
                         {globalShowPhotos && groom.photo && (
                             <div className="mu-player-photo-wrap">
@@ -466,28 +495,27 @@ function BrideGroomSection({ brideGrooms, invitation }) {
                                     ? `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`
                                     : (groom.father_name || groom.mother_name || '')}
                             </p>
+                            <p className="mu-player-bio" style={{ fontSize: '0.74rem', color: 'var(--mu-text-secondary)', margin: '8px 0 12px 0', lineHeight: '1.4' }}>
+                                {groom.bio}
+                            </p>
                             {groom.instagram && (
                                 <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="mu-player-ig">
                                     <i className="fab fa-instagram" />
                                 </a>
                             )}
                         </div>
-                        <div className="mu-player-stats">
-                            <div className="mu-stat-item"><span className="mu-stat-val">99</span><span className="mu-stat-label">LOVE</span></div>
-                            <div className="mu-stat-item"><span className="mu-stat-val">95</span><span className="mu-stat-label">PASS</span></div>
-                            <div className="mu-stat-item"><span className="mu-stat-val">100</span><span className="mu-stat-label">LOY</span></div>
-                        </div>
                     </Reveal>
                 )}
 
-                <div className="mu-couple-vs">VS</div>
+                <div className="mu-couple-crest-divider" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '15px 0' }}>
+                    <CrestIcon size={48} />
+                </div>
 
                 {/* Bride Player Card */}
                 {bride.full_name && (
                     <Reveal variant="right" className="mu-player-card">
-                        <div className="mu-player-card__badge">
-                            <span className="mu-player-card__number">09</span>
-                            <span className="mu-player-card__pos">MID</span>
+                        <div className="mu-player-card__badge" style={{ padding: '4px 8px' }}>
+                            <span className="mu-player-card__number">#09</span>
                         </div>
                         {globalShowPhotos && bride.photo && (
                             <div className="mu-player-photo-wrap">
@@ -502,16 +530,14 @@ function BrideGroomSection({ brideGrooms, invitation }) {
                                     ? `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`
                                     : (bride.father_name || bride.mother_name || '')}
                             </p>
+                            <p className="mu-player-bio" style={{ fontSize: '0.74rem', color: 'var(--mu-text-secondary)', margin: '8px 0 12px 0', lineHeight: '1.4' }}>
+                                {bride.bio}
+                            </p>
                             {bride.instagram && (
                                 <a href={`https://instagram.com/${bride.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="mu-player-ig">
                                     <i className="fab fa-instagram" />
                                 </a>
                             )}
-                        </div>
-                        <div className="mu-player-stats">
-                            <div className="mu-stat-item"><span className="mu-stat-val">100</span><span className="mu-stat-label">BEAU</span></div>
-                            <div className="mu-stat-item"><span className="mu-stat-val">98</span><span className="mu-stat-label">CHEM</span></div>
-                            <div className="mu-stat-item"><span className="mu-stat-val">99</span><span className="mu-stat-label">FAIT</span></div>
                         </div>
                     </Reveal>
                 )}
@@ -531,8 +557,8 @@ function EventSection({ events, invitation }) {
     return (
         <section id="event" className="mu-section">
             <Reveal>
-                <h2 className="mu-section-title">{isEn ? "MATCH DAY DETAILS" : "RANGKAIAN ACARA"}</h2>
-                <p className="mu-section-subtitle">Official Fixture</p>
+                <h2 className="mu-section-title">{isEn ? "WEDDING FIxture" : "ACARA PERNIKAHAN"}</h2>
+                <p className="mu-section-subtitle">{isEn ? "Wedding Schedule" : "Jadwal Rangkaian Acara"}</p>
             </Reveal>
 
             {list.map((evt, idx) => {
@@ -540,11 +566,11 @@ function EventSection({ events, invitation }) {
                 const isEven = idx % 2 === 0;
                 
                 // Akad = First Half, Resepsi = Second Half, others = Extra Time
-                let periodName = isEn ? "EXTRA TIME" : "ACARA TAMBAHAN";
+                let periodName = isEn ? "EVENT" : "ACARA";
                 if (evt.event_type === 'akad' || evt.event_name?.toLowerCase().includes('akad')) {
-                    periodName = isEn ? "FIRST HALF" : "FIRST HALF: AKAD NIKAH";
+                    periodName = isEn ? "AKAD NIKAH" : "AKAD NIKAH";
                 } else if (evt.event_type === 'resepsi' || evt.event_name?.toLowerCase().includes('resepsi')) {
-                    periodName = isEn ? "SECOND HALF" : "SECOND HALF: RESEPSI PERNIKAHAN";
+                    periodName = isEn ? "RESEPSI" : "RESEPSI PERNIKAHAN";
                 }
 
                 return (
@@ -564,7 +590,7 @@ function EventSection({ events, invitation }) {
                         <div className="mu-event-row">
                             <i className="far fa-clock mu-event-icon" />
                             <div>
-                                {isEn ? "Kick-off" : "Pukul"}: {formatTime(evt.start_time)} {evt.end_time ? `- ${formatTime(evt.end_time)}` : ' - Selesai'} {evt.timezone || 'WIB'}
+                                {isEn ? "Time" : "Pukul"}: {formatTime(evt.start_time)} {evt.end_time ? `- ${formatTime(evt.end_time)}` : ' - Selesai'} {evt.timezone || 'WIB'}
                             </div>
                         </div>
 
@@ -578,7 +604,7 @@ function EventSection({ events, invitation }) {
 
                         {evt.gmaps_link && (
                             <a href={evt.gmaps_link} target="_blank" rel="noreferrer" className="mu-event-btn">
-                                🗺️ {isEn ? "Stadium Directions" : "Peta Lokasi Stadion"}
+                                🗺️ {isEn ? "View Location Map" : "Buka Peta Lokasi"}
                             </a>
                         )}
                     </Reveal>
@@ -614,7 +640,7 @@ function LiveStreamingSection({ events, invitation }) {
         <section id="livestream" className="mu-section" style={{ textAlign: 'center' }}>
             <Reveal>
                 <h2 className="mu-section-title">{isEn ? "LIVE BROADCAST" : "SIARAN LANGSUNG"}</h2>
-                <p className="mu-section-subtitle">MUTV Special Broadcast</p>
+                <p className="mu-section-subtitle">{isEn ? "Virtual Streaming" : "Siaran Streaming Langsung"}</p>
                 
                 <div style={{ margin: '30px 0' }}>
                     {streamsList.map((stream, idx) => (
@@ -639,20 +665,18 @@ function LoveStorySection({ loveStories, invitation }) {
     return (
         <section id="love_story" className="mu-section">
             <Reveal>
-                <h2 className="mu-section-title">{isEn ? "MATCH HIGHLIGHTS" : "KISAH CINTA KAMI"}</h2>
-                <p className="mu-section-subtitle">Match Commentary Timeline</p>
+                <h2 className="mu-section-title">{isEn ? "OUR LOVE STORY" : "KISAH CINTA KAMI"}</h2>
+                <p className="mu-section-subtitle">{isEn ? "Our Love Journey" : "Perjalanan Kasih Kami"}</p>
             </Reveal>
 
             <div className="mu-timeline">
                 {list.map((story, idx) => {
-                    // Match Minute marker simulation (e.g. 15', 45', 75', 90')
-                    const minutes = [ "12'", "45'", "75'", "90'", "120'" ];
-                    const marker = minutes[idx % minutes.length];
+                    const marker = "❤️";
                     const isEven = idx % 2 === 0;
 
                     return (
                         <div key={story.id || idx} className="mu-timeline-node">
-                            <span className="mu-timeline-marker">{marker}</span>
+                            <span className="mu-timeline-marker" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>{marker}</span>
                             <Reveal variant={isEven ? 'left' : 'right'} className="mu-timeline-card">
                                 <div className="mu-timeline-header">
                                     <span className="mu-timeline-time">{story.title}</span>
@@ -766,20 +790,20 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
     return (
         <section id="rsvp" className="mu-section">
             <Reveal>
-                <h2 className="mu-section-title">{isEn ? "BOOK MATCH PASS" : "KONFIRMASI PRESENSI"}</h2>
-                <p className="mu-section-subtitle">Ticket &amp; Supporter Greetings</p>
+                <h2 className="mu-section-title">{isEn ? "RSVP & WISHES" : "KONFIRMASI KEHADIRAN"}</h2>
+                <p className="mu-section-subtitle">{isEn ? "Kindly respond to our invitation" : "Mohon Konfirmasi Kehadiran & Doa Restu Anda"}</p>
             </Reveal>
 
             {(enableRsvp || enableWishes) && (
                 <Reveal variant="zoom" className="mu-ticket">
                     <div className="mu-ticket-header">
-                        <h4 className="mu-ticket-title">🏟️ {isEn ? "MATCH TICKETING SERVICE" : "PEMESANAN TIKET ACARA"}</h4>
+                        <h4 className="mu-ticket-title">✉️ {isEn ? "ATTENDANCE CONFIRMATION" : "KONFIRMASI KEHADIRAN"}</h4>
                     </div>
                     
                     <form onSubmit={handleSubmit} className="mu-ticket-body">
                         {/* Name Field */}
                         <div className="mu-field">
-                            <label className="mu-label">{isEn ? "Player/Guest Name" : "Nama Tamu Pemegang Tiket"}</label>
+                            <label className="mu-label">{isEn ? "Guest Name" : "Nama Lengkap"}</label>
                             <input
                                 type="text"
                                 className="mu-input"
@@ -794,28 +818,28 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                         {/* RSVP Attendance */}
                         {enableRsvp && (
                             <div className="mu-field">
-                                <label className="mu-label">{isEn ? "Choose Squad Position" : "Konfirmasi Kehadiran Tribun"}</label>
+                                <label className="mu-label">{isEn ? "Confirmation" : "Konfirmasi Kehadiran"}</label>
                                 <div className="mu-rsvp-options">
                                     <button
                                         type="button"
                                         className={`mu-rsvp-btn ${attendance === 'hadir' ? 'is-active' : ''}`}
                                         onClick={() => setAttendance('hadir')}
                                     >
-                                        ⚽ {isEn ? "ATTEND" : "HADIR"}
+                                        ✨ {isEn ? "ATTEND" : "HADIR"}
                                     </button>
                                     <button
                                         type="button"
                                         className={`mu-rsvp-btn ${attendance === 'masih_ragu' ? 'is-active' : ''}`}
                                         onClick={() => setAttendance('masih_ragu')}
                                     >
-                                        📋 {isEn ? "BENCH" : "BENCH / RAGU"}
+                                        📋 {isEn ? "UNSURE" : "MASIH RAGU"}
                                     </button>
                                     <button
                                         type="button"
                                         className={`mu-rsvp-btn ${attendance === 'tidak_hadir' ? 'is-active' : ''}`}
                                         onClick={() => setAttendance('tidak_hadir')}
                                     >
-                                        ❌ {isEn ? "MISS" : "ABSEN"}
+                                        ❌ {isEn ? "ABSENT" : "TIDAK HADIR"}
                                     </button>
                                 </div>
                             </div>
@@ -824,7 +848,7 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                         {/* Qty Stepper */}
                         {enableRsvp && attendance === 'hadir' && (
                             <div className="mu-field">
-                                <label className="mu-label">{isEn ? "Ticket Quantity (Pax)" : "Jumlah Alokasi Tiket (Pax)"}</label>
+                                <label className="mu-label">{isEn ? "Number of Guests" : "Jumlah Tamu"}</label>
                                 <div className="mu-qty">
                                     <button type="button" className="mu-qty-btn" onClick={() => setNumGuests(Math.max(1, numGuests - 1))}>−</button>
                                     <span className="mu-qty-val">{numGuests}</span>
@@ -836,12 +860,12 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                         {/* Message field */}
                         {enableWishes && (
                             <div className="mu-field">
-                                <label className="mu-label">{isEn ? "Supporter Chants & Greetings" : "Pesan Dukungan & Chants Restu"}</label>
+                                <label className="mu-label">{isEn ? "Doa Restu & Wishes" : "Doa Restu & Ucapan"}</label>
                                 <textarea
                                     className="mu-input"
                                     rows="3"
                                     required={!enableRsvp}
-                                    placeholder={isEn ? "Send your chants/wishes..." : "Tuliskan doa terbaik untuk Starting XI di pelaminan..."}
+                                    placeholder={isEn ? "Write your wishes..." : "Tuliskan doa & ucapan terbaik Anda..."}
                                     value={message}
                                     onChange={e => setMessage(e.target.value)}
                                 />
@@ -849,12 +873,12 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                         )}
 
                         <button type="submit" disabled={isSubmitting} className="mu-submit-btn">
-                            🎫 {isSubmitting ? (isEn ? "SUBMITTING..." : "MENGIRIM TIKET...") : (isEn ? "CONFIRM MATCH TICKET" : "KONFIRMASI TIKET MASUK")}
+                            🎫 {isSubmitting ? (isEn ? "SUBMITTING..." : "MENGIRIM...") : (isEn ? "CONFIRM ATTENDANCE" : "KIRIM KONFIRMASI")}
                         </button>
 
                         {success && (
                             <p style={{ color: '#27ae60', fontSize: '0.72rem', fontWeight: 'bold', textAlign: 'center', marginTop: '12px', margin: 0 }}>
-                                🎉 {isEn ? "Ticket confirmed successfully!" : "Tiket & Restu berhasil dikonfirmasi!"}
+                                🎉 {isEn ? "Attendance confirmed successfully!" : "Konfirmasi kehadiran berhasil dikirim!"}
                             </p>
                         )}
                     </form>
@@ -864,12 +888,12 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
             {/* Wishes/Chants tribune */}
             {enableWishes && chantsList.length > 0 && (
                 <div className="mu-chants">
-                    <h3 className="mu-chants-title">📢 {isEn ? "TRIBUNE CHANTS & greetings" : "SUARA SUPORTER DARI TRIBUN"}</h3>
+                    <h3 className="mu-chants-title">📢 {isEn ? "Wishes & Prayers" : "Doa Restu & Ucapan Tamu"}</h3>
                     <div className="mu-chants-list">
                         {chantsList.map((w, idx) => (
                             <div key={idx} className="mu-chant-card">
                                 <div className="mu-chant-sender">
-                                    <span>🚩</span>
+                                    <span>✨</span>
                                     <span>{w.sender_name}</span>
                                 </div>
                                 <p className="mu-chant-msg">{w.message}</p>
@@ -922,14 +946,14 @@ function BankSection({ bankAccounts, invitation }) {
     return (
         <section id="bank" className="mu-section">
             <Reveal>
-                <h2 className="mu-section-title">{isEn ? "TRANSFER WINDOW" : "DOMPET SUPORTER"}</h2>
-                <p className="mu-section-subtitle">Sponsorship / Amplop Digital</p>
+                <h2 className="mu-section-title">{isEn ? "DIGITAL GIFT" : "KADO DIGITAL"}</h2>
+                <p className="mu-section-subtitle">{isEn ? "Wedding Gift / E-Wallet" : "Dompet Digital / Amplop Pernikahan"}</p>
             </Reveal>
 
             <div className="mu-bank-grid">
                 {list.map((acc, idx) => (
                     <Reveal key={idx} variant="zoom" className="mu-bank-card">
-                        <span className="mu-bank-badge">{acc.bank_name || "Official Club Bank"}</span>
+                        <span className="mu-bank-badge">{acc.bank_name || "Official Bank"}</span>
                         <p className="mu-bank-acc">{acc.account_number}</p>
                         <p className="mu-bank-holder">a.n. {acc.account_holder || acc.account_name}</p>
                         <button type="button" className="mu-bank-copy-btn" onClick={() => copyToClipboard(acc.account_number, idx)}>
@@ -1039,13 +1063,13 @@ function Navigation({
                 let label = isEn ? 'Home' : 'Beranda';
 
                 if (key === 'opening') { icon = 'fas fa-door-open'; label = isEn ? 'Opening' : 'Pembuka'; }
-                else if (key === 'bride_groom') { icon = 'fas fa-users'; label = isEn ? 'Squad' : 'Mempelai'; }
-                else if (key === 'event') { icon = 'fas fa-calendar-alt'; label = isEn ? 'Fixture' : 'Acara'; }
-                else if (key === 'love_story') { icon = 'fas fa-history'; label = isEn ? 'Highlights' : 'Kisah'; }
-                else if (key === 'gallery') { icon = 'fas fa-images'; label = isEn ? 'Snapshots' : 'Galeri'; }
-                else if (key === 'rsvp') { icon = 'fas fa-ticket-alt'; label = isEn ? 'Match Pass' : 'RSVP'; }
-                else if (key === 'bank') { icon = 'fas fa-wallet'; label = isEn ? 'Transfer' : 'Amplop'; }
-                else if (key === 'closing') { icon = 'fas fa-flag-checkered'; label = isEn ? 'FT' : 'Penutup'; }
+                else if (key === 'bride_groom') { icon = 'fas fa-users'; label = isEn ? 'Couple' : 'Mempelai'; }
+                else if (key === 'event') { icon = 'fas fa-calendar-alt'; label = isEn ? 'Events' : 'Acara'; }
+                else if (key === 'love_story') { icon = 'fas fa-history'; label = isEn ? 'Story' : 'Kisah'; }
+                else if (key === 'gallery') { icon = 'fas fa-images'; label = isEn ? 'Gallery' : 'Galeri'; }
+                else if (key === 'rsvp') { icon = 'fas fa-ticket-alt'; label = isEn ? 'RSVP' : 'RSVP'; }
+                else if (key === 'bank') { icon = 'fas fa-wallet'; label = isEn ? 'Gift' : 'Kado'; }
+                else if (key === 'closing') { icon = 'fas fa-flag-checkered'; label = isEn ? 'Closing' : 'Penutup'; }
 
                 unique.push({ id: key, icon, label });
             }
@@ -1506,7 +1530,7 @@ export default function DynamicIndex({
                         <div style={{ position: 'fixed', top: '15px', left: '50%', transform: 'translateX(-50%)', width: '90%', maxWidth: '380px', height: '40px', background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(8px)', border: '1px solid var(--mu-border)', borderRadius: '25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', boxSizing: 'border-box', zIndex: 997, boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#888', fontSize: '0.74rem' }}>
                                 <span style={{ color: 'var(--mu-primary)', display: 'flex' }}>{ICONS.search}</span>
-                                <span>{isEn ? "Search squad lineup..." : "Cari info pertandingan..."}</span>
+                                <span>{isEn ? "Search details..." : "Cari informasi..."}</span>
                             </div>
                             {enableQr && activeGuest && (
                                 <span className="mu-search-qr-btn" onClick={() => setShowQr(true)}>
@@ -1563,7 +1587,7 @@ export default function DynamicIndex({
                 {enableQr && showQr && activeGuest && (
                     <div className="mu-qr-modal-overlay" onClick={() => setShowQr(false)}>
                         <div className="mu-qr-modal-card" onClick={e => e.stopPropagation()}>
-                            <h3 className="mu-qr-modal-title">{isEn ? "Match Day Pass" : "Tiket Masuk Presensi"}</h3>
+                            <h3 className="mu-qr-modal-title">{isEn ? "VVIP Guest Pass" : "Pass Masuk VVIP"}</h3>
                             <p className="mu-qr-modal-guest-name">{activeGuest.name}</p>
                             <div className="mu-qr-code-box">
                                 <img
@@ -1573,7 +1597,7 @@ export default function DynamicIndex({
                                 />
                             </div>
                             <p className="mu-qr-modal-footer">
-                                {isEn ? "Show this match pass QR at the stadium gates" : "Tunjukkan barcode tiket ini ke petugas gerbang stadion"}
+                                {isEn ? "Show this QR code at the guest registration desk" : "Tunjukkan kode QR ini pada meja registrasi tamu"}
                             </p>
                             <button onClick={() => setShowQr(false)} className="mu-qr-close-btn">
                                 {isEn ? "Close" : "Tutup"}

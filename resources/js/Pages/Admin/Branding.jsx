@@ -14,6 +14,8 @@ export default function Branding({ settings }) {
         brand_name: settings?.brand_name || '',
         brand_logo: null,
         remove_logo: false,
+        site_title: settings?.site_title || '',
+        site_motto: settings?.site_motto || '',
     });
     const [preview, setPreview] = useState(null);
 
@@ -95,6 +97,34 @@ export default function Branding({ settings }) {
                         />
                         {errors.brand_name && <p className="text-xs text-red-500 mt-1">{errors.brand_name}</p>}
                         <p className="text-xs text-[#bbb] mt-1.5">Nama ini akan ditampilkan di halaman landing page dan dashboard user Anda.</p>
+                    </div>
+
+                    {/* Site Title */}
+                    <div>
+                        <label className="block text-sm font-bold text-[#333] mb-2">Judul Website (Meta Title)</label>
+                        <input
+                            type="text"
+                            value={data.site_title}
+                            onChange={e => setData('site_title', e.target.value)}
+                            className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                            placeholder="Contoh: Sakinah - Jasa Undangan Digital Murah Premium"
+                        />
+                        {errors.site_title && <p className="text-xs text-red-500 mt-1">{errors.site_title}</p>}
+                        <p className="text-xs text-[#bbb] mt-1.5">Judul ini akan menjadi nama tab browser dan judul utama ketika link website Anda dibagikan di WhatsApp.</p>
+                    </div>
+
+                    {/* Site Motto / Description */}
+                    <div>
+                        <label className="block text-sm font-bold text-[#333] mb-2">Motto / Deskripsi Website (Meta Description)</label>
+                        <textarea
+                            value={data.site_motto}
+                            onChange={e => setData('site_motto', e.target.value)}
+                            rows={3}
+                            className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none resize-none"
+                            placeholder="Contoh: Buat undangan pernikahan digital elegan dengan mudah, cepat, dan murah. Tersedia banyak pilihan tema premium menarik."
+                        />
+                        {errors.site_motto && <p className="text-xs text-red-500 mt-1">{errors.site_motto}</p>}
+                        <p className="text-xs text-[#bbb] mt-1.5">Moto/deskripsi ini akan ditampilkan di bawah judul ketika link website Anda dibagikan di WhatsApp.</p>
                     </div>
 
                     {/* Preview */}

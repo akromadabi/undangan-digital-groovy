@@ -36,10 +36,14 @@ class ResellerSettingsController extends Controller
         $request->validate([
             'brand_name' => 'required|string|max:100',
             'brand_logo' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
+            'site_title' => 'nullable|string|max:255',
+            'site_motto' => 'nullable|string|max:1000',
         ]);
 
         $settings = $this->getSettings();
         $settings->brand_name = $request->brand_name;
+        $settings->site_title = $request->site_title;
+        $settings->site_motto = $request->site_motto;
 
         if ($request->hasFile('brand_logo')) {
             // Delete old logo

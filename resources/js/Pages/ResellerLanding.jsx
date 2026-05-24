@@ -210,9 +210,22 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
         return () => window.removeEventListener('scroll', h);
     }, []);
 
+    const siteTitle = reseller.site_title || `${reseller.brand_name} — Undangan Digital Premium`;
+    const siteMotto = reseller.site_motto || 'Desain elegan, fitur lengkap, dan mudah dibagikan. Buat undangan pernikahan Anda dalam hitungan menit.';
+
     return (
         <>
-            <Head title={`${reseller.brand_name} — Undangan Digital Premium`} />
+            <Head>
+                <title>{siteTitle}</title>
+                <meta name="description" content={siteMotto} />
+                <meta property="og:title" content={siteTitle} />
+                <meta property="og:description" content={siteMotto} />
+                {reseller.brand_logo && <meta property="og:image" content={reseller.brand_logo} />}
+                <meta property="og:url" content={reseller.reseller_url} />
+                <meta name="twitter:title" content={siteTitle} />
+                <meta name="twitter:description" content={siteMotto} />
+                {reseller.brand_logo && <meta name="twitter:image" content={reseller.brand_logo} />}
+            </Head>
 
             {/* ═══ NAVBAR ═══ */}
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
@@ -346,7 +359,7 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
                     <div id="reseller-theme-scroll" className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         {themes.map((theme) => (
                             <div key={theme.id} className={`group relative rounded-2xl border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex-shrink-0 w-[200px] sm:w-[240px] snap-start ${T.name === 'elegant' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
-                                <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
+                                <div className="aspect-[3/4] bg-gray-100 overflow-hidden relative">
                                     {theme.thumbnail ? (
                                         <img src={getThumbnailUrl(theme.thumbnail)} alt={theme.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
@@ -356,6 +369,15 @@ export default function ResellerLanding({ reseller, plans, themes = [] }) {
                                             </svg>
                                         </div>
                                     )}
+                                    {/* Floating Actions */}
+                                    <div className="absolute right-3 bottom-3 flex flex-row gap-2 opacity-100 z-10">
+                                        <a href={theme.preview_url || '#'} target="_blank" rel="noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-lg text-gray-700 hover:text-gray-900 hover:scale-110 transition-all" title="Lihat Contoh">
+                                            <Icon d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-4 h-4" />
+                                        </a>
+                                        <a href={`${reseller.reseller_url || ''}/register?ref=${reseller.ref}&theme=${theme.slug}`} className={`w-9 h-9 flex items-center justify-center rounded-full text-white shadow-lg hover:scale-110 transition-all bg-gradient-to-tr ${T.accentGradient}`} title="Order Tema">
+                                            <Icon d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" className="w-4 h-4" />
+                                        </a>
+                                    </div>
                                 </div>
                                 <div className="p-4">
                                     <div className="flex items-start justify-between gap-2">

@@ -21,13 +21,28 @@ class OtpVerificationController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasVerifiedEmail()) {
+        // TEMPORARY: Bypass OTP/Email verification by marking it as verified immediately.
+        if (!$user->hasVerifiedEmail()) {
+            $user->forceFill([
+                'email_verified_at' => now(),
+                'otp_code' => null,
+                'otp_expires_at' => null,
+            ])->save();
+        }
+
+        if ($user->role === 'super_admin') {
+            return redirect()->intended('/super-admin');
+        }
+
+        if ($user->role === 'admin') {
+            return redirect()->intended('/admin');
+        }
+
+        if ($user->onboardingComplete()) {
             return redirect()->route('dashboard');
         }
 
-        return Inertia::render('Auth/VerifyOtp', [
-            'phoneHint' => $user->phone ? $this->maskPhone($user->phone) : null,
-        ]);
+        return redirect()->route('wizard.link');
     }
 
     /**
