@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 import WizardLayout from '@/Layouts/WizardLayout';
 import { Instagram, Youtube, Facebook, Twitter, Plus, X, Globe } from 'lucide-react';
@@ -13,7 +13,7 @@ const SOCMED_OPTIONS = [
 
 const defaultBrideGroom = {
     full_name: '', nickname: '', father_name: '', mother_name: '',
-    gender: 'wanita', bio: '', instagram: '', tiktok: '', twitter: '', facebook: '', youtube: '',
+    gender: 'wanita', instagram: '', tiktok: '', twitter: '', facebook: '', youtube: '',
 };
 
 export default function Profile({ step, brideGrooms }) {
@@ -96,13 +96,7 @@ export default function Profile({ step, brideGrooms }) {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600 mb-1.5">Bio</label>
-                                    <textarea value={data.bride_grooms[index].bio || ''}
-                                        onChange={(e) => updateField(index, 'bio', e.target.value)}
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none"
-                                        rows={3} />
-                                </div>
+
 
                                 {/* Social Media Section */}
                                 <div className="pt-2 border-t border-gray-100">
@@ -170,10 +164,16 @@ export default function Profile({ step, brideGrooms }) {
                     ))}
                 </div>
 
-                <button type="submit" disabled={processing}
-                    className="w-full mt-6 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
-                    Kirim
-                </button>
+                <div className="flex gap-4 mt-6">
+                    <button type="button" onClick={() => router.visit(route('wizard.link'))}
+                        className="flex-1 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-lg transition-all text-center">
+                        ← Kembali
+                    </button>
+                    <button type="submit" disabled={processing}
+                        className="flex-[2] py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
+                        Lanjutkan →
+                    </button>
+                </div>
             </form>
         </WizardLayout>
     );

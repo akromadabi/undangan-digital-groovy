@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import WizardLayout from '@/Layouts/WizardLayout';
 
 const defaultEvent = {
@@ -227,10 +227,16 @@ export default function Events({ step, events }) {
                     + Tambah Acara
                 </button>
 
-                <button type="submit" disabled={processing}
-                    className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
-                    Lanjutkan →
-                </button>
+                <div className="flex gap-4 mt-6">
+                    <button type="button" onClick={() => router.visit(route('wizard.profile'))}
+                        className="flex-1 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-lg transition-all text-center">
+                        ← Kembali
+                    </button>
+                    <button type="submit" disabled={processing}
+                        className="flex-[2] py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
+                        Lanjutkan →
+                    </button>
+                </div>
             </form>
         </WizardLayout>
     );

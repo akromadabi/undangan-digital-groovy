@@ -67,12 +67,16 @@ export default function Template({ step, themes, selectedThemeId }) {
                 ))}
             </div>
 
-            {selected && (
-                <button onClick={handleSubmit} disabled={submitting}
-                    className="w-full mt-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
+            <div className="flex gap-4 mt-8">
+                <button type="button" onClick={() => router.visit(route('wizard.events'))}
+                    className="flex-1 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-lg transition-all text-center">
+                    ← Kembali
+                </button>
+                <button onClick={handleSubmit} disabled={!selected || submitting}
+                    className="flex-[2] py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
                     {submitting ? 'Memproses...' : 'Buat Undangan Saya'}
                 </button>
-            )}
+            </div>
         </WizardLayout>
     );
 }
