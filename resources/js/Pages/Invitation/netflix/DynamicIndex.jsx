@@ -354,21 +354,6 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
 
     return (
         <section id={id || "bride_groom"} className="nf-couple">
-            <Reveal>
-                <div className="nf-section-header">
-                    <p className="nf-section-header__quote">
-                        &ldquo;{t('invitation.save_the_date') === 'Save The Date'
-                            ? 'And of His signs is that He created for you from yourselves mates that you may find tranquility in them; and He placed between you affection and mercy. Indeed in that are signs for a people who give thought.'
-                            : 'Dan di antara tanda-tanda kekuasaan-Nya diciptakan-Nya untukmu pasangan hidup dari jenismu sendiri supaya kamu dapat ketenangan hati dan dijadikannya kasih sayang di antara kamu.'}&rdquo;
-                    </p>
-                    <p className="nf-section-header__source">
-                        {t('invitation.save_the_date') === 'Save The Date'
-                            ? <><span className="nf-badge">Holy Qur&apos;an Surah</span> Ar-Rum: 21</>
-                            : <><span className="nf-badge">Qur&apos;an Surah</span> Ar-Rum: 21</>}
-                    </p>
-                </div>
-            </Reveal>
-
             <Reveal delay={100}>
                 <h3 className="nf-section-title">
                     {t('invitation.save_the_date') === 'Save The Date' ? <><span className="nf-badge">Groom</span> &amp; Bride</> : <><span className="nf-badge">Kedua</span> Mempelai</>}
@@ -1097,7 +1082,7 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
         livestream: 'fas fa-video',
     };
 
-    const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
+    const validKeys = ['opening', 'bride_groom', 'event', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
 
     // Resolve active sections (prioritize DB sections, fallback to dynamic sections list if empty)
     const resolvedSections = [];
@@ -1132,10 +1117,6 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
             fallbacks.push({ section_key: 'livestream' });
         }
 
-        const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
-        if (primaryEvent?.event_date) {
-            fallbacks.push({ section_key: 'countdown' });
-        }
         if (loveStories?.length > 0) {
             fallbacks.push({ section_key: 'love_story' });
         }

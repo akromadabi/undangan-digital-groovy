@@ -1069,8 +1069,9 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                     </div>
                                 )}
                                 {/* Fullscreen control — separate circle above Auto Scroll */}
-                                <div className="relative group">
+                                <div className="relative group lx-fullscreen-btn-wrapper">
                                     <button onClick={toggleFullscreen}
+                                        title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
                                         className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-300"
                                         style={{
                                             backgroundColor: isFullscreen ? colors.primary : '#fff',
