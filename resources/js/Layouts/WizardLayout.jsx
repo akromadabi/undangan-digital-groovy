@@ -16,7 +16,7 @@ export default function WizardLayout({ children, currentStep, title }) {
             <header className="bg-white border-b border-gray-200 py-3 px-4">
                 <div className="max-w-4xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">G</div>
+                        <div className="w-8 h-8 bg-gradient-to-br from-[#E5654B] to-[#c24b33] rounded-lg flex items-center justify-center text-white font-bold text-sm">G</div>
                         <span className="font-semibold text-gray-800 hidden sm:block">Groovy</span>
                     </div>
                     <UserMenu />
@@ -31,20 +31,20 @@ export default function WizardLayout({ children, currentStep, title }) {
                             <div key={step.number} className="flex items-center">
                                 <div className="flex flex-col items-center">
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${step.number < currentStep
-                                            ? 'bg-emerald-500 text-white'
+                                            ? 'bg-[#E5654B] text-white'
                                             : step.number === currentStep
-                                                ? 'bg-emerald-500 text-white ring-4 ring-emerald-100'
+                                                ? 'bg-[#E5654B] text-white ring-4 ring-orange-100'
                                                 : 'bg-gray-200 text-gray-400'
                                         }`}>
                                         {step.number < currentStep ? '✓' : step.number}
                                     </div>
-                                    <span className={`mt-1.5 text-xs font-medium ${step.number <= currentStep ? 'text-emerald-600' : 'text-gray-400'
+                                    <span className={`mt-1.5 text-xs font-medium ${step.number <= currentStep ? 'text-[#c24b33]' : 'text-gray-400'
                                         }`}>
                                         {step.label}
                                     </span>
                                 </div>
                                 {index < steps.length - 1 && (
-                                    <div className={`hidden sm:block w-12 lg:w-20 h-0.5 mx-2 ${step.number < currentStep ? 'bg-emerald-500' : 'bg-gray-200'
+                                    <div className={`hidden sm:block w-12 lg:w-20 h-0.5 mx-2 ${step.number < currentStep ? 'bg-[#E5654B]' : 'bg-gray-200'
                                         }`} />
                                 )}
                             </div>

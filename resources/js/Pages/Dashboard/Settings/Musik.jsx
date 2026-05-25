@@ -110,7 +110,7 @@ export default function Musik({ invitation, platformMusic = [] }) {
             <Head title="Musik" />
             <div className="max-w-2xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm flex items-center gap-2">
                         <CheckCircle size={16} /> {flash.success}
                     </div>
                 )}
@@ -220,7 +220,7 @@ export default function Musik({ invitation, platformMusic = [] }) {
                         {uploadNotif && (
                             <div className={`rounded-xl p-4 flex items-start gap-3 text-sm ${uploadNotif.type === 'error'
                                 ? 'bg-red-50 border border-red-200 text-red-700'
-                                : 'bg-emerald-50 border border-emerald-200 text-emerald-700'}`}>
+                                : 'bg-orange-50 border border-orange-200 text-[#b03a24]'}`}>
                                 {uploadNotif.type === 'error' ? <AlertCircle size={18} className="flex-shrink-0 mt-0.5" /> : <CheckCircle size={18} className="flex-shrink-0 mt-0.5" />}
                                 <div className="flex-1">{uploadNotif.message}</div>
                                 <button type="button" onClick={() => setUploadNotif(null)} className="flex-shrink-0 opacity-50 hover:opacity-100">

@@ -5,7 +5,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 const statusConfig = {
     pending_manual: { label: 'Menunggu Upload Bukti', color: 'text-amber-600 bg-amber-50 border-amber-200', step: 2 },
     waiting_review: { label: 'Menunggu Konfirmasi Admin', color: 'text-blue-600 bg-blue-50 border-blue-200', step: 3 },
-    paid:           { label: 'Aktif', color: 'text-emerald-600 bg-emerald-50 border-emerald-200', step: 4 },
+    paid:           { label: 'Aktif', color: 'text-[#c24b33] bg-orange-50 border-orange-200', step: 4 },
     rejected:       { label: 'Ditolak', color: 'text-red-600 bg-red-50 border-red-200', step: 0 },
     cancelled:      { label: 'Dibatalkan', color: 'text-gray-500 bg-gray-50 border-gray-200', step: 0 },
 };
@@ -65,7 +65,7 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
 
                 {/* Flash Messages */}
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm flex items-center gap-2">
                         <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         {flash.success}
                     </div>
@@ -85,13 +85,13 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
                                 <div key={s.num} className="flex flex-col items-center gap-1.5 z-10">
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
                                         payment.status === 'rejected' && s.num <= 2 ? 'border-red-400 bg-red-50 text-red-600'
-                                        : done ? 'border-emerald-500 bg-emerald-500 text-white'
-                                        : active ? 'border-emerald-500 bg-white text-emerald-600'
+                                        : done ? 'border-[#E5654B] bg-[#E5654B] text-white'
+                                        : active ? 'border-[#E5654B] bg-white text-[#c24b33]'
                                         : 'border-gray-200 bg-white text-gray-400'
                                     }`}>
                                         {done ? <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg> : s.num}
                                     </div>
-                                    <span className={`text-[10px] font-medium text-center leading-tight max-w-[64px] ${active ? 'text-emerald-600' : 'text-gray-400'}`}>{s.label}</span>
+                                    <span className={`text-[10px] font-medium text-center leading-tight max-w-[64px] ${active ? 'text-[#c24b33]' : 'text-gray-400'}`}>{s.label}</span>
                                 </div>
                             );
                         })}
@@ -121,7 +121,7 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
                         </div>
                         <div className="flex justify-between py-2">
                             <span className="text-gray-600 font-semibold">Total Transfer</span>
-                            <span className="font-black text-lg text-emerald-600">{formatCurrency(payment.amount)}</span>
+                            <span className="font-black text-lg text-[#c24b33]">{formatCurrency(payment.amount)}</span>
                         </div>
                     </div>
                 </div>
@@ -138,9 +138,9 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
                         {bankAccounts && bankAccounts.length > 0 ? (
                             <div className="space-y-3 mt-2">
                                 <div className="bg-white rounded-xl px-4 py-3 flex justify-between items-center border border-blue-100 shadow-sm relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400"></div>
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#e87058]"></div>
                                     <span className="text-sm text-gray-500 font-semibold">Jumlah Transfer</span>
-                                    <span className="text-xl font-black text-emerald-600">{formatCurrency(payment.amount)}</span>
+                                    <span className="text-xl font-black text-[#c24b33]">{formatCurrency(payment.amount)}</span>
                                 </div>
 
                                 <div className="grid gap-3 pt-2">
@@ -172,7 +172,7 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
                                             href={getResellerWaLink()}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+                                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#E5654B] hover:bg-[#c24b33] text-white font-bold text-xs rounded-xl shadow-sm transition-all"
                                         >
                                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.739-1.456L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.45 5.489 0 9.952-4.43 9.955-9.885.002-2.643-1.019-5.127-2.87-6.983-1.852-1.855-4.316-2.877-6.97-2.878-5.49 0-9.953 4.43-9.957 9.886-.002 2.125.567 4.197 1.65 6.023L2.098 21.95l6.549-1.706c.001-.001 0 0 0 0z"/></svg>
                                             Hubungi Reseller (WA)
@@ -200,21 +200,21 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
                                 onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]); }}
                                 onClick={() => fileRef.current?.click()}
                                 className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                                    dragOver ? 'border-emerald-400 bg-emerald-50' : preview ? 'border-emerald-300 bg-emerald-50/30' : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/20'
+                                    dragOver ? 'border-[#e87058] bg-orange-50' : preview ? 'border-orange-300 bg-orange-50/30' : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/20'
                                 }`}>
                                 <input ref={fileRef} type="file" accept="image/*" className="hidden"
                                     onChange={(e) => handleFile(e.target.files[0])} />
                                 {preview ? (
                                     <div className="space-y-2">
                                         <img src={preview} alt="Preview" className="max-h-48 mx-auto rounded-lg object-contain" />
-                                        <p className="text-xs text-emerald-600 font-medium">Klik untuk ganti foto</p>
+                                        <p className="text-xs text-[#c24b33] font-medium">Klik untuk ganti foto</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
                                         <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto">
                                             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                         </div>
-                                        <p className="text-sm text-gray-500">Drag & drop atau <span className="text-emerald-600 font-semibold">klik di sini</span></p>
+                                        <p className="text-sm text-gray-500">Drag & drop atau <span className="text-[#c24b33] font-semibold">klik di sini</span></p>
                                         <p className="text-xs text-gray-400">JPG, PNG, WEBP — Maks. 5MB</p>
                                     </div>
                                 )}
@@ -222,7 +222,7 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
                             {errors.proof && <p className="text-red-500 text-xs">{errors.proof}</p>}
 
                             <button type="submit" disabled={!data.proof || processing}
-                                className="w-full py-3 bg-emerald-500 text-white rounded-xl font-semibold hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                                className="w-full py-3 bg-[#E5654B] text-white rounded-xl font-semibold hover:bg-[#c24b33] disabled:opacity-40 disabled:cursor-not-allowed transition-all">
                                 {processing ? 'Mengirim...' : 'Kirim Bukti Transfer'}
                             </button>
                         </form>
@@ -259,7 +259,7 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
                                     href={getResellerWaLink()}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#E5654B] hover:bg-[#c24b33] text-white font-bold text-xs rounded-xl shadow-sm transition-all"
                                 >
                                     <svg className="w-4.5 h-4.5 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.739-1.456L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.45 5.489 0 9.952-4.43 9.955-9.885.002-2.643-1.019-5.127-2.87-6.983-1.852-1.855-4.316-2.877-6.97-2.878-5.49 0-9.953 4.43-9.957 9.886-.002 2.125.567 4.197 1.65 6.023L2.098 21.95l6.549-1.706c.001-.001 0 0 0 0z"/></svg>
                                     Hubungi Reseller (WA)

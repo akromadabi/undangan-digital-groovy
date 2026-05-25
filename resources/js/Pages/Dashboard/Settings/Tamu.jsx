@@ -140,12 +140,16 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
     };
 
     const sendWaToGuest = (guest) => {
-        if (!guest.phone) return;
         const slug = invitation?.slug || '';
         const link = `${window.location.origin}/u/${slug}?to=${encodeURIComponent(guest.slug)}`;
         const msg = template.replace('{nama}', guest.name).replace('{link}', link);
-        const phone = guest.phone.replace(/^0/, '62').replace(/[^0-9]/g, '');
-        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        if (guest.phone) {
+            const phone = guest.phone.replace(/^0/, '62').replace(/[^0-9]/g, '');
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        } else {
+            // Open WA without number so user chooses contact manually
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+        }
     };
 
     // --- WA ---
@@ -175,7 +179,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
     const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     const statusColors = {
-        hadir: 'bg-emerald-100 text-emerald-700',
+        hadir: 'bg-orange-100 text-[#b03a24]',
         tidak_hadir: 'bg-red-100 text-red-700',
         belum_pasti: 'bg-amber-100 text-amber-700',
     };
@@ -195,7 +199,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
             <Head title="Tamu" />
             <div className="max-w-4xl mx-auto space-y-5">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm">
                         {flash.success}
                     </div>
                 )}
@@ -206,9 +210,9 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                         <div className="text-xl font-bold text-gray-800">{totalGuests}</div>
                         <div className="text-[10px] text-gray-500 mt-0.5">Total Tamu</div>
                     </div>
-                    <div className="bg-emerald-50 rounded-xl border border-emerald-100 p-3 text-center">
-                        <div className="text-xl font-bold text-emerald-600">{rsvpStats?.hadir || 0}</div>
-                        <div className="text-[10px] text-emerald-500 mt-0.5">RSVP Hadir</div>
+                    <div className="bg-orange-50 rounded-xl border border-orange-100 p-3 text-center">
+                        <div className="text-xl font-bold text-[#c24b33]">{rsvpStats?.hadir || 0}</div>
+                        <div className="text-[10px] text-[#E5654B] mt-0.5">RSVP Hadir</div>
                     </div>
                     <div className="bg-blue-50 rounded-xl border border-blue-100 p-3 text-center">
                         <div className="text-xl font-bold text-blue-600">{sentGuests.length}</div>
@@ -226,11 +230,11 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                         <button key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
                             className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all ${activeTab === tab.key
-                                ? 'bg-emerald-500 text-white shadow-sm'
+                                ? 'bg-[#E5654B] text-white shadow-sm'
                                 : 'text-gray-500 hover:bg-gray-50'
                                 }`}>
                             {tab.label}
-                            <span className={`ml-1 text-[10px] ${activeTab === tab.key ? 'text-emerald-100' : 'text-gray-400'}`}>
+                            <span className={`ml-1 text-[10px] ${activeTab === tab.key ? 'text-orange-100' : 'text-gray-400'}`}>
                                 {tab.count}
                             </span>
                         </button>
@@ -245,10 +249,10 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                             <div>
                                 <h3 className="font-bold text-gray-800">Daftar Tamu</h3>
                                 <p className="text-xs text-gray-400 mt-0.5">
-                                    {totalGuests}/{maxGuests} tamu &bull; Sisa kuota: <strong className={remaining <= 5 ? 'text-amber-600' : 'text-emerald-600'}>{remaining}</strong>
+                                    {totalGuests}/{maxGuests} tamu &bull; Sisa kuota: <strong className={remaining <= 5 ? 'text-amber-600' : 'text-[#c24b33]'}>{remaining}</strong>
                                 </p>
                                 <div className="w-48 h-1.5 bg-gray-100 rounded-full mt-2">
-                                    <div className="h-full bg-emerald-500 rounded-full transition-all"
+                                    <div className="h-full bg-[#E5654B] rounded-full transition-all"
                                         style={{ width: `${Math.min(100, (totalGuests / maxGuests) * 100)}%` }} />
                                 </div>
                             </div>
@@ -259,7 +263,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                     Template
                                 </button>
                                 <button onClick={() => { setShowForm(!showForm); setShowImport(false); }}
-                                    className="px-3 py-2 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600 transition-colors">
+                                    className="px-3 py-2 bg-[#E5654B] text-white rounded-xl text-sm font-medium hover:bg-[#c24b33] transition-colors">
                                     + Tambah
                                 </button>
                                 <button onClick={() => { setShowImport(!showImport); setShowForm(false); }}
@@ -271,32 +275,32 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
 
                         {/* Add Form */}
                         {showForm && (
-                            <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-emerald-200 p-6 space-y-4">
+                            <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-orange-200 p-6 space-y-4">
                                 <h4 className="font-bold text-gray-800 text-sm">Tambah Tamu Baru</h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 mb-1">Nama Tamu *</label>
                                         <input type="text" value={data.name} onChange={(e) => setData('name', e.target.value)}
                                             placeholder="Nama lengkap/panggilan"
-                                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300" required />
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300" required />
                                         {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-600 mb-1">No. WhatsApp</label>
+                                        <label className="block text-sm font-medium text-gray-600 mb-1">No. WhatsApp (Opsional)</label>
                                         <input type="text" value={data.phone} onChange={(e) => setData('phone', e.target.value)}
                                             placeholder="08xxxxxxxxxx"
-                                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300" />
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300" />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-600 mb-1">Grup / Kategori</label>
+                                        <label className="block text-sm font-medium text-gray-600 mb-1">Grup / Kategori (Opsional)</label>
                                         <input type="text" value={data.group_name} onChange={(e) => setData('group_name', e.target.value)}
                                             placeholder="Contoh: Keluarga, Kantor"
-                                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300" />
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300" />
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
                                     <button type="submit" disabled={processing}
-                                        className="px-6 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600 disabled:opacity-50">
+                                        className="px-6 py-2.5 bg-[#E5654B] text-white rounded-xl text-sm font-medium hover:bg-[#c24b33] disabled:opacity-50">
                                         {processing ? 'Menyimpan...' : 'Simpan'}
                                     </button>
                                     <button type="button" onClick={() => setShowForm(false)}
@@ -390,7 +394,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                                     </td>
                                                     <td className="px-1 sm:px-4 py-2 text-center">
                                                         {guest.is_opened ? (
-                                                            <span className="text-emerald-500 text-[10px] sm:text-xs font-medium">Dibuka</span>
+                                                            <span className="text-[#E5654B] text-[10px] sm:text-xs font-medium">Dibuka</span>
                                                         ) : guest.wa_sent ? (
                                                             <span className="text-blue-500 text-[10px] sm:text-xs font-medium">Terkirim</span>
                                                         ) : (
@@ -400,21 +404,19 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                                     <td className="px-1 sm:px-4 py-2">
                                                         <div className="flex items-center justify-center gap-0.5 sm:gap-1.5">
                                                             <button onClick={() => openGuestLink(guest)} title="Buka"
-                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
+                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600 sm:bg-transparent sm:text-blue-500 sm:hover:bg-blue-50 transition-colors flex-shrink-0">
                                                                 <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                                             </button>
-                                                            {guest.phone && (
-                                                                <button onClick={() => sendWaToGuest(guest)} title="WA"
-                                                                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-emerald-500 hover:bg-emerald-50 transition-colors">
-                                                                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.66 0-3.203-.51-4.484-1.375l-.316-.188-2.875.852.852-2.875-.188-.316A7.963 7.963 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" /></svg>
-                                                                </button>
-                                                            )}
+                                                            <button onClick={() => sendWaToGuest(guest)} title="Kirim WA"
+                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-orange-50 text-[#E5654B] sm:bg-transparent sm:hover:bg-orange-50 transition-colors flex-shrink-0">
+                                                                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                                                            </button>
                                                             <button onClick={() => { setEditGuest(guest); setShowEditModal(true); }} title="Edit"
-                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-amber-500 hover:bg-amber-50 transition-colors">
+                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-amber-50 text-amber-600 sm:bg-transparent sm:text-amber-500 sm:hover:bg-amber-50 transition-colors flex-shrink-0">
                                                                 <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                             </button>
                                                             <button onClick={() => handleDelete(guest.id)} title="Hapus"
-                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 transition-colors">
+                                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-red-50 text-red-500 sm:bg-transparent sm:text-red-400 sm:hover:bg-red-50 transition-colors flex-shrink-0">
                                                                 <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                             </button>
                                                         </div>
@@ -439,7 +441,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                     <button key={i}
                                         onClick={() => link.url && router.get(link.url, {}, { preserveScroll: true })}
                                         disabled={!link.url}
-                                        className={`px-3 py-1.5 rounded-lg text-sm ${link.active ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} ${!link.url ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                        className={`px-3 py-1.5 rounded-lg text-sm ${link.active ? 'bg-[#E5654B] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} ${!link.url ? 'opacity-40 cursor-not-allowed' : ''}`}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />
                                 ))}
@@ -453,9 +455,9 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                     <div className="space-y-4">
                         {/* Stats */}
                         <div className="grid grid-cols-3 gap-3">
-                            <div className="bg-emerald-50 rounded-xl p-4 text-center">
-                                <div className="text-3xl font-bold text-emerald-600">{rsvpStats?.hadir || 0}</div>
-                                <div className="text-xs text-emerald-500 mt-1 font-medium">Total Hadir</div>
+                            <div className="bg-orange-50 rounded-xl p-4 text-center">
+                                <div className="text-3xl font-bold text-[#c24b33]">{rsvpStats?.hadir || 0}</div>
+                                <div className="text-xs text-[#E5654B] mt-1 font-medium">Total Hadir</div>
                             </div>
                             <div className="bg-red-50 rounded-xl p-4 text-center">
                                 <div className="text-3xl font-bold text-red-600">{rsvpStats?.tidak_hadir || 0}</div>
@@ -526,7 +528,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                 <div className="text-xs text-gray-500 mt-1">Total Ucapan</div>
                             </div>
                             <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                                <div className="text-2xl font-bold text-emerald-600">
+                                <div className="text-2xl font-bold text-[#c24b33]">
                                     {wishList.filter(w => w.guest?.name).length}
                                 </div>
                                 <div className="text-xs text-gray-500 mt-1">Dari Tamu Terdaftar</div>
@@ -577,9 +579,9 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                     <h3 className="text-lg font-bold">Halaman Live Tamu</h3>
                                     <p className="text-white/50 text-sm mt-1">Buka halaman fullscreen untuk menampilkan tamu yang hadir secara realtime</p>
                                 </div>
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 rounded-full">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span className="text-xs text-emerald-300 font-semibold">Live</span>
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E5654B]/20 rounded-full">
+                                    <div className="w-2 h-2 rounded-full bg-[#e87058] animate-pulse" />
+                                    <span className="text-xs text-orange-300 font-semibold">Live</span>
                                 </div>
                             </div>
                             {liveUrl && (
@@ -596,7 +598,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                         {/* Stats */}
                         <div className="grid grid-cols-3 gap-3">
                             <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                                <div className="text-2xl font-bold text-emerald-600">{liveStats.checked_in}</div>
+                                <div className="text-2xl font-bold text-[#c24b33]">{liveStats.checked_in}</div>
                                 <div className="text-xs text-gray-500 mt-1">Sudah Hadir</div>
                             </div>
                             <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -611,11 +613,11 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
 
                         {/* New Guest Alert */}
                         {liveNewGuest && (
-                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3 animate-pulse">
-                                <span className="text-2xl"><svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg></span>
+                            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3 animate-pulse">
+                                <span className="text-2xl"><svg className="w-5 h-5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg></span>
                                 <div>
-                                    <div className="font-bold text-emerald-800">{liveNewGuest.name} baru saja hadir!</div>
-                                    <div className="text-xs text-emerald-600 mt-0.5">Check-in berhasil</div>
+                                    <div className="font-bold text-[#962c19]">{liveNewGuest.name} baru saja hadir!</div>
+                                    <div className="text-xs text-[#c24b33] mt-0.5">Check-in berhasil</div>
                                 </div>
                             </div>
                         )}
@@ -630,7 +632,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                 <label className="text-sm font-semibold text-gray-700">Delay Tampilan (detik)</label>
                                 <input type="number" min="1" max="30" value={liveForm.data.live_delay}
                                     onChange={(e) => liveForm.setData('live_delay', parseInt(e.target.value) || 3)}
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-emerald-300" />
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-orange-300" />
                             </div>
                             <div className="flex items-center justify-between">
                                 <div>
@@ -638,7 +640,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                     <div className="text-xs text-gray-400">Jumlah tamu hadir di halaman live</div>
                                 </div>
                                 <button type="button" onClick={() => liveForm.setData('live_counter', !liveForm.data.live_counter)}
-                                    className={`relative w-11 h-6 rounded-full transition-colors ${liveForm.data.live_counter ? 'bg-emerald-500' : 'bg-gray-300'}`}>
+                                    className={`relative w-11 h-6 rounded-full transition-colors ${liveForm.data.live_counter ? 'bg-[#E5654B]' : 'bg-gray-300'}`}>
                                     <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${liveForm.data.live_counter ? 'translate-x-5' : ''}`} />
                                 </button>
                             </div>
@@ -649,7 +651,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                     { value: 'celebration', label: 'Celebration', preview: 'bg-gradient-to-br from-[#E5654B] to-[#ff7b5e]' }].map(t => (
                                         <button key={t.value} type="button"
                                             onClick={() => liveForm.setData('live_template', t.value)}
-                                            className={`p-4 rounded-xl border-2 transition-all ${liveForm.data.live_template === t.value ? 'border-emerald-500 shadow-sm' : 'border-gray-200'}`}>
+                                            className={`p-4 rounded-xl border-2 transition-all ${liveForm.data.live_template === t.value ? 'border-[#E5654B] shadow-sm' : 'border-gray-200'}`}>
                                             <div className={`h-16 rounded-lg ${t.preview} mb-2`} />
                                             <div className="text-sm font-medium text-gray-800">{t.label}</div>
                                         </button>
@@ -657,7 +659,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                 </div>
                             </div>
                             <button type="submit" disabled={liveForm.processing}
-                                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
+                                className="w-full py-3 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
                                 {liveForm.processing ? 'Menyimpan...' : 'Simpan Pengaturan'}
                             </button>
                         </form>
@@ -670,7 +672,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                     {liveGuests.slice(0, 10).map((g, i) => (
                                         <div key={i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-sm font-bold text-emerald-600">
+                                                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-sm font-bold text-[#c24b33]">
                                                     {g.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <span className="text-sm font-medium text-gray-800">{g.name}</span>
@@ -699,22 +701,22 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 mb-1">Nama *</label>
                                 <input type="text" value={editGuest.name} onChange={(e) => setEditGuest({ ...editGuest, name: e.target.value })}
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300" required />
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300" required />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-600 mb-1">No. WhatsApp</label>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">No. WhatsApp (Opsional)</label>
                                 <input type="text" value={editGuest.phone || ''} onChange={(e) => setEditGuest({ ...editGuest, phone: e.target.value })}
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300" />
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600 mb-1">Grup</label>
+                                    <label className="block text-sm font-medium text-gray-600 mb-1">Grup (Opsional)</label>
                                     <input type="text" value={editGuest.group_name || ''} onChange={(e) => setEditGuest({ ...editGuest, group_name: e.target.value })}
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300" />
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300" />
                                 </div>
                             </div>
                             <div className="flex gap-2 pt-2">
-                                <button type="submit" className="flex-1 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600">Simpan</button>
+                                <button type="submit" className="flex-1 py-2.5 bg-[#E5654B] text-white rounded-xl text-sm font-medium hover:bg-[#c24b33]">Simpan</button>
                                 <button type="button" onClick={() => { setShowEditModal(false); setEditGuest(null); }}
                                     className="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-200">Batal</button>
                             </div>
@@ -737,14 +739,14 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                 Gunakan <code className="bg-gray-100 px-1 rounded">{'{nama}'}</code> untuk nama tamu dan <code className="bg-gray-100 px-1 rounded">{'{link}'}</code> untuk link undangan
                             </p>
                             <textarea value={template} onChange={(e) => setTemplate(e.target.value)}
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 resize-none font-mono" rows={12} />
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 resize-none font-mono" rows={12} />
                             <div className="flex justify-end gap-2">
                                 <button onClick={() => setTemplate(defaultTemplate)}
                                     className="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-200">
                                     Reset Default
                                 </button>
                                 <button onClick={() => setShowTemplateModal(false)}
-                                    className="px-6 py-2 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600">
+                                    className="px-6 py-2 bg-[#E5654B] text-white rounded-xl text-sm font-medium hover:bg-[#c24b33]">
                                     Simpan
                                 </button>
                             </div>

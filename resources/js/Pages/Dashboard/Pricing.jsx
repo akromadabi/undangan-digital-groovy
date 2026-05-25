@@ -48,7 +48,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{flash.error}</div>
                 )}
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* Header */}
@@ -74,7 +74,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                         return (
                             <div key={plan.id}
                                 className={`relative rounded-2xl p-[2px] transition-all duration-300 ${isCurrent
-                                    ? 'bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-xl shadow-emerald-200/40'
+                                    ? 'bg-gradient-to-b from-[#e87058] to-[#c24b33] shadow-xl shadow-orange-200/40'
                                     : isGold
                                         ? 'bg-gradient-to-b from-amber-300 to-orange-400 shadow-xl shadow-amber-200/40'
                                         : 'bg-gradient-to-b from-gray-200 to-gray-300 hover:shadow-lg'
@@ -83,7 +83,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                                 {/* Current badge */}
                                 {isCurrent && (
                                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-                                        <span className="bg-emerald-500 text-white text-[10px] font-bold px-4 py-1 rounded-full shadow-md whitespace-nowrap">
+                                        <span className="bg-[#E5654B] text-white text-[10px] font-bold px-4 py-1 rounded-full shadow-md whitespace-nowrap">
                                             PAKET SAAT INI
                                         </span>
                                     </div>
@@ -127,16 +127,16 @@ export default function Pricing({ plans, currentPlan, features }) {
                                     {/* Key features */}
                                     <div className="space-y-2.5 mb-5 flex-1">
                                         <div className="flex items-center gap-2.5">
-                                            <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                                                <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                            <div className="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                                                <svg className="w-3 h-3 text-[#c24b33]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
                                             <span className="text-[13px] text-gray-700">Max <strong>{plan.max_guests.toLocaleString()}</strong> tamu</span>
                                         </div>
                                         <div className="flex items-center gap-2.5">
-                                            <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                                                <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                            <div className="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                                                <svg className="w-3 h-3 text-[#c24b33]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
@@ -144,9 +144,9 @@ export default function Pricing({ plans, currentPlan, features }) {
                                         </div>
                                         {totalFeatures > 0 && (
                                             <div className="flex items-center gap-2.5">
-                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${enabledCount === totalFeatures ? 'bg-emerald-100' : 'bg-amber-100'}`}>
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${enabledCount === totalFeatures ? 'bg-orange-100' : 'bg-amber-100'}`}>
                                                     {enabledCount === totalFeatures ? (
-                                                        <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                        <svg className="w-3 h-3 text-[#c24b33]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     ) : (
@@ -173,7 +173,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                                             Upgrade
                                         </button>
                                     ) : isCurrent ? (
-                                        <div className="w-full py-3 text-center bg-emerald-50 text-emerald-600 rounded-xl text-sm font-bold border border-emerald-200 flex items-center justify-center gap-2">
+                                        <div className="w-full py-3 text-center bg-orange-50 text-[#c24b33] rounded-xl text-sm font-bold border border-orange-200 flex items-center justify-center gap-2">
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                             </svg>
@@ -228,7 +228,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                                                             {plan.name}
                                                         </span>
                                                         {isCurrent && (
-                                                            <span className="text-[9px] text-emerald-500 font-semibold">Aktif</span>
+                                                            <span className="text-[9px] text-[#E5654B] font-semibold">Aktif</span>
                                                         )}
                                                     </div>
                                                 </th>
@@ -299,8 +299,8 @@ export default function Pricing({ plans, currentPlan, features }) {
                                                         return (
                                                             <td key={plan.id} className="text-center px-4 py-3">
                                                                 {enabled ? (
-                                                                    <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
-                                                                        <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                    <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center mx-auto">
+                                                                        <svg className="w-3.5 h-3.5 text-[#c24b33]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                                         </svg>
                                                                     </div>

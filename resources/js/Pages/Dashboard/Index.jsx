@@ -35,7 +35,7 @@ const Icon = ({ d, className = 'w-5 h-5', strokeWidth = 1.5 }) => (
 
 // ── Feature icons (SVG paths) ──
 const featureIcons = {
-    opening: 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z',
+    opening: 'M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
     bride_groom: 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z',
     event: 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5',
     gallery: 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v13.5a2.25 2.25 0 002.25 2.25z',
@@ -45,9 +45,9 @@ const featureIcons = {
     guestbook: 'M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25',
     save_the_date: 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z',
     turut_mengundang: 'M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z',
-    bride_groom_detail: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
+    bride_groom_detail: 'M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm-7.5 7.125c0-2.071 1.679-3.75 3.75-3.75s3.75 1.679 3.75 3.75H3.75z',
     cover: 'M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z',
-    guest: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
+    guest: 'M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 0A48.536 48.536 0 0112 3c1.28 0 2.53.05 3.77.148m-9.78 1.528A2.23 2.23 0 004.5 9v10.5A2.25 2.25 0 006.75 21.75h9a2.25 2.25 0 002.25-2.25V9a2.23 2.23 0 00-2.25-4.324m-9 0h9',
     rsvp: 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z',
     music: 'M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z',
     gift: 'M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z',
@@ -56,37 +56,37 @@ const featureIcons = {
     animasi: 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z',
     qr_code: 'M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 15.75h.008v.008H13.5V15.75zm3.75-2.25h.008v.008H17.25v-.008zm-2.25 2.25h.008v.008h-.008V15.75zm2.25 2.25h.008v.008H17.25v-.008zm2.25-2.25h.008v.008H19.5v-.008zm0 2.25h.008v.008H19.5v-.008zM15.75 13.5h.008v.008h-.008V13.5z',
     layar_sapa: 'M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25',
-    partikel: 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z',
-    show_photos: 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v13.5a2.25 2.25 0 002.25 2.25z',
+    partikel: 'M 9 12 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 M 4 6 a 2 2 0 1 0 4 0 a 2 2 0 1 0 -4 0 M 16 18 a 2 2 0 1 0 4 0 a 2 2 0 1 0 -4 0 M 17 6 a 1 1 0 1 0 2 0 a 1 1 0 1 0 -2 0 M 5 18 a 1 1 0 1 0 2 0 a 1 1 0 1 0 -2 0',
+    show_photos: 'M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
     auto_scroll: 'M12 3v18M12 3a6 6 0 00-6 6v6a6 6 0 006 6 6 6 0 006-6V9a6 6 0 00-6-6zm0 4a1 1 0 011 1v2a1 1 0 01-2 0V8a1 1 0 011-1z',
 };
 
-// Feature color map for icons
+// Feature color map for icons (unified with theme brand color #E5654B)
 const featureColors = {
-    opening: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' },
-    bride_groom: { bg: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-100' },
-    event: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100' },
-    gallery: { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-100' },
-    love_story: { bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100' },
-    bank: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100' },
-    closing: { bg: 'bg-teal-50', text: 'text-teal-600', border: 'border-teal-100' },
-    guestbook: { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-100' },
-    save_the_date: { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-100' },
-    turut_mengundang: { bg: 'bg-sky-50', text: 'text-sky-600', border: 'border-sky-100' },
-    bride_groom_detail: { bg: 'bg-fuchsia-50', text: 'text-fuchsia-600', border: 'border-fuchsia-100' },
-    cover: { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100' },
-    guest: { bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-100' },
-    rsvp: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-100' },
-    music: { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100' },
-    gift: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-100' },
-    whatsapp: { bg: 'bg-lime-50', text: 'text-lime-600', border: 'border-lime-100' },
-    template: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-100' },
-    animasi: { bg: 'bg-fuchsia-50', text: 'text-fuchsia-600', border: 'border-fuchsia-100' },
-    qr_code: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' },
-    layar_sapa: { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-100' },
-    partikel: { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-100' },
-    show_photos: { bg: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-100' },
-    auto_scroll: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100' },
+    opening: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    bride_groom: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    event: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    gallery: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    love_story: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    bank: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    closing: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    guestbook: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    save_the_date: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    turut_mengundang: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    bride_groom_detail: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    cover: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    guest: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    rsvp: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    music: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    gift: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    whatsapp: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    template: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    animasi: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    qr_code: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    layar_sapa: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    partikel: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    show_photos: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
+    auto_scroll: { bg: 'bg-orange-50/60', text: 'text-[#E5654B]', border: 'border-orange-100/50' },
 };
 
 // ── Mini Bar Chart ──
@@ -111,7 +111,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
 
             <div className="space-y-4">
                 {/* ═══ Welcome Card ═══ */}
-                <div className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 rounded-xl lg:rounded-2xl p-4 lg:p-6 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-br from-[#E5654B] via-[#e87058] to-[#c24b33] rounded-xl lg:rounded-2xl p-4 lg:p-6 text-white relative overflow-hidden">
                     {/* Decorative circles */}
                     <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/5" />
                     <div className="absolute -bottom-8 -right-12 w-40 h-40 rounded-full bg-white/5" />
@@ -125,7 +125,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                                 </div>
                                 <h2 className="text-base lg:text-xl font-bold">{invitation?.title || 'Selamat Datang'}</h2>
                             </div>
-                            <p className="text-emerald-100 text-sm mt-1 flex items-center gap-1.5">
+                            <p className="text-orange-100 text-sm mt-1 flex items-center gap-1.5">
                                 <Icon d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-6.364-6.364L4.5 8.5" className="w-3.5 h-3.5 flex-shrink-0" />
                                 {invitation?.slug ? (
                                     <span className="truncate">{window.location.origin}/u/{invitation.slug}</span>
@@ -134,7 +134,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                                 )}
                             </p>
                             {dashboardSubscription && (
-                                <span className={`inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold ${dashboardSubscription.plan_slug === 'free' ? 'bg-white/15 text-white backdrop-blur-sm' : 'bg-white text-emerald-700'}`}>
+                                <span className={`inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold ${dashboardSubscription.plan_slug === 'free' ? 'bg-white/15 text-white backdrop-blur-sm' : 'bg-white text-[#E5654B]'}`}>
                                     {dashboardSubscription.status === 'active' ? (
                                         <Icon d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-3.5 h-3.5" />
                                     ) : (
@@ -152,7 +152,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                                     Preview
                                 </a>
                             )}
-                            <Link href="/profile" className="px-4 py-2.5 bg-white text-emerald-700 rounded-xl text-sm font-medium hover:bg-emerald-50 transition-all inline-flex items-center gap-2 shadow-sm">
+                            <Link href="/profile" className="px-4 py-2.5 bg-white text-[#E5654B] rounded-xl text-sm font-medium hover:bg-orange-50 transition-all inline-flex items-center gap-2 shadow-sm">
                                 <Icon d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-4 h-4" />
                                 Account
                             </Link>
@@ -182,7 +182,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                 {/* ═══ Tutorial Help Card ═══ */}
                 <div className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100 flex items-center justify-center text-[#E5654B] flex-shrink-0">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
@@ -192,7 +192,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                             <div className="text-gray-500 text-xs">Temukan cara cepat mengatur tema, musik, mengelola tamu, dan membagikan undangan Anda.</div>
                         </div>
                     </div>
-                    <Link href="/tutorial" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all whitespace-nowrap inline-flex items-center gap-1.5 self-stretch sm:self-auto justify-center">
+                    <Link href="/tutorial" className="px-4 py-2 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-lg text-xs font-semibold shadow-sm transition-all whitespace-nowrap inline-flex items-center gap-1.5 self-stretch sm:self-auto justify-center">
                         Buka Panduan
                         <Icon d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" className="w-3.5 h-3.5" />
                     </Link>
@@ -222,11 +222,11 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                             {/* RSVP Hadir */}
                             <div className="bg-white border border-gray-100 rounded-xl p-3 hover:shadow-md transition-shadow">
                                 <div className="flex items-center justify-between mb-2">
-                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
-                                        <Icon d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-4 h-4 text-emerald-600" />
+                                    <div className="w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center">
+                                        <Icon d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-4 h-4 text-[#c24b33]" />
                                     </div>
                                     {totalRsvp > 0 && (
-                                        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                        <span className="text-xs font-medium text-[#c24b33] bg-orange-50 px-2 py-0.5 rounded-full">
                                             {Math.round(((stats.rsvp_hadir || 0) / totalRsvp) * 100)}%
                                         </span>
                                     )}
@@ -283,7 +283,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                                 </div>
                                 <h3 className="text-sm font-semibold text-gray-700">Ucapan Terbaru</h3>
                             </div>
-                            <Link href="/content/guestbook" className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors inline-flex items-center gap-1">
+                            <Link href="/content/guestbook" className="text-xs font-medium text-[#E5654B] hover:text-[#c24b33] transition-colors inline-flex items-center gap-1">
                                 Lihat Semua
                                 <Icon d="M8.25 4.5l7.5 7.5-7.5 7.5" className="w-3 h-3" />
                             </Link>
@@ -291,7 +291,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                         <div className="divide-y divide-gray-50">
                             {latestWishes.slice(0, 3).map((wish, i) => (
                                 <div key={i} className="px-5 py-3 flex items-start gap-3 hover:bg-gray-50/50 transition-colors">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#E5654B] to-[#e87058] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
                                         {wish.sender_name?.charAt(0)?.toUpperCase() || '?'}
                                     </div>
                                     <div className="min-w-0 flex-1">
@@ -321,7 +321,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                                     onClick={feature.is_locked ? (e) => e.preventDefault() : undefined}
                                     className={`group relative p-2.5 rounded-xl text-center transition-all duration-200 ${feature.is_locked
                                         ? 'bg-gray-50 text-gray-400 cursor-not-allowed border border-gray-100'
-                                        : `bg-white border border-gray-100 text-gray-700 hover:shadow-lg hover:border-emerald-200 hover:-translate-y-1`
+                                        : `bg-white border border-gray-100 text-gray-700 hover:shadow-lg hover:border-[#E5654B]/40 hover:shadow-orange-100/50 hover:-translate-y-1`
                                         }`}
                                 >
                                     {feature.is_locked && (

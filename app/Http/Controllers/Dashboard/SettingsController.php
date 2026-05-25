@@ -110,6 +110,22 @@ class SettingsController extends Controller
         return back()->with('success', 'Tamu berhasil ditambahkan.');
     }
 
+    public function updateTamu(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'phone' => 'nullable|string|max:20',
+            'group_name' => 'nullable|string|max:100',
+        ]);
+
+        $invitation = $this->getUserInvitation($request);
+        $guest = $invitation->guests()->findOrFail($id);
+
+        $guest->update($request->only(['name', 'phone', 'group_name']));
+
+        return back()->with('success', 'Tamu berhasil diperbarui.');
+    }
+
     public function importTamu(Request $request)
     {
         $request->validate([

@@ -22,7 +22,7 @@ export default function Guestbook({ wishes }) {
             <Head title="Guestbook / Ucapan" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 flex items-start gap-3">
@@ -42,7 +42,7 @@ export default function Guestbook({ wishes }) {
                         <div className="text-xs text-gray-500 mt-1">Total Ucapan</div>
                     </div>
                     <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                        <div className="text-2xl font-bold text-emerald-600">
+                        <div className="text-2xl font-bold text-[#c24b33]">
                             {wishList.filter(w => w.guest?.name).length}
                         </div>
                         <div className="text-xs text-gray-500 mt-1">Dari Tamu Terdaftar</div>

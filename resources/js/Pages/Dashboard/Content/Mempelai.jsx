@@ -97,8 +97,8 @@ export default function Mempelai({ brideGrooms }) {
             <Head title="Mempelai" />
             <div className="max-w-2xl mx-auto space-y-3">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-3 py-2 rounded-lg text-xs flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 text-[#E5654B] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         {flash.success}
                     </div>
                 )}
@@ -123,7 +123,7 @@ export default function Mempelai({ brideGrooms }) {
                         <button key={tab.idx} type="button"
                             onClick={() => setActiveTab(tab.idx)}
                             className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${activeTab === tab.idx
-                                ? 'bg-emerald-500 text-white shadow-sm'
+                                ? 'bg-[#E5654B] text-white shadow-sm'
                                 : 'text-gray-500 hover:bg-gray-50'
                             }`}>
                             <span className="text-sm">{tab.icon}</span>
@@ -176,7 +176,7 @@ export default function Mempelai({ brideGrooms }) {
                                 {['pria', 'wanita'].map((g) => (
                                     <button key={g} type="button" onClick={() => update(idx, 'gender', g)}
                                         className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${data.bride_grooms[idx].gender === g
-                                            ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-[#E5654B] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                         }`}>{g === 'pria' ? 'Pria' : 'Wanita'}</button>
                                 ))}
                             </div>
@@ -200,7 +200,7 @@ export default function Mempelai({ brideGrooms }) {
                             <label className="block text-xs font-medium text-gray-600 mb-1">Bio Singkat</label>
                             <textarea value={data.bride_grooms[idx].bio || ''}
                                 onChange={(e) => update(idx, 'bio', e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none"
+                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none"
                                 rows={2} placeholder="Sedikit tentang diri Anda..." />
                         </div>
 
@@ -223,7 +223,7 @@ export default function Mempelai({ brideGrooms }) {
                                                 value={data.bride_grooms[idx][key] || ''}
                                                 onChange={(e) => update(idx, key, e.target.value)}
                                                 placeholder={opt.placeholder}
-                                                className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
+                                                className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]"
                                             />
                                             <button type="button" onClick={() => removeSocmed(idx, key)}
                                                 className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
@@ -242,7 +242,7 @@ export default function Mempelai({ brideGrooms }) {
                                             updated[idx] = !updated[idx];
                                             setShowSocmedPicker(updated);
                                         }}
-                                        className="flex items-center gap-1 text-[11px] text-emerald-600 font-semibold hover:text-emerald-700 py-1">
+                                        className="flex items-center gap-1 text-[11px] text-[#c24b33] font-semibold hover:text-[#b03a24] py-1">
                                         <Plus size={12} /> Tambah Sosmed
                                     </button>
 
@@ -267,7 +267,7 @@ export default function Mempelai({ brideGrooms }) {
                     </div>
 
                     <button type="submit" disabled={processing}
-                        className="w-full mt-3 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all disabled:opacity-50">
+                        className="w-full mt-3 py-2.5 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all disabled:opacity-50">
                         {processing ? 'Menyimpan...' : 'Simpan Data Mempelai'}
                     </button>
                 </form>
@@ -282,7 +282,7 @@ function Field({ label, value, onChange, required, placeholder, error }) {
             <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
             <input type="text" value={value || ''} onChange={(e) => onChange(e.target.value)} required={required}
                 placeholder={placeholder}
-                className={`w-full border rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 ${error ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} />
+                className={`w-full border rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 ${error ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-orange-300 focus:border-[#e87058]'}`} />
             {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
         </div>
     );

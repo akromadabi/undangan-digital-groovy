@@ -145,11 +145,17 @@
     }
 
     /* Primary/action buttons (those with bg color) */
-    main button[class*="bg-emerald"],
-    main button[class*="bg-blue"],
+    main button.bg-\[\#E5654B\],
+    main button[class*="bg-blue-500"],
+    main button[class*="bg-blue-600"],
+    main button[class*="bg-emerald-500"],
+    main button[class*="bg-emerald-600"],
     main button[class*="bg-gradient"],
-    main a[class*="bg-emerald"],
-    main a[class*="bg-blue"] {
+    main a.bg-\[\#E5654B\],
+    main a[class*="bg-blue-500"],
+    main a[class*="bg-blue-600"],
+    main a[class*="bg-emerald-500"],
+    main a[class*="bg-emerald-600"] {
         padding: 0.5rem 0.875rem;
         font-size: 0.8125rem;
     }

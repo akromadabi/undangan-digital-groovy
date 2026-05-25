@@ -110,7 +110,7 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
             <Head title="Galeri" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
@@ -130,21 +130,21 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
                             <h4 className="text-sm font-semibold text-gray-700">Model Tampilan Galeri</h4>
                             <p className="text-xs text-gray-400 mt-0.5">Pilih cara foto ditampilkan di undangan</p>
                         </div>
-                        {savingMode && <span className="text-xs text-emerald-500 animate-pulse">Menyimpan...</span>}
+                        {savingMode && <span className="text-xs text-[#E5654B] animate-pulse">Menyimpan...</span>}
                     </div>
                     <div className="grid grid-cols-3 gap-3">
                         {modes.map((m) => (
                             <button key={m.value} type="button" onClick={() => handleModeChange(m.value)}
-                                className={`relative p-4 rounded-xl border-2 text-center transition-all ${mode === m.value ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}>
-                                <div className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center mb-2 ${mode === m.value ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                                className={`relative p-4 rounded-xl border-2 text-center transition-all ${mode === m.value ? 'border-[#E5654B] bg-orange-50 shadow-sm' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}>
+                                <div className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center mb-2 ${mode === m.value ? 'bg-[#E5654B] text-white' : 'bg-gray-200 text-gray-500'}`}>
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d={m.icon} />
                                     </svg>
                                 </div>
-                                <div className={`text-xs font-bold ${mode === m.value ? 'text-emerald-700' : 'text-gray-600'}`}>{m.label}</div>
+                                <div className={`text-xs font-bold ${mode === m.value ? 'text-[#b03a24]' : 'text-gray-600'}`}>{m.label}</div>
                                 <div className="text-[10px] text-gray-400 mt-0.5">{m.desc}</div>
                                 {mode === m.value && (
-                                    <div className="absolute top-2 right-2 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
+                                    <div className="absolute top-2 right-2 w-4 h-4 bg-[#E5654B] rounded-full flex items-center justify-center">
                                         <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
                                     </div>
                                 )}
@@ -163,7 +163,7 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
                                 value={caption}
                                 onChange={(e) => setCaption(e.target.value)}
                                 placeholder="Caption foto (opsional, hanya untuk upload 1 foto)"
-                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
+                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]"
                             />
                             {caption && (
                                 <p className="text-[10px] text-amber-600 font-medium px-1">
@@ -177,12 +177,12 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
                                     onDrop={handleDrop}
                                     className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
                                         isDragOver 
-                                            ? 'border-emerald-500 bg-emerald-50 scale-[1.01]' 
-                                            : 'border-gray-300 hover:border-emerald-400 hover:bg-emerald-50/50'
+                                            ? 'border-[#E5654B] bg-orange-50 scale-[1.01]' 
+                                            : 'border-gray-300 hover:border-[#e87058] hover:bg-orange-50/50'
                                     }`}
                                 >
                                     {uploading ? (
-                                        <div className="text-emerald-500 font-medium">
+                                        <div className="text-[#E5654B] font-medium">
                                             <svg className="w-5 h-5 inline mr-2 -mt-0.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                             </svg>

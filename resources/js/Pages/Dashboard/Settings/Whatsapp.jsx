@@ -65,14 +65,14 @@ export default function Whatsapp({ guests, logs }) {
             <Head title="WhatsApp" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-emerald-50 rounded-xl p-4 text-center">
-                        <div className="text-2xl font-bold text-emerald-600">{sentGuests.length}</div>
-                        <div className="text-xs text-emerald-500 mt-1">Terkirim</div>
+                    <div className="bg-orange-50 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-[#c24b33]">{sentGuests.length}</div>
+                        <div className="text-xs text-[#E5654B] mt-1">Terkirim</div>
                     </div>
                     <div className="bg-amber-50 rounded-xl p-4 text-center">
                         <div className="text-2xl font-bold text-amber-600">{unsentGuests.length}</div>
@@ -91,7 +91,7 @@ export default function Whatsapp({ guests, logs }) {
                         Gunakan <code className="bg-gray-100 px-1 rounded">{'{nama}'}</code> untuk nama tamu dan <code className="bg-gray-100 px-1 rounded">{'{link}'}</code> untuk link undangan
                     </p>
                     <textarea value={template} onChange={(e) => setTemplate(e.target.value)}
-                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 resize-none font-mono" rows={10} />
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 resize-none font-mono" rows={10} />
                 </div>
 
                 {/* Guest Selection */}
@@ -99,7 +99,7 @@ export default function Whatsapp({ guests, logs }) {
                     <div className="bg-white rounded-2xl border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-bold text-gray-800 text-sm">Pilih Penerima ({selectedIds.length} dipilih)</h3>
-                            <button onClick={selectAll} className="text-xs text-emerald-600 hover:underline font-medium">
+                            <button onClick={selectAll} className="text-xs text-[#c24b33] hover:underline font-medium">
                                 {selectedIds.length === unsentGuests.length ? 'Batal Semua' : 'Pilih Semua'}
                             </button>
                         </div>
@@ -107,10 +107,10 @@ export default function Whatsapp({ guests, logs }) {
                         <div className="space-y-1.5 max-h-60 overflow-y-auto">
                             {unsentGuests.map(guest => (
                                 <label key={guest.id}
-                                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${selectedIds.includes(guest.id) ? 'bg-emerald-50 border border-emerald-200' : 'bg-gray-50 hover:bg-gray-100'
+                                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${selectedIds.includes(guest.id) ? 'bg-orange-50 border border-orange-200' : 'bg-gray-50 hover:bg-gray-100'
                                         }`}>
                                     <input type="checkbox" checked={selectedIds.includes(guest.id)}
-                                        onChange={() => toggleSelect(guest.id)} className="rounded border-gray-300 text-emerald-500 focus:ring-emerald-300" />
+                                        onChange={() => toggleSelect(guest.id)} className="rounded border-gray-300 text-[#E5654B] focus:ring-orange-300" />
                                     <div className="flex-1">
                                         <div className="font-medium text-gray-800 text-sm">{guest.name}</div>
                                         <div className="text-xs text-gray-400">{guest.phone}</div>
@@ -123,7 +123,7 @@ export default function Whatsapp({ guests, logs }) {
                         </div>
 
                         <button onClick={handleSend} disabled={sending || selectedIds.length === 0}
-                            className="w-full mt-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
+                            className="w-full mt-4 py-3 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
                             {sending ? 'Mengirim...' : `Kirim ke ${selectedIds.length} Tamu`}
                         </button>
                     </div>

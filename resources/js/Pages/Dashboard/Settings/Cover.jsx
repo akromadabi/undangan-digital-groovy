@@ -38,7 +38,7 @@ export default function Cover({ invitation }) {
             <Head title="Cover" />
             <div className="max-w-2xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
@@ -70,7 +70,7 @@ export default function Cover({ invitation }) {
                             )}
                         </div>
                         <div className="text-center mt-4">
-                            <label className="inline-block px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-medium cursor-pointer transition-colors">
+                            <label className="inline-block px-5 py-2 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-xl text-sm font-medium cursor-pointer transition-colors">
                                 {uploading ? 'Uploading...' : 'Upload Gambar Cover'}
                                 <input type="file" accept="image/*" className="hidden"
                                     onChange={(e) => handleImageUpload(e.target.files[0])} disabled={uploading} />
@@ -84,7 +84,7 @@ export default function Cover({ invitation }) {
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Teks Atas Cover</label>
                         <input type="text" value={data.cover_title} onChange={(e) => setData('cover_title', e.target.value)}
                             placeholder="Contoh: The Wedding Of"
-                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]" />
                         {errors.cover_title && <p className="text-red-500 text-xs mt-1">{errors.cover_title}</p>}
                     </div>
 
@@ -93,12 +93,12 @@ export default function Cover({ invitation }) {
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Teks Bawah / Nama Pasangan</label>
                         <input type="text" value={data.cover_subtitle} onChange={(e) => setData('cover_subtitle', e.target.value)}
                             placeholder="Contoh: Mira & Randi"
-                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]" />
                         {errors.cover_subtitle && <p className="text-red-500 text-xs mt-1">{errors.cover_subtitle}</p>}
                     </div>
 
                     <button type="submit" disabled={processing}
-                        className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
+                        className="w-full py-3.5 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
                         {processing ? 'Menyimpan...' : 'Simpan Cover'}
                     </button>
                 </form>

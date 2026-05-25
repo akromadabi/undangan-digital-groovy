@@ -63,7 +63,7 @@ export default function Acara({ events }) {
             <Head title="Acara" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {Object.keys(errors).length > 0 && (
@@ -127,7 +127,7 @@ export default function Acara({ events }) {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 mb-1.5">Jenis Acara</label>
                                     <select value={event.event_type} onChange={(e) => updateEvent(index, 'event_type', e.target.value)}
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400">
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]">
                                         <option value="akad">Akad Nikah</option>
                                         <option value="pemberkatan">Pemberkatan</option>
                                         <option value="resepsi">Resepsi</option>
@@ -139,7 +139,7 @@ export default function Acara({ events }) {
                                     <label className="block text-sm font-medium text-gray-600 mb-1.5">Nama Acara *</label>
                                     <input type="text" value={event.event_name} onChange={(e) => updateEvent(index, 'event_name', e.target.value)}
                                         placeholder="Nama acara"
-                                        className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.event_name`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} required />
+                                        className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.event_name`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-orange-300 focus:border-[#e87058]'}`} required />
                                     {errors[`events.${index}.event_name`] && (
                                         <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.event_name`]}</p>
                                     )}
@@ -148,7 +148,7 @@ export default function Acara({ events }) {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 mb-1.5">Tanggal *</label>
                                     <input type="date" value={event.event_date?.split('T')[0] || ''} onChange={(e) => updateEvent(index, 'event_date', e.target.value)}
-                                        className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.event_date`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} required />
+                                        className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.event_date`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-orange-300 focus:border-[#e87058]'}`} required />
                                     {errors[`events.${index}.event_date`] && (
                                         <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.event_date`]}</p>
                                     )}
@@ -158,7 +158,7 @@ export default function Acara({ events }) {
                                     <div className="flex-1">
                                         <label className="block text-sm font-medium text-gray-600 mb-1.5">Mulai *</label>
                                         <input type="time" value={event.start_time} onChange={(e) => updateEvent(index, 'start_time', e.target.value)}
-                                            className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.start_time`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} required />
+                                            className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.start_time`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-orange-300 focus:border-[#e87058]'}`} required />
                                         {errors[`events.${index}.start_time`] && (
                                             <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.start_time`]}</p>
                                         )}
@@ -166,12 +166,12 @@ export default function Acara({ events }) {
                                     <div className="flex-1">
                                         <label className="block text-sm font-medium text-gray-600 mb-1.5">Selesai</label>
                                         {event.end_time === 'Selesai' ? (
-                                            <div className="w-full border border-emerald-200 bg-emerald-50 rounded-xl px-4 py-2.5 text-sm text-emerald-700 font-medium">
+                                            <div className="w-full border border-orange-200 bg-orange-50 rounded-xl px-4 py-2.5 text-sm text-[#b03a24] font-medium">
                                                 Selesai
                                             </div>
                                         ) : (
                                             <input type="time" value={event.end_time || ''} onChange={(e) => updateEvent(index, 'end_time', e.target.value)}
-                                                className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.end_time`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} />
+                                                className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.end_time`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-orange-300 focus:border-[#e87058]'}`} />
                                         )}
                                         {errors[`events.${index}.end_time`] && (
                                             <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.end_time`]}</p>
@@ -180,7 +180,7 @@ export default function Acara({ events }) {
                                             <input type="checkbox"
                                                 checked={event.end_time === 'Selesai'}
                                                 onChange={(e) => updateEvent(index, 'end_time', e.target.checked ? 'Selesai' : '')}
-                                                className="w-3.5 h-3.5 rounded border-gray-300 text-emerald-500 focus:ring-emerald-400" />
+                                                className="w-3.5 h-3.5 rounded border-gray-300 text-[#E5654B] focus:ring-[#e87058]" />
                                             <span className="text-xs text-gray-500">Sampai selesai</span>
                                         </label>
                                     </div>
@@ -189,7 +189,7 @@ export default function Acara({ events }) {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 mb-1.5">Zona Waktu</label>
                                     <select value={event.timezone} onChange={(e) => updateEvent(index, 'timezone', e.target.value)}
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400">
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]">
                                         <option value="WIB">WIB (GMT+7)</option>
                                         <option value="WITA">WITA (GMT+8)</option>
                                         <option value="WIT">WIT (GMT+9)</option>
@@ -200,7 +200,7 @@ export default function Acara({ events }) {
                                     <label className="block text-sm font-medium text-gray-600 mb-1.5">Nama Tempat</label>
                                     <input type="text" value={event.venue_name || ''} onChange={(e) => updateEvent(index, 'venue_name', e.target.value)}
                                         placeholder="Nama gedung / tempat"
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]" />
                                 </div>
                             </div>
 
@@ -208,7 +208,7 @@ export default function Acara({ events }) {
                                 <label className="block text-sm font-medium text-gray-600 mb-1.5">Alamat Lengkap</label>
                                 <textarea value={event.venue_address || ''} onChange={(e) => updateEvent(index, 'venue_address', e.target.value)}
                                     placeholder="Jl. ..."
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none" rows={2} />
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none" rows={2} />
                             </div>
 
                             <div className="mt-4">
@@ -218,7 +218,7 @@ export default function Acara({ events }) {
                                 </label>
                                 <input type="url" value={event.gmaps_link || ''} onChange={(e) => updateEvent(index, 'gmaps_link', e.target.value)}
                                     placeholder="https://maps.google.com/..."
-                                    className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.gmaps_link`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-emerald-300 focus:border-emerald-400'}`} />
+                                    className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.gmaps_link`] ? 'border-red-300 focus:ring-red-300 focus:border-red-400' : 'border-gray-200 focus:ring-orange-300 focus:border-[#e87058]'}`} />
                                 {errors[`events.${index}.gmaps_link`] && (
                                     <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.gmaps_link`]}</p>
                                 )}
@@ -228,11 +228,11 @@ export default function Acara({ events }) {
                             {(event.streamings?.length > 0) ? (
                                 <div className="mt-4 space-y-3">
                                     {event.streamings.map((stream, si) => (
-                                        <div key={si} className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                                        <div key={si} className="bg-orange-50 border border-orange-200 rounded-xl p-4">
                                             <div className="flex items-center justify-between mb-3">
                                                 <div className="flex items-center gap-2">
-                                                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                                    <span className="font-semibold text-emerald-800 text-sm">Live Streaming {event.streamings.length > 1 ? `#${si + 1}` : ''}</span>
+                                                    <svg className="w-4 h-4 text-[#c24b33]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                                    <span className="font-semibold text-[#962c19] text-sm">Live Streaming {event.streamings.length > 1 ? `#${si + 1}` : ''}</span>
                                                 </div>
                                                 <button type="button" onClick={() => {
                                                     const updated = [...data.events];
@@ -244,14 +244,14 @@ export default function Acara({ events }) {
                                             </div>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-emerald-700 mb-1">Platform</label>
+                                                    <label className="block text-xs font-medium text-[#b03a24] mb-1">Platform</label>
                                                     <select value={String(stream.platform || 'youtube').toLowerCase()} onChange={(e) => {
                                                         const updated = [...data.events];
                                                         const streams = [...updated[index].streamings];
                                                         streams[si] = { ...streams[si], platform: e.target.value.toLowerCase() };
                                                         updated[index] = { ...updated[index], streamings: streams };
                                                         setData('events', updated);
-                                                    }} className="w-full border border-emerald-200 bg-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300">
+                                                    }} className="w-full border border-orange-200 bg-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300">
                                                         <option value="youtube">YouTube</option>
                                                         <option value="instagram">Instagram</option>
                                                         <option value="tiktok">TikTok</option>
@@ -260,7 +260,7 @@ export default function Acara({ events }) {
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-emerald-700 mb-1">Link Streaming</label>
+                                                    <label className="block text-xs font-medium text-[#b03a24] mb-1">Link Streaming</label>
                                                     <input type="url" value={stream.url || ''} onChange={(e) => {
                                                         const updated = [...data.events];
                                                         const streams = [...updated[index].streamings];
@@ -268,7 +268,7 @@ export default function Acara({ events }) {
                                                         updated[index] = { ...updated[index], streamings: streams };
                                                         setData('events', updated);
                                                     }} placeholder="https://..."
-                                                        className={`w-full border bg-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.streamings.${si}.url`] ? 'border-red-300 focus:ring-red-300' : 'border-emerald-200 focus:ring-emerald-300'}`} />
+                                                        className={`w-full border bg-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 ${errors[`events.${index}.streamings.${si}.url`] ? 'border-red-300 focus:ring-red-300' : 'border-orange-200 focus:ring-orange-300'}`} />
                                                     {errors[`events.${index}.streamings.${si}.url`] && (
                                                         <p className="text-xs text-red-500 mt-1">{errors[`events.${index}.streamings.${si}.url`]}</p>
                                                     )}
@@ -280,7 +280,7 @@ export default function Acara({ events }) {
                                         const updated = [...data.events];
                                         updated[index] = { ...updated[index], streamings: [...(updated[index].streamings || []), { platform: 'youtube', url: '' }] };
                                         setData('events', updated);
-                                    }} className="w-full py-2 border-2 border-dashed border-emerald-300 rounded-xl text-emerald-400 hover:border-emerald-500 hover:text-emerald-600 transition-colors text-xs font-medium flex items-center justify-center gap-1">
+                                    }} className="w-full py-2 border-2 border-dashed border-orange-300 rounded-xl text-[#e87058] hover:border-[#E5654B] hover:text-[#c24b33] transition-colors text-xs font-medium flex items-center justify-center gap-1">
                                         + Tambah Streaming Lainnya
                                     </button>
                                 </div>
@@ -290,7 +290,7 @@ export default function Acara({ events }) {
                                     updated[index] = { ...updated[index], streamings: [{ platform: 'youtube', url: '' }] };
                                     setData('events', updated);
                                 }}
-                                    className="mt-4 w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-emerald-400 hover:text-emerald-500 transition-colors text-sm font-medium flex items-center justify-center gap-2">
+                                    className="mt-4 w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-[#e87058] hover:text-[#E5654B] transition-colors text-sm font-medium flex items-center justify-center gap-2">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                     + Tambah Live Streaming
                                 </button>
@@ -299,12 +299,12 @@ export default function Acara({ events }) {
                     ))}
 
                     <button type="button" onClick={addEvent}
-                        className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-emerald-400 hover:text-emerald-500 transition-colors text-sm font-medium">
+                        className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-[#e87058] hover:text-[#E5654B] transition-colors text-sm font-medium">
                         + Tambah Acara Baru
                     </button>
 
                     <button type="submit" disabled={processing}
-                        className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
+                        className="w-full py-3.5 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
                         {processing ? 'Menyimpan...' : 'Simpan Acara'}
                     </button>
                 </form>

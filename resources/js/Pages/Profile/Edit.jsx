@@ -59,7 +59,7 @@ export default function Edit({ mustVerifyEmail, status }) {
             <div className="max-w-2xl mx-auto space-y-3">
 
                 {/* Profile Header */}
-                <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-4 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-br from-[#E5654B] to-[#c24b33] rounded-xl p-4 text-white relative overflow-hidden">
                     <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-white/5" />
                     <div className="absolute -bottom-6 -right-8 w-28 h-28 rounded-full bg-white/5" />
                     <div className="flex items-center gap-3 relative z-10">
@@ -68,7 +68,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                         </div>
                         <div>
                             <h2 className="text-base font-bold">{user.name}</h2>
-                            <p className="text-emerald-100 text-xs">{user.email}</p>
+                            <p className="text-orange-100 text-xs">{user.email}</p>
                         </div>
                     </div>
                 </div>
@@ -76,7 +76,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                 {/* ═══ Informasi Profil ═══ */}
                 <form onSubmit={submitProfile} className="bg-white rounded-xl border border-gray-200 p-3 space-y-3">
                     <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                        <svg className="w-4 h-4 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                         </svg>
                         <h3 className="text-sm font-bold text-gray-800">Informasi Profil</h3>
@@ -87,7 +87,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                             <label className="block text-xs font-medium text-gray-600 mb-1">Nama</label>
                             <input type="text" value={profileForm.data.name}
                                 onChange={(e) => profileForm.setData('name', e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
+                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-orange-300 focus:border-[#E5654B]"
                                 required />
                             {profileForm.errors.name && <p className="text-red-500 text-[10px] mt-0.5">{profileForm.errors.name}</p>}
                         </div>
@@ -95,7 +95,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                             <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
                             <input type="email" value={profileForm.data.email}
                                 onChange={(e) => profileForm.setData('email', e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
+                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-orange-300 focus:border-[#E5654B]"
                                 required />
                             {profileForm.errors.email && <p className="text-red-500 text-[10px] mt-0.5">{profileForm.errors.email}</p>}
                         </div>
@@ -116,11 +116,11 @@ export default function Edit({ mustVerifyEmail, status }) {
 
                     <div className="flex items-center gap-2">
                         <button type="submit" disabled={profileForm.processing}
-                            className="px-4 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50">
+                            className="px-4 py-1.5 bg-[#E5654B] text-white rounded-lg text-xs font-medium hover:bg-[#c24b33] transition-colors disabled:opacity-50">
                             {profileForm.processing ? 'Menyimpan...' : 'Simpan Profil'}
                         </button>
                         {profileForm.recentlySuccessful && (
-                            <span className="text-emerald-600 text-[11px] font-medium">✓ Tersimpan</span>
+                            <span className="text-orange-600 text-[11px] font-medium">✓ Tersimpan</span>
                         )}
                     </div>
                 </form>
@@ -128,7 +128,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                 {/* ═══ Ubah Password ═══ */}
                 <form onSubmit={submitPassword} className="bg-white rounded-xl border border-gray-200 p-3 space-y-3">
                     <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                        <svg className="w-4 h-4 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                         </svg>
                         <h3 className="text-sm font-bold text-gray-800">Ubah Password</h3>
@@ -139,7 +139,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                         <input type="password" ref={currentPasswordInput}
                             value={passwordForm.data.current_password}
                             onChange={(e) => passwordForm.setData('current_password', e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                            className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-orange-300 focus:border-[#E5654B]" />
                         {passwordForm.errors.current_password && <p className="text-red-500 text-[10px] mt-0.5">{passwordForm.errors.current_password}</p>}
                     </div>
 
@@ -149,7 +149,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                             <input type="password" ref={passwordInput}
                                 value={passwordForm.data.password}
                                 onChange={(e) => passwordForm.setData('password', e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-orange-300 focus:border-[#E5654B]" />
                             {passwordForm.errors.password && <p className="text-red-500 text-[10px] mt-0.5">{passwordForm.errors.password}</p>}
                         </div>
                         <div>
@@ -157,18 +157,18 @@ export default function Edit({ mustVerifyEmail, status }) {
                             <input type="password"
                                 value={passwordForm.data.password_confirmation}
                                 onChange={(e) => passwordForm.setData('password_confirmation', e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-orange-300 focus:border-[#E5654B]" />
                             {passwordForm.errors.password_confirmation && <p className="text-red-500 text-[10px] mt-0.5">{passwordForm.errors.password_confirmation}</p>}
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <button type="submit" disabled={passwordForm.processing}
-                            className="px-4 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50">
+                            className="px-4 py-1.5 bg-[#E5654B] text-white rounded-lg text-xs font-medium hover:bg-[#c24b33] transition-colors disabled:opacity-50">
                             {passwordForm.processing ? 'Menyimpan...' : 'Ubah Password'}
                         </button>
                         {passwordForm.recentlySuccessful && (
-                            <span className="text-emerald-600 text-[11px] font-medium">✓ Password diubah</span>
+                            <span className="text-orange-600 text-[11px] font-medium">✓ Password diubah</span>
                         )}
                     </div>
                 </form>

@@ -14,8 +14,8 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
    VISUAL SIMULATION MOCKUPS (Adapting dynamic colors)
    ───────────────────────────────────────────────────────── */
 const ActiveStatusMockup = () => (
-    <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-sm text-left">
-        <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI STATUS PANEL</div>
+    <div className="mt-4 p-4 rounded-xl max-w-sm text-left border" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)' }}>
+        <div className="text-[11px] font-semibold tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>SIMULASI STATUS PANEL</div>
         <div className="rounded-lg p-3 border" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.05)', borderColor: 'rgba(var(--accent-rgb), 0.1)' }}>
             <div className="flex items-center justify-between text-xs font-semibold" style={{ color: 'var(--accent-dark)' }}>
                 <span>Paket Premium Pro</span>
@@ -32,13 +32,13 @@ const ActiveStatusMockup = () => (
 const WhatsappShareMockup = () => {
     const [sent, setSent] = useState(false);
     return (
-        <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-md text-left">
-            <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI DAFTAR TAMU</div>
-            <div className="bg-white border border-gray-100 rounded-lg divide-y divide-gray-100 overflow-hidden">
+        <div className="mt-4 p-4 rounded-xl max-w-md text-left border" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)' }}>
+            <div className="text-[11px] font-semibold tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>SIMULASI DAFTAR TAMU</div>
+            <div className="border rounded-lg divide-y overflow-hidden" style={{ backgroundColor: 'var(--section-base)', borderColor: 'var(--card-border)', divideColor: 'var(--card-border)' }}>
                 <div className="p-3 flex items-center justify-between gap-2">
                     <div>
-                        <div className="text-xs font-semibold text-gray-800">Bapak Budi Santoso</div>
-                        <div className="text-[10px] text-gray-400">Grup: Keluarga Besar</div>
+                        <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Bapak Budi Santoso</div>
+                        <div className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Grup: Keluarga Besar</div>
                     </div>
                     <button
                         type="button"
@@ -68,21 +68,21 @@ const WhatsappShareMockup = () => {
 };
 
 const AddGuestMockup = () => (
-    <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-sm text-left">
-        <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI FORMULIR TAMU</div>
-        <div className="bg-white border border-gray-200/80 rounded-lg p-3 shadow-sm space-y-2">
+    <div className="mt-4 p-4 rounded-xl max-w-sm text-left border" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)' }}>
+        <div className="text-[11px] font-semibold tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>SIMULASI FORMULIR TAMU</div>
+        <div className="border rounded-lg p-3 shadow-sm space-y-2" style={{ backgroundColor: 'var(--section-base)', borderColor: 'var(--card-border)' }}>
             <div>
-                <label className="block text-[10px] font-bold text-gray-600 mb-0.5">NAMA TAMU</label>
-                <input type="text" readOnly value="Rian & Pasangan" className="w-full text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" />
+                <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--text-secondary)' }}>NAMA TAMU</label>
+                <input type="text" readOnly value="Rian & Pasangan" className="w-full text-xs border rounded px-2 py-1 focus:outline-none" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)', color: 'var(--text-primary)' }} />
             </div>
             <div className="grid grid-cols-2 gap-2">
                 <div>
-                    <label className="block text-[10px] font-bold text-gray-600 mb-0.5">NOMOR WA</label>
-                    <input type="text" readOnly value="08123456789" className="w-full text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" />
+                    <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--text-secondary)' }}>NOMOR WA</label>
+                    <input type="text" readOnly value="08123456789" className="w-full text-xs border rounded px-2 py-1 focus:outline-none" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)', color: 'var(--text-primary)' }} />
                 </div>
                 <div>
-                    <label className="block text-[10px] font-bold text-gray-600 mb-0.5">KATEGORI/GRUP</label>
-                    <input type="text" readOnly value="Teman Kampus" className="w-full text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" />
+                    <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--text-secondary)' }}>KATEGORI/GRUP</label>
+                    <input type="text" readOnly value="Teman Kampus" className="w-full text-xs border rounded px-2 py-1 focus:outline-none" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)', color: 'var(--text-primary)' }} />
                 </div>
             </div>
             <button type="button" className="w-full py-1.5 text-white rounded text-xs font-semibold shadow-sm hover:brightness-110 transition-colors"
@@ -96,17 +96,19 @@ const AddGuestMockup = () => (
 const ThemeChangeMockup = () => {
     const [selected, setSelected] = useState('modern');
     return (
-        <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-md text-left">
-            <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI KATALOG TEMA</div>
+        <div className="mt-4 p-4 rounded-xl max-w-md text-left border" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)' }}>
+            <div className="text-[11px] font-semibold tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>SIMULASI KATALOG TEMA</div>
             <div className="grid grid-cols-2 gap-3">
                 {/* Theme 1 */}
-                <div onClick={() => setSelected('adat')} className="cursor-pointer bg-white border rounded-xl overflow-hidden shadow-sm transition-all p-0.5"
-                     style={selected === 'adat' ? { outline: '2px solid var(--accent)', borderColor: 'transparent' } : { borderColor: '#e2e8f0' }}>
-                    <div className="h-16 bg-[#e0d6c8] flex items-center justify-center text-[10px] text-amber-800 font-serif">
+                <div onClick={() => setSelected('adat')} className="cursor-pointer border rounded-xl overflow-hidden shadow-sm transition-all p-0.5"
+                     style={selected === 'adat' 
+                         ? { outline: '2px solid var(--accent)', borderColor: 'transparent', backgroundColor: 'var(--section-base)' } 
+                         : { borderColor: 'var(--card-border)', backgroundColor: 'var(--section-base)' }}>
+                    <div className="h-16 bg-[#e0d6c8] flex items-center justify-center text-[10px] text-amber-800 font-serif rounded-t-lg">
                         ADAT JAWA PREVIEW
                     </div>
                     <div className="p-2 flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-gray-700">Joglo Klasik</span>
+                        <span className="text-[10px] font-bold" style={{ color: 'var(--text-primary)' }}>Joglo Klasik</span>
                         {selected === 'adat' ? (
                             <span className="w-3.5 h-3.5 text-white rounded-full flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: 'var(--accent)' }}>✓</span>
                         ) : (
@@ -115,13 +117,15 @@ const ThemeChangeMockup = () => {
                     </div>
                 </div>
                 {/* Theme 2 */}
-                <div onClick={() => setSelected('modern')} className="cursor-pointer bg-white border rounded-xl overflow-hidden shadow-sm transition-all p-0.5"
-                     style={selected === 'modern' ? { outline: '2px solid var(--accent)', borderColor: 'transparent' } : { borderColor: '#e2e8f0' }}>
-                    <div className="h-16 bg-gradient-to-tr from-rose-100 to-indigo-100 flex items-center justify-center text-[10px] text-indigo-700 font-semibold">
+                <div onClick={() => setSelected('modern')} className="cursor-pointer border rounded-xl overflow-hidden shadow-sm transition-all p-0.5"
+                     style={selected === 'modern' 
+                         ? { outline: '2px solid var(--accent)', borderColor: 'transparent', backgroundColor: 'var(--section-base)' } 
+                         : { borderColor: 'var(--card-border)', backgroundColor: 'var(--section-base)' }}>
+                    <div className="h-16 bg-gradient-to-tr from-rose-100 to-indigo-100 flex items-center justify-center text-[10px] text-indigo-700 font-semibold rounded-t-lg">
                         MODERN MINIMALIST
                     </div>
                     <div className="p-2 flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-gray-700">Groovy Pink</span>
+                        <span className="text-[10px] font-bold" style={{ color: 'var(--text-primary)' }}>Groovy Pink</span>
                         {selected === 'modern' ? (
                             <span className="w-3.5 h-3.5 text-white rounded-full flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: 'var(--accent)' }}>✓</span>
                         ) : (
@@ -135,31 +139,31 @@ const ThemeChangeMockup = () => {
 };
 
 const StreamingFormMockup = () => (
-    <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-sm text-left">
-        <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI FORMULIR STREAMING</div>
-        <div className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
-            <div className="flex items-center justify-between p-1 bg-gray-50 rounded border border-gray-100">
-                <span className="text-[10px] font-bold text-gray-600 uppercase">Aktifkan live streaming</span>
+    <div className="mt-4 p-4 rounded-xl max-w-sm text-left border" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)' }}>
+        <div className="text-[11px] font-semibold tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>SIMULASI FORMULIR STREAMING</div>
+        <div className="border rounded-lg p-3 space-y-2" style={{ backgroundColor: 'var(--section-base)', borderColor: 'var(--card-border)' }}>
+            <div className="flex items-center justify-between p-1 rounded border" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)' }}>
+                <span className="text-[10px] font-bold uppercase" style={{ color: 'var(--text-secondary)' }}>Aktifkan live streaming</span>
                 <div className="w-7 h-4 rounded-full p-0.5 flex justify-end items-center cursor-pointer" style={{ backgroundColor: 'var(--accent)' }}>
                     <div className="w-3 h-3 bg-white rounded-full" />
                 </div>
             </div>
             <div>
-                <label className="block text-[10px] font-bold text-gray-600 mb-0.5">PLATFORM</label>
-                <input type="text" readOnly value="YouTube Live" className="w-full text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" />
+                <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--text-secondary)' }}>PLATFORM</label>
+                <input type="text" readOnly value="YouTube Live" className="w-full text-xs border rounded px-2 py-1 focus:outline-none" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)', color: 'var(--text-primary)' }} />
             </div>
             <div>
-                <label className="block text-[10px] font-bold text-gray-600 mb-0.5">LINK STREAMING (URL)</label>
-                <input type="text" readOnly value="https://youtube.com/live/xYzA123" className="w-full text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" style={{ color: 'var(--accent)' }} />
+                <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--text-secondary)' }}>LINK STREAMING (URL)</label>
+                <input type="text" readOnly value="https://youtube.com/live/xYzA123" className="w-full text-xs border rounded px-2 py-1 focus:outline-none" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)', color: 'var(--accent)' }} />
             </div>
         </div>
     </div>
 );
 
 const MusicPlayerMockup = () => (
-    <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-sm text-left">
-        <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI PENGATURAN MUSIK</div>
-        <div className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
+    <div className="mt-4 p-4 rounded-xl max-w-sm text-left border" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)' }}>
+        <div className="text-[11px] font-semibold tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>SIMULASI PENGATURAN MUSIK</div>
+        <div className="border rounded-lg p-3 space-y-2" style={{ backgroundColor: 'var(--section-base)', borderColor: 'var(--card-border)' }}>
             <div className="flex items-center gap-2 p-2 rounded border" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.05)', borderColor: 'rgba(var(--accent-rgb), 0.1)' }}>
                 <div className="w-6 h-6 rounded-full text-white flex items-center justify-center animate-spin" style={{ backgroundColor: 'var(--accent)' }}>
                     ♫
@@ -169,26 +173,26 @@ const MusicPlayerMockup = () => (
                     <div className="text-[8px]" style={{ color: 'var(--accent)' }}>Terpilih (Pustaka Groovy)</div>
                 </div>
             </div>
-            <div className="border border-dashed border-gray-300 rounded-lg p-3 text-center bg-white hover:bg-gray-50">
-                <div className="text-xs text-gray-500 font-semibold">Upload Musik (.mp3)</div>
-                <div className="text-[8px] text-gray-400 mt-0.5">Maksimal ukuran file: 5MB</div>
+            <div className="border border-dashed rounded-lg p-3 text-center transition-colors" style={{ backgroundColor: 'var(--section-base)', borderColor: 'var(--card-border)' }}>
+                <div className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Upload Musik (.mp3)</div>
+                <div className="text-[8px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Maksimal ukuran file: 5MB</div>
             </div>
         </div>
     </div>
 );
 
 const GiftRegisterMockup = () => (
-    <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-sm text-left">
-        <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI AMPLOP DIGITAL</div>
-        <div className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
+    <div className="mt-4 p-4 rounded-xl max-w-sm text-left border" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)' }}>
+        <div className="text-[11px] font-semibold tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>SIMULASI AMPLOP DIGITAL</div>
+        <div className="border rounded-lg p-3 space-y-2" style={{ backgroundColor: 'var(--section-base)', borderColor: 'var(--card-border)' }}>
             <div className="rounded-lg p-2.5 flex items-start gap-2.5 border" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.05)', borderColor: 'rgba(var(--accent-rgb), 0.1)' }}>
                 <div className="text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase mt-0.5" style={{ backgroundColor: 'var(--accent)' }}>BCA</div>
                 <div>
-                    <div className="text-[11px] font-bold text-gray-800">1234567890</div>
-                    <div className="text-[9px] text-gray-500">a.n Budi Santoso</div>
+                    <div className="text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>1234567890</div>
+                    <div className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>a.n Budi Santoso</div>
                 </div>
             </div>
-            <button type="button" className="w-full py-1.5 border border-dashed border-gray-300 hover:border-gray-400 rounded-lg text-xs font-semibold text-gray-600 bg-white">
+            <button type="button" className="w-full py-1.5 border border-dashed rounded-lg text-xs font-semibold transition-colors" style={{ backgroundColor: 'var(--section-base)', borderColor: 'var(--card-border)', color: 'var(--text-secondary)' }}>
                 + Tambah Rekening Lain
             </button>
         </div>
@@ -196,17 +200,17 @@ const GiftRegisterMockup = () => (
 );
 
 const CustomDomainMockup = () => (
-    <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-sm text-left">
-        <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI CUSTOM DOMAIN</div>
-        <div className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
+    <div className="mt-4 p-4 rounded-xl max-w-sm text-left border" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)' }}>
+        <div className="text-[11px] font-semibold tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>SIMULASI CUSTOM DOMAIN</div>
+        <div className="border rounded-lg p-3 space-y-2" style={{ backgroundColor: 'var(--section-base)', borderColor: 'var(--card-border)' }}>
             <div>
-                <label className="block text-[10px] font-bold text-gray-600 mb-0.5">ALAMAT DOMAIN ANDA</label>
+                <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--text-secondary)' }}>ALAMAT DOMAIN ANDA</label>
                 <div className="flex gap-1.5">
-                    <input type="text" readOnly value="budiandsiti.com" className="flex-1 text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" />
+                    <input type="text" readOnly value="budiandsiti.com" className="flex-1 text-xs border rounded px-2 py-1 focus:outline-none" style={{ backgroundColor: 'var(--section-alt)', borderColor: 'var(--card-border)', color: 'var(--text-primary)' }} />
                     <button type="button" className="text-white px-3 py-1 rounded text-xs font-semibold hover:brightness-110" style={{ backgroundColor: 'var(--accent)' }}>Hubungkan</button>
                 </div>
             </div>
-            <div className="p-2 bg-amber-50 border border-amber-100 rounded text-[9px] text-amber-700 leading-tight">
+            <div className="p-2 border rounded text-[9px] leading-tight" style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)', borderColor: 'rgba(245, 158, 11, 0.2)', color: 'var(--accent)' }}>
                 <strong>Panduan DNS:</strong> Arahkan DNS <strong>A Record</strong> domain Anda ke IP <code>103.174.112.56</code>.
             </div>
         </div>
@@ -833,7 +837,7 @@ export default function ResellerFaq({ reseller }) {
 
                     {/* Search Bar */}
                     <div className="mt-8 max-w-md mx-auto relative z-10">
-                        <div className="flex items-center bg-white rounded-xl shadow-md border border-gray-100/60 px-4 py-1.5 focus-within:ring-2 focus-within:ring-white transition-all">
+                        <div className="rl-faq-search-box">
                             {/* Search Icon */}
                             <div className="text-gray-400 mr-2 flex-shrink-0 flex items-center justify-center">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -893,7 +897,7 @@ export default function ResellerFaq({ reseller }) {
                 </div>
 
                 {/* ═══ Category Tabs ═══ */}
-                <div className="flex overflow-x-auto pb-3 gap-2 mb-8" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <div className="flex overflow-x-auto pb-3 gap-3 mb-8 justify-start md:justify-center" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                     {categories.map((cat) => {
                         const isActive = activeCategory === cat.id;
                         return (
@@ -901,12 +905,7 @@ export default function ResellerFaq({ reseller }) {
                                 key={cat.id}
                                 type="button"
                                 onClick={() => setActiveCategory(cat.id)}
-                                className={`px-4.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 border cursor-pointer ${
-                                    isActive
-                                        ? 'text-white shadow-sm border-transparent'
-                                        : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
-                                }`}
-                                style={isActive ? { background: 'var(--accent)' } : {}}
+                                className={`rl-faq-tab ${isActive ? 'rl-faq-tab--active' : ''}`}
                             >
                                 {cat.label}
                             </button>
@@ -922,27 +921,18 @@ export default function ResellerFaq({ reseller }) {
                             return (
                                 <div
                                     key={faq.id}
-                                    className={`bg-white border rounded-xl overflow-hidden transition-all duration-200 border-l-4 ${
-                                        isOpen 
-                                            ? 'shadow-md' 
-                                            : 'border-gray-100 hover:border-gray-200 shadow-sm border-l-transparent'
-                                    }`}
-                                    style={isOpen ? { borderLeftColor: 'var(--accent)', borderColor: 'rgba(var(--accent-rgb), 0.2)' } : {}}
+                                    className={`rl-faq-card ${isOpen ? 'rl-faq-card--open' : ''}`}
                                 >
                                     {/* Accordion Trigger */}
                                     <button
                                         type="button"
                                         onClick={() => toggleAccordion(faq.id)}
-                                        className="w-full flex items-center justify-between text-left p-4.5 focus:outline-none transition-colors hover:bg-gray-50/40 cursor-pointer"
+                                        className="rl-faq-trigger"
                                     >
-                                        <span className="text-sm font-bold pr-4 transition-colors" style={isOpen ? { color: 'var(--accent)' } : { color: '#1e293b' }}>
+                                        <span className="rl-faq-question">
                                             {faq.question}
                                         </span>
-                                        <span className={`flex-shrink-0 w-6.5 h-6.5 rounded-lg flex items-center justify-center transition-all ${
-                                            isOpen ? 'rotate-180' : 'bg-gray-50 text-gray-400'
-                                        }`}
-                                        style={isOpen ? { backgroundColor: 'rgba(var(--accent-rgb), 0.1)', color: 'var(--accent)' } : {}}
-                                        >
+                                        <span className="rl-faq-icon-wrap">
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                             </svg>
@@ -952,21 +942,21 @@ export default function ResellerFaq({ reseller }) {
                                     {/* Accordion Content */}
                                     <div
                                         className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                                            isOpen ? 'max-h-[1200px] border-t border-gray-50' : 'max-h-0'
+                                            isOpen ? 'max-h-[1200px]' : 'max-h-0'
                                         }`}
                                     >
-                                        <div className="p-5 bg-white text-gray-600 text-xs lg:text-sm leading-relaxed space-y-5">
+                                        <div className="rl-faq-content space-y-5">
                                             
                                             {/* Description & Steps */}
                                             <div 
                                                 onClick={() => toggleAccordion(faq.id)}
-                                                className="cursor-pointer hover:text-gray-800 transition-colors space-y-4 group relative pr-6"
+                                                className="cursor-pointer hover:text-[var(--text-primary)] transition-colors space-y-4 group relative pr-6"
                                                 title="Klik area teks ini untuk menutup panduan"
                                             >
                                                 {/* Answer Description */}
-                                                <p className="text-gray-700 font-medium relative pr-8">
+                                                <p className="font-semibold relative pr-8" style={{ color: 'var(--text-primary)' }}>
                                                     {faq.answer}
-                                                    <span className="absolute right-0 top-1/2 -translate-y-1/2 transition-colors text-xl font-bold group-hover:text-[var(--accent)] text-gray-300" style={isOpen ? {} : {}}>
+                                                    <span className="absolute right-0 top-1/2 -translate-y-1/2 transition-colors text-xl font-bold group-hover:text-[var(--accent)] text-gray-400">
                                                         &times;
                                                     </span>
                                                 </p>
@@ -974,17 +964,17 @@ export default function ResellerFaq({ reseller }) {
                                                 {/* Step-by-Step */}
                                                 <div className="space-y-2">
                                                     <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">LANGKAH-LANGKAH PANDUAN</div>
-                                                    <ol className="list-decimal list-inside pl-1 space-y-1.5 text-gray-600 text-xs">
+                                                    <ol className="rl-faq-steps text-sm">
                                                         {faq.steps.map((step, idx) => (
-                                                            <li key={idx} className="pl-1">
-                                                                <span className="text-gray-700">{step}</span>
+                                                            <li key={idx}>
+                                                                <span>{step}</span>
                                                             </li>
                                                         ))}
                                                     </ol>
                                                 </div>
 
                                                 <div className="text-[10px] text-gray-400 italic pt-1 flex items-center gap-1.5">
-                                                    <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
                                                     Tip: Klik area teks ini untuk menutup panduan.
@@ -993,18 +983,18 @@ export default function ResellerFaq({ reseller }) {
 
                                             {/* Visual mockup (if any) */}
                                             {faq.mockup && (
-                                                <div className="pt-4.5 border-t border-gray-50" onClick={(e) => e.stopPropagation()}>
+                                                <div className="pt-4 border-t border-[var(--card-border)]" onClick={(e) => e.stopPropagation()}>
                                                     <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">PANDUAN VISUAL</div>
                                                     {renderVisualMockup(faq.mockup)}
                                                 </div>
                                             )}
 
                                             {/* Explicit Close Button */}
-                                            <div className="flex justify-end pt-2.5 border-t border-gray-50/50">
+                                            <div className="flex justify-end pt-3 border-t border-[var(--card-border)]">
                                                 <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); toggleAccordion(faq.id); }}
-                                                    className="px-3.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-gray-700 border border-gray-100 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                                                    className="px-3.5 py-1.5 bg-gray-50/10 hover:bg-gray-50/20 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
                                                 >
                                                     <svg className="w-3 h-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -1019,14 +1009,14 @@ export default function ResellerFaq({ reseller }) {
                         })
                     ) : (
                         /* No Results */
-                        <div className="bg-white border border-gray-100 rounded-xl p-10 text-center shadow-sm">
-                            <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
+                        <div className="border rounded-xl p-10 text-center shadow-sm" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400" style={{ backgroundColor: 'var(--section-alt)' }}>
                                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                             </div>
-                            <h3 className="text-sm font-bold text-gray-800">Pertanyaan Tidak Ditemukan</h3>
-                            <p className="text-xs text-gray-500 mt-1.5 max-w-sm mx-auto">
+                            <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Pertanyaan Tidak Ditemukan</h3>
+                            <p className="text-xs mt-1.5 max-w-sm mx-auto" style={{ color: 'var(--text-secondary)' }}>
                                 Maaf, kami tidak dapat menemukan panduan dengan kata kunci "{searchQuery}". Coba gunakan kata kunci umum lainnya seperti <strong>'tema'</strong>, <strong>'wa'</strong>, atau <strong>'streaming'</strong>.
                             </p>
                             <button
@@ -1043,18 +1033,16 @@ export default function ResellerFaq({ reseller }) {
 
                 {/* ═══ Contact Support Card (dynamically linked to Reseller's WhatsApp support) ═══ */}
                 {reseller.footer_whatsapp && (
-                    <div className="border rounded-2xl p-5.5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-sm"
-                         style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.04)', borderColor: 'rgba(var(--accent-rgb), 0.12)' }}>
+                    <div className="rl-faq-support-card shadow-sm">
                         <div>
-                            <h4 className="text-sm font-extrabold" style={{ color: 'var(--accent-dark)' }}>Masih Butuh Bantuan Tambahan?</h4>
-                            <p className="text-xs text-gray-600 mt-0.5">Jika Anda tidak menemukan solusi di atas, tim support kami siap membantu Anda secara langsung via WhatsApp.</p>
+                            <h4 className="rl-faq-support-title">Masih Butuh Bantuan Tambahan?</h4>
+                            <p className="rl-faq-support-desc">Jika Anda tidak menemukan solusi di atas, tim support kami siap membantu Anda secara langsung via WhatsApp.</p>
                         </div>
                         <a
                             href={getWhatsappLink(reseller.footer_whatsapp, `Halo Admin ${reseller.brand_name}, saya butuh bantuan terkait pengaturan/pembuatan undangan digital saya.`)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-4.5 py-2.5 text-white rounded-xl text-xs font-bold shadow-sm inline-flex items-center gap-1.5 transition-all hover:brightness-110 hover:shadow-md cursor-pointer"
-                            style={{ background: 'var(--accent)' }}
+                            className="rl-faq-support-btn"
                         >
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
@@ -1426,5 +1414,189 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     .rl-footer__grid { grid-template-columns: 1fr; gap: 2.5rem; }
     .rl-footer__desc-text { max-width: none; }
     .rl-footer__bottom { flex-direction: column; gap: 1rem; text-align: center; }
+}
+
+/* ── FAQ INTERACTIVE STYLES ── */
+.rl-faq-search-box {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 0.5rem 1.25rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+}
+.rl-faq-search-box:focus-within {
+    box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.12), 0 0 0 3px rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+}
+
+.rl-faq-tab {
+    padding: 0.625rem 1.25rem;
+    border-radius: 12px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.rl-faq-tab:hover {
+    color: var(--text-primary);
+    background: rgba(var(--accent-rgb), 0.08);
+    border-color: rgba(var(--accent-rgb), 0.2);
+}
+.rl-faq-tab--active {
+    background: var(--accent) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.25);
+}
+
+.rl-faq-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.03);
+    margin-bottom: 1rem;
+}
+.rl-faq-card:hover {
+    border-color: rgba(var(--accent-rgb), 0.2);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+.rl-faq-card--open {
+    border-left: 4px solid var(--accent);
+    border-color: rgba(var(--accent-rgb), 0.25) rgba(var(--accent-rgb), 0.25) rgba(var(--accent-rgb), 0.25) var(--accent);
+    background: var(--card-bg);
+    box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.08);
+}
+
+.rl-faq-trigger {
+    padding: 1.125rem 1.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+    transition: background-color 0.2s;
+    outline: none;
+}
+.rl-faq-trigger:hover {
+    background: rgba(var(--accent-rgb), 0.02);
+}
+
+.rl-faq-question {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    transition: color 0.2s;
+    padding-right: 1rem;
+}
+.rl-faq-card--open .rl-faq-question {
+    color: var(--accent);
+}
+
+.rl-faq-icon-wrap {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: rgba(var(--accent-rgb), 0.05);
+    color: var(--text-secondary);
+}
+.rl-faq-card--open .rl-faq-icon-wrap {
+    transform: rotate(180deg);
+    background: var(--accent);
+    color: #fff;
+}
+
+.rl-faq-content {
+    padding: 1.25rem 1.5rem 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    border-top: 1px solid var(--card-border);
+    background: rgba(var(--accent-rgb), 0.01);
+}
+
+.rl-faq-steps {
+    list-style-type: decimal;
+    padding-left: 1.25rem;
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.rl-faq-steps li {
+    padding-left: 0.25rem;
+    color: var(--text-secondary);
+}
+.rl-faq-steps li::marker {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.rl-faq-support-card {
+    padding: 1.5rem 1.75rem;
+    border-radius: 20px;
+    border: 1px solid rgba(var(--accent-rgb), 0.15);
+    background: rgba(var(--accent-rgb), 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+@media (min-width: 640px) {
+    .rl-faq-support-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+    }
+}
+.rl-faq-support-title {
+    font-size: 0.9375rem;
+    font-weight: 800;
+    color: var(--accent);
+}
+.rl-faq-support-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+.rl-faq-support-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff !important;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    border-radius: 12px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.2);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+.rl-faq-support-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.3);
+    filter: brightness(1.1);
 }
 `;

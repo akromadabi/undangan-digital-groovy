@@ -62,7 +62,7 @@ export default function LiveTamu({ invitation, liveUrl }) {
             <Head title="Live Tamu" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* ═══ Live Link ═══ */}
@@ -72,9 +72,9 @@ export default function LiveTamu({ invitation, liveUrl }) {
                             <h3 className="text-lg font-bold">Halaman Live Tamu</h3>
                             <p className="text-white/50 text-sm mt-1">Buka halaman fullscreen untuk menampilkan tamu yang hadir secara realtime</p>
                         </div>
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 rounded-full">
-                            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                            <span className="text-xs text-emerald-300 font-semibold">Live</span>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E5654B]/20 rounded-full">
+                            <div className="w-2 h-2 rounded-full bg-[#e87058] animate-pulse" />
+                            <span className="text-xs text-orange-300 font-semibold">Live</span>
                         </div>
                     </div>
                     {liveUrl && (
@@ -87,7 +87,7 @@ export default function LiveTamu({ invitation, liveUrl }) {
                                 Salin
                             </button>
                             <Link href="/qr-scanner"
-                                className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-500/25 whitespace-nowrap inline-flex items-center gap-2">
+                                className="px-5 py-3 bg-[#E5654B] hover:bg-[#c24b33] rounded-xl text-sm font-bold transition-all shadow-lg shadow-[#E5654B]/25 whitespace-nowrap inline-flex items-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
                                 </svg>
@@ -129,7 +129,7 @@ export default function LiveTamu({ invitation, liveUrl }) {
                             <p className="text-xs text-gray-400 mt-0.5">Menampilkan jumlah tamu yang sudah hadir</p>
                         </div>
                         <button type="button" onClick={() => setData('live_counter', !data.live_counter)}
-                            className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${data.live_counter ? 'bg-emerald-500' : 'bg-gray-300'}`}>
+                            className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${data.live_counter ? 'bg-[#E5654B]' : 'bg-gray-300'}`}>
                             <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${data.live_counter ? 'left-6' : 'left-1'}`} />
                         </button>
                     </div>
@@ -185,11 +185,11 @@ export default function LiveTamu({ invitation, liveUrl }) {
 
                 {/* New Guest Toast */}
                 {newGuest && (
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-center gap-4 animate-pulse">
-                        <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white text-lg font-bold flex-shrink-0">✓</div>
+                    <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5 flex items-center gap-4 animate-pulse">
+                        <div className="w-12 h-12 rounded-full bg-[#E5654B] flex items-center justify-center text-white text-lg font-bold flex-shrink-0">✓</div>
                         <div>
-                            <div className="text-lg font-bold text-emerald-800">{newGuest.name}</div>
-                            <div className="text-sm text-emerald-600">baru saja hadir!</div>
+                            <div className="text-lg font-bold text-[#962c19]">{newGuest.name}</div>
+                            <div className="text-sm text-[#c24b33]">baru saja hadir!</div>
                         </div>
                     </div>
                 )}
@@ -197,7 +197,7 @@ export default function LiveTamu({ invitation, liveUrl }) {
                 {/* Guest List */}
                 <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
                     <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2.5">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <div className="w-2 h-2 rounded-full bg-[#E5654B] animate-pulse" />
                         <h3 className="font-bold text-gray-800 text-sm">Tamu yang Hadir</h3>
                         <span className="text-xs text-gray-400 ml-auto">Auto-refresh tiap 3 detik</span>
                     </div>

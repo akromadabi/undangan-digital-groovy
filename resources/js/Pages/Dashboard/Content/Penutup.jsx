@@ -20,7 +20,7 @@ export default function Penutup({ invitation }) {
             <Head title="Penutup" />
             <div className="max-w-2xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
@@ -36,7 +36,7 @@ export default function Penutup({ invitation }) {
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Judul Penutup</label>
                         <input type="text" value={data.closing_title} onChange={(e) => setData('closing_title', e.target.value)}
                             placeholder="Contoh: Terima Kasih"
-                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]" />
                         {errors.closing_title && <p className="text-red-500 text-xs mt-1">{errors.closing_title}</p>}
                     </div>
 
@@ -45,7 +45,7 @@ export default function Penutup({ invitation }) {
                         <textarea value={data.closing_text} onChange={(e) => setData('closing_text', e.target.value)}
                             placeholder="Tulis ucapan penutup Anda..."
                             rows={6}
-                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none" />
+                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none" />
                         {errors.closing_text && <p className="text-red-500 text-xs mt-1">{errors.closing_text}</p>}
                     </div>
 
@@ -55,7 +55,7 @@ export default function Penutup({ invitation }) {
                         <textarea value={data.turut_mengundang_text} onChange={(e) => setData('turut_mengundang_text', e.target.value)}
                             placeholder={"Contoh:\nKeluarga Besar Bpk. H. Ahmad Suryanto\nKeluarga Besar Bpk. H. Bambang Wijaya"}
                             rows={4}
-                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none" />
+                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none" />
                         {errors.turut_mengundang_text && <p className="text-red-500 text-xs mt-1">{errors.turut_mengundang_text}</p>}
                     </div>
 
@@ -87,7 +87,7 @@ export default function Penutup({ invitation }) {
                     </div>
 
                     <button type="submit" disabled={processing}
-                        className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
+                        className="w-full py-3.5 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
                         {processing ? 'Menyimpan...' : 'Simpan Penutup'}
                     </button>
                 </form>

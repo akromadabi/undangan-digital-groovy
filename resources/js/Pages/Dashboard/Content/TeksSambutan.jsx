@@ -133,7 +133,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
 
             <div className="max-w-2xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* Tabs */}
@@ -142,7 +142,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                         <button key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${activeTab === tab.id
-                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm'
+                                    ? 'bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white shadow-sm'
                                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
                                 }`}>
                             <div>{tab.label}</div>
@@ -170,7 +170,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                                 {Object.entries(religionLabels).map(([key, label]) => (
                                     <button key={key} type="button" onClick={() => handleReligionChange(key)}
                                         className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedReligion === key
-                                            ? 'bg-emerald-500 text-white shadow-sm'
+                                            ? 'bg-[#E5654B] text-white shadow-sm'
                                             : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
                                         {label}
                                     </button>
@@ -183,7 +183,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                             <input type="text" value={openingForm.data.opening_title}
                                 onChange={(e) => openingForm.setData('opening_title', e.target.value)}
                                 placeholder="Misalnya: Bismillahirrahmanirrahim"
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]" />
                             {openingForm.errors.opening_title && <p className="text-red-500 text-xs mt-1">{openingForm.errors.opening_title}</p>}
                         </div>
 
@@ -193,7 +193,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                                 onChange={(e) => openingForm.setData('opening_text', e.target.value)}
                                 placeholder="Tulis salam pembuka Anda di sini..."
                                 rows={5}
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none" />
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none" />
                             {openingForm.errors.opening_text && <p className="text-red-500 text-xs mt-1">{openingForm.errors.opening_text}</p>}
                         </div>
 
@@ -204,9 +204,9 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                             {/* Quote Template Selector */}
                             {filteredQuotes.length > 0 && (
                                 <div>
-                                    <label className="block text-xs font-medium text-emerald-700 mb-2">📖 Pilih Template Kutipan</label>
+                                    <label className="block text-xs font-medium text-[#b03a24] mb-2">📖 Pilih Template Kutipan</label>
                                     <select onChange={(e) => handleQuoteSelect(e.target.value)} defaultValue=""
-                                        className="w-full border border-emerald-200 bg-emerald-50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300">
+                                        className="w-full border border-orange-200 bg-orange-50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300">
                                         <option value="">— Pilih template untuk auto-fill —</option>
                                         {filteredQuotes.map(q => (
                                             <option key={q.id} value={q.id}>{q.title}</option>
@@ -222,7 +222,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                                     onChange={(e) => openingForm.setData('opening_ayat', e.target.value)}
                                     placeholder={isIslam ? 'Teks ayat dalam bahasa Arab...' : 'Tulis kutipan di sini...'}
                                     rows={3}
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none"
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none"
                                     dir={isIslam ? 'rtl' : 'auto'} />
                             </div>
 
@@ -234,7 +234,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                                         onChange={(e) => openingForm.setData('opening_ayat_translation', e.target.value)}
                                         placeholder="Terjemahan ayat dalam Bahasa Indonesia..."
                                         rows={3}
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none" />
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none" />
                                 </div>
                             )}
 
@@ -244,7 +244,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                                 <input type="text" value={openingForm.data.opening_ayat_source}
                                     onChange={(e) => openingForm.setData('opening_ayat_source', e.target.value)}
                                     placeholder={isIslam ? 'Contoh: QS. Ar-Rum: 21' : 'Contoh: Kejadian 2:24'}
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]" />
                             </div>
                         </div>
 
@@ -270,7 +270,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                         </div>
 
                         <button type="submit" disabled={openingForm.processing}
-                            className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
+                            className="w-full py-3.5 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
                             {openingForm.processing ? 'Menyimpan...' : 'Simpan Opening'}
                         </button>
                     </form>
@@ -292,7 +292,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                             <input type="text" value={closingForm.data.closing_title}
                                 onChange={(e) => closingForm.setData('closing_title', e.target.value)}
                                 placeholder="Contoh: Terima Kasih"
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400" />
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]" />
                             {closingForm.errors.closing_title && <p className="text-red-500 text-xs mt-1">{closingForm.errors.closing_title}</p>}
                         </div>
 
@@ -302,7 +302,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                                 onChange={(e) => closingForm.setData('closing_text', e.target.value)}
                                 placeholder="Tulis ucapan penutup Anda..."
                                 rows={6}
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none" />
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none" />
                             {closingForm.errors.closing_text && <p className="text-red-500 text-xs mt-1">{closingForm.errors.closing_text}</p>}
                         </div>
 
@@ -313,7 +313,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                                 onChange={(e) => closingForm.setData('turut_mengundang_text', e.target.value)}
                                 placeholder={"Contoh:\nKeluarga Besar Bpk. H. Ahmad Suryanto\nKeluarga Besar Bpk. H. Bambang Wijaya"}
                                 rows={4}
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none" />
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none" />
                             {closingForm.errors.turut_mengundang_text && <p className="text-red-500 text-xs mt-1">{closingForm.errors.turut_mengundang_text}</p>}
                         </div>
 
@@ -341,7 +341,7 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                         </div>
 
                         <button type="submit" disabled={closingForm.processing}
-                            className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
+                            className="w-full py-3.5 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50">
                             {closingForm.processing ? 'Menyimpan...' : 'Simpan Penutup'}
                         </button>
                     </form>

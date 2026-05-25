@@ -29,7 +29,7 @@ export default function Template({ step, themes, selectedThemeId }) {
                         key={theme.id}
                         onClick={() => handleSelect(theme.id)}
                         className={`relative rounded-2xl overflow-hidden cursor-pointer transition-all group ${selected === theme.id
-                                ? 'ring-3 ring-emerald-500 shadow-lg scale-[1.02]'
+                                ? 'ring-3 ring-[#E5654B] shadow-lg scale-[1.02]'
                                 : 'border border-gray-200 hover:shadow-md hover:-translate-y-1'
                             }`}
                     >
@@ -46,8 +46,8 @@ export default function Template({ step, themes, selectedThemeId }) {
                                 </div>
                             )}
                             {selected === theme.id && (
-                                <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center">
-                                    <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white text-2xl">✓</div>
+                                <div className="absolute inset-0 bg-[#E5654B]/20 flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-[#E5654B] rounded-full flex items-center justify-center text-white text-2xl">✓</div>
                                 </div>
                             )}
                         </div>
@@ -56,8 +56,8 @@ export default function Template({ step, themes, selectedThemeId }) {
                             <button
                                 onClick={(e) => { e.stopPropagation(); handleSelect(theme.id); }}
                                 className={`mt-2 w-full py-1.5 rounded-lg text-xs font-medium transition-colors ${selected === theme.id
-                                        ? 'bg-emerald-500 text-white'
-                                        : 'border border-emerald-500 text-emerald-600 hover:bg-emerald-50'
+                                        ? 'bg-[#E5654B] text-white'
+                                        : 'border border-[#E5654B] text-[#E5654B] hover:bg-orange-50'
                                     }`}
                             >
                                 {selected === theme.id ? 'Terpilih ✓' : 'Select'}
@@ -73,7 +73,7 @@ export default function Template({ step, themes, selectedThemeId }) {
                     ← Kembali
                 </button>
                 <button onClick={handleSubmit} disabled={!selected || submitting}
-                    className="flex-[2] py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
+                    className="flex-[2] py-4 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
                     {submitting ? 'Memproses...' : 'Buat Undangan Saya'}
                 </button>
             </div>

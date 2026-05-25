@@ -10,7 +10,7 @@ export default function Rsvp({ rsvps, stats }) {
     const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     const statusColors = {
-        hadir: 'bg-emerald-100 text-emerald-700',
+        hadir: 'bg-orange-100 text-[#b03a24]',
         tidak_hadir: 'bg-red-100 text-red-700',
         belum_pasti: 'bg-amber-100 text-amber-700',
     };
@@ -22,14 +22,14 @@ export default function Rsvp({ rsvps, stats }) {
             <Head title="RSVP" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-emerald-50 rounded-xl p-4 text-center">
-                        <div className="text-3xl font-bold text-emerald-600">{stats?.hadir || 0}</div>
-                        <div className="text-xs text-emerald-500 mt-1 font-medium"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Total Hadir</div>
+                    <div className="bg-orange-50 rounded-xl p-4 text-center">
+                        <div className="text-3xl font-bold text-[#c24b33]">{stats?.hadir || 0}</div>
+                        <div className="text-xs text-[#E5654B] mt-1 font-medium"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Total Hadir</div>
                     </div>
                     <div className="bg-red-50 rounded-xl p-4 text-center">
                         <div className="text-3xl font-bold text-red-600">{stats?.tidak_hadir || 0}</div>
@@ -97,7 +97,7 @@ export default function Rsvp({ rsvps, stats }) {
                             <button key={i}
                                 onClick={() => link.url && router.get(link.url, {}, { preserveScroll: true })}
                                 disabled={!link.url}
-                                className={`px-3 py-1.5 rounded-lg text-sm ${link.active ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} ${!link.url ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                className={`px-3 py-1.5 rounded-lg text-sm ${link.active ? 'bg-[#E5654B] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} ${!link.url ? 'opacity-40 cursor-not-allowed' : ''}`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />
                         ))}

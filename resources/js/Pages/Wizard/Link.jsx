@@ -65,10 +65,10 @@ export default function LinkStep({ step, currentSlug }) {
     const borderClass = checking
         ? 'border-gray-300'
         : isUnchanged || available === true
-            ? 'border-emerald-400 focus-within:border-emerald-500'
+            ? 'border-orange-400 focus-within:border-[#E5654B]'
             : available === false
                 ? 'border-red-400 focus-within:border-red-500'
-                : 'border-gray-200 focus-within:border-emerald-400';
+                : 'border-gray-200 focus-within:border-orange-400';
 
     // Buat saran nama alternatif jika tidak tersedia
     const makeSuggestion = (slug) => {
@@ -118,11 +118,11 @@ export default function LinkStep({ step, currentSlug }) {
                         )}
                         {/* Link milik sendiri */}
                         {!checking && isUnchanged && (
-                            <p className="text-xs text-emerald-600 font-medium">✓ Ini link undangan Anda saat ini</p>
+                            <p className="text-xs text-orange-600 font-medium">✓ Ini link undangan Anda saat ini</p>
                         )}
                         {/* Tersedia */}
                         {!checking && !isUnchanged && available === true && (
-                            <p className="text-xs text-emerald-600 font-medium">✓ Link tersedia! Klik Lanjutkan untuk menggunakannya.</p>
+                            <p className="text-xs text-orange-600 font-medium">✓ Link tersedia! Klik Lanjutkan untuk menggunakannya.</p>
                         )}
                         {/* Tidak tersedia */}
                         {!checking && !isUnchanged && available === false && (
@@ -134,7 +134,7 @@ export default function LinkStep({ step, currentSlug }) {
                                     Coba misalnya: <button
                                         type="button"
                                         onClick={() => { setData('slug', makeSuggestion(data.slug)); setAvailable(null); }}
-                                        className="text-emerald-600 font-semibold hover:underline"
+                                        className="text-orange-600 font-semibold hover:underline"
                                     >{makeSuggestion(data.slug)}</button>
                                 </p>
                             </div>
@@ -151,12 +151,12 @@ export default function LinkStep({ step, currentSlug }) {
                     <button
                         type="submit"
                         disabled={processing || checking || data.slug.length < 3 || !canSubmit}
-                        className="w-full mt-2 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full mt-2 py-3 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {processing ? 'Menyimpan...' : checking ? 'Memeriksa...' : 'Lanjutkan →'}
                     </button>
 
-                    <div className="mt-5 p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-100/60 text-left text-xs text-emerald-800 leading-relaxed">
+                    <div className="mt-5 p-3.5 bg-orange-50/60 rounded-xl border border-orange-100/60 text-left text-xs text-[#b03a24] leading-relaxed">
                         <p className="font-semibold flex items-center gap-1.5 mb-1">💡 Info</p>
                         <p>Anda bisa mengubah nama link ini nanti di dashboard. Anda juga bisa mengubah dengan domain nama Anda sendiri.</p>
                     </div>

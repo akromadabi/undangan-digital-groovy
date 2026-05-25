@@ -91,7 +91,7 @@ export default function Profile({ step, brideGrooms }) {
                                             <button key={g} type="button"
                                                 onClick={() => updateField(index, 'gender', g)}
                                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${data.bride_grooms[index].gender === g
-                                                    ? 'bg-emerald-500 text-white'
+                                                    ? 'bg-[#E5654B] text-white'
                                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                     }`}>
                                                 {g === 'pria' ? 'Pria' : 'Wanita'}
@@ -121,7 +121,7 @@ export default function Profile({ step, brideGrooms }) {
                                                         value={data.bride_grooms[index][key] || ''}
                                                         onChange={(e) => updateField(index, key, e.target.value)}
                                                         placeholder={opt.placeholder}
-                                                        className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
+                                                        className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#E5654B]"
                                                     />
                                                     <button type="button" onClick={() => removeSocmed(index, key)}
                                                         className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
@@ -141,7 +141,7 @@ export default function Profile({ step, brideGrooms }) {
                                                     updated[index] = !updated[index];
                                                     setShowSocmedPicker(updated);
                                                 }}
-                                                className="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold hover:text-emerald-700 py-1.5">
+                                                className="flex items-center gap-1.5 text-xs text-[#E5654B] font-semibold hover:text-[#c24b33] py-1.5">
                                                 <Plus size={14} /> Tambah Media Sosial
                                             </button>
 
@@ -188,7 +188,7 @@ function InputField({ label, value, onChange, required, small, placeholder }) {
         <div>
             <label className={`block font-medium text-gray-600 mb-1 ${small ? 'text-xs' : 'text-sm'}`}>{label}</label>
             <input type="text" value={value || ''} onChange={(e) => onChange(e.target.value)} required={required} placeholder={placeholder || ''}
-                className={`w-full border border-gray-200 rounded-xl px-4 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 ${small ? 'py-2' : 'py-2.5'}`} />
+                className={`w-full border border-gray-200 rounded-xl px-4 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#E5654B] ${small ? 'py-2' : 'py-2.5'}`} />
         </div>
     );
 }

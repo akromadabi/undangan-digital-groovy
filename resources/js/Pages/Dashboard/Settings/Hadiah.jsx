@@ -17,7 +17,7 @@ export default function Hadiah({ gifts }) {
             <Head title="Hadiah" />
             <div className="max-w-3xl mx-auto space-y-6">
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
@@ -45,7 +45,7 @@ export default function Hadiah({ gifts }) {
                     <div className="space-y-3">
                         {giftList.map((gift) => (
                             <div key={gift.id} className="bg-white rounded-2xl border border-gray-200 p-5 flex items-start gap-4">
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${gift.gift_type === 'uang' ? 'bg-emerald-100' : 'bg-amber-100'
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${gift.gift_type === 'uang' ? 'bg-orange-100' : 'bg-amber-100'
                                     }`}>
                                     {gift.gift_type === 'uang' ? 'Uang' : 'Barang'}
                                 </div>
@@ -53,11 +53,11 @@ export default function Hadiah({ gifts }) {
                                     <div className="flex items-center justify-between">
                                         <div className="font-semibold text-gray-800 text-sm">{gift.sender_name}</div>
                                         {gift.confirmed && (
-                                            <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Dikonfirmasi</span>
+                                            <span className="text-xs bg-orange-100 text-[#c24b33] px-2 py-0.5 rounded-full"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Dikonfirmasi</span>
                                         )}
                                     </div>
                                     {gift.gift_type === 'uang' ? (
-                                        <div className="text-lg font-bold text-emerald-600 mt-1">{formatCurrency(gift.amount)}</div>
+                                        <div className="text-lg font-bold text-[#c24b33] mt-1">{formatCurrency(gift.amount)}</div>
                                     ) : (
                                         <div className="text-sm text-gray-600 mt-1">{gift.item_name}</div>
                                     )}

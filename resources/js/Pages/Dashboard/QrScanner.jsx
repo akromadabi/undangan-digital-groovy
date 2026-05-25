@@ -154,7 +154,7 @@ export default function QrScanner({ invitation }) {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2">
                     <div className="bg-white rounded-xl border border-gray-200 p-3 text-center">
-                        <div className="text-xl font-bold text-emerald-600">{stats.checked_in}</div>
+                        <div className="text-xl font-bold text-[#c24b33]">{stats.checked_in}</div>
                         <div className="text-[10px] text-gray-400 font-semibold uppercase mt-0.5">Hadir</div>
                     </div>
                     <div className="bg-white rounded-xl border border-gray-200 p-3 text-center">
@@ -171,8 +171,8 @@ export default function QrScanner({ invitation }) {
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                     {!scanning ? (
                         <div className="p-8 text-center">
-                            <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-emerald-50 flex items-center justify-center">
-                                <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                            <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-orange-50 flex items-center justify-center">
+                                <svg className="w-8 h-8 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
                                 </svg>
@@ -180,7 +180,7 @@ export default function QrScanner({ invitation }) {
                             <h3 className="text-sm font-bold text-gray-800 mb-1">Scan QR Code Tamu</h3>
                             <p className="text-xs text-gray-400 mb-4">Arahkan kamera ke QR undangan tamu untuk check-in otomatis</p>
                             <button onClick={startScanning}
-                                className="px-6 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-semibold hover:bg-emerald-600 transition-colors inline-flex items-center gap-2">
+                                className="px-6 py-2.5 bg-[#E5654B] text-white rounded-xl text-sm font-semibold hover:bg-[#c24b33] transition-colors inline-flex items-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
@@ -199,16 +199,16 @@ export default function QrScanner({ invitation }) {
                             {/* Scan overlay */}
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="w-48 h-48 border-2 border-white/50 rounded-2xl relative">
-                                    <div className="absolute -top-0.5 -left-0.5 w-6 h-6 border-t-3 border-l-3 border-emerald-400 rounded-tl-lg" />
-                                    <div className="absolute -top-0.5 -right-0.5 w-6 h-6 border-t-3 border-r-3 border-emerald-400 rounded-tr-lg" />
-                                    <div className="absolute -bottom-0.5 -left-0.5 w-6 h-6 border-b-3 border-l-3 border-emerald-400 rounded-bl-lg" />
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 border-b-3 border-r-3 border-emerald-400 rounded-br-lg" />
+                                    <div className="absolute -top-0.5 -left-0.5 w-6 h-6 border-t-3 border-l-3 border-[#e87058] rounded-tl-lg" />
+                                    <div className="absolute -top-0.5 -right-0.5 w-6 h-6 border-t-3 border-r-3 border-[#e87058] rounded-tr-lg" />
+                                    <div className="absolute -bottom-0.5 -left-0.5 w-6 h-6 border-b-3 border-l-3 border-[#e87058] rounded-bl-lg" />
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 border-b-3 border-r-3 border-[#e87058] rounded-br-lg" />
                                 </div>
                             </div>
 
                             {/* Result overlay */}
                             {result && (
-                                <div className={`absolute inset-0 flex items-center justify-center ${result.success ? 'bg-emerald-500/90' : 'bg-red-500/90'}`}>
+                                <div className={`absolute inset-0 flex items-center justify-center ${result.success ? 'bg-[#E5654B]/90' : 'bg-red-500/90'}`}>
                                     <div className="text-center text-white p-4">
                                         <div className="text-4xl mb-2">{result.success ? (result.already ? '⚠️' : '✅') : '❌'}</div>
                                         <div className="text-lg font-bold">{result.guest?.name || ''}</div>
@@ -229,7 +229,7 @@ export default function QrScanner({ invitation }) {
                             {!result && (
                                 <div className="absolute bottom-3 left-0 right-0 text-center">
                                     <span className="bg-black/50 text-white text-xs px-3 py-1.5 rounded-full inline-flex items-center gap-1.5">
-                                        <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                                        <span className="w-2 h-2 bg-[#e87058] rounded-full animate-pulse" />
                                         Scanning...
                                     </span>
                                 </div>
@@ -242,7 +242,7 @@ export default function QrScanner({ invitation }) {
                 {recentScans.length > 0 && (
                     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                         <div className="px-3 py-2.5 border-b border-gray-100 flex items-center gap-2">
-                            <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <svg className="w-3.5 h-3.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <h3 className="text-xs font-bold text-gray-700">Scan Terakhir</h3>
@@ -251,7 +251,7 @@ export default function QrScanner({ invitation }) {
                         <div className="divide-y divide-gray-50 max-h-60 overflow-y-auto">
                             {recentScans.map((scan, i) => (
                                 <div key={i} className="px-3 py-2 flex items-center gap-2.5">
-                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${scan.already ? 'bg-amber-400' : 'bg-emerald-500'}`}>
+                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${scan.already ? 'bg-amber-400' : 'bg-[#E5654B]'}`}>
                                         {scan.already ? '!' : '✓'}
                                     </div>
                                     <div className="flex-1 min-w-0">

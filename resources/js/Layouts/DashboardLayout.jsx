@@ -44,14 +44,14 @@ const bottomNavItems = [
 
 // Slide-up menu items (inside center Menu button sheet)
 const menuSheetItems = [
-    { label: 'Sambutan', href: '/content/teks-sambutan', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', color: 'bg-rose-100 text-rose-600' },
-    { label: 'Mempelai', href: '/content/mempelai', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v-1', color: 'bg-blue-100 text-blue-600' },
-    { label: 'Acara', href: '/content/acara', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', color: 'bg-amber-100 text-amber-600' },
-    { label: 'Galeri', href: '/content/galeri', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', color: 'bg-teal-100 text-teal-600' },
-    { label: 'Kisah', href: '/content/kisah', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z', color: 'bg-pink-100 text-pink-600' },
-    { label: 'Amplop', href: '/content/bank', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', color: 'bg-emerald-100 text-emerald-600' },
-    { label: 'Musik', href: '/settings/musik', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3', color: 'bg-purple-100 text-purple-600' },
-    { label: 'Upgrade', href: '/pricing', icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'bg-yellow-100 text-yellow-600' },
+    { label: 'Sambutan', href: '/content/teks-sambutan', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', color: 'bg-orange-50 text-[#E5654B]' },
+    { label: 'Mempelai', href: '/content/mempelai', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v-1', color: 'bg-orange-50 text-[#E5654B]' },
+    { label: 'Acara', href: '/content/acara', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', color: 'bg-orange-50 text-[#E5654B]' },
+    { label: 'Galeri', href: '/content/galeri', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', color: 'bg-orange-50 text-[#E5654B]' },
+    { label: 'Kisah', href: '/content/kisah', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z', color: 'bg-orange-50 text-[#E5654B]' },
+    { label: 'Amplop', href: '/content/bank', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', color: 'bg-orange-50 text-[#E5654B]' },
+    { label: 'Musik', href: '/settings/musik', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3', color: 'bg-orange-50 text-[#E5654B]' },
+    { label: 'Upgrade', href: '/pricing', icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'bg-orange-50 text-[#E5654B]' },
 ];
 
 const SvgIcon = ({ d, className = '' }) => (
@@ -136,9 +136,7 @@ export default function DashboardLayout({ children, title }) {
                 <div className="h-16 flex items-center px-5">
                     <Link href="/dashboard" className="flex items-center gap-3 w-full">
                         {brandLogo ? (
-                            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 bg-transparent border border-gray-100">
-                                <img src={brandLogo} alt="Logo" className="w-full h-full object-contain" />
-                            </div>
+                            <img src={brandLogo} alt="Logo" className="w-9 h-9 object-contain flex-shrink-0" />
                         ) : (
                             <div className="w-9 h-9 bg-[#E5654B] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
                                 {(appName || 'G').charAt(0).toUpperCase()}
@@ -202,7 +200,7 @@ export default function DashboardLayout({ children, title }) {
                     {subscription && (
                         <div className={`px-3 py-2.5 rounded-xl text-xs font-medium ${subscription.plan?.slug === 'free'
                             ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                            : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                            : 'bg-orange-50 text-[#E5654B] border border-orange-100/50'
                             }`}>
                             <div className="flex items-center justify-between">
                                 <span>Paket {subscription.plan?.name || 'Free'}</span>
@@ -239,9 +237,7 @@ export default function DashboardLayout({ children, title }) {
                         {/* Mobile logo */}
                         <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
                             {brandLogo ? (
-                                <div className="w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 bg-transparent border border-gray-100">
-                                    <img src={brandLogo} alt="Logo" className="w-full h-full object-contain" />
-                                </div>
+                                    <img src={brandLogo} alt="Logo" className="w-7 h-7 object-contain flex-shrink-0" />
                             ) : (
                                 <div className="w-7 h-7 bg-[#E5654B] rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm flex-shrink-0">
                                     {(appName || 'G').charAt(0).toUpperCase()}
@@ -290,7 +286,7 @@ export default function DashboardLayout({ children, title }) {
                                     <div className="text-xs text-[#999] mt-0.5">{auth.user?.email || ''}</div>
                                     {subscription && (
                                         <div className="mt-2 flex items-center gap-1.5">
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${subscription.plan?.slug === 'free' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${subscription.plan?.slug === 'free' ? 'bg-amber-100 text-amber-700' : 'bg-orange-100 text-[#E5654B]'}`}>
                                                 {subscription.plan?.name || 'Free'}
                                             </span>
                                             {subscription.expires_at && (

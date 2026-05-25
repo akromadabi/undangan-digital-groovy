@@ -22,8 +22,8 @@ export default function Opening({ invitation }) {
             <div className="max-w-2xl mx-auto space-y-6">
                 {/* Flash message */}
                 {flash?.success && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">
-                        <svg className="w-4 h-4 inline mr-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm">
+                        <svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}
                     </div>
                 )}
 
@@ -47,7 +47,7 @@ export default function Opening({ invitation }) {
                             value={data.opening_title}
                             onChange={(e) => setData('opening_title', e.target.value)}
                             placeholder="Misalnya: Bismillahirrahmanirrahim"
-                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
+                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]"
                         />
                         {errors.opening_title && <p className="text-red-500 text-xs mt-1">{errors.opening_title}</p>}
                     </div>
@@ -60,7 +60,7 @@ export default function Opening({ invitation }) {
                             onChange={(e) => setData('opening_text', e.target.value)}
                             placeholder="Tulis salam pembuka Anda di sini..."
                             rows={5}
-                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none"
+                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none"
                         />
                         {errors.opening_text && <p className="text-red-500 text-xs mt-1">{errors.opening_text}</p>}
                     </div>
@@ -74,7 +74,7 @@ export default function Opening({ invitation }) {
                             onChange={(e) => setData('opening_ayat', e.target.value)}
                             placeholder="Contoh: QS. Ar-Rum ayat 21"
                             rows={3}
-                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 resize-none"
+                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] resize-none"
                             dir="auto"
                         />
                         {errors.opening_ayat && <p className="text-red-500 text-xs mt-1">{errors.opening_ayat}</p>}
@@ -102,7 +102,7 @@ export default function Opening({ invitation }) {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50"
+                        className="w-full py-3.5 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50"
                     >
                         {processing ? 'Menyimpan...' : 'Simpan Opening'}
                     </button>

@@ -71,7 +71,7 @@ const ToggleSwitch = ({ checked, onChange, label, desc, icon, disabled = false }
             disabled={disabled}
             onClick={disabled ? undefined : () => onChange(!checked)}
             className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${
-                disabled ? 'bg-gray-200 cursor-not-allowed' : checked ? 'bg-emerald-500' : 'bg-gray-300'
+                disabled ? 'bg-gray-200 cursor-not-allowed' : checked ? 'bg-[#E5654B]' : 'bg-gray-300'
             }`}>
             <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${checked ? 'translate-x-5' : ''}`} />
         </button>
@@ -396,7 +396,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                             ].map(tab => (
                                 <button key={tab.key} onClick={() => handleTabChange(tab.key)}
                                     className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-semibold transition-all duration-200 ${activeTab === tab.key
-                                        ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200 scale-[1.02]'
+                                        ? 'bg-[#E5654B] text-white shadow-md shadow-orange-200 scale-[1.02]'
                                         : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                     }`}>
                                     {tab.icon}
@@ -433,7 +433,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                     onClick={() => setSelectedCategory(cat)}
                                                     className={`px-3 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all duration-200 ${
                                                         selectedCategory === cat
-                                                            ? 'bg-emerald-500 text-white shadow-md shadow-emerald-100 scale-105'
+                                                            ? 'bg-[#E5654B] text-white shadow-md shadow-orange-100 scale-105'
                                                             : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-transparent'
                                                     }`}
                                                 >
@@ -458,10 +458,10 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                 <button onClick={isLockedByPlan('template') ? undefined : () => handleThemeChange(theme.id)}
                                                     className={`w-full group relative rounded-2xl overflow-hidden border-2 text-left transition-all duration-300 ${
                                                         isSelected 
-                                                            ? 'border-emerald-500 ring-4 ring-emerald-100 shadow-md scale-[1.01]' 
+                                                            ? 'border-[#E5654B] ring-4 ring-orange-100 shadow-md scale-[1.01]' 
                                                             : isLockedByPlan('template')
                                                                 ? 'border-gray-200 opacity-60 cursor-not-allowed'
-                                                                : 'border-gray-200 hover:border-emerald-300 hover:shadow-sm'
+                                                                : 'border-gray-200 hover:border-orange-300 hover:shadow-sm'
                                                     }`}>
                                                     {/* Card Image */}
                                                     <div className="aspect-[3/4] w-full bg-gray-50 overflow-hidden relative">
@@ -478,8 +478,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                         </div>
                                                         {/* Selected overlay checkmark */}
                                                         {isSelected && (
-                                                            <div className="absolute inset-0 bg-emerald-500/10 backdrop-blur-[1px] flex items-center justify-center">
-                                                                <div className="bg-emerald-500 text-white rounded-full p-1.5 shadow-md transform scale-110">
+                                                            <div className="absolute inset-0 bg-[#E5654B]/10 backdrop-blur-[1px] flex items-center justify-center">
+                                                                <div className="bg-[#E5654B] text-white rounded-full p-1.5 shadow-md transform scale-110">
                                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                                                                 </div>
                                                             </div>
@@ -496,7 +496,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                     {/* Card Info */}
                                                     <div className="p-2.5 bg-white border-t border-gray-100 flex items-center justify-between">
                                                         <div className="min-w-0 flex-1">
-                                                            <div className="font-bold text-gray-800 text-xs truncate group-hover:text-emerald-600 transition-colors" title={theme.name}>{theme.name}</div>
+                                                            <div className="font-bold text-gray-800 text-xs truncate group-hover:text-[#c24b33] transition-colors" title={theme.name}>{theme.name}</div>
                                                             {/* Color Scheme Dots */}
                                                             <div className="flex gap-1 mt-1">
                                                                 {theme.color_scheme && Object.entries(theme.color_scheme).slice(0, 4).map(([key, val]) => (
@@ -526,8 +526,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                     Urutan Section
                                 </h3>
                                 <div className="flex items-center gap-2">
-                                    {saveMsg && <span className={`text-xs font-medium ${saveMsg === 'Tersimpan!' ? 'text-emerald-600' : 'text-red-500'}`}>{saveMsg}</span>}
-                                    <button onClick={saveSections} disabled={saving} className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-semibold hover:bg-emerald-600 disabled:opacity-50 transition-all shadow-sm flex items-center gap-1">
+                                    {saveMsg && <span className={`text-xs font-medium ${saveMsg === 'Tersimpan!' ? 'text-[#c24b33]' : 'text-red-500'}`}>{saveMsg}</span>}
+                                    <button onClick={saveSections} disabled={saving} className="px-3 py-1.5 bg-[#E5654B] text-white rounded-lg text-xs font-semibold hover:bg-[#c24b33] disabled:opacity-50 transition-all shadow-sm flex items-center gap-1">
                                         {saving ? <><svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Simpan...</> : <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg> Simpan</>}
                                     </button>
                                 </div>
@@ -543,7 +543,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                     const locked = layoutLocked || planLocked;
                                     
                                     return (
-                                        <div key={section.id} className={`flex items-center gap-2 p-2.5 rounded-xl text-sm transition-all ${locked ? 'bg-gray-100/80 border border-gray-200' : section.is_visible ? 'bg-white border border-gray-200 hover:border-emerald-300' : 'bg-gray-50/50 border border-dashed border-gray-200 opacity-50'}`}>
+                                        <div key={section.id} className={`flex items-center gap-2 p-2.5 rounded-xl text-sm transition-all ${locked ? 'bg-gray-100/80 border border-gray-200' : section.is_visible ? 'bg-white border border-gray-200 hover:border-orange-300' : 'bg-gray-50/50 border border-dashed border-gray-200 opacity-50'}`}>
                                             <div className="flex flex-col gap-0.5 w-4">
                                                 {locked ? (
                                                     <svg className={`w-3.5 h-3.5 ${planLocked ? 'text-amber-400' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -551,8 +551,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                     </svg>
                                                 ) : (
                                                     <>
-                                                        <button onClick={() => moveSection(index, 'up')} disabled={index === 0 || isLocked(sectionList[index - 1]?.section_key) || isLockedByPlan(sectionKeyToFeatureSlug[sectionList[index - 1]?.section_key])} className="text-gray-400 hover:text-emerald-600 disabled:opacity-20 transition-colors leading-none"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg></button>
-                                                        <button onClick={() => moveSection(index, 'down')} disabled={index === sectionList.length - 1 || isLocked(sectionList[index + 1]?.section_key) || isLockedByPlan(sectionKeyToFeatureSlug[sectionList[index + 1]?.section_key])} className="text-gray-400 hover:text-emerald-600 disabled:opacity-20 transition-colors leading-none"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>
+                                                        <button onClick={() => moveSection(index, 'up')} disabled={index === 0 || isLocked(sectionList[index - 1]?.section_key) || isLockedByPlan(sectionKeyToFeatureSlug[sectionList[index - 1]?.section_key])} className="text-gray-400 hover:text-[#c24b33] disabled:opacity-20 transition-colors leading-none"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg></button>
+                                                        <button onClick={() => moveSection(index, 'down')} disabled={index === sectionList.length - 1 || isLocked(sectionList[index + 1]?.section_key) || isLockedByPlan(sectionKeyToFeatureSlug[sectionList[index + 1]?.section_key])} className="text-gray-400 hover:text-[#c24b33] disabled:opacity-20 transition-colors leading-none"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>
                                                     </>
                                                 )}
                                             </div>
@@ -568,7 +568,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                             ) : (
                                                 <label className="relative inline-flex items-center cursor-pointer">
                                                     <input type="checkbox" checked={!!section.is_visible} onChange={() => toggleSection(section.id, section.section_key)} className="sr-only peer" />
-                                                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                                                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#E5654B] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
                                                 </label>
                                             )}
                                         </div>
@@ -624,14 +624,14 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                             )}
                                         </div>
                                         <div className="text-center">
-                                            <label className="inline-block px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-medium cursor-pointer transition-colors">
+                                            <label className="inline-block px-3 py-1.5 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-lg text-xs font-medium cursor-pointer transition-colors">
                                                 {coverUploading ? 'Uploading...' : 'Upload Cover'}
                                                 <input type="file" accept="image/*" className="hidden" onChange={(e) => handleCoverImageUpload(e.target.files[0])} disabled={coverUploading} />
                                             </label>
                                         </div>
-                                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Teks Atas Cover</label><input type="text" value={coverTitle} onChange={(e) => setCoverTitle(e.target.value)} placeholder="The Wedding Of" className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-emerald-300" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Nama Pasangan</label><input type="text" value={coverSubtitle} onChange={(e) => setCoverSubtitle(e.target.value)} placeholder="Mira & Randi" className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-emerald-300" /></div>
-                                        <button onClick={saveCover} disabled={coverSaving} className="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all disabled:opacity-50">{coverSaving ? 'Menyimpan...' : 'Simpan Cover'}</button>
+                                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Teks Atas Cover</label><input type="text" value={coverTitle} onChange={(e) => setCoverTitle(e.target.value)} placeholder="The Wedding Of" className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-orange-300" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Nama Pasangan</label><input type="text" value={coverSubtitle} onChange={(e) => setCoverSubtitle(e.target.value)} placeholder="Mira & Randi" className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-orange-300" /></div>
+                                        <button onClick={saveCover} disabled={coverSaving} className="w-full py-2 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all disabled:opacity-50">{coverSaving ? 'Menyimpan...' : 'Simpan Cover'}</button>
                                     </div>
                                 )}
                             </div>
@@ -640,8 +640,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                             <div className={`bg-white rounded-2xl border border-gray-200 p-4 transition-opacity ${isLockedByPlan('template') ? 'opacity-60' : ''}`}>
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
-                                        <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center relative">
-                                            <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                                        <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center relative">
+                                            <svg className="w-4 h-4 text-[#c24b33]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                             </svg>
                                             {isLockedByPlan('template') && (
@@ -667,7 +667,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                     <select value={layoutMode} 
                                         disabled={isLockedByPlan('template')}
                                         onChange={(e) => handleLayoutChange(e.target.value)}
-                                        className="border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 bg-white outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                        className="border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] bg-white outline-none disabled:opacity-50 disabled:cursor-not-allowed">
                                         <option value="scroll">Scroll (Gulir)</option>
                                         <option value="slide-h">Horizontal</option>
                                         <option value="slide-v">Vertikal</option>
@@ -679,8 +679,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                             <div className={`bg-white rounded-2xl border border-gray-200 p-4 transition-opacity ${isLockedByPlan('partikel') ? 'opacity-60' : ''}`}>
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
-                                        <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center relative">
-                                            <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                                        <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center relative">
+                                            <svg className="w-4 h-4 text-[#c24b33]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.187-.904L9 9l.813 5.096L15 15l-5.187.904zM19.071 4.929l-.429 2.571-.429-2.571-2.571-.429 2.571-.429.429-2.571.429 2.571 2.571.429-2.571.429z" />
                                             </svg>
                                             {isLockedByPlan('partikel') && (
@@ -701,7 +701,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                 )}
                                                 {!isLockedByPlan('partikel') && (
                                                     particleType ? (
-                                                        <span className="text-[9px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-full font-medium">
+                                                        <span className="text-[9px] bg-orange-100 text-[#c24b33] px-1.5 py-0.5 rounded-full font-medium">
                                                             {PARTICLE_OPTIONS.find(p => p.key === particleType)?.label || particleType}
                                                         </span>
                                                     ) : (
@@ -852,7 +852,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                             </div>
                                         </div>
                                         <select value={language} onChange={(e) => { setLanguage(e.target.value); saveSetting('language', e.target.value); }}
-                                            className="border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 bg-white outline-none">
+                                            className="border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] bg-white outline-none">
                                             <option value="id">🇮🇩 Indonesia</option>
                                             <option value="en">🇬🇧 English</option>
                                         </select>
@@ -864,8 +864,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                             <div className={`bg-white rounded-2xl border border-gray-200 p-4 space-y-3 transition-opacity ${isLockedByPlan('template') ? 'opacity-60' : ''}`}>
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
-                                        <span className="w-6 h-6 rounded-lg bg-teal-100 flex items-center justify-center relative">
-                                            <svg className="w-3.5 h-3.5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <span className="w-6 h-6 rounded-lg bg-orange-100 flex items-center justify-center relative">
+                                            <svg className="w-3.5 h-3.5 text-[#c24b33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                                             </svg>
                                             {isLockedByPlan('template') && (
@@ -895,14 +895,14 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         disabled={isLockedByPlan('template')}
                                         value={customDomain}
                                         onChange={e => setCustomDomain(e.target.value)}
-                                        className="flex-1 px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                                         placeholder="nama-pengantin.wedding"
                                     />
                                     <button
                                         type="button"
                                         disabled={settingsSaving || isLockedByPlan('template')}
                                         onClick={saveCustomDomain}
-                                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-sm transition-all disabled:cursor-not-allowed"
+                                        className="px-4 py-2 bg-[#E5654B] hover:bg-[#c24b33] disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-sm transition-all disabled:cursor-not-allowed"
                                     >
                                         {settingsSaving ? 'Saving...' : 'Simpan'}
                                     </button>
@@ -914,7 +914,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         type="button" 
                                         disabled={isLockedByPlan('template')}
                                         onClick={() => setIsTutorialOpen(true)} 
-                                        className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="inline-flex items-center gap-1 text-[10px] font-bold text-[#c24b33] hover:text-[#b03a24] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
@@ -931,7 +931,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                                                 <div>
                                                     <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-                                                        <span className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                                        <span className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center text-[#c24b33]">
                                                             ✨
                                                         </span>
                                                         Pengaturan Efek Partikel
@@ -960,7 +960,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                             return (
                                                                 <button key={p.key} type="button" 
                                                                     onClick={() => { setParticleType(p.key); handleParticleSave({ type: p.key }); }}
-                                                                    className={`p-2 rounded-xl text-center transition-all border ${isSelected ? 'bg-emerald-50 border-emerald-500 shadow-sm scale-[1.03]' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
+                                                                    className={`p-2 rounded-xl text-center transition-all border ${isSelected ? 'bg-orange-50 border-[#E5654B] shadow-sm scale-[1.03]' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
                                                                     <div className="flex justify-center mb-1">{PIcons[p.key]?.('w-5 h-5')}</div>
                                                                     <div className="text-[8px] font-bold text-gray-600 leading-none truncate">{p.label}</div>
                                                                 </button>
@@ -973,9 +973,9 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                 <div className="pt-2">
                                                     <div className="flex items-center justify-between mb-1.5">
                                                         <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Jumlah Partikel</label>
-                                                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{particleCount} pcs</span>
+                                                        <span className="text-[10px] font-bold text-[#c24b33] bg-orange-50 px-2 py-0.5 rounded-full">{particleCount} pcs</span>
                                                     </div>
-                                                    <input type="range" min="5" max="80" step="5" value={particleCount} onChange={(e) => setParticleCount(parseInt(e.target.value))} onMouseUp={(e) => handleParticleSave({ count: parseInt(e.target.value) })} onTouchEnd={(e) => handleParticleSave({ count: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-emerald-500" />
+                                                    <input type="range" min="5" max="80" step="5" value={particleCount} onChange={(e) => setParticleCount(parseInt(e.target.value))} onMouseUp={(e) => handleParticleSave({ count: parseInt(e.target.value) })} onTouchEnd={(e) => handleParticleSave({ count: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#E5654B]" />
                                                 </div>
 
                                                 {/* Kecepatan */}
@@ -990,7 +990,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                             const isSelected = particleSpeed === s.val;
                                                             return (
                                                                 <button key={s.val} type="button" onClick={() => { setParticleSpeed(s.val); handleParticleSave({ speed: s.val }); }}
-                                                                    className={`p-2 rounded-xl text-center transition-all border ${isSelected ? 'bg-emerald-50 border-emerald-500 font-bold' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
+                                                                    className={`p-2 rounded-xl text-center transition-all border ${isSelected ? 'bg-orange-50 border-[#E5654B] font-bold' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
                                                                     <div className="mb-1">{s.icon}</div>
                                                                     <div className="text-[10px] text-gray-600 font-semibold">{s.label}</div>
                                                                 </button>
@@ -1010,7 +1010,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                 )}
                                                 <button 
                                                     onClick={() => setIsParticleModalOpen(false)}
-                                                    className="flex-1 py-2 px-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-100 transition-all text-center"
+                                                    className="flex-1 py-2 px-3 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-xl text-xs font-semibold shadow-md shadow-orange-100 transition-all text-center"
                                                 >
                                                     Simpan & Tutup
                                                 </button>
@@ -1062,7 +1062,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
             {/* Toast notification */}
             {toast && (
                 <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 text-sm font-medium text-white animate-[slideUp_0.3s_ease] ${
-                    toast.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'
+                    toast.type === 'success' ? 'bg-[#E5654B]' : 'bg-red-500'
                 }`}>
                     {toast.type === 'success' ? (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
