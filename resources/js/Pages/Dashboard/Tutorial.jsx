@@ -6,15 +6,15 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 const ActiveStatusMockup = () => (
     <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-sm">
         <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI STATUS PANEL</div>
-        <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3">
-            <div className="flex items-center justify-between text-xs font-semibold text-emerald-800">
+        <div className="bg-orange-50 border border-orange-100 rounded-lg p-3">
+            <div className="flex items-center justify-between text-xs font-semibold text-orange-800">
                 <span>Paket Premium Pro</span>
-                <span className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full">Aktif</span>
+                <span className="bg-[#E5654B] text-white text-[10px] px-2 py-0.5 rounded-full">Aktif</span>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-emerald-100 mt-2 overflow-hidden">
-                <div className="h-full rounded-full bg-emerald-500" style={{ width: '85%' }} />
+            <div className="w-full h-1.5 rounded-full bg-orange-100 mt-2 overflow-hidden">
+                <div className="h-full rounded-full bg-[#E5654B]" style={{ width: '85%' }} />
             </div>
-            <div className="mt-2 text-[10px] text-emerald-700/80">Sisa masa aktif: 312 Hari lagi (s/d 25 Mei 2027)</div>
+            <div className="mt-2 text-[10px] text-orange-700/80">Sisa masa aktif: 312 Hari lagi (s/d 25 Mei 2027)</div>
         </div>
     </div>
 );
@@ -72,7 +72,7 @@ const AddGuestMockup = () => (
                     <input type="text" readOnly value="Teman Kampus" className="w-full text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" />
                 </div>
             </div>
-            <button type="button" className="w-full py-1 bg-emerald-600 text-white rounded text-xs font-semibold shadow-sm">
+            <button type="button" className="w-full py-1 bg-[#E5654B] text-white rounded text-xs font-semibold shadow-sm">
                 + Tambahkan Tamu
             </button>
         </div>
@@ -86,30 +86,30 @@ const ThemeChangeMockup = () => {
             <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI KATALOG TEMA</div>
             <div className="grid grid-cols-2 gap-3">
                 {/* Theme 1 */}
-                <div onClick={() => setSelected('adat')} className={`cursor-pointer bg-white border rounded-xl overflow-hidden shadow-sm transition-all ${selected === 'adat' ? 'ring-2 ring-emerald-500 border-transparent' : 'border-gray-200 hover:border-gray-300'}`}>
+                <div onClick={() => setSelected('adat')} className={`cursor-pointer bg-white border rounded-xl overflow-hidden shadow-sm transition-all ${selected === 'adat' ? 'ring-2 ring-[#E5654B] border-transparent' : 'border-gray-200 hover:border-gray-300'}`}>
                     <div className="h-16 bg-[#e0d6c8] flex items-center justify-center text-[10px] text-amber-800 font-serif">
                         ADAT JAWA PREVIEW
                     </div>
                     <div className="p-2 flex items-center justify-between">
                         <span className="text-[10px] font-bold text-gray-700">Joglo Klasik</span>
                         {selected === 'adat' ? (
-                            <span className="w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] font-bold">✓</span>
+                            <span className="w-3.5 h-3.5 bg-[#E5654B] text-white rounded-full flex items-center justify-center text-[8px] font-bold">✓</span>
                         ) : (
-                            <span className="text-[9px] text-emerald-600 font-semibold">Gunakan</span>
+                            <span className="text-[9px] text-[#E5654B] font-semibold">Gunakan</span>
                         )}
                     </div>
                 </div>
                 {/* Theme 2 */}
-                <div onClick={() => setSelected('modern')} className={`cursor-pointer bg-white border rounded-xl overflow-hidden shadow-sm transition-all ${selected === 'modern' ? 'ring-2 ring-emerald-500 border-transparent' : 'border-gray-200 hover:border-gray-300'}`}>
+                <div onClick={() => setSelected('modern')} className={`cursor-pointer bg-white border rounded-xl overflow-hidden shadow-sm transition-all ${selected === 'modern' ? 'ring-2 ring-[#E5654B] border-transparent' : 'border-gray-200 hover:border-gray-300'}`}>
                     <div className="h-16 bg-gradient-to-tr from-rose-100 to-indigo-100 flex items-center justify-center text-[10px] text-indigo-700 font-semibold">
                         MODERN MINIMALIST
                     </div>
                     <div className="p-2 flex items-center justify-between">
                         <span className="text-[10px] font-bold text-gray-700">Groovy Pink</span>
                         {selected === 'modern' ? (
-                            <span className="w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] font-bold">✓</span>
+                            <span className="w-3.5 h-3.5 bg-[#E5654B] text-white rounded-full flex items-center justify-center text-[8px] font-bold">✓</span>
                         ) : (
-                            <span className="text-[9px] text-emerald-600 font-semibold">Gunakan</span>
+                            <span className="text-[9px] text-[#E5654B] font-semibold">Gunakan</span>
                         )}
                     </div>
                 </div>
@@ -124,7 +124,7 @@ const StreamingFormMockup = () => (
         <div className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
             <div className="flex items-center justify-between p-1 bg-gray-50 rounded border border-gray-100">
                 <span className="text-[10px] font-bold text-gray-600 uppercase">Aktifkan live streaming</span>
-                <div className="w-7 h-4 bg-emerald-500 rounded-full p-0.5 flex justify-end items-center cursor-pointer">
+                <div className="w-7 h-4 bg-[#E5654B] rounded-full p-0.5 flex justify-end items-center cursor-pointer">
                     <div className="w-3 h-3 bg-white rounded-full" />
                 </div>
             </div>
@@ -134,7 +134,7 @@ const StreamingFormMockup = () => (
             </div>
             <div>
                 <label className="block text-[10px] font-bold text-gray-600 mb-0.5">LINK STREAMING (URL)</label>
-                <input type="text" readOnly value="https://youtube.com/live/xYzA123" className="w-full text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none text-emerald-600" />
+                <input type="text" readOnly value="https://youtube.com/live/xYzA123" className="w-full text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none text-[#E5654B]" />
             </div>
         </div>
     </div>
@@ -144,13 +144,13 @@ const MusicPlayerMockup = () => (
     <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-sm">
         <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI PENGATURAN MUSIK</div>
         <div className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
-            <div className="flex items-center gap-2 p-2 bg-emerald-50 rounded border border-emerald-100">
-                <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center animate-spin">
+            <div className="flex items-center gap-2 p-2 bg-orange-50 rounded border border-orange-100">
+                <div className="w-6 h-6 rounded-full bg-[#E5654B] text-white flex items-center justify-center animate-spin">
                     ♫
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="text-[10px] font-bold text-emerald-950 truncate">Beautiful In White.mp3</div>
-                    <div className="text-[8px] text-emerald-600">Terpilih (Pustaka Groovy)</div>
+                    <div className="text-[10px] font-bold text-orange-950 truncate">Beautiful In White.mp3</div>
+                    <div className="text-[8px] text-[#E5654B]">Terpilih (Pustaka Groovy)</div>
                 </div>
             </div>
             <div className="border border-dashed border-gray-300 rounded-lg p-3 text-center bg-white hover:bg-gray-50">
@@ -165,8 +165,8 @@ const GiftRegisterMockup = () => (
     <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl max-w-sm">
         <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI AMPLOP DIGITAL</div>
         <div className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
-            <div className="border border-emerald-100 bg-emerald-50/50 rounded-lg p-2.5 flex items-start gap-2.5">
-                <div className="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase mt-0.5">BCA</div>
+            <div className="border border-orange-100 bg-orange-50/50 rounded-lg p-2.5 flex items-start gap-2.5">
+                <div className="bg-[#E5654B] text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase mt-0.5">BCA</div>
                 <div>
                     <div className="text-[11px] font-bold text-gray-800">1234567890</div>
                     <div className="text-[9px] text-gray-500">a.n Budi Santoso</div>
@@ -187,7 +187,7 @@ const CustomDomainMockup = () => (
                 <label className="block text-[10px] font-bold text-gray-600 mb-0.5">ALAMAT DOMAIN ANDA</label>
                 <div className="flex gap-1.5">
                     <input type="text" readOnly value="budiandsiti.com" className="flex-1 text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" />
-                    <button type="button" className="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-semibold">Hubungkan</button>
+                    <button type="button" className="bg-[#E5654B] text-white px-3 py-1 rounded text-xs font-semibold">Hubungkan</button>
                 </div>
             </div>
             <div className="p-2 bg-amber-50 border border-amber-100 rounded text-[9px] text-amber-700 leading-tight">
@@ -417,7 +417,7 @@ const FAQ_DATABASE = [
         category: 'desain-tema',
         question: '16. Bagaimana cara menyembunyikan atau menonaktifkan fitur tertentu?',
         answer: 'Anda dapat menyembunyikan bagian-bagian tertentu dari undangan (seperti menyembunyikan Kisah Cinta atau bagian Amplop) dengan mudah melalui menu manajemen tata letak.',
-        keywords: ['matikan', 'nonaktifkan', 'sembunyikan', 'hilangkan', 'fitur', 'bagian', 'section', 'tata letak', 'hide'],
+        keywords: ['matikan', 'nonaktifkan', 'sembunyikan', 'hilangkan', 'fitur', 'bagian', 'section', 'tata lekat', 'hide'],
         steps: [
             'Buka menu "Desain & Tema" di panel samping kiri.',
             'Pilih tab "Tata Letak" atau masuk ke menu pengaturan sections.',
@@ -538,12 +538,12 @@ export default function Tutorial() {
 
             <div className="space-y-6 max-w-4xl mx-auto pb-12">
                 {/* ═══ Header Section ═══ */}
-                <div className="text-center py-6 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-2xl text-white px-4 relative overflow-hidden shadow-sm">
+                <div className="text-center py-8 bg-gradient-to-br from-[#E5654B] to-[#c24b33] rounded-2xl text-white px-4 relative overflow-hidden shadow-sm">
                     <div className="absolute -top-12 -left-12 w-40 h-40 rounded-full bg-white/5" />
                     <div className="absolute -bottom-16 -right-12 w-48 h-48 rounded-full bg-white/5" />
                     
                     <h1 className="text-xl lg:text-3xl font-bold tracking-tight mb-2 relative z-10">Pusat Panduan & FAQ</h1>
-                    <p className="text-xs lg:text-sm text-emerald-100/90 max-w-md mx-auto relative z-10">
+                    <p className="text-xs lg:text-sm text-orange-100/90 max-w-md mx-auto relative z-10">
                         Punya pertanyaan? Cari solusi cepat untuk mempermudah Anda dalam mengaplikasikan undangan pernikahan digital.
                     </p>
 
@@ -555,7 +555,7 @@ export default function Tutorial() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Cari panduan..."
-                                className="w-full bg-white text-gray-800 placeholder-gray-400 pl-11 pr-16 py-3 rounded-xl border-none shadow-md text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                                className="w-full bg-white text-gray-800 placeholder-gray-400 pl-11 pr-16 py-3 rounded-xl border-none shadow-md text-sm focus:ring-2 focus:ring-[#E5654B] focus:outline-none transition-all"
                             />
                             <div className="absolute left-4 top-3.5 text-gray-400">
                                 <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -614,7 +614,7 @@ export default function Tutorial() {
                             onClick={() => setActiveCategory(cat.id)}
                             className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
                                 activeCategory === cat.id
-                                    ? 'bg-emerald-600 text-white shadow-sm'
+                                    ? 'bg-[#E5654B] text-white shadow-sm'
                                     : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'
                             }`}
                         >
@@ -632,7 +632,7 @@ export default function Tutorial() {
                                 <div
                                     key={faq.id}
                                     className={`bg-white border rounded-xl overflow-hidden transition-all duration-200 ${
-                                        isOpen ? 'border-emerald-200/80 shadow-md' : 'border-gray-100 hover:border-gray-200 shadow-sm'
+                                        isOpen ? 'border-orange-200/80 shadow-md' : 'border-gray-100 hover:border-gray-200 shadow-sm'
                                     }`}
                                 >
                                     {/* Accordion Trigger */}
@@ -641,11 +641,11 @@ export default function Tutorial() {
                                         onClick={() => toggleAccordion(faq.id)}
                                         className="w-full flex items-center justify-between text-left p-4 focus:outline-none transition-colors hover:bg-gray-50/40"
                                     >
-                                        <span className={`text-sm font-semibold pr-4 transition-colors ${isOpen ? 'text-emerald-700' : 'text-gray-800'}`}>
+                                        <span className={`text-sm font-semibold pr-4 transition-colors ${isOpen ? 'text-[#E5654B]' : 'text-gray-800'}`}>
                                             {faq.question}
                                         </span>
                                         <span className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
-                                            isOpen ? 'bg-emerald-50 text-emerald-600 rotate-180' : 'bg-gray-50 text-gray-400'
+                                            isOpen ? 'bg-orange-50 text-[#E5654B] rotate-180' : 'bg-gray-50 text-gray-400'
                                         }`}>
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -702,7 +702,7 @@ export default function Tutorial() {
                             <button
                                 type="button"
                                 onClick={() => { setSearchQuery(''); setActiveCategory('semua'); }}
-                                className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+                                className="mt-4 px-4 py-2 bg-[#E5654B] hover:bg-[#d05238] text-white text-xs font-semibold rounded-lg shadow-sm"
                             >
                                 Reset Pencarian
                             </button>
@@ -711,16 +711,16 @@ export default function Tutorial() {
                 </div>
 
                 {/* ═══ Contact Support Footer Card ═══ */}
-                <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                <div className="bg-orange-50/50 border border-orange-100 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
                     <div>
-                        <h4 className="text-sm font-bold text-emerald-950">Masih Butuh Bantuan Tambahan?</h4>
-                        <p className="text-xs text-emerald-800 mt-0.5">Jika Anda tidak menemukan solusi di atas, tim support kami siap membantu Anda secara langsung.</p>
+                        <h4 className="text-sm font-bold text-orange-950">Masih Butuh Bantuan Tambahan?</h4>
+                        <p className="text-xs text-orange-800 mt-0.5">Jika Anda tidak menemukan solusi di atas, tim support kami siap membantu Anda secara langsung.</p>
                     </div>
                     <a
                         href="https://wa.me/6281234567890?text=Halo%20Admin%20Groovy,%20saya%20butuh%20bantuan%20terkait%20pengaturan%20undangan%20saya"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm inline-flex items-center gap-1.5 transition-colors"
+                        className="px-4 py-2 bg-[#E5654B] hover:bg-[#d05238] text-white rounded-lg text-xs font-semibold shadow-sm inline-flex items-center gap-1.5 transition-colors"
                     >
                         <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
