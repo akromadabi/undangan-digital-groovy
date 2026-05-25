@@ -18,6 +18,10 @@ class Payment extends Model
         'status',
         'paid_at',
         'metadata',
+        'proof_image',
+        'admin_notes',
+        'reviewed_by',
+        'reviewed_at',
     ];
 
     protected function casts(): array

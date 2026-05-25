@@ -251,6 +251,9 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
     Route::get('/pricing', [PaymentController::class, 'pricing'])->name('payment.pricing');
     Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
     Route::get('/payment-history', [PaymentController::class, 'history'])->name('payment.history');
+    Route::get('/payment/manual/{payment}', [PaymentController::class, 'showManualPayment'])->name('payment.manual.show');
+    Route::post('/payment/manual/{payment}/proof', [PaymentController::class, 'uploadProof'])->name('payment.manual.proof');
+    Route::post('/payment/manual/{payment}/cancel', [PaymentController::class, 'cancelPayment'])->name('payment.manual.cancel');
 
     // Live Tamu
     Route::get('/live-tamu', [LiveTamuController::class, 'index'])->name('live-tamu');

@@ -41,12 +41,32 @@ class ResellerSettingsController extends Controller
             'brand_logo' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
             'site_title' => 'nullable|string|max:255',
             'site_motto' => 'nullable|string|max:1000',
+            'bank_name' => 'nullable|string|max:100',
+            'bank_account' => 'nullable|string|max:50',
+            'bank_holder' => 'nullable|string|max:150',
+            'footer_whatsapp' => 'nullable|string|max:30',
+            'footer_phone' => 'nullable|string|max:30',
+            'footer_email' => 'nullable|email|max:100',
+            'footer_instagram' => 'nullable|string|max:100',
+            'footer_tiktok' => 'nullable|string|max:100',
+            'footer_address' => 'nullable|string|max:1000',
+            'footer_description' => 'nullable|string|max:1000',
         ]);
 
         $settings = $this->getSettings();
         $settings->brand_name = $request->brand_name;
         $settings->site_title = $request->site_title;
         $settings->site_motto = $request->site_motto;
+        $settings->bank_name = $request->bank_name;
+        $settings->bank_account = $request->bank_account;
+        $settings->bank_holder = $request->bank_holder;
+        $settings->footer_whatsapp = $request->footer_whatsapp;
+        $settings->footer_phone = $request->footer_phone;
+        $settings->footer_email = $request->footer_email;
+        $settings->footer_instagram = $request->footer_instagram;
+        $settings->footer_tiktok = $request->footer_tiktok;
+        $settings->footer_address = $request->footer_address;
+        $settings->footer_description = $request->footer_description;
 
         if ($request->hasFile('brand_logo')) {
             // Delete old logo
@@ -69,7 +89,7 @@ class ResellerSettingsController extends Controller
 
         $settings->save();
 
-        return back()->with('success', 'Branding berhasil disimpan.');
+        return back()->with('success', 'Branding dan kontak berhasil disimpan.');
     }
 
     // ═══ Landing Page ═══

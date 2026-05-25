@@ -16,8 +16,15 @@ class AdminPaymentController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
         $query = Payment::with(['user', 'plan'])
             ->orderByDesc('created_at');
+
+        if ($user->isReseller()) {
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->where('reseller_id', $user->id);
+            });
+        }
 
         // Filter by status
         if ($request->status && $request->status !== 'all') {
@@ -39,7 +46,15 @@ class AdminPaymentController extends Controller
 
         $payments = $query->paginate(20)->withQueryString();
 
-        $pendingCount = Payment::where('status', 'waiting_review')->count();
+        if ($user->isReseller()) {
+            $pendingCount = Payment::where('status', 'waiting_review')
+                ->whereHas('user', function ($q) use ($user) {
+                    $q->where('reseller_id', $user->id);
+                })
+                ->count();
+        } else {
+            $pendingCount = Payment::where('status', 'waiting_review')->count();
+        }
 
         return Inertia::render('Admin/Transactions/Index', [
             'payments'     => $payments,
@@ -53,6 +68,11 @@ class AdminPaymentController extends Controller
      */
     public function show(Payment $payment)
     {
+        $user = auth()->user();
+        if ($user->isReseller() && $payment->user->reseller_id !== $user->id) {
+            abort(403, 'Akses ditolak. Transaksi ini bukan milik pelanggan Anda.');
+        }
+
         $payment->load(['user', 'plan', 'subscription']);
 
         return Inertia::render('Admin/Transactions/Detail', [
@@ -65,6 +85,11 @@ class AdminPaymentController extends Controller
      */
     public function approve(Request $request, Payment $payment)
     {
+        $user = auth()->user();
+        if ($user->isReseller() && $payment->user->reseller_id !== $user->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
         if (!in_array($payment->status, ['waiting_review', 'pending_manual'])) {
             return back()->with('error', 'Pembayaran tidak dalam status yang dapat disetujui.');
         }
@@ -96,6 +121,11 @@ class AdminPaymentController extends Controller
      */
     public function reject(Request $request, Payment $payment)
     {
+        $user = auth()->user();
+        if ($user->isReseller() && $payment->user->reseller_id !== $user->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
         $request->validate(['notes' => 'required|string|max:500']);
 
         if (!in_array($payment->status, ['waiting_review', 'pending_manual'])) {

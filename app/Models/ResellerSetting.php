@@ -20,6 +20,13 @@ class ResellerSetting extends Model
         'bank_name',
         'bank_account',
         'bank_holder',
+        'footer_phone',
+        'footer_email',
+        'footer_whatsapp',
+        'footer_instagram',
+        'footer_tiktok',
+        'footer_address',
+        'footer_description',
     ];
 
     protected function casts(): array

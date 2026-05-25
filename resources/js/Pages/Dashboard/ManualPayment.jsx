@@ -10,7 +10,7 @@ const statusConfig = {
     cancelled:      { label: 'Dibatalkan', color: 'text-gray-500 bg-gray-50 border-gray-200', step: 0 },
 };
 
-export default function ManualPayment({ payment, bankAccounts = [] }) {
+export default function ManualPayment({ payment, bankAccounts = [], resellerContact = null }) {
     const { flash } = usePage().props;
     const [dragOver, setDragOver] = useState(false);
     const [preview, setPreview] = useState(null);
@@ -20,6 +20,15 @@ export default function ManualPayment({ payment, bankAccounts = [] }) {
 
     const status = statusConfig[payment.status] || statusConfig.pending_manual;
     const formatCurrency = a => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(a);
+
+    const getResellerWaLink = () => {
+        if (!resellerContact || !resellerContact.whatsapp) return null;
+        let phone = resellerContact.whatsapp.replace(/\D/g, '');
+        if (phone.startsWith('0')) {
+            phone = '62' + phone.slice(1);
+        }
+        return `https://wa.me/${phone}?text=Halo%20${encodeURIComponent(resellerContact.brand_name)},%20saya%20sudah%20memilih%20paket%20${encodeURIComponent(payment.plan?.name)}%20dan%20ingin%20melakukan%20pembayaran.`;
+    };
 
     const handleFile = (file) => {
         if (!file || !file.type.startsWith('image/')) return;
@@ -154,8 +163,24 @@ export default function ManualPayment({ payment, bankAccounts = [] }) {
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-xl border border-red-200 mt-2">
-                                Admin belum mengatur rekening bank. Silakan hubungi admin.
+                            <div className="bg-amber-50 text-amber-700 text-sm p-4 rounded-xl border border-amber-200 mt-2 space-y-3">
+                                <p className="font-semibold">Informasi rekening transfer belum dikonfigurasi oleh reseller.</p>
+                                {resellerContact?.whatsapp ? (
+                                    <div>
+                                        <p className="text-xs text-amber-600 mb-2">Silakan hubungi kami via WhatsApp untuk meminta rekening transfer langsung:</p>
+                                        <a
+                                            href={getResellerWaLink()}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+                                        >
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.739-1.456L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.45 5.489 0 9.952-4.43 9.955-9.885.002-2.643-1.019-5.127-2.87-6.983-1.852-1.855-4.316-2.877-6.97-2.878-5.49 0-9.953 4.43-9.957 9.886-.002 2.125.567 4.197 1.65 6.023L2.098 21.95l6.549-1.706c.001-.001 0 0 0 0z"/></svg>
+                                            Hubungi Reseller (WA)
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs">Hubungi reseller Anda untuk informasi lebih lanjut.</p>
+                                )}
                             </div>
                         )}
 
@@ -220,6 +245,36 @@ export default function ManualPayment({ payment, bankAccounts = [] }) {
                                 <img src={`/storage/${payment.proof_image}`} alt="Bukti" className="max-h-40 mx-auto rounded-xl object-contain border border-gray-200" />
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* Reseller Support Contact */}
+                {resellerContact && (resellerContact.whatsapp || resellerContact.phone || resellerContact.email) && (
+                    <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+                        <h3 className="font-bold text-gray-800 text-sm">Butuh Bantuan?</h3>
+                        <p className="text-xs text-gray-500">Hubungi kami melalui kontak di bawah ini jika Anda memerlukan bantuan atau ingin melakukan konfirmasi langsung.</p>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                            {resellerContact.whatsapp && (
+                                <a
+                                    href={getResellerWaLink()}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+                                >
+                                    <svg className="w-4.5 h-4.5 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.739-1.456L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.45 5.489 0 9.952-4.43 9.955-9.885.002-2.643-1.019-5.127-2.87-6.983-1.852-1.855-4.316-2.877-6.97-2.878-5.49 0-9.953 4.43-9.957 9.886-.002 2.125.567 4.197 1.65 6.023L2.098 21.95l6.549-1.706c.001-.001 0 0 0 0z"/></svg>
+                                    Hubungi Reseller (WA)
+                                </a>
+                            )}
+                            {resellerContact.email && (
+                                <a
+                                    href={`mailto:${resellerContact.email}`}
+                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition-all"
+                                >
+                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    Kirim Email
+                                </a>
+                            )}
+                        </div>
                     </div>
                 )}
 

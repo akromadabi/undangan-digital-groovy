@@ -16,6 +16,16 @@ export default function Branding({ settings }) {
         remove_logo: false,
         site_title: settings?.site_title || '',
         site_motto: settings?.site_motto || '',
+        bank_name: settings?.bank_name || '',
+        bank_account: settings?.bank_account || '',
+        bank_holder: settings?.bank_holder || '',
+        footer_whatsapp: settings?.footer_whatsapp || '',
+        footer_phone: settings?.footer_phone || '',
+        footer_email: settings?.footer_email || '',
+        footer_instagram: settings?.footer_instagram || '',
+        footer_tiktok: settings?.footer_tiktok || '',
+        footer_address: settings?.footer_address || '',
+        footer_description: settings?.footer_description || '',
     });
     const [preview, setPreview] = useState(null);
 
@@ -46,8 +56,8 @@ export default function Branding({ settings }) {
             <Head title="Branding" />
             <div className="max-w-2xl mx-auto space-y-6">
                 <div>
-                    <h2 className="text-xl font-bold text-[#1a1a1a]">Pengaturan Branding</h2>
-                    <p className="text-[#999] text-sm mt-1">Atur identitas brand reseller Anda</p>
+                    <h2 className="text-xl font-bold text-[#1a1a1a]">Pengaturan Branding & Kontak</h2>
+                    <p className="text-[#999] text-sm mt-1">Atur identitas brand, rekening transfer, dan kontak dukungan reseller Anda</p>
                 </div>
 
                 {flash?.success && (
@@ -127,6 +137,141 @@ export default function Branding({ settings }) {
                         <p className="text-xs text-[#bbb] mt-1.5">Moto/deskripsi ini akan ditampilkan di bawah judul ketika link website Anda dibagikan di WhatsApp.</p>
                     </div>
 
+                    {/* Bank Transfer Information */}
+                    <div className="border-t border-[#f0ede8] pt-5 space-y-4">
+                        <div>
+                            <h3 className="text-sm font-bold text-[#1a1a1a]">Rekening Pembayaran</h3>
+                            <p className="text-xs text-[#999] mt-0.5">Informasi rekening ini akan ditampilkan saat pelanggan Anda memilih pembayaran transfer bank manual.</p>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-[#555] mb-1.5">Nama Bank</label>
+                                <input
+                                    type="text"
+                                    value={data.bank_name}
+                                    onChange={e => setData('bank_name', e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                    placeholder="Contoh: BCA, Mandiri, Dana"
+                                />
+                                {errors.bank_name && <p className="text-xs text-red-500 mt-1">{errors.bank_name}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-[#555] mb-1.5">Nomor Rekening / E-Wallet</label>
+                                <input
+                                    type="text"
+                                    value={data.bank_account}
+                                    onChange={e => setData('bank_account', e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                    placeholder="Contoh: 1234567890"
+                                />
+                                {errors.bank_account && <p className="text-xs text-red-500 mt-1">{errors.bank_account}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-[#555] mb-1.5">Nama Pemilik Rekening</label>
+                                <input
+                                    type="text"
+                                    value={data.bank_holder}
+                                    onChange={e => setData('bank_holder', e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                    placeholder="Contoh: Ahmad Fauzi"
+                                />
+                                {errors.bank_holder && <p className="text-xs text-red-500 mt-1">{errors.bank_holder}</p>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Support Contact & Social Media */}
+                    <div className="border-t border-[#f0ede8] pt-5 space-y-4">
+                        <div>
+                            <h3 className="text-sm font-bold text-[#1a1a1a]">Kontak & Sosial Media</h3>
+                            <p className="text-xs text-[#999] mt-0.5">Kontak ini akan ditampilkan di Landing Page dan Dashboard agar pelanggan dapat menghubungi Anda jika ada pertanyaan.</p>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-[#555] mb-1.5">No. WhatsApp</label>
+                                <input
+                                    type="text"
+                                    value={data.footer_whatsapp}
+                                    onChange={e => setData('footer_whatsapp', e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                    placeholder="Contoh: 08123456789"
+                                />
+                                {errors.footer_whatsapp && <p className="text-xs text-red-500 mt-1">{errors.footer_whatsapp}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-[#555] mb-1.5">Email Dukungan</label>
+                                <input
+                                    type="email"
+                                    value={data.footer_email}
+                                    onChange={e => setData('footer_email', e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                    placeholder="Contoh: support@brand.com"
+                                />
+                                {errors.footer_email && <p className="text-xs text-red-500 mt-1">{errors.footer_email}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-[#555] mb-1.5">No. Telepon / Kantor</label>
+                                <input
+                                    type="text"
+                                    value={data.footer_phone}
+                                    onChange={e => setData('footer_phone', e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                    placeholder="Contoh: 021-123456"
+                                />
+                                {errors.footer_phone && <p className="text-xs text-red-500 mt-1">{errors.footer_phone}</p>}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-[#555] mb-1.5">Username Instagram</label>
+                                <input
+                                    type="text"
+                                    value={data.footer_instagram}
+                                    onChange={e => setData('footer_instagram', e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                    placeholder="Contoh: brand_undangan"
+                                />
+                                {errors.footer_instagram && <p className="text-xs text-red-500 mt-1">{errors.footer_instagram}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-[#555] mb-1.5">Username TikTok</label>
+                                <input
+                                    type="text"
+                                    value={data.footer_tiktok}
+                                    onChange={e => setData('footer_tiktok', e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                    placeholder="Contoh: brand_undangan"
+                                />
+                                {errors.footer_tiktok && <p className="text-xs text-red-500 mt-1">{errors.footer_tiktok}</p>}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-semibold text-[#555] mb-1.5">Tentang Kami / Deskripsi Singkat</label>
+                            <textarea
+                                value={data.footer_description}
+                                onChange={e => setData('footer_description', e.target.value)}
+                                rows={2}
+                                className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none resize-none"
+                                placeholder="Jelaskan secara singkat mengenai bisnis layanan undangan digital Anda."
+                            />
+                            {errors.footer_description && <p className="text-xs text-red-500 mt-1">{errors.footer_description}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-semibold text-[#555] mb-1.5">Alamat Fisik Kantor (Opsional)</label>
+                            <textarea
+                                value={data.footer_address}
+                                onChange={e => setData('footer_address', e.target.value)}
+                                rows={2}
+                                className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none resize-none"
+                                placeholder="Alamat lengkap kantor Anda"
+                            />
+                            {errors.footer_address && <p className="text-xs text-red-500 mt-1">{errors.footer_address}</p>}
+                        </div>
+                    </div>
+
                     {/* Preview */}
                     <div className="border-t border-[#f0ede8] pt-5">
                         <label className="block text-sm font-bold text-[#333] mb-3">Preview</label>
@@ -138,13 +283,23 @@ export default function Branding({ settings }) {
                                     <span className="text-white font-bold text-sm">{(data.brand_name || 'B').charAt(0).toUpperCase()}</span>
                                 )}
                             </div>
-                            <div>
+                            <div className="flex-1">
                                 <div className="font-bold text-[#1a1a1a] text-[15px]">{data.brand_name || 'Nama Brand'}</div>
                                 <div className="text-[11px] text-[#999]">RESELLER PANEL</div>
                             </div>
                         </div>
                     </div>
 
+                    {/* Submit Button */}
+                    <div className="flex justify-end pt-4 border-t border-[#f0ede8]">
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="px-6 py-2.5 bg-[#E5654B] text-white text-sm font-bold rounded-xl hover:bg-[#d55a42] transition-colors shadow-sm disabled:opacity-50"
+                        >
+                            {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
+                        </button>
+                    </div>
                 </form>
 
                 {/* Demo Account Section */}
