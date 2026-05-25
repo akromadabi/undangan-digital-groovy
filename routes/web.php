@@ -47,12 +47,23 @@ Route::get('/', function () {
         ->take(6)
         ->get(['id', 'slug', 'cover_image', 'cover_title', 'cover_subtitle', 'theme_id', 'created_at']);
 
+    $resellerCount = \App\Models\User::where('role', 'admin')->count() + 15;
+    $invitationCount = \App\Models\Invitation::count() + 40;
+    $adminWhatsapp = \App\Models\GlobalSetting::getValue('footer_whatsapp') ?: \App\Models\GlobalSetting::getValue('mpwav9_sender_number') ?: '6283132211830';
+    $adminEmail = \App\Models\GlobalSetting::getValue('footer_email') ?: 'admin@groovy.com';
+    $minModalCost = \App\Models\SubscriptionPlan::where('price', '>', 0)->min('price') ?: 15000;
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => false,
         'appName' => config('app.name'),
         'themes' => $themes,
         'recentInvitations' => $recentInvitations,
+        'resellerCount' => $resellerCount,
+        'invitationCount' => $invitationCount,
+        'adminWhatsapp' => $adminWhatsapp,
+        'adminEmail' => $adminEmail,
+        'minModalCost' => (float) $minModalCost,
     ]);
 })->name('home');
 
