@@ -4,6 +4,7 @@ import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 export default function Index({ themes }) {
     const { adminRoutePrefix } = usePage().props;
     const handleDelete = (id) => { if (confirm('Hapus tema?')) router.delete(`${adminRoutePrefix}/themes/${id}`); };
+    const handleToggleActive = (id) => { router.post(`${adminRoutePrefix}/themes/${id}/toggle-active`, {}, { preserveScroll: true }); };
 
     return (
         <DynamicAdminLayout title="Manajemen Tema">
@@ -22,9 +23,13 @@ export default function Index({ themes }) {
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-4xl text-[#ddd]"><svg className="w-10 h-10 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.486M7 17h.01" /></svg></div>
                                 )}
-                                <div className={`absolute top-2 left-2 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm ${theme.is_active ? 'bg-emerald-500' : 'bg-gray-500'}`}>
+                                <button
+                                    onClick={() => handleToggleActive(theme.id)}
+                                    title={theme.is_active ? 'Klik untuk Nonaktifkan Tema' : 'Klik untuk Publikasikan Tema'}
+                                    className={`absolute top-2 left-2 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm cursor-pointer hover:scale-105 active:scale-95 transition-transform ${theme.is_active ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-gray-500 hover:bg-gray-600'}`}
+                                >
                                     {theme.is_active ? 'PUBLISHED' : 'DRAFT'}
-                                </div>
+                                </button>
                                 {theme.is_premium && (
                                     <div className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">PREMIUM</div>
                                 )}

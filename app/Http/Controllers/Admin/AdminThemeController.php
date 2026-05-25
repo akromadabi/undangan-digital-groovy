@@ -22,7 +22,7 @@ class AdminThemeController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:100',
             'slug' => 'required|string|max:100|unique:themes',
             'thumbnail' => 'required|string|max:500',
@@ -31,11 +31,14 @@ class AdminThemeController extends Controller
             'font_config' => 'nullable|array',
             'is_premium' => 'boolean',
             'is_active' => 'boolean',
+            'supports_scroll' => 'boolean',
+            'supports_slide' => 'boolean',
+            'supports_tab' => 'boolean',
             'base_likes' => 'nullable|integer|min:0',
             'sort_order' => 'nullable|integer',
         ]);
 
-        Theme::create($request->all());
+        Theme::create($validated);
         return redirect()->back()->with('success', 'Tema berhasil ditambahkan.');
     }
 
@@ -46,19 +49,29 @@ class AdminThemeController extends Controller
 
     public function update(Request $request, Theme $theme)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:100',
+            'thumbnail' => 'required|string|max:500',
             'category' => 'nullable|string|max:50',
             'color_scheme' => 'nullable|array',
             'font_config' => 'nullable|array',
             'is_premium' => 'boolean',
             'is_active' => 'boolean',
+            'supports_scroll' => 'boolean',
+            'supports_slide' => 'boolean',
+            'supports_tab' => 'boolean',
             'base_likes' => 'nullable|integer|min:0',
             'sort_order' => 'nullable|integer',
         ]);
 
-        $theme->update($request->all());
+        $theme->update($validated);
         return redirect()->back()->with('success', 'Tema berhasil diupdate.');
+    }
+
+    public function toggleActive(Theme $theme)
+    {
+        $theme->update(['is_active' => !$theme->is_active]);
+        return redirect()->back()->with('success', 'Status aktif tema berhasil diubah.');
     }
 
     public function destroy(Theme $theme)

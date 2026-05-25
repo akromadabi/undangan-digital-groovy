@@ -338,6 +338,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
 
     // Global Management (themes, plans, music, quotes, settings)
     Route::resource('plans', AdminPlanController::class);
+    Route::post('themes/{theme}/toggle-active', [AdminThemeController::class, 'toggleActive'])->name('themes.toggle-active');
     Route::resource('themes', AdminThemeController::class);
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
