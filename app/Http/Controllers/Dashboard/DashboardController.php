@@ -65,6 +65,11 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function tutorial()
+    {
+        return Inertia::render('Dashboard/Tutorial');
+    }
+
     public function upload(Request $request)
     {
         // Override PHP limits for audio/large files

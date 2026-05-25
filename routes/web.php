@@ -177,6 +177,9 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
     // Main Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Tutorial & Panduan
+    Route::get('/tutorial', [DashboardController::class, 'tutorial'])->name('tutorial');
+
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
