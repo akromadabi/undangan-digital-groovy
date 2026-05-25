@@ -221,7 +221,7 @@ export default function AdminLayout({ children, title }) {
                 </header>
 
                 {/* Page Content - add bottom padding on mobile for bottom nav */}
-                <main className="flex-1 p-4 lg:p-8 pb-20 lg:pb-8 overflow-x-hidden page-enter">
+                <main className="flex-1 p-4 lg:p-8 pb-20 lg:pb-8 overflow-x-clip page-enter" style={{ overflowX: 'clip' }}>
                     <div className="stagger-children">
                         {children}
                     </div>

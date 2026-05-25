@@ -134,7 +134,7 @@ export default function SuperAdminLayout({ children, title }) {
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 p-4 lg:p-8 pb-20 lg:pb-8 overflow-x-hidden page-enter">
+                <main className="flex-1 p-4 lg:p-8 pb-20 lg:pb-8 overflow-x-clip page-enter" style={{ overflowX: 'clip' }}>
                     {urlMismatch && (
                         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
                             <div className="flex items-start gap-2.5">
