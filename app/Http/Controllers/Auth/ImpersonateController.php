@@ -334,6 +334,7 @@ class ImpersonateController extends Controller
     {
         $currentUser = $request->user();
         $originalRole = session('impersonator_role') ?: $currentUser->role;
+        $originalId = session('impersonator_id') ?: $currentUser->id;
 
         // Security check: Only allow if original user is super_admin or admin
         if (!in_array($originalRole, ['super_admin', 'admin'])) {
@@ -388,8 +389,8 @@ class ImpersonateController extends Controller
             }
 
             session([
-                'impersonator_id' => auth()->id(),
-                'impersonator_role' => auth()->user()->role,
+                'impersonator_id' => $originalId,
+                'impersonator_role' => $originalRole,
             ]);
             auth()->login($reseller);
 
@@ -428,8 +429,8 @@ class ImpersonateController extends Controller
                 }
 
                 session([
-                    'impersonator_id' => $superAdmin->id,
-                    'impersonator_role' => $superAdmin->role,
+                    'impersonator_id' => $originalId,
+                    'impersonator_role' => $originalRole,
                 ]);
                 auth()->login($user);
 
