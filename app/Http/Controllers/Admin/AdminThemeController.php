@@ -30,6 +30,9 @@ class AdminThemeController extends Controller
             'color_scheme' => 'nullable|array',
             'font_config' => 'nullable|array',
             'is_premium' => 'boolean',
+            'is_active' => 'boolean',
+            'base_likes' => 'nullable|integer|min:0',
+            'sort_order' => 'nullable|integer',
         ]);
 
         Theme::create($request->all());
@@ -48,6 +51,10 @@ class AdminThemeController extends Controller
             'category' => 'nullable|string|max:50',
             'color_scheme' => 'nullable|array',
             'font_config' => 'nullable|array',
+            'is_premium' => 'boolean',
+            'is_active' => 'boolean',
+            'base_likes' => 'nullable|integer|min:0',
+            'sort_order' => 'nullable|integer',
         ]);
 
         $theme->update($request->all());

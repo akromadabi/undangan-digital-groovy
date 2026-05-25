@@ -16,6 +16,7 @@ export default function Form({ theme }) {
         color_scheme: JSON.stringify(theme?.color_scheme || { primary: '#B76E79', secondary: '#D4A373', bg: '#FFF9F5', text: '#2D2D2D' }, null, 2),
         font_config: JSON.stringify(theme?.font_config || { heading: 'Playfair Display', body: 'Poppins', script: 'Great Vibes' }, null, 2),
         sort_order: theme?.sort_order || 0,
+        base_likes: theme?.base_likes || 0,
     });
 
     const handleThumbnailUpload = async (e) => {
@@ -129,16 +130,33 @@ export default function Form({ theme }) {
                                     <option value="floral">Floral</option><option value="islamic">Islamic</option>
                                     <option value="rustic">Rustic</option><option value="minimalist">Minimalist</option>
                                 </select></div>
+                            <div><label className={labelClass}>Like Dasar (Base Likes)</label>
+                                <input type="number" min="0" value={data.base_likes} onChange={(e) => setData('base_likes', parseInt(e.target.value) || 0)}
+                                    className={inputClass} />
+                                {errors.base_likes && <p className="text-red-500 text-xs mt-1">{errors.base_likes}</p>}</div>
+                            <div><label className={labelClass}>Urutan Sortir (Sort Order)</label>
+                                <input type="number" value={data.sort_order} onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
+                                    className={inputClass} />
+                                {errors.sort_order && <p className="text-red-500 text-xs mt-1">{errors.sort_order}</p>}</div>
                         </div>
 
                         <div className="flex flex-wrap gap-4 pt-2">
-                            {['is_premium', 'is_active', 'supports_scroll', 'supports_slide', 'supports_tab'].map(key => (
-                                <label key={key} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer transition-all ${data[key] ? 'bg-[#E5654B]/5 border border-[#E5654B]/30' : 'bg-[#f8f7f4] border border-transparent'}`}>
-                                    <input type="checkbox" checked={data[key]} onChange={(e) => setData(key, e.target.checked)}
-                                        className="rounded border-[#e8e5e0] text-[#E5654B] focus:ring-[#E5654B]" />
-                                    <span className={`text-xs font-medium capitalize ${data[key] ? 'text-[#E5654B]' : 'text-[#777]'}`}>{key.replace(/_/g, ' ').replace('supports ', '').replace('is ', '')}</span>
-                                </label>
-                            ))}
+                            {['is_premium', 'is_active', 'supports_scroll', 'supports_slide', 'supports_tab'].map(key => {
+                                const labelMap = {
+                                    is_premium: 'Premium',
+                                    is_active: 'Publish Tema',
+                                    supports_scroll: 'Scroll',
+                                    supports_slide: 'Slide',
+                                    supports_tab: 'Tab'
+                                };
+                                return (
+                                    <label key={key} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer transition-all ${data[key] ? 'bg-[#E5654B]/5 border border-[#E5654B]/30' : 'bg-[#f8f7f4] border border-transparent'}`}>
+                                        <input type="checkbox" checked={data[key]} onChange={(e) => setData(key, e.target.checked)}
+                                            className="rounded border-[#e8e5e0] text-[#E5654B] focus:ring-[#E5654B]" />
+                                        <span className={`text-xs font-medium capitalize ${data[key] ? 'text-[#E5654B]' : 'text-[#777]'}`}>{labelMap[key] || key}</span>
+                                    </label>
+                                );
+                            })}
                         </div>
                     </div>
 
