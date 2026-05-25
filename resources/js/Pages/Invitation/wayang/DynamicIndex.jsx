@@ -1299,6 +1299,15 @@ export default function WayangTheme({
         }
     }, [isSlideMode, slideIdx, resolvedSections]);
 
+    // Auto-scroll active menu item into viewport (centers the active bottom navigation menu item)
+    useEffect(() => {
+        if (!activeSection) return;
+        const activeEl = document.querySelector(`.wy-nav-item--active`);
+        if (activeEl) {
+            activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }, [activeSection]);
+
     const touchStart = useRef({ x: 0, y: 0, time: 0, atTop: true, atBottom: true });
 
     const nextSlide = () => {

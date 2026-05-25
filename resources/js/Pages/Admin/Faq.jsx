@@ -287,44 +287,31 @@ const RESELLER_FAQ_DATABASE = [
 ];
 
 export default function Faq() {
-    const [mainTab, setMainTab] = useState('reseller'); // 'reseller' or 'client'
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('semua');
     const [activeId, setActiveId] = useState(''); // Accordion active state
     const [isListening, setIsListening] = useState(false);
 
-    // Reset filters on tab switch
-    const handleMainTabChange = (tab) => {
-        setMainTab(tab);
-        setSearchQuery('');
-        setActiveCategory('semua');
-        setActiveId('');
-    };
-
-    // Category Tabs Configuration based on Main Tab
+    // Unified Category Tabs Configuration (combining Reseller & Client/User guides)
     const categories = useMemo(() => {
-        if (mainTab === 'reseller') {
-            return [
-                { id: 'semua', label: 'Semua Panduan' },
-                { id: 'domain-branding', label: 'Domain & Branding' },
-                { id: 'pricing-revenue', label: 'Harga & Pencairan' },
-                { id: 'transaksi-klien', label: 'Transaksi & Klien' }
-            ];
-        } else {
-            return [
-                { id: 'semua', label: 'Semua Panduan' },
-                { id: 'mulai-cepat', label: 'Mulai Cepat' },
-                { id: 'desain-tema', label: 'Desain & Tema' },
-                { id: 'tamu-undangan', label: 'Tamu & Undangan' },
-                { id: 'fitur-tambahan', label: 'Fitur Tambahan' }
-            ];
-        }
-    }, [mainTab]);
+        return [
+            { id: 'semua', label: 'Semua Panduan' },
+            { id: 'domain-branding', label: 'Reseller: Domain & Branding' },
+            { id: 'pricing-revenue', label: 'Reseller: Harga & Pencairan' },
+            { id: 'transaksi-klien', label: 'Reseller: Transaksi & Klien' },
+            { id: 'mulai-cepat', label: 'Klien: Mulai Cepat' },
+            { id: 'desain-tema', label: 'Klien: Desain & Tema' },
+            { id: 'tamu-undangan', label: 'Klien: Tamu & Undangan' },
+            { id: 'fitur-tambahan', label: 'Klien: Fitur Tambahan' }
+        ];
+    }, []);
 
-    // Active Database
+    // Combined Active Database containing both reseller specific and client guides
     const currentDatabase = useMemo(() => {
-        return mainTab === 'reseller' ? RESELLER_FAQ_DATABASE : CLIENT_FAQ_DATABASE;
-    }, [mainTab]);
+        const resellers = RESELLER_FAQ_DATABASE.map(item => ({ ...item, isReseller: true }));
+        const clients = CLIENT_FAQ_DATABASE.map(item => ({ ...item, isReseller: false }));
+        return [...resellers, ...clients];
+    }, []);
 
     // Filter FAQ list based on Search & Category
     const filteredFAQs = useMemo(() => {
@@ -506,7 +493,7 @@ export default function Faq() {
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder={mainTab === 'reseller' ? 'Cari panduan reseller...' : 'Cari panduan klien...'}
+                                    placeholder="Cari panduan reseller atau klien..."
                                     className="flex-1 bg-transparent text-gray-800 placeholder-gray-400 text-sm border-none focus:outline-none focus:ring-0 p-1 min-w-0"
                                     style={{
                                         border: 'none',
@@ -552,34 +539,6 @@ export default function Faq() {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* ═══ Main Dual-Tab Navigation (FAQ Reseller vs FAQ Client) ═══ */}
-                <div className="flex bg-[#f3f0ec] p-1.5 rounded-xl border border-[#e8e5e0] gap-1 shadow-sm">
-                    <button
-                        type="button"
-                        onClick={() => handleMainTabChange('reseller')}
-                        className={`flex-1 py-3 text-center rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
-                            mainTab === 'reseller'
-                                ? 'bg-white text-[#E5654B] shadow-sm'
-                                : 'text-gray-600 hover:text-gray-800'
-                        }`}
-                    >
-                        <Icon d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" className="w-4.5 h-4.5" />
-                        Panduan Reseller (Agency)
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => handleMainTabChange('client')}
-                        className={`flex-1 py-3 text-center rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
-                            mainTab === 'client'
-                                ? 'bg-white text-[#E5654B] shadow-sm'
-                                : 'text-gray-600 hover:text-gray-800'
-                        }`}
-                    >
-                        <Icon d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.97 5.97 0 00-.75-2.98m-.001-3.97a3.375 3.375 0 110-6.75 3.375 3.375 0 00-.001 6.75zm-1.902 2.102a4.875 4.875 0 01-5.995 0M9 21h1.5v-3H9v3z" className="w-4.5 h-4.5" />
-                        Panduan Klien (User)
-                    </button>
                 </div>
 
                 {/* ═══ Category Tabs (Horizontal Scrollable) ═══ */}
@@ -655,7 +614,7 @@ export default function Faq() {
                                             {/* Render Specific Mockup Simulator */}
                                             {faq.mockup && (
                                                 <div className="flex justify-center mt-4">
-                                                    {mainTab === 'reseller'
+                                                    {faq.isReseller
                                                         ? renderResellerMockup(faq.mockup)
                                                         : renderClientMockup(faq.mockup)
                                                     }
@@ -704,3 +663,4 @@ export default function Faq() {
         </AdminLayout>
     );
 }
+
