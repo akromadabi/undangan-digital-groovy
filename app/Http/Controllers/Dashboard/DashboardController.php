@@ -79,7 +79,11 @@ class DashboardController extends Controller
 
         try {
             $folder = $request->input('folder', 'uploads');
-            $path = $request->file('file')->store($folder, 'public');
+            
+            $file = $request->file('file');
+            \App\Helpers\ImageCompressor::compress($file);
+            
+            $path = $file->store($folder, 'public');
 
             return response()->json([
                 'url' => '/storage/' . $path,

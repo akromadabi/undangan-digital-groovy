@@ -53,7 +53,11 @@ class ResellerSettingsController extends Controller
             if ($settings->brand_logo && Storage::disk('public')->exists($settings->brand_logo)) {
                 Storage::disk('public')->delete($settings->brand_logo);
             }
-            $settings->brand_logo = $request->file('brand_logo')->store('reseller/logos', 'public');
+            
+            $file = $request->file('brand_logo');
+            \App\Helpers\ImageCompressor::compress($file);
+            
+            $settings->brand_logo = $file->store('reseller/logos', 'public');
         }
 
         if ($request->has('remove_logo') && $request->remove_logo) {
