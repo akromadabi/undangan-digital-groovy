@@ -198,7 +198,7 @@ const CustomDomainMockup = () => (
 );
 
 // FAQ Data Source
-const FAQ_DATABASE = [
+export const FAQ_DATABASE = [
     {
         id: 'faq-aktif',
         category: 'mulai-cepat',

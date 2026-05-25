@@ -51,4 +51,9 @@ class AdminDashboardController extends Controller
             'themes' => $themes
         ]);
     }
+
+    public function faq()
+    {
+        return Inertia::render('Admin/Faq');
+    }
 }

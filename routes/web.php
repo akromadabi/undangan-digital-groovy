@@ -281,6 +281,7 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/themes', [AdminDashboardController::class, 'themes'])->name('themes');
+    Route::get('/faq', [AdminDashboardController::class, 'faq'])->name('faq');
     Route::resource('users', AdminUserController::class)->only(['index', 'show']);
     Route::get('/live-tamu', [AdminLiveTamuController::class, 'index'])->name('live-tamu');
     Route::get('/live-tamu/data', [AdminLiveTamuController::class, 'data'])->name('live-tamu.data');
