@@ -326,4 +326,117 @@ class ImpersonateController extends Controller
 
         return redirect('/dashboard');
     }
+
+    /**
+     * Switch role dynamically for testing.
+     */
+    public function switchRole(Request $request, string $role)
+    {
+        $currentUser = $request->user();
+        $originalRole = session('impersonator_role') ?: $currentUser->role;
+
+        // Security check: Only allow if original user is super_admin or admin
+        if (!in_array($originalRole, ['super_admin', 'admin'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Limit options based on original role
+        if ($originalRole === 'admin' && !in_array($role, ['admin', 'user'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (!in_array($role, ['super_admin', 'admin', 'user'])) {
+            abort(400, 'Invalid role.');
+        }
+
+        $currentRole = $currentUser->role;
+        if ($currentRole === $role) {
+            // Already in this role
+            return back();
+        }
+
+        // 1. Switch to Super Admin
+        if ($role === 'super_admin') {
+            if (session()->has('impersonator_id') && session('impersonator_role') === 'super_admin') {
+                return $this->leave($request);
+            }
+            abort(403, 'Unauthorized.');
+        }
+
+        // 2. Switch to Reseller (admin)
+        if ($role === 'admin') {
+            // If original user is reseller, they just want to return to their account
+            if ($originalRole === 'admin') {
+                return $this->leave($request);
+            }
+
+            // If original user is super admin, we need to leave any user impersonation first
+            if (session()->has('impersonator_id')) {
+                // Log back into Super Admin first
+                $superAdmin = User::find(session('impersonator_id'));
+                if (!$superAdmin) {
+                    abort(500, 'Original session user not found.');
+                }
+                auth()->login($superAdmin);
+                session()->forget(['impersonator_id', 'impersonator_role']);
+            }
+
+            // Impersonate the first reseller user
+            $reseller = User::where('role', 'admin')->first();
+            if (!$reseller) {
+                return back()->with('error', 'Tidak ada akun reseller untuk tes.');
+            }
+
+            session([
+                'impersonator_id' => auth()->id(),
+                'impersonator_role' => auth()->user()->role,
+            ]);
+            auth()->login($reseller);
+
+            return redirect()->route('admin.dashboard')->with('success', "Ganti ke peran Reseller ({$reseller->name}).");
+        }
+
+        // 3. Switch to User (client)
+        if ($role === 'user') {
+            // If original role is reseller, switch to reseller's demo user
+            if ($originalRole === 'admin') {
+                // Return demo user switch directly
+                if (session()->has('impersonator_id')) {
+                    // If we were impersonating a user already, leave it first
+                    $this->leave($request);
+                }
+                return $this->switchToDemoUser($request);
+            }
+
+            // If original user is super admin
+            if ($originalRole === 'super_admin') {
+                // Log back to super admin first if impersonating
+                $superAdmin = auth()->user();
+                if (session()->has('impersonator_id')) {
+                    $superAdmin = User::find(session('impersonator_id'));
+                    if (!$superAdmin) {
+                        abort(500, 'Original session user not found.');
+                    }
+                    auth()->login($superAdmin);
+                    session()->forget(['impersonator_id', 'impersonator_role']);
+                }
+
+                // Impersonate first user client in the database
+                $user = User::where('role', 'user')->first();
+                if (!$user) {
+                    return back()->with('error', 'Tidak ada akun user client untuk tes.');
+                }
+
+                session([
+                    'impersonator_id' => $superAdmin->id,
+                    'impersonator_role' => $superAdmin->role,
+                ]);
+                auth()->login($user);
+
+                return redirect()->route('dashboard')->with('success', "Ganti ke peran User ({$user->name}).");
+            }
+        }
+
+        return back();
+    }
 }

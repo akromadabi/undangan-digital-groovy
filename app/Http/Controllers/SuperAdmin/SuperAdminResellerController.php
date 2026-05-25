@@ -44,7 +44,13 @@ class SuperAdminResellerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                \Illuminate\Validation\Rule::unique('users', 'email')->where(function ($query) {
+                    $query->where('role', 'admin');
+                })
+            ],
             'password' => 'required|string|min:6',
             'phone' => 'nullable|string|max:20',
             'brand_name' => 'nullable|string|max:100',
@@ -125,7 +131,13 @@ class SuperAdminResellerController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email,' . $reseller->id,
+            'email' => [
+                'required',
+                'email',
+                \Illuminate\Validation\Rule::unique('users', 'email')->ignore($reseller->id)->where(function ($query) {
+                    $query->where('role', 'admin');
+                })
+            ],
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
             'brand_name' => 'nullable|string|max:100',

@@ -85,12 +85,12 @@ export default function Edit({ reseller, centralHost = 'undangan.com' }) {
                             <div>
                                 <label className="block text-xs font-medium text-[#999] mb-1.5">Password Baru</label>
                                 <input type="password" value={pw.password} onChange={e => setPw({ ...pw, password: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none" placeholder="Minimal 6 karakter" required minLength={6} />
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none" placeholder="Minimal 6 karakter" minLength={6} />
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-[#999] mb-1.5">Konfirmasi Password</label>
                                 <input type="password" value={pw.password_confirmation} onChange={e => setPw({ ...pw, password_confirmation: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none" placeholder="Ulangi password" required />
+                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none" placeholder="Ulangi password" />
                             </div>
                         </div>
                         <div className="flex items-center gap-3 mt-4">

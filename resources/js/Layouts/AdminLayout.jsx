@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
+import RoleSwitcher from '../Components/RoleSwitcher';
 
 const SvgIcon = ({ d, className = '' }) => (
     <svg className={`w-5 h-5 ${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -147,6 +148,7 @@ export default function AdminLayout({ children, title }) {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <RoleSwitcher auth={auth} />
                         <div className="hidden lg:flex items-center gap-2 text-sm text-[#999]">
                             <span>Admin:</span>
                             <span className="font-medium text-[#555]">{auth.user?.name}</span>

@@ -24,7 +24,13 @@ class ProfileUpdateRequest extends FormRequest
                 'email',
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id)->where(function ($query) {
-                    $query->where('reseller_id', $this->user()->reseller_id);
+                    if ($this->user()->role === 'admin') {
+                        $query->where('role', 'admin');
+                    } elseif ($this->user()->role === 'super_admin') {
+                        $query->where('role', 'super_admin');
+                    } else {
+                        $query->where('reseller_id', $this->user()->reseller_id);
+                    }
                 }),
             ],
         ];

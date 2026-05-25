@@ -352,6 +352,7 @@ Route::post('/webhooks/xendit', [PaymentController::class, 'webhook'])->name('we
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/impersonate/leave', [\App\Http\Controllers\Auth\ImpersonateController::class, 'leave'])->name('impersonate.leave');
+    Route::post('/impersonate/switch-role/{role}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'switchRole'])->name('impersonate.switch-role');
 });
 
 require __DIR__ . '/auth.php';

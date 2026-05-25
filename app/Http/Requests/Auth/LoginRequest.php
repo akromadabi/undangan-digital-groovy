@@ -41,25 +41,44 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $credentials = [
-            'email' => $this->email,
-            'password' => $this->password,
-        ];
+        $email = $this->email;
+        $password = $this->password;
 
         $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
+
+        // Find candidate users
+        $query = \App\Models\User::where('email', $email);
+
         if ($resellerSetting) {
-            $credentials['reseller_id'] = $resellerSetting->user_id;
-            $credentials['role'] = 'user';
-        } else {
-            $credentials[] = function ($query) {
-                $query->where(function ($q) {
-                    $q->whereNull('reseller_id')
-                      ->orWhereIn('role', ['super_admin', 'admin']);
+            // Either a user client under this reseller, or the reseller admin account itself
+            $query->where(function ($q) use ($resellerSetting) {
+                $q->where(function ($sub) use ($resellerSetting) {
+                    $sub->where('reseller_id', $resellerSetting->user_id)
+                        ->where('role', 'user');
+                })->orWhere(function ($sub) use ($resellerSetting) {
+                    $sub->where('id', $resellerSetting->user_id)
+                        ->where('role', 'admin');
                 });
-            };
+            });
+        } else {
+            // Central login: Super Admin, Reseller, or central client
+            $query->where(function ($q) {
+                $q->whereNull('reseller_id')
+                  ->orWhereIn('role', ['super_admin', 'admin']);
+            });
         }
 
-        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
+        $users = $query->get();
+        $authenticatedUser = null;
+
+        foreach ($users as $user) {
+            if (\Illuminate\Support\Facades\Hash::check($password, $user->password)) {
+                $authenticatedUser = $user;
+                break;
+            }
+        }
+
+        if (!$authenticatedUser) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -67,6 +86,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        Auth::login($authenticatedUser, $this->boolean('remember'));
         RateLimiter::clear($this->throttleKey());
     }
 

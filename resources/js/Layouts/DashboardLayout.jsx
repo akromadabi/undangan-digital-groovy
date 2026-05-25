@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
+import RoleSwitcher from '../Components/RoleSwitcher';
 
 const menuItems = [
     {
@@ -262,6 +263,7 @@ export default function DashboardLayout({ children, title }) {
                     </div>
 
                     <div className="flex items-center gap-2">
+                        <RoleSwitcher auth={auth} />
                         {/* Desktop buttons */}
                         <a
                             href={`/u/${auth.user?.invitation_slug || ''}`}

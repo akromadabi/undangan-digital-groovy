@@ -37,6 +37,42 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        // Resolve active reseller settings
+        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+        
+        if (!$resellerSetting && $user) {
+            if ($user->role === 'admin') {
+                $resellerSetting = $user->resellerSettings;
+            } elseif ($user->role === 'user' && $user->reseller) {
+                $resellerSetting = $user->reseller->resellerSettings;
+            }
+        }
+
+        $path = $request->path();
+        $pathParts = explode('/', $path);
+
+        if (!$resellerSetting && count($pathParts) >= 2 && $pathParts[0] === 'r') {
+            $subdomain = $pathParts[1];
+            $resellerSetting = \App\Models\ResellerSetting::where('subdomain', $subdomain)->where('is_active', true)->first();
+        }
+
+        if (!$resellerSetting && count($pathParts) >= 2 && $pathParts[0] === 'u') {
+            $slug = $pathParts[1];
+            $invitation = \App\Models\Invitation::where('slug', $slug)->where('is_active', true)->first();
+            if ($invitation && $invitation->user) {
+                $owner = $invitation->user;
+                if ($owner->role === 'admin') {
+                    $resellerSetting = $owner->resellerSettings;
+                } elseif ($owner->reseller) {
+                    $resellerSetting = $owner->reseller->resellerSettings;
+                }
+            }
+        }
+
+        $appName = $resellerSetting && $resellerSetting->brand_name 
+            ? $resellerSetting->brand_name 
+            : (config('app.name') === 'Laravel' ? 'Undangan Digital' : config('app.name', 'Undangan Digital'));
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -73,7 +109,7 @@ class HandleInertiaRequests extends Middleware
                 ]
             ) : null,
             'features' => $featureAccess,
-            'appName' => config('app.name'),
+            'appName' => $appName,
             'adminRoutePrefix' => str_starts_with($request->path(), 'super-admin') ? '/super-admin' : '/admin',
             'resellerSubdomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->subdomain : null,
             'resellerCustomDomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->custom_domain : null,
