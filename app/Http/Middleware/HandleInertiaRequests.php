@@ -50,6 +50,11 @@ class HandleInertiaRequests extends Middleware
                     'avatar' => $user->avatar,
                     'invitation_slug' => $user->invitation?->slug,
                 ] : null,
+                'impersonator' => session()->has('impersonator_id') ? [
+                    'id' => session('impersonator_id'),
+                    'role' => session('impersonator_role'),
+                    'name' => \App\Models\User::find(session('impersonator_id'))?->name,
+                ] : null,
             ],
             'subscription' => $user ? (
                 (!$user->isAdmin() && !$user->isSuperAdmin()) ? [

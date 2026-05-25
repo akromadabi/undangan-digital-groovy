@@ -8,6 +8,7 @@ class ResellerSetting extends Model
 {
     protected $fillable = [
         'user_id',
+        'demo_user_id',
         'brand_name',
         'brand_logo',
         'site_title',
@@ -31,5 +32,10 @@ class ResellerSetting extends Model
     public function reseller()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function demoUser()
+    {
+        return $this->belongsTo(User::class, 'demo_user_id');
     }
 }

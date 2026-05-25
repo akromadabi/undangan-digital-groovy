@@ -290,6 +290,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/pencairan', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'index'])->name('pencairan');
     Route::post('/pencairan/request', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'requestWithdrawal'])->name('pencairan.request');
     Route::post('/pencairan/bank', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'updateBank'])->name('pencairan.bank');
+
+    // Impersonation
+    Route::post('/impersonate/user/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateUser'])->name('impersonate.user');
+    Route::post('/impersonate/demo-user', [\App\Http\Controllers\Auth\ImpersonateController::class, 'switchToDemoUser'])->name('impersonate.demo-user');
 });
 
 // ═══════════════════════════════════════
@@ -335,11 +339,19 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     // Withdrawal Management
     Route::get('/withdrawals', [\App\Http\Controllers\SuperAdmin\WithdrawalManagementController::class, 'index'])->name('withdrawals.index');
     Route::post('/withdrawals/{id}', [\App\Http\Controllers\SuperAdmin\WithdrawalManagementController::class, 'updateStatus'])->name('withdrawals.update');
+
+    // Impersonation
+    Route::post('/impersonate/user/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateUser'])->name('impersonate.user');
+    Route::post('/impersonate/reseller/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateReseller'])->name('impersonate.reseller');
 });
 
 // ═══════════════════════════════════════
 // Webhooks (no CSRF, no auth)
 // ═══════════════════════════════════════
 Route::post('/webhooks/xendit', [PaymentController::class, 'webhook'])->name('webhook.xendit')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/impersonate/leave', [\App\Http\Controllers\Auth\ImpersonateController::class, 'leave'])->name('impersonate.leave');
+});
 
 require __DIR__ . '/auth.php';

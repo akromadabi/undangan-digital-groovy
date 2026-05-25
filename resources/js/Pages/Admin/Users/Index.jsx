@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
-import { Eye, Pencil } from 'lucide-react';
+import { Eye, Pencil, UserCheck } from 'lucide-react';
 
 export default function Index({ users, filters }) {
     const { auth, adminRoutePrefix } = usePage().props;
@@ -71,6 +71,15 @@ export default function Index({ users, filters }) {
                                         <div className="flex items-center justify-center gap-1.5">
                                             <Link href={`${adminRoutePrefix}/users/${user.id}`} className="p-2 bg-[#fdfdfd] hover:bg-slate-50 text-slate-600 hover:text-slate-900 rounded-xl transition-all inline-flex items-center justify-center border border-slate-100 shadow-sm" title="Lihat Detail">
                                                 <Eye size={15} />
+                                            </Link>
+                                            <Link 
+                                                href={`${adminRoutePrefix}/impersonate/user/${user.id}`} 
+                                                method="post" 
+                                                as="button"
+                                                className="p-2 bg-[#fdfdfd] hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 rounded-xl transition-all inline-flex items-center justify-center border border-emerald-100 shadow-sm" 
+                                                title="Masuk sebagai User (Impersonasi)"
+                                            >
+                                                <UserCheck size={15} />
                                             </Link>
                                             {isSuperAdmin && (
                                                 <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="p-2 bg-[#fdfdfd] hover:bg-amber-50 text-amber-600 hover:text-amber-700 rounded-xl transition-all inline-flex items-center justify-center border border-amber-100 shadow-sm" title="Edit User">

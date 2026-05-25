@@ -231,6 +231,75 @@ class InvitationController extends Controller
     {
         $theme = \App\Models\Theme::where('slug', $slug)->firstOrFail();
         
+        // ── CUSTOM DEMO FROM RESELLER DEMO USER ──
+        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+        $customDemoInvitation = null;
+        if ($resellerSetting && $resellerSetting->demo_user_id) {
+            $customDemoInvitation = Invitation::where('user_id', $resellerSetting->demo_user_id)
+                ->with(['brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
+                ->first();
+        }
+
+        if ($customDemoInvitation) {
+            // We use the reseller's custom demo invitation data!
+            $invitation = clone $customDemoInvitation;
+            $invitation->id = 0; // treat as mock in memory
+            $invitation->theme_id = $theme->id;
+            $invitation->slug = $slug;
+            $invitation->setRelation('theme', $theme);
+
+            // Force full features active for preview
+            $invitation->enable_rsvp = true;
+            $invitation->enable_wishes = true;
+            $invitation->show_countdown = true;
+            $invitation->show_animations = true;
+            $invitation->save_the_date_enabled = true;
+            $invitation->enable_auto_scroll = true;
+            $invitation->show_qr_code = true;
+            $invitation->enable_qr = true;
+
+            $brideGrooms = $customDemoInvitation->brideGrooms;
+            $events = $customDemoInvitation->events;
+            $galleries = $customDemoInvitation->galleries;
+            $loveStories = $customDemoInvitation->loveStories;
+            $bankAccounts = $customDemoInvitation->bankAccounts;
+            $wishes = $customDemoInvitation->wishes()->latest()->take(50)->get();
+
+            // Setup sections from theme if custom invitation has no sections yet
+            $sections = $customDemoInvitation->sections->count() > 0 ? $customDemoInvitation->sections : $theme->sections()->orderBy('default_order')->get()->map(function($ts) {
+                return new \App\Models\InvitationSection([
+                    'section_key' => $ts->section_key,
+                    'section_name' => $ts->section_name,
+                    'sort_order' => $ts->default_order,
+                    'is_visible' => true
+                ]);
+            });
+
+            $user = $customDemoInvitation->user;
+            if ($user) {
+                $user->load(['resellerSettings', 'reseller.resellerSettings']);
+                $invitation->setRelation('user', $user);
+            }
+
+            $page = 'Invitation/Show';
+            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang', 'shopee', 'manchester-united'])) {
+                $page = 'Invitation/' . $theme->slug . '/DynamicIndex';
+            }
+
+            return Inertia::render($page, [
+                'invitation' => $invitation,
+                'sections' => $sections,
+                'brideGrooms' => $brideGrooms,
+                'events' => $events,
+                'galleries' => $galleries,
+                'loveStories' => $loveStories,
+                'bankAccounts' => $bankAccounts,
+                'guest' => new Guest(['name' => 'Tamu Kehormatan', 'slug' => 'tamu']),
+                'wishes' => $wishes,
+                'isDemo' => true,
+            ]);
+        }
+
         $defaultData = $theme->default_data ?? [];
         
         $invitation = new Invitation();

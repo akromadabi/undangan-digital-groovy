@@ -26,8 +26,11 @@ class ResellerSettingsController extends Controller
 
     public function branding()
     {
+        $settings = $this->getSettings();
+        $settings->load('demoUser');
+
         return Inertia::render('Admin/Branding', [
-            'settings' => $this->getSettings(),
+            'settings' => $settings,
         ]);
     }
 

@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { useState } from 'react';
 
@@ -145,14 +145,44 @@ export default function Branding({ settings }) {
                         </div>
                     </div>
 
-                    {/* Submit */}
-                    <div className="flex justify-end pt-2">
-                        <button type="submit" disabled={processing}
-                            className="px-6 py-2.5 bg-[#E5654B] text-white text-sm font-medium rounded-xl shadow-sm hover:bg-[#d55a42] disabled:opacity-50 transition-all">
-                            {processing ? 'Menyimpan...' : 'Simpan Branding'}
-                        </button>
-                    </div>
                 </form>
+
+                {/* Demo Account Section */}
+                <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-6">
+                    <div>
+                        <h3 className="text-base font-bold text-[#1a1a1a]">Akun Demo Undangan</h3>
+                        <p className="text-[#999] text-xs mt-1">
+                            Preview tema di Landing Page Anda akan menampilkan data undangan dari akun demo khusus Anda. Anda bisa mengedit nama pengantin, foto galeri, musik latar, dll.
+                        </p>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[#faf9f6] rounded-xl border border-[#e8e5e0]">
+                        <div>
+                            <div className="font-semibold text-sm text-[#333]">
+                                {settings?.demo_user ? `Terhubung: ${settings.demo_user.name}` : 'Belum diatur (Menggunakan data default Korea)'}
+                            </div>
+                            <div className="text-xs text-[#999] mt-0.5">
+                                {settings?.demo_user 
+                                    ? `Email: ${settings.demo_user.email}`
+                                    : 'Klik tombol di samping untuk membuat akun demo reseller Anda secara otomatis.'}
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                            <Link 
+                                href="/admin/impersonate/demo-user" 
+                                method="post" 
+                                as="button" 
+                                className="px-4 py-2 bg-[#E5654B] text-white text-xs font-bold rounded-xl hover:bg-[#d55a42] transition-colors shadow-sm inline-flex items-center gap-1.5"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                {settings?.demo_user ? 'Masuk & Kelola Undangan Demo' : 'Buat & Kelola Akun Demo'}
+                            </Link>
+                        </div>
+                    </div>
+                </div>
             </div>
         </AdminLayout>
     );
