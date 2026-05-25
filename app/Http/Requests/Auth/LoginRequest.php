@@ -41,7 +41,25 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $credentials = [
+            'email' => $this->email,
+            'password' => $this->password,
+        ];
+
+        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
+        if ($resellerSetting) {
+            $credentials['reseller_id'] = $resellerSetting->user_id;
+            $credentials['role'] = 'user';
+        } else {
+            $credentials[] = function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNull('reseller_id')
+                      ->orWhereIn('role', ['super_admin', 'admin']);
+                });
+            };
+        }
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

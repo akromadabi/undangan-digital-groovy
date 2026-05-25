@@ -66,14 +66,6 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|string|lowercase|email|max:255|unique:' . User::class,
-            'phone' => 'required|string|max:20',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'ref' => 'nullable|string',
-        ]);
-
         // Resolve reseller_id from ref code or current host
         $resellerId = null;
         $ref = $request->ref;
@@ -97,6 +89,19 @@ class RegisteredUserController extends Controller
         if (!$resellerId) {
             return redirect('/')->with('error', 'Pendaftaran tidak dapat dilakukan melalui domain utama. Silakan mendaftar melalui website reseller kami.');
         }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => [
+                'nullable', 'string', 'lowercase', 'email', 'max:255',
+                \Illuminate\Validation\Rule::unique('users')->where(function ($query) use ($resellerId) {
+                    return $query->where('reseller_id', $resellerId);
+                })
+            ],
+            'phone' => 'required|string|max:20',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'ref' => 'nullable|string',
+        ]);
 
         $user = User::create([
             'name' => $request->name,
