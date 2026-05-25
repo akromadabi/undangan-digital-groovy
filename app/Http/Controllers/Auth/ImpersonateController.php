@@ -37,10 +37,12 @@ class ImpersonateController extends Controller
         }
 
         // Store original user in session
-        session([
-            'impersonator_id' => $currentUser->id,
-            'impersonator_role' => $currentUser->role,
-        ]);
+        if (!session()->has('impersonator_id')) {
+            session([
+                'impersonator_id' => $currentUser->id,
+                'impersonator_role' => $currentUser->role,
+            ]);
+        }
 
         // Login as the user
         auth()->login($user);
@@ -65,10 +67,12 @@ class ImpersonateController extends Controller
         }
 
         // Store original user in session
-        session([
-            'impersonator_id' => $currentUser->id,
-            'impersonator_role' => $currentUser->role,
-        ]);
+        if (!session()->has('impersonator_id')) {
+            session([
+                'impersonator_id' => $currentUser->id,
+                'impersonator_role' => $currentUser->role,
+            ]);
+        }
 
         // Login as the reseller
         auth()->login($user);
@@ -281,10 +285,12 @@ class ImpersonateController extends Controller
         }
 
         // Store original reseller in session
-        session([
-            'impersonator_id' => $reseller->id,
-            'impersonator_role' => $reseller->role,
-        ]);
+        if (!session()->has('impersonator_id')) {
+            session([
+                'impersonator_id' => $reseller->id,
+                'impersonator_role' => $reseller->role,
+            ]);
+        }
 
         // Login as the demo user
         auth()->login($demoUser);
