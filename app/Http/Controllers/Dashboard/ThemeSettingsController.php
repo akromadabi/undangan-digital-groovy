@@ -126,9 +126,16 @@ class ThemeSettingsController extends Controller
         }
 
         // Keamanan: Validasi otorisasi Paket berlangganan untuk fitur Desain & Tema (template)
-        if ($request->hasAny(['layout_mode', 'menu_position', 'particle_type', 'particle_count', 'particle_speed'])) {
+        if ($request->hasAny(['layout_mode', 'menu_position'])) {
             if (!$user->hasFeatureAccess('template')) {
                 return response()->json(['error' => 'Fitur Desain & Tema dikunci oleh Paket Anda.'], 403);
+            }
+        }
+
+        // Keamanan: Validasi otorisasi Paket berlangganan untuk fitur Partikel (partikel)
+        if ($request->hasAny(['particle_type', 'particle_count', 'particle_speed'])) {
+            if (!$user->hasFeatureAccess('partikel')) {
+                return response()->json(['error' => 'Fitur Partikel dikunci oleh Paket Anda.'], 403);
             }
         }
 
@@ -169,13 +176,16 @@ class ThemeSettingsController extends Controller
         ]);
 
         // Keamanan: Validasi otorisasi Paket berlangganan untuk masing-masing toggle pengaturan
-        if ($request->has('show_photos') && !$user->hasFeatureAccess('bride_groom')) {
-            return response()->json(['error' => 'Fitur Mempelai dikunci oleh Paket Anda.'], 403);
+        if ($request->has('show_photos') && !$user->hasFeatureAccess('show_photos')) {
+            return response()->json(['error' => 'Fitur Tampilkan Foto dikunci oleh Paket Anda.'], 403);
         }
         if ($request->has('show_animations') && !$user->hasFeatureAccess('animasi')) {
             return response()->json(['error' => 'Fitur Animasi dikunci oleh Paket Anda.'], 403);
         }
-        if ($request->hasAny(['enable_auto_scroll', 'menu_position', 'custom_domain']) && !$user->hasFeatureAccess('template')) {
+        if ($request->has('enable_auto_scroll') && !$user->hasFeatureAccess('auto_scroll')) {
+            return response()->json(['error' => 'Fitur Auto Scroll dikunci oleh Paket Anda.'], 403);
+        }
+        if ($request->hasAny(['menu_position', 'custom_domain']) && !$user->hasFeatureAccess('template')) {
             return response()->json(['error' => 'Fitur Desain & Tema dikunci oleh Paket Anda.'], 403);
         }
         if ($request->has('enable_qr') && !$user->hasFeatureAccess('qr_code')) {

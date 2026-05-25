@@ -125,6 +125,12 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
+        // Fitur dasar selalu aktif untuk paket apapun
+        $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
+        if (in_array($featureSlug, $basicFeatures)) {
+            return true;
+        }
+
         $plan = $this->currentPlan();
         if (!$plan)
             return false;

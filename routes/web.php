@@ -256,10 +256,10 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
     Route::post('/payment/manual/{payment}/cancel', [PaymentController::class, 'cancelPayment'])->name('payment.manual.cancel');
 
     // Live Tamu
-    Route::get('/live-tamu', [LiveTamuController::class, 'index'])->name('live-tamu');
-    Route::post('/live-tamu/save', [LiveTamuController::class, 'saveSettings'])->name('live-tamu.save');
-    Route::get('/live-tamu/data', [LiveTamuController::class, 'data'])->name('live-tamu.data');
-    Route::get('/qr-scanner', [LiveTamuController::class, 'qrScanner'])->name('qr-scanner');
+    Route::get('/live-tamu', [LiveTamuController::class, 'index'])->middleware('feature:layar_sapa')->name('live-tamu');
+    Route::post('/live-tamu/save', [LiveTamuController::class, 'saveSettings'])->middleware('feature:layar_sapa')->name('live-tamu.save');
+    Route::get('/live-tamu/data', [LiveTamuController::class, 'data'])->middleware('feature:layar_sapa')->name('live-tamu.data');
+    Route::get('/qr-scanner', [LiveTamuController::class, 'qrScanner'])->middleware('feature:layar_sapa')->name('qr-scanner');
 });
 
 // ═══════════════════════════════════════

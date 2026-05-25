@@ -73,6 +73,11 @@ class LiveTamuController extends Controller
     {
         $invitation = \App\Models\Invitation::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
+        $user = $invitation->user;
+        if (!$user || !$user->hasFeatureAccess('layar_sapa')) {
+            abort(403, 'Fitur Layar Sapa dikunci oleh paket Anda.');
+        }
+
         return Inertia::render('LiveTamu/Fullscreen', [
             'invitation' => $invitation->only(['id', 'slug', 'live_delay', 'live_counter', 'live_template']),
             'colors' => $invitation->theme?->color_scheme ?? ['primary' => '#B76E79', 'secondary' => '#D4A373', 'bg' => '#FFF9F5', 'text' => '#2D2D2D'],
@@ -85,6 +90,11 @@ class LiveTamuController extends Controller
     public function publicData($slug)
     {
         $invitation = \App\Models\Invitation::where('slug', $slug)->firstOrFail();
+
+        $user = $invitation->user;
+        if (!$user || !$user->hasFeatureAccess('layar_sapa')) {
+            return response()->json(['error' => 'Fitur Layar Sapa dikunci oleh paket Anda.'], 403);
+        }
 
         $guests = Guest::where('invitation_id', $invitation->id)
             ->where('checked_in', true)

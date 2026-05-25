@@ -676,14 +676,14 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                             </div>
 
                             {/* Efek Partikel */}
-                            <div className={`bg-white rounded-2xl border border-gray-200 p-4 transition-opacity ${isLockedByPlan('template') ? 'opacity-60' : ''}`}>
+                            <div className={`bg-white rounded-2xl border border-gray-200 p-4 transition-opacity ${isLockedByPlan('partikel') ? 'opacity-60' : ''}`}>
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
                                         <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center relative">
                                             <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.187-.904L9 9l.813 5.096L15 15l-5.187.904zM19.071 4.929l-.429 2.571-.429-2.571-2.571-.429 2.571-.429.429-2.571.429 2.571 2.571.429-2.571.429z" />
                                             </svg>
-                                            {isLockedByPlan('template') && (
+                                            {isLockedByPlan('partikel') && (
                                                 <div className="absolute -top-1 -right-1 bg-amber-400 text-white rounded-full p-0.5 shadow-sm">
                                                     <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
@@ -694,12 +694,12 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         <div>
                                             <div className="text-xs font-semibold text-gray-800 flex items-center gap-1.5">
                                                 Efek Partikel Layar
-                                                {isLockedByPlan('template') && (
+                                                {isLockedByPlan('partikel') && (
                                                     <span className="inline-flex items-center gap-0.5 text-[9px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full font-bold border border-amber-100">
                                                         Locked
                                                     </span>
                                                 )}
-                                                {!isLockedByPlan('template') && (
+                                                {!isLockedByPlan('partikel') && (
                                                     particleType ? (
                                                         <span className="text-[9px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-full font-medium">
                                                             {PARTICLE_OPTIONS.find(p => p.key === particleType)?.label || particleType}
@@ -716,7 +716,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                     </div>
                                     <button
                                         type="button"
-                                        disabled={isLockedByPlan('template')}
+                                        disabled={isLockedByPlan('partikel')}
                                         onClick={() => setIsParticleModalOpen(true)}
                                         className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
@@ -741,7 +741,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         label="Tampilkan Foto"
                                         desc="Tampilkan foto mempelai di undangan"
                                         checked={showPhotos}
-                                        disabled={isLockedByPlan('bride_groom')}
+                                        disabled={isLockedByPlan('show_photos')}
                                         onChange={(v) => { setShowPhotos(v); saveSetting('show_photos', v); }}
                                     />
                                     <ToggleSwitch
@@ -781,7 +781,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         label="Tombol Auto Scroll"
                                         desc="Tampilkan tombol auto scroll di undangan"
                                         checked={enableAutoScroll}
-                                        disabled={isLockedByPlan('template')}
+                                        disabled={isLockedByPlan('auto_scroll')}
                                         onChange={(v) => { setEnableAutoScroll(v); saveSetting('enable_auto_scroll', v); }}
                                     />
                                     <ToggleSwitch
