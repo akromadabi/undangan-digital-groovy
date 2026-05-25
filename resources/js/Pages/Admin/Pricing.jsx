@@ -127,6 +127,7 @@ export default function Pricing({ planPricing }) {
                                                     step="1000"
                                                     value={data.prices[index].reseller_price}
                                                     onChange={(e) => handlePriceChange(index, e.target.value)}
+                                                    style={{ paddingLeft: '2.75rem' }}
                                                     className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm font-semibold focus:ring-1 transition-colors ${isBelowBase
                                                         ? 'border-red-300 focus:border-red-500 focus:ring-red-500 text-red-600'
                                                         : 'border-[#e8e5e0] focus:border-[#E5654B] focus:ring-[#E5654B] text-[#1a1a1a]'

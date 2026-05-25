@@ -1655,6 +1655,7 @@ export default function DynamicIndex({
                 if (s.section_key === 'gallery' && !(galleries?.length > 0)) return;
                 if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return;
                 if (s.section_key === 'rsvp' && !enableRsvp) return;
+                if (s.section_key === 'livestream' && !hasStream) return;
                 
                 // Skip standalone countdown (integrated in event)
                 if (s.section_key === 'countdown') return;

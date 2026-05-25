@@ -377,18 +377,17 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const colors = activeTheme?.color_scheme || { primary: '#B76E79', secondary: '#D4A373', bg: '#FFF9F5', text: '#2D2D2D' };
     const fonts = activeTheme?.font_config || { heading: 'serif', body: 'sans-serif', script: 'cursive' };
     const isJawa = activeTheme?.slug === 'adat-jawa';
-
     const visibleForPreview = sectionList.filter(s => s.is_visible);
 
     return (
         <DashboardLayout title="Pengaturan Tema">
             <Head title="Pengaturan Tema" />
 
-            <div className="flex gap-6 h-[calc(100vh-8rem)]">
+            <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-8rem)]">
                 {/* Left Panel */}
-                <div className="w-full lg:w-1/2 xl:w-[45%] overflow-y-auto pr-2">
+                <div className="w-full lg:w-1/2 xl:w-[45%] lg:overflow-y-auto pr-2">
                     {/* Segmented Tab Control */}
-                    <div className="sticky top-0 z-10 bg-gray-50/80 backdrop-blur-md pb-2 pt-1">
+                    <div className="sticky top-14 lg:top-0 z-10 bg-gray-50/80 backdrop-blur-md pb-2 pt-1">
                         <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-200">
                             {[
                                 { key: 'tampilan', label: 'Tampilan', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg> },

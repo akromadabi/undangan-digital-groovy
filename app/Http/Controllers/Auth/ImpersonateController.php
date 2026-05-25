@@ -132,22 +132,7 @@ class ImpersonateController extends Controller
             // Update settings
             $settings->update(['demo_user_id' => $demoUser->id]);
 
-            // Create default premium subscription for demo user
-            $premiumPlan = \App\Models\SubscriptionPlan::where('slug', 'platinum')->first()
-                ?: \App\Models\SubscriptionPlan::where('slug', 'gold')->first()
-                ?: \App\Models\SubscriptionPlan::orderBy('sort_order', 'desc')->first();
 
-            if ($premiumPlan) {
-                \App\Models\Subscription::updateOrCreate(
-                    ['user_id' => $demoUser->id],
-                    [
-                        'plan_id' => $premiumPlan->id,
-                        'status' => 'active',
-                        'starts_at' => now(),
-                        'expires_at' => null,
-                    ]
-                );
-            }
 
             // Initialize default invitation data
             $invitation = \App\Models\Invitation::where('user_id', $demoUser->id)->first();
@@ -282,6 +267,23 @@ class ImpersonateController extends Controller
                     }
                 }
             }
+        }
+
+        // Ensure the demo user always has an active premium subscription
+        $premiumPlan = \App\Models\SubscriptionPlan::where('slug', 'platinum')->first()
+            ?: \App\Models\SubscriptionPlan::where('slug', 'gold')->first()
+            ?: \App\Models\SubscriptionPlan::orderBy('sort_order', 'desc')->first();
+
+        if ($premiumPlan) {
+            \App\Models\Subscription::updateOrCreate(
+                ['user_id' => $demoUser->id],
+                [
+                    'plan_id' => $premiumPlan->id,
+                    'status' => 'active',
+                    'starts_at' => now(),
+                    'expires_at' => null,
+                ]
+            );
         }
 
         // Store original reseller in session

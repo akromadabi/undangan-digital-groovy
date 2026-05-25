@@ -407,6 +407,8 @@ export default function DynamicIndex({
                     if (enableRsvp) return; // merged in RSVP menu
                 }
 
+                if (s.section_key === 'livestream' && !hasStream) return;
+
                 resolved.push(s);
                 if (s.section_key === 'event' && hasStream) {
                     resolved.push({ section_key: 'livestream' });
