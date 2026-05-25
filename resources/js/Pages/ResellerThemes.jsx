@@ -215,6 +215,11 @@ export default function ResellerThemes({ reseller, themes = [] }) {
     const registerUrl = `${reseller.reseller_url || ''}/register?ref=${reseller.ref}`;
     const loginUrl = `${reseller.reseller_url || ''}/login`;
 
+    const getFaqUrl = () => {
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/r/')) return `/r/${reseller.ref}/faq`;
+        return '/faq';
+    };
+
     /* CSS variables injected inline */
     const cssVars = `
         :root {
@@ -413,6 +418,7 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                                 <Link href={`/r/${reseller.ref}`} className="rl-footer__link">Beranda</Link>
                                 <a href={registerUrl} className="rl-footer__link">Daftar Gratis</a>
                                 <a href={loginUrl} className="rl-footer__link">Masuk ke Akun</a>
+                                <Link href={getFaqUrl()} className="rl-footer__link">FAQ & Panduan</Link>
                                 {hasContact && (
                                     <button onClick={handleContactClick} className="rl-footer__link-btn">Hubungi Kami</button>
                                 )}

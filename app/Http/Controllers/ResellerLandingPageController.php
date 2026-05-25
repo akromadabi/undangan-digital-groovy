@@ -149,4 +149,52 @@ class ResellerLandingPageController extends Controller
             'themes' => $themes,
         ]);
     }
+
+    /**
+     * Show the reseller's FAQ/Tutorial page.
+     * URL: /r/{subdomain}/faq
+     */
+    public function faq(string $subdomain)
+    {
+        $setting = ResellerSetting::where('subdomain', $subdomain)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$setting) {
+            abort(404, 'Reseller tidak ditemukan.');
+        }
+
+        $reseller = $setting->reseller;
+
+        $appUrl = config('app.url');
+        $parsed = parse_url($appUrl);
+        $scheme = $parsed['scheme'] ?? 'http';
+        $host = $parsed['host'] ?? 'undangan-digital.test';
+        $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
+
+        if ($setting->custom_domain) {
+            $resellerUrl = $scheme . '://' . $setting->custom_domain . $port;
+        } else {
+            $resellerUrl = $scheme . '://' . $subdomain . '.' . $host . $port;
+        }
+
+        return Inertia::render('ResellerFaq', [
+            'reseller' => [
+                'brand_name' => $setting->brand_name ?: $reseller->name,
+                'brand_logo' => $setting->brand_logo ? '/storage/' . $setting->brand_logo : null,
+                'ref' => $subdomain,
+                'reseller_url' => $resellerUrl,
+                'template' => $setting->landing_page_template ?: 'default',
+                'site_title' => $setting->site_title,
+                'site_motto' => $setting->site_motto,
+                'footer_whatsapp' => $setting->footer_whatsapp,
+                'footer_phone' => $setting->footer_phone,
+                'footer_email' => $setting->footer_email,
+                'footer_instagram' => $setting->footer_instagram,
+                'footer_tiktok' => $setting->footer_tiktok,
+                'footer_address' => $setting->footer_address,
+                'footer_description' => $setting->footer_description,
+            ],
+        ]);
+    }
 }

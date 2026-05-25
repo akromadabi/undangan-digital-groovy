@@ -59,6 +59,7 @@ Route::get('/', function () {
 // Reseller Landing Page (public)
 Route::get('/r/{subdomain}', [\App\Http\Controllers\ResellerLandingPageController::class, 'show'])->name('reseller.landing');
 Route::get('/r/{subdomain}/themes', [\App\Http\Controllers\ResellerLandingPageController::class, 'themes'])->name('reseller.themes');
+Route::get('/r/{subdomain}/faq', [\App\Http\Controllers\ResellerLandingPageController::class, 'faq'])->name('reseller.faq');
 
 Route::get('/katalog-tema', function () {
     $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
@@ -81,6 +82,14 @@ Route::get('/katalog-tema', function () {
         'appName' => config('app.name'),
     ]);
 })->name('themes');
+
+Route::get('/faq', function () {
+    $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
+    if ($resellerSetting) {
+        return app(\App\Http\Controllers\ResellerLandingPageController::class)->faq($resellerSetting->subdomain);
+    }
+    abort(404);
+})->name('faq');
 
 // ═══════════════════════════════════════
 // Public Invitation (no auth needed)
@@ -224,6 +233,7 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
 
         Route::get('/tamu', [SettingsController::class, 'tamu'])->name('tamu');
         Route::post('/tamu', [SettingsController::class, 'saveTamu'])->name('tamu.save');
+        Route::post('/tamu/{id}', [SettingsController::class, 'updateTamu'])->name('tamu.update');
         Route::post('/tamu/import', [SettingsController::class, 'importTamu'])->name('tamu.import');
         Route::post('/tamu/import-excel', [SettingsController::class, 'importExcel'])->name('tamu.import.excel');
         Route::get('/tamu/template', [SettingsController::class, 'downloadTemplate'])->name('tamu.template');

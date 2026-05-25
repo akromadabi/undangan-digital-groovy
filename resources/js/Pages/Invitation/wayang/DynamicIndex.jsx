@@ -688,9 +688,6 @@ function GallerySection({ galleries, language }) {
                     return (
                         <Reveal className="wy-gallery-item" variant="zoom" key={idx} delay={idx * 50}>
                             <img src={finalImg} alt={gal.caption || 'Gallery Image'} onClick={() => setSelectedImage(finalImg)} />
-                            <div className="wy-gallery-overlay" onClick={() => setSelectedImage(finalImg)}>
-                                <i className="fas fa-search-plus" />
-                            </div>
                         </Reveal>
                     );
                 })}
@@ -720,11 +717,8 @@ function RsvpSection({ wishes, invitation, guest, language }) {
     const activeGuest = guest || { name: '', id: null };
     const isEn = language === 'en';
 
-    const [sharedName, setSharedName] = useState(activeGuest.name || '');
-    const [attendance, setAttendance] = useState('hadir');
-    const [numGuests, setNumGuests] = useState(1);
-    const [message, setMessage] = useState('');
     const [success, setSuccess] = useState(false);
+    const [isSending, setIsSending] = useState(false);
 
     const rsvpForm = useForm({
         sender_name: activeGuest.name || '',
@@ -739,36 +733,51 @@ function RsvpSection({ wishes, invitation, guest, language }) {
         guest_id: activeGuest.id || null,
     });
 
+    const handleNameChange = (val) => {
+        rsvpForm.setData('sender_name', val);
+        wishForm.setData('sender_name', val);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        rsvpForm.setData('sender_name', sharedName);
-        rsvpForm.setData('attendance', attendance);
-        rsvpForm.setData('number_of_guests', numGuests);
-        wishForm.setData('sender_name', sharedName);
-        wishForm.setData('message', message);
+        setSuccess(false);
+        setIsSending(true);
 
         const doWish = () => {
-            if (enableWishes && message.trim()) {
+            if (enableWishes && wishForm.data.message.trim()) {
                 wishForm.post(route('invitation.wish', invitation.slug), {
                     preserveScroll: true,
-                    onSuccess: () => { setMessage(''); setSuccess(true); },
+                    onSuccess: () => { 
+                        wishForm.reset('message');
+                        setSuccess(true); 
+                        setIsSending(false);
+                    },
+                    onError: () => {
+                        setIsSending(false);
+                    }
                 });
             } else {
                 setSuccess(true);
+                setIsSending(false);
             }
         };
 
         if (enableRsvp) {
             rsvpForm.post(route('invitation.rsvp', invitation.slug), {
                 preserveScroll: true,
-                onSuccess: doWish,
+                onSuccess: () => {
+                    doWish();
+                },
+                onError: () => {
+                    setIsSending(false);
+                }
             });
         } else {
             doWish();
         }
     };
 
-    const isSubmitting = rsvpForm.processing || wishForm.processing;
+    const isSubmitting = isSending || rsvpForm.processing || wishForm.processing;
     const recentWishes = safeArr(wishes).slice(0, 5);
     const sectionTitle = enableRsvp && enableWishes
         ? (isEn ? 'RSVP & Wishes' : 'Konfirmasi & Ucapan')
@@ -794,8 +803,8 @@ function RsvpSection({ wishes, invitation, guest, language }) {
                             type="text"
                             required
                             className="wy-form-input"
-                            value={sharedName}
-                            onChange={e => setSharedName(e.target.value)}
+                            value={rsvpForm.data.sender_name}
+                            onChange={e => handleNameChange(e.target.value)}
                             readOnly={!!activeGuest.name}
                         />
                     </div>
@@ -806,8 +815,8 @@ function RsvpSection({ wishes, invitation, guest, language }) {
                             <label className="wy-form-label">{isEn ? 'Attendance' : 'Konfirmasi Kehadiran'}</label>
                             <select
                                 className="wy-form-select"
-                                value={attendance}
-                                onChange={e => setAttendance(e.target.value)}
+                                value={rsvpForm.data.attendance}
+                                onChange={e => rsvpForm.setData('attendance', e.target.value)}
                             >
                                 <option value="hadir">{isEn ? 'Attending' : 'Hadir'}</option>
                                 <option value="tidak_hadir">{isEn ? 'Not Attending' : 'Tidak Hadir'}</option>
@@ -817,13 +826,13 @@ function RsvpSection({ wishes, invitation, guest, language }) {
                     )}
 
                     {/* Jumlah Tamu - hanya jika RSVP aktif DAN hadir */}
-                    {enableRsvp && attendance === 'hadir' && (
+                    {enableRsvp && rsvpForm.data.attendance === 'hadir' && (
                         <div className="wy-form-group">
                             <label className="wy-form-label">{isEn ? 'Number of Guests' : 'Jumlah Tamu'}</label>
                             <select
                                 className="wy-form-select"
-                                value={numGuests}
-                                onChange={e => setNumGuests(parseInt(e.target.value) || 1)}
+                                value={rsvpForm.data.number_of_guests}
+                                onChange={e => rsvpForm.setData('number_of_guests', parseInt(e.target.value) || 1)}
                             >
                                 <option value="1">1</option>
                                 <option value="2">2</option>
@@ -840,8 +849,8 @@ function RsvpSection({ wishes, invitation, guest, language }) {
                             <textarea
                                 rows="3"
                                 className="wy-form-textarea"
-                                value={message}
-                                onChange={e => setMessage(e.target.value)}
+                                value={wishForm.data.message}
+                                onChange={e => wishForm.setData('message', e.target.value)}
                                 placeholder={isEn ? 'Write your wishes...' : 'Tulis ucapan dan doa restu...'}
                                 required={!enableRsvp}
                             />

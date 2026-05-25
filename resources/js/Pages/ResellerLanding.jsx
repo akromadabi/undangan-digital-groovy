@@ -279,6 +279,11 @@ export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
         return '/katalog-tema';
     };
 
+    const getFaqUrl = () => {
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/r/')) return `/r/${reseller.ref}/faq`;
+        return '/faq';
+    };
+
     const registerUrl = `${reseller.reseller_url || ''}/register?ref=${reseller.ref}`;
     const loginUrl = `${reseller.reseller_url || ''}/login`;
 
@@ -653,6 +658,13 @@ export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
                             </div>
                         ))}
                     </div>
+                    
+                    {/* Link ke halaman FAQ interaktif */}
+                    <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
+                        <Link href={getFaqUrl()} className="rl-btn rl-btn--accent-outline" style={{ display: 'inline-flex', padding: '0.75rem 2rem' }}>
+                            Lihat Semua FAQ & Panduan Lengkap →
+                        </Link>
+                    </div>
                 </div>
             </section>
 
@@ -725,6 +737,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
                                 <a href={getThemesUrl()} className="rl-footer__link">Katalog Tema</a>
                                 <a href={registerUrl} className="rl-footer__link">Daftar Gratis</a>
                                 <a href={loginUrl} className="rl-footer__link">Masuk ke Akun</a>
+                                <Link href={getFaqUrl()} className="rl-footer__link">FAQ & Panduan</Link>
                                 {hasContact && (
                                     <button onClick={handleContactClick} className="rl-footer__link-btn">Hubungi Kami</button>
                                 )}
