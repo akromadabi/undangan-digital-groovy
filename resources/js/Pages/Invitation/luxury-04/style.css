@@ -1197,15 +1197,15 @@
 .lx4-nav-menu__inner--row {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 0;
   /* Horizontal scrollable */
   overflow-x: auto;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   flex-wrap: nowrap;
-  gap: 4px;
-  justify-content: center;
+  gap: 0;
+  justify-content: flex-start;
 }
 
 .lx4-nav-menu__inner--row::-webkit-scrollbar {
@@ -1216,26 +1216,34 @@
   background: transparent;
   border: none;
   color: var(--lx4-text-muted);
-  min-width: 42px;
-  height: 42px;
+  padding: 12px 6px;
+  gap: 4px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  border-radius: 50%;
-  flex: 0 0 auto;
+  border-radius: 0;
+  flex: 1 0 auto;
+  min-width: 72px;
+  white-space: nowrap;
 }
 
 .lx4-nav-menu__item i {
-  font-size: 15px;
+  font-size: 16px;
+}
+
+.lx4-nav-item-text {
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .lx4-nav-menu__item.active {
-  color: var(--lx4-bg-light) !important;
-  background: var(--lx4-burgundy) !important;
-  box-shadow: 0 2px 10px rgba(74, 14, 23, 0.4) !important;
+  color: var(--lx4-burgundy);
+  background-color: rgba(74, 14, 23, 0.08);
 }
 
 /* Floating Controls Area */

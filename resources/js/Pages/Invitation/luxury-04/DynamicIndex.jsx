@@ -1359,6 +1359,15 @@ function Navigation({
     const { t } = useTranslation();
     const [showQr, setShowQr] = useState(false);
 
+    // Auto-scroll active menu item into viewport
+    useEffect(() => {
+        if (!activeMenuId) return;
+        const activeEl = document.querySelector(`.lx4-nav-menu button[data-id="${activeMenuId}"]`);
+        if (activeEl) {
+            activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }, [activeMenuId]);
+
     const enableQr = parseBool(invitation?.enable_qr) && parseBool(invitation?.show_qr_code);
     const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
 
@@ -1419,12 +1428,14 @@ function Navigation({
                             return (
                                 <button
                                     key={item.id}
+                                    data-id={item.id}
                                     type="button"
                                     onClick={() => { setAutoScrollEnabled(false); scrollToSection(item.id); }}
                                     className={`lx4-nav-menu__item ${isActive ? 'active' : ''}`}
                                     title={item.label}
                                 >
                                     <i className={item.icon} />
+                                    <span className="lx4-nav-item-text">{item.label}</span>
                                 </button>
                             );
                         })}

@@ -1191,15 +1191,15 @@
 .lx3-nav-menu__inner--row {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 0;
   /* Horizontal scrollable */
   overflow-x: auto;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   flex-wrap: nowrap;
-  gap: 4px;
-  justify-content: center;
+  gap: 0;
+  justify-content: flex-start;
 }
 
 .lx3-nav-menu__inner--row::-webkit-scrollbar {
@@ -1210,26 +1210,34 @@
   background: transparent;
   border: none;
   color: var(--lx3-text-muted);
-  min-width: 42px;
-  height: 42px;
+  padding: 12px 6px;
+  gap: 4px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  border-radius: 50%;
-  flex: 0 0 auto;
+  border-radius: 0;
+  flex: 1 0 auto;
+  min-width: 72px;
+  white-space: nowrap;
 }
 
 .lx3-nav-menu__item i {
-  font-size: 15px;
+  font-size: 16px;
+}
+
+.lx3-nav-item-text {
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .lx3-nav-menu__item.active {
   color: var(--lx3-red);
-  background: rgba(197, 168, 128, 0.1);
-  box-shadow: 0 0 10px rgba(197, 168, 128, 0.1) inset;
+  background-color: rgba(184, 45, 64, 0.08);
 }
 
 /* Floating Controls Area */

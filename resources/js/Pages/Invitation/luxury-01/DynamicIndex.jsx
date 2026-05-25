@@ -493,6 +493,15 @@ export default function DynamicIndex({
         setActiveMenuId(menuId);
     }, [activeSectionId, enableRsvp]);
 
+    // Auto-scroll active menu item into viewport
+    useEffect(() => {
+        if (!activeMenuId) return;
+        const activeEl = document.querySelector(`.lx1-nav-menu button[data-id="${activeMenuId}"]`);
+        if (activeEl) {
+            activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }, [activeMenuId]);
+
     // Auto scroll logic
     useEffect(() => {
         if (!isOpened || !autoScrollEnabled) return;
@@ -1440,6 +1449,7 @@ export default function DynamicIndex({
                                     return (
                                         <button
                                             key={item.id}
+                                            data-id={item.id}
                                             type="button"
                                             onClick={() => { setAutoScrollEnabled(false); scrollToSection(item.id); }}
                                             className={`lx1-nav-item ${isActive ? 'lx1-active' : ''}`}

@@ -373,25 +373,30 @@
   border: none;
   color: var(--lx1-text-muted);
   cursor: pointer;
-  padding: 5px 8px;
+  padding: 12px 6px;
   gap: 4px;
-  font-size: 0.65rem;
-  font-weight: 500;
   transition: all 0.3s ease;
   /* Fixed width so items don't shrink */
-  flex: 0 0 auto;
-  min-width: 48px;
-  text-transform: capitalize;
+  flex: 1 0 auto;
+  min-width: 72px;
   white-space: nowrap;
 }
 
 .lx1-nav-icon {
-  font-size: 1.1rem;
+  font-size: 16px;
+}
+
+.lx1-nav-item span {
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .lx1-nav-item:hover,
 .lx1-nav-item.lx1-active {
   color: var(--lx1-slate-dark);
+  background-color: rgba(71, 97, 111, 0.08);
 }
 
 /* --- Scroll Reveal Animations --- */
