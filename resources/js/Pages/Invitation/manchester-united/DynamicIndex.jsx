@@ -1018,7 +1018,7 @@ function ClosingSection({ invitation, brideGrooms }) {
                 )}
 
                 <p className="mu-watermark">
-                    {isEn ? "Made with ❤️ by" : "Dibuat dengan ❤️ oleh"} <br />
+                    Made with ❤️ by <br />
                     <strong style={{ color: 'var(--mu-primary)' }}>{resellerName}</strong>
                 </p>
             </Reveal>
@@ -1039,7 +1039,9 @@ function Navigation({
     resolvedSections,
     enableRsvp,
     autoScrollEnabled,
-    setAutoScrollEnabled
+    setAutoScrollEnabled,
+    isFullscreen,
+    toggleFullscreen
 }) {
     if (!isOpened) return null;
 
@@ -1101,6 +1103,31 @@ function Navigation({
                     </button>
                 </div>
             )}
+
+            {/* Floating controls bottom-right */}
+            <div className="mu-floating-controls" style={{ position: 'fixed', bottom: '90px', right: '20px', display: 'flex', flexDirection: 'column', gap: '12px', zIndex: 997 }}>
+                <button
+                    type="button"
+                    className="mu-float-audio-btn"
+                    onClick={toggleFullscreen}
+                    style={isFullscreen ? { backgroundColor: 'var(--mu-primary)', color: '#fff' } : {}}
+                    title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+                >
+                    <i className={isFullscreen ? "fas fa-compress" : "fas fa-expand"} style={{ fontSize: '14px' }} />
+                </button>
+                
+                {invitation?.enable_auto_scroll !== false && (
+                    <button
+                        type="button"
+                        className="mu-float-audio-btn"
+                        onClick={() => setAutoScrollEnabled(p => !p)}
+                        style={autoScrollEnabled ? { backgroundColor: 'var(--mu-primary)', color: '#fff' } : {}}
+                        title={autoScrollEnabled ? "Matikan Auto Scroll" : "Auto Scroll"}
+                    >
+                        <i className={autoScrollEnabled ? "fas fa-pause" : "fas fa-scroll"} style={{ fontSize: '14px' }} />
+                    </button>
+                )}
+            </div>
         </>
     );
 }
@@ -1126,6 +1153,23 @@ export default function DynamicIndex({
     const [activeSectionId, setActiveSectionId] = useState('opening');
     const audioRef = useRef(null);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
     const guestName = guest?.name || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null) || 'Tamu Undangan';
     const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
@@ -1176,6 +1220,9 @@ export default function DynamicIndex({
         setIsOpened(true);
         if (audioRef.current && musicAutoplay) {
             audioRef.current.play().then(() => setIsPlaying(true)).catch(() => { });
+        }
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
         }
         if (!isSlideMode) {
             document.body.style.overflow = 'auto';
@@ -1581,6 +1628,8 @@ export default function DynamicIndex({
                     enableRsvp={enableRsvp}
                     autoScrollEnabled={autoScrollEnabled}
                     setAutoScrollEnabled={setAutoScrollEnabled}
+                    isFullscreen={isFullscreen}
+                    toggleFullscreen={toggleFullscreen}
                 />
 
                 {/* QR Code Check-in Modal */}

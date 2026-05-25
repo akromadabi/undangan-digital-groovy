@@ -23,6 +23,7 @@ class InvitationController extends Controller
                 'loveStories',
                 'bankAccounts',
                 'sections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
+                'user.resellerSettings',
                 'user.reseller.resellerSettings',
             ])
             ->firstOrFail();
@@ -249,6 +250,12 @@ class InvitationController extends Controller
         $invitation->countdown_target_date = $defaultData['invitation']['countdown_target_date'] ?? now()->addDays(30)->toDateTimeString();
         $invitation->music_url = $defaultData['invitation']['music_url'] ?? '/audio/backsound.mp3';
         $invitation->music_autoplay = true;
+        
+        $user = auth()->user() ?: \App\Models\User::where('role', 'reseller')->first();
+        if ($user) {
+            $user->load(['resellerSettings', 'reseller.resellerSettings']);
+            $invitation->setRelation('user', $user);
+        }
         
         // Force full features active
         $invitation->enable_rsvp = true;

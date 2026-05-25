@@ -1239,7 +1239,7 @@ function FooterSection({ invitation, brideGrooms, id }) {
     const brideNick = (bride.nickname || 'Bride').toUpperCase();
 
     // Brand reseller watermark
-    const brandName = invitation?.user?.reseller?.reseller_settings?.brand_name || 'Groovy Digital';
+    const brandName = invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'Groovy Digital';
 
     const defaultIdText = 'Merupakan suatu kehormatan dan kebahagiaan bagi kami, apabila Bapak/Ibu, Saudara/i berkenan hadir di hari bahagia kami.';
     const defaultIdTitle = 'THANK YOU';
@@ -1308,8 +1308,8 @@ function FooterSection({ invitation, brideGrooms, id }) {
                     </div>
                 </div>
 
-                <div className="aruna-footer__credit" style={{ fontSize: '10px', letterSpacing: '1px', marginTop: '30px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>
-                    Powered by {brandName}
+                <div className="aruna-footer__credit" style={{ fontSize: '10px', letterSpacing: '1px', marginTop: '30px', color: 'rgba(255,255,255,0.4)' }}>
+                    Made with ❤️ by {brandName}
                 </div>
             </RevealDiv>
         </footer>
@@ -1317,7 +1317,7 @@ function FooterSection({ invitation, brideGrooms, id }) {
 }
 
 /* ── Navigation Menu & Controls ── */
-function Navigation({ isOpened, isPlaying, onToggleMusic, resolvedSections, layoutMode, activeSlideIdx, isSlideMode, scrollToSection, enableRsvp, enableWishes, autoScrollEnabled, setAutoScrollEnabled, activeSection }) {
+function Navigation({ isOpened, isPlaying, onToggleMusic, resolvedSections, layoutMode, activeSlideIdx, isSlideMode, scrollToSection, enableRsvp, enableWishes, autoScrollEnabled, setAutoScrollEnabled, activeSection, isFullscreen, toggleFullscreen }) {
     const { t } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
@@ -1430,6 +1430,17 @@ function Navigation({ isOpened, isPlaying, onToggleMusic, resolvedSections, layo
             {/* Bottom Controls Raised when menuPosition === 'bottom' */}
             <div className={`aruna-bottom-controls ${isMenuOpen ? 'is-hidden' : ''} aruna-bottom-controls--raised`}>
                 <div className="aruna-floating" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Fullscreen Controller Button */}
+                    <button
+                        type="button"
+                        className={`aruna-floating__btn ${isFullscreen ? 'active' : ''}`}
+                        onClick={toggleFullscreen}
+                        style={isFullscreen ? { backgroundColor: '#847d4a', color: '#fff', boxShadow: '0 0 10px #847d4a' } : {}}
+                        title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+                    >
+                        <i className={isFullscreen ? "fas fa-compress" : "fas fa-expand"} />
+                    </button>
+
                     {/* Auto Scroll Controller Button */}
                     <button
                         type="button"
@@ -1482,6 +1493,23 @@ export default function Aruna({
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
     const [activeSlideIdx, setActiveSlideIdx] = useState(0);
     const [activeSection, setActiveSection] = useState('opening');
 
@@ -1634,6 +1662,9 @@ export default function Aruna({
         if (audioRef.current) {
             audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
         }
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
     }, []);
 
     const toggleMusic = useCallback(() => {
@@ -1772,6 +1803,8 @@ export default function Aruna({
                 autoScrollEnabled={autoScrollEnabled}
                 setAutoScrollEnabled={setAutoScrollEnabled}
                 activeSection={activeSection}
+                isFullscreen={isFullscreen}
+                toggleFullscreen={toggleFullscreen}
             />
         </div>
     );

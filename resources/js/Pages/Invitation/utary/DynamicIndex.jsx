@@ -1278,7 +1278,7 @@ function FooterSection({ invitation, brideGrooms, id }) {
                     </div>
                 </div>
 
-                <div className="utary-footer__credit">Powered by {invitation?.user?.reseller?.reseller_settings?.brand_name || 'Groovy Digital'}</div>
+                <div className="utary-footer__credit">Made with ❤️ by {invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'Groovy Digital'}</div>
             </RevealDiv>
         </footer>
     );
@@ -1320,7 +1320,9 @@ function Navigation({
     activeMenuId, 
     isSlideMode,
     autoScrollEnabled,
-    setAutoScrollEnabled 
+    setAutoScrollEnabled,
+    isFullscreen,
+    toggleFullscreen
 }) {
     const { t } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -1410,6 +1412,16 @@ function Navigation({
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
+                    </button>
+                    {/* Fullscreen Button */}
+                    <button
+                        type="button"
+                        className="utary-floating__btn"
+                        onClick={toggleFullscreen}
+                        style={isFullscreen ? { backgroundColor: 'var(--uty-primary, #8a6e53)', color: '#fff', boxShadow: '0 0 10px var(--uty-primary)' } : {}}
+                        title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+                    >
+                        <i className={isFullscreen ? "fas fa-compress" : "fas fa-expand"} />
                     </button>
                     {invitation?.enable_auto_scroll !== false && (
                     <button
@@ -1508,6 +1520,23 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
     const [activeSection, setActiveSection] = useState('opening');
     const audioRef = useRef(null);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
     const guestName = guest?.name || new URLSearchParams(window.location.search).get('to');
     
@@ -1546,6 +1575,9 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
 
     const handleOpen = () => {
         setIsOpened(true);
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
         if (audioRef.current) {
             audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
         }
@@ -1949,6 +1981,8 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
                 isSlideMode={isSlideMode}
                 autoScrollEnabled={autoScrollEnabled}
                 setAutoScrollEnabled={setAutoScrollEnabled}
+                isFullscreen={isFullscreen}
+                toggleFullscreen={toggleFullscreen}
             />
             </div>
         </ErrorBoundary>

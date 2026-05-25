@@ -1048,7 +1048,7 @@ function FooterSection({ invitation, brideGrooms, language }) {
 
             {/* Reseller Branding Watermark */}
             <Reveal className="wy-watermark">
-                Powered by {invitation?.user?.reseller?.reseller_settings?.brand_name || 'Groovy Digital'}
+                Made with ❤️ by {invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'Groovy Digital'}
             </Reveal>
         </section>
     );
@@ -1075,6 +1075,23 @@ export default function WayangTheme({
     const [showQr, setShowQr] = useState(false);
     const [activeSection, setActiveSection] = useState('opening');
     const audioRef = useRef(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
     // Read config settings
     const layoutMode = invitation?.layout_mode || 'scroll';
@@ -1096,6 +1113,9 @@ export default function WayangTheme({
 
     const handleOpen = () => {
         setIsOpened(true);
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
         if (audioRef.current) {
             audioRef.current.play()
                 .then(() => setIsPlaying(true))
@@ -1503,6 +1523,17 @@ export default function WayangTheme({
                         className="wy-floating-group"
                         style={invitation?.menu_position === 'none' ? { bottom: '24px' } : undefined}
                     >
+                        {/* Fullscreen Toggle */}
+                        <button
+                            type="button"
+                            className="wy-floating-btn"
+                            onClick={toggleFullscreen}
+                            style={isFullscreen ? { backgroundColor: 'var(--wy-primary)', color: '#000' } : undefined}
+                            title={isFullscreen ? 'Keluar Layar Penuh' : 'Layar Penuh'}
+                        >
+                            <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'}`} />
+                        </button>
+
                         {/* Auto-Scroll Toggle */}
                         <button
                             type="button"

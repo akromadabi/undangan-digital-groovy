@@ -105,6 +105,23 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
     const [copiedIdx, setCopiedIdx] = useState(null);
     const [showQr, setShowQr] = useState(false);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
     const audioRef = useRef(null);
     const layoutMode = invitation.layout_mode || 'scroll';
     const enableQr = invitation.enable_qr !== false && invitation.show_qr_code !== false;
@@ -167,6 +184,9 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
         setIsOpen(true);
         if (invitation.music_url && musicAutoplay && audioRef.current) {
             audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => { });
+        }
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
         }
     };
 
@@ -995,7 +1015,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                         {/* Footer (scroll mode only) */}
                         {layoutMode === 'scroll' && (
                             <footer className="text-center py-6 opacity-40 text-xs">
-                                <p>Powered by {invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'Undangan Digital Groovy'}</p>
+                                <p>Made with ❤️ by {invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'Undangan Digital Groovy'}</p>
                             </footer>
                         )}
 
@@ -1048,6 +1068,32 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                         </span>
                                     </div>
                                 )}
+                                {/* Fullscreen control — separate circle above Auto Scroll */}
+                                <div className="relative group">
+                                    <button onClick={toggleFullscreen}
+                                        className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-300"
+                                        style={{
+                                            backgroundColor: isFullscreen ? colors.primary : '#fff',
+                                            color: isFullscreen ? '#fff' : colors.primary,
+                                            boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
+                                        }}>
+                                        {isFullscreen ? (
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 3v4.5m0 0H4.5M9 7.5L4.5 3m10.5 0v4.5m0 0h4.5M15 7.5l4.5-4.5M9 21v-4.5m0 0H4.5M9 16.5L4.5 21m10.5 0v-4.5m0 0h4.5m-4.5 4.5l4.5-4.5" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9V4.5m0 0H8m-4.25 0L9 9m11.25 0V4.5m0 0H16m4.25 0L15 9m-11.25 6v4.5m0 0H8m-4.25 0L9 15m11.25 0v4.5m0 0H16m4.25 0L15 15" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none text-white"
+                                        style={{ backgroundColor: colors.primary, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+                                        {isFullscreen ? 'Keluar Layar Penuh' : 'Layar Penuh'}
+                                        <span className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 rotate-45" style={{ backgroundColor: colors.primary }} />
+                                    </span>
+                                </div>
+
                                 {/* Auto Scroll control — separate circle above Music */}
                                 {invitation.enable_auto_scroll !== false && (
                                 <div className="relative group">

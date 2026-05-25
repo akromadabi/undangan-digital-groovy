@@ -221,6 +221,23 @@ export default function DynamicIndex({
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef(null);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
     // Navigation and slide indexes
     const [activeSlideIdx, setActiveSlideIdx] = useState(0);
@@ -341,6 +358,9 @@ export default function DynamicIndex({
         setIsOpened(true);
         if (audioRef.current) {
             audioRef.current.play().then(() => setIsPlaying(true)).catch(() => { });
+        }
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
         }
         // Mark opened in DB if guest id exists
         if (guest?.id) {
@@ -1259,7 +1279,7 @@ export default function DynamicIndex({
                     </Reveal>
 
                     <div className="lx1-closing-footer">
-                        Made with ❤ by {invitation?.user?.reseller?.reseller_settings?.brand_name || 'Wekita.id'}
+                        Made with ❤️ by {invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'Undangan Digital Groovy'}
                     </div>
                 </div>
             </section>
@@ -1445,6 +1465,15 @@ export default function DynamicIndex({
                                 <i className="fas fa-qrcode" />
                             </button>
                         )}
+                        <button
+                            type="button"
+                            className="lx1-float-btn"
+                            onClick={toggleFullscreen}
+                            style={isFullscreen ? { backgroundColor: 'var(--lx1-slate-primary, #809BAA)', color: '#fff', boxShadow: '0 0 10px var(--lx1-slate-primary)' } : {}}
+                            title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+                        >
+                            <i className={isFullscreen ? "fas fa-compress" : "fas fa-expand"} />
+                        </button>
                         {invitation?.enable_auto_scroll !== false && (
                         <button
                             type="button"

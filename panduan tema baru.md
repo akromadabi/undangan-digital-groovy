@@ -111,7 +111,12 @@ Jika `invitation?.show_animations === false` (atau bernilai `0`):
 
 ### 4.1 Seksi Sampul (`CoverSection` / `Cover`)
 - Tampilkan logo monogram inisial melingkar di tengah.
-- Tombol **"Buka Undangan"** wajib memicu fungsi pembukaan yang memutar musik latar (`autoplay`) dan membuka kuncian gulir layar (`overflow: auto`).
+- Tombol **"Buka Undangan"** wajib memicu fungsi pembukaan yang memutar musik latar (`autoplay`), membuka kuncian gulir layar (`overflow: auto`), dan memicu Fullscreen mode browser secara otomatis:
+  ```js
+  if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+  }
+  ```
 
 ### 4.2 Seksi Mempelai (`bride_groom` / `couple`)
 - **Deteksi Gender yang Kokoh**: Jangan andalkan urutan indeks array `couples[0]`/`couples[1]` saja. Selalu filter berdasarkan string jenis kelamin:
@@ -197,15 +202,17 @@ Jika `invitation?.show_animations === false` (atau bernilai `0`):
   ```jsx
   {hasGroomParents && <div>{isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`}</div>}
   ```
-- **Watermark Reseller Bilingual ("Made with ❤️")**: Wajib menyertakan teks kredit "Made with love" (Made with ❤️ by) yang dinamis menggunakan nama brand reseller dan mendukung multi-bahasa:
+- **Watermark Reseller Seragam ("Made with ❤️")**: Wajib menyertakan teks kredit seragam yang dinamis menggunakan nama brand reseller (mendukung pencarian dari akun reseller langsung maupun akun sub-reseller):
   ```jsx
-  const isEn = t('invitation.save_the_date') === 'Save The Date';
-  const resellerName = invitation?.user?.reseller?.reseller_settings?.brand_name || 'Groovy Digital';
+  const brandName = invitation?.user?.reseller_settings?.brand_name 
+      || invitation?.user?.reseller?.reseller_settings?.brand_name 
+      || 'TrueLove Invitation';
   
   <p className="watermark">
-      {isEn ? 'Made with ❤️ by' : 'Dibuat dengan ❤️ oleh'} {resellerName}
+      Made with ❤️ by {brandName}
   </p>
   ```
+  *(Catatan khusus Shopee: Letakkan watermark ini di bagian paling bawah tab Beranda/Home dengan `padding-bottom: 80px` agar tidak tertutup navigation bar bawah).*
 
 ---
 
@@ -233,11 +240,38 @@ Agar setara dengan kelancaran tema **Luxury-02**, struktur transisi geser wajib 
    - Jika YA, program akan secara otomatis menggulirkan konten internal slide secara perlahan (pixel-by-pixel, contoh `scrollTop += 1`) dari atas ke bawah.
    - Begitu konten internal slide tersebut telah mencapai dasar terdalam (atau jika konten slide memang pendek), sistem akan memberikan jeda waktu tunggu (delay) selama 4 detik sebelum meluncurkan efek transisi geser ke slide halaman berikutnya secara otomatis!
 
+### 5.3 Fungsionalitas Fullscreen Halaman
+Setiap tema harus menyediakan fitur Fullscreen yang konsisten di semua layout:
+1. **Auto-Fullscreen saat Dibuka**: Begitu tombol "Buka Undangan" diklik, halaman otomatis memicu API fullscreen browser.
+2. **State & Event Listener Fullscreen**:
+   ```js
+   const [isFullscreen, setIsFullscreen] = useState(false);
+
+   useEffect(() => {
+       const handleFullscreenChange = () => {
+           setIsFullscreen(!!document.fullscreenElement);
+       };
+       document.addEventListener('fullscreenchange', handleFullscreenChange);
+       return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+   }, []);
+
+   const toggleFullscreen = () => {
+       if (!document.fullscreenElement) {
+           document.documentElement.requestFullscreen().catch(() => {});
+       } else {
+           document.exitFullscreen();
+       }
+   };
+   ```
+3. **Tombol Layar Penuh (Fullscreen Toggle)**:
+   - Sediakan tombol mengambang (floating button) untuk masuk/keluar dari mode layar penuh.
+   - Posisi tombol ini **WAJIB** diletakkan tepat di atas tombol Auto Scroll (atau sebaris dalam kontrol navigasi sejenis).
+   - Tampilan tombol menggunakan ikon `fas fa-expand` (untuk masuk fullscreen) dan `fas fa-compress` (untuk keluar fullscreen).
+
 ---
 
 ## 6. Integrasi Backend, Formulir Dashboard & Local Development
 
-Setiap pemeliharaan database dan file internal harus mengikuti standar lokal & produksi.
 
 ### 6.1 Safe Seeding (Perlindungan Data Pengguna)
 Saat berpindah tema di menu **Pengaturan Tema** dashboard, controller **ThemeSettingsController.php** tidak boleh secara brutal menghapus data penting pengguna. Pengecekan jumlah relasi database wajib dilakukan sebelum seeding default data bawaan tema dijalankan:

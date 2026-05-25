@@ -556,6 +556,18 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                     </div>
                 </div>
             )}
+
+            {/* Watermark/Branding Footer */}
+            <div className="sp-watermark-footer" style={{
+                padding: '40px 16px 80px',
+                textAlign: 'center',
+                backgroundColor: '#ffffff',
+                borderTop: '1px solid #f4f5f6',
+                color: '#888888',
+                fontSize: '0.75rem',
+            }}>
+                Made with ❤️ by {invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'TrueLove Invitation'}
+            </div>
         </div>
     );
 }
@@ -1163,6 +1175,23 @@ function ShopeeThemeContent({ invitation, sections, brideGrooms, events, galleri
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef(null);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
     const enableRsvp = parseBool(invitation?.enable_rsvp);
     const enableWishes = parseBool(invitation?.enable_wishes);
@@ -1182,6 +1211,9 @@ function ShopeeThemeContent({ invitation, sections, brideGrooms, events, galleri
 
     const handleOpen = useCallback(() => {
         setIsOpened(true);
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
         if (audioRef.current && musicAutoplay) {
             audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
         }
@@ -1296,6 +1328,23 @@ function ShopeeThemeContent({ invitation, sections, brideGrooms, events, galleri
                     {/* 3. Floating Buttons (Music & Auto Scroll) */}
                     {isOpened && (
                         <>
+                            {activeTab === 'home' && (
+                                <div className="sp-float-fullscreen">
+                                    <button
+                                        className={`sp-float-fullscreen-btn ${isFullscreen ? 'is-active' : ''}`}
+                                        onClick={toggleFullscreen}
+                                        title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+                                    >
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            {isFullscreen ? (
+                                                <path d="M4 14h6v6m10-6h-6v6M4 10h6V4m10 6h-6V4" />
+                                            ) : (
+                                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                                            )}
+                                        </svg>
+                                    </button>
+                                </div>
+                            )}
                             {invitation?.enable_auto_scroll !== false && activeTab === 'home' && (
                                 <div className="sp-float-autoscroll">
                                     <button

@@ -1342,7 +1342,7 @@ function ClosingSection({ invitation, brideGrooms, galleries }) {
 
                     <h3 className="lx3-closing__couple">{coupleName}</h3>
                     <p style={{ marginTop: 40, fontSize: 10, color: 'var(--lx3-text-muted)', letterSpacing: 1 }}>
-                        POWERED BY {(invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'GROOVY DIGITAL').toUpperCase()}
+                        Made with ❤️ by {invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'Groovy Digital'}
                     </p>
                 </Reveal>
             </div>
@@ -1365,7 +1365,9 @@ function Navigation({
     enableRsvp,
     enableWishes,
     autoScrollEnabled,
-    setAutoScrollEnabled
+    setAutoScrollEnabled,
+    isFullscreen,
+    toggleFullscreen
 }) {
     const { t } = useTranslation();
     const [showQr, setShowQr] = useState(false);
@@ -1456,6 +1458,16 @@ function Navigation({
                     </button>
                 )}
 
+                <button
+                    type="button"
+                    className="lx3-floating-btn"
+                    onClick={toggleFullscreen}
+                    style={isFullscreen ? { backgroundColor: 'var(--lx3-gold, #b82d40)', color: '#fff', boxShadow: '0 0 10px var(--lx3-gold)' } : {}}
+                    title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+                >
+                    <i className={isFullscreen ? "fas fa-compress" : "fas fa-expand"} />
+                </button>
+
                 {invitation?.enable_auto_scroll !== false && (
                 <button
                     type="button"
@@ -1528,6 +1540,23 @@ export default function DynamicIndex({
     const [activeSectionId, setActiveSectionId] = useState('opening');
     const audioRef = useRef(null);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
     const guestName = guest?.name || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null) || 'Tamu Undangan';
 
@@ -1572,6 +1601,9 @@ export default function DynamicIndex({
         setIsOpened(true);
         if (audioRef.current && musicAutoplay) {
             audioRef.current.play().then(() => setIsPlaying(true)).catch(() => { });
+        }
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
         }
         if (!isSlideMode) {
             document.body.style.overflow = 'auto';
@@ -1975,6 +2007,8 @@ export default function DynamicIndex({
                 enableWishes={enableWishes}
                 autoScrollEnabled={autoScrollEnabled}
                 setAutoScrollEnabled={setAutoScrollEnabled}
+                isFullscreen={isFullscreen}
+                toggleFullscreen={toggleFullscreen}
             />
             </div>
         </ErrorBoundaryLuxury3>

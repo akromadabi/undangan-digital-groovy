@@ -986,7 +986,7 @@ function ClosingSection({ invitation, brideGrooms, id }) {
 
                 <Reveal delay={300}>
                     <p className="nf-closing__couple">{coupleName}</p>
-                    <p className="nf-closing__tagline">Powered by {invitation?.user?.reseller?.reseller_settings?.brand_name || 'TrueLove Invitation'}</p>
+                    <p className="nf-closing__tagline">Made with ❤️ by {invitation?.user?.reseller_settings?.brand_name || invitation?.user?.reseller?.reseller_settings?.brand_name || 'TrueLove Invitation'}</p>
                 </Reveal>
             </div>
         </section>
@@ -1022,6 +1022,23 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
     const [showQr, setShowQr] = useState(false);
     const audioRef = useRef(null);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
     const layoutMode = invitation?.layout_mode || 'scroll';
     const isSlideMode = layoutMode === 'slide-h' || layoutMode === 'slide-v' || layoutMode === 'slide';
@@ -1220,6 +1237,9 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
 
     const handleOpen = useCallback(() => {
         setIsOpened(true);
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
         if (audioRef.current) {
             audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
         }
@@ -1502,6 +1522,16 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
                             </svg>
                         </button>
                     )}
+                    {/* Fullscreen Button */}
+                    <button
+                        type="button"
+                        className="nf-music-btn"
+                        onClick={toggleFullscreen}
+                        style={isFullscreen ? { backgroundColor: '#E50914', color: '#fff', boxShadow: '0 0 10px #E50914' } : {}}
+                        title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+                    >
+                        <i className={isFullscreen ? "fas fa-compress" : "fas fa-expand"} />
+                    </button>
                     {invitation?.enable_auto_scroll !== false && (
                     <button
                         type="button"

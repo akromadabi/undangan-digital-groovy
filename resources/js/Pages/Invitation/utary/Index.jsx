@@ -858,14 +858,14 @@ function FooterSection() {
                 <div className="utary-footer__message">
                     Merupakan suatu kehormatan dan kebahagiaan bagi kami, apabila Bapak/Ibu, Saudara/i berkenan hadir di hari bahagia kami.
                 </div>
-                <div className="utary-footer__credit">Powered by Groovy Digital</div>
+                <div className="utary-footer__credit">Made with ❤️ by Groovy Digital</div>
             </RevealDiv>
         </footer>
     );
 }
 
 /* ── Navigation Menu & Controls ── */
-function Navigation({ guest, isOpened, isPlaying, onToggleMusic }) {
+function Navigation({ guest, isOpened, isPlaying, onToggleMusic, isFullscreen, toggleFullscreen }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [showQr, setShowQr] = useState(false);
@@ -941,6 +941,10 @@ function Navigation({ guest, isOpened, isPlaying, onToggleMusic }) {
                             </svg>
                         </button>
                     )}
+                    {/* Fullscreen Button */}
+                    <button type="button" className="utary-floating__btn" onClick={toggleFullscreen} title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}>
+                        <i className={isFullscreen ? "fas fa-compress" : "fas fa-expand"} />
+                    </button>
                     <button className="utary-floating__btn" onClick={() => scrollToSection('rsvp')} title="RSVP">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -1008,6 +1012,23 @@ export default function Utary() {
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
     const guestName = typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search).get('to') || 'Tamu Undangan'
@@ -1015,6 +1036,9 @@ export default function Utary() {
 
     const handleOpen = useCallback(() => {
         setIsOpened(true);
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
         document.getElementById('utary-cover')?.classList.add('is-opened');
         // Auto play music
         if (audioRef.current) {
@@ -1093,7 +1117,7 @@ export default function Utary() {
             </div>
 
             {/* Navigation and Floating Controls */}
-            <Navigation guest={{ name: guestName, slug: 'demo-guest' }} isOpened={isOpened} isPlaying={isPlaying} onToggleMusic={toggleMusic} />
+            <Navigation guest={{ name: guestName, slug: 'demo-guest' }} isOpened={isOpened} isPlaying={isPlaying} onToggleMusic={toggleMusic} isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
         </div>
     );
 }
