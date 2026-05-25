@@ -31,6 +31,7 @@ const WhatsappShareMockup = () => {
                         <div className="text-[10px] text-gray-400">Grup: Keluarga Besar</div>
                     </div>
                     <button
+                        type="button"
                         onClick={() => { setSent(true); setTimeout(() => setSent(false), 2000); }}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium inline-flex items-center gap-1 transition-all ${
                             sent ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm'
@@ -44,7 +45,7 @@ const WhatsappShareMockup = () => {
                 </div>
             </div>
             {sent && (
-                <div className="mt-2 text-[10px] text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1.5">
+                <div className="mt-2 text-[10px] text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1.5 animate-fadeIn">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                     Simulasi: Mengalihkan ke pesan WhatsApp Budi Santoso...
                 </div>
@@ -71,7 +72,7 @@ const AddGuestMockup = () => (
                     <input type="text" readOnly value="Teman Kampus" className="w-full text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" />
                 </div>
             </div>
-            <button className="w-full py-1 bg-emerald-600 text-white rounded text-xs font-semibold shadow-sm">
+            <button type="button" className="w-full py-1 bg-emerald-600 text-white rounded text-xs font-semibold shadow-sm">
                 + Tambahkan Tamu
             </button>
         </div>
@@ -122,7 +123,7 @@ const StreamingFormMockup = () => (
         <div className="text-[11px] font-semibold text-gray-400 tracking-wider mb-2">SIMULASI FORMULIR STREAMING</div>
         <div className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
             <div className="flex items-center justify-between p-1 bg-gray-50 rounded border border-gray-100">
-                <span className="text-[10px] font-bold text-gray-600 uppercase">AKtifkan live streaming</span>
+                <span className="text-[10px] font-bold text-gray-600 uppercase">Aktifkan live streaming</span>
                 <div className="w-7 h-4 bg-emerald-500 rounded-full p-0.5 flex justify-end items-center cursor-pointer">
                     <div className="w-3 h-3 bg-white rounded-full" />
                 </div>
@@ -152,7 +153,7 @@ const MusicPlayerMockup = () => (
                     <div className="text-[8px] text-emerald-600">Terpilih (Pustaka Groovy)</div>
                 </div>
             </div>
-            <div className="border border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer bg-white hover:bg-gray-50">
+            <div className="border border-dashed border-gray-300 rounded-lg p-3 text-center bg-white hover:bg-gray-50">
                 <div className="text-xs text-gray-500 font-semibold">Upload Musik (.mp3)</div>
                 <div className="text-[8px] text-gray-400 mt-0.5">Maksimal ukuran file: 5MB</div>
             </div>
@@ -171,7 +172,7 @@ const GiftRegisterMockup = () => (
                     <div className="text-[9px] text-gray-500">a.n Budi Santoso</div>
                 </div>
             </div>
-            <button className="w-full py-1.5 border border-dashed border-gray-300 hover:border-gray-400 rounded-lg text-xs font-semibold text-gray-600 bg-white">
+            <button type="button" className="w-full py-1.5 border border-dashed border-gray-300 hover:border-gray-400 rounded-lg text-xs font-semibold text-gray-600 bg-white">
                 + Tambah Rekening Lain
             </button>
         </div>
@@ -186,7 +187,7 @@ const CustomDomainMockup = () => (
                 <label className="block text-[10px] font-bold text-gray-600 mb-0.5">ALAMAT DOMAIN ANDA</label>
                 <div className="flex gap-1.5">
                     <input type="text" readOnly value="budiandsiti.com" className="flex-1 text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 text-gray-700 focus:outline-none" />
-                    <button className="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-semibold">Hubungkan</button>
+                    <button type="button" className="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-semibold">Hubungkan</button>
                 </div>
             </div>
             <div className="p-2 bg-amber-50 border border-amber-100 rounded text-[9px] text-amber-700 leading-tight">
@@ -203,7 +204,7 @@ const FAQ_DATABASE = [
         category: 'mulai-cepat',
         question: '1. Berapa lama masa aktif undangan digital saya?',
         answer: 'Masa aktif undangan digital Anda tergantung pada jenis paket yang Anda pilih saat pendaftaran atau upgrade.',
-        keywords: ['aktif', 'lama', 'durasi', 'expired', 'masa', 'berlaku', 'kapan', 'sisa', 'kadaluarsa'],
+        keywords: ['aktif', 'lama', 'durasi', 'expired', 'masa', 'berlaku', 'kapan', 'sisa', 'kadaluarsa', 'perpanjang'],
         steps: [
             'Paket Free (Gratis): Aktif selama 7 hari sejak tanggal pembuatan undangan.',
             'Paket Premium / Pro: Aktif selama 1 tahun (365 hari) penuh.',
@@ -217,7 +218,7 @@ const FAQ_DATABASE = [
         category: 'tamu-undangan',
         question: '2. Bagaimana cara membagikan undangan pernikahan ke WhatsApp?',
         answer: 'Membagikan undangan ke WhatsApp sangat praktis karena sistem kami telah menyiapkan teks template otomatis beserta link personal untuk masing-masing tamu.',
-        keywords: ['share', 'wa', 'whatsapp', 'bagikan', 'kirim', 'tamu', 'link', 'broadcast', 'kirim wa'],
+        keywords: ['share', 'wa', 'whatsapp', 'bagikan', 'kirim', 'tamu', 'link', 'broadcast', 'kirim wa', 'bagikan link'],
         steps: [
             'Masuk ke halaman "Tamu & RSVP" di panel samping.',
             'Pastikan Anda telah mengisi nama tamu di dalam daftar tamu.',
@@ -232,7 +233,7 @@ const FAQ_DATABASE = [
         category: 'tamu-undangan',
         question: '3. Bagaimana cara menambah daftar tamu undangan?',
         answer: 'Anda memiliki dua opsi mudah untuk menambahkan nama tamu: menambahkannya satu per satu, atau mengunggah daftar tamu sekaligus menggunakan template Excel.',
-        keywords: ['tamu', 'tambah', 'import', 'excel', 'guest', 'daftar', 'xlsx', 'unggah', 'masukkan'],
+        keywords: ['tamu', 'tambah', 'import', 'excel', 'guest', 'daftar', 'xlsx', 'unggah', 'masukkan', 'banyak tamu'],
         steps: [
             'Buka menu "Tamu & RSVP" pada panel samping kiri.',
             'Opsi 1 (Satu Per Satu): Klik tombol "+ Tambah Tamu". Masukkan nama tamu, grup/kategori (opsional), dan nomor telepon. Klik "Simpan".',
@@ -246,7 +247,7 @@ const FAQ_DATABASE = [
         category: 'desain-tema',
         question: '4. Bagaimana cara mengganti tema atau desain undangan?',
         answer: 'Anda bebas bereksperimen mengganti tema undangan kapan saja tanpa khawatir kehilangan informasi, teks, atau galeri foto yang sudah diisi sebelumnya.',
-        keywords: ['tema', 'ganti', 'desain', 'ubah', 'tampilan', 'theme', 'katalog', 'pilih', 'template'],
+        keywords: ['tema', 'ganti', 'desain', 'ubah', 'tampilan', 'theme', 'katalog', 'pilih', 'template', 'ganti tema'],
         steps: [
             'Buka menu "Desain & Tema" di panel samping.',
             'Pilih tab "Tema" di bagian atas halaman (jika belum terpilih).',
@@ -260,7 +261,7 @@ const FAQ_DATABASE = [
         category: 'fitur-tambahan',
         question: '5. Bagaimana cara menambahkan link Live Streaming?',
         answer: 'Anda bisa menyematkan link siaran langsung (Live Streaming) acara pernikahan Anda agar kerabat yang berada jauh atau berhalangan hadir tetap dapat menyaksikan prosesi sakral.',
-        keywords: ['streaming', 'live', 'youtube', 'zoom', 'siaran', 'langsung', 'video', 'link live', 'instagram'],
+        keywords: ['streaming', 'live', 'youtube', 'zoom', 'siaran', 'langsung', 'video', 'link live', 'instagram', 'youtube live'],
         steps: [
             'Masuk ke menu "Acara" di panel samping.',
             'Gulir layar ke bawah hingga menemukan section formulir "Live Streaming".',
@@ -276,7 +277,7 @@ const FAQ_DATABASE = [
         category: 'desain-tema',
         question: '6. Bagaimana cara mengganti musik latar (Backsound)?',
         answer: 'Undangan digital Anda akan terasa lebih hidup dengan latar belakang musik yang romantis dan sesuai dengan selera Anda.',
-        keywords: ['musik', 'lagu', 'backsound', 'suara', 'sound', 'mp3', 'audio', 'ganti lagu', 'autoplay'],
+        keywords: ['musik', 'lagu', 'backsound', 'suara', 'sound', 'mp3', 'audio', 'ganti lagu', 'autoplay', 'lagu latar'],
         steps: [
             'Pilih menu "Musik" di panel samping.',
             'Anda dapat mendengarkan dan menggunakan pilihan lagu romantis yang sudah kami sediakan di dalam pustaka sistem.',
@@ -290,7 +291,7 @@ const FAQ_DATABASE = [
         category: 'fitur-tambahan',
         question: '7. Bagaimana cara mengaktifkan amplop digital (kado pernikahan)?',
         answer: 'Fitur Amplop Digital memberikan kemudahan bagi para tamu undangan untuk mengirimkan kado/amplop secara non-tunai (cashless) secara langsung ke rekening Anda.',
-        keywords: ['hadiah', 'amplop', 'rekening', 'transfer', 'bank', 'kado', 'digital', 'cashless', 'angpao'],
+        keywords: ['hadiah', 'amplop', 'rekening', 'transfer', 'bank', 'kado', 'digital', 'cashless', 'angpao', 'nomor rekening'],
         steps: [
             'Pilih menu "Amplop Digital" di panel samping kiri.',
             'Klik tombol "Tambah Rekening".',
@@ -305,7 +306,7 @@ const FAQ_DATABASE = [
         category: 'fitur-tambahan',
         question: '8. Apakah saya bisa menggunakan domain sendiri (Custom Domain)?',
         answer: 'Ya, bagi pengguna paket Premium Pro atau paket tertentu dari Reseller, Anda dapat menggunakan domain pribadi (contoh: www.budiandsiti.com) alih-alih menggunakan link default.',
-        keywords: ['domain', 'custom', 'nama', 'web', 'alamat', 'sendiri', 'dns', 'cname', 'a record'],
+        keywords: ['domain', 'custom', 'nama', 'web', 'alamat', 'sendiri', 'dns', 'cname', 'a record', 'domain pribadi'],
         steps: [
             'Masuk ke menu "Desain & Tema", lalu pilih tab "Pengaturan" di bagian kanan atas.',
             'Scroll ke bawah ke kolom "Custom Domain".',
@@ -319,7 +320,7 @@ const FAQ_DATABASE = [
         category: 'desain-tema',
         question: '9. Mengapa musik di undangan tidak otomatis berputar saat dibuka pertama kali?',
         answer: 'Hal ini terjadi karena adanya kebijakan privasi dan keamanan ketat pada browser modern (Google Chrome, Apple Safari, Mozilla Firefox) yang melarang pemutaran audio otomatis (autoplay) sebelum pengguna berinteraksi dengan halaman.',
-        keywords: ['musik', 'tidak', 'putar', 'bunyi', 'suara', 'autoplay', 'senyap', 'mati', 'browser'],
+        keywords: ['musik', 'tidak', 'putar', 'bunyi', 'suara', 'autoplay', 'senyap', 'mati', 'browser', 'lagu mati'],
         steps: [
             'Untuk mengatasi kendala aturan browser ini, undangan kami dirancang menggunakan halaman pembuka (Cover/Sampul) interaktif.',
             'Di halaman Cover tersebut, terdapat tombol "Buka Undangan".',
@@ -333,11 +334,95 @@ const FAQ_DATABASE = [
         category: 'mulai-cepat',
         question: '10. Bagaimana cara memperbarui detail informasi Pengantin & Acara?',
         answer: 'Pengeditan nama calon pengantin, data keluarga, tanggal, hingga lokasi maps dapat diubah dengan mudah dan perubahannya langsung diperbarui seketika pada undangan digital Anda.',
-        keywords: ['edit', 'mempelai', 'foto', 'nama', 'tanggal', 'lokasi', 'alamat', 'ubah', 'pengantin', 'akad', 'resepsi'],
+        keywords: ['edit', 'mempelai', 'foto', 'nama', 'tanggal', 'lokasi', 'alamat', 'ubah', 'pengantin', 'akad', 'resepsi', 'lokasi maps'],
         steps: [
             'Gunakan menu "Mempelai" di panel samping untuk memperbarui foto profil pengantin pria/wanita, nama lengkap, nama panggilan, nama orang tua, serta link media sosial.',
             'Gunakan menu "Acara" untuk melengkapi tanggal pelaksanaan, jam mulai-selesai, zona waktu, nama gedung, alamat tertulis, serta menyematkan link Google Maps lokasi agar tamu tidak tersesat.',
             'Klik tombol "Simpan" di masing-masing menu setelah melakukan perubahan agar data ter-update.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-rsvp',
+        category: 'tamu-undangan',
+        question: '11. Bagaimana cara mengaktifkan RSVP & melacak konfirmasi kehadiran tamu?',
+        answer: 'Secara default, fitur RSVP sudah aktif di bagian bawah undangan Anda dan rekapannya terhubung langsung ke panel admin Anda.',
+        keywords: ['rsvp', 'kehadiran', 'hadir', 'tidak hadir', 'konfirmasi', 'melacak', 'tamu datang', 'status hadir'],
+        steps: [
+            'Fitur RSVP / Konfirmasi Kehadiran akan muncul di bagian bawah undangan digital yang dibagikan kepada para tamu.',
+            'Tamu undangan dapat memilih opsi "Hadir", "Tidak Hadir", atau "Ragu-ragu", serta mengisi ucapan atau doa restu.',
+            'Untuk melihat rekap data konfirmasi tersebut, buka menu "Tamu & RSVP" di panel samping kiri.',
+            'Pada dashboard Tamu, Anda akan melihat persentase kehadiran tamu, rincian ucapan, serta daftar tamu yang sudah mengonfirmasi kehadirannya secara real-time.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-kisah',
+        category: 'mulai-cepat',
+        question: '12. Bagaimana cara mengaktifkan dan mengedit Cerita/Kisah Cinta (Love Story)?',
+        answer: 'Fitur Kisah Cinta memungkinkan Anda membagikan perjalanan asmara Anda dengan pasangan (dari awal perkenalan hingga jenjang lamaran) dengan visualisasi timeline yang elegan.',
+        keywords: ['kisah', 'cerita', 'love', 'story', 'perjalanan', 'timeline', 'kenalan', 'pacaran', 'tunangan', 'lamaran'],
+        steps: [
+            'Pastikan fitur ini termasuk dalam paket langganan Anda (tidak terkunci). Buka menu "Kisah Cinta" di panel samping.',
+            'Klik tombol "+ Tambah Kisah" untuk membuat cerita baru.',
+            'Tentukan judul kisah (misal: "Awal Bertemu", "Tunangan"), masukkan tanggal/tahun kejadian, unggah foto pendukung, lalu tulis deskripsi cerita singkatnya.',
+            'Klik "Simpan" untuk menerapkan kisah tersebut ke dalam timeline undangan Anda.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-cover-img',
+        category: 'desain-tema',
+        question: '13. Bagaimana cara mengganti Gambar Sampul (Cover Background)?',
+        answer: 'Mengganti gambar sampul utama (cover) sangat penting untuk memberikan impresi pertama yang memukau bagi tamu undangan.',
+        keywords: ['cover', 'sampul', 'gambar sampul', 'background cover', 'foto utama', 'ganti foto', 'slide', 'latar belakang cover'],
+        steps: [
+            'Buka menu "Desain & Tema" di panel samping, lalu pilih tab "Pengaturan" di kanan atas.',
+            'Cari kolom pengaturan "Gambar Sampul / Background Cover".',
+            'Klik tombol "Upload Gambar" untuk memilih foto terbaik Anda dari penyimpanan komputer/HP (rekomendasi menggunakan rasio foto tegak/portrait untuk tampilan mobile yang optimal).',
+            'Klik tombol "Simpan Pengaturan" di bagian paling bawah untuk memperbarui gambar sampul.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-text-kustom',
+        category: 'tamu-undangan',
+        question: '14. Bagaimana cara membuat Teks Pengantar WhatsApp yang Kustom?',
+        answer: 'Anda dapat menyesuaikan teks pembuka saat membagikan undangan di WhatsApp agar terdengar lebih sopan, akrab, atau formal.',
+        keywords: ['teks', 'kustom', 'pesan wa', 'sapaan', 'pengantar', 'bahasa', 'tata kata', 'template wa', 'kustom wa'],
+        steps: [
+            'Buka menu "Tamu & RSVP" di panel samping kiri.',
+            'Pilih tab "Pesan Pengantar" di bagian atas halaman (jika fitur didukung paket Anda).',
+            'Tulis pesan kustom Anda. Anda dapat menggunakan parameter otomatis seperti `{nama}` untuk memanggil nama tamu, dan `{link}` untuk melampirkan link undangan pribadi mereka.',
+            'Klik "Simpan Teks Pengantar" untuk menyimpan perubahan pesan otomatis tersebut.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-error-akses',
+        category: 'mulai-cepat',
+        question: '15. Undangan digital saya tidak bisa diakses atau blank putih, bagaimana mengatasinya?',
+        answer: 'Kendala akses biasanya disebabkan oleh masa aktif paket yang telah kedaluwarsa atau masalah cache pada browser.',
+        keywords: ['error', 'tidak bisa dibuka', 'blank', 'mati', 'rusak', 'putih', 'tidak aktif', 'akses', 'loading lama'],
+        steps: [
+            'Periksa status masa aktif paket Anda di bagian bawah panel sidebar kiri. Jika paket Anda sudah habis masa aktifnya, silakan lakukan perpanjangan paket.',
+            'Pastikan Anda tidak mengubah atau menghapus slug/link undangan di menu Pengaturan Profil.',
+            'Jika Anda baru saja menyambungkan **Custom Domain**, proses propagasi jaringan DNS biasanya membutuhkan waktu 1 hingga 24 jam untuk aktif sepenuhnya di seluruh perangkat.',
+            'Coba buka link undangan menggunakan browser lain atau bersihkan cache browser Anda (gunakan mode Samaran/Incognito). Jika masih bermasalah, klik tombol "Hubungi Support WA" di bawah.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-matikan-section',
+        category: 'desain-tema',
+        question: '16. Bagaimana cara menyembunyikan atau menonaktifkan fitur tertentu?',
+        answer: 'Anda dapat menyembunyikan bagian-bagian tertentu dari undangan (seperti menyembunyikan Kisah Cinta atau bagian Amplop) dengan mudah melalui menu manajemen tata letak.',
+        keywords: ['matikan', 'nonaktifkan', 'sembunyikan', 'hilangkan', 'fitur', 'bagian', 'section', 'tata letak', 'hide'],
+        steps: [
+            'Buka menu "Desain & Tema" di panel samping kiri.',
+            'Pilih tab "Tata Letak" atau masuk ke menu pengaturan sections.',
+            'Cukup hilangkan centang (uncheck) pada section yang ingin disembunyikan (misal: hilangkan centang "Kisah Cinta" atau "Amplop Digital").',
+            'Klik tombol "Simpan Tata Letak" di bawah halaman. Bagian tersebut otomatis hilang dari halaman undangan tanpa menghapus data aslinya.'
         ],
         mockup: null
     }
@@ -346,7 +431,8 @@ const FAQ_DATABASE = [
 export default function Tutorial() {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('semua');
-    const [openIds, setOpenIds] = useState(['faq-aktif']); // First item open by default
+    const [activeId, setActiveId] = useState('faq-aktif'); // Accordion single state: open active item
+    const [isListening, setIsListening] = useState(false);
 
     // Category Tabs Configuration
     const categories = [
@@ -359,9 +445,48 @@ export default function Tutorial() {
 
     // Toggle Accordion State
     const toggleAccordion = (id) => {
-        setOpenIds(prev =>
-            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-        );
+        setActiveId(prev => prev === id ? null : id);
+    };
+
+    // Voice Search Handler using Web Speech API
+    const handleVoiceSearch = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("Browser Anda tidak mendukung pencarian suara. Silakan gunakan Google Chrome atau browser modern lainnya.");
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'id-ID'; // Set lang to Indonesian
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        if (isListening) {
+            recognition.stop();
+            setIsListening(false);
+            return;
+        }
+
+        recognition.onstart = () => {
+            setIsListening(true);
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+            setIsListening(false);
+        };
+
+        recognition.onresult = (event) => {
+            const speechToText = event.results[0][0].transcript;
+            const cleanedText = speechToText.replace(/\.$/, ''); // Remove trailing dot if present
+            setSearchQuery(cleanedText);
+        };
+
+        recognition.start();
     };
 
     // Filter FAQs based on active tab and search query
@@ -422,44 +547,71 @@ export default function Tutorial() {
                         Punya pertanyaan? Cari solusi cepat untuk mempermudah Anda dalam mengaplikasikan undangan pernikahan digital.
                     </p>
 
-                    {/* Smart Search Bar */}
+                    {/* Smart Search Bar with Voice Input (Mic Button) */}
                     <div className="mt-6 max-w-md mx-auto relative z-10">
                         <div className="relative">
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Ketik kata kunci (misal: 'tema', 'wa', 'musik', 'aktif')..."
-                                className="w-full bg-white text-gray-800 placeholder-gray-400 pl-11 pr-4 py-3 rounded-xl border-none shadow-md text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                                placeholder="Cari panduan..."
+                                className="w-full bg-white text-gray-800 placeholder-gray-400 pl-11 pr-16 py-3 rounded-xl border-none shadow-md text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                             />
                             <div className="absolute left-4 top-3.5 text-gray-400">
                                 <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            {searchQuery && (
-                                <button
-                                    onClick={() => setSearchQuery('')}
-                                    className="absolute right-3 top-2.5 p-1 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-                                >
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            )}
+                            
+                            {/* Action Buttons: Mic Search & Clear Input */}
+                            <div className="absolute right-3 top-2.5 flex items-center gap-1">
+                                {isListening ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleVoiceSearch}
+                                        className="p-1.5 rounded-full bg-red-100 text-red-600 animate-pulse transition-colors"
+                                        title="Sedang mendengarkan... Klik untuk berhenti"
+                                    >
+                                        <svg className="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+                                        </svg>
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={handleVoiceSearch}
+                                        className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                        title="Cari dengan suara"
+                                    >
+                                        <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                        </svg>
+                                    </button>
+                                )}
+                                {searchQuery && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearchQuery('')}
+                                        className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                        title="Hapus pencarian"
+                                    >
+                                        <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* ═══ Category Tabs ═══ */}
-                <div className="flex overflow-x-auto pb-1 gap-1.5 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                <div className="flex overflow-x-auto pb-1 gap-1.5 scrollbar-none">
                     {categories.map((cat) => (
                         <button
                             key={cat.id}
-                            onClick={() => {
-                                setActiveCategory(cat.id);
-                                // If tab switches, keep search but reset view/open states optionally
-                            }}
+                            type="button"
+                            onClick={() => setActiveCategory(cat.id)}
                             className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
                                 activeCategory === cat.id
                                     ? 'bg-emerald-600 text-white shadow-sm'
@@ -475,7 +627,7 @@ export default function Tutorial() {
                 <div className="space-y-3">
                     {filteredFAQs.length > 0 ? (
                         filteredFAQs.map((faq) => {
-                            const isOpen = openIds.includes(faq.id);
+                            const isOpen = activeId === faq.id;
                             return (
                                 <div
                                     key={faq.id}
@@ -485,6 +637,7 @@ export default function Tutorial() {
                                 >
                                     {/* Accordion Trigger */}
                                     <button
+                                        type="button"
                                         onClick={() => toggleAccordion(faq.id)}
                                         className="w-full flex items-center justify-between text-left p-4 focus:outline-none transition-colors hover:bg-gray-50/40"
                                     >
@@ -502,7 +655,7 @@ export default function Tutorial() {
 
                                     {/* Accordion Content */}
                                     <div
-                                        className={`transition-all duration-200 ease-in-out overflow-hidden ${
+                                        className={`transition-all duration-300 ease-in-out overflow-hidden ${
                                             isOpen ? 'max-h-[1000px] border-t border-gray-50' : 'max-h-0'
                                         }`}
                                     >
@@ -547,6 +700,7 @@ export default function Tutorial() {
                                 Maaf, kami tidak dapat menemukan panduan dengan kata kunci "{searchQuery}". Coba gunakan kata kunci umum lainnya seperti <strong>'tema'</strong>, <strong>'wa'</strong>, atau <strong>'musik'</strong>.
                             </p>
                             <button
+                                type="button"
                                 onClick={() => { setSearchQuery(''); setActiveCategory('semua'); }}
                                 className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm"
                             >
