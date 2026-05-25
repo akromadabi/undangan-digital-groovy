@@ -69,12 +69,6 @@ export default function SuperAdminLayout({ children, title }) {
 
                 {/* Sidebar Bottom */}
                 <div className="border-t border-[#f0ede8] p-3 space-y-1">
-                    <Link href="/admin" className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-[#999] hover:text-[#E5654B] rounded-xl hover:bg-[#fef2f0] transition-colors">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Admin Panel
-                    </Link>
                     <div className="flex items-center gap-3 px-3 py-2">
                         <div className="w-8 h-8 rounded-full bg-[#E5654B] flex items-center justify-center text-white text-xs font-bold">
                             {auth.user?.name?.charAt(0)?.toUpperCase() || 'S'}
@@ -125,18 +119,7 @@ export default function SuperAdminLayout({ children, title }) {
                                         <div className="text-sm font-semibold text-[#333]">{auth.user?.name}</div>
                                         <div className="text-xs text-[#999] mt-0.5">{auth.user?.email || 'Super Admin'}</div>
                                     </div>
-                                    <div className="py-1">
-                                        <Link href="/admin" className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#555] hover:bg-[#f5f3f0] transition-colors"
-                                            onClick={() => setAvatarOpen(false)}>
-                                            <SvgIcon d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" className="w-4 h-4 text-[#999]" />
-                                            Admin Panel
-                                        </Link>
-                                        <Link href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#555] hover:bg-[#f5f3f0] transition-colors"
-                                            onClick={() => setAvatarOpen(false)}>
-                                            <SvgIcon d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" className="w-4 h-4 text-[#999]" />
-                                            User Dashboard
-                                        </Link>
-                                    </div>
+
                                     <div className="border-t border-[#f0ede8] pt-1">
                                         <Link href={route('logout')} method="post" as="button"
                                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors w-full">

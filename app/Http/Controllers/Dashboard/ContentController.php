@@ -179,25 +179,51 @@ class ContentController extends Controller
     public function saveGaleri(Request $request)
     {
         $request->validate([
-            'image_url' => 'required|string|max:500',
+            'images' => 'nullable|array',
+            'images.*.image_url' => 'required_with:images|string|max:500',
+            'images.*.caption' => 'nullable|string|max:200',
+            'image_url' => 'required_without:images|nullable|string|max:500',
             'caption' => 'nullable|string|max:200',
         ]);
 
         $invitation = $this->getUserInvitation($request);
         $maxGalleries = $request->user()->currentPlan()?->max_galleries ?? 3;
+        $currentCount = $invitation->galleries()->count();
 
-        if ($invitation->galleries()->count() >= $maxGalleries) {
-            return back()->withErrors(['image_url' => 'Jumlah foto sudah mencapai batas maksimal paket Anda.']);
+        if ($request->has('images')) {
+            $images = $request->input('images');
+            $added = 0;
+            foreach ($images as $img) {
+                if ($currentCount >= $maxGalleries) {
+                    break;
+                }
+                Gallery::create([
+                    'invitation_id' => $invitation->id,
+                    'image_url' => $img['image_url'],
+                    'caption' => $img['caption'] ?? null,
+                    'sort_order' => $currentCount,
+                ]);
+                $currentCount++;
+                $added++;
+            }
+            if ($added === 0 && count($images) > 0) {
+                return back()->withErrors(['images' => 'Jumlah foto sudah mencapai batas maksimal paket Anda.']);
+            }
+            return back()->with('success', $added . ' foto berhasil ditambahkan.');
+        } else {
+            if ($currentCount >= $maxGalleries) {
+                return back()->withErrors(['image_url' => 'Jumlah foto sudah mencapai batas maksimal paket Anda.']);
+            }
+
+            Gallery::create([
+                'invitation_id' => $invitation->id,
+                'image_url' => $request->image_url,
+                'caption' => $request->caption,
+                'sort_order' => $currentCount,
+            ]);
+
+            return back()->with('success', 'Foto berhasil ditambahkan.');
         }
-
-        Gallery::create([
-            'invitation_id' => $invitation->id,
-            'image_url' => $request->image_url,
-            'caption' => $request->caption,
-            'sort_order' => $invitation->galleries()->count(),
-        ]);
-
-        return back()->with('success', 'Foto berhasil ditambahkan.');
     }
 
     public function deleteGaleri(Request $request, $id)

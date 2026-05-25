@@ -9,29 +9,77 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
     const [caption, setCaption] = useState('');
     const [mode, setMode] = useState(galleryMode || 'grid');
     const [savingMode, setSavingMode] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState('');
+    const [isDragOver, setIsDragOver] = useState(false);
 
-    const handleUpload = async (file) => {
-        if (!file) return;
-        setUploading(true);
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+    };
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('folder', 'galeri');
+    const handleDragLeave = () => {
+        setIsDragOver(false);
+    };
 
-        try {
-            const response = await axios.post(route('upload'), formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-
-            router.post(route('content.galeri.save'), {
-                image_url: response.data.url,
-                caption: caption,
-            }, { preserveScroll: true });
-            setCaption('');
-        } catch (e) {
-            console.error(e);
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            handleUpload(e.dataTransfer.files);
         }
-        setUploading(false);
+    };
+
+    const handleUpload = async (files) => {
+        if (!files || files.length === 0) return;
+        const fileArray = Array.from(files);
+
+        if (fileArray.length > remaining) {
+            alert(`Oops! Kuota sisa Anda adalah ${remaining} foto. Silakan pilih maksimal ${remaining} foto.`);
+            return;
+        }
+
+        setUploading(true);
+        const uploadedImages = [];
+
+        for (let i = 0; i < fileArray.length; i++) {
+            setUploadStatus(`Mengupload ${i + 1} dari ${fileArray.length} foto...`);
+            const file = fileArray[i];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'galeri');
+
+            try {
+                const response = await axios.post(route('upload'), formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                uploadedImages.push({
+                    image_url: response.data.url,
+                    caption: fileArray.length === 1 ? caption : '',
+                });
+            } catch (e) {
+                console.error(`Gagal mengupload file ke-${i + 1}:`, e);
+            }
+        }
+
+        if (uploadedImages.length > 0) {
+            setUploadStatus('Menyimpan ke galeri...');
+            router.post(route('content.galeri.save'), {
+                images: uploadedImages,
+            }, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setCaption('');
+                },
+                onFinish: () => {
+                    setUploading(false);
+                    setUploadStatus('');
+                }
+            });
+        } else {
+            alert('Gagal mengunggah foto. Silakan coba lagi.');
+            setUploading(false);
+            setUploadStatus('');
+        }
     };
 
     const handleDelete = (id) => {
@@ -108,29 +156,53 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
                 {/* Upload Area */}
                 {remaining > 0 ? (
                     <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Upload Foto Baru</h4>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Upload Foto Baru (Mendukung Upload Masal)</h4>
                         <div className="space-y-3">
                             <input
                                 type="text"
                                 value={caption}
                                 onChange={(e) => setCaption(e.target.value)}
-                                placeholder="Caption foto (opsional)"
+                                placeholder="Caption foto (opsional, hanya untuk upload 1 foto)"
                                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
                             />
+                            {caption && (
+                                <p className="text-[10px] text-amber-600 font-medium px-1">
+                                    * Catatan: Caption hanya akan digunakan jika Anda mengunggah 1 foto saja.
+                                </p>
+                            )}
                             <label className="block cursor-pointer">
-                                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-emerald-400 hover:bg-emerald-50/50 transition-all">
+                                <div 
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                                        isDragOver 
+                                            ? 'border-emerald-500 bg-emerald-50 scale-[1.01]' 
+                                            : 'border-gray-300 hover:border-emerald-400 hover:bg-emerald-50/50'
+                                    }`}
+                                >
                                     {uploading ? (
-                                        <div className="text-emerald-500 font-medium"><svg className="w-4 h-4 inline mr-1 -mt-0.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Uploading...</div>
+                                        <div className="text-emerald-500 font-medium">
+                                            <svg className="w-5 h-5 inline mr-2 -mt-0.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                            {uploadStatus || 'Uploading...'}
+                                        </div>
                                     ) : (
                                         <>
-                                            <div className="text-4xl mb-2"><svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
-                                            <div className="text-sm font-medium text-gray-600">Klik untuk upload foto</div>
-                                            <div className="text-xs text-gray-400 mt-1">JPG, PNG, WEBP • Max 5MB</div>
+                                            <div className="text-4xl mb-2">
+                                                <svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            </div>
+                                            <div className="text-sm font-medium text-gray-600">Klik atau seret (drag & drop) foto-foto di sini untuk upload masal</div>
+                                            <div className="text-xs text-gray-400 mt-1">Bisa memilih banyak foto sekaligus • JPG, PNG, WEBP • Max 5MB per file</div>
                                         </>
                                     )}
                                 </div>
-                                <input type="file" accept="image/*" className="hidden"
-                                    onChange={(e) => handleUpload(e.target.files[0])} disabled={uploading} />
+                                <input type="file" accept="image/*" className="hidden" multiple
+                                    onChange={(e) => handleUpload(e.target.files)} disabled={uploading} />
                             </label>
                         </div>
                         <div className="mt-3 text-xs text-gray-400 text-right">Sisa kuota: {remaining} foto</div>

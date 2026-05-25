@@ -53,33 +53,9 @@ export default function AdminLayout({ children, title }) {
     const isActive = (href) => currentPath === href || (href !== '/admin' && currentPath.startsWith(href));
 
     return (
-        <div className={`min-h-screen bg-[#f8f7f4] flex ${auth?.impersonator ? 'pt-[44px]' : ''}`}>
-            {auth?.impersonator && (
-                <div className="fixed top-0 left-0 right-0 h-[44px] z-[9999] bg-[#E5654B] text-white px-4 py-2 flex items-center justify-between text-sm shadow-md font-semibold select-none">
-                    <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>
-                            Impersonasi Reseller: <strong>{auth.user?.name}</strong> (oleh {auth.impersonator.name})
-                        </span>
-                    </div>
-                    <Link
-                        href="/impersonate/leave"
-                        method="post"
-                        as="button"
-                        className="px-3.5 py-1 bg-white text-[#E5654B] rounded-lg hover:bg-opacity-95 text-xs font-bold shadow-sm transition-all hover:scale-[1.02]"
-                    >
-                        Kembali ke Super Admin
-                    </Link>
-                </div>
-            )}
+        <div className="min-h-screen bg-[#f8f7f4] flex">
             {/* ═══ Desktop Sidebar (hidden on mobile) ═══ */}
-            <aside className="hidden lg:flex sticky w-[240px] bg-white flex-col shadow-[1px_0_0_0_#e8e5e0]"
-                style={{
-                    top: auth?.impersonator ? '44px' : '0',
-                    height: auth?.impersonator ? 'calc(100vh - 44px)' : '100vh'
-                }}>
+            <aside className="hidden lg:flex sticky top-0 h-screen w-[240px] bg-white flex-col shadow-[1px_0_0_0_#e8e5e0]">
                 {/* Logo */}
                 <div className="h-16 flex items-center px-5">
                     <Link href="/admin" className="flex items-center gap-3">
@@ -108,12 +84,6 @@ export default function AdminLayout({ children, title }) {
 
                 {/* Sidebar Bottom */}
                 <div className="border-t border-[#f0ede8] p-3 space-y-1">
-                    <Link href="/dashboard" className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-[#999] hover:text-[#E5654B] rounded-xl hover:bg-[#fef2f0] transition-colors">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        User Dashboard
-                    </Link>
                     <div className="flex items-center gap-3 px-3 py-2">
                         <div className="w-8 h-8 rounded-full bg-[#E5654B] flex items-center justify-center text-white text-xs font-bold">
                             {auth.user?.name?.charAt(0)?.toUpperCase() || 'A'}
@@ -134,10 +104,7 @@ export default function AdminLayout({ children, title }) {
             {/* ═══ Main Content ═══ */}
             <div className="flex-1 flex flex-col min-h-screen min-w-0">
                 {/* Top Bar */}
-                <header className="h-14 lg:h-16 bg-white flex items-center justify-between px-4 lg:px-8 sticky z-30 shadow-[0_1px_0_0_#e8e5e0]"
-                    style={{
-                        top: auth?.impersonator ? '44px' : '0'
-                    }}>
+                <header className="h-14 lg:h-16 bg-white flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-[0_1px_0_0_#e8e5e0]">
                     <div className="flex items-center gap-3">
                         {/* Mobile logo */}
                         <Link href="/admin" className="lg:hidden flex items-center gap-2">
@@ -191,13 +158,7 @@ export default function AdminLayout({ children, title }) {
                                             </svg>
                                             Profil
                                         </Link>
-                                        <Link href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#555] hover:bg-[#f5f3f0] transition-colors"
-                                            onClick={() => setAvatarOpen(false)}>
-                                            <svg className="w-4 h-4 text-[#999]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                                            </svg>
-                                            User Dashboard
-                                        </Link>
+
                                     </div>
 
                                     {/* Logout */}
