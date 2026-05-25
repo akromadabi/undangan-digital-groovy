@@ -121,7 +121,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasFeatureAccess(string $featureSlug): bool
     {
-        if ($this->isSuperAdmin()) {
+        if ($this->isSuperAdmin() || $this->isAdmin()) {
             return true;
         }
 

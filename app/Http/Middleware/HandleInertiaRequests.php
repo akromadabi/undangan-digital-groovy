@@ -19,14 +19,21 @@ class HandleInertiaRequests extends Middleware
         $user = $request->user();
         $featureAccess = [];
 
-        if ($user && !$user->isAdmin() && !$user->isSuperAdmin()) {
-            $plan = $user->currentPlan();
-            if ($plan) {
-                $featureAccess = $plan->featureAccess()
-                    ->with('feature')
-                    ->get()
-                    ->mapWithKeys(fn($pfa) => [$pfa->feature->slug => $pfa->is_enabled])
+        if ($user) {
+            if ($user->isAdmin() || $user->isSuperAdmin()) {
+                // Admin and Super Admin have full access to all features
+                $featureAccess = \App\Models\Feature::pluck('slug')
+                    ->mapWithKeys(fn($slug) => [$slug => true])
                     ->toArray();
+            } else {
+                $plan = $user->currentPlan();
+                if ($plan) {
+                    $featureAccess = $plan->featureAccess()
+                        ->with('feature')
+                        ->get()
+                        ->mapWithKeys(fn($pfa) => [$pfa->feature->slug => $pfa->is_enabled])
+                        ->toArray();
+                }
             }
         }
 
@@ -44,11 +51,22 @@ class HandleInertiaRequests extends Middleware
                     'invitation_slug' => $user->invitation?->slug,
                 ] : null,
             ],
-            'subscription' => $user && !$user->isAdmin() && !$user->isSuperAdmin() ? [
-                'plan' => $user->currentPlan()?->only(['name', 'slug', 'max_guests', 'max_galleries']),
-                'status' => $user->activeSubscription?->status,
-                'expires_at' => $user->activeSubscription?->expires_at?->toISOString(),
-            ] : null,
+            'subscription' => $user ? (
+                (!$user->isAdmin() && !$user->isSuperAdmin()) ? [
+                    'plan' => $user->currentPlan()?->only(['name', 'slug', 'max_guests', 'max_galleries']),
+                    'status' => $user->activeSubscription?->status,
+                    'expires_at' => $user->activeSubscription?->expires_at?->toISOString(),
+                ] : [
+                    'plan' => [
+                        'name' => $user->isSuperAdmin() ? 'Super Admin' : 'Administrator',
+                        'slug' => 'premium',
+                        'max_guests' => 99999,
+                        'max_galleries' => 99999,
+                    ],
+                    'status' => 'active',
+                    'expires_at' => null,
+                ]
+            ) : null,
             'features' => $featureAccess,
             'appName' => config('app.name'),
             'adminRoutePrefix' => str_starts_with($request->path(), 'super-admin') ? '/super-admin' : '/admin',

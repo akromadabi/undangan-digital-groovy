@@ -39,17 +39,28 @@ class DashboardController extends Controller
         });
 
         $subscription = $user->activeSubscription;
+        $dashboardSubscription = null;
+        if ($subscription) {
+            $dashboardSubscription = [
+                'plan_name' => $subscription->plan->name,
+                'plan_slug' => $subscription->plan->slug,
+                'status' => $subscription->status,
+                'expires_at' => $subscription->expires_at?->format('d M Y'),
+            ];
+        } elseif ($user->isAdmin() || $user->isSuperAdmin()) {
+            $dashboardSubscription = [
+                'plan_name' => $user->isSuperAdmin() ? 'Super Admin' : 'Administrator',
+                'plan_slug' => 'premium',
+                'status' => 'active',
+                'expires_at' => null,
+            ];
+        }
 
         return Inertia::render('Dashboard/Index', [
             'invitation' => $invitation,
             'stats' => $stats,
             'features' => $features,
-            'dashboardSubscription' => $subscription ? [
-                'plan_name' => $subscription->plan->name,
-                'plan_slug' => $subscription->plan->slug,
-                'status' => $subscription->status,
-                'expires_at' => $subscription->expires_at?->format('d M Y'),
-            ] : null,
+            'dashboardSubscription' => $dashboardSubscription,
             'latestWishes' => $invitation?->wishes()->latest()->take(5)->get() ?? [],
         ]);
     }
