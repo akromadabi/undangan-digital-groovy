@@ -22,76 +22,78 @@ export default function Index({ users, filters }) {
 
                 {/* Table */}
                 <div className="bg-white rounded-2xl border border-[#e8e5e0] overflow-hidden">
-                    <table className="w-full text-sm">
-                        <thead className="bg-[#f8f7f4]">
-                            <tr>
-                                <th className="text-left px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide">User</th>
-                                {isSuperAdmin && (
-                                    <th className="text-left px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide">Reseller</th>
-                                )}
-                                <th className="text-left px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide hidden sm:table-cell">Email</th>
-                                <th className="text-center px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide">Paket</th>
-                                <th className="text-center px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide">Tanggal</th>
-                                <th className="text-center px-5 py-3.5 text-[#999] font-semibold text-xs tracking-wide">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[#f0ede8]">
-                            {userList.map(user => (
-                                <tr key={user.id} className="hover:bg-[#faf9f6] transition-colors">
-                                    <td className="px-5 py-3.5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-[#E5654B]/10 text-[#E5654B] flex items-center justify-center text-xs font-bold">
-                                                {user.name.charAt(0).toUpperCase()}
-                                            </div>
-                                            <div>
-                                                <div className="font-medium text-[#333]">{user.name}</div>
-                                                <div className="text-xs text-[#999] sm:hidden">{user.email}</div>
-                                            </div>
-                                        </div>
-                                    </td>
+                    <div className="overflow-x-auto w-full">
+                        <table className={`w-full text-sm ${isSuperAdmin ? 'min-w-[700px]' : 'min-w-[550px]'} sm:min-w-full`}>
+                            <thead className="bg-[#f8f7f4]">
+                                <tr>
+                                    <th className="text-left px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide">User</th>
                                     {isSuperAdmin && (
-                                        <td className="px-5 py-3.5 text-[#555] font-medium">
-                                            {user.reseller?.reseller_settings?.brand_name || user.reseller?.name || 'Super Admin / Utama'}
-                                        </td>
+                                        <th className="text-left px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide">Reseller</th>
                                     )}
-                                    <td className="px-5 py-3.5 text-[#777] hidden sm:table-cell">{user.email}</td>
-                                    <td className="px-5 py-3.5 text-center">
-                                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${user.active_subscription?.plan?.slug === 'platinum' ? 'bg-violet-50 text-violet-600' :
-                                                user.active_subscription?.plan?.slug === 'gold' ? 'bg-amber-50 text-amber-600' :
-                                                    user.active_subscription?.plan?.slug === 'silver' ? 'bg-slate-100 text-slate-600' :
-                                                        'bg-[#f0ede8] text-[#999]'
-                                            }`}>
-                                            {user.active_subscription?.plan?.name || 'Free'}
-                                        </span>
-                                    </td>
-                                    <td className="px-5 py-3.5 text-center text-xs text-[#999]">
-                                        {new Date(user.created_at).toLocaleDateString('id-ID')}
-                                    </td>
-                                    <td className="px-5 py-3.5 text-center">
-                                        <div className="flex items-center justify-center gap-1.5">
-                                            <Link href={`${adminRoutePrefix}/users/${user.id}`} className="p-2 bg-[#fdfdfd] hover:bg-slate-50 text-slate-600 hover:text-slate-900 rounded-xl transition-all inline-flex items-center justify-center border border-slate-100 shadow-sm" title="Lihat Detail">
-                                                <Eye size={15} />
-                                            </Link>
-                                            <Link 
-                                                href={`${adminRoutePrefix}/impersonate/user/${user.id}`} 
-                                                method="post" 
-                                                as="button"
-                                                className="p-2 bg-[#fdfdfd] hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 rounded-xl transition-all inline-flex items-center justify-center border border-emerald-100 shadow-sm" 
-                                                title="Masuk sebagai User (Impersonasi)"
-                                            >
-                                                <UserCheck size={15} />
-                                            </Link>
-                                            {isSuperAdmin && (
-                                                <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="p-2 bg-[#fdfdfd] hover:bg-amber-50 text-amber-600 hover:text-amber-700 rounded-xl transition-all inline-flex items-center justify-center border border-amber-100 shadow-sm" title="Edit User">
-                                                    <Pencil size={15} />
-                                                </Link>
-                                            )}
-                                        </div>
-                                    </td>
+                                    <th className="text-left px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide hidden sm:table-cell">Email</th>
+                                    <th className="text-center px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide">Paket</th>
+                                    <th className="text-center px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide">Tanggal</th>
+                                    <th className="text-center px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide">Aksi</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-[#f0ede8]">
+                                {userList.map(user => (
+                                    <tr key={user.id} className="hover:bg-[#faf9f6] transition-colors">
+                                        <td className="px-3 sm:px-5 py-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-[#E5654B]/10 text-[#E5654B] flex items-center justify-center text-xs font-bold">
+                                                    {user.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium text-[#333]">{user.name}</div>
+                                                    <div className="text-xs text-[#999] sm:hidden">{user.email}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        {isSuperAdmin && (
+                                            <td className="px-3 sm:px-5 py-3 text-[#555] font-medium">
+                                                {user.reseller?.reseller_settings?.brand_name || user.reseller?.name || 'Super Admin / Utama'}
+                                            </td>
+                                        )}
+                                        <td className="px-3 sm:px-5 py-3 text-[#777] hidden sm:table-cell">{user.email}</td>
+                                        <td className="px-3 sm:px-5 py-3 text-center">
+                                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${user.active_subscription?.plan?.slug === 'platinum' ? 'bg-violet-50 text-violet-600' :
+                                                    user.active_subscription?.plan?.slug === 'gold' ? 'bg-amber-50 text-amber-600' :
+                                                        user.active_subscription?.plan?.slug === 'silver' ? 'bg-slate-100 text-slate-600' :
+                                                            'bg-[#f0ede8] text-[#999]'
+                                                }`}>
+                                                {user.active_subscription?.plan?.name || 'Free'}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 sm:px-5 py-3 text-center text-xs text-[#999]">
+                                            {new Date(user.created_at).toLocaleDateString('id-ID')}
+                                        </td>
+                                        <td className="px-3 sm:px-5 py-3 text-center">
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                <Link href={`${adminRoutePrefix}/users/${user.id}`} className="p-2 bg-[#fdfdfd] hover:bg-slate-50 text-slate-600 hover:text-slate-900 rounded-xl transition-all inline-flex items-center justify-center border border-slate-100 shadow-sm" title="Lihat Detail">
+                                                    <Eye size={15} />
+                                                </Link>
+                                                <Link 
+                                                    href={`${adminRoutePrefix}/impersonate/user/${user.id}`} 
+                                                    method="post" 
+                                                    as="button"
+                                                    className="p-2 bg-[#fdfdfd] hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 rounded-xl transition-all inline-flex items-center justify-center border border-emerald-100 shadow-sm" 
+                                                    title="Masuk sebagai User (Impersonasi)"
+                                                >
+                                                    <UserCheck size={15} />
+                                                </Link>
+                                                {isSuperAdmin && (
+                                                    <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="p-2 bg-[#fdfdfd] hover:bg-amber-50 text-amber-600 hover:text-amber-700 rounded-xl transition-all inline-flex items-center justify-center border border-amber-100 shadow-sm" title="Edit User">
+                                                        <Pencil size={15} />
+                                                    </Link>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 {/* Pagination */}

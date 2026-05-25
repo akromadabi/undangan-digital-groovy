@@ -67,7 +67,7 @@ const SvgIcon = ({ d, className = '' }) => (
 );
 
 export default function DashboardLayout({ children, title }) {
-    const { auth, features, subscription, appName } = usePage().props;
+    const { auth, features, subscription, appName, brandLogo } = usePage().props;
     const [openGroups, setOpenGroups] = useState({ 'OVERVIEW': true, 'KONTEN UNDANGAN': true, 'PENGATURAN': true });
     const [avatarOpen, setAvatarOpen] = useState(false);
     const [menuSheetOpen, setMenuSheetOpen] = useState(false);
@@ -133,10 +133,18 @@ export default function DashboardLayout({ children, title }) {
             <aside className="hidden lg:flex sticky top-0 h-screen w-[260px] bg-white flex-col shadow-[1px_0_0_0_#e8e5e0]">
                 {/* Logo */}
                 <div className="h-16 flex items-center px-5">
-                    <Link href="/dashboard" className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-[#E5654B] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm">G</div>
-                        <div>
-                            <div className="font-bold text-[#1a1a1a] text-[15px] leading-tight">{appName || 'Groovy'}</div>
+                    <Link href="/dashboard" className="flex items-center gap-3 w-full">
+                        {brandLogo ? (
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 bg-transparent border border-gray-100">
+                                <img src={brandLogo} alt="Logo" className="w-full h-full object-contain" />
+                            </div>
+                        ) : (
+                            <div className="w-9 h-9 bg-[#E5654B] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                {(appName || 'G').charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                            <div className="font-bold text-[#1a1a1a] text-[15px] leading-tight truncate">{appName || 'Groovy'}</div>
                             <div className="text-[11px] text-[#999] font-medium tracking-wide">DASHBOARD</div>
                         </div>
                     </Link>
@@ -229,8 +237,16 @@ export default function DashboardLayout({ children, title }) {
                     <div className="flex items-center gap-3">
                         {/* Mobile logo */}
                         <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
-                            <div className="w-7 h-7 bg-[#E5654B] rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm">G</div>
-                            <span className="font-bold text-[#1a1a1a] text-sm">{appName || 'Groovy'}</span>
+                            {brandLogo ? (
+                                <div className="w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 bg-transparent border border-gray-100">
+                                    <img src={brandLogo} alt="Logo" className="w-full h-full object-contain" />
+                                </div>
+                            ) : (
+                                <div className="w-7 h-7 bg-[#E5654B] rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm flex-shrink-0">
+                                    {(appName || 'G').charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                            <span className="font-bold text-[#1a1a1a] text-sm truncate max-w-[120px]">{appName || 'Groovy'}</span>
                         </Link>
                         {title && <h1 className="hidden lg:block text-lg font-bold text-[#1a1a1a]">{title}</h1>}
                     </div>

@@ -97,7 +97,14 @@ export default function Pricing({ planPricing }) {
                                     <div className="flex items-center justify-between mb-4">
                                         <div>
                                             <h3 className="font-bold text-[#1a1a1a] text-lg">{plan.name}</h3>
-                                            <p className="text-xs text-[#999] mt-0.5">Harga dasar: {formatCurrency(plan.base_price)}</p>
+                                            <p className="text-xs text-[#999] mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                                <span>Harga dasar: {formatCurrency(plan.base_price)}</span>
+                                                {plan.suggested_price !== null && (
+                                                    <span className="font-medium text-amber-600">
+                                                        (Saran harga jual: {formatCurrency(plan.suggested_price)})
+                                                    </span>
+                                                )}
+                                            </p>
                                         </div>
                                         {profit > 0 && (
                                             <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-xl">

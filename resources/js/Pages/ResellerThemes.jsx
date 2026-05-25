@@ -351,7 +351,7 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                         <a href={loginUrl} className="rl-footer__link">Masuk</a>
                     </div>
                     <div className="rl-footer__copy">
-                        © {new Date().getFullYear()} {reseller.brand_name}. Powered by <strong style={{ color: 'var(--accent)' }}>Groovy</strong>.
+                        © {new Date().getFullYear()} {reseller.brand_name}.
                     </div>
                 </div>
             </footer>

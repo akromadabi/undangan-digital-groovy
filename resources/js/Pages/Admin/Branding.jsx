@@ -61,7 +61,7 @@ export default function Branding({ settings }) {
                     <div>
                         <label className="block text-sm font-bold text-[#333] mb-3">Logo Brand</label>
                         <div className="flex items-start gap-6">
-                            <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-[#e8e5e0] flex items-center justify-center bg-[#faf9f6] overflow-hidden flex-shrink-0">
+                            <div className={`w-24 h-24 rounded-2xl border-2 border-dashed border-[#e8e5e0] flex items-center justify-center overflow-hidden flex-shrink-0 ${logoUrl ? 'bg-transparent' : 'bg-[#faf9f6]'}`}>
                                 {logoUrl ? (
                                     <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
                                 ) : (
@@ -131,7 +131,7 @@ export default function Branding({ settings }) {
                     <div className="border-t border-[#f0ede8] pt-5">
                         <label className="block text-sm font-bold text-[#333] mb-3">Preview</label>
                         <div className="bg-[#faf9f6] rounded-xl p-5 flex items-center gap-3 border border-[#e8e5e0]">
-                            <div className="w-10 h-10 rounded-xl bg-[#E5654B] flex items-center justify-center overflow-hidden flex-shrink-0">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 ${logoUrl ? 'bg-transparent border border-gray-100' : 'bg-[#E5654B]'}`}>
                                 {logoUrl ? (
                                     <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
                                 ) : (

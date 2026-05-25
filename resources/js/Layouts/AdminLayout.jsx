@@ -11,6 +11,7 @@ const SvgIcon = ({ d, className = '' }) => (
 const menuItems = [
     { label: 'Dashboard', href: '/admin', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
     { label: 'Users', href: '/admin/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v-1' },
+    { label: 'Katalog Tema', href: '/admin/themes', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
     { label: 'Live Tamu', href: '/admin/live-tamu', icon: 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z' },
     { label: 'Branding', href: '/admin/branding', icon: 'M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42' },
     { label: 'Landing Page', href: '/admin/landing-page', icon: 'M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418' },
@@ -20,10 +21,28 @@ const menuItems = [
     { label: 'Pencairan', href: '/admin/pencairan', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z' },
 ];
 
+const bottomNavItems = [
+    { label: 'Dashboard', href: '/admin', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+    { label: 'User', href: '/admin/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v-1', matchPrefix: '/admin/users' },
+    { label: 'Menu', isCenter: true },
+    { label: 'Tema', href: '/admin/themes', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', matchPrefix: '/admin/themes' },
+    { label: 'Harga Paket', href: '/admin/pricing', icon: 'M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3zM6 6h.008v.008H6V6z', matchPrefix: '/admin/pricing' },
+];
+
+const menuSheetItems = [
+    { label: 'Live Tamu', href: '/admin/live-tamu', icon: 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z', color: 'bg-indigo-50 text-indigo-600' },
+    { label: 'Branding', href: '/admin/branding', icon: 'M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42', color: 'bg-rose-50 text-rose-600' },
+    { label: 'Landing Page', href: '/admin/landing-page', icon: 'M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418', color: 'bg-emerald-50 text-emerald-600' },
+    { label: 'Pendapatan', href: '/admin/pendapatan', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z', color: 'bg-amber-50 text-amber-600' },
+    { label: 'Domain', href: '/admin/domain', icon: 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-6.364-6.364L4.757 8.25a4.5 4.5 0 003.182 7.682', color: 'bg-blue-50 text-blue-600' },
+    { label: 'Pencairan', href: '/admin/pencairan', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z', color: 'bg-teal-50 text-teal-600' },
+];
+
 export default function AdminLayout({ children, title }) {
-    const { auth, resellerSubdomain, resellerCustomDomain, appUrl } = usePage().props;
+    const { auth, resellerSubdomain, resellerCustomDomain, appUrl, appName, brandLogo } = usePage().props;
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
     const [avatarOpen, setAvatarOpen] = useState(false);
+    const [menuSheetOpen, setMenuSheetOpen] = useState(false);
     const avatarRef = useRef(null);
 
     const getPreviewUrl = () => {
@@ -52,16 +71,32 @@ export default function AdminLayout({ children, title }) {
 
     const isActive = (href) => currentPath === href || (href !== '/admin' && currentPath.startsWith(href));
 
+    const isBottomActive = (item) => {
+        if (item.isCenter) return menuSheetOpen;
+        if (item.matchPrefix) {
+            return currentPath.startsWith(item.matchPrefix);
+        }
+        return currentPath === item.href;
+    };
+
     return (
         <div className="min-h-screen bg-[#f8f7f4] flex">
             {/* ═══ Desktop Sidebar (hidden on mobile) ═══ */}
             <aside className="hidden lg:flex sticky top-0 h-screen w-[240px] bg-white flex-col shadow-[1px_0_0_0_#e8e5e0]">
                 {/* Logo */}
                 <div className="h-16 flex items-center px-5">
-                    <Link href="/admin" className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-[#E5654B] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm">G</div>
-                        <div>
-                            <div className="font-bold text-[#1a1a1a] text-[15px] leading-tight">Groovy</div>
+                    <Link href="/admin" className="flex items-center gap-3 w-full">
+                        {brandLogo ? (
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 bg-transparent border border-gray-100">
+                                <img src={brandLogo} alt="Logo" className="w-full h-full object-contain" />
+                            </div>
+                        ) : (
+                            <div className="w-9 h-9 bg-[#E5654B] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                {(appName || 'G').charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                            <div className="font-bold text-[#1a1a1a] text-[15px] leading-tight truncate">{appName || 'Groovy'}</div>
                             <div className="text-[11px] text-[#999] font-medium tracking-wide">ADMIN PANEL</div>
                         </div>
                     </Link>
@@ -108,8 +143,16 @@ export default function AdminLayout({ children, title }) {
                     <div className="flex items-center gap-3">
                         {/* Mobile logo */}
                         <Link href="/admin" className="lg:hidden flex items-center gap-2">
-                            <div className="w-7 h-7 bg-[#E5654B] rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm">G</div>
-                            <span className="font-bold text-[#1a1a1a] text-sm">Groovy</span>
+                            {brandLogo ? (
+                                <div className="w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 bg-transparent border border-gray-100">
+                                    <img src={brandLogo} alt="Logo" className="w-full h-full object-contain" />
+                                </div>
+                            ) : (
+                                <div className="w-7 h-7 bg-[#E5654B] rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm flex-shrink-0">
+                                    {(appName || 'G').charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                            <span className="font-bold text-[#1a1a1a] text-sm truncate max-w-[120px]">{appName || 'Groovy'}</span>
                         </Link>
                         {title && <h1 className="hidden lg:block text-lg font-bold text-[#1a1a1a]">{title}</h1>}
                     </div>
@@ -185,15 +228,34 @@ export default function AdminLayout({ children, title }) {
                 </main>
             </div>
 
-            {/* ═══ Mobile Bottom Navigation ═══ */}
+            {/* ═══ Mobile Bottom Navigation (5 icons w/ center Menu FAB) ═══ */}
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e8e5e0] shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
                 <div className="flex items-center justify-around h-16 px-1">
-                    {menuItems.map(item => {
-                        const active = isActive(item.href);
+                    {bottomNavItems.map(item => {
+                        const active = isBottomActive(item);
+
+                        // Center Menu FAB button
+                        if (item.isCenter) {
+                            return (
+                                <button key="menu-center" onClick={() => setMenuSheetOpen(!menuSheetOpen)}
+                                    className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
+                                        menuSheetOpen ? 'text-[#E5654B]' : 'text-[#999]'
+                                    }`}>
+                                    <div className="w-10 h-10 -mt-5 rounded-full bg-[#E5654B] flex items-center justify-center shadow-lg transition-transform duration-200"
+                                        style={{ transform: menuSheetOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </div>
+                                    <span className="text-[10px] leading-tight font-medium">{item.label}</span>
+                                </button>
+                            );
+                        }
+
                         return (
-                            <Link key={item.href} href={item.href}
+                            <Link key={item.label} href={item.href}
                                 className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${active ? 'text-[#E5654B]' : 'text-[#999]'}`}>
-                                <div className={`relative ${active ? '' : ''}`}>
+                                <div className="relative">
                                     {active && (
                                         <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[#E5654B] rounded-full" />
                                     )}
@@ -204,9 +266,33 @@ export default function AdminLayout({ children, title }) {
                         );
                     })}
                 </div>
-                {/* Safe area padding for notched phones */}
                 <div className="h-[env(safe-area-inset-bottom)]" />
             </nav>
+
+            {/* ═══ Menu Sheet (slide-up from bottom) ═══ */}
+            {menuSheetOpen && (
+                <>
+                    <div className="lg:hidden fixed inset-0 bg-black/30 z-[35] transition-opacity" style={{ bottom: '64px' }} onClick={() => setMenuSheetOpen(false)} />
+                    <div className="lg:hidden fixed bottom-[64px] left-0 right-0 z-[38] bg-white rounded-t-2xl shadow-2xl border-t border-gray-200 p-4 pb-2 animate-in slide-in-from-bottom">
+                        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+                        <div className="grid grid-cols-3 gap-2">
+                            {menuSheetItems.map(item => (
+                                <Link key={item.label} href={item.href} onClick={() => setMenuSheetOpen(false)}
+                                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors ${
+                                        currentPath === item.href || currentPath.startsWith(item.href)
+                                            ? 'bg-[#E5654B]/10 ring-1 ring-[#E5654B]/20'
+                                            : 'hover:bg-gray-50'
+                                    }`}>
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.color}`}>
+                                        <SvgIcon d={item.icon} className="w-5 h-5" />
+                                    </div>
+                                    <span className="text-[10px] font-medium text-gray-600 text-center leading-tight">{item.label}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

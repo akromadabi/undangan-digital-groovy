@@ -14,7 +14,7 @@ class ResellerPricingController extends Controller
     {
         $reseller = auth()->user();
 
-        $plans = SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug', 'price']);
+        $plans = SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug', 'price', 'suggested_price']);
 
         $resellerPrices = ResellerPlanPrice::where('reseller_id', $reseller->id)
             ->pluck('reseller_price', 'plan_id');
@@ -25,6 +25,7 @@ class ResellerPricingController extends Controller
             'name' => $plan->name,
             'slug' => $plan->slug,
             'base_price' => (float) $plan->price,
+            'suggested_price' => $plan->suggested_price !== null ? (float) $plan->suggested_price : null,
             'reseller_price' => isset($resellerPrices[$plan->id])
                 ? (float) $resellerPrices[$plan->id]
                 : (float) $plan->price,

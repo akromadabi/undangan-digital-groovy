@@ -110,6 +110,7 @@ class HandleInertiaRequests extends Middleware
             ) : null,
             'features' => $featureAccess,
             'appName' => $appName,
+            'brandLogo' => $resellerSetting && $resellerSetting->brand_logo ? '/storage/' . $resellerSetting->brand_logo : null,
             'adminRoutePrefix' => str_starts_with($request->path(), 'super-admin') ? '/super-admin' : '/admin',
             'resellerSubdomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->subdomain : null,
             'resellerCustomDomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->custom_domain : null,

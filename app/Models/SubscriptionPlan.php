@@ -11,6 +11,7 @@ class SubscriptionPlan extends Model
         'slug',
         'description',
         'price',
+        'suggested_price',
         'duration_days',
         'max_guests',
         'max_galleries',
@@ -22,6 +23,7 @@ class SubscriptionPlan extends Model
     {
         return [
             'price' => 'decimal:2',
+            'suggested_price' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

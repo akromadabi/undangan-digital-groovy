@@ -43,4 +43,12 @@ class AdminDashboardController extends Controller
                 ->get(),
         ]);
     }
+
+    public function themes()
+    {
+        $themes = \App\Models\Theme::where('is_active', true)->orderBy('sort_order')->get();
+        return Inertia::render('Admin/ThemesCatalog', [
+            'themes' => $themes
+        ]);
+    }
 }

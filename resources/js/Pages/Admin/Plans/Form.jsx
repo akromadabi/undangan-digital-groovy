@@ -9,7 +9,7 @@ export default function Form({ plan, features }) {
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: plan?.name || '', slug: plan?.slug || '', description: plan?.description || '',
-        price: plan?.price || 0, duration_days: plan?.duration_days || 30,
+        price: plan?.price || 0, suggested_price: plan?.suggested_price ?? '', duration_days: plan?.duration_days || 30,
         max_guests: plan?.max_guests || 50, max_galleries: plan?.max_galleries || 5,
         sort_order: plan?.sort_order || 0, features: featureAccess,
     });
@@ -40,6 +40,7 @@ export default function Form({ plan, features }) {
                                 { label: 'Nama *', key: 'name', type: 'text' },
                                 { label: 'Slug *', key: 'slug', type: 'text', disabled: isEdit },
                                 { label: 'Harga (Rp) *', key: 'price', type: 'number' },
+                                { label: 'Saran Harga Jual (Rp)', key: 'suggested_price', type: 'number' },
                                 { label: 'Durasi (hari) *', key: 'duration_days', type: 'number' },
                                 { label: 'Max Tamu *', key: 'max_guests', type: 'number' },
                                 { label: 'Max Galeri *', key: 'max_galleries', type: 'number' },
@@ -47,8 +48,8 @@ export default function Form({ plan, features }) {
                             ].map(f => (
                                 <div key={f.key}>
                                     <label className={labelClass}>{f.label}</label>
-                                    <input type={f.type} value={data[f.key]} disabled={f.disabled}
-                                        onChange={(e) => setData(f.key, f.type === 'number' ? parseFloat(e.target.value) : e.target.value)}
+                                    <input type={f.type} value={data[f.key] ?? ''} disabled={f.disabled}
+                                        onChange={(e) => setData(f.key, e.target.value === '' ? '' : (f.type === 'number' ? parseFloat(e.target.value) : e.target.value))}
                                         className={inputClass} />
                                     {errors[f.key] && <p className="text-red-500 text-xs mt-1">{errors[f.key]}</p>}
                                 </div>
