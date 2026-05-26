@@ -102,6 +102,7 @@ function StillWithYouFull({ card }) {
 
     // Auto layout dimensions & orientation warning
     const [isLandscapeLocked, setIsLandscapeLocked] = useState(false);
+    const [dismissWarning, setDismissWarning] = useState(false);
     useEffect(() => {
         const checkOrientation = () => {
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -392,6 +393,17 @@ function StillWithYouFull({ card }) {
     }, [gateState, card.messages, card.photos]);
 
     const handleOpenStart = () => {
+        // Auto enter fullscreen upon user gesture
+        try {
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) docEl.requestFullscreen();
+            else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+            else if (docEl.mozRequestFullScreen) docEl.mozRequestFullScreen();
+            else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
+        } catch (e) {
+            console.warn("Fullscreen request blocked or failed:", e);
+        }
+
         setGateState('countdown');
         if (audioRef.current) {
             audioRef.current.play().then(() => setIsMuted(false)).catch(() => {});
@@ -562,13 +574,16 @@ function StillWithYouFull({ card }) {
             )}
 
             {/* Screen Portrait locked Alert */}
-            {isLandscapeLocked && (
+            {isLandscapeLocked && !dismissWarning && (
                 <div id="portrait-warning" className="fixed inset-0 z-[9999] bg-[#09090b] flex flex-col items-center justify-center text-center p-6 text-white">
                     <svg viewBox="0 0 24 24" className="w-16 h-16 fill-[#ff65a3] mb-6 animate-rotatePhone">
                         <path d="M16 1H8C6.34 1 5 2.34 5 4v16c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V4c0-1.66-1.34-3-3-3zm-2 20h-4v-1h4v1zm3-3H7V4h10v14z"/>
                     </svg>
-                    <h2 className="text-xl font-bold mb-2">Silakan Putar Layar Anda</h2>
-                    <p className="text-sm text-gray-400 max-w-xs">Gunakan mode landscape (horizontal) untuk menikmati pertunjukan kembang api terbaik.</p>
+                    <h2 className="text-xl font-bold mb-2">Disarankan Putar Layar Anda</h2>
+                    <p className="text-sm text-gray-400 max-w-xs mb-8">Gunakan mode landscape (horizontal) untuk menikmati pertunjukan kembang api terbaik.</p>
+                    <button onClick={() => setDismissWarning(true)} className="px-6 py-2.5 rounded-full text-white text-xs font-semibold tracking-wider uppercase border border-white/20 bg-white/10 backdrop-blur hover:bg-white/20 active:scale-95 transition-all">
+                        Tetap Lanjutkan ➔
+                    </button>
                 </div>
             )}
 
@@ -650,6 +665,7 @@ function GiftForAnitaFull({ card }) {
 
     // Orientation Warning state
     const [isLandscapeLocked, setIsLandscapeLocked] = useState(false);
+    const [dismissWarning, setDismissWarning] = useState(false);
     useEffect(() => {
         const checkOrientation = () => {
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -793,6 +809,17 @@ function GiftForAnitaFull({ card }) {
     }, [opened, charIdx, isDeleting, currentMsgIdx, romanticLines]);
 
     const handleOpen = () => {
+        // Auto enter fullscreen upon user gesture
+        try {
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) docEl.requestFullscreen();
+            else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+            else if (docEl.mozRequestFullScreen) docEl.mozRequestFullScreen();
+            else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
+        } catch (e) {
+            console.warn("Fullscreen request blocked or failed:", e);
+        }
+
         setOpened(true);
         if (audioRef.current) {
             audioRef.current.play().then(() => setIsMuted(false)).catch(() => {});
@@ -1039,13 +1066,16 @@ function GiftForAnitaFull({ card }) {
             )}
 
             {/* Screen Orientation warning lock */}
-            {isLandscapeLocked && (
+            {isLandscapeLocked && !dismissWarning && (
                 <div id="orientation-lock" className="fixed inset-0 z-[99999] bg-[#07060a] flex flex-col items-center justify-center text-center p-6 text-white">
                     <svg viewBox="0 0 24 24" className="w-16 h-16 fill-[#ff4d80] mb-6 animate-rotatePhone">
                         <path d="M16 1H8C6.34 1 5 2.34 5 4v16c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V4c0-1.66-1.34-3-3-3zm-2 20h-4v-1h4v1zm3-3H7V4h10v14z"/>
                     </svg>
-                    <h2 className="text-xl font-bold mb-2">Silakan Putar Layar Anda</h2>
-                    <p className="text-sm text-gray-400 max-w-xs">Gunakan mode landscape (horizontal) untuk membuka buku memori secara maksimal.</p>
+                    <h2 className="text-xl font-bold mb-2">Disarankan Putar Layar Anda</h2>
+                    <p className="text-sm text-gray-400 max-w-xs mb-8">Gunakan mode landscape (horizontal) untuk membuka buku memori secara maksimal.</p>
+                    <button onClick={() => setDismissWarning(true)} className="px-6 py-2.5 rounded-full text-white text-xs font-semibold tracking-wider uppercase border border-[#ff4d80]/30 bg-white/5 backdrop-blur hover:bg-white/10 active:scale-95 transition-all">
+                        Tetap Lanjutkan ➔
+                    </button>
                 </div>
             )}
 
