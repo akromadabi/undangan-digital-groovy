@@ -101,7 +101,7 @@ class InvitationController extends Controller
 
         // THEME ADDED BY BHAKTIAJI ILHAM
         $page = 'Invitation/Show';
-        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang', 'shopee', 'manchester-united'])) {
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang', 'shopee', 'manchester-united', 'dusk-mosque', 'jawa-2'])) {
             $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
         }
 
@@ -282,7 +282,7 @@ class InvitationController extends Controller
             }
 
             $page = 'Invitation/Show';
-            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang', 'shopee', 'manchester-united'])) {
+            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang', 'shopee', 'manchester-united', 'dusk-mosque', 'jawa-2'])) {
                 $page = 'Invitation/' . $theme->slug . '/DynamicIndex';
             }
 
@@ -464,7 +464,7 @@ class InvitationController extends Controller
         });
 
         $page = 'Invitation/Show';
-        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang', 'shopee', 'manchester-united'])) {
+        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'aruna', 'luxury-04', 'wayang', 'shopee', 'manchester-united', 'dusk-mosque', 'jawa-2'])) {
             $page = 'Invitation/' . $theme->slug . '/DynamicIndex';
         }
 

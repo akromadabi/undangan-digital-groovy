@@ -224,6 +224,9 @@ class DatabaseSeeder extends Seeder
         // Run theme-specific seeders
         $this->call([
             UtaryThemeSeeder::class,
+            DuskMosqueThemeSeeder::class,
+            JawaKlasikThemeSeeder::class,
+            Jawa2ThemeSeeder::class,
             QuoteTemplateSeeder::class,
             NetflixThemeSeeder::class,
             Luxury01ThemeSeeder::class,

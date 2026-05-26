@@ -80,13 +80,26 @@ const ToggleSwitch = ({ checked, onChange, label, desc, icon, disabled = false }
 );
 
 export default function ThemeSettings({ invitation, currentTheme, themes, sections, previewData, centralHost = 'undangan.com' }) {
-    const { auth, features } = usePage().props;
+    const { auth, features, subscription } = usePage().props;
     const isUserAdminOrSuper = auth.user?.role === 'admin' || auth.user?.role === 'super_admin';
 
     const isLockedByPlan = (featureSlug) => {
         if (isUserAdminOrSuper) return false;
         if (!features) return true;
         return features[featureSlug] === false || features[featureSlug] === undefined;
+    };
+
+    const isThemeLocked = (themeItem) => {
+        if (isUserAdminOrSuper) return false;
+        if (isLockedByPlan('template')) return true;
+        
+        // Cek jika tema dibatasi untuk kelas paket tertentu
+        if (themeItem.allowed_plans && themeItem.allowed_plans.length > 0) {
+            const userPlanId = subscription?.plan?.id;
+            if (!userPlanId) return true;
+            return !themeItem.allowed_plans.includes(userPlanId);
+        }
+        return false;
     };
 
     const sectionKeyToFeatureSlug = {
@@ -456,11 +469,11 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         const isSelected = selectedThemeId === theme.id;
                                         return (
                                             <div key={theme.id} className="relative group/card">
-                                                <button onClick={isLockedByPlan('template') ? undefined : () => handleThemeChange(theme.id)}
+                                                <button onClick={isThemeLocked(theme) ? undefined : () => handleThemeChange(theme.id)}
                                                     className={`w-full group relative rounded-2xl overflow-hidden border-2 text-left transition-all duration-300 ${
                                                         isSelected 
                                                             ? 'border-[#E5654B] ring-4 ring-orange-100 shadow-md scale-[1.01]' 
-                                                            : isLockedByPlan('template')
+                                                            : isThemeLocked(theme)
                                                                 ? 'border-gray-200 opacity-60 cursor-not-allowed'
                                                                 : 'border-gray-200 hover:border-orange-300 hover:shadow-sm'
                                                     }`}>
@@ -486,7 +499,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                             </div>
                                                         )}
                                                         {/* Premium Lock Overlay for Locked Plan */}
-                                                        {isLockedByPlan('template') && !isSelected && (
+                                                        {isThemeLocked(theme) && !isSelected && (
                                                             <div className="absolute top-2 right-2 bg-amber-400 text-white rounded-full p-1 shadow-md z-10">
                                                                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />

@@ -263,6 +263,16 @@ class ThemeSettingsController extends Controller
 
         $theme = Theme::findOrFail($request->theme_id);
 
+        // Keamanan: Validasi otorisasi apakah plan user diizinkan menggunakan tema ini
+        if (!$user->isSuperAdmin() && !$user->isAdmin()) {
+            if ($theme->allowed_plans && count($theme->allowed_plans) > 0) {
+                $userPlan = $user->currentPlan();
+                if (!$userPlan || !in_array($userPlan->id, $theme->allowed_plans)) {
+                    return response()->json(['error' => 'Tema ini terkunci oleh Paket Anda.'], 403);
+                }
+            }
+        }
+
         // THEME ADDED BY BHAKTIAJI ILHAM
         $invitation->update(['theme_id' => $theme->id]);
 

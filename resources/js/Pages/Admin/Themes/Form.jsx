@@ -2,12 +2,14 @@ import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 
-export default function Form({ theme }) {
+export default function Form({ theme, plans = [] }) {
     const { adminRoutePrefix } = usePage().props;
     const isEdit = !!theme;
     const fileInputRef = useRef(null);
+    const dropdownRef = useRef(null);
     const [thumbnailPreview, setThumbnailPreview] = useState('');
     const [uploading, setUploading] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
     // State untuk mengontrol tab editor ("visual" vs "json")
     const [colorTab, setColorTab] = useState('visual');
@@ -25,6 +27,7 @@ export default function Form({ theme }) {
         thumbnail: theme?.thumbnail || '',
         category: theme?.category || 'elegant', 
         is_premium: theme?.is_premium || false, 
+        allowed_plans: theme?.allowed_plans || [],
         is_active: theme?.is_active ?? true,
         supports_scroll: theme?.supports_scroll ?? true, 
         supports_slide: theme?.supports_slide ?? true, 
@@ -44,6 +47,7 @@ export default function Form({ theme }) {
                 thumbnail: theme.thumbnail || '',
                 category: theme.category || 'elegant',
                 is_premium: theme.is_premium || false,
+                allowed_plans: theme.allowed_plans || [],
                 is_active: theme.is_active ?? true,
                 supports_scroll: theme.supports_scroll ?? true,
                 supports_slide: theme.supports_slide ?? true,
@@ -56,6 +60,17 @@ export default function Form({ theme }) {
             setThumbnailPreview(getThumbnailUrl(theme.thumbnail));
         }
     }, [theme?.id, theme?.thumbnail]);
+
+    // Click outside listener untuk menutup dropdown paket
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleThumbnailUpload = async (e) => {
         const file = e.target.files[0];
@@ -108,6 +123,18 @@ export default function Form({ theme }) {
         } catch (e) {
             console.error('Failed to parse font config JSON:', e);
         }
+    };
+
+    // Helper untuk mengaktifkan/menonaktifkan allowed_plans
+    const handlePlanToggle = (planId) => {
+        const currentPlans = [...(data.allowed_plans || [])];
+        const index = currentPlans.indexOf(planId);
+        if (index > -1) {
+            currentPlans.splice(index, 1);
+        } else {
+            currentPlans.push(planId);
+        }
+        setData('allowed_plans', currentPlans);
     };
 
     const handleSubmit = (e) => {
@@ -305,34 +332,111 @@ export default function Form({ theme }) {
                         </div>
 
                         {/* GRUP CHECKLIST: DIPISAH SESUAI KEGUNAAN */}
-                        <div className="border-t border-[#f5f3f0] pt-5 space-y-5">
-                            {/* Kategori 1: Status & Akses */}
-                            <div className="space-y-2">
-                                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Status & Aksesibilitas Tema
-                                </h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {/* is_active */}
-                                    <label className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${data.is_active ? 'bg-emerald-50/20 border-emerald-500/20' : 'bg-gray-50 border-gray-200/60'}`}>
-                                        <input type="checkbox" checked={data.is_active} onChange={(e) => setData('is_active', e.target.checked)}
-                                            className="mt-0.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
-                                        <div>
-                                            <span className={`text-xs font-bold block ${data.is_active ? 'text-emerald-700' : 'text-gray-700'}`}>Publish Tema</span>
-                                            <span className="text-[9px] text-gray-400 block mt-0.5">Jika aktif, tema ini muncul dan bisa digunakan langsung oleh pengguna.</span>
+                        <div className="border-t border-[#f5f3f0] pt-5 space-y-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                {/* Kategori 1: Status & Akses */}
+                                <div className="space-y-3">
+                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5f3f0] pb-2">
+                                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Status & Publikasi Tema
+                                    </h4>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {/* is_active */}
+                                        <label className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${data.is_active ? 'bg-emerald-50/20 border-emerald-500/20' : 'bg-gray-50 border-gray-200/60'}`}>
+                                            <input type="checkbox" checked={data.is_active} onChange={(e) => setData('is_active', e.target.checked)}
+                                                className="mt-0.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
+                                            <div>
+                                                <span className={`text-xs font-bold block ${data.is_active ? 'text-emerald-700' : 'text-gray-700'}`}>Publish Tema</span>
+                                                <span className="text-[9px] text-gray-400 block mt-0.5">Jika aktif, tema ini muncul dan bisa digunakan langsung oleh pengguna.</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Kategori Baru: Pembatasan Kelas Paket */}
+                                <div className="space-y-3 relative" ref={dropdownRef}>
+                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5f3f0] pb-2">
+                                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Akses Kelas Paket (Subscription Plans)
+                                    </h4>
+                                    <p className="text-[9px] text-gray-400 leading-normal">
+                                        Pilih paket yang diizinkan menggunakan tema ini. Jika dikosongkan, tema bersifat <strong>Gratis/Umum</strong> untuk semua paket.
+                                    </p>
+                                    
+                                    {/* Trigger Button Dropdown */}
+                                    <div 
+                                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                        className="w-full min-h-[44px] bg-[#fcfbfa] border border-[#e8e5e0] rounded-xl px-4 py-2 flex items-center justify-between cursor-pointer hover:border-[#E5654B] transition-all select-none shadow-xs"
+                                    >
+                                        <div className="flex flex-wrap gap-1.5 items-center">
+                                            {(data.allowed_plans || []).length === 0 ? (
+                                                <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 border border-emerald-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                                                    🔓 Semua Paket (Gratis/Umum)
+                                                </span>
+                                            ) : (
+                                                (data.allowed_plans || []).map(planId => {
+                                                    const plan = plans.find(p => p.id === planId);
+                                                    if (!plan) return null;
+                                                    return (
+                                                        <span 
+                                                            key={planId} 
+                                                            className="text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-500/10 pl-2.5 pr-1.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm hover:bg-amber-100 transition-colors"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handlePlanToggle(planId);
+                                                            }}
+                                                        >
+                                                            {plan.name}
+                                                            <button type="button" className="text-amber-500 hover:text-amber-700 font-bold w-4 h-4 rounded-full bg-white flex items-center justify-center text-[10px]">&times;</button>
+                                                        </span>
+                                                    );
+                                                })
+                                            )}
                                         </div>
-                                    </label>
-                                    {/* is_premium */}
-                                    <label className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${data.is_premium ? 'bg-amber-50/20 border-amber-500/20' : 'bg-gray-50 border-gray-200/60'}`}>
-                                        <input type="checkbox" checked={data.is_premium} onChange={(e) => setData('is_premium', e.target.checked)}
-                                            className="mt-0.5 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
-                                        <div>
-                                            <span className={`text-xs font-bold block ${data.is_premium ? 'text-amber-700' : 'text-gray-700'}`}>Tema Premium (Berbayar)</span>
-                                            <span className="text-[9px] text-gray-400 block mt-0.5">Tema eksklusif khusus pengguna dengan paket berlangganan Premium.</span>
+                                        
+                                        <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${isDropdownOpen ? 'rotate-180 text-[#E5654B]' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+
+                                    {/* Dropdown Options List */}
+                                    {isDropdownOpen && (
+                                        <div className="absolute z-20 left-0 right-0 top-[100%] mt-1.5 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl overflow-hidden max-h-[190px] overflow-y-auto p-1.5 space-y-0.5">
+                                            {plans.length === 0 ? (
+                                                <div className="text-center text-xs text-gray-400 py-4">Belum ada paket yang terdaftar.</div>
+                                            ) : (
+                                                plans.map((plan) => {
+                                                    const isChecked = (data.allowed_plans || []).includes(plan.id);
+                                                    return (
+                                                        <div 
+                                                            key={plan.id}
+                                                            onClick={() => handlePlanToggle(plan.id)}
+                                                            className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all select-none hover:bg-gray-50 ${isChecked ? 'bg-amber-50/10' : ''}`}
+                                                        >
+                                                            <input 
+                                                                type="checkbox" 
+                                                                checked={isChecked}
+                                                                onChange={() => {}} // Controlled by div parent onClick
+                                                                className="rounded border-gray-300 text-amber-600 focus:ring-amber-500" 
+                                                            />
+                                                            <div className="flex-1 min-w-0">
+                                                                <span className={`text-xs font-bold block ${isChecked ? 'text-amber-800' : 'text-gray-700'}`}>
+                                                                    Paket {plan.name}
+                                                                </span>
+                                                                <span className="text-[8px] text-gray-400 block mt-0.5 truncate">
+                                                                    Izinkan pengguna paket {plan.name} untuk memakai tema ini.
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })
+                                            )}
                                         </div>
-                                    </label>
+                                    )}
                                 </div>
                             </div>
 

@@ -219,6 +219,16 @@ class WizardController extends Controller
         $invitation = $user->invitation;
         $theme = Theme::findOrFail($request->theme_id);
 
+        // Security check: Verify if the user's plan is allowed to use this theme
+        if (!$user->isSuperAdmin() && !$user->isAdmin()) {
+            if ($theme->allowed_plans && count($theme->allowed_plans) > 0) {
+                $userPlan = $user->currentPlan();
+                if (!$userPlan || !in_array($userPlan->id, $theme->allowed_plans)) {
+                    return back()->withErrors(['theme_id' => 'Tema ini terkunci oleh Paket Anda.']);
+                }
+            }
+        }
+
         $invitation->update(['theme_id' => $theme->id]);
 
         // Initialize default sections from theme
