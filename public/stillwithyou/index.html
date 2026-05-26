@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Happy 1st Anniversary Anita my love 💗</title>
+    
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Fredoka:wght@400;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-pink: #ff65a3;
+            --glowing-pink: rgba(255, 101, 163, 0.8);
+            --dark-bg: #09090b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--dark-bg);
+            font-family: 'Outfit', sans-serif;
+            color: #ffffff;
+        }
+
+        /* Ambient background glow */
+        .ambient-glow {
+            position: absolute;
+            width: 150vmax;
+            height: 150vmax;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 101, 163, 0.05) 0%, rgba(9, 9, 11, 0) 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            mix-blend-mode: lighten;
+        }
+
+        /* Wishes Layer (3D perspective) */
+        .wishes-container {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .wish-item {
+            position: absolute;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%) translateZ(0);
+            pointer-events: auto;
+            cursor: grab;
+            will-change: transform, opacity;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .wish-item:active {
+            cursor: grabbing;
+        }
+
+        .wish-text {
+            display: inline-block;
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.1rem, 4vw, 1.8rem);
+            color: #ffb8d2;
+            padding: 0.6rem 1.4rem;
+            background: rgba(15, 10, 15, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 101, 163, 0.35);
+            border-radius: 30px;
+            box-shadow: 0 0 15px rgba(255, 101, 163, 0.2), inset 0 0 10px rgba(255, 101, 163, 0.1);
+            text-shadow: 0 0 8px rgba(255, 101, 163, 0.6);
+            white-space: nowrap;
+        }
+
+        .wish-image {
+            display: block;
+            width: clamp(70px, 15vw, 110px);
+            height: clamp(70px, 15vw, 110px);
+            object-fit: cover;
+            border-radius: 18px;
+            border: 2px solid rgba(255, 101, 163, 0.5);
+            box-shadow: 0 0 20px rgba(255, 101, 163, 0.4);
+            animation: pulse-glow 2s ease-in-out infinite alternate;
+        }
+
+        /* Circular & Heart clip-paths */
+        .shape-circle {
+            border-radius: 50%;
+        }
+
+        .shape-heart {
+            clip-path: path("M 50 93 C 3 59 0 30 25 16 C 40 10 50 16 50 23 C 50 16 60 10 75 16 C 100 30 97 59 50 93 Z");
+            -webkit-clip-path: path("M 50 93 C 3 59 0 30 25 16 C 40 10 50 16 50 23 C 50 16 60 10 75 16 C 100 30 97 59 50 93 Z");
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 15px rgba(255, 101, 163, 0.3);
+                border-color: rgba(255, 101, 163, 0.4);
+            }
+            100% {
+                box-shadow: 0 0 25px rgba(255, 101, 163, 0.7);
+                border-color: rgba(255, 255, 255, 0.9);
+            }
+        }
+
+        /* Floating Animation */
+        @keyframes floatUp {
+            0% {
+                transform: translateX(-50%) translateY(10vh) translateZ(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-50%) translateY(-110vh) translateZ(0);
+                opacity: 0;
+            }
+        }
+
+        /* Start Overlay */
+        .overlay-screen {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 6, 9, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.8s ease;
+        }
+
+        .glass-card {
+            background: rgba(18, 18, 24, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .glass-card h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.8rem;
+            color: var(--primary-pink);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 12px var(--glowing-pink);
+        }
+
+        .glass-card p {
+            font-size: 0.95rem;
+            color: #a1a1aa;
+            margin-bottom: 2.5rem;
+            line-height: 1.5;
+        }
+
+        .pulse-heart-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            position: relative;
+            width: 80px;
+            height: 80px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .pulse-heart-btn svg {
+            width: 50px;
+            height: 50px;
+            fill: var(--primary-pink);
+            filter: drop-shadow(0 0 10px var(--glowing-pink));
+            transition: transform 0.3s ease, fill 0.3s ease;
+            animation: heart-beat 1.2s infinite ease-in-out;
+        }
+
+        .pulse-heart-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 101, 163, 0.15);
+            animation: pulse-ring 1.2s infinite ease-in-out;
+        }
+
+        @keyframes heart-beat {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.15); }
+            45% { transform: scale(1.05); }
+            60% { transform: scale(1.2); }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.6); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        .start-text {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #ffffff;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            display: block;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Countdown Layer */
+        .countdown-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 90;
+            background: rgba(5, 5, 8, 0.9);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .countdown-text {
+            font-family: 'Fredoka', sans-serif;
+            font-size: clamp(6rem, 20vw, 12rem);
+            font-weight: 600;
+            color: var(--primary-pink);
+            text-shadow: 0 0 30px var(--glowing-pink);
+            transform: scale(0.5);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        /* Show/Animation states */
+        .show {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+
+        .animate-countdown {
+            animation: countdownScale 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes countdownScale {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+                filter: blur(10px);
+            }
+            30% {
+                transform: scale(1.1);
+                opacity: 1;
+                filter: blur(0);
+            }
+            80% {
+                transform: scale(1);
+                opacity: 1;
+                filter: blur(0);
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+                filter: blur(5px);
+            }
+        }
+
+        /* Anniversary Title Overlay */
+        .title-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none;
+            background: transparent;
+        }
+
+        .anniversary-card {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+            transition: all 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 2rem;
+            max-width: 90%;
+        }
+
+        .anniversary-card.reveal {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .anniversary-card h2 {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(2rem, 8vw, 4.5rem);
+            color: #ffffff;
+            line-height: 1.3;
+            text-shadow: 0 0 15px rgba(255, 101, 163, 0.9), 
+                         0 0 30px rgba(255, 101, 163, 0.5),
+                         0 0 45px rgba(255, 101, 163, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        .anniversary-card p {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(0.9rem, 3vw, 1.3rem);
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Float controls */
+        .floating-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 50;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-ctrl {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(18, 18, 24, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-ctrl:hover {
+            background: rgba(255, 101, 163, 0.2);
+            border-color: rgba(255, 101, 163, 0.5);
+            transform: scale(1.05);
+        }
+
+        .btn-ctrl svg {
+            width: 20px;
+            height: 20px;
+            fill: #ffffff;
+        }
+
+        /* Portrait mode lock warning (only for mobile portrait, optional elegant prompt) */
+        #portrait-warning {
+            position: fixed;
+            inset: 0;
+            background: #09090b;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            color: #ffffff;
+        }
+
+        #portrait-warning svg {
+            width: 64px;
+            height: 64px;
+            fill: var(--primary-pink);
+            margin-bottom: 1.5rem;
+            animation: rotate-phone 2s infinite ease-in-out;
+        }
+
+        @keyframes rotate-phone {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+        }
+
+        #portrait-warning p {
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-top: 0.5rem;
+            color: #a1a1aa;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Ambient Glow -->
+    <div class="ambient-glow"></div>
+
+    <!-- Canvas for Fireworks -->
+    <canvas id="fireworksCanvas"></canvas>
+
+    <!-- Wishes Floating Container -->
+    <div class="wishes-container" id="wishesContainer"></div>
+
+    <!-- Floating controls -->
+    <div class="floating-controls">
+        <button class="btn-ctrl" id="soundBtn" title="Toggle Music">
+            <svg id="soundOnIcon" viewBox="0 0 24 24" style="display: none;">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+            <svg id="soundOffIcon" viewBox="0 0 24 24">
+                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Start Overlay Screen -->
+    <div class="overlay-screen" id="startOverlay">
+        <div class="glass-card">
+            <h1>Special Gift For You</h1>
+            <p>Sebuah persembahan kecil yang penuh warna dan kehangatan khusus untukmu.</p>
+            <button class="pulse-heart-btn" id="startBtn" aria-label="Buka Kado">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+            </button>
+            <span class="start-text">Buka 💗</span>
+        </div>
+    </div>
+
+    <!-- Countdown Overlay Screen -->
+    <div class="countdown-screen" id="countdownOverlay">
+        <div class="countdown-text" id="countdownText">3</div>
+    </div>
+
+    <!-- Anniversary Title Screen -->
+    <div class="title-screen">
+        <div class="anniversary-card" id="anniversaryCard">
+            <h2>Happy 1st Anniversary<br>Anita my love 💗</h2>
+            <p>Still you, still us. Always.</p>
+        </div>
+    </div>
+
+    <!-- Portrait Mode Alert Warning (for mobile portrait locks, custom design) -->
+    <div id="portrait-warning">
+        <svg viewBox="0 0 24 24">
+            <path d="M16 1H8C6.34 1 5 2.34 5 4v16c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V4c0-1.66-1.34-3-3-3zm-2 20h-4v-1h4v1zm3-3H7V4h10v14z"/>
+        </svg>
+        <h2>Silakan Putar Layar Anda</h2>
+        <p>Gunakan mode landscape (horizontal) untuk menikmati pertunjukan kembang api terbaik.</p>
+    </div>
+
+    <script>
+        // ----------------------------------------------------
+        // AUDIO HANDLER (Highly Robust - Prevents IDM Crashes)
+        // ----------------------------------------------------
+        // We initialize local music via a simple background streaming Audio element
+        const bgMusic = new Audio('music/music.mp3');
+        bgMusic.loop = true;
+        let isPlaying = false;
+
+        // Firework sound effect creator using browser Web Audio synthesis!
+        // No fetch, no files needed! 100% IDM-proof and completely robust!
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSynthesizedSound(type) {
+            if (!isPlaying || audioCtx.state === 'suspended') return;
+            
+            try {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                const now = audioCtx.currentTime;
+                
+                if (type === 'lift') {
+                    // Soft high sweep
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(100, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.65);
+                    gainNode.gain.setValueAtTime(0.06, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+                    osc.start(now);
+                    osc.stop(now + 0.65);
+                } else if (type === 'burst') {
+                    // Deep thud burst with noise/low frequency
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.exponentialRampToValueAtTime(20, now + 0.8);
+                    
+                    // Low rumble gain
+                    gainNode.gain.setValueAtTime(0.3, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                    
+                    osc.start(now);
+                    osc.stop(now + 0.8);
+
+                    // Add high crackle
+                    setTimeout(() => playSynthesizedSound('crackle'), 50);
+                } else if (type === 'crackle') {
+                    // High frequency short sizzle
+                    const sizzleOsc = audioCtx.createOscillator();
+                    const sizzleGain = audioCtx.createGain();
+                    
+                    sizzleOsc.connect(sizzleGain);
+                    sizzleGain.connect(audioCtx.destination);
+                    
+                    sizzleOsc.type = 'sawtooth';
+                    sizzleOsc.frequency.setValueAtTime(12000, now);
+                    sizzleOsc.frequency.exponentialRampToValueAtTime(500, now + 0.2);
+                    
+                    sizzleGain.gain.setValueAtTime(0.04, now);
+                    sizzleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    
+                    sizzleOsc.start(now);
+                    sizzleOsc.stop(now + 0.2);
+                }
+            } catch (err) {
+                console.log("Synthesized sound blocked/failed:", err);
+            }
+        }
+
+        // Toggle Audio Control
+        const soundBtn = document.getElementById('soundBtn');
+        const soundOnIcon = document.getElementById('soundOnIcon');
+        const soundOffIcon = document.getElementById('soundOffIcon');
+
+        function toggleSound() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            if (isPlaying) {
+                bgMusic.pause();
+                isPlaying = false;
+                soundOnIcon.style.display = 'none';
+                soundOffIcon.style.display = 'block';
+            } else {
+                bgMusic.play().then(() => {
+                    isPlaying = true;
+                    soundOnIcon.style.display = 'block';
+                    soundOffIcon.style.display = 'none';
+                }).catch(err => {
+                    console.log("Autoplay blocked/failed:", err);
+                    // Force state visual change
+                    isPlaying = true;
+                    soundOnIcon.style.display = 'block';
+                    soundOffIcon.style.display = 'none';
+                });
+            }
+        }
+
+        soundBtn.addEventListener('click', toggleSound);
+
+        // ----------------------------------------------------
+        // FIREWORKS CANVAS SIMULATION (High Fidelity)
+        // ----------------------------------------------------
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            
+            // Check orientation warning for mobile
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const warning = document.getElementById('portrait-warning');
+            if (isMobile && window.innerHeight > window.innerWidth) {
+                warning.style.display = 'flex';
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const fireworks = [];
+        const particles = [];
+
+        // HSL Palettes for elegant colors
+        const colors = [
+            'hsl(330, 100%, 65%)', // hot pink
+            'hsl(340, 90%, 60%)',  // deep rose
+            'hsl(45, 100%, 60%)',  // warm gold
+            'hsl(190, 100%, 60%)', // neon cyan
+            'hsl(270, 90%, 65%)',  // violet purple
+            'hsl(300, 100%, 75%)', // soft magenta
+        ];
+
+        class Particle {
+            constructor(x, y, color, speed, angle, type = 'normal') {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.alpha = 1;
+                this.decay = type === 'heart' ? 0.012 + Math.random() * 0.008 : 0.015 + Math.random() * 0.015;
+                this.friction = 0.96;
+                this.gravity = 0.09;
+                
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                
+                // For long exposure trail effect
+                this.trail = [];
+                this.trailLength = type === 'heart' ? 3 : 5;
+            }
+
+            update() {
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > this.trailLength) {
+                    this.trail.shift();
+                }
+
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.vy += this.gravity;
+                
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                this.alpha -= this.decay;
+            }
+
+            draw() {
+                if (this.alpha <= 0) return;
+                
+                ctx.save();
+                
+                // Draw trailing lines for smooth glowing effect
+                if (this.trail.length > 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                    for (let i = 1; i < this.trail.length; i++) {
+                        ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                    }
+                    ctx.strokeStyle = this.color;
+                    ctx.globalAlpha = this.alpha * 0.35;
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+
+                // Draw main glowing dot
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.alpha;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        class Rocket {
+            constructor(startX, startY, targetX, targetY, color) {
+                this.x = startX;
+                this.y = startY;
+                this.tx = targetX;
+                this.ty = targetY;
+                this.color = color;
+                
+                const angle = Math.atan2(targetY - startY, targetX - startX);
+                const distance = Math.hypot(targetX - startX, targetY - startY);
+                this.speed = distance / 60; // Travel in roughly 60 frames (1s)
+                
+                this.vx = Math.cos(angle) * this.speed;
+                this.vy = Math.sin(angle) * this.speed;
+                
+                this.trail = [];
+            }
+
+            update() {
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > 10) this.trail.shift();
+                
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            draw() {
+                ctx.save();
+                if (this.trail.length > 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                    for (let i = 1; i < this.trail.length; i++) {
+                        ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                    }
+                    ctx.strokeStyle = this.color;
+                    ctx.globalAlpha = 0.5;
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+                }
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            hasArrived() {
+                return this.vy >= 0 || this.y <= this.ty;
+            }
+        }
+
+        // Custom explosion forms
+        function createExplosion(x, y, color) {
+            playSynthesizedSound('burst');
+            
+            const randType = Math.random();
+            
+            if (randType < 0.25) {
+                // Heart shape explosion (Romantic)
+                const steps = 60;
+                for (let i = 0; i < steps; i++) {
+                    const angle = (i / steps) * Math.PI * 2;
+                    // Heart parametric equations
+                    const rX = 16 * Math.pow(Math.sin(angle), 3);
+                    const rY = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
+                    
+                    const speed = 0.25 + Math.random() * 0.05;
+                    const p = new Particle(x, y, color, speed * 12, angle, 'heart');
+                    // Modify speed vector to align with heart shape
+                    p.vx = rX * speed;
+                    p.vy = rY * speed;
+                    particles.push(p);
+                }
+            } else if (randType < 0.5) {
+                // Perfect Double Ring
+                const numParticles = 80;
+                for (let i = 0; i < numParticles; i++) {
+                    const angle = (i / numParticles) * Math.PI * 2;
+                    const speed1 = 4.5 + Math.random() * 0.5;
+                    const speed2 = 2.2 + Math.random() * 0.3;
+                    particles.push(new Particle(x, y, color, speed1, angle));
+                    particles.push(new Particle(x, y, color, speed2, angle));
+                }
+            } else {
+                // Traditional Circular Chrysanthemum
+                const numParticles = 75;
+                for (let i = 0; i < numParticles; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 1.5 + Math.random() * 6.5;
+                    particles.push(new Particle(x, y, color, speed, angle));
+                }
+            }
+        }
+
+        function launchRocket(tx, ty) {
+            const startX = width / 2 + (Math.random() - 0.5) * (width * 0.4);
+            const startY = height;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            playSynthesizedSound('lift');
+            fireworks.push(new Rocket(startX, startY, tx, ty, color));
+        }
+
+        // Tap/Click to launch kembang api
+        window.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('#soundBtn') || e.target.closest('#startOverlay') || e.target.closest('#portrait-warning')) return;
+            
+            launchRocket(e.clientX, e.clientY);
+        });
+
+        // ----------------------------------------------------
+        // SIMULATION TICKER
+        // ----------------------------------------------------
+        let isSimulationRunning = false;
+
+        function animate() {
+            if (!isSimulationRunning) return;
+            
+            requestAnimationFrame(animate);
+            
+            // Draw clean dark semi-transparent layer for trailing effect
+            ctx.fillStyle = 'rgba(9, 9, 11, 0.18)';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Update & Draw Rockets
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                const f = fireworks[i];
+                f.update();
+                f.draw();
+                
+                if (f.hasArrived()) {
+                    createExplosion(f.x, f.y, f.color);
+                    fireworks.splice(i, 1);
+                }
+            }
+            
+            // Update & Draw Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+                
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        // Auto launch schedule
+        let autoLaunchInterval;
+        function startAutoLaunch() {
+            autoLaunchInterval = setInterval(() => {
+                if (Math.random() < 0.7) {
+                    const tx = width * 0.15 + Math.random() * (width * 0.7);
+                    const ty = height * 0.15 + Math.random() * (height * 0.45);
+                    launchRocket(tx, ty);
+                }
+            }, 1200);
+        }
+
+        // ----------------------------------------------------
+        // FLOATING WISHES & IMAGES ENGINE
+        // ----------------------------------------------------
+        const WISH_MESSAGES = [
+            "Happy 1nd Anniversary, my love... 💖",
+            "Setiap detik bersamamu adalah favoritku. ✨",
+            "Terima kasih sudah memilihku untuk berada di sampingmu. 💗",
+            "Happy anniversary! Masih kamu, tetap kamu. Selalu. ❤️",
+            "Still you, still us. Always and forever. 💕",
+            "Kamu adalah tempat ternyaman untuk pulang. 🏡✨",
+            "Satu tahun berlalu, cintaku padamu masih terus bertambah. 🌸",
+            "Menyayangimu adalah hal termudah yang pernah kulakukan. 💌",
+            "Here's to many more years of laughing together. 🥂❤️"
+        ];
+
+        const wishImages = [
+            'images/b1.png',
+            'images/b2.png',
+            'images/b3.png',
+            'images/b4.png',
+            'images/b5.png'
+        ];
+
+        const container = document.getElementById('wishesContainer');
+        let wishesInterval;
+
+        function spawnWishItem(type = 'text') {
+            const item = document.createElement('div');
+            item.className = 'wish-item';
+            
+            const duration = 8 + Math.random() * 5; // 8 - 13s float
+            item.style.animation = `floatUp ${duration}s linear forwards`;
+            
+            // Random horizontal distribution
+            const randomX = 10 + Math.random() * 80;
+            item.style.left = `${randomX}%`;
+            
+            // Random rotation orientation
+            const rotX = (Math.random() - 0.5) * 20;
+            const rotY = (Math.random() - 0.5) * 20;
+            const rotZ = (Math.random() - 0.5) * 15;
+            
+            if (type === 'text') {
+                const bubble = document.createElement('div');
+                bubble.className = 'wish-text';
+                bubble.textContent = WISH_MESSAGES[Math.floor(Math.random() * WISH_MESSAGES.length)];
+                bubble.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg)`;
+                item.appendChild(bubble);
+            } else {
+                const img = document.createElement('img');
+                img.className = 'wish-image';
+                img.src = wishImages[Math.floor(Math.random() * wishImages.length)];
+                
+                // Alternating shapes
+                const shapeClass = Math.random() < 0.5 ? 'shape-circle' : 'shape-heart';
+                img.classList.add(shapeClass);
+                img.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg)`;
+                
+                // Handle image error gracefully by falling back to a custom emoji placeholder if needed
+                img.onerror = function() {
+                    item.innerHTML = `<div class="wish-text" style="font-size: 2.2rem;">💖</div>`;
+                };
+
+                item.appendChild(img);
+            }
+
+            container.appendChild(item);
+            
+            // Auto clean DOM
+            setTimeout(() => {
+                item.remove();
+            }, duration * 1000 + 500);
+        }
+
+        function startWishesEngine() {
+            // Spawn 3 wishes immediately
+            setTimeout(() => spawnWishItem('text'), 500);
+            setTimeout(() => spawnWishItem('image'), 1200);
+            setTimeout(() => spawnWishItem('text'), 2000);
+            
+            // Infinite loop
+            wishesInterval = setInterval(() => {
+                const type = Math.random() < 0.65 ? 'text' : 'image';
+                spawnWishItem(type);
+            }, 3000);
+        }
+
+        // ----------------------------------------------------
+        // TRANSITIONS & COUNTDOWN FLOW
+        // ----------------------------------------------------
+        const startOverlay = document.getElementById('startOverlay');
+        const startBtn = document.getElementById('startBtn');
+        const countdownOverlay = document.getElementById('countdownOverlay');
+        const countdownText = document.getElementById('countdownText');
+        const anniversaryCard = document.getElementById('anniversaryCard');
+
+        startBtn.addEventListener('click', () => {
+            // Fade out overlay screen
+            startOverlay.style.opacity = '0';
+            setTimeout(() => startOverlay.classList.remove('show'), 800);
+            
+            // Audio context unlock
+            audioCtx.resume();
+            toggleSound(); // Autoplay music
+
+            // Start countdown sequence
+            setTimeout(runCountdownFlow, 300);
+        });
+
+        function runCountdownFlow() {
+            countdownOverlay.classList.add('show');
+            
+            let count = 3;
+            countdownText.textContent = count;
+            countdownText.classList.add('animate-countdown');
+            
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    // Update countdown text & retrigger animation
+                    countdownText.classList.remove('animate-countdown');
+                    void countdownText.offsetWidth; // Force reflow
+                    countdownText.textContent = count;
+                    countdownText.classList.add('animate-countdown');
+                } else {
+                    clearInterval(timer);
+                    
+                    // Show custom glowing anniversary text
+                    countdownText.classList.remove('animate-countdown');
+                    void countdownText.offsetWidth;
+                    countdownText.style.fontFamily = "'Dancing Script', cursive";
+                    countdownText.style.fontSize = "clamp(2rem, 6vw, 4.5rem)";
+                    countdownText.style.textAlign = "center";
+                    countdownText.style.lineHeight = "1.4";
+                    countdownText.innerHTML = "Happy 1st<br>Anniversary Anita<br>my love 💗";
+                    countdownText.classList.add('animate-countdown');
+                    
+                    // Trigger massive fireworks explosions!
+                    setTimeout(() => {
+                        isSimulationRunning = true;
+                        animate();
+                        
+                        // Blast 4 initial explosions in sync!
+                        createExplosion(width * 0.25, height * 0.35, colors[0]);
+                        createExplosion(width * 0.75, height * 0.35, colors[1]);
+                        setTimeout(() => {
+                            createExplosion(width * 0.5, height * 0.25, colors[2]);
+                            createExplosion(width * 0.5, height * 0.45, colors[3]);
+                        }, 250);
+                    }, 100);
+
+                    // Fade out countdown overlay after showing anniversary text
+                    setTimeout(() => {
+                        countdownOverlay.style.opacity = '0';
+                        
+                        // Immediately reveal the persistent anniversary title and start wishes loop
+                        // so they smoothly emerge behind the fading dark overlay without any blank gap!
+                        anniversaryCard.classList.add('reveal');
+                        startAutoLaunch();
+                        startWishesEngine();
+                        
+                        setTimeout(() => {
+                            countdownOverlay.classList.remove('show');
+                        }, 600); // Allow fade animation to complete
+                    }, 1400); // Sped up the blank overlay delay from 2800ms to 1400ms!
+                }
+            }, 1000);
+        }
+
+        // Initially show the start screen overlay
+        startOverlay.classList.add('show');
+    </script>
+</body>
+</html>

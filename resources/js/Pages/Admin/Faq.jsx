@@ -541,8 +541,8 @@ export default function Faq() {
                     </div>
                 </div>
 
-                {/* ═══ Category Tabs (Horizontal Scrollable) ═══ */}
-                <div className="flex overflow-x-auto pb-1 gap-2 scrollbar-none">
+                {/* ═══ Category Tabs (Horizontal Scrollable on mobile, wrapped on desktop) ═══ */}
+                <div className="flex overflow-x-auto md:overflow-x-visible md:flex-wrap pb-1.5 gap-2 scrollbar-none">
                     {categories.map((cat) => (
                         <button
                             key={cat.id}

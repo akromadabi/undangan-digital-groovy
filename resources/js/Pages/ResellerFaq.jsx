@@ -897,7 +897,7 @@ export default function ResellerFaq({ reseller }) {
                 </div>
 
                 {/* ═══ Category Tabs ═══ */}
-                <div className="flex overflow-x-auto pb-3 gap-3 mb-8 justify-start md:justify-center" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <div className="flex overflow-x-auto md:overflow-x-visible md:flex-wrap pb-3 gap-3 mb-8 justify-start md:justify-center scrollbar-none">
                     {categories.map((cat) => {
                         const isActive = activeCategory === cat.id;
                         return (
