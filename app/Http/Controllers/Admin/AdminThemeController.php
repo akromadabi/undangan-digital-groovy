@@ -17,7 +17,8 @@ class AdminThemeController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Themes/Form');
+        $plans = \App\Models\SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug']);
+        return Inertia::render('Admin/Themes/Form', ['plans' => $plans]);
     }
 
     public function store(Request $request)
@@ -30,6 +31,7 @@ class AdminThemeController extends Controller
             'color_scheme' => 'nullable|array',
             'font_config' => 'nullable|array',
             'is_premium' => 'boolean',
+            'allowed_plans' => 'nullable|array',
             'is_active' => 'boolean',
             'supports_scroll' => 'boolean',
             'supports_slide' => 'boolean',
@@ -44,7 +46,11 @@ class AdminThemeController extends Controller
 
     public function edit(Theme $theme)
     {
-        return Inertia::render('Admin/Themes/Form', ['theme' => $theme->load('sections')]);
+        $plans = \App\Models\SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug']);
+        return Inertia::render('Admin/Themes/Form', [
+            'theme' => $theme->load('sections'),
+            'plans' => $plans
+        ]);
     }
 
     public function update(Request $request, Theme $theme)
@@ -56,6 +62,7 @@ class AdminThemeController extends Controller
             'color_scheme' => 'nullable|array',
             'font_config' => 'nullable|array',
             'is_premium' => 'boolean',
+            'allowed_plans' => 'nullable|array',
             'is_active' => 'boolean',
             'supports_scroll' => 'boolean',
             'supports_slide' => 'boolean',

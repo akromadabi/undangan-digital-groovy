@@ -20,6 +20,7 @@ class Theme extends Model
         'supports_slide',
         'supports_tab',
         'is_premium',
+        'allowed_plans',
         'is_active',
         'sort_order',
         'base_likes',
@@ -36,6 +37,7 @@ class Theme extends Model
             'supports_slide' => 'boolean',
             'supports_tab' => 'boolean',
             'is_premium' => 'boolean',
+            'allowed_plans' => 'array',
             'is_active' => 'boolean',
         ];
     }

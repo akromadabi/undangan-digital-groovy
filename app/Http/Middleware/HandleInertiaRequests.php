@@ -96,7 +96,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'subscription' => $user ? (
                 (!$user->isAdmin() && !$user->isSuperAdmin()) ? [
-                    'plan' => $user->currentPlan()?->only(['name', 'slug', 'max_guests', 'max_galleries']),
+                    'plan' => $user->currentPlan()?->only(['id', 'name', 'slug', 'max_guests', 'max_galleries']),
                     'status' => $user->activeSubscription?->status,
                     'expires_at' => $user->activeSubscription?->expires_at?->toISOString(),
                 ] : [

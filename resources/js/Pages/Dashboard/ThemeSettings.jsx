@@ -1,5 +1,6 @@
 import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
@@ -964,9 +965,9 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                 </div>
             </div>
 
-            {/* Modal Pengaturan Partikel (moved to root level to prevent clipping) */}
-            {isParticleModalOpen && (
-                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
+            {/* Modal Pengaturan Partikel (moved to root level to prevent clipping and rendered in a Portal) */}
+            {isParticleModalOpen && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
                     <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-[scaleIn_0.2s_ease-out] border border-gray-100">
                         {/* Header */}
                         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
@@ -1057,7 +1058,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Custom Domain Tutorial Modal (rendered correctly here) */}

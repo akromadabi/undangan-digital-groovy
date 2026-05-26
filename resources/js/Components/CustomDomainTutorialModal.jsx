@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function CustomDomainTutorialModal({ isOpen, onClose }) {
     if (!isOpen) return null;
@@ -13,7 +14,7 @@ export default function CustomDomainTutorialModal({ isOpen, onClose }) {
 
     const serverIp = '157.20.159.47';
 
-    return (
+    const modalContent = (
         <div 
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-opacity duration-300"
             onClick={(e) => e.target === e.currentTarget && onClose()}
@@ -190,4 +191,9 @@ export default function CustomDomainTutorialModal({ isOpen, onClose }) {
             </div>
         </div>
     );
+
+    if (typeof document !== 'undefined') {
+        return createPortal(modalContent, document.body);
+    }
+    return modalContent;
 }
