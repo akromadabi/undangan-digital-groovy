@@ -88,7 +88,34 @@ class DashboardController extends Controller
             $file = $request->file('file');
             \App\Helpers\ImageCompressor::compress($file);
             
-            $path = $file->store($folder, 'public');
+            $ext = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'jpg';
+            if ($ext === 'jpeg') {
+                $ext = 'jpg';
+            }
+
+            $time = time();
+            $rand = rand(100, 999);
+            
+            if ($folder === 'themes') {
+                $themeSlug = $request->input('theme_slug') ?: $request->input('slug') ?: $request->input('theme_name') ?: '';
+                $themePart = $themeSlug ? '-' . \Illuminate\Support\Str::slug($themeSlug) : '';
+                $filename = "preview-tema{$themePart}-{$time}-{$rand}.{$ext}";
+            } elseif (in_array($folder, ['bride_grooms', 'avatars', 'mempelai', 'couples'])) {
+                $gender = $request->input('gender') ?: '';
+                $genderPart = $gender ? '-' . \Illuminate\Support\Str::slug($gender) : '';
+                $filename = "foto-mempelai{$genderPart}-{$time}-{$rand}.{$ext}";
+            } elseif (in_array($folder, ['galleries', 'gallery'])) {
+                $filename = "galeri-undangan-{$time}-{$rand}.{$ext}";
+            } elseif (in_array($folder, ['covers', 'backgrounds', 'cover'])) {
+                $filename = "cover-undangan-{$time}-{$rand}.{$ext}";
+            } elseif (in_array($folder, ['reseller', 'logos', 'reseller/logos'])) {
+                $filename = "logo-reseller-{$time}-{$rand}.{$ext}";
+            } else {
+                $cleanFolder = str_replace('/', '-', $folder);
+                $filename = "undangan-{$cleanFolder}-{$time}-{$rand}.{$ext}";
+            }
+
+            $path = $file->storeAs($folder, $filename, 'public');
 
             return response()->json([
                 'url' => '/storage/' . $path,

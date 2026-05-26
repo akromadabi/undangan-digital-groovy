@@ -77,7 +77,10 @@ class ResellerSettingsController extends Controller
             $file = $request->file('brand_logo');
             \App\Helpers\ImageCompressor::compress($file);
             
-            $settings->brand_logo = $file->store('reseller/logos', 'public');
+            $ext = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'jpg';
+            if ($ext === 'jpeg') { $ext = 'jpg'; }
+            $filename = 'logo-reseller-' . time() . '-' . rand(100, 999) . '.' . $ext;
+            $settings->brand_logo = $file->storeAs('reseller/logos', $filename, 'public');
         }
 
         if ($request->has('remove_logo') && $request->remove_logo) {

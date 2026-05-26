@@ -227,6 +227,7 @@ class DatabaseSeeder extends Seeder
             DuskMosqueThemeSeeder::class,
             JawaKlasikThemeSeeder::class,
             Jawa2ThemeSeeder::class,
+            JawaNewThemeSeeder::class,
             QuoteTemplateSeeder::class,
             NetflixThemeSeeder::class,
             Luxury01ThemeSeeder::class,

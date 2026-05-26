@@ -202,7 +202,7 @@ export default function Form({ theme, plans = [] }) {
     return (
         <DynamicAdminLayout title={isEdit ? `Edit Tema: ${theme.name}` : 'Tambah Tema Baru'}>
             <Head title={isEdit ? 'Edit Tema' : 'Tambah Tema'} />
-            <div className="max-w-2xl space-y-6 pb-12">
+            <div className="max-w-2xl space-y-6 pb-36 md:pb-12">
                 <Link href={`${adminRoutePrefix}/themes`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium inline-flex items-center gap-1 transition-colors">
                     ← Kembali ke Daftar Tema
                 </Link>

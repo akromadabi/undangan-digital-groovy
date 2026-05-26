@@ -470,7 +470,7 @@ export default function Faq() {
         <AdminLayout title="FAQ & Panduan">
             <Head title="FAQ & Panduan - Reseller Dashboard" />
 
-            <div className="space-y-6 max-w-4xl mx-auto pb-12">
+            <div className="space-y-6 max-w-4xl mx-auto pb-36 md:pb-12">
                 {/* ═══ Header Section ═══ */}
                 <div className="relative py-8 px-6 bg-gradient-to-br from-[#E5654B] to-[#c24b33] rounded-2xl text-white overflow-hidden shadow-sm">
                     <div className="absolute -top-12 -left-12 w-40 h-40 rounded-full bg-white/5" />

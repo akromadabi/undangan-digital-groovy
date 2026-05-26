@@ -234,7 +234,10 @@ class PaymentController extends Controller
 
             \App\Helpers\ImageCompressor::compress($file);
 
-            $path = $file->store('payment/proofs', 'public');
+            $ext = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'jpg';
+            if ($ext === 'jpeg') { $ext = 'jpg'; }
+            $filename = 'bukti-bayar-' . time() . '-' . rand(100, 999) . '.' . $ext;
+            $path = $file->storeAs('payment/proofs', $filename, 'public');
 
             $payment->update([
                 'proof_image' => $path,

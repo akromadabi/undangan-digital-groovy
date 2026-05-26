@@ -49,8 +49,8 @@ class ImageCompressor
             return false;
         }
 
-        // 2. Resize image if dimensions are too large (max 1200px)
-        $maxDim = 1200;
+        // 2. Resize image if dimensions are too large (max 800px for optimal mobile size)
+        $maxDim = 800;
         if ($width > $maxDim || $height > $maxDim) {
             $ratio = $width / $height;
             if ($ratio > 1) {
@@ -84,7 +84,22 @@ class ImageCompressor
                     imagejpeg($image, $filePath, 75); // 75% quality is excellent for balancing size and quality
                     break;
                 case 'image/png':
-                    imagepng($image, $filePath, 9); // Compression level 9 (max compression, lossless)
+                    // If the PNG has no transparency, convert it to JPEG to save ~95% of space!
+                    if (!self::hasTransparency($image)) {
+                        imagejpeg($image, $filePath, 75);
+                    } else {
+                        // If it has transparency, save it as WebP at 75% quality
+                        // WebP has extremely compact compression for alpha-channels
+                        if (function_exists('imagewebp')) {
+                            imagewebp($image, $filePath, 75);
+                        } else {
+                            // Fallback to truecolor-to-palette to reduce zlib block sizes
+                            if (imageistruecolor($image)) {
+                                imagetruecolortopalette($image, false, 256);
+                            }
+                            imagepng($image, $filePath, 9);
+                        }
+                    }
                     break;
                 case 'image/webp':
                     imagewebp($image, $filePath, 75); // 75% quality for WebP
@@ -102,5 +117,34 @@ class ImageCompressor
             }
             return false;
         }
+    }
+
+    /**
+     * Fast check if a truecolor GD image has any transparent/semi-transparent pixels.
+     * Samples every 4th pixel for speed.
+     *
+     * @param resource $image GD image resource.
+     * @return bool True if there are transparent/semi-transparent pixels, false otherwise.
+     */
+    private static function hasTransparency($image)
+    {
+        if (!imageistruecolor($image)) {
+            return imagecolortransparent($image) >= 0;
+        }
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        for ($y = 0; $y < $height; $y += 4) {
+            for ($x = 0; $x < $width; $x += 4) {
+                $rgba = imagecolorat($image, $x, $y);
+                $alpha = ($rgba >> 24) & 0x7F;
+                if ($alpha > 0) {
+                    return true; // Found transparent pixel
+                }
+            }
+        }
+
+        return false;
     }
 }
