@@ -9,9 +9,7 @@ return new class extends Migration {
     {
         $seeders = [
             'shopee' => 'ShopeeThemeSeeder',
-            'manchester-united' => 'ManchesterThemeSeeder',
             'wayang' => 'WayangThemeSeeder',
-            'aruna' => 'ArunaThemeSeeder',
             'utary' => 'UtaryThemeSeeder',
             'netflix' => 'NetflixThemeSeeder',
             'luxury-01' => 'Luxury01ThemeSeeder',

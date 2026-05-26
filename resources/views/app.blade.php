@@ -183,9 +183,37 @@
     @viteReactRefresh
     @vite(['resources/js/app.jsx'])
     @inertiaHead
+    <!-- Global JavaScript Error Visualizer -->
+    <script>
+        window.addEventListener('error', function(event) {
+            showErrorVisualizer('Error: ' + event.message + '\nat ' + event.filename + ':' + event.lineno + ':' + event.colno + '\nStack: ' + (event.error ? event.error.stack : 'N/A'));
+        });
+        window.addEventListener('unhandledrejection', function(event) {
+            showErrorVisualizer('Unhandled Promise Rejection: ' + event.reason + (event.reason && event.reason.stack ? '\nStack: ' + event.reason.stack : ''));
+        });
+
+        function showErrorVisualizer(message) {
+            var container = document.getElementById('js-error-visualizer');
+            if (container) {
+                container.style.display = 'block';
+                var preEl = document.getElementById('js-error-pre');
+                if (preEl) {
+                    preEl.innerText += message + '\n\n---------------------------------\n\n';
+                }
+            } else {
+                console.error(message);
+                setTimeout(function() { showErrorVisualizer(message); }, 100);
+            }
+        }
+    </script>
 </head>
 
 <body class="font-sans antialiased">
+    <!-- Global JavaScript Error Visualizer Container -->
+    <div id="js-error-visualizer" style="display: none; position: fixed; bottom: 20px; right: 20px; left: 20px; z-index: 999999; padding: 20px; background: #fef2f2; color: #991b1b; border: 2px solid #f87171; border-radius: 12px; font-family: monospace; font-size: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); max-height: 80vh; overflow-y: auto; white-space: pre-wrap;">
+        <h3 style="margin: 0 0 10px 0; color: #7f1d1d; font-size: 14px; font-weight: bold;">🔴 JavaScript Error Detected</h3>
+        <pre id="js-error-pre" style="margin: 0; overflow-x: auto; white-space: pre-wrap; word-break: break-all;"></pre>
+    </div>
     @inertia
 </body>
 

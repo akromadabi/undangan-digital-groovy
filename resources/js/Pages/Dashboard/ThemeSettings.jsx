@@ -469,16 +469,22 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         const isSelected = selectedThemeId === theme.id;
                                         return (
                                             <div key={theme.id} className="relative group/card">
-                                                <button onClick={isThemeLocked(theme) ? undefined : () => handleThemeChange(theme.id)}
-                                                    className={`w-full group relative rounded-2xl overflow-hidden border-2 text-left transition-all duration-300 ${
+                                                <div role="button" tabIndex={0}
+                                                    onClick={isThemeLocked(theme) ? undefined : () => handleThemeChange(theme.id)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                                            if (!isThemeLocked(theme)) handleThemeChange(theme.id);
+                                                        }
+                                                    }}
+                                                    className={`w-full group relative rounded-2xl overflow-hidden border-2 text-left transition-all duration-300 focus:outline-none ${
                                                         isSelected 
-                                                            ? 'border-[#E5654B] ring-4 ring-orange-100 shadow-md scale-[1.01]' 
+                                                            ? 'border-[#E5654B] ring-4 ring-orange-100 shadow-md scale-[1.01] cursor-pointer' 
                                                             : isThemeLocked(theme)
-                                                                ? 'border-gray-200 opacity-60 cursor-not-allowed'
-                                                                : 'border-gray-200 hover:border-orange-300 hover:shadow-sm'
+                                                                ? 'border-gray-200 cursor-not-allowed'
+                                                                : 'border-gray-200 hover:border-orange-300 hover:shadow-sm cursor-pointer'
                                                     }`}>
                                                     {/* Card Image */}
-                                                    <div className="aspect-[3/4] w-full bg-gray-50 overflow-hidden relative">
+                                                    <div className={`aspect-[3/4] w-full bg-gray-50 overflow-hidden relative ${isThemeLocked(theme) ? 'opacity-65' : ''}`}>
                                                         {theme.thumbnail ? (
                                                             <img src={theme.thumbnail} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={theme.name} />
                                                         ) : (
@@ -509,7 +515,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                     </div>
                                                     {/* Card Info */}
                                                     <div className="p-2.5 bg-white border-t border-gray-100 flex items-center justify-between">
-                                                        <div className="min-w-0 flex-1">
+                                                        <div className={`min-w-0 flex-1 ${isThemeLocked(theme) ? 'opacity-65' : ''}`}>
                                                             <div className="font-bold text-gray-800 text-xs truncate group-hover:text-[#c24b33] transition-colors" title={theme.name}>{theme.name}</div>
                                                             {/* Color Scheme Dots */}
                                                             <div className="flex gap-1 mt-1">
@@ -519,10 +525,22 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                             </div>
                                                         </div>
                                                         
-                                                        {/* Instagram Like Button */}
-                                                        <ThemeLikeButton theme={theme} />
+                                                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                                            {/* Preview Eye Button */}
+                                                            <a href={route('demo.theme', theme.slug)} target="_blank" rel="noopener noreferrer"
+                                                                className="flex items-center justify-center p-1.5 rounded-full bg-[#E5654B] text-white hover:bg-[#c24b33] hover:scale-105 active:scale-95 transition-all duration-200 shadow-xs cursor-pointer"
+                                                                title="Lihat Preview Demo">
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                </svg>
+                                                            </a>
+
+                                                            {/* Instagram Like Button */}
+                                                            <ThemeLikeButton theme={theme} />
+                                                        </div>
                                                     </div>
-                                                </button>
+                                                </div>
                                             </div>
                                         );
                                     });
@@ -944,8 +962,16 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                 {/* Right Panel: Phone Preview (Real iframe) */}
                 <div className="hidden lg:flex flex-1 items-start justify-center">
                     <div className="sticky top-4">
-                        <div className="w-[360px] h-[762px] bg-white rounded-[2.5rem] shadow-2xl border-[8px] border-gray-800 overflow-hidden relative">
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-800 rounded-b-2xl z-10" />
+                        <div className="w-[360px] h-[762px] bg-zinc-950 rounded-[2.5rem] shadow-2xl border-[8px] border-gray-800 overflow-hidden relative">
+                            {/* Premium Dynamic Island */}
+                            <div className="absolute top-3.5 left-1/2 -translate-x-1/2 w-[90px] h-6 bg-black rounded-full z-20 flex items-center justify-between px-2.5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),_0_1px_2px_rgba(0,0,0,0.4)] pointer-events-none border border-black/40">
+                                {/* Left camera lens dot */}
+                                <div className="w-2.5 h-2.5 rounded-full bg-[#0d0d12] flex items-center justify-center border border-gray-900/30">
+                                    <div className="w-1 h-1 rounded-full bg-[#1c1c3c] opacity-60" />
+                                </div>
+                                {/* Right sensor indicator */}
+                                <div className="w-1 h-1 rounded-full bg-[#0d0d12] opacity-40" />
+                            </div>
                             <div className="w-full h-full overflow-hidden relative">
                                 <iframe
                                     key={previewKey}
@@ -1155,7 +1181,7 @@ function ThemeLikeButton({ theme }) {
     };
 
     return (
-        <button type="button" onClick={handleLike} className="flex items-center gap-1 py-1 px-1.5 rounded-full hover:bg-gray-50 transition-colors duration-200" title="Sukai tema ini">
+        <button type="button" onClick={handleLike} className="flex items-center gap-1 py-1 px-2.5 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200/60 transition-colors duration-200" title="Sukai tema ini">
             <svg className={`w-3.5 h-3.5 transition-all duration-300 ${liked ? 'fill-rose-500 text-rose-500 scale-110' : 'text-gray-400 hover:text-rose-500'} ${isAnimate ? 'animate-[heartBeat_0.4s_ease-in-out]' : ''}`} fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
             </svg>

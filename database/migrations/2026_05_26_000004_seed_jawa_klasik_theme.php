@@ -7,15 +7,11 @@
  return new class extends Migration {
      public function up(): void
      {
-         try {
-             Artisan::call('db:seed', ['--class' => 'JawaKlasikThemeSeeder', '--force' => true]);
-         } catch (\Exception $e) {
-             \Log::error("Failed seeding Jawa Klasik theme: " . $e->getMessage());
-         }
+         // Disabled
      }
  
      public function down(): void
      {
-         DB::table('themes')->where('slug', 'jawa-klasik')->delete();
+         // Disabled
      }
  };

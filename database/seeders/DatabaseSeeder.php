@@ -19,72 +19,84 @@ class DatabaseSeeder extends Seeder
         // ═══════════════════════════════════════
         // 1. ADMIN USERS (Super Admin & Reseller)
         // ═══════════════════════════════════════
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'akromadabi@gmail.com',
-            'password' => Hash::make('akromadabi'),
-            'role' => 'super_admin',
-            'is_active' => true,
-            'onboarding_step' => 6,
-            'email_verified_at' => now(),
-        ]);
+        $superAdmin = User::updateOrCreate(
+            ['email' => 'akromadabi@gmail.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('akromadabi'),
+                'role' => 'super_admin',
+                'is_active' => true,
+                'onboarding_step' => 6,
+                'email_verified_at' => now(),
+            ]
+        );
 
-        $reseller = User::create([
-            'name' => 'Reseller Groovy',
-            'email' => 'reseller@groovy.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin', // Role 'admin' di sistem ini berfungsi sebagai Reseller
-            'is_active' => true,
-            'onboarding_step' => 6,
-            'email_verified_at' => now(),
-        ]);
+        $reseller = User::updateOrCreate(
+            ['email' => 'reseller@groovy.com'],
+            [
+                'name' => 'Reseller Groovy',
+                'password' => Hash::make('password'),
+                'role' => 'admin', // Role 'admin' di sistem ini berfungsi sebagai Reseller
+                'is_active' => true,
+                'onboarding_step' => 6,
+                'email_verified_at' => now(),
+            ]
+        );
 
         // ═══════════════════════════════════════
         // 2. SUBSCRIPTION PLANS
         // ═══════════════════════════════════════
-        $free = SubscriptionPlan::create([
-            'name' => 'Free',
-            'slug' => 'free',
-            'description' => 'Paket gratis dengan fitur terbatas',
-            'price' => 0,
-            'duration_days' => 0,
-            'max_guests' => 50,
-            'max_galleries' => 3,
-            'sort_order' => 1,
-        ]);
+        $free = SubscriptionPlan::updateOrCreate(
+            ['slug' => 'free'],
+            [
+                'name' => 'Free',
+                'description' => 'Paket gratis dengan fitur terbatas',
+                'price' => 0,
+                'duration_days' => 0,
+                'max_guests' => 50,
+                'max_galleries' => 3,
+                'sort_order' => 1,
+            ]
+        );
 
-        $silver = SubscriptionPlan::create([
-            'name' => 'Silver',
-            'slug' => 'silver',
-            'description' => 'Paket dasar untuk undangan digital',
-            'price' => 49000,
-            'duration_days' => 90,
-            'max_guests' => 200,
-            'max_galleries' => 10,
-            'sort_order' => 2,
-        ]);
+        $silver = SubscriptionPlan::updateOrCreate(
+            ['slug' => 'silver'],
+            [
+                'name' => 'Silver',
+                'description' => 'Paket dasar untuk undangan digital',
+                'price' => 49000,
+                'duration_days' => 90,
+                'max_guests' => 200,
+                'max_galleries' => 10,
+                'sort_order' => 2,
+            ]
+        );
 
-        $gold = SubscriptionPlan::create([
-            'name' => 'Gold',
-            'slug' => 'gold',
-            'description' => 'Paket lengkap dengan semua fitur',
-            'price' => 99000,
-            'duration_days' => 180,
-            'max_guests' => 500,
-            'max_galleries' => 25,
-            'sort_order' => 3,
-        ]);
+        $gold = SubscriptionPlan::updateOrCreate(
+            ['slug' => 'gold'],
+            [
+                'name' => 'Gold',
+                'description' => 'Paket lengkap dengan semua fitur',
+                'price' => 99000,
+                'duration_days' => 180,
+                'max_guests' => 500,
+                'max_galleries' => 25,
+                'sort_order' => 3,
+            ]
+        );
 
-        $platinum = SubscriptionPlan::create([
-            'name' => 'Platinum',
-            'slug' => 'platinum',
-            'description' => 'Paket premium tanpa batas',
-            'price' => 199000,
-            'duration_days' => 365,
-            'max_guests' => 9999,
-            'max_galleries' => 50,
-            'sort_order' => 4,
-        ]);
+        $platinum = SubscriptionPlan::updateOrCreate(
+            ['slug' => 'platinum'],
+            [
+                'name' => 'Platinum',
+                'description' => 'Paket premium tanpa batas',
+                'price' => 199000,
+                'duration_days' => 365,
+                'max_guests' => 9999,
+                'max_galleries' => 50,
+                'sort_order' => 4,
+            ]
+        );
 
         // ═══════════════════════════════════════
         // 3. FEATURES (Lockable)
@@ -115,7 +127,7 @@ class DatabaseSeeder extends Seeder
 
         $featureModels = [];
         foreach ($features as $f) {
-            $featureModels[$f['slug']] = Feature::create($f);
+            $featureModels[$f['slug']] = Feature::updateOrCreate(['slug' => $f['slug']], $f);
         }
 
         // ═══════════════════════════════════════
@@ -127,118 +139,69 @@ class DatabaseSeeder extends Seeder
         $freeLocked = ['love_story', 'bank', 'save_the_date', 'turut_mengundang', 'bride_groom_detail', 'music', 'gift', 'whatsapp'];
 
         foreach ($featureModels as $slug => $feature) {
-            PlanFeatureAccess::create([
-                'plan_id' => $free->id,
-                'feature_id' => $feature->id,
-                'is_enabled' => in_array($slug, $freeEnabled),
-            ]);
+            PlanFeatureAccess::updateOrCreate(
+                ['plan_id' => $free->id, 'feature_id' => $feature->id],
+                ['is_enabled' => in_array($slug, $freeEnabled)]
+            );
         }
 
         // Silver plan: most features unlocked
         $silverLocked = ['gift', 'bride_groom_detail'];
         foreach ($featureModels as $slug => $feature) {
-            PlanFeatureAccess::create([
-                'plan_id' => $silver->id,
-                'feature_id' => $feature->id,
-                'is_enabled' => !in_array($slug, $silverLocked),
-            ]);
+            PlanFeatureAccess::updateOrCreate(
+                ['plan_id' => $silver->id, 'feature_id' => $feature->id],
+                ['is_enabled' => !in_array($slug, $silverLocked)]
+            );
         }
 
         // Gold & Platinum: all features enabled
         foreach ([$gold, $platinum] as $plan) {
             foreach ($featureModels as $feature) {
-                PlanFeatureAccess::create([
-                    'plan_id' => $plan->id,
-                    'feature_id' => $feature->id,
-                    'is_enabled' => true,
-                ]);
+                PlanFeatureAccess::updateOrCreate(
+                    ['plan_id' => $plan->id, 'feature_id' => $feature->id],
+                    ['is_enabled' => true]
+                );
             }
         }
 
         // ── Give Super Admin & Reseller Gold Subscription ──
         foreach ([$superAdmin, $reseller] as $adminUser) {
-            $payment = \App\Models\Payment::create([
-                'user_id' => $adminUser->id,
-                'plan_id' => $gold->id,
-                'amount' => $gold->price,
-                'payment_gateway' => 'manual',
-                'status' => 'paid',
-                'paid_at' => now(),
-            ]);
+            $payment = \App\Models\Payment::updateOrCreate(
+                ['user_id' => $adminUser->id, 'plan_id' => $gold->id, 'amount' => $gold->price],
+                [
+                    'payment_gateway' => 'manual',
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                ]
+            );
 
-            \App\Models\Subscription::create([
-                'user_id' => $adminUser->id,
-                'plan_id' => $gold->id,
-                'payment_id' => $payment->id,
-                'starts_at' => now(),
-                'expires_at' => now()->addYears(10), // Long duration for admin
-                'status' => 'active',
-            ]);
+            \App\Models\Subscription::updateOrCreate(
+                ['user_id' => $adminUser->id, 'plan_id' => $gold->id, 'payment_id' => $payment->id],
+                [
+                    'starts_at' => now(),
+                    'expires_at' => now()->addYears(10), // Long duration for admin
+                    'status' => 'active',
+                ]
+            );
         }
 
         // ═══════════════════════════════════════
-        // 5. DEFAULT THEMES
+        // 5. DEFAULT THEMES & RUN SEEDERS
         // ═══════════════════════════════════════
-        $theme5 = Theme::create([
-            'name' => 'Adat Jawa',
-            'slug' => 'adat-jawa',
-            'thumbnail' => '/themes/adat-jawa/the-wedding.png',
-            'category' => 'islamic',
-            'color_scheme' => [
-                'primary' => '#C5963B',
-                'secondary' => '#8B6914',
-                'bg' => '#FFF9F0',
-                'text' => '#2D2D2D',
-                'accent' => '#DAA520',
-            ],
-            'font_config' => [
-                'heading' => 'Cinzel',
-                'body' => 'Poppins',
-                'script' => 'Great Vibes',
-            ],
-            'is_premium' => true,
-            'sort_order' => 5,
-        ]);
-
-        // Default sections for each theme
-        $defaultSections = [
-            ['section_key' => 'cover', 'section_name' => 'Cover', 'component_name' => 'CoverSection', 'default_order' => 1, 'is_removable' => false],
-            ['section_key' => 'opening', 'section_name' => 'Opening', 'component_name' => 'OpeningSection', 'default_order' => 2, 'is_removable' => true],
-            ['section_key' => 'bride_groom', 'section_name' => 'Mempelai', 'component_name' => 'BrideGroomSection', 'default_order' => 3, 'is_removable' => true],
-            ['section_key' => 'countdown', 'section_name' => 'Save The Date', 'component_name' => 'CountdownSection', 'default_order' => 4, 'is_removable' => true],
-            ['section_key' => 'love_story', 'section_name' => 'Kisah Cinta', 'component_name' => 'LoveStorySection', 'default_order' => 5, 'is_removable' => true],
-            ['section_key' => 'event', 'section_name' => 'Acara', 'component_name' => 'EventSection', 'default_order' => 6, 'is_removable' => true],
-            ['section_key' => 'gallery', 'section_name' => 'Galeri', 'component_name' => 'GallerySection', 'default_order' => 7, 'is_removable' => true],
-            ['section_key' => 'rsvp', 'section_name' => 'RSVP', 'component_name' => 'RsvpSection', 'default_order' => 8, 'is_removable' => true],
-            ['section_key' => 'wishes', 'section_name' => 'Ucapan', 'component_name' => 'WishesSection', 'default_order' => 9, 'is_removable' => true],
-            ['section_key' => 'bank', 'section_name' => 'Amplop Digital', 'component_name' => 'BankSection', 'default_order' => 10, 'is_removable' => true],
-            ['section_key' => 'closing', 'section_name' => 'Penutup', 'component_name' => 'ClosingSection', 'default_order' => 11, 'is_removable' => true],
-        ];
-
-        foreach ([$theme5] as $theme) {
-            foreach ($defaultSections as $section) {
-                ThemeSection::create(array_merge($section, ['theme_id' => $theme->id]));
-            }
-        }
-
-        // Run theme-specific seeders
         $this->call([
             UtaryThemeSeeder::class,
-            DuskMosqueThemeSeeder::class,
-            JawaKlasikThemeSeeder::class,
-            Jawa2ThemeSeeder::class,
-            JawaNewThemeSeeder::class,
             QuoteTemplateSeeder::class,
             NetflixThemeSeeder::class,
             Luxury01ThemeSeeder::class,
             Luxury02ThemeSeeder::class,
             Luxury03ThemeSeeder::class,
-            ArunaThemeSeeder::class,
             Luxury04ThemeSeeder::class,
             WayangThemeSeeder::class,
             ShopeeThemeSeeder::class,
-            ManchesterThemeSeeder::class,
+            SpotifyThemeSeeder::class,
         ]);
+
+        $defaultTheme = Theme::where('slug', 'utary')->first();
 
         // ═══════════════════════════════════════
         // 6. GLOBAL SETTINGS
@@ -472,6 +435,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\Rsvp::create(['invitation_id' => $invitation->id, 'guest_id' => $guestModels[4]->id, 'attendance' => 'belum_pasti', 'number_of_guests' => 1]);
 
         // Invitation Sections
+        $defaultSections = \App\Models\ThemeSection::where('theme_id', $defaultTheme->id)->get();
         foreach ($defaultSections as $section) {
             \App\Models\InvitationSection::create([
                 'invitation_id' => $invitation->id,
@@ -498,7 +462,7 @@ class DatabaseSeeder extends Seeder
 
         $invitationFree = \App\Models\Invitation::create([
             'user_id' => $userFree->id,
-            'theme_id' => $theme4->id,
+            'theme_id' => $defaultTheme->id,
             'slug' => 'andi-sari',
             'title' => 'Pernikahan Andi & Sari',
             'layout_mode' => 'scroll',
@@ -531,6 +495,7 @@ class DatabaseSeeder extends Seeder
             'mother_name' => 'Bu Rina',
         ]);
 
+        $defaultSections = \App\Models\ThemeSection::where('theme_id', $defaultTheme->id)->get();
         foreach ($defaultSections as $section) {
             \App\Models\InvitationSection::create([
                 'invitation_id' => $invitationFree->id,
@@ -538,6 +503,63 @@ class DatabaseSeeder extends Seeder
                 'section_name' => $section['section_name'],
                 'sort_order' => $section['default_order'],
                 'is_visible' => true,
+            ]);
+        }
+
+        // ═══════════════════════════════════════
+        // 9. GREETING CARDS (3 Random Cards)
+        // ═══════════════════════════════════════
+        $usersForCards = User::all();
+        foreach ($usersForCards as $cardUser) {
+            \App\Models\GreetingCard::create([
+                'user_id' => $cardUser->id,
+                'title' => 'Selamat Hari Anniversary',
+                'template' => 'stillwithyou',
+                'type' => 'anniversary',
+                'recipient_name' => 'Adinda',
+                'sender_name' => 'Bagus',
+                'photo_url' => 'https://picsum.photos/seed/anniversary/800/800',
+                'messages' => [
+                    'Selamat hari jadi kita yang pertama!',
+                    'Terima kasih telah menemani setiap langkah dan hariku.',
+                    'Semoga cinta kita selalu mekar seiring berjalannya waktu.'
+                ],
+                'custom_url' => \App\Models\GreetingCard::generateUniqueSlug(),
+                'is_active' => true,
+            ]);
+
+            \App\Models\GreetingCard::create([
+                'user_id' => $cardUser->id,
+                'title' => 'Selamat Ulang Tahun',
+                'template' => 'giftforanita',
+                'type' => 'birthday',
+                'recipient_name' => 'Budi',
+                'sender_name' => 'Siti',
+                'photo_url' => 'https://picsum.photos/seed/birthday/800/800',
+                'messages' => [
+                    'Selamat ulang tahun yang ke-25!',
+                    'Semoga panjang umur, sehat selalu, dan dilancarkan rezekinya.',
+                    'Sukses selalu untuk karir dan impian-impianmu ke depan.'
+                ],
+                'custom_url' => \App\Models\GreetingCard::generateUniqueSlug(),
+                'is_active' => true,
+            ]);
+
+            \App\Models\GreetingCard::create([
+                'user_id' => $cardUser->id,
+                'title' => 'Selamat Atas Kelulusanmu',
+                'template' => 'cosmicdrift',
+                'type' => 'graduation',
+                'recipient_name' => 'Mega',
+                'sender_name' => 'Dimas',
+                'photo_url' => 'https://picsum.photos/seed/graduation/800/800',
+                'messages' => [
+                    'Selamat atas gelar barunya!',
+                    'Perjuangan kuliah bertahun-tahun akhirnya membuahkan hasil manis.',
+                    'Semoga ilmu yang didapat berkah dan membantumu menggapai masa depan.'
+                ],
+                'custom_url' => \App\Models\GreetingCard::generateUniqueSlug(),
+                'is_active' => true,
             ]);
         }
     }

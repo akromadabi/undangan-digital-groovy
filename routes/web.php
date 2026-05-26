@@ -115,6 +115,7 @@ Route::get('/demo/{slug}', [InvitationController::class, 'demo'])->name('demo.th
 
 // Public Greeting Card Preview (no auth)
 Route::get('/card/{slug}', [GreetingCardController::class, 'preview'])->name('greeting-card.preview');
+Route::get('/card/{slug}/og-image', [GreetingCardController::class, 'ogImage'])->name('greeting-card.og-image');
 
 // Demo tema — hanya untuk user yang login (mencegah ekspos template ke publik)
 Route::middleware(['auth'])->group(function () {

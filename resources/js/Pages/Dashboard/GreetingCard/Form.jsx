@@ -221,6 +221,430 @@ function GiftForAnitaPreview({ data }) {
     );
 }
 
+
+function CyberpunkPreview({ data }) {
+    const { recipientName, senderName, type } = data;
+    const typeMap = {
+        anniversary: 'DECRYPTION COMPLETE: ANNIVERSARY 💑',
+        birthday:    'DECRYPTION COMPLETE: HAPPY BIRTHDAY 🎂',
+        graduation:  'SECURE LINK: GRADUATION SYSTEM 🎓',
+        wedding:     'SECURE LINK: WEDDING NODE 💍',
+    };
+    const connectionStatus = typeMap[type] || 'ENCRYPTED TRANSMISSION 🤖';
+
+    return (
+        <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center border border-cyan-500/20"
+            style={{ background: 'linear-gradient(135deg, #030712 0%, #0f172a 100%)', minHeight: '480px' }}>
+
+            {/* Glowing Scanlines overlay */}
+            <div className="absolute inset-0 pointer-events-none z-10 opacity-10" style={{
+                background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%)',
+                backgroundSize: '100% 6px'
+            }} />
+            
+            {/* Tech grid */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
+                backgroundImage: 'linear-gradient(rgba(34,211,238,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.2) 1px, transparent 1px)',
+                backgroundSize: '24px 24px'
+            }} />
+
+            {/* Biometric Thumbprint Glow */}
+            <div className="mb-5 text-4xl" style={{ 
+                animation: 'cdCyberPulse 2s ease-in-out infinite',
+                filter: 'drop-shadow(0 0 12px #22d3ee)'
+            }}>
+                👍
+            </div>
+
+            {/* Connection HUD */}
+            <div style={{ fontFamily:'monospace', fontSize:'0.42rem', letterSpacing:'3px', textTransform:'uppercase', color:'#ec4899', opacity:0.85, marginBottom:'0.8rem', textShadow: '0 0 6px #ec4899' }}>
+                {connectionStatus}
+            </div>
+
+            {/* Recipient Name */}
+            <h2 style={{ fontFamily:'monospace', fontWeight: 900, fontSize:'1.35rem', color: '#22d3ee', textShadow: '0 0 8px #22d3ee', letterSpacing: '2px', lineHeight:1.2, marginBottom:'0.4rem', textTransform: 'uppercase' }}>
+                {recipientName || 'Nama Penerima'}
+            </h2>
+
+            {/* Flashing "TOUCH TO SCAN" */}
+            <div className="px-3 py-1 bg-cyan-950/40 border border-cyan-500/30 rounded text-[#22d3ee] mb-4" style={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.48rem', 
+                letterSpacing: '2px', 
+                fontWeight: 700, 
+                textTransform: 'uppercase',
+                boxShadow: '0 0 8px rgba(34, 211, 238, 0.2)',
+                animation: 'cdFlashText 1.5s infinite'
+            }}>
+                [ TOUCH TO SCAN ]
+            </div>
+
+            {/* Tech details */}
+            <div style={{ width:'60%', height:1, background:'linear-gradient(90deg, transparent, #22d3ee, transparent)', marginBottom:'0.8rem' }} />
+
+            {/* Sender */}
+            <div className="flex flex-col items-center gap-1">
+                <span style={{ fontFamily:'monospace', fontSize:'0.38rem', letterSpacing:'2px', color:'rgba(255,255,255,0.4)' }}>SENDER ACCESS CODE:</span>
+                <span style={{ fontFamily:'monospace', fontSize:'0.55rem', fontWeight: 700, letterSpacing:'2px', color:'#ec4899', textShadow: '0 0 6px #ec4899' }}>
+                    {senderName || 'Nama Pengirim'}
+                </span>
+            </div>
+
+            {/* Cyber Active Badge */}
+            <div className="mt-5 px-3 py-1 rounded-full text-center border border-cyan-500/30 bg-cyan-500/10 text-cyan-400" style={{ fontFamily:'monospace', fontSize:'0.46rem', letterSpacing:'1.5px', textTransform:'uppercase', textShadow: '0 0 4px #22d3ee' }}>
+                🤖 Biometric scan ready
+            </div>
+
+            <style>{`
+                @keyframes cdCyberPulse {
+                    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px #22d3ee) brightness(1); }
+                    50% { transform: scale(1.08); filter: drop-shadow(0 0 15px #ec4899) brightness(1.2); }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+function BioluminescentPreview({ data }) {
+    const { recipientName, senderName, type } = data;
+    const typeMap = {
+        anniversary: 'DEEP DIVE: CELEBRATION 💑',
+        birthday:    'DEEP DIVE: BIRTHDAY WISHES 🎂',
+        graduation:  'ARCHIVE FOUND: GRADUATION 🎓',
+        wedding:     'ARCHIVE FOUND: WEDDING DAY 💍',
+    };
+    const diveStatus = typeMap[type] || 'SUBMARINE VIEWPORT ACTIVE 🌊';
+
+    return (
+        <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center border border-cyan-500/20"
+            style={{ background: 'linear-gradient(135deg, #021526 0%, #033043 100%)', minHeight: '480px' }}>
+
+            {/* Glowing Water overlay */}
+            <div className="absolute inset-0 pointer-events-none z-10 opacity-20" style={{
+                background: 'radial-gradient(circle at 50% 30%, rgba(34, 211, 238, 0.15) 0%, transparent 75%)',
+            }} />
+            
+            {/* Viewport Frame */}
+            <div className="absolute inset-4 rounded-full border-[8px] border-amber-800/40 pointer-events-none flex items-center justify-center" style={{
+                boxShadow: '0 0 0 4px rgba(6, 182, 212, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.8)'
+            }}>
+                {/* Viewport Rivets */}
+                {[...Array(8)].map((_, i) => (
+                    <div key={i} className="absolute w-2 h-2 rounded-full bg-cyan-400/40" style={{
+                        transform: `rotate(${i * 45}deg) translateY(-88px)`
+                    }} />
+                ))}
+            </div>
+
+            {/* Jellyfish Emoji Floating */}
+            <div className="mb-4 text-4xl" style={{ 
+                animation: 'cdJellyFloating 3.5s ease-in-out infinite',
+                filter: 'drop-shadow(0 0 10px #06b6d4)'
+            }}>
+                🪼
+            </div>
+
+            {/* Sub HUD */}
+            <div style={{ fontFamily:'monospace', fontSize:'0.42rem', letterSpacing:'3px', textTransform:'uppercase', color:'#2dd4bf', opacity:0.85, marginBottom:'0.8rem', textShadow: '0 0 5px #2dd4bf' }}>
+                {diveStatus}
+            </div>
+
+            {/* Recipient Name */}
+            <h2 style={{ fontFamily:'monospace', fontWeight: 900, fontSize:'1.35rem', color: '#38bdf8', textShadow: '0 0 8px #0284c7', letterSpacing: '2px', lineHeight:1.2, marginBottom:'0.4rem', textTransform: 'uppercase' }}>
+                {recipientName || 'Nama Penerima'}
+            </h2>
+
+            {/* Flashing "OPEN CHEST" */}
+            <div className="px-3 py-1 bg-[#021526]/80 border border-teal-500/30 rounded text-cyan-300 mb-4" style={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.48rem', 
+                letterSpacing: '2px', 
+                fontWeight: 700, 
+                textTransform: 'uppercase',
+                boxShadow: '0 0 8px rgba(6, 182, 212, 0.2)',
+                animation: 'cdFlashText 2s infinite'
+            }}>
+                [ OPEN TREASURE ]
+            </div>
+
+            {/* Divider */}
+            <div style={{ width:'50%', height:1, background:'linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.3), transparent)', marginBottom:'0.8rem' }} />
+
+            {/* Sender */}
+            <div className="flex flex-col items-center gap-1">
+                <span style={{ fontFamily:'monospace', fontSize:'0.38rem', letterSpacing:'2px', color:'rgba(255,255,255,0.4)' }}>RETRIEVED FROM:</span>
+                <span style={{ fontFamily:'monospace', fontSize:'0.55rem', fontWeight: 700, letterSpacing:'2px', color:'#2dd4bf', textShadow: '0 0 6px #2dd4bf' }}>
+                    {senderName || 'Nama Pengirim'}
+                </span>
+            </div>
+
+            {/* Underwater active badge */}
+            <div className="mt-5 px-3 py-1 rounded-full text-center border border-teal-500/30 bg-teal-500/10 text-teal-400" style={{ fontFamily:'monospace', fontSize:'0.46rem', letterSpacing:'1.5px', textTransform:'uppercase', textShadow: '0 0 4px #06b6d4' }}>
+                🪼 Sonar & sea harp active
+            </div>
+
+            <style>{`
+                @keyframes cdJellyFloating {
+                    0%, 100% { transform: translateY(0) scaleY(1) rotate(0deg); }
+                    50% { transform: translateY(-12px) scaleY(0.92) rotate(3deg); }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+function MysticForestPreview({ data }) {
+    const { recipientName, senderName, type } = data;
+    const typeMap = {
+        anniversary: 'MISTIK SCROLL: CELEBRATION 💑',
+        birthday:    'MISTIK SCROLL: BIRTHDAY WISHES 🎂',
+        graduation:  'MISTIK SCROLL: GRADUATION 🎓',
+        wedding:     'MISTIK SCROLL: WEDDING 💍',
+    };
+    const scrollStatus = typeMap[type] || 'MAGICAL SCROLL ACTIVE 🌲';
+
+    return (
+        <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center border border-lime-500/20"
+            style={{ background: 'linear-gradient(135deg, #030a05 0%, #0d1c10 100%)', minHeight: '480px' }}>
+
+            <div className="absolute inset-0 pointer-events-none z-10 opacity-20" style={{
+                background: 'radial-gradient(circle at 50% 30%, rgba(163, 230, 53, 0.15) 0%, transparent 75%)',
+            }} />
+
+            {[...Array(6)].map((_, i) => (
+                <div key={i} className="absolute w-1.5 h-1.5 rounded-full bg-lime-300" style={{
+                    left: `${15 + (i * 12) + Math.random() * 5}%`,
+                    top: `${20 + (i * 8) + Math.random() * 5}%`,
+                    boxShadow: '0 0 6px #a3e635',
+                    animation: `cdFlashText ${1.2 + Math.random() * 1.5}s infinite alternate`
+                }} />
+            ))}
+
+            <div className="mb-4 text-4xl" style={{ 
+                animation: 'cdScrollFloating 4s ease-in-out infinite',
+                filter: 'drop-shadow(0 0 10px #a3e635)'
+            }}>
+                📜
+            </div>
+
+            <div style={{ fontFamily:'monospace', fontSize:'0.42rem', letterSpacing:'3px', textTransform:'uppercase', color:'#a3e635', opacity:0.85, marginBottom:'0.8rem', textShadow: '0 0 5px #a3e635' }}>
+                {scrollStatus}
+            </div>
+
+            <h2 className="text-xl font-bold text-yellow-100 mb-2" style={{ fontFamily:'Georgia, serif', textShadow: '0 0 6px #d97706', letterSpacing: '1px' }}>
+                {recipientName || 'Nama Penerima'}
+            </h2>
+
+            <div className="px-3 py-1 bg-[#0d1c10]/80 border border-lime-500/30 rounded text-[#d9f99d] mb-4" style={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.48rem', 
+                letterSpacing: '2px', 
+                fontWeight: 700, 
+                textTransform: 'uppercase',
+                boxShadow: '0 0 8px rgba(163, 230, 53, 0.2)',
+                animation: 'cdFlashText 2s infinite'
+            }}>
+                [ UNROLL SCROLL ]
+            </div>
+
+            <div style={{ width:'50%', height:1, background:'linear-gradient(90deg, transparent, rgba(163, 230, 53, 0.3), transparent)', marginBottom:'0.8rem' }} />
+
+            <div className="flex flex-col items-center gap-1">
+                <span style={{ fontFamily:'monospace', fontSize:'0.38rem', letterSpacing:'2px', color:'rgba(255,255,255,0.4)' }}>SENT FROM FOREST:</span>
+                <span style={{ fontFamily:'monospace', fontSize:'0.55rem', fontWeight: 700, letterSpacing:'2px', color:'#a3e635', textShadow: '0 0 6px #a3e635' }}>
+                    {senderName || 'Nama Pengirim'}
+                </span>
+            </div>
+
+            <div className="mt-5 px-3 py-1 rounded-full text-center border border-lime-500/30 bg-lime-500/10 text-lime-400" style={{ fontFamily:'monospace', fontSize:'0.46rem', letterSpacing:'1.5px', textTransform:'uppercase', textShadow: '0 0 4px #a3e635' }}>
+                🌲 Forest Chimes Active
+            </div>
+
+            <style>{`
+                @keyframes cdScrollFloating {
+                    0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+                    50% { transform: translateY(-8px) scale(1.02) rotate(2deg); }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+function RetroArcadePreview({ data }) {
+    const { recipientName, senderName, type } = data;
+    const typeMap = {
+        anniversary: 'LEVEL UP: ANNIVERSARY! 💑',
+        birthday:    'LEVEL UP: HAPPY BIRTHDAY! 🎂',
+        graduation:  'MISSION ACCOMPLISHED: GRADUATION! 🎓',
+        wedding:     'PLAYER 1 & 2 JOINED THE GAME! 💍',
+    };
+    const gameStatus = typeMap[type] || 'READY PLAYER ONE 👾';
+
+    return (
+        <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center border border-purple-500/20"
+            style={{ background: 'linear-gradient(135deg, #0d0726 0%, #04020d 100%)', minHeight: '480px' }}>
+
+            {/* CRT Screen curve and scanlines overlay */}
+            <div className="absolute inset-0 pointer-events-none z-10 opacity-15" style={{
+                background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
+                backgroundSize: '100% 4px, 6px 100%'
+            }} />
+            
+            {/* Retro Pixel Grid */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
+                backgroundImage: 'radial-gradient(#8b5cf6 1px, transparent 1px)',
+                backgroundSize: '16px 16px'
+            }} />
+
+            {/* Glowing Neon Bezel Brackets */}
+            <div className="absolute inset-2 border border-purple-500/30 rounded-lg pointer-events-none" style={{
+                boxShadow: 'inset 0 0 15px rgba(139, 92, 246, 0.15)'
+            }} />
+
+            {/* Cute Pixel Alien Floating */}
+            <div className="mb-4 text-4xl" style={{ 
+                animation: 'cdArcadeMonster 2.5s ease-in-out infinite',
+                filter: 'drop-shadow(0 0 8px #a855f7)'
+            }}>
+                👾
+            </div>
+
+            {/* Game Stats HUD */}
+            <div style={{ fontFamily:'monospace', fontSize:'0.42rem', letterSpacing:'4px', textTransform:'uppercase', color:'#10b981', opacity:0.85, marginBottom:'0.8rem', textShadow: '0 0 6px #10b981' }}>
+                {gameStatus}
+            </div>
+
+            {/* Recipient Name in glowing pixel look */}
+            <h2 style={{ fontFamily:'monospace', fontWeight: 900, fontSize:'1.4rem', color: '#fbbf24', textShadow: '0 0 10px #d97706, 0 0 20px rgba(217,119,6,0.3)', letterSpacing: '2px', lineHeight:1.2, marginBottom:'0.4rem', textTransform: 'uppercase' }}>
+                {recipientName || 'Nama Penerima'}
+            </h2>
+
+            {/* Flashing "INSERT COIN" */}
+            <div className="px-3 py-1 bg-purple-950/40 border border-pink-500/30 rounded text-[#f43f5e] mb-4" style={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.5rem', 
+                letterSpacing: '3px', 
+                fontWeight: 700, 
+                textTransform: 'uppercase',
+                boxShadow: '0 0 8px rgba(244, 63, 94, 0.2)',
+                animation: 'cdFlashText 1.2s infinite'
+            }}>
+                [ INSERT COIN ]
+            </div>
+
+            {/* High score divider */}
+            <div style={{ width:'60%', height:2, background:'repeating-linear-gradient(90deg, #ec4899, #ec4899 4px, transparent 4px, transparent 8px)', marginBottom:'0.8rem' }} />
+
+            {/* Sender */}
+            <div className="flex flex-col items-center gap-1">
+                <span style={{ fontFamily:'monospace', fontSize:'0.4rem', letterSpacing:'2px', color:'rgba(255,255,255,0.4)' }}>SENT BY:</span>
+                <span style={{ fontFamily:'monospace', fontSize:'0.58rem', fontWeight: 700, letterSpacing:'2px', color:'#22d3ee', textShadow: '0 0 8px #22d3ee' }}>
+                    {senderName || 'Nama Pengirim'}
+                </span>
+            </div>
+
+            {/* Retro Audio Active Badge */}
+            <div className="mt-5 px-3 py-1 rounded-full text-center border border-pink-500/30 bg-pink-500/10 text-pink-400" style={{ fontFamily:'monospace', fontSize:'0.48rem', letterSpacing:'1.5px', textTransform:'uppercase', textShadow: '0 0 4px #ec4899' }}>
+                👾 Retro 8-bit Audio Active
+            </div>
+
+            <style>{`
+                @keyframes cdArcadeMonster {
+                    0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+                    50% { transform: translateY(-8px) scale(1.05) rotate(4deg); }
+                }
+                @keyframes cdFlashText {
+                    0%, 100% { opacity: 0.15; }
+                    50% { opacity: 1; }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+function CosmicDriftPreview({ data }) {
+    const { recipientName, senderName, type } = data;
+    const typeMap = {
+        anniversary: 'Selamat Aniversari 💑',
+        birthday:    'Selamat Ulang Tahun 🎂',
+        graduation:  'Selamat Wisuda 🎓',
+        wedding:     'Selamat Menikah 💍',
+    };
+    const greeting = typeMap[type] || 'Pesan Spesial ✨';
+
+    return (
+        <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #020817 0%, #0a1628 50%, #050d1f 100%)', minHeight: '480px' }}>
+
+            {/* Animated stars */}
+            {[...Array(30)].map((_, i) => (
+                <div key={i} className="absolute rounded-full" style={{
+                    width:  Math.random() * 2 + 1 + 'px',
+                    height: Math.random() * 2 + 1 + 'px',
+                    left:   `${Math.random() * 100}%`,
+                    top:    `${Math.random() * 100}%`,
+                    background: ['#60a5fa','#a78bfa','#67e8f9','#fbbf24','white'][i % 5],
+                    opacity: 0.3 + Math.random() * 0.7,
+                    animation: `twinkle${i % 3} ${2 + Math.random() * 3}s ease-in-out infinite`,
+                    animationDelay: `${Math.random() * 2}s`,
+                }} />
+            ))}
+
+            {/* Nebula glow */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+                background: 'radial-gradient(ellipse at 30% 30%, rgba(59,130,246,0.12) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(168,85,247,0.09) 0%, transparent 60%)',
+            }} />
+
+            {/* HUD brackets */}
+            <div className="absolute top-3 left-3" style={{ width:12, height:12, borderTop:'1.5px solid rgba(96,165,250,.35)', borderLeft:'1.5px solid rgba(96,165,250,.35)' }} />
+            <div className="absolute top-3 right-3" style={{ width:12, height:12, borderTop:'1.5px solid rgba(96,165,250,.35)', borderRight:'1.5px solid rgba(96,165,250,.35)' }} />
+            <div className="absolute bottom-3 left-3" style={{ width:12, height:12, borderBottom:'1.5px solid rgba(96,165,250,.35)', borderLeft:'1.5px solid rgba(96,165,250,.35)' }} />
+            <div className="absolute bottom-3 right-3" style={{ width:12, height:12, borderBottom:'1.5px solid rgba(96,165,250,.35)', borderRight:'1.5px solid rgba(96,165,250,.35)' }} />
+
+            {/* Planet */}
+            <div className="mb-4" style={{ width:44, height:44, borderRadius:'50%', background:'radial-gradient(circle at 35% 35%, #4f8ef7, #1a3a8f 60%, #0a1a4a)', boxShadow:'0 0 20px rgba(59,130,246,.6)', animation:'cdPreviewPlanet 5s ease-in-out infinite' }} />
+
+            {/* Eyebrow */}
+            <div style={{ fontFamily:'monospace', fontSize:'0.42rem', letterSpacing:'5px', textTransform:'uppercase', color:'#22d3ee', opacity:0.65, marginBottom:'0.6rem' }}>✦ COSMIC DRIFT ✦</div>
+
+            {/* Greeting */}
+            <h2 style={{ fontFamily:"'Dancing Script', cursive", fontSize:'1.6rem', background:'linear-gradient(135deg,#60a5fa,#c4b5fd)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', filter:'drop-shadow(0 0 8px rgba(96,165,250,.4))', lineHeight:1.2, marginBottom:'0.25rem' }}>
+                {greeting}
+            </h2>
+            <p style={{ fontFamily:'monospace', fontSize:'0.52rem', letterSpacing:'3px', color:'rgba(196,181,253,.7)', marginBottom:'0.75rem' }}>
+                {recipientName || 'Nama Penerima'}
+            </p>
+
+            {/* Divider */}
+            <div style={{ width:'70%', height:1, background:'linear-gradient(90deg,transparent,rgba(96,165,250,.3),transparent)', marginBottom:'0.75rem' }} />
+
+            {/* Constellation dots */}
+            <div className="flex gap-1.5 mb-3">
+                {[...Array(5)].map((_, i) => (
+                    <div key={i} style={{ width: i===2?8:5, height: i===2?8:5, borderRadius:'50%', background:'rgba(96,165,250,0.7)', boxShadow:'0 0 6px rgba(96,165,250,0.8)' }} />
+                ))}
+            </div>
+
+            {/* Sender */}
+            <div style={{ fontFamily:'monospace', fontSize:'0.52rem', letterSpacing:'2px', color:'rgba(251,191,36,.75)' }}>
+                — {senderName || 'Nama Pengirim'}
+            </div>
+
+            {/* Ambient audio indicator preview */}
+            <div className="mt-5 px-4 py-1.5 rounded-full text-center border border-purple-500/30 bg-purple-500/10 text-purple-300" style={{ fontFamily:'monospace', fontSize:'0.52rem', letterSpacing:'1.5px', textTransform:'uppercase' }}>
+                🌌 Space Ambient Audio Active
+            </div>
+
+            <style>{`
+                @keyframes cdPreviewPlanet { 0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)} }
+                @keyframes twinkle0 { 0%,100%{opacity:0.3}50%{opacity:1} }
+                @keyframes twinkle1 { 0%,100%{opacity:0.5}50%{opacity:0.2} }
+                @keyframes twinkle2 { 0%,100%{opacity:0.8}50%{opacity:0.3} }
+            `}</style>
+        </div>
+    );
+}
+
 /* ─────────────────────────────────────
    MAIN FORM PAGE
 ───────────────────────────────────── */
@@ -370,8 +794,14 @@ export default function GreetingCardForm({ card, types, templates }) {
                                         const gradients = {
                                             stillwithyou: 'from-[#0d0915] to-[#1b102b]',
                                             giftforanita:  'from-[#1e050d] to-[#4c1125]',
+                                            oceanbreeze:   'from-[#082f49] to-[#0369a1]',
+                                            cosmicdrift:   'from-[#020817] to-[#0a1628]',
+                                            retroarcade:   'from-[#0d0726] to-[#04020d]',
+                                            cyberpunk:     'from-[#030712] to-[#0f172a]',
+                                            bioluminescent: 'from-[#021526] to-[#033043]',
+                                            mysticforest:  'from-[#030a05] to-[#0d1c10]',
                                         };
-                                        const icons = { stillwithyou: '🎆', giftforanita: '🎁' };
+                                        const icons = { stillwithyou: '🎆', giftforanita: '🎁', oceanbreeze: '🌊', cosmicdrift: '🌌', retroarcade: '👾', cyberpunk: '🤖', bioluminescent: '🪼', mysticforest: '🌲' };
                                         const selected = data.template === key;
                                         return (
                                             <button
@@ -627,6 +1057,18 @@ export default function GreetingCardForm({ card, types, templates }) {
                                 <div className="rounded-xl overflow-hidden ring-1 ring-gray-100 shadow-inner">
                                     {data.template === 'stillwithyou' ? (
                                         <StillWithYouPreview data={previewData} />
+                                    ) : data.template === 'giftforanita' ? (
+                                        <GiftForAnitaPreview data={previewData} />
+                                    ) : data.template === 'cosmicdrift' ? (
+                                        <CosmicDriftPreview data={previewData} />
+                                    ) : data.template === 'retroarcade' ? (
+                                        <RetroArcadePreview data={previewData} />
+                                    ) : data.template === 'cyberpunk' ? (
+                                        <CyberpunkPreview data={previewData} />
+                                    ) : data.template === 'bioluminescent' ? (
+                                        <BioluminescentPreview data={previewData} />
+                                    ) : data.template === 'mysticforest' ? (
+                                        <MysticForestPreview data={previewData} />
                                     ) : (
                                         <GiftForAnitaPreview data={previewData} />
                                     )}

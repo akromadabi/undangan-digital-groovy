@@ -1,0 +1,1738 @@
+/* ==========================================
+   SPOTIFY NEON THEME - style.css
+   ========================================== */
+
+:root {
+    --spty-green: #1DB954;
+    --spty-green-glow: #1ed760;
+    --spty-black: #121212;
+    --spty-dark: #191414;
+    --spty-card: #181818;
+    --spty-card-hover: #282828;
+    --spty-text: #ffffff;
+    --spty-text-muted: #a7a7a7;
+    --spty-border: #292929;
+    --spty-shadow: rgba(0, 0, 0, 0.7);
+    --spty-font: 'Plus Jakarta Sans', sans-serif;
+    --spty-script: 'Great Vibes', cursive;
+}
+
+html, body {
+    background-color: var(--spty-black) !important;
+}
+
+/* Base Reset within Theme */
+.spty-wrapper {
+    font-family: var(--spty-font);
+    background-color: var(--spty-black);
+    color: var(--spty-text);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    position: relative;
+}
+
+.spty-wrapper * {
+    box-sizing: border-box;
+}
+
+/* Animations */
+@keyframes sptyGlow {
+    0%, 100% { box-shadow: 0 0 10px rgba(29, 185, 84, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(29, 185, 84, 0.8); }
+}
+
+@keyframes sptyPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes sptyFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes sptyBounceVisualizer {
+    0%, 100% { height: 4px; }
+    50% { height: 16px; }
+}
+
+@keyframes sptyDeviceEntry {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+        filter: blur(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes sptyPlayerSlideUp {
+    0% {
+        transform: translate(-50%, 100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes sptyPlayPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.6);
+    }
+    70% {
+        box-shadow: 0 0 0 12px rgba(29, 185, 84, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(29, 185, 84, 0);
+    }
+}
+
+.spty-glow-button {
+    animation: sptyGlow 3s infinite;
+}
+
+.spty-float {
+    animation: sptyFloat 4s ease-in-out infinite;
+}
+
+/* Reveal Animations */
+.spty-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(5px);
+    transition: opacity 0.8s ease, transform 0.8s ease, filter 0.8s ease;
+}
+
+.spty-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+}
+
+.spty-reveal--left {
+    transform: translateX(-30px);
+}
+
+.spty-reveal--right {
+    transform: translateX(30px);
+}
+
+.spty-reveal--zoom {
+    transform: scale(0.95);
+}
+
+.spty-reveal--zoom.is-visible,
+.spty-reveal--left.is-visible,
+.spty-reveal--right.is-visible {
+    opacity: 1;
+    transform: translate(0) scale(1);
+}
+
+/* Global No Animations Override */
+.theme-no-animations *,
+.theme-no-animations *::before,
+.theme-no-animations *::after {
+    animation: none !important;
+    transition: none !important;
+    transition-delay: 0s !important;
+    animation-delay: 0s !important;
+    transform: none !important;
+    opacity: 1 !important;
+}
+
+/* ------------------------------------------
+   COVER SECTION (Now Playing UI)
+   ------------------------------------------ */
+.spty-cover {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--spty-black);
+    padding: 24px;
+    transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease, filter 0.8s ease;
+    overflow-y: auto;
+}
+
+.spty-cover.is-opened {
+    transform: translateY(-100%) scale(0.95);
+    opacity: 0;
+    filter: blur(15px);
+    pointer-events: none;
+}
+
+.spty-cover__bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px) brightness(0.2);
+    opacity: 0.6;
+    z-index: 0;
+}
+
+.spty-cover__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.spty-cover__device {
+    background-color: #000;
+    border-radius: 36px;
+    border: 8px solid #222;
+    padding: 24px;
+    width: 100%;
+    box-shadow: 0 20px 50px var(--spty-shadow);
+    display: flex;
+    flex-direction: column;
+    animation: sptyDeviceEntry 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+.spty-cover__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    color: var(--spty-text-muted);
+    font-size: 0.75rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.spty-cover__header i {
+    font-size: 1rem;
+}
+
+.spty-cover__artwork-wrap {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    margin-bottom: 24px;
+    background-color: var(--spty-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--spty-border);
+}
+
+.spty-cover__artwork {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.spty-cover__monogram-art {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--spty-dark) 0%, #000000 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--spty-green);
+    font-size: 4.5rem;
+    font-family: var(--spty-font);
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    text-shadow: 0 0 15px rgba(29, 185, 84, 0.4);
+}
+
+.spty-cover__title-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.spty-cover__song-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--spty-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.spty-cover__artist {
+    font-size: 0.85rem;
+    color: var(--spty-text-muted);
+    margin: 0;
+    font-weight: 500;
+}
+
+.spty-cover__like-btn {
+    background: none;
+    border: none;
+    color: var(--spty-green);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.spty-cover__seekbar {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.spty-cover__progress-bg {
+    width: 100%;
+    height: 4px;
+    background-color: #535353;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.spty-cover__progress-fill {
+    width: 30%;
+    height: 100%;
+    background-color: var(--spty-green);
+    border-radius: 2px;
+}
+
+.spty-cover__time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--spty-text-muted);
+    margin-bottom: 24px;
+}
+
+.spty-cover__controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.spty-cover__ctrl-btn {
+    background: none;
+    border: none;
+    color: var(--spty-text);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.spty-cover__ctrl-btn.active {
+    color: var(--spty-green);
+}
+
+.spty-cover__ctrl-btn--play {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--spty-green);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 10px rgba(29, 185, 84, 0.3);
+    transition: transform 0.2s, background-color 0.2s;
+    animation: sptyPlayPulse 2s infinite;
+}
+
+.spty-cover__ctrl-btn--play:hover {
+    transform: scale(1.05);
+    background-color: var(--spty-green-glow);
+}
+
+.spty-cover__guest-panel {
+    border-top: 1px solid var(--spty-border);
+    padding-top: 16px;
+    text-align: center;
+    width: 100%;
+}
+
+.spty-cover__guest-label {
+    font-size: 0.75rem;
+    color: var(--spty-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 6px 0;
+}
+
+.spty-cover__guest-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--spty-green);
+    margin: 0 0 4px 0;
+}
+
+.spty-cover__guest-desc {
+    font-size: 0.7rem;
+    color: var(--spty-text-muted);
+    font-style: italic;
+    margin: 0;
+}
+
+
+/* ------------------------------------------
+   MAIN LAYOUT & GENERAL PAGE COMPONENTS
+   ------------------------------------------ */
+.spty-main {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: var(--spty-black);
+    min-height: 100vh;
+    padding-bottom: 90px; /* Space for the bottom player */
+    position: relative;
+    border-left: 1px solid var(--spty-border);
+    border-right: 1px solid var(--spty-border);
+    box-shadow: 0 0 40px rgba(0,0,0,0.8);
+}
+
+/* Segmented Layout Mode Support */
+.spty-main--slide {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    padding-bottom: 90px;
+}
+
+.spty-slide-container {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.spty-slide {
+    display: none;
+    height: 100%;
+}
+
+.spty-slide.is-active {
+    display: block;
+}
+
+/* Sections */
+.spty-section {
+    padding: 64px 24px;
+    border-bottom: 1px solid var(--spty-border);
+    position: relative;
+}
+
+.spty-section-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--spty-text-muted);
+    margin: 0 0 8px 0;
+    font-weight: 700;
+}
+
+.spty-section-title span {
+    color: var(--spty-green);
+}
+
+.spty-section-header {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 24px 0;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Buttons */
+.spty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--spty-green);
+    color: #000;
+    border: none;
+    border-radius: 500px;
+    padding: 12px 24px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.spty-btn:hover {
+    transform: scale(1.03);
+    background-color: var(--spty-green-glow);
+    box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
+}
+
+.spty-btn--outline {
+    background-color: transparent;
+    color: var(--spty-text);
+    border: 1px solid var(--spty-text-muted);
+}
+
+.spty-btn--outline:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: var(--spty-text);
+    border-color: var(--spty-text);
+    transform: scale(1.03);
+    box-shadow: none;
+}
+
+.spty-btn--small {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+}
+
+
+/* ------------------------------------------
+   OPENING SECTION
+   ------------------------------------------ */
+.spty-opening {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 80vh;
+}
+
+.spty-opening__playlist-header {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.spty-opening__playlist-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 6px;
+    object-fit: cover;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    background: linear-gradient(135deg, #2b2b2b, #111111);
+    border: 1px solid var(--spty-border);
+}
+
+.spty-opening__playlist-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.spty-opening__badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--spty-text);
+    margin-bottom: 4px;
+}
+
+.spty-opening__playlist-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+}
+
+.spty-opening__playlist-meta {
+    font-size: 0.75rem;
+    color: var(--spty-text-muted);
+    font-weight: 500;
+}
+
+.spty-opening__playlist-meta span {
+    color: var(--spty-text);
+    font-weight: 700;
+}
+
+.spty-opening__controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.spty-opening__play-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--spty-green);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(29, 185, 84, 0.2);
+}
+
+.spty-opening__icon-btn {
+    background: none;
+    border: none;
+    color: var(--spty-text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.spty-opening__icon-btn:hover {
+    color: var(--spty-text);
+}
+
+.spty-opening__quote-card {
+    background-color: var(--spty-card);
+    border-radius: 12px;
+    padding: 24px 24px 24px 56px;
+    border: 1px solid var(--spty-border);
+    margin-bottom: 24px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.spty-opening__quote-card i {
+    color: var(--spty-green);
+    font-size: 1.5rem;
+    opacity: 0.3;
+    position: absolute;
+    top: 24px;
+    left: 20px;
+}
+
+.spty-opening__ayat {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+    text-align: right;
+    font-weight: 500;
+}
+
+.spty-opening__terjemah {
+    font-size: 0.85rem;
+    color: var(--spty-text-muted);
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+    font-style: italic;
+}
+
+.spty-opening__source {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--spty-green);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.spty-opening__body {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--spty-text-muted);
+    margin: 0;
+}
+
+
+/* ------------------------------------------
+   MEMPELAI SECTION (Artist Profile UI)
+   ------------------------------------------ */
+.spty-couple__banner {
+    position: relative;
+    width: calc(100% + 48px);
+    margin-left: -24px;
+    margin-top: -64px;
+    height: 220px;
+    background-size: cover;
+    background-position: center;
+    border-bottom: 1px solid var(--spty-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px;
+}
+
+.spty-couple__banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 20%, rgba(18, 18, 18, 0.8) 70%, var(--spty-black) 100%);
+    z-index: 1;
+}
+
+.spty-couple__banner-info {
+    position: relative;
+    z-index: 2;
+}
+
+.spty-couple__verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--spty-text);
+    background-color: rgba(0,0,0,0.4);
+    padding: 4px 10px;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.15);
+    margin-bottom: 10px;
+}
+
+.spty-couple__verified i {
+    color: #3d91ff;
+    font-size: 0.8rem;
+}
+
+.spty-couple__monthly-listeners {
+    font-size: 0.75rem;
+    color: var(--spty-text-muted);
+    font-weight: 500;
+    margin: 0;
+}
+
+.spty-couple__featured-header {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 32px 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.spty-artists-list {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.spty-artist-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background-color: var(--spty-card);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--spty-border);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.spty-artist-card:hover {
+    background-color: var(--spty-card-hover);
+    transform: scale(1.01);
+}
+
+.spty-artist-card__photo-wrap {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--spty-border);
+    background-color: var(--spty-black);
+}
+
+.spty-artist-card__monogram {
+    width: 100%;
+    height: 100%;
+    background-color: #282828;
+    color: var(--spty-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.25rem;
+    font-weight: 800;
+}
+
+.spty-artist-card__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.spty-artist-card__info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.spty-artist-card__role {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--spty-green);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+}
+
+.spty-artist-card__name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    color: var(--spty-text);
+}
+
+.spty-artist-card__parents {
+    font-size: 0.75rem;
+    color: var(--spty-text-muted);
+    line-height: 1.4;
+    margin: 0 0 8px 0;
+}
+
+.spty-artist-card__ig {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--spty-text-muted);
+    font-size: 0.75rem;
+    text-decoration: none;
+    font-weight: 600;
+    background-color: rgba(255,255,255,0.05);
+    padding: 4px 10px;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.spty-artist-card__ig:hover {
+    color: var(--spty-green);
+    background-color: rgba(29, 185, 84, 0.1);
+    border-color: rgba(29, 185, 84, 0.2);
+}
+
+
+/* ------------------------------------------
+   COUNTDOWN TIMER (Visualizer Style)
+   ------------------------------------------ */
+.spty-countdown {
+    background-color: var(--spty-card);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--spty-border);
+    margin-bottom: 28px;
+}
+
+.spty-countdown__visualizer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 24px;
+    margin-bottom: 16px;
+}
+
+.spty-countdown__bar {
+    width: 3px;
+    background-color: var(--spty-green);
+    border-radius: 10px;
+    animation: sptyBounceVisualizer 1.2s ease-in-out infinite;
+}
+
+.spty-countdown__grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+}
+
+.spty-countdown__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20%;
+}
+
+.spty-countdown__val {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--spty-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.spty-countdown__label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    color: var(--spty-text-muted);
+    font-weight: 700;
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+}
+
+.spty-countdown__colon {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--spty-green);
+    opacity: 0.7;
+    margin-bottom: 20px;
+}
+
+
+/* ------------------------------------------
+   ACARA SECTION (Tour Dates UI)
+   ------------------------------------------ */
+.spty-tour {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.spty-tour-card {
+    display: flex;
+    background-color: var(--spty-card);
+    border-radius: 10px;
+    border: 1px solid var(--spty-border);
+    overflow: hidden;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.spty-tour-card:hover {
+    background-color: var(--spty-card-hover);
+    transform: translateY(-2px);
+}
+
+.spty-tour-card__date-badge {
+    width: 80px;
+    background-color: rgba(255,255,255,0.03);
+    border-right: 1px solid var(--spty-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.spty-tour-card__month {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--spty-green);
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.spty-tour-card__day-num {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--spty-text);
+    line-height: 1;
+}
+
+.spty-tour-card__day-name {
+    font-size: 0.6rem;
+    color: var(--spty-text-muted);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.spty-tour-card__details {
+    flex-grow: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.spty-tour-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    color: var(--spty-text);
+}
+
+.spty-tour-card__time {
+    font-size: 0.75rem;
+    color: var(--spty-text-muted);
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.spty-tour-card__time i {
+    color: var(--spty-green);
+}
+
+.spty-tour-card__venue {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--spty-text);
+    margin: 0 0 4px 0;
+}
+
+.spty-tour-card__address {
+    font-size: 0.75rem;
+    color: var(--spty-text-muted);
+    margin: 0 0 14px 0;
+    line-height: 1.4;
+}
+
+.spty-tour-card__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ------------------------------------------
+   LIVE STREAMING SECTION
+   ------------------------------------------ */
+.spty-stream {
+    background-color: var(--spty-card);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--spty-border);
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.spty-stream__icon {
+    font-size: 2rem;
+    color: var(--spty-green);
+    margin-bottom: 16px;
+    display: inline-block;
+}
+
+.spty-stream__title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+}
+
+.spty-stream__desc {
+    font-size: 0.85rem;
+    color: var(--spty-text-muted);
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+.spty-stream__btns {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 260px;
+    margin: 0 auto;
+}
+
+
+/* ------------------------------------------
+   KISAH CINTA SECTION (Spotify Lyrics UI)
+   ------------------------------------------ */
+.spty-lyrics {
+    background: linear-gradient(180deg, #2b4a3f 0%, var(--spty-black) 100%);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.spty-lyrics__watermark {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.spty-lyrics__watermark i {
+    font-size: 0.85rem;
+}
+
+.spty-lyrics__list {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.spty-lyrics__line {
+    cursor: pointer;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.spty-lyrics__line-date {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: color 0.3s;
+}
+
+.spty-lyrics__line-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.3);
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+    transition: color 0.3s;
+}
+
+.spty-lyrics__line-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.3);
+    margin: 0;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+/* Lyrics Active State */
+.spty-lyrics__line.is-active .spty-lyrics__line-date {
+    color: var(--spty-green);
+}
+
+.spty-lyrics__line.is-active .spty-lyrics__line-title {
+    color: var(--spty-text);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.spty-lyrics__line.is-active .spty-lyrics__line-text {
+    color: var(--spty-text);
+}
+
+.spty-lyrics__line:hover .spty-lyrics__line-title {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.spty-lyrics__line:hover .spty-lyrics__line-text {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+
+/* ------------------------------------------
+   GALERI SECTION (Popular Releases UI)
+   ------------------------------------------ */
+.spty-gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.spty-gallery__item {
+    background-color: var(--spty-card);
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid var(--spty-border);
+    transition: transform 0.2s, background-color 0.2s;
+    cursor: pointer;
+}
+
+.spty-gallery__item:hover {
+    background-color: var(--spty-card-hover);
+    transform: translateY(-2px);
+}
+
+.spty-gallery__img-wrap {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    background-color: var(--spty-black);
+    border: 1px solid var(--spty-border);
+}
+
+.spty-gallery__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.spty-gallery__item:hover .spty-gallery__img {
+    transform: scale(1.05);
+}
+
+.spty-gallery__caption {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--spty-text);
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spty-gallery__type {
+    font-size: 0.65rem;
+    color: var(--spty-text-muted);
+    font-weight: 500;
+    margin: 0;
+}
+
+
+/* ------------------------------------------
+   HADIAH SECTION (Merchandise / Tip Jar UI)
+   ------------------------------------------ */
+.spty-gift__desc {
+    font-size: 0.85rem;
+    color: var(--spty-text-muted);
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.spty-gift__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.spty-gift-card {
+    background-color: var(--spty-card);
+    border-radius: 10px;
+    border: 1px solid var(--spty-border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.spty-gift-card__watermark {
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+    font-size: 6rem;
+    color: rgba(255,255,255,0.02);
+    transform: rotate(-15deg);
+    pointer-events: none;
+}
+
+.spty-gift-card__bank {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--spty-green);
+    margin: 0 0 8px 0;
+}
+
+.spty-gift-card__number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--spty-text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+    margin: 0 0 4px 0;
+}
+
+.spty-gift-card__holder {
+    font-size: 0.8rem;
+    color: var(--spty-text-muted);
+    margin: 0 0 16px 0;
+}
+
+.spty-gift-card__copy-btn {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: rgba(255,255,255,0.05);
+    color: var(--spty-text);
+    border: 1px solid var(--spty-border);
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.spty-gift-card__copy-btn:hover {
+    background-color: var(--spty-green);
+    color: #000;
+    border-color: var(--spty-green);
+}
+
+
+/* ------------------------------------------
+   RSVP & WISHES SECTION (Collaborative Playlist)
+   ------------------------------------------ */
+.spty-form {
+    background-color: var(--spty-card);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--spty-border);
+    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.spty-input {
+    width: 100%;
+    background-color: #252525;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 12px 16px;
+    color: var(--spty-text);
+    font-family: var(--spty-font);
+    font-size: 0.85rem;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.spty-input::placeholder {
+    color: var(--spty-text-muted);
+}
+
+.spty-input:focus {
+    outline: none;
+    border-color: var(--spty-green);
+    background-color: #2c2c2c;
+}
+
+.spty-input[readonly] {
+    background-color: #1a1a1a;
+    border-color: var(--spty-border);
+    color: var(--spty-text-muted);
+    cursor: not-allowed;
+}
+
+.spty-radio-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.spty-radio-btn {
+    position: relative;
+    cursor: pointer;
+}
+
+.spty-radio-btn input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.spty-radio-btn__label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #252525;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 10px;
+    color: var(--spty-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.spty-radio-btn input:checked + .spty-radio-btn__label {
+    background-color: rgba(29, 185, 84, 0.1);
+    border-color: var(--spty-green);
+    color: var(--spty-green);
+}
+
+.spty-guest-count-label {
+    font-size: 0.75rem;
+    color: var(--spty-text-muted);
+    font-weight: 700;
+    margin-bottom: -8px;
+}
+
+.spty-success-box {
+    background-color: rgba(29, 185, 84, 0.1);
+    border: 1px solid rgba(29, 185, 84, 0.2);
+    border-radius: 8px;
+    padding: 16px;
+    color: var(--spty-green-glow);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+/* Unified Wishes List (Tracks View) */
+.spty-playlist {
+    display: flex;
+    flex-direction: column;
+}
+
+.spty-playlist__header {
+    display: flex;
+    border-bottom: 1px solid var(--spty-border);
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--spty-text-muted);
+    letter-spacing: 0.05em;
+}
+
+.spty-playlist__col-num { width: 30px; text-align: center; }
+.spty-playlist__col-title { flex-grow: 1; padding-left: 10px; }
+.spty-playlist__col-status { width: 80px; text-align: right; }
+
+.spty-playlist__scrollable {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 4px;
+}
+
+/* Custom scrollbar for wishes playlist */
+.spty-playlist__scrollable::-webkit-scrollbar {
+    width: 4px;
+}
+
+.spty-playlist__scrollable::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.spty-playlist__scrollable::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 2px;
+}
+
+.spty-playlist__scrollable::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.spty-track {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.spty-track:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.spty-track__num {
+    width: 30px;
+    font-size: 0.8rem;
+    color: var(--spty-text-muted);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spty-track:hover .spty-track__num-val {
+    display: none;
+}
+
+.spty-track__play-btn {
+    display: none;
+    color: var(--spty-green);
+    font-size: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.spty-track:hover .spty-track__play-btn {
+    display: block;
+}
+
+.spty-track__details {
+    flex-grow: 1;
+    padding-left: 10px;
+    min-width: 0; /* allows text truncation */
+}
+
+.spty-track__sender {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--spty-text);
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spty-track__message {
+    font-size: 0.75rem;
+    color: var(--spty-text-muted);
+    margin: 0;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.spty-track__status {
+    width: 80px;
+    text-align: right;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.spty-track__status--hadir {
+    color: var(--spty-green);
+}
+
+.spty-track__status--tidak {
+    color: #ff4d4d;
+}
+
+.spty-track__status--ragu {
+    color: #ffc107;
+}
+
+.spty-track__status--none {
+    color: var(--spty-text-muted);
+    font-style: italic;
+    text-transform: none;
+    font-weight: 500;
+}
+
+
+/* ------------------------------------------
+   CLOSING SECTION & FOOTER (Watermark)
+   ------------------------------------------ */
+.spty-closing {
+    text-align: center;
+    padding: 80px 24px;
+}
+
+.spty-closing__title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--spty-text);
+    margin-bottom: 24px;
+}
+
+.spty-closing__text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--spty-text-muted);
+    margin-bottom: 40px;
+}
+
+.spty-closing__signature-header {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--spty-green);
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+}
+
+.spty-closing__signatures {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: var(--spty-text);
+    font-weight: 600;
+    margin-bottom: 48px;
+}
+
+.spty-closing__watermark {
+    font-size: 0.75rem;
+    color: var(--spty-text-muted);
+    margin-top: 40px;
+    padding-bottom: 20px;
+}
+
+.spty-closing__watermark span {
+    color: var(--spty-green);
+    font-weight: 700;
+}
+
+
+/* ------------------------------------------
+   PERSISTENT NOW PLAYING CONTROL BAR
+   ------------------------------------------ */
+.spty-player {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 500px;
+    height: 72px;
+    background-color: #212121;
+    border-top: 1px solid var(--spty-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 90;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.5);
+    border-left: 1px solid var(--spty-border);
+    border-right: 1px solid var(--spty-border);
+    animation: sptyPlayerSlideUp 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+.spty-player__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0; /* enables truncation */
+    flex: 1;
+}
+
+.spty-player__art-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: var(--spty-dark);
+    border: 1px solid var(--spty-border);
+}
+
+.spty-player__art {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.spty-player__monogram-art {
+    width: 100%;
+    height: 100%;
+    background-color: #282828;
+    color: var(--spty-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.spty-player__info {
+    min-width: 0;
+}
+
+.spty-player__title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--spty-text);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spty-player__artist {
+    font-size: 0.7rem;
+    color: var(--spty-text-muted);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spty-player__btn {
+    background: none;
+    border: none;
+    color: var(--spty-text);
+    font-size: 1.15rem;
+    cursor: pointer;
+    padding: 6px;
+    transition: color 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spty-player__btn:active {
+    transform: scale(0.95);
+}
+
+.spty-player__btn.active {
+    color: var(--spty-green);
+}
+
+.spty-player__btn--play {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--spty-text);
+    color: #000;
+    font-size: 1rem;
+    padding: 0;
+}
+
+.spty-player__btn--play.is-playing {
+    padding: 0;
+}
+
+.spty-player__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Volume bar or Seek slider visual */
+.spty-player__seek-container {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #5e5e5e;
+    cursor: pointer;
+}
+
+.spty-player__seek-progress {
+    height: 100%;
+    background-color: var(--spty-green);
+    position: relative;
+    transition: width 0.1s linear;
+}
+
+.spty-player__seek-handle {
+    position: absolute;
+    right: -4px;
+    top: -2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--spty-text);
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    display: none;
+}
+
+.spty-player__seek-container:hover .spty-player__seek-handle {
+    display: block;
+}
+
+.spty-player__seek-container:hover {
+    height: 4px;
+    top: -3px;
+}
+
+/* Responsive adjust */
+@media (max-width: 480px) {
+    .spty-player__btn--prev,
+    .spty-player__btn--next {
+        display: none;
+    }
+    .spty-player__seek-handle {
+        display: block !important;
+        width: 6px;
+        height: 6px;
+        top: -1px;
+    }
+}

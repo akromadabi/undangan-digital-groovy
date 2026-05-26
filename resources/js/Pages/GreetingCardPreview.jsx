@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Head } from '@inertiajs/react';
 
 /* ─────────────────────────────────────────────────────────
@@ -75,20 +75,34 @@ function StillWithYouFull({ card }) {
     const canvasRef = useRef(null);
     const audioRef = useRef(null);
     
-    // Gate state: 'closed' | 'countdown' | 'opened'
+    // Gate state: 'closed' | 'prologue' | 'countdown' | 'opened'
     const [gateState, setGateState] = useState('closed');
+    const [prologueIdx, setPrologueIdx] = useState(0);
     const [countdownVal, setCountdownVal] = useState(3);
     const [countdownGreet, setCountdownGreet] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
     
     // Wishes Float State
     const [floatingItems, setFloatingItems] = useState([]);
+
+    const prologueTexts = [
+        "Di setiap detik waktu yang berputar...",
+        "Ada kisah indah yang senantiasa menetap...",
+        "Mari mulai hitung mundur... ❤️"
+    ];
     
     const typeGreetingText = {
         anniversary: `Happy Anniversary\n${card.recipient_name} my love 💗`,
         birthday:    `Happy Birthday\n${card.recipient_name} 🎂`,
         graduation:  `Selamat Wisuda\n${card.recipient_name} 🎓`,
         wedding:     `Selamat Menikah\n${card.recipient_name} 💍`,
+    };
+
+    const typeTitleText = {
+        anniversary: "Happy Anniversary",
+        birthday:    "Happy Birthday",
+        graduation:  "Selamat Wisuda",
+        wedding:     "Selamat Menikah",
     };
     
     const colors = [
@@ -280,12 +294,33 @@ function StillWithYouFull({ card }) {
             fireworks.push(new Rocket(startX, startY, tx, ty, color));
         };
 
-        // Tap/click handler
-        const handlePointer = (e) => {
-            if (e.target.closest('button')) return;
+        // Drag and click rocket launcher
+        let isPointerDown = false;
+        let lastLaunch = 0;
+
+        const handlePointerDown = (e) => {
+            if (e.target.closest('button') || e.target.closest('.spty-float-item')) return;
+            isPointerDown = true;
             launchRocket(e.clientX, e.clientY);
         };
-        window.addEventListener('pointerdown', handlePointer);
+
+        const handlePointerMove = (e) => {
+            if (!isPointerDown) return;
+            const now = Date.now();
+            if (now - lastLaunch < 250) return; // limit to 4 launches per second during drag
+            lastLaunch = now;
+            if (e.target.closest('button') || e.target.closest('.spty-float-item')) return;
+            launchRocket(e.clientX, e.clientY);
+        };
+
+        const handlePointerUp = () => {
+            isPointerDown = false;
+        };
+
+        window.addEventListener('pointerdown', handlePointerDown);
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointercancel', handlePointerUp);
 
         // Simulation ticker loop
         const loop = () => {
@@ -332,7 +367,10 @@ function StillWithYouFull({ card }) {
             cancelAnimationFrame(animId);
             clearInterval(autoLaunch);
             window.removeEventListener('resize', resize);
-            window.removeEventListener('pointerdown', handlePointer);
+            window.removeEventListener('pointerdown', handlePointerDown);
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('pointercancel', handlePointerUp);
         };
     }, [gateState, isMuted]);
 
@@ -343,8 +381,9 @@ function StillWithYouFull({ card }) {
         const photos = (card.photos || []).filter(Boolean);
 
         const spawnItem = () => {
-            const isPhoto = photos.length > 0 && Math.random() < 0.38;
-            const left = 10 + Math.random() * 80;
+            const isPhoto = photos.length > 0 && Math.random() < 0.48;
+            // Keep text items more centered so they don't get cut off on the screen edges
+            const left = isPhoto ? (15 + Math.random() * 70) : (22 + Math.random() * 56);
             const duration = 8 + Math.random() * 5;
             const id = Math.random().toString();
             const rotX = (Math.random() - 0.5) * 20;
@@ -353,10 +392,12 @@ function StillWithYouFull({ card }) {
 
             let content = '';
             let shape = '';
+            let size = null;
 
             if (isPhoto) {
                 content = photos[Math.floor(Math.random() * photos.length)];
                 shape = Math.random() < 0.5 ? 'shape-circle' : 'shape-heart';
+                size = Math.floor(65 + Math.random() * 95); // random size from 65px to 160px
             } else if (messages.length > 0) {
                 content = messages[Math.floor(Math.random() * messages.length)];
             } else {
@@ -372,7 +413,8 @@ function StillWithYouFull({ card }) {
                 rotX,
                 rotY,
                 rotZ,
-                shape
+                shape,
+                size
             };
 
             setFloatingItems(prev => [...prev, newItem]);
@@ -384,11 +426,13 @@ function StillWithYouFull({ card }) {
         };
 
         // Initial spawn
-        setTimeout(spawnItem, 600);
-        setTimeout(spawnItem, 1300);
-        setTimeout(spawnItem, 2100);
+        spawnItem();
+        spawnItem();
+        spawnItem();
+        setTimeout(spawnItem, 800);
+        setTimeout(spawnItem, 1600);
 
-        const engine = setInterval(spawnItem, 3200);
+        const engine = setInterval(spawnItem, 2500);
         return () => clearInterval(engine);
     }, [gateState, card.messages, card.photos]);
 
@@ -404,38 +448,59 @@ function StillWithYouFull({ card }) {
             console.warn("Fullscreen request blocked or failed:", e);
         }
 
-        setGateState('countdown');
         if (audioRef.current) {
             audioRef.current.play().then(() => setIsMuted(false)).catch(() => {});
         }
 
-        // Run countdown sequence
-        let val = 3;
-        const timer = setInterval(() => {
-            val--;
-            if (val > 0) {
-                setCountdownVal(val);
-            } else if (val === 0) {
-                setCountdownGreet(true);
-                // Trigger massive synch explosions!
-                setTimeout(() => {
-                    setGateState('opened');
-                    const w = window.innerWidth;
-                    const h = window.innerHeight;
-                    if (window.__triggerExplosion) {
-                        window.__triggerExplosion(w * 0.25, h * 0.35, colors[0]);
-                        window.__triggerExplosion(w * 0.75, h * 0.35, colors[1]);
-                        setTimeout(() => {
-                            window.__triggerExplosion(w * 0.5, h * 0.22, colors[2]);
-                            window.__triggerExplosion(w * 0.5, h * 0.44, colors[3]);
-                        }, 250);
-                    }
-                }, 100);
-            } else {
-                clearInterval(timer);
-            }
-        }, 1000);
+        setGateState('prologue');
+        setPrologueIdx(0);
     };
+
+    // Effect to cycle prologue texts and run the countdown
+    useEffect(() => {
+        if (gateState !== 'prologue') return;
+        
+        const timer = setInterval(() => {
+            setPrologueIdx(prev => {
+                if (prev < prologueTexts.length - 1) {
+                    return prev + 1;
+                } else {
+                    clearInterval(timer);
+                    // Start countdown sequence
+                    setGateState('countdown');
+                    setCountdownVal(3);
+                    let val = 3;
+                    const cTimer = setInterval(() => {
+                        val--;
+                        if (val > 0) {
+                            setCountdownVal(val);
+                        } else if (val === 0) {
+                            setCountdownGreet(true);
+                            // Keep greeting text for 1.5s before opening fully and burst fireworks
+                            setTimeout(() => {
+                                setGateState('opened');
+                                const w = window.innerWidth;
+                                const h = window.innerHeight;
+                                if (window.__triggerExplosion) {
+                                    window.__triggerExplosion(w * 0.25, h * 0.35, colors[0]);
+                                    window.__triggerExplosion(w * 0.75, h * 0.35, colors[1]);
+                                    setTimeout(() => {
+                                        window.__triggerExplosion(w * 0.5, h * 0.22, colors[2]);
+                                        window.__triggerExplosion(w * 0.5, h * 0.44, colors[3]);
+                                    }, 250);
+                                }
+                            }, 1500);
+                        } else {
+                            clearInterval(cTimer);
+                        }
+                    }, 1000);
+                    return prev;
+                }
+            });
+        }, 2000);
+        
+        return () => clearInterval(timer);
+    }, [gateState]);
 
     const toggleMute = () => {
         if (!audioRef.current) return;
@@ -448,7 +513,7 @@ function StillWithYouFull({ card }) {
     };
 
     return (
-        <div className="relative w-full h-screen overflow-hidden select-none" style={{ background: '#09090b', fontFamily: "'Outfit', sans-serif" }}>
+        <div className="relative w-full h-screen overflow-hidden select-none" style={{ background: '#09090b', fontFamily: "'Outfit', sans-serif", touchAction: 'none' }}>
             <audio ref={audioRef} src="/stillwithyou/music/music.mp3" loop />
             
             {/* Ambient Background Glow */}
@@ -463,7 +528,7 @@ function StillWithYouFull({ card }) {
             {/* Wishes Floating Container */}
             <div className="absolute inset-0 z-20 pointer-events-none" style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}>
                 {floatingItems.map(item => (
-                    <div key={item.id} className="absolute pointer-events-none" style={{
+                    <div key={item.id} className="absolute spty-float-item" style={{
                         left: `${item.left}%`,
                         bottom: '-120px',
                         animation: `floatUp ${item.duration}s linear forwards`,
@@ -471,33 +536,48 @@ function StillWithYouFull({ card }) {
                         willChange: 'transform, opacity',
                     }}>
                         {item.type === 'text' ? (
-                            <div className="text-center" style={{
+                            <div className="spty-float-rotator" style={{
                                 transform: `rotateX(${item.rotX}deg) rotateY(${item.rotY}deg) rotateZ(${item.rotZ}deg)`,
-                                fontFamily: "'Dancing Script', cursive",
-                                fontSize: 'clamp(1.1rem, 4vw, 1.8rem)',
-                                color: '#ffb8d2',
-                                padding: '0.6rem 1.4rem',
-                                background: 'rgba(15, 10, 15, 0.55)',
-                                backdropFilter: 'blur(8px)',
-                                WebkitBackdropFilter: 'blur(8px)',
-                                border: '1px solid rgba(255, 101, 163, 0.35)',
-                                borderRadius: '30px',
-                                boxShadow: '0 0 15px rgba(255, 101, 163, 0.2), inset 0 0 10px rgba(255, 101, 163, 0.1)',
-                                textShadow: '0 0 8px rgba(255, 101, 163, 0.6)',
-                                whiteSpace: 'nowrap',
+                                transformStyle: 'preserve-3d',
                             }}>
-                                {item.content}
+                                <div className="spty-float-scaler text-center" style={{
+                                    fontFamily: "'Dancing Script', cursive",
+                                    fontSize: 'clamp(1.1rem, 4vw, 1.8rem)',
+                                    color: '#ffb8d2',
+                                    padding: '0.6rem 1.2rem',
+                                    background: 'rgba(15, 10, 15, 0.55)',
+                                    backdropFilter: 'blur(8px)',
+                                    WebkitBackdropFilter: 'blur(8px)',
+                                    border: '1px solid rgba(255, 101, 163, 0.35)',
+                                    borderRadius: '20px',
+                                    boxShadow: '0 0 15px rgba(255, 101, 163, 0.2), inset 0 0 10px rgba(255, 101, 163, 0.1)',
+                                    textShadow: '0 0 8px rgba(255, 101, 163, 0.6)',
+                                    width: item.content.length > 40 ? '280px' : item.content.length > 20 ? '200px' : 'max-content',
+                                    minWidth: item.content.length > 20 ? '200px' : '120px',
+                                    maxWidth: '280px',
+                                    whiteSpace: 'normal',
+                                    wordBreak: 'break-word',
+                                    lineHeight: '1.5',
+                                }}>
+                                    {item.content}
+                                </div>
                             </div>
                         ) : (
-                            <img src={item.content} className={`block ${item.shape === 'shape-circle' ? 'rounded-full' : 'shape-heart'}`} style={{
+                            <div className="spty-float-rotator" style={{
                                 transform: `rotateX(${item.rotX}deg) rotateY(${item.rotY}deg) rotateZ(${item.rotZ}deg)`,
-                                width: 'clamp(70px, 15vw, 110px)',
-                                height: 'clamp(70px, 15vw, 110px)',
-                                objectFit: 'cover',
-                                border: '2px solid rgba(255, 101, 163, 0.5)',
-                                boxShadow: '0 0 20px rgba(255, 101, 163, 0.4)',
-                                animation: 'pulseGlow 2s ease-in-out infinite alternate',
-                            }} alt="" />
+                                transformStyle: 'preserve-3d',
+                            }}>
+                                <div className="spty-float-scaler">
+                                    <img src={item.content} className={`block ${item.shape === 'shape-circle' ? 'rounded-full' : 'shape-heart'}`} style={{
+                                        width: `${item.size}px`,
+                                        height: `${item.size}px`,
+                                        objectFit: 'cover',
+                                        border: '2px solid rgba(255, 101, 163, 0.5)',
+                                        boxShadow: '0 0 20px rgba(255, 101, 163, 0.4)',
+                                        animation: 'pulseGlow 2s ease-in-out infinite alternate',
+                                    }} alt="" />
+                                </div>
+                            </div>
                         )}
                     </div>
                 ))}
@@ -541,15 +621,24 @@ function StillWithYouFull({ card }) {
                 </div>
             )}
 
+            {/* Prologue Overlay Screen */}
+            {gateState === 'prologue' && (
+                <div className="fixed inset-0 z-45 flex items-center justify-center bg-[#050508]/95 transition-opacity duration-700">
+                    <div key={prologueIdx} style={{ fontFamily: "'Dancing Script', cursive", textShadow: '0 0 15px rgba(255, 101, 163, 0.7)' }} className="text-[#ff65a3] text-3xl sm:text-4xl text-center px-6 leading-relaxed max-w-lg animate-fadeInOut">
+                        {prologueTexts[prologueIdx]}
+                    </div>
+                </div>
+            )}
+
             {/* Countdown Overlay Screen */}
             {gateState === 'countdown' && (
                 <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#050508]/90 transition-opacity duration-500">
                     {!countdownGreet ? (
-                        <div style={{ fontFamily: "'Fredoka', sans-serif" }} className="text-[#ff65a3] font-bold drop-shadow-[0_0_30px_rgba(255,101,163,0.8)] animate-countdownScale text-9xl">
+                        <div key={countdownVal} style={{ fontFamily: "'Fredoka', sans-serif" }} className="text-[#ff65a3] font-bold drop-shadow-[0_0_30px_rgba(255,101,163,0.8)] animate-countdownScale text-9xl">
                             {countdownVal}
                         </div>
                     ) : (
-                        <div style={{ fontFamily: "'Dancing Script', cursive", textShadow: '0 0 20px rgba(255,101,163,0.9)' }} className="text-center text-[#ff65a3] font-bold leading-normal animate-countdownScale text-4xl sm:text-6xl max-w-lg px-6 whitespace-pre-line">
+                        <div style={{ fontFamily: "'Dancing Script', cursive", textShadow: '0 0 20px rgba(255, 101, 163, 0.9)' }} className="text-center text-[#ff65a3] font-bold leading-normal animate-countdownScale text-[clamp(1.8rem,6.5vw,3.5rem)] max-w-lg px-6 whitespace-pre-line">
                             {typeGreetingText[card.type] || `Selamat Spesial\nUntuk ${card.recipient_name} 💗`}
                         </div>
                     )}
@@ -563,8 +652,8 @@ function StillWithYouFull({ card }) {
                         <h2 style={{
                             fontFamily: "'Dancing Script', cursive",
                             textShadow: '0 0 15px rgba(255, 101, 163, 0.9), 0 0 30px rgba(255, 101, 163, 0.5), 0 0 45px rgba(255, 101, 163, 0.3)'
-                        }} className="text-5xl sm:text-7xl font-bold text-white leading-tight mb-4 whitespace-pre-line">
-                            {card.title}
+                        }} className="text-[clamp(2.2rem,7.5vw,4.5rem)] font-bold text-white leading-tight mb-4 whitespace-pre-line">
+                            {(!card.title || card.title === "Kartu Ucapan") ? (typeTitleText[card.type] || "Kartu Ucapan") : card.title}
                         </h2>
                         <p style={{ letterSpacing: '4px' }} className="font-light text-xs sm:text-sm uppercase text-white/70 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                             Untuk {card.recipient_name} dari {card.sender_name} 💗
@@ -618,6 +707,32 @@ function StillWithYouFull({ card }) {
                     0%, 100% { transform: rotate(0deg); }
                     50% { transform: rotate(-90deg); }
                 }
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translateY(15px) scale(0.96); filter: blur(5px); }
+                    12%, 88% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+                    100% { opacity: 0; transform: translateY(-15px) scale(1.04); filter: blur(5px); }
+                }
+                .animate-fadeInOut {
+                    animation: fadeInOut 2.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+                }
+                .spty-float-item {
+                    pointer-events: auto;
+                    cursor: pointer;
+                }
+                .spty-float-item:hover {
+                    animation-play-state: paused !important;
+                    z-index: 999;
+                }
+                .spty-float-rotator {
+                    transform-style: preserve-3d;
+                }
+                .spty-float-scaler {
+                    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+                }
+                .spty-float-item:hover .spty-float-scaler,
+                .spty-float-item:active .spty-float-scaler {
+                    transform: scale(1.12) translateZ(30px);
+                }
                 .animate-countdownScale {
                     animation: countdownScale 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
                 }
@@ -653,7 +768,8 @@ function GiftForAnitaFull({ card }) {
     const canvasRef = useRef(null);
     const audioRef = useRef(null);
     
-    const [opened, setOpened] = useState(false);
+    const [scene, setScene] = useState('envelope'); // 'envelope' | 'envelope-opening' | 'letter' | 'letter-folding' | 'book'
+    const opened = true;
     const [isMuted, setIsMuted] = useState(true);
     const [flipped, setFlipped] = useState([]);
     
@@ -720,44 +836,86 @@ function GiftForAnitaFull({ card }) {
         let width = canvas.width = window.innerWidth;
         let height = canvas.height = window.innerHeight;
 
+        const getMatrixText = () => {
+            const recipient = (card.recipient_name || 'Anita').toUpperCase();
+            switch (card.type) {
+                case 'birthday':
+                    return Array.from(`HAPPY BIRTHDAY ${recipient} 🎂 🎉 💫   `);
+                case 'anniversary':
+                    return Array.from(`HAPPY ANNIVERSARY ${recipient} 💖 💑 💍   `);
+                case 'graduation':
+                    return Array.from(`CONGRATULATIONS ${recipient} 🎓 🎉 ✨   `);
+                case 'wedding':
+                    return Array.from(`HAPPY WEDDING ${recipient} 💍 💑 💖   `);
+                default:
+                    return Array.from(`HAPPY SPESIAL FOR ${recipient} 💝 ✨ 💖   `);
+            }
+        };
+        const letters = getMatrixText();
+        const fontSize = 18;
+        let columns = Math.floor(width / 36);
+        let drops = Array(columns).fill(0).map(() => Math.random() * -100);
+        let columnOffsets = Array(columns).fill(0).map(() => Math.floor(Math.random() * letters.length));
+
         const resize = () => {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            columns = Math.floor(width / 14);
+            columns = Math.floor(width / 36);
             drops = Array(columns).fill(0).map(() => Math.random() * -100);
+            columnOffsets = Array(columns).fill(0).map(() => Math.floor(Math.random() * letters.length));
         };
         window.addEventListener('resize', resize);
 
-        const letters = "HAPPY1STANNIVERSARYMYLOVEANITAPRECIUS💖💫✨💍💗".split("");
-        const fontSize = 14;
-        let columns = Math.floor(width / fontSize);
-        let drops = Array(columns).fill(0).map(() => Math.random() * -100);
-
         const draw = () => {
             animId = requestAnimationFrame(draw);
-            ctx.fillStyle = 'rgba(7, 6, 10, 0.08)';
-            ctx.fillRect(0, 0, width, height);
+            ctx.clearRect(0, 0, width, height);
 
             ctx.font = `600 ${fontSize}px 'Fredoka', sans-serif`;
 
             for (let i = 0; i < drops.length; i++) {
-                const char = letters[Math.floor(Math.random() * letters.length)];
-                const hue = 330 + (Math.random() - 0.5) * 20; // Pink variations
-                
-                ctx.fillStyle = `hsla(${hue}, 100%, 75%, 0.85)`;
-                ctx.shadowBlur = 4;
-                ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
-                
-                const x = i * fontSize;
-                const y = drops[i] * fontSize;
+                const x = i * 36;
+                const headGrid = Math.floor(drops[i]);
+                const trailLength = 10;
 
-                ctx.fillText(char, x, y);
+                for (let j = 0; j < trailLength; j++) {
+                    const yGrid = headGrid - j;
+                    if (yGrid < 0) continue;
+                    
+                    const y = yGrid * fontSize;
+                    if (y > height + fontSize) continue;
 
-                if (y > height && Math.random() > 0.985) {
-                    drops[i] = 0;
+                    const charIndex = (yGrid + (columnOffsets[i] || 0)) % letters.length;
+                    const char = letters[charIndex];
+
+                    if (char && char.trim() !== '') {
+                        if (j === 0) {
+                            ctx.globalAlpha = 1.0;
+                            ctx.fillStyle = '#ffffff';
+                            ctx.shadowBlur = 10;
+                            ctx.shadowColor = '#ff4d80';
+                        } else {
+                            const opacity = 1 - (j / trailLength);
+                            ctx.globalAlpha = opacity * 0.85;
+                            const hue = 330 + (Math.random() - 0.5) * 10; // Pink variations
+                            ctx.fillStyle = `hsl(${hue}, 100%, 75%)`;
+                            ctx.shadowBlur = 4;
+                            ctx.shadowColor = `hsl(${hue}, 100%, 65%)`;
+                        }
+                        ctx.fillText(char, x, y);
+                    }
                 }
-                drops[i] += 0.85;
+
+                drops[i] += 0.16; // Slower speed to make it elegant and readable
+
+                if ((headGrid - trailLength) * fontSize > height && Math.random() > 0.98) {
+                    drops[i] = 0;
+                    columnOffsets[i] = Math.floor(Math.random() * letters.length);
+                }
             }
+
+            // Reset canvas states for other potential uses
+            ctx.globalAlpha = 1.0;
+            ctx.shadowBlur = 0;
         };
         draw();
 
@@ -765,18 +923,51 @@ function GiftForAnitaFull({ card }) {
             cancelAnimationFrame(animId);
             window.removeEventListener('resize', resize);
         };
-    }, [opened]);
+    }, [opened, card.recipient_name, card.type]);
 
     // Typewriter dynamic looping effect
     const messages = (card.messages || []).filter(Boolean);
-    const romanticLines = messages.length > 0 ? messages : [
-        "Hai orang ter-istimewa di hatiku... 💗",
-        "Selamat satu tahun kebersamaan kita! ✨",
-        "Setiap detik bersamamu adalah lembaran terindah.",
-        "Dalam senyummu, aku menemukan alasan untuk bahagia. 💕",
-        "Terima kasih telah selalu ada di sisiku, sayang. 👩‍❤️‍👨",
-        "Mari kita tulis ribuan kisah indah lainnya bersama! 📖💫",
-    ];
+    const romanticLines = useMemo(() => {
+        if (messages.length > 0) {
+            const items = [...messages];
+            while (items.length < 4) {
+                items.push(items[items.length - 1] || "With Love ❤️");
+            }
+            return items;
+        }
+        
+        switch (card.type) {
+            case 'birthday':
+                return [
+                    `Selamat ulang tahun untukmu yang paling istimewa dan bersinar... 🎂\nHari ini adalah hari spesial di mana doaku mengalir paling deras untukmu.`,
+                    `Semoga setiap impian dan harapan besarmu terwujud menjadi kenyataan indah. 🌟\nTerima kasih telah selalu menghiasi dunia ini dengan kebaikan dan tawa hangatmu.`,
+                    `Semoga kebahagiaan sejati, kesehatan prima, dan kesuksesan selalu menyertaimu. 💗\nKamu adalah berkah luar biasa yang patut mendapatkan segala kebaikan di dunia.`,
+                    `Selamat hari kelahiran! Mari rayakan hari indahmu ini dengan senyuman terbaik. 🥳🎉\nSemoga hari-harimu ke depan selalu dipenuhi dengan keberkahan dan tawa ceria.`
+                ];
+            case 'graduation':
+                return [
+                    `Selamat atas kelulusan dan pencapaian luar biasamu hari ini! 🎓\nSemua kerja keras, tetesan keringat, dan perjuangan panjangmu kini terbayar dengan sangat indah.`,
+                    `Hari ini menandai awal dari babak baru perjalanan hebat dalam hidupmu. 🌟\nGantungkan mimpimu setinggi langit, dan melangkahlah maju dengan penuh keyakinan.`,
+                    `Kami semua sangat bangga atas dedikasi, ketekunan, dan gelar yang kini berhasil kau raih. 👨‍🎓👩‍🎓\nSemoga ini menjadi batu loncatan menuju masa depan yang cerah.`,
+                    `Semoga ilmu yang didapat membawa berkah dan menuntunmu ke puncak kesuksesan! 🚀🌠\nSelamat bersenang-senang merayakan pencapaian luar biasa ini.`
+                ];
+            case 'wedding':
+                return [
+                    `Selamat menempuh hidup baru dan selamat berbahagia untuk kalian berdua! 💍\nHari ini, dua hati dan dua takdir telah dipersatukan dalam ikatan janji suci yang sakral.`,
+                    `Semoga bahtera rumah tangga yang kalian bangun selalu dipenuhi cinta dan kedamaian. 💖\nSaling melengkapi di kala kurang, dan saling menguatkan di kala menghadapi ujian.`,
+                    `Jadikan setiap hari sebagai lembaran kisah cinta baru yang penuh kasih sayang. 💞\nSaling menghormati, setia menemani, dan berkatalah dengan kelembutan hati.`,
+                    `Selamat menempuh bahtera keluarga baru, semoga sakinah, mawaddah, warahmah. 💑🌸\nSemoga cinta kalian abadi hingga akhir hayat memisahkan.`
+                ];
+            case 'anniversary':
+            default:
+                return [
+                    `Hai orang ter-istimewa yang paling kucintai di dunia ini... 💗\nSelamat hari jadi kebersamaan kita yang penuh dengan warna dan kehangatan.`,
+                    `Setiap detik yang telah kita lalui bersama adalah lembaran terbaik yang sangat kusyukuri. ✨\nTerima kasih telah mengajariku arti kenyamanan dan ketulusan.`,
+                    `Dalam senyuman manis dan tatapan matamu, aku selalu menemukan alasan terbaik untuk bahagia. 💕\nBersamamu, perjalanan hidup ini terasa jauh lebih indah dan bermakna.`,
+                    `Terima kasih telah setia menemani dan selalu ada di sisiku melewati segala musim. 👩‍❤️‍👨\nMari kita rajut dan tulis ribuan kisah cinta indah lainnya bersama selamanya! 📖💫`
+                ];
+        }
+    }, [messages, card.type]);
 
     useEffect(() => {
         if (!opened) return;
@@ -789,16 +980,17 @@ function GiftForAnitaFull({ card }) {
                 setCharIdx(prev => prev - 1);
             }, 30);
         } else {
+            // Slower typing speed (100ms instead of 70ms) to make it more readable
             timer = setTimeout(() => {
                 setTypewriterText(currentMsg.substring(0, charIdx + 1));
                 setCharIdx(prev => prev + 1);
-            }, 70);
+            }, 100);
         }
 
         if (!isDeleting && charIdx === currentMsg.length) {
-            // Wait at the end of text
+            // Wait longer at the end of text (4500ms instead of 3500ms) for better readability
             clearTimeout(timer);
-            timer = setTimeout(() => setIsDeleting(true), 3500);
+            timer = setTimeout(() => setIsDeleting(true), 4500);
         } else if (isDeleting && charIdx === 0) {
             clearTimeout(timer);
             setIsDeleting(false);
@@ -808,7 +1000,16 @@ function GiftForAnitaFull({ card }) {
         return () => clearTimeout(timer);
     }, [opened, charIdx, isDeleting, currentMsgIdx, romanticLines]);
 
-    const handleOpen = () => {
+    const handleOpenEnvelope = () => {
+        setScene('envelope-opening');
+        // Play click transition sound
+        playSynthesizedSound('lift', isMuted);
+        
+        // Start background music!
+        if (audioRef.current) {
+            audioRef.current.play().then(() => setIsMuted(false)).catch(() => {});
+        }
+        
         // Auto enter fullscreen upon user gesture
         try {
             const docEl = document.documentElement;
@@ -819,11 +1020,22 @@ function GiftForAnitaFull({ card }) {
         } catch (e) {
             console.warn("Fullscreen request blocked or failed:", e);
         }
+        
+        // Wait 1.0s for the flap-open & seal-break animations before revealing the letter
+        setTimeout(() => {
+            setScene('letter');
+        }, 1000);
+    };
 
-        setOpened(true);
-        if (audioRef.current) {
-            audioRef.current.play().then(() => setIsMuted(false)).catch(() => {});
-        }
+    const handleOpenBook = () => {
+        setScene('letter-folding');
+        // Play flip transition sound
+        playSynthesizedSound('burst', isMuted);
+        
+        // Wait 800ms for folding animation to resolve before showing the 3D book
+        setTimeout(() => {
+            setScene('book');
+        }, 800);
     };
 
     const toggleMute = () => {
@@ -859,7 +1071,14 @@ function GiftForAnitaFull({ card }) {
         return <div className="page-illustration text-3xl my-2 animate-bounceIllustrate">{placeholderIllustrations[idx % placeholderIllustrations.length]}</div>;
     };
 
-    // Folds structure: 3 pages. Fold 0 (Front: Cover, Back: Page 1), Fold 1 (Front: Page 2, Back: Page 3), Fold 2 (Front: Page 4, Back: Back Cover)
+    const typeTitleText = {
+        anniversary: "Happy Anniversary",
+        birthday:    "Happy Birthday",
+        graduation:  "Selamat Wisuda",
+        wedding:     "Selamat Menikah",
+    };
+
+    // Folds structure: 4 folds (8 pages/faces). Fold 0 (Front: Cover, Back: Page 1), Fold 1 (Front: Page 2, Back: Page 3), Fold 2 (Front: Page 4, Back: Page 5), Fold 3 (Front: Page 6, Back: Back Cover)
     const folds = [
         {
             front: 'cover',
@@ -887,6 +1106,18 @@ function GiftForAnitaFull({ card }) {
                 body: romanticLines[3] || 'Mari kita jaga ikatan romansa murni ini hingga akhir waktu...',
                 illIdx: 3
             },
+            back: {
+                title: 'Growing Together 🌱',
+                body: romanticLines[4] || 'Setiap langkah tumbuh kembang yang kita lalui menjadi saksi kedewasaan cinta kita...',
+                illIdx: 4
+            }
+        },
+        {
+            front: {
+                title: 'Endless Horizons 🌅',
+                body: romanticLines[5] || 'Menatap ufuk masa depan dengan senyuman terindah dan keyakinan bersamamu...',
+                illIdx: 5
+            },
             back: 'back-cover'
         }
     ];
@@ -901,7 +1132,7 @@ function GiftForAnitaFull({ card }) {
             }} />
 
             {/* Rain matrix canvas */}
-            <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10 opacity-30" />
+            <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" />
 
             {/* Ambient floating hearts */}
             {opened && ambientHearts.map(h => (
@@ -930,7 +1161,7 @@ function GiftForAnitaFull({ card }) {
             )}
 
             {/* Typewriter Banner */}
-            <div className={`absolute top-[4%] left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-20 text-center transition-all duration-1000 ${opened ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-[20px] scale-95'}`} style={{
+            <div className={`absolute top-[4%] left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-20 text-center transition-all duration-1000 ${scene === 'book' ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-[20px] scale-95'}`} style={{
                 background: 'rgba(18, 15, 22, 0.55)',
                 border: '1px solid rgba(255, 77, 128, 0.3)',
                 borderRadius: '20px',
@@ -945,10 +1176,148 @@ function GiftForAnitaFull({ card }) {
                 <span className="inline-block w-[2px] h-[1.2em] bg-[#ff4d80] ml-1 align-middle animate-blink" />
             </div>
 
-            {/* Book Display System */}
-            {opened && (
-                <div className="absolute top-[52%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[440px] h-[55vh] max-h-[500px] min-h-[380px] z-10 transition-all duration-1000 scale-100 opacity-100" style={{ perspective: '1500px' }}>
-                    <div className="w-full h-full relative transform-style-3d shadow-[0_30px_60px_rgba(0,0,0,0.6)] rounded-lg">
+            {/* 3D Perspective Workspace Container */}
+            <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none" style={{ perspective: '1500px', transformStyle: 'preserve-3d' }}>
+                
+                {/* Envelope Wrapper */}
+                <div 
+                    className="absolute pointer-events-auto transition-all-3d"
+                    style={{
+                        left: '50%',
+                        top: '50%',
+                        transformStyle: 'preserve-3d',
+                        zIndex: (scene === 'envelope' || scene === 'envelope-opening') ? 40 : 10,
+                        transform: (scene === 'envelope' || scene === 'envelope-opening')
+                            ? 'translate(-50%, -50%) translateY(0) scale(1) translateZ(0)'
+                            : 'translate(-50%, -50%) translateY(240px) scale(0.7) translateZ(-150px) rotateX(15deg)',
+                        opacity: (scene === 'envelope' || scene === 'envelope-opening') ? 1 : 0,
+                        pointerEvents: (scene === 'envelope' || scene === 'envelope-opening') ? 'auto' : 'none'
+                    }}
+                >
+                    {/* The 3D Envelope */}
+                    <div 
+                        onClick={scene === 'envelope' ? handleOpenEnvelope : undefined}
+                        className="relative w-[300px] h-[190px] cursor-pointer rounded-xl bg-gradient-to-br from-[#4c1125] to-[#1e050d] border border-[#ff4d80]/30 flex flex-col items-center justify-center transition-transform hover:scale-105 active:scale-95 duration-300"
+                        style={{
+                            boxShadow: '0 25px 55px rgba(0,0,0,0.7), 0 0 35px rgba(255, 77, 128, 0.2)',
+                            transformStyle: 'preserve-3d',
+                        }}
+                    >
+                        {/* Back Pocket Background (inside envelope) */}
+                        <div className="absolute inset-0 rounded-xl bg-[#2e0915] z-0" />
+
+                        {/* Top Flap (closes over the front) */}
+                        <div className={`absolute top-0 left-0 w-0 h-0 border-t-[90px] border-t-[#3b0d1c] border-x-[150px] border-x-transparent origin-top z-40 transition-all duration-[850ms] ${scene !== 'envelope' ? 'envelope-flap-open' : ''}`} style={{ transformOrigin: 'top' }} />
+
+                        {/* Left Flap */}
+                        <div className="absolute inset-0 border-l-[150px] border-l-[#3b0d1c] border-y-[95px] border-y-transparent z-30 pointer-events-none rounded-l-xl" />
+
+                        {/* Right Flap */}
+                        <div className="absolute inset-0 border-r-[150px] border-r-[#3b0d1c] border-y-[95px] border-y-transparent z-30 pointer-events-none rounded-r-xl" />
+
+                        {/* Bottom Flap */}
+                        <div className="absolute inset-0 border-b-[95px] border-b-[#2f0a17] border-x-[150px] border-x-transparent z-30 pointer-events-none rounded-b-xl" />
+
+                        {/* Wax Seal / Glow Seal */}
+                        <div className={`absolute z-50 flex flex-col items-center justify-center transition-all duration-700 ${scene !== 'envelope' ? 'opacity-0 scale-50 -translate-y-12 rotate-45 pointer-events-none' : ''}`}>
+                            <div className="w-16 h-16 rounded-full bg-[#ff4d80]/15 border border-[#ff4d80]/40 flex items-center justify-center animate-pulseRing absolute" />
+                            <div className="w-16 h-16 rounded-full bg-[#ff4d80] flex items-center justify-center shadow-[0_0_25px_rgba(255,77,128,0.9)] z-10 hover:scale-110 active:scale-90 transition-transform">
+                                <svg viewBox="0 0 24 24" className="w-8 h-8 fill-white animate-heartBeat">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                            </div>
+                            <span className="text-[10px] text-[#ffb8d2] font-bold tracking-widest uppercase mt-4 text-center select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+                                Ketuk Segel 💗
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Love Letter Wrapper */}
+                <div 
+                    className="absolute pointer-events-auto transition-all-3d w-[90vw] max-w-[400px]"
+                    style={{
+                        left: '50%',
+                        top: '50%',
+                        transformStyle: 'preserve-3d',
+                        zIndex: (scene === 'letter' || scene === 'letter-folding') ? 45 : 20,
+                        transform: (scene === 'letter')
+                            ? 'translate(-50%, -50%) translateY(0) scale(1) translateZ(0)'
+                            : (scene === 'envelope' || scene === 'envelope-opening')
+                            ? 'translate(-50%, -50%) translateY(80px) scale(0.65) translateZ(-80px)' // sits slightly inside/below the envelope
+                            : 'translate(-50%, -50%) translateY(-200px) scale(0.15) rotateY(-180deg) rotateZ(-10deg) translateZ(-200px)', // folded/shrunk/flipped
+                        opacity: (scene === 'letter') ? 1 : 0,
+                        pointerEvents: (scene === 'letter') ? 'auto' : 'none'
+                    }}
+                >
+                    <div 
+                        className="w-full rounded-2xl p-6 sm:p-8 flex flex-col justify-between"
+                        style={{
+                            background: '#fffaf0',
+                            backgroundImage: 'linear-gradient(rgba(139, 90, 66, 0.08) 1px, transparent 1px)',
+                            backgroundSize: '100% 24px',
+                            border: '2px solid rgba(255, 77, 128, 0.3)',
+                            boxShadow: '0 25px 55px rgba(0,0,0,0.55), inset 0 0 20px rgba(139, 90, 66, 0.05)',
+                            minHeight: '380px',
+                        }}
+                    >
+                        {/* Header */}
+                        <div className="text-right text-[10px] text-[#8b5a42] font-mono tracking-widest border-b border-[#8b5a42]/20 pb-2 mb-4">
+                            DEDIKASI KHUSUS ✉️
+                        </div>
+
+                        {/* Letter Body */}
+                        <div className="flex-1 flex flex-col justify-center py-4">
+                            <h3 style={{ fontFamily: "'Dancing Script', cursive" }} className="text-2xl sm:text-3xl font-bold text-[#4c1125] mb-4">
+                                Teruntuk {card.recipient_name} tercinta,
+                            </h3>
+                            <p style={{ fontFamily: "'Dancing Script', cursive", lineHeight: '1.8' }} className="text-lg sm:text-xl text-[#3d2218] font-bold">
+                                {card.type === 'birthday' ? (
+                                    `Di hari yang indah ini, saat semesta merayakan hari kelahiranmu, kusembahkan kotak memori kecil ini khusus untukmu. Semoga kebahagiaan dan keberkahan selalu menyertai setiap langkahmu...`
+                                ) : card.type === 'wedding' ? (
+                                    `Selamat menempuh hidup baru. Dua takdir kini telah menyatu dalam janji suci. Semoga pernikahan ini dipenuhi keberkahan, sakinah, mawaddah, dan warahmah selamanya...`
+                                ) : card.type === 'graduation' ? (
+                                    `Selamat atas keberhasilan dan kelulusan hebatmu hari ini. Semua perjuanganmu kini berbuah manis. Semoga ini menjadi awal masa depanmu yang sangat gemilang...`
+                                ) : (
+                                    `Selamat hari jadi kebersamaan kita yang penuh warna. Terima kasih telah selalu menjadi pelipur lara dan pelengkap terindah dalam hidupku. Ini adalah rangkuman kisah kita...`
+                                )}
+                            </p>
+                            <p style={{ fontFamily: "'Dancing Script', cursive" }} className="text-right text-base sm:text-lg text-[#8b5a42] mt-6 font-semibold">
+                                Dari: {card.sender_name} 💖
+                            </p>
+                        </div>
+
+                        {/* Footer Button */}
+                        <div className="border-t border-[#8b5a42]/15 pt-4 mt-4 text-center">
+                            <button 
+                                onClick={handleOpenBook}
+                                className="px-6 py-3 rounded-full text-white text-xs font-semibold tracking-wider uppercase border-none bg-gradient-to-r from-[#ff4d80] to-[#ff66a3] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(255,77,128,0.4)] cursor-pointer"
+                            >
+                                Buka Album Memori 📖
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3D Book Wrapper */}
+                <div 
+                    className="absolute pointer-events-auto transition-all-3d w-[90vw] max-w-[440px] h-[55vh] max-h-[500px] min-h-[380px]"
+                    style={{
+                        left: '50%',
+                        top: '52%', // Visual balance alignment
+                        transformStyle: 'preserve-3d',
+                        zIndex: scene === 'book' ? 50 : 15,
+                        transform: scene === 'book'
+                            ? `translate(${flipped.length === 0 ? '-50%' : flipped.length === folds.length ? '50%' : '0%'}, -50%) scale(1) rotateY(0deg) translateZ(0)`
+                            : (scene === 'letter-folding')
+                            ? 'translate(0%, -50%) scale(0.65) rotateY(90deg) translateZ(-50px)'
+                            : 'translate(-50%, -50%) translateY(100px) scale(0.2) rotateY(180deg) translateZ(-200px)', // hidden far back and flipped
+                        opacity: scene === 'book' ? 1 : 0,
+                        pointerEvents: scene === 'book' ? 'auto' : 'none'
+                    }}
+                >
+                    {/* The 3D Book Layout */}
+                    <div className="w-full h-full relative transform-style-3d shadow-[0_30px_60px_rgba(0,0,0,0.65)] rounded-lg">
                         {folds.map((fold, idx) => {
                             const isFlipped = flipped.includes(idx);
                             const zIndex = folds.length + 2 - idx;
@@ -970,7 +1339,9 @@ function GiftForAnitaFull({ card }) {
                                                 <svg viewBox="0 0 24 24" className="w-16 h-16 fill-[#ff4d80] drop-shadow-[0_0_15px_rgba(255,77,128,0.8)] mx-auto mb-4 animate-pulseBeat">
                                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                                 </svg>
-                                                <h2 style={{ fontFamily: "'Dancing Script', cursive" }} className="text-3xl sm:text-4xl font-bold mb-1">{card.title}</h2>
+                                                <h2 style={{ fontFamily: "'Dancing Script', cursive" }} className="text-3xl sm:text-4xl font-bold mb-1">
+                                                    {(!card.title || card.title === "Kartu Ucapan") ? (typeTitleText[card.type] || "Kartu Ucapan") : card.title}
+                                                </h2>
                                                 <p className="text-[10px] sm:text-xs tracking-[3px] uppercase text-white/60">Our Story Book</p>
                                                 <span className="text-[10px] text-white/30 block mt-8">Ketuk untuk membuka 💗</span>
                                             </div>
@@ -992,7 +1363,7 @@ function GiftForAnitaFull({ card }) {
                                             </div>
                                         )}
                                     </div>
-
+ 
                                     {/* Back Face */}
                                     <div className="absolute inset-0 rounded-lg p-5 sm:p-7 flex flex-col items-center justify-center text-center backface-hidden transform-rotateY-180" style={{
                                         background: fold.back === 'back-cover' ? 'linear-gradient(135deg, #1e050d 0%, #4c1125 100%)' : '#fffaf0',
@@ -1032,6 +1403,7 @@ function GiftForAnitaFull({ card }) {
                             );
                         })}
                     </div>
+
                     {/* Swipe Instructions indicator */}
                     <div className="absolute bottom-[-55px] left-1/2 transform -translate-x-1/2 text-gray-400 text-xs flex items-center gap-2 tracking-widest uppercase opacity-75 font-semibold">
                         <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current animate-swipeHand">
@@ -1040,30 +1412,8 @@ function GiftForAnitaFull({ card }) {
                         <span>Buka lembaran halaman</span>
                     </div>
                 </div>
-            )}
+            </div>
 
-            {/* Opening Overlay Screen */}
-            {!opened && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#060609]/96 transition-opacity duration-700">
-                    <div className="w-full max-w-sm px-6 py-10 rounded-3xl text-center shadow-2xl bg-[#121018]/65 border border-[#ff4d80]/20 backdrop-blur-xl">
-                        <h1 style={{ fontFamily: "'Dancing Script', cursive", textShadow: '0 0 10px rgba(255, 77, 128, 0.8)' }} className="text-4xl font-bold mb-3 text-[#ff4d80]">
-                            Special Gift Box 🎁
-                        </h1>
-                        <p className="text-sm text-gray-400 mb-8 leading-relaxed">
-                            Ada sebuah kotak memori penuh keajaiban khusus yang telah dirangkai untukmu, <span className="text-[#ffb8d2] font-semibold">{card.recipient_name}</span>.
-                        </p>
-                        <button onClick={handleOpen} className="relative w-20 h-20 inline-flex items-center justify-center cursor-pointer outline-none bg-transparent border-none focus:outline-none mb-3" style={{ WebkitTapHighlightColor: 'transparent' }}>
-                            <div className="absolute inset-0 rounded-full animate-pulseRing bg-[#ff4d80]/15" />
-                            <svg viewBox="0 0 24 24" className="w-12 h-12 fill-[#ff4d80] drop-shadow-[0_0_12px_rgba(255,77,128,0.8)] animate-bounceGift">
-                                <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.67C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h16v6z" />
-                            </svg>
-                        </button>
-                        <span style={{ fontFamily: "'Fredoka', sans-serif" }} className="block uppercase text-xs font-semibold tracking-widest mt-2 text-white/90 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">
-                            Buka Hadiah 💗
-                        </span>
-                    </div>
-                </div>
-            )}
 
             {/* Screen Orientation warning lock */}
             {isLandscapeLocked && !dismissWarning && (
@@ -1114,6 +1464,37 @@ function GiftForAnitaFull({ card }) {
                     0%, 100% { transform: rotate(0deg); }
                     50% { transform: rotate(-90deg); }
                 }
+                @keyframes fadeIn {
+                    0% { opacity: 0; transform: scale(0.95) translate(-50%, -48%); }
+                    100% { opacity: 1; transform: scale(1) translate(-50%, -50%); }
+                }
+                @keyframes slideUpLetter {
+                    0% { opacity: 0; transform: translate(-50%, 10vh); filter: blur(5px); }
+                    100% { opacity: 1; transform: translate(-50%, -50%); filter: blur(0); }
+                }
+                .transition-all-3d {
+                    transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1.0s cubic-bezier(0.25, 1, 0.5, 1), z-index 1.2s;
+                }
+                .envelope-flap-open {
+                    transform: rotateX(180deg) !important;
+                    z-index: 5 !important;
+                }
+                @keyframes pulseBeat {
+                    0% { transform: scale(1); }
+                    100% { transform: scale(1.1); }
+                }
+                @keyframes bounceIllustrate {
+                    0% { transform: translateY(0); }
+                    100% { transform: translateY(-8px); }
+                }
+                @keyframes swipeHand {
+                    0%, 100% { transform: translateX(0); }
+                    50% { transform: translateX(8px); }
+                }
+                @keyframes rotatePhone {
+                    0%, 100% { transform: rotate(0deg); }
+                    50% { transform: rotate(-90deg); }
+                }
                 .transform-style-3d {
                     transform-style: preserve-3d;
                 }
@@ -1139,9 +1520,6 @@ function GiftForAnitaFull({ card }) {
                 .animate-rotatePhone {
                     animation: rotatePhone 2s infinite ease-in-out;
                 }
-                .animate-bounceGift {
-                    animation: bounceGift 1.2s infinite ease-in-out;
-                }
                 .polaroid-frame {
                     background: #ffffff;
                     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
@@ -1150,7 +1528,3597 @@ function GiftForAnitaFull({ card }) {
             `}</style>
         </div>
     );
+
 }
+
+
+
+function DetailedRocketSVG({ glowColor = "rgba(34,211,238,0.85)", isIgnited = false }) {
+    return (
+        <svg viewBox="0 0 64 120" style={{ width: '100%', height: '100%' }}>
+            <defs>
+                <linearGradient id="cdNoseGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#f43f5e" />
+                    <stop offset="100%" stopColor="#be123c" />
+                </linearGradient>
+                <linearGradient id="cdBodyGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#f8fafc" />
+                    <stop offset="35%" stopColor="#e2e8f0" />
+                    <stop offset="100%" stopColor="#94a3b8" />
+                </linearGradient>
+                <linearGradient id="cdFinGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#0ea5e9" />
+                    <stop offset="100%" stopColor="#0369a1" />
+                </linearGradient>
+                <linearGradient id="cdNozzleGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#475569" />
+                    <stop offset="100%" stopColor="#1e293b" />
+                </linearGradient>
+                <linearGradient id="cdWindowBg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#0284c7" />
+                    <stop offset="100%" stopColor="#0c4a6e" />
+                </linearGradient>
+                <filter id="cdGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+            </defs>
+            
+            {/* Fin Shadows */}
+            <path d="M20,95 L8,95 C11,85 17,75 22,70 Z" fill="rgba(15,23,42,0.15)" />
+            <path d="M44,95 L56,95 C53,85 47,75 42,70 Z" fill="rgba(15,23,42,0.15)" />
+
+            {/* Side Fin Left */}
+            <path d="M22,70 C16,72 8,85 8,96 C14,97 20,95 22,92 Z" fill="url(#cdFinGradient)" />
+            {/* Side Fin Right */}
+            <path d="M42,70 C48,72 56,85 56,96 C50,97 44,95 42,92 Z" fill="url(#cdFinGradient)" />
+
+            {/* Center Fin (Stabilizer) */}
+            <path d="M30,92 L34,92 L35,102 L29,102 Z" fill="url(#cdNozzleGradient)" />
+
+            {/* Nozzle */}
+            <path d="M26,92 L38,92 L36,99 L28,99 Z" fill="url(#cdNozzleGradient)" />
+
+            {/* Main Rocket Cylinder Body */}
+            <path d="M22,42 L42,42 C43,62 43,80 42,92 L22,92 C21,80 21,62 22,42 Z" fill="url(#cdBodyGradient)" />
+
+            {/* Nose Cone */}
+            <path d="M32,6 C37,18 42,30 42,42 L22,42 C22,30 27,18 32,6 Z" fill="url(#cdNoseGradient)" />
+
+            {/* Metallic Panel lines */}
+            <line x1="32" y1="42" x2="32" y2="92" stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" />
+            <line x1="22" y1="62" x2="42" y2="62" stroke="rgba(15,23,42,0.18)" strokeWidth="1" />
+            <line x1="22" y1="78" x2="42" y2="78" stroke="rgba(15,23,42,0.18)" strokeWidth="1" />
+
+            {/* Window */}
+            <circle cx="32" cy="56" r="7" fill="url(#cdWindowBg)" stroke="#38bdf8" strokeWidth="1.5" filter="url(#cdGlow)" />
+            <path d="M28,52 A5,5 0 0 1 35,54" stroke="rgba(255,255,255,0.6)" strokeWidth="1" fill="none" strokeLinecap="round" />
+
+            {/* Warning indicator light */}
+            <circle cx="32" cy="85" r="1.5" fill="#f43f5e" />
+        </svg>
+    );
+}
+
+
+
+function CosmicDriftFull({ card }) {
+    const starsRef      = useRef(null);
+    const nebulaRef     = useRef(null);
+    const constRef      = useRef(null);
+    const audioCtxRef   = useRef(null);
+    const masterGainRef = useRef(null);
+
+    const [opened, setOpened]                 = useState(false);
+    const [isPlaying, setIsPlaying]           = useState(false);
+    const [warpActive, setWarpActive]         = useState(false);
+    const [contentVisible, setContentVisible] = useState(false);
+    const [bubbles, setBubbles]               = useState([]);
+    const [coords, setCoords]                 = useState('03°22\'14"S  116°44\'09"E  ALT: 408KM');
+    const [activePhoto, setActivePhoto]       = useState(null);
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [launchState, setLaunchState]       = useState('cover');
+
+    const typeGreeting = {
+        anniversary: 'Selamat Aniversari',
+        birthday:    'Selamat Ulang Tahun',
+        graduation:  'Selamat Wisuda',
+        wedding:     'Selamat Menikah',
+    };
+
+    // Dynamically compile user wishes for the floating bubbles
+    const floatMessages = useMemo(() => {
+        let msgs = [];
+        if (card.messages && card.messages.length > 0) {
+            card.messages.forEach(m => {
+                if (!m) return;
+                // Split by major punctuation to get beautiful short chunks
+                const parts = m.split(/[.\n;!]+/).map(p => p.trim()).filter(p => p.length > 3 && p.length < 50);
+                if (parts.length > 0) {
+                    msgs.push(...parts);
+                } else {
+                    if (m.length < 50) msgs.push(m);
+                }
+            });
+        }
+        
+        // Also add the primary wish strings in the mix
+        msgs.push(
+            `Selamat ${card.type_label || 'Hari Spesial'} ✨`,
+            `Untuk ${card.recipient_name} tercinta ❤️`,
+            `Dari ${card.sender_name} ✨`
+        );
+        
+        return [...new Set(msgs)];
+    }, [card.messages, card.recipient_name, card.sender_name, card.type_label]);
+
+    // ── Stars canvas (Perspective 3D & Radial Warp Speed & Stardust Trail) ──
+    useEffect(() => {
+        if (!opened) return;
+        const canvas = starsRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+        let W = canvas.width  = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+        const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; };
+        window.addEventListener('resize', onResize);
+
+        // 3D Star fields
+        const numStars = 220;
+        const stars = Array.from({ length: numStars }, () => ({
+            x: Math.random() * W - W / 2,
+            y: Math.random() * H - H / 2,
+            z: Math.random() * W,
+            size: Math.random() * 1.5 + 0.4,
+            hue: [195, 205, 220, 260, 45][Math.floor(Math.random() * 5)],
+            brightness: 0.5 + Math.random() * 0.5,
+        }));
+
+        let mouseX = W / 2, mouseY = H / 2;
+        const dustParticles = [];
+
+        const onMouse = (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            // Emit stardust
+            dustParticles.push({
+                x: mouseX,
+                y: mouseY,
+                vx: (Math.random() - 0.5) * 1.6,
+                vy: (Math.random() - 0.5) * 1.6 - 0.6,
+                alpha: 1.0,
+                decay: 0.015 + Math.random() * 0.01,
+                color: `hsla(${[190, 220, 260, 325][Math.floor(Math.random() * 4)]}, 85%, 75%, `,
+                size: Math.random() * 3 + 1.2
+            });
+            if (dustParticles.length > 60) dustParticles.shift();
+        };
+        window.addEventListener('mousemove', onMouse);
+
+        const shootingStars = [];
+        const handleClick = (e) => {
+            if (e.target.closest('button,input,textarea,a,img')) return;
+            const rect = canvas.getBoundingClientRect();
+            shootingStars.push({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+                vx: Math.cos(-Math.PI / 6) * (9 + Math.random() * 6),
+                vy: Math.sin(-Math.PI / 6) * (9 + Math.random() * 6),
+                life: 1,
+                decay: 0.02 + Math.random() * 0.012,
+                tail: [],
+            });
+        };
+        canvas.addEventListener('click', handleClick);
+
+        let currentSpeed = warpActive ? 32 : 0.45;
+
+        const draw = () => {
+            animId = requestAnimationFrame(draw);
+            
+            // Motion blur during warp speed, normal space color otherwise
+            ctx.fillStyle = warpActive ? 'rgba(2, 8, 23, 0.14)' : '#020817';
+            ctx.fillRect(0, 0, W, H);
+
+            // Interpolate speed smoothly
+            if (warpActive) {
+                currentSpeed += (80 - currentSpeed) * 0.08;
+            } else {
+                currentSpeed += (0.45 - currentSpeed) * 0.12;
+            }
+
+            const mx = (mouseX / W - 0.5) * 20;
+            const my = (mouseY / H - 0.5) * 20;
+
+            // Draw projected 3D stars
+            stars.forEach(s => {
+                s.z -= currentSpeed;
+                if (s.z <= 0) {
+                    s.z = W;
+                    s.x = Math.random() * W - W / 2;
+                    s.y = Math.random() * H - H / 2;
+                }
+
+                const k = 400 / s.z;
+                const px = s.x * k + W / 2 + mx * (1 - s.z / W);
+                const py = s.y * k + H / 2 + my * (1 - s.z / W);
+
+                if (px < 0 || px > W || py < 0 || py > H) return;
+
+                if (currentSpeed > 2.5) {
+                    // Warp speed lines stretching radially outward (even longer with higher speed)
+                    const prevK = 400 / (s.z + currentSpeed * 2.2);
+                    const ppx = s.x * prevK + W / 2 + mx * (1 - (s.z + currentSpeed * 2.2) / W);
+                    const ppy = s.y * prevK + H / 2 + my * (1 - (s.z + currentSpeed * 2.2) / W);
+
+                    ctx.beginPath();
+                    ctx.moveTo(px, py);
+                    ctx.lineTo(ppx, ppy);
+                    // Dynamically shifting colors during warp speeds
+                    ctx.strokeStyle = `hsla(${(s.hue + Date.now() * 0.08) % 360}, 95%, 85%, ${s.brightness * 0.9})`;
+                    ctx.lineWidth = s.size * 2.2;
+                    ctx.stroke();
+                } else {
+                    // Normal floating twinkling stars
+                    ctx.beginPath();
+                    ctx.arc(px, py, s.size * (1 + 0.12 * Math.sin(Date.now() * 0.004 + s.z)), 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${s.hue}, 80%, 92%, ${s.brightness})`;
+                    ctx.fill();
+
+                    if (s.size > 1.2) {
+                        const g = ctx.createRadialGradient(px, py, 0, px, py, s.size * 3.5);
+                        g.addColorStop(0, `hsla(${s.hue}, 80%, 85%, ${s.brightness * 0.25})`);
+                        g.addColorStop(1, 'transparent');
+                        ctx.beginPath();
+                        ctx.arc(px, py, s.size * 3.5, 0, Math.PI * 2);
+                        ctx.fillStyle = g;
+                        ctx.fill();
+                    }
+                }
+            });
+
+            // Draw interactive stardust trail
+            for (let i = dustParticles.length - 1; i >= 0; i--) {
+                const d = dustParticles[i];
+                d.x += d.vx;
+                d.y += d.vy;
+                d.alpha -= d.decay;
+                if (d.alpha <= 0) {
+                    dustParticles.splice(i, 1);
+                    continue;
+                }
+                const g = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.size * 2.8);
+                g.addColorStop(0, d.color + d.alpha * 0.35 + ')');
+                g.addColorStop(1, 'transparent');
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.size * 2.8, 0, Math.PI * 2);
+                ctx.fillStyle = g;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.size * 0.8, 0, Math.PI * 2);
+                ctx.fillStyle = d.color + d.alpha + ')';
+                ctx.fill();
+            }
+
+            // Shooting stars
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                const ss = shootingStars[i];
+                ss.tail.push({ x: ss.x, y: ss.y });
+                if (ss.tail.length > 14) ss.tail.shift();
+                ss.x += ss.vx; ss.y += ss.vy; ss.life -= ss.decay;
+                if (ss.life <= 0) { shootingStars.splice(i, 1); continue; }
+                for (let j = 0; j < ss.tail.length - 1; j++) {
+                    const a = (j / ss.tail.length) * ss.life * 0.6;
+                    ctx.beginPath();
+                    ctx.moveTo(ss.tail[j].x, ss.tail[j].y);
+                    ctx.lineTo(ss.tail[j+1].x, ss.tail[j+1].y);
+                    ctx.strokeStyle = `rgba(255,255,255,${a})`;
+                    ctx.lineWidth = a * 1.8; ctx.stroke();
+                }
+                ctx.beginPath(); ctx.arc(ss.x, ss.y, 1.2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,255,255,${ss.life})`; ctx.fill();
+            }
+        };
+        draw();
+
+        // Spawn periodic shooting star
+        let sTimer = setTimeout(function spawn() {
+            if (currentSpeed < 2) {
+                shootingStars.push({
+                    x: Math.random() * W * 0.7,
+                    y: Math.random() * H * 0.4,
+                    vx: Math.cos(-Math.PI / 6) * (9 + Math.random() * 5),
+                    vy: Math.sin(-Math.PI / 6) * (9 + Math.random() * 5),
+                    life: 1, decay: 0.018 + Math.random() * 0.01, tail: [],
+                });
+            }
+            sTimer = setTimeout(spawn, 8000 + Math.random() * 7000);
+        }, 8000);
+
+        return () => {
+            cancelAnimationFrame(animId);
+            clearTimeout(sTimer);
+            canvas.removeEventListener('click', handleClick);
+            window.removeEventListener('mousemove', onMouse);
+            window.removeEventListener('resize', onResize);
+        };
+    }, [opened, warpActive]);
+
+    // ── Nebula canvas & Rotating Spiral Galaxy ──
+    useEffect(() => {
+        if (!opened) return;
+        const canvas = nebulaRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+        let W = canvas.width  = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+        const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; };
+        window.addEventListener('resize', onResize);
+
+        // Generate Spiral Galaxy particles
+        const numGalaxyStars = 1200;
+        const galaxyStars = [];
+        for (let i = 0; i < numGalaxyStars; i++) {
+            const rVal = Math.pow(Math.random(), 2.2); // Concentrated near the core
+            const arm = Math.random() < 0.5 ? 0 : 1;
+            const tightness = 4.2; // Number of arm wraps
+            const theta = (arm * Math.PI) + (rVal * tightness) + (Math.random() - 0.5) * 0.48;
+            const size = Math.random() * 1.4 + 0.35;
+            
+            // Color mapping based on distance from core
+            let hue, sat = 90, light = 88;
+            if (rVal < 0.12) {
+                hue = 45; // Bright gold/white core
+                light = 95;
+            } else if (rVal < 0.45) {
+                hue = 195 + Math.random() * 20; // Cyan arms
+            } else if (rVal < 0.8) {
+                hue = 300 + Math.random() * 30; // Magenta / Pink arms
+            } else {
+                hue = 245 + Math.random() * 20; // Deep Violet outskirts
+                sat = 75;
+                light = 75;
+            }
+            
+            const orbitSpeed = 0.00035 + (0.00025 * (1 - rVal));
+            
+            galaxyStars.push({
+                rVal,
+                theta,
+                size,
+                hue,
+                sat,
+                light,
+                brightness: 0.45 + Math.random() * 0.55,
+                orbitSpeed
+            });
+        }
+
+        const blobs = [
+            { cx: W*0.3, cy: H*0.3, rx: W*0.55, ry: H*0.55, hue: 220, alpha: 0.12, t: 0, speed: 0.0003 },
+            { cx: W*0.7, cy: H*0.6, rx: W*0.5,  ry: H*0.5,  hue: 270, alpha: 0.09, t: 1, speed: 0.0004 },
+            { cx: W*0.5, cy: H*0.5, rx: W*0.65, ry: H*0.65, hue: 200, alpha: 0.07, t: 2, speed: 0.0002 },
+            { cx: W*0.2, cy: H*0.7, rx: W*0.35, ry: H*0.35, hue: 310, alpha: 0.06, t: 3, speed: 0.0005 },
+        ];
+
+        // Inclination / Tilt properties
+        const inclination = 62 * (Math.PI / 180); // 62 degrees 3D tilt
+        const rotationAngle = -28 * (Math.PI / 180); // Angle of galaxy on screen
+        const cosInc = Math.cos(inclination);
+        const sinInc = Math.sin(inclination);
+        const cosRot = Math.cos(rotationAngle);
+        const sinRot = Math.sin(rotationAngle);
+
+        const draw = () => {
+            animId = requestAnimationFrame(draw);
+            ctx.clearRect(0, 0, W, H);
+            
+            // Draw ambient nebula blobs
+            blobs.forEach(b => {
+                b.t += b.speed;
+                const wobble = Math.sin(b.t) * 0.1;
+                const rx = b.rx * (1 + wobble);
+                const ry = b.ry * (1 - wobble * 0.5);
+                const g = ctx.createRadialGradient(b.cx, b.cy, 0, b.cx, b.cy, Math.max(rx, ry));
+                g.addColorStop(0,   `hsla(${b.hue},80%,50%,${b.alpha})`);
+                g.addColorStop(0.4, `hsla(${b.hue+20},70%,35%,${b.alpha*0.5})`);
+                g.addColorStop(1,   'transparent');
+                ctx.save();
+                ctx.translate(b.cx, b.cy);
+                ctx.scale(rx / Math.max(rx,ry), ry / Math.max(rx,ry));
+                ctx.beginPath(); ctx.arc(0, 0, Math.max(rx,ry), 0, Math.PI*2);
+                ctx.fillStyle = g; ctx.fill();
+                ctx.restore();
+            });
+
+            // Draw Galaxy Core Glow
+            const galaxyCenterX = W * 0.5;
+            const galaxyCenterY = H * 0.42;
+            const maxRadius = Math.min(W, H) * 0.42;
+
+            const coreGlow = ctx.createRadialGradient(galaxyCenterX, galaxyCenterY, 0, galaxyCenterX, galaxyCenterY, maxRadius * 0.22);
+            coreGlow.addColorStop(0, 'rgba(255, 245, 220, 0.45)');
+            coreGlow.addColorStop(0.2, 'rgba(167, 139, 250, 0.2)');
+            coreGlow.addColorStop(0.5, 'rgba(34, 211, 238, 0.08)');
+            coreGlow.addColorStop(1, 'transparent');
+            ctx.beginPath();
+            ctx.arc(galaxyCenterX, galaxyCenterY, maxRadius * 0.22, 0, Math.PI * 2);
+            ctx.fillStyle = coreGlow;
+            ctx.fill();
+
+            // Draw Galaxy Stars
+            galaxyStars.forEach(s => {
+                s.theta += s.orbitSpeed;
+                const currentR = s.rVal * maxRadius;
+                
+                // 2D position in coordinate plane
+                const x2D = currentR * Math.cos(s.theta);
+                const y2D = currentR * Math.sin(s.theta);
+                
+                // Project Y coordinate for 3D tilt
+                const xTilted = x2D;
+                const yTilted = y2D * cosInc;
+                
+                // Rotate on screen plane & offset to center
+                const finalX = xTilted * cosRot - yTilted * sinRot + galaxyCenterX;
+                const finalY = xTilted * sinRot + yTilted * cosRot + galaxyCenterY;
+
+                if (finalX >= 0 && finalX <= W && finalY >= 0 && finalY <= H) {
+                    ctx.beginPath();
+                    ctx.arc(finalX, finalY, s.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${s.hue}, ${s.sat}%, ${s.light}%, ${s.brightness})`;
+                    ctx.fill();
+                    
+                    if (s.size > 1.15 && Math.random() < 0.1) {
+                        ctx.beginPath();
+                        ctx.arc(finalX, finalY, s.size * 2.5, 0, Math.PI * 2);
+                        ctx.fillStyle = `hsla(${s.hue}, ${s.sat}%, ${s.light}%, ${s.brightness * 0.12})`;
+                        ctx.fill();
+                    }
+                }
+            });
+        };
+        draw();
+
+        return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', onResize); };
+    }, [opened]);
+
+    // ── Constellation canvas ──
+    useEffect(() => {
+        if (!opened || !contentVisible) return;
+        const canvas = constRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+        let W = canvas.width  = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+        const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; };
+        window.addEventListener('resize', onResize);
+
+        const pattern = [[0.38,0.35],[0.44,0.29],[0.50,0.27],[0.56,0.29],[0.62,0.35],[0.50,0.48],[0.38,0.35],[0.50,0.48],[0.62,0.35]];
+        const nodes   = pattern.map(([rx,ry]) => ({ x: rx*W, y: ry*H }));
+        const lines   = nodes.slice(1).map((_, i) => ({ from: i, to: i+1, progress: 0 }));
+        let totalProg = 0;
+
+        const draw = () => {
+            animId = requestAnimationFrame(draw);
+            if (totalProg < 1) totalProg = Math.min(1, totalProg + 0.004);
+            ctx.clearRect(0, 0, W, H);
+
+            lines.forEach((line, i) => {
+                const startAt = i / lines.length;
+                const endAt   = (i+1) / lines.length;
+                if (totalProg < startAt) return;
+                line.progress = Math.min(1, (totalProg - startAt) / (endAt - startAt));
+
+                const a = nodes[line.from], b = nodes[line.to];
+                const ex = a.x + (b.x - a.x) * line.progress;
+                const ey = a.y + (b.y - a.y) * line.progress;
+                ctx.save();
+                ctx.strokeStyle = 'rgba(96,165,250,0.35)';
+                ctx.lineWidth = 1.2;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = 'rgba(96,165,250,0.6)';
+                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(ex, ey); ctx.stroke();
+                ctx.restore();
+            });
+
+            nodes.forEach((n, i) => {
+                const prog = i === 0 ? 1 : (lines[i-1]?.progress ?? 0);
+                if (prog <= 0) return;
+                ctx.beginPath(); ctx.arc(n.x, n.y, 3, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(96,165,250,0.8)';
+                ctx.shadowBlur = 12; ctx.shadowColor = 'rgba(96,165,250,1)';
+                ctx.fill();
+            });
+        };
+        draw();
+
+        return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', onResize); };
+    }, [opened, contentVisible]);
+
+    // ── Floating wishes bubbles (Spawning a lot, flying all over the screen) ──
+    useEffect(() => {
+        if (!opened || !contentVisible) return;
+        let idx = 0;
+        const spawn = () => {
+            if (floatMessages.length === 0) return;
+            const msg = floatMessages[idx % floatMessages.length];
+            idx++;
+            const id  = Math.random().toString(36).slice(2);
+            const dur = 9 + Math.random() * 5; // Float duration 9s - 14s
+            setBubbles(prev => [...prev, {
+                id, msg,
+                left: `${3 + Math.random() * 92}%`, // Scatter completely across full screen width
+                bottom: `-12vh`, // Start below the viewport
+                dur,
+                scale: 0.82 + Math.random() * 0.4,
+                drift: (Math.random() - 0.5) * 80
+            }]);
+            setTimeout(() => setBubbles(prev => prev.filter(b => b.id !== id)), dur * 1000 + 500);
+        };
+
+        // Stagger spawn initial batch of messages (14 bubbles)
+        for (let i = 0; i < 14; i++) {
+            setTimeout(spawn, i * 350);
+        }
+
+        // Spawn a new bubble quickly (every 750ms) to create a rich stardust stream
+        const intv = setInterval(spawn, 750);
+        return () => clearInterval(intv);
+    }, [opened, contentVisible, floatMessages]);
+
+    // ── Rotating alternating photos timer ──
+    useEffect(() => {
+        if (!opened || !contentVisible || !card.photos || card.photos.length === 0) return;
+        const interval = setInterval(() => {
+            setCurrentPhotoIndex(prev => (prev + 1) % card.photos.length);
+        }, 6200); // Shift photo every 6.2s
+        return () => clearInterval(interval);
+    }, [opened, contentVisible, card.photos]);
+
+    // ── Live coordinates ticker ──
+    useEffect(() => {
+        let tick = 0;
+        const intv = setInterval(() => {
+            tick++;
+            setCoords(`03°22'${14 + (tick%6)}"S  116°44'${9 + (tick%9)}"E  ALT: ${408 + (tick%3)}KM`);
+        }, 1800);
+        return () => clearInterval(intv);
+    }, []);
+
+    // ── Web Audio ambient (with Warp Sweep Sound Effect) ──
+    const startAudio = (withWarp = false) => {
+        if (!window.AudioContext && !window.webkitAudioContext) return;
+        if (audioCtxRef.current) return;
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtxRef.current = ctx;
+        const master = ctx.createGain();
+        master.gain.setValueAtTime(0, ctx.currentTime);
+        master.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 3);
+        master.connect(ctx.destination);
+        masterGainRef.current = master;
+
+        // Base celestial oscillators
+        [[55,0.16,'sine'],[82,0.09,'sine'],[110,0.05,'triangle']].forEach(([freq,g,type]) => {
+            const osc = ctx.createOscillator();
+            const gn  = ctx.createGain();
+            osc.type = type; osc.frequency.value = freq; gn.gain.value = g;
+            osc.connect(gn); gn.connect(master); osc.start();
+        });
+
+        // Space pink noise
+        const bufSz = ctx.sampleRate * 4;
+        const buf   = ctx.createBuffer(1, bufSz, ctx.sampleRate);
+        const data  = buf.getChannelData(0);
+        for (let i = 0; i < bufSz; i++) data[i] = (Math.random() * 2 - 1);
+        const ns = ctx.createBufferSource();
+        ns.buffer = buf; ns.loop = true;
+        const bpf = ctx.createBiquadFilter();
+        bpf.type = 'bandpass'; bpf.frequency.value = 220; bpf.Q.value = 0.4;
+        const ng = ctx.createGain(); ng.gain.value = 0.06;
+        ns.connect(bpf); bpf.connect(ng); ng.connect(master); ns.start();
+
+        // Warp sound sweep
+        if (withWarp) {
+            const warpOsc = ctx.createOscillator();
+            const warpGain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+            
+            warpOsc.type = 'sawtooth';
+            filter.type = 'lowpass';
+            
+            filter.frequency.setValueAtTime(40, ctx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(650, ctx.currentTime + 1.3);
+            filter.frequency.exponentialRampToValueAtTime(75, ctx.currentTime + 2.3);
+
+            warpGain.gain.setValueAtTime(0, ctx.currentTime);
+            warpGain.gain.linearRampToValueAtTime(0.38, ctx.currentTime + 0.4);
+            warpGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
+
+            warpOsc.frequency.setValueAtTime(45, ctx.currentTime);
+            warpOsc.frequency.linearRampToValueAtTime(140, ctx.currentTime + 1.6);
+
+            warpOsc.connect(filter);
+            filter.connect(warpGain);
+            warpGain.connect(master);
+            warpOsc.start(ctx.currentTime);
+            warpOsc.stop(ctx.currentTime + 2.7);
+        }
+
+        const ping = () => {
+            const po = ctx.createOscillator();
+            const pe = ctx.createGain();
+            po.type = 'sine';
+            po.frequency.value = [528,432,396,639][Math.floor(Math.random()*4)];
+            pe.gain.setValueAtTime(0, ctx.currentTime);
+            pe.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.02);
+            pe.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.5);
+            po.connect(pe); pe.connect(master); po.start(ctx.currentTime); po.stop(ctx.currentTime + 4);
+            setTimeout(ping, 10000 + Math.random() * 8000);
+        };
+        ping();
+
+        setIsPlaying(true);
+    };
+
+    const toggleAudio = () => {
+        if (!audioCtxRef.current) { startAudio(false); return; }
+        const master = masterGainRef.current;
+        if (isPlaying) {
+            master.gain.setValueAtTime(0, audioCtxRef.current.currentTime);
+            setIsPlaying(false);
+        } else {
+            master.gain.linearRampToValueAtTime(0.5, audioCtxRef.current.currentTime + 1);
+            setIsPlaying(true);
+        }
+    };
+
+    // ── Open card with Warp Transition ──
+    const handleOpen = () => {
+        try {
+            const el = document.documentElement;
+            if (el.requestFullscreen) el.requestFullscreen();
+        } catch(e) {}
+        
+        setOpened(true);
+        setLaunchState('launching');
+        startAudio(true);
+        
+        // Launching rocket for 1.2s
+        setTimeout(() => {
+            setLaunchState('warp');
+            setWarpActive(true);
+            
+            // Swirling wormhole warp speed for 1.8s (this preserves the warp lines!)
+            setTimeout(() => {
+                setWarpActive(false);
+                setLaunchState('target'); // target planet lockdown appears
+                
+                // Rocket crashes towards planet for 1.2s
+                setTimeout(() => {
+                    setLaunchState('explosion');
+                    // Play synth crash explosion sound
+                    if (audioCtxRef.current && masterGainRef.current) {
+                        try {
+                            const ctx = audioCtxRef.current;
+                            const master = masterGainRef.current;
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            const filter = ctx.createBiquadFilter();
+                            osc.type = 'sawtooth';
+                            filter.type = 'lowpass';
+                            filter.frequency.setValueAtTime(1000, ctx.currentTime);
+                            filter.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.8);
+                            gain.gain.setValueAtTime(0.45, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+                            osc.connect(filter);
+                            filter.connect(gain);
+                            gain.connect(master);
+                            osc.start();
+                            osc.stop(ctx.currentTime + 0.8);
+                        } catch(e) {}
+                    }
+                    
+                    // Impact flash covers screen for 0.8s, then reveals main screen
+                    setTimeout(() => {
+                        setLaunchState('active');
+                        setContentVisible(true);
+                    }, 800);
+                    
+                }, 1200);
+                
+            }, 1800);
+            
+        }, 1200);
+    };
+
+    return (
+        <div style={{ position:'fixed', inset:0, background:'#020817', overflow:'hidden', userSelect:'none', cursor:'crosshair' }}>
+            {/* Canvas layers */}
+            <canvas ref={starsRef}  style={{ position:'fixed', inset:0, zIndex:1, pointerEvents:'auto' }} />
+            <canvas ref={nebulaRef} style={{ position:'fixed', inset:0, zIndex:2, pointerEvents:'none', mixBlendMode:'screen' }} />
+            <canvas ref={constRef}  style={{ position:'fixed', inset:0, zIndex:3, pointerEvents:'none' }} />
+
+            {/* Sci-Fi scanline grid overlay */}
+            {opened && contentVisible && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 5,
+                    pointerEvents: 'none',
+                    background: 'linear-gradient(rgba(34, 211, 238, 0.015) 50%, rgba(0,0,0,0) 50%)',
+                    backgroundSize: '100% 4px',
+                }} />
+            )}
+
+            {/* HUD corners */}
+            {opened && contentVisible && (
+                <>
+                    <div style={{ position:'fixed', top:14, left:14, zIndex:40, pointerEvents:'none' }}>
+                        <div style={{ width:16, height:16, borderTop:'2px solid rgba(96,165,250,.3)', borderLeft:'2px solid rgba(96,165,250,.3)' }} />
+                        <div style={{ fontFamily:'Orbitron,monospace', fontSize:'0.45rem', letterSpacing:'2.5px', color:'rgba(96,165,250,.3)', marginTop:'0.3rem', lineHeight:1.8 }}>
+                            COSMIC DRIFT v1.2<br/>SECTOR: ANDROMEDA-7
+                        </div>
+                    </div>
+                    <div style={{ position:'fixed', top:14, right:14, zIndex:40, pointerEvents:'none', textAlign:'right' }}>
+                        <div style={{ width:16, height:16, borderTop:'2px solid rgba(96,165,250,.3)', borderRight:'2px solid rgba(96,165,250,.3)', marginLeft:'auto' }} />
+                        <div style={{ fontFamily:'Orbitron,monospace', fontSize:'0.45rem', letterSpacing:'2.5px', color:'rgba(96,165,250,.3)', marginTop:'0.3rem', lineHeight:1.8 }}>
+                            STATUS: LIVE<br/><span style={{ color:'rgba(34,211,238,.45)' }}>● SIGNAL ACQUIRED</span>
+                        </div>
+                    </div>
+                    <div style={{ position:'fixed', bottom:20, left:14, zIndex:40, pointerEvents:'none' }}>
+                        <div style={{ fontFamily:'Orbitron,monospace', fontSize:'0.42rem', letterSpacing:'2px', color:'rgba(96,165,250,.28)', lineHeight:1.8, marginBottom:'0.3rem' }}>
+                            KLIK LAYAR → BINTANG JATUH<br/>CONSTELLATION: ❤ ACTIVE
+                        </div>
+                        <div style={{ width:16, height:16, borderBottom:'2px solid rgba(96,165,250,.3)', borderLeft:'2px solid rgba(96,165,250,.3)' }} />
+                    </div>
+                    <div style={{ position:'fixed', bottom:20, right:14, zIndex:40, pointerEvents:'none', textAlign:'right' }}>
+                        <div style={{ fontFamily:'Orbitron,monospace', fontSize:'0.42rem', letterSpacing:'2px', color:'rgba(96,165,250,.28)', lineHeight:1.8, marginBottom:'0.3rem' }}>
+                            NEBULA: ONLINE<br/>{coords}
+                        </div>
+                        <div style={{ width:16, height:16, borderBottom:'2px solid rgba(96,165,250,.3)', borderRight:'2px solid rgba(96,165,250,.3)', marginLeft:'auto' }} />
+                    </div>
+                </>
+            )}
+
+            {/* Floating wishes bubbles */}
+            {opened && contentVisible && bubbles.map(b => (
+                <div 
+                    key={b.id} 
+                    className="cosmic-float-item"
+                    style={{
+                        position:'fixed', 
+                        zIndex:20, 
+                        left:b.left, 
+                        bottom:b.bottom, 
+                        pointerEvents:'auto',
+                        animation: `cdBubble ${b.dur}s ease-in-out forwards`,
+                        '--cd-scale': b.scale,
+                        '--cd-drift': `${b.drift}px`,
+                        '--cd-drift-half': `${b.drift / 2}px`,
+                    }}
+                >
+                    <div className="cosmic-bubble-content text-center" style={{
+                        fontFamily:'"Exo 2", sans-serif', 
+                        fontSize:'clamp(0.72rem, 2vw, 0.92rem)',
+                        fontWeight: 600,
+                        color:'rgba(255, 255, 255, 0.95)',
+                        textShadow: '0 0 10px rgba(96, 165, 250, 0.6)',
+                        maxWidth:'min(300px, 75vw)', 
+                        lineHeight:1.75,
+                        padding:'0.65rem 1.2rem',
+                        background:'rgba(5, 13, 31, 0.68)', 
+                        border:'1px solid rgba(96, 165, 250, 0.25)',
+                        borderRadius:20, 
+                        backdropFilter:'blur(12px)',
+                        boxShadow: '0 0 15px rgba(96, 165, 250, 0.2)',
+                        transition: 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s, box-shadow 0.3s',
+                    }}>
+                        ✦ {b.msg} ✦
+                    </div>
+                </div>
+            ))}
+
+            {/* Alternating Shooting Star Photo Gallery */}
+            {opened && contentVisible && card.photos && card.photos.length > 0 && (
+                <div 
+                    key={currentPhotoIndex}
+                    style={{
+                        position: 'fixed',
+                        zIndex: 30,
+                        top: '50%',
+                        left: '50%',
+                        marginLeft: '-110px', // Center offset (half of width 220px)
+                        marginTop: '-135px',  // Center offset (half of height 270px)
+                        pointerEvents: 'auto',
+                        // Triggers alternating shooting star trajectories based on index!
+                        animation: `cdShootDirection${currentPhotoIndex % 4} 6.2s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
+                    }}
+                >
+                    <div 
+                        onClick={() => setActivePhoto(card.photos[currentPhotoIndex])}
+                        style={{
+                            position: 'relative',
+                            width: '220px',
+                            background: 'rgba(5, 13, 31, 0.72)',
+                            backdropFilter: 'blur(20px)',
+                            border: '1.5px solid rgba(34, 211, 238, 0.45)',
+                            borderRadius: '16px',
+                            padding: '8px 8px 24px 8px',
+                            boxShadow: '0 0 40px rgba(34, 211, 238, 0.35)',
+                            cursor: 'pointer',
+                            transition: 'transform 0.3s, border-color 0.3s, box-shadow 0.3s',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.06) rotate(1deg)';
+                            e.currentTarget.style.borderColor = 'rgba(34, 211, 238, 0.8)';
+                            e.currentTarget.style.boxShadow = '0 0 50px rgba(34, 211, 238, 0.6)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'none';
+                            e.currentTarget.style.borderColor = 'rgba(34, 211, 238, 0.45)';
+                            e.currentTarget.style.boxShadow = '0 0 40px rgba(34, 211, 238, 0.35)';
+                        }}
+                    >
+                        {/* 3D Optical Illusion Planetary Ring */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '20%',
+                            left: '-24px',
+                            right: '-24px',
+                            height: '60px',
+                            border: '3px solid rgba(34, 211, 238, 0.52)',
+                            borderTopColor: 'transparent', // cuts off top edge to simulate card wrapping in 3D
+                            borderRadius: '50%',
+                            transform: 'rotate(-15deg)',
+                            pointerEvents: 'none',
+                            boxShadow: '0 5px 15px rgba(34, 211, 238, 0.35)',
+                            animation: 'cdRingPulse 4s ease-in-out infinite alternate',
+                            zIndex: 10,
+                        }} />
+
+                        <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', overflow: 'hidden', borderRadius: '12px', marginBottom: '10px' }}>
+                            <img src={card.photos[currentPhotoIndex]} alt="Celestial capture" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            {/* Subtle pixel scanlines overlay */}
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(rgba(34, 211, 238, 0.05) 50%, rgba(0,0,0,0) 50%)', backgroundSize: '100% 4px', pointerEvents: 'none' }} />
+                        </div>
+                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.52rem', letterSpacing: '2px', color: 'rgba(34, 211, 238, 0.85)', display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
+                            <span>SAT-CAM {currentPhotoIndex + 1}</span>
+                            <span>ZOOM ACTIVE</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Rocket flight animation element (Target state) */}
+            {launchState === 'target' && (
+                <div className="fixed z-[950] animate-rocketCrash" style={{
+                    left: '50%',
+                    marginLeft: '-25px',
+                    width: '50px',
+                    height: '90px',
+                    pointerEvents: 'none',
+                }}>
+                    <div style={{ position: 'relative', width: '100%', height: '100%', transform: 'rotate(135deg)' }}>
+                        <DetailedRocketSVG isIgnited={true} />
+                        {/* Rocket Engine Fire/Flame */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '-24px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '14px',
+                            height: '30px',
+                            background: 'linear-gradient(to bottom, #ff9730, #ff3b30, transparent)',
+                            borderRadius: '50%',
+                            animation: 'cdRocketFlame 0.15s infinite alternate',
+                            boxShadow: '0 0 15px #ff7e47, 0 0 30px #ff3b30',
+                        }} />
+                    </div>
+                </div>
+            )}
+
+            {/* Rocket traveling in Warp tunnel */}
+            {launchState === 'warp' && (
+                <>
+                    {/* Wormhole Vortex background & Concentric Warp Rings */}
+                    <div className="fixed inset-0 z-[920] pointer-events-none overflow-hidden" style={{ background: '#020617' }}>
+                        <div className="absolute inset-0" style={{
+                            background: 'radial-gradient(circle at 50% 50%, #03001e 0%, #7303c0 50%, #ec38bc 80%, #020617 100%)',
+                            opacity: 0.45,
+                            filter: 'blur(35px)',
+                            animation: 'cdWormholeTunnelGlow 6s ease-in-out infinite alternate',
+                        }} />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[100vw] max-w-[1000px] max-h-[1000px] pointer-events-none">
+                            {[...Array(5)].map((_, i) => (
+                                <div 
+                                    key={i} 
+                                    className="absolute top-1/2 left-1/2 rounded-full border border-cyan-400/20"
+                                    style={{
+                                        transform: 'translate(-50%, -50%)',
+                                        boxShadow: '0 0 30px rgba(34,211,238,0.1), inset 0 0 30px rgba(34,211,238,0.1)',
+                                        animation: `cdWormholeRing 2s linear infinite`,
+                                        animationDelay: `${i * 0.4}s`,
+                                    }}
+                                />
+                            ))}
+                        </div>
+                        <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] rounded-full pointer-events-none" style={{
+                            background: 'conic-gradient(from 0deg, transparent, rgba(34,211,238,0.15) 25%, rgba(167,139,250,0.15) 50%, rgba(236,72,153,0.15) 75%, transparent 100%)',
+                            transform: 'translate(-50%, -50%) rotate(0deg)',
+                            animation: 'cdWormholeSpiral 3s linear infinite',
+                            filter: 'blur(8px)',
+                        }} />
+                    </div>
+
+                    {/* Traveling Rocket */}
+                    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[950] pointer-events-none" style={{
+                        width: '36px',
+                        height: '68px',
+                        animation: 'cdRocketWarpTravel 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+                    }}>
+                        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                            <DetailedRocketSVG isIgnited={true} />
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '-18px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '10px',
+                                height: '22px',
+                                background: 'linear-gradient(to bottom, #ff9730, transparent)',
+                                borderRadius: '50%',
+                                boxShadow: '0 0 12px #ff9730',
+                                animation: 'cdRocketFlame 0.15s infinite alternate',
+                            }} />
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* Target Planet Lockdown (Target state visual overlay) */}
+            {launchState === 'target' && (
+                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[930] flex flex-col items-center justify-center pointer-events-none">
+                    <div className="w-[140px] h-[140px] rounded-full" style={{
+                        background: 'radial-gradient(circle at 30% 30%, #ec4899, #7c3aed 60%, #030712)',
+                        boxShadow: '0 0 45px rgba(236, 72, 153, 0.65), 0 0 90px rgba(124, 58, 237, 0.4)',
+                        animation: 'cdTargetPlanetReveal 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                    }} />
+                    <div className="absolute w-[200px] h-[200px] border border-red-500/35 rounded-full animate-ping" style={{ animationDuration: '2s' }} />
+                    <div className="absolute text-[8px] font-mono tracking-[4px] text-red-500 font-bold uppercase mt-44 animate-pulse">
+                        IMPACT IMMINENT
+                    </div>
+                </div>
+            )}
+
+            {/* Screen Impact Explosion Flash & Shockwave */}
+            {launchState === 'explosion' && (
+                <div className="fixed inset-0 z-[990] pointer-events-none flex items-center justify-center">
+                    {/* Planet Shards flying apart */}
+                    <div className="absolute w-[140px] h-[140px] flex items-center justify-center">
+                        {[...Array(6)].map((_, i) => {
+                            const angle = (i / 6) * Math.PI * 2;
+                            const tx = Math.cos(angle) * 220;
+                            const ty = Math.sin(angle) * 220;
+                            const rot = Math.random() * 360 + 180;
+                            return (
+                                <div 
+                                    key={i} 
+                                    style={{
+                                        position: 'absolute',
+                                        width: '45px',
+                                        height: '45px',
+                                        background: 'radial-gradient(circle at 30% 30%, #ec4899, #7c3aed 70%)',
+                                        clipPath: i % 3 === 0 ? 'polygon(0 0, 100% 0, 50% 100%)' : i % 3 === 1 ? 'polygon(50% 0, 100% 100%, 0 100%)' : 'polygon(0 0, 100% 50%, 0 100%)',
+                                        boxShadow: '0 0 20px rgba(236, 72, 153, 0.7)',
+                                        animation: 'cdPlanetShatter 0.8s cubic-bezier(0.1, 0.8, 0.2, 1) forwards',
+                                        '--tx': `${tx}px`,
+                                        '--ty': `${ty}px`,
+                                        '--rot': `${rot}deg`,
+                                    }}
+                                />
+                            );
+                        })}
+                    </div>
+                    <div className="rounded-full border-[8px] border-[#22d3ee]/80" style={{
+                        animation: 'cdShockwave 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards',
+                    }} />
+                    <div className="absolute inset-0 bg-white" style={{
+                        animation: 'cdFlash 0.8s ease-out forwards',
+                    }} />
+                </div>
+            )}
+
+            {/* COVER SCREEN */}
+            {launchState !== 'active' && launchState !== 'explosion' && (
+                <div style={{ 
+                    position:'fixed', inset:0, zIndex:900, 
+                    display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', 
+                    background: launchState === 'target' ? 'transparent' : 'radial-gradient(ellipse at 50% 50%, #0a1628 0%, #020817 70%)',
+                    transition: 'background 1s ease-in-out, opacity 0.5s ease-in-out',
+                    opacity: launchState === 'warp' ? 0 : 1,
+                    pointerEvents: launchState === 'cover' ? 'auto' : 'none',
+                }}>
+                    {/* Planet orbits */}
+                    {launchState === 'cover' && [180,300,440].map(s => (
+                        <div key={s} style={{ position:'absolute', width:s, height:s, borderRadius:'50%', border:`1px solid rgba(${s===180?'59,130,246':s===300?'168,85,247':'34,211,238'},.${s===180?25:s===300?15:10})`, animation:'cdRing 4s ease-in-out infinite', animationDelay:`${(s-180)/260*0.7}s` }} />
+                    ))}
+                    
+                    {/* Cover text & launch button (fades and scale-shrinks out upon ignition) */}
+                    <div style={{ 
+                        position:'relative', zIndex:2, textAlign:'center', padding:'2rem', 
+                        display:'flex', flexDirection:'column', alignItems:'center', gap:'1.5rem',
+                        transition: 'opacity 0.6s ease-in-out, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
+                        opacity: launchState === 'cover' ? 1 : 0,
+                        transform: launchState === 'cover' ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(-40px)',
+                    }}>
+                        {/* Rocket sitting on Launchpad (instead of simple planet) */}
+                        <div style={{
+                            position: 'relative',
+                            width: '140px',
+                            height: '180px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '0.5rem',
+                            animation: launchState === 'cover' ? 'cdRocketHover 3s ease-in-out infinite' : launchState === 'launching' ? 'cdLaunchPadShake 0.1s infinite' : 'none',
+                        }}>
+                            {/* Launch Pad Base */}
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '0',
+                                width: '100px',
+                                height: '12px',
+                                background: '#1e293b',
+                                border: '2.5px solid #38bdf8',
+                                borderRadius: '4px',
+                                boxShadow: '0 0 15px rgba(56, 189, 248, 0.4)',
+                                zIndex: 5,
+                                overflow: 'hidden',
+                            }}>
+                                {/* Hazard Stripes */}
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    backgroundImage: 'linear-gradient(45deg, #f59e0b 25%, transparent 25%, transparent 50%, #f59e0b 50%, #f59e0b 75%, transparent 75%, transparent)',
+                                    backgroundSize: '10px 10px',
+                                    opacity: 0.25,
+                                }} />
+                            </div>
+
+                            {/* Gantry Tower on the right */}
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '6px',
+                                right: '16px',
+                                width: '18px',
+                                height: '115px',
+                                background: 'linear-gradient(90deg, #1e293b 0%, #0f172a 100%)',
+                                borderLeft: '1.5px solid #475569',
+                                borderRight: '1.5px solid #475569',
+                                zIndex: 4,
+                                boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)',
+                            }}>
+                                {/* Gantry Truss diagonals */}
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    backgroundImage: 'linear-gradient(45deg, transparent 45%, #ef4444 48%, #ef4444 52%, transparent 55%), linear-gradient(-45deg, transparent 45%, #ef4444 48%, #ef4444 52%, transparent 55%)',
+                                    backgroundSize: '18px 24px',
+                                    opacity: 0.35,
+                                }} />
+                                {/* Flashing Amber Beacon Light at top of tower */}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-6px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    background: '#f59e0b',
+                                    boxShadow: '0 0 10px #f59e0b',
+                                    animation: 'cdWarningBeacon 0.5s infinite alternate',
+                                }} />
+                            </div>
+
+                            {/* Top Support Arm (clamps rocket) */}
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '80px',
+                                right: '28px',
+                                width: '36px',
+                                height: '6px',
+                                background: '#334155',
+                                border: '1px solid #64748b',
+                                borderRadius: '2px',
+                                transform: launchState === 'launching' ? 'rotate(75deg) translate(8px, -8px)' : 'rotate(0deg)',
+                                transformOrigin: 'right center',
+                                transition: 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)',
+                                zIndex: 11,
+                            }} />
+
+                            {/* Bottom Support Arm (clamps rocket) */}
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '40px',
+                                right: '28px',
+                                width: '36px',
+                                height: '6px',
+                                background: '#334155',
+                                border: '1px solid #64748b',
+                                borderRadius: '2px',
+                                transform: launchState === 'launching' ? 'rotate(75deg) translate(8px, -8px)' : 'rotate(0deg)',
+                                transformOrigin: 'right center',
+                                transition: 'transform 0.65s cubic-bezier(0.25, 1, 0.5, 1)',
+                                zIndex: 11,
+                            }} />
+                            
+                            {/* The Rocket vector illustration */}
+                            <div style={{ 
+                                position: 'absolute', 
+                                bottom: '8px', 
+                                width: '54px', 
+                                height: '120px',
+                                zIndex: 10,
+                                animation: launchState === 'launching' ? 'cdLiftoffShoot 1.2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards' : 'none',
+                            }}>
+                                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                    <DetailedRocketSVG isIgnited={launchState === 'launching'} />
+                                    
+                                    {/* Engine Flame (flies with rocket) */}
+                                    {launchState === 'launching' && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: '-28px',
+                                            left: '50%',
+                                            transform: 'translateX(-50%)',
+                                            width: '16px',
+                                            height: '35px',
+                                            background: 'linear-gradient(to bottom, #ff9730, #ff3b30, transparent)',
+                                            borderRadius: '50%',
+                                            boxShadow: '0 0 15px #ff9730, 0 0 30px #ff3b30',
+                                            animation: 'cdRocketFlame 0.1s infinite alternate',
+                                            zIndex: 1
+                                        }} />
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Heavy Billowing Launch Smoke (stays on ground) */}
+                            {launchState === 'launching' && (
+                                <div style={{ position: 'absolute', bottom: '6px', width: '100%', height: '20px', zIndex: 12 }}>
+                                    <div className="cd-smoke cd-smoke-l1" />
+                                    <div className="cd-smoke cd-smoke-l2" />
+                                    <div className="cd-smoke cd-smoke-r1" />
+                                    <div className="cd-smoke cd-smoke-r2" />
+                                </div>
+                            )}
+
+                            {/* Launch Pad Venting Smoke / Gas (cover mode) */}
+                            {launchState === 'cover' && (
+                                <div style={{ position: 'absolute', bottom: '6px', display: 'flex', gap: '40px', zIndex: 1 }}>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-white/25 animate-ping" style={{ animationDuration: '2s' }} />
+                                    <div className="w-2.5 h-2.5 rounded-full bg-white/25 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.4s' }} />
+                                </div>
+                            )}
+                        </div>
+
+                        <div>
+                            <p style={{ fontFamily:'Orbitron,monospace', fontSize:'0.52rem', letterSpacing:'6px', textTransform:'uppercase', color:'#22d3ee', opacity:0.7 }}>A Message From The Universe</p>
+                            <h1 style={{ fontFamily:'Orbitron,monospace', fontSize:'clamp(1.8rem,7vw,3rem)', fontWeight:900, background:'linear-gradient(135deg,#60a5fa,#a78bfa,#67e8f9)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', letterSpacing:3, filter:'drop-shadow(0 0 18px rgba(96,165,250,.5))', lineHeight:1.1, marginTop:'0.5rem' }}>COSMIC<br/>DRIFT</h1>
+                            <p style={{ fontFamily:'Exo 2,sans-serif', fontStyle:'italic', fontSize:'0.85rem', color:'rgba(255,255,255,.5)', maxWidth:270, lineHeight:1.7, marginTop:'0.75rem' }}>Sebuah surat cinta melewati bintang-bintang, khusus untuk <strong style={{ color:'#c4b5fd' }}>{card.recipient_name}</strong></p>
+                        </div>
+                        <button onClick={handleOpen} style={{ display:'inline-flex', alignItems:'center', gap:'0.6rem', padding:'0.9rem 2.4rem', background:'linear-gradient(135deg,#3b82f6,#7c3aed)', border:'none', borderRadius:100, fontFamily:'Orbitron,monospace', fontSize:'0.75rem', fontWeight:700, letterSpacing:'2px', textTransform:'uppercase', color:'#fff', cursor:'pointer', boxShadow:'0 0 30px rgba(59,130,246,.5)', animation:'cdBtnGlow 3s ease-in-out infinite' }}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width:16,height:16 }} className="animate-bounce"><path d="M4.5 16.5c-1.5 1.25-2.5 3.5-2.5 3.5s2.25-1 3.5-2.5M12 2C6.5 2 2 6.5 2 12c0 3.5 1.5 6.5 4 8.5M19.5 7.5c1.5-1.25 2.5-3.5 2.5-3.5s-2.25 1-3.5 2.5M22 2s-3.5.5-6 3.5M16 12l-6-6-4 4 6 6 4-4zM7 17l-3 3"/></svg>
+                            Luncurkan Roket 🚀
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Sleek Floating bottom HUD bar for Ambient Audio controls */}
+            {opened && contentVisible && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '30px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 100,
+                    pointerEvents: 'auto',
+                    animation: 'cdContentFadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                }}>
+                    <button 
+                        onClick={toggleAudio} 
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.75rem 1.6rem',
+                            borderRadius: 100,
+                            fontFamily: 'Orbitron, monospace',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            letterSpacing: '2px',
+                            textTransform: 'uppercase',
+                            cursor: 'pointer',
+                            border: '1px solid rgba(168, 85, 247, 0.35)',
+                            background: 'rgba(13, 7, 38, 0.72)',
+                            backdropFilter: 'blur(16px)',
+                            color: '#c4b5fd',
+                            boxShadow: '0 0 25px rgba(168, 85, 247, 0.25)',
+                            transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                            e.currentTarget.style.boxShadow = '0 0 35px rgba(168, 85, 247, 0.45)';
+                            e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.6)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'none';
+                            e.currentTarget.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.25)';
+                            e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.35)';
+                        }}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width:14, height:14 }}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                        {isPlaying ? 'MUTE AUDIO' : 'UNMUTE AUDIO'}
+                    </button>
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL */}
+            {activePhoto && (
+                <div 
+                    onClick={() => setActivePhoto(null)}
+                    style={{
+                        position:'fixed', inset:0, zIndex:1000,
+                        background:'rgba(2,8,23,.92)', backdropFilter:'blur(16px)',
+                        display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem',
+                        animation: 'fadeIn 0.3s ease-out'
+                    }}
+                >
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            position:'relative',
+                            background:'rgba(5,13,31,.85)',
+                            border:'1px solid rgba(34,211,238,.3)',
+                            borderRadius:24, padding:'12px',
+                            maxWidth:'min(500px,90vw)', width:'100%',
+                            boxShadow:'0 0 50px rgba(34, 211, 238,.25)',
+                            animation: 'scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        }}
+                    >
+                        <button 
+                            onClick={() => setActivePhoto(null)}
+                            style={{
+                                position:'absolute', top:-16, right:-16,
+                                background:'rgba(5,13,31,.9)', border:'1px solid rgba(34,211,238,.4)',
+                                borderRadius:'50%', width:36, height:36,
+                                display:'flex', alignItems:'center', justifyContent:'center',
+                                color:'#22d3ee', cursor:'pointer', fontSize:'1rem',
+                                boxShadow:'0 0 15px rgba(34, 211, 238,.3)'
+                            }}
+                        >
+                            ✕
+                        </button>
+                        <div style={{ borderRadius:16, overflow:'hidden', border:'1px solid rgba(255,255,255,.08)' }}>
+                            <img src={activePhoto} alt="Zoomed celestial capture" style={{ width:'100%', height:'auto', display:'block', maxHeight:'70vh', objectFit:'contain' }} />
+                        </div>
+                        <div style={{ marginTop: '12px', fontFamily: 'Orbitron, monospace', fontSize: '0.52rem', letterSpacing: '2px', color: 'rgba(34, 211, 238, 0.7)', display: 'flex', justifyContent: 'space-between', padding: '0 8px' }}>
+                            <span>ENCRYPTED VISUAL TRANSMISSION</span>
+                            <span>SECURED</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Fonts + keyframes */}
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@700&display=swap');
+                @keyframes cdRing { 0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.04);opacity:1} }
+                @keyframes cdPlanet { 0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(5deg)} }
+                @keyframes cdBtnGlow { 0%,100%{box-shadow:0 0 30px rgba(59,130,246,.5)}50%{box-shadow:0 0 50px rgba(124,58,237,.7)} }
+                
+                @keyframes cdBubble { 
+                    0% {
+                        opacity: 0;
+                        transform: translateY(15vh) translateX(0) scale(var(--cd-scale, 1));
+                    }
+                    12% {
+                        opacity: 1;
+                    }
+                    90% {
+                        opacity: 0.95;
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: translateY(-120vh) translateX(var(--cd-drift, 30px)) scale(var(--cd-scale, 1));
+                    }
+                }
+
+                @keyframes cdRingPulse {
+                    0% { transform: rotate(-15deg) scale(0.96); opacity: 0.6; filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.4)); }
+                    100% { transform: rotate(-15deg) scale(1.04); opacity: 0.95; filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.7)); }
+                }
+
+                .cosmic-float-item {
+                    cursor: pointer;
+                }
+                .cosmic-float-item:hover {
+                    animation-play-state: paused !important;
+                    z-index: 99 !important;
+                }
+                .cosmic-float-item:hover .cosmic-bubble-content {
+                    transform: scale(1.12);
+                    border-color: rgba(34, 211, 238, 0.65) !important;
+                    box-shadow: 0 0 25px rgba(34, 211, 238, 0.5), inset 0 0 10px rgba(34, 211, 238, 0.2) !important;
+                }
+                
+                @keyframes cdContentFadeIn { 0%{opacity:0;transform:scale(0.9) translateY(18px);filter:blur(8px)}100%{opacity:1;transform:scale(1) translateY(0);filter:blur(0)} }
+                
+                @keyframes cdShootDirection0 {
+                    0% {
+                        transform: translate3d(-40vw, -40vh, 0) scale(0.01) rotate(-35deg);
+                        opacity: 0;
+                        filter: blur(4px) brightness(2.5);
+                    }
+                    14% {
+                        transform: translate3d(0, 0, 0) scale(1) rotate(-4deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    82% {
+                        transform: translate3d(2vw, 2vh, 0) scale(1.06) rotate(-2deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    100% {
+                        transform: translate3d(40vw, 40vh, 0) scale(4.0) rotate(15deg);
+                        opacity: 0;
+                        filter: blur(6px) brightness(2);
+                    }
+                }
+                
+                @keyframes cdShootDirection1 {
+                    0% {
+                        transform: translate3d(40vw, -40vh, 0) scale(0.01) rotate(35deg);
+                        opacity: 0;
+                        filter: blur(4px) brightness(2.5);
+                    }
+                    14% {
+                        transform: translate3d(0, 0, 0) scale(1) rotate(4deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    82% {
+                        transform: translate3d(-2vw, 2vh, 0) scale(1.06) rotate(2deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    100% {
+                        transform: translate3d(-40vw, 40vh, 0) scale(4.0) rotate(-15deg);
+                        opacity: 0;
+                        filter: blur(6px) brightness(2);
+                    }
+                }
+                
+                @keyframes cdShootDirection2 {
+                    0% {
+                        transform: translate3d(-40vw, 40vh, 0) scale(0.01) rotate(-145deg);
+                        opacity: 0;
+                        filter: blur(4px) brightness(2.5);
+                    }
+                    14% {
+                        transform: translate3d(0, 0, 0) scale(1) rotate(-6deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    82% {
+                        transform: translate3d(2vw, -2vh, 0) scale(1.06) rotate(-4deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    100% {
+                        transform: translate3d(40vw, -40vh, 0) scale(4.0) rotate(15deg);
+                        opacity: 0;
+                        filter: blur(6px) brightness(2);
+                    }
+                }
+                
+                @keyframes cdShootDirection3 {
+                    0% {
+                        transform: translate3d(40vw, 40vh, 0) scale(0.01) rotate(145deg);
+                        opacity: 0;
+                        filter: blur(4px) brightness(2.5);
+                    }
+                    14% {
+                        transform: translate3d(0, 0, 0) scale(1) rotate(6deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    82% {
+                        transform: translate3d(-2vw, -2vh, 0) scale(1.06) rotate(4deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    100% {
+                        transform: translate3d(-40vw, -40vh, 0) scale(4.0) rotate(-15deg);
+                        opacity: 0;
+                        filter: blur(6px) brightness(2);
+                    }
+                }
+
+                @keyframes fadeIn { 0%{opacity:0}100%{opacity:1} }
+                @keyframes scaleIn { 0%{opacity:0;transform:scale(0.85) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)} }
+
+                @keyframes cdWarningBeacon {
+                    0% { opacity: 0.3; filter: drop-shadow(0 0 1px #f59e0b); }
+                    100% { opacity: 1; filter: drop-shadow(0 0 8px #f59e0b); }
+                }
+
+                .cd-smoke {
+                    position: absolute;
+                    background: radial-gradient(circle, rgba(203,213,225,0.7) 0%, rgba(148,163,184,0.3) 50%, rgba(71,85,105,0) 70%);
+                    border-radius: 50%;
+                    pointer-events: none;
+                }
+                .cd-smoke-l1 {
+                    width: 50px;
+                    height: 50px;
+                    left: 20px;
+                    bottom: 0px;
+                    animation: cdSmokeLeft1 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                .cd-smoke-l2 {
+                    width: 40px;
+                    height: 40px;
+                    left: 35px;
+                    bottom: 5px;
+                    animation: cdSmokeLeft2 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                .cd-smoke-r1 {
+                    width: 50px;
+                    height: 50px;
+                    right: 20px;
+                    bottom: 0px;
+                    animation: cdSmokeRight1 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                .cd-smoke-r2 {
+                    width: 40px;
+                    height: 40px;
+                    right: 35px;
+                    bottom: 5px;
+                    animation: cdSmokeRight2 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+
+                @keyframes cdSmokeLeft1 {
+                    0% { transform: translate(0, 0) scale(0.5); opacity: 0; filter: blur(2px); }
+                    15% { opacity: 0.8; }
+                    100% { transform: translate(-65px, -25px) scale(1.8); opacity: 0; filter: blur(14px); }
+                }
+                @keyframes cdSmokeLeft2 {
+                    0% { transform: translate(0, 0) scale(0.5); opacity: 0; filter: blur(2px); }
+                    15% { opacity: 0.7; }
+                    100% { transform: translate(-45px, -40px) scale(1.5); opacity: 0; filter: blur(12px); }
+                }
+                @keyframes cdSmokeRight1 {
+                    0% { transform: translate(0, 0) scale(0.5); opacity: 0; filter: blur(2px); }
+                    15% { opacity: 0.8; }
+                    100% { transform: translate(65px, -25px) scale(1.8); opacity: 0; filter: blur(14px); }
+                }
+                @keyframes cdSmokeRight2 {
+                    0% { transform: translate(0, 0) scale(0.5); opacity: 0; filter: blur(2px); }
+                    15% { opacity: 0.7; }
+                    100% { transform: translate(45px, -40px) scale(1.5); opacity: 0; filter: blur(12px); }
+                }
+
+                @keyframes cdWormholeTunnelGlow {
+                    0% { transform: scale(1) rotate(0deg); opacity: 0.4; }
+                    100% { transform: scale(1.15) rotate(10deg); opacity: 0.6; }
+                }
+
+                @keyframes cdWormholeRing {
+                    0% { width: 0px; height: 0px; opacity: 0; border-color: rgba(34, 211, 238, 0.05); }
+                    10% { opacity: 0.8; }
+                    80% { opacity: 0.5; border-color: rgba(167, 139, 250, 0.35); }
+                    100% { width: 900px; height: 900px; opacity: 0; border-color: rgba(236, 72, 153, 0); }
+                }
+
+                @keyframes cdWormholeSpiral {
+                    0% { transform: translate(-50%, -50%) rotate(0deg) scale(0.9); }
+                    50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.1); }
+                    100% { transform: translate(-50%, -50%) rotate(360deg) scale(0.9); }
+                }
+
+                @keyframes cdRocketFlame {
+                    0% { height: 25px; opacity: 0.8; }
+                    100% { height: 40px; opacity: 1; }
+                }
+
+                @keyframes cdRocketHover {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-5px); }
+                }
+
+                @keyframes cdLaunchPadShake {
+                    0%, 100% { transform: translate(0, 0); }
+                    25% { transform: translate(-1.5px, 1.5px); }
+                    50% { transform: translate(1.5px, -1.5px); }
+                    75% { transform: translate(-1.5px, -1.5px); }
+                }
+
+                @keyframes cdLiftoffShoot {
+                    0% { transform: translateY(0) scale(1); filter: blur(0px); }
+                    20% { transform: translateY(-12px) scale(1); filter: blur(0px); }
+                    100% { transform: translateY(-130vh) scale(0.25); filter: blur(2px); }
+                }
+
+                @keyframes cdRocketWarpTravel {
+                    0% { transform: translate3d(-50%, 130px, 0) scale(1.6) rotate(0deg); opacity: 0; filter: blur(4px); }
+                    12% { transform: translate3d(-50%, 25px, 0) scale(1.0) rotate(0deg); opacity: 1; filter: blur(0px); }
+                    30% { transform: translate3d(calc(-50% + 15px), -5px, 0) scale(0.8) rotate(4deg); }
+                    55% { transform: translate3d(calc(-50% - 15px), -25px, 0) scale(0.5) rotate(-6deg); }
+                    80% { transform: translate3d(calc(-50% + 5px), -45px, 0) scale(0.25) rotate(2deg); opacity: 0.8; }
+                    100% { transform: translate3d(-50%, -85px, 0) scale(0.01) rotate(0deg); opacity: 0; filter: blur(6px); }
+                }
+
+                @keyframes cdRocketCrash {
+                    0% { transform: translate3d(-35vw, -35vh, 0) scale(0.1) rotate(135deg); opacity: 0; filter: blur(3px); }
+                    15% { opacity: 1; filter: blur(0px); }
+                    100% { transform: translate3d(-20px, -20px, 0) scale(0.8) rotate(135deg); opacity: 1; }
+                }
+
+                @keyframes cdTargetPlanetReveal {
+                    0% { transform: scale(0.1); opacity: 0; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+
+                @keyframes cdPlanetShatter {
+                    0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+                    100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.15); opacity: 0; }
+                }
+
+                @keyframes cdShockwave {
+                    0% { width: 0px; height: 0px; opacity: 1; border-width: 30px; }
+                    100% { width: 1000px; height: 1000px; opacity: 0; border-width: 1px; filter: blur(6px); }
+                }
+
+                @keyframes cdFlash {
+                    0% { opacity: 1; background: #ffffff; }
+                    25% { opacity: 0.85; background: #22d3ee; }
+                    100% { opacity: 0; background: transparent; }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+
+function RetroArcadeFull({ card }) {
+    const canvasRef = useRef(null);
+    const audioCtxRef = useRef(null);
+    const bgmIntervalRef = useRef(null);
+    const heroXRef = useRef(50);
+    const heroYRef = useRef(0);
+    const heroVyRef = useRef(0);
+    const blockBounceRef = useRef(0);
+    const isJumpingRef = useRef(false);
+    const particlesRef = useRef([]);
+
+    const [credit, setCredit] = useState(0);
+    const [gameStage, setGameStage] = useState('cover'); // 'cover' | 'playing' | 'revealed'
+    const [isMuted, setIsMuted] = useState(true);
+    const [displayText, setDisplayText] = useState('');
+    const [typingDone, setTypingDone] = useState(false);
+    const [activePhoto, setActivePhoto] = useState(null);
+
+    const mainMessage = card.messages?.[0] || 'HAPPY LEVEL UP! Semoga hari-harimu selalu seru dan penuh keceriaan seperti game retro klasik ini!';
+
+    // Sound Synthesis (Web Audio API)
+    const initAudio = () => {
+        if (!audioCtxRef.current) {
+            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+            audioCtxRef.current.resume();
+        }
+        return audioCtxRef.current;
+    };
+
+    const playCoinSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(987.77, now); // B5
+            osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        } catch(e) {}
+    };
+
+    const playJumpSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(850, now + 0.15);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } catch(e) {}
+    };
+
+    const playBumpSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(120, now);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } catch(e) {}
+    };
+
+    const startBgm = () => {
+        if (bgmIntervalRef.current) clearInterval(bgmIntervalRef.current);
+        const ctx = initAudio();
+        let step = 0;
+        // Simple upbeat retro arpeggio melody
+        const melody = [
+            261.63, 329.63, 392.00, 523.25,
+            293.66, 349.23, 440.00, 587.33,
+            329.63, 392.00, 493.88, 659.25,
+            349.23, 440.00, 523.25, 698.46
+        ];
+        
+        bgmIntervalRef.current = setInterval(() => {
+            if (isMuted || gameStage === 'cover') return;
+            try {
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = melody[step % melody.length];
+                gain.gain.setValueAtTime(0.03, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+                step++;
+            } catch(e){}
+        }, 250);
+    };
+
+    const stopBgm = () => {
+        if (bgmIntervalRef.current) {
+            clearInterval(bgmIntervalRef.current);
+            bgmIntervalRef.current = null;
+        }
+    };
+
+    // Handle Mute Toggle
+    const handleMuteToggle = () => {
+        const nextMute = !isMuted;
+        setIsMuted(nextMute);
+        if (!nextMute) {
+            initAudio();
+            if (gameStage !== 'cover') {
+                startBgm();
+            }
+        } else {
+            stopBgm();
+        }
+    };
+
+    // Insert Coin Trigger
+    const handleInsertCoin = () => {
+        playCoinSound();
+        setCredit(c => c + 1);
+        setTimeout(() => {
+            setGameStage('playing');
+            if (!isMuted) startBgm();
+        }, 600);
+    };
+
+    // Game loop (Canvas)
+    useEffect(() => {
+        if (gameStage !== 'playing') return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+
+        canvas.width = 480;
+        canvas.height = 320;
+
+        heroXRef.current = 50;
+        heroYRef.current = 240;
+        heroVyRef.current = 0;
+        isJumpingRef.current = false;
+        particlesRef.current = [];
+
+        const blockX = 240;
+        const blockY = 160;
+        const blockW = 32;
+        const blockH = 32;
+
+        let hasHitBlock = false;
+
+        const update = () => {
+            // Apply gravity
+            if (isJumpingRef.current) {
+                heroYRef.current += heroVyRef.current;
+                heroVyRef.current += 0.8; // gravity
+                if (heroYRef.current >= 240) {
+                    heroYRef.current = 240;
+                    isJumpingRef.current = false;
+                    heroVyRef.current = 0;
+                }
+            }
+
+            // Move hero to block
+            if (!hasHitBlock) {
+                if (heroXRef.current < blockX) {
+                    heroXRef.current += 1.8;
+                } else {
+                    // Trigger Jump under the block
+                    if (!isJumpingRef.current) {
+                        isJumpingRef.current = true;
+                        heroVyRef.current = -11;
+                        playJumpSound();
+                    }
+                }
+            }
+
+            // Collision check with block (bottom check)
+            if (isJumpingRef.current && heroVyRef.current < 0 && !hasHitBlock) {
+                const headX = heroXRef.current + 12;
+                const headY = heroYRef.current;
+                if (headX >= blockX && headX <= blockX + blockW && headY <= blockY + blockH && headY >= blockY) {
+                    // HIT!
+                    hasHitBlock = true;
+                    heroVyRef.current = 3; // Bounce back down
+                    blockBounceRef.current = -12;
+                    playBumpSound();
+
+                    // Spawn pixel particles
+                    const pCols = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444'];
+                    for (let i = 0; i < 35; i++) {
+                        particlesRef.current.push({
+                            x: blockX + 16,
+                            y: blockY + 16,
+                            vx: (Math.random() - 0.5) * 6,
+                            vy: (Math.random() - 0.8) * 8,
+                            size: Math.random() * 4 + 2,
+                            color: pCols[Math.floor(Math.random() * pCols.length)],
+                            life: 1,
+                            decay: 0.02 + Math.random() * 0.02
+                        });
+                    }
+
+                    // Proceed to revealed stage shortly
+                    setTimeout(() => {
+                        setGameStage('revealed');
+                        stopBgm();
+                    }, 1500);
+                }
+            }
+
+            // Animate block bounce back
+            if (blockBounceRef.current < 0) {
+                blockBounceRef.current += 1.5;
+            } else {
+                blockBounceRef.current = 0;
+            }
+
+            // Update particles
+            particlesRef.current.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // gravity
+                p.life -= p.decay;
+                if (p.life <= 0) {
+                    particlesRef.current.splice(idx, 1);
+                }
+            });
+        };
+
+        const draw = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Sky
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ground (pixelated green line)
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(0, 260, canvas.width, 60);
+            ctx.fillStyle = '#047857';
+            ctx.fillRect(0, 260, canvas.width, 6);
+
+            // Draw Mystery Block
+            ctx.save();
+            ctx.translate(0, blockBounceRef.current);
+            ctx.fillStyle = hasHitBlock ? '#475569' : '#fbbf24';
+            ctx.fillRect(blockX, blockY, blockW, blockH);
+            // Draw Question Mark ?
+            if (!hasHitBlock) {
+                ctx.fillStyle = '#78350f';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('?', blockX + 10, blockY + 23);
+            }
+            ctx.restore();
+
+            // Draw Hero (Cute 8-bit character)
+            ctx.fillStyle = '#ef4444'; // Red shirt
+            ctx.fillRect(heroXRef.current + 4, heroYRef.current, 16, 20);
+            ctx.fillStyle = '#f59e0b'; // Head skin
+            ctx.fillRect(heroXRef.current + 6, heroYRef.current - 10, 12, 10);
+            ctx.fillStyle = '#000000'; // Eyes
+            ctx.fillRect(heroXRef.current + 14, heroYRef.current - 8, 2, 2);
+            ctx.fillStyle = '#1e3a8a'; // Pants
+            ctx.fillRect(heroXRef.current + 4, heroYRef.current + 20, 16, 4);
+            // Feet
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(heroXRef.current + 3, heroYRef.current + 24, 6, 2);
+            ctx.fillRect(heroXRef.current + 15, heroYRef.current + 24, 6, 2);
+
+            // Draw particles
+            particlesRef.current.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+            ctx.globalAlpha = 1.0;
+        };
+
+        const loop = () => {
+            update();
+            draw();
+            animId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        return () => {
+            cancelAnimationFrame(animId);
+        };
+    }, [gameStage]);
+
+    // Typewriter message
+    useEffect(() => {
+        if (gameStage !== 'revealed') return;
+        let idx = 0;
+        setDisplayText('');
+        setTypingDone(false);
+        const interval = setInterval(() => {
+            if (idx < mainMessage.length) {
+                setDisplayText(prev => prev + mainMessage.charAt(idx));
+                idx++;
+            } else {
+                clearInterval(interval);
+                setTypingDone(true);
+            }
+        }, 40);
+        return () => clearInterval(interval);
+    }, [gameStage]);
+
+    return (
+        <div className="fixed inset-0 overflow-hidden flex flex-col items-center justify-center p-4 bg-[#04020d] text-white select-none">
+            {/* CRT TV Filter Bezel */}
+            <div className="absolute inset-0 pointer-events-none z-50 crt-screen" style={{
+                background: 'radial-gradient(circle, transparent 70%, rgba(0,0,0,0.65) 100%)',
+                boxShadow: 'inset 0 0 100px rgba(0,0,0,0.8)'
+            }} />
+            <div className="absolute inset-0 pointer-events-none z-50 scanlines" />
+
+            {/* Mute Button */}
+            <button 
+                onClick={handleMuteToggle} 
+                style={{
+                    position: 'absolute', top: '15px', right: '15px', zIndex: 60,
+                    border: '2px solid #10b981', background: 'rgba(16, 185, 129, 0.1)',
+                    color: '#10b981', padding: '0.4rem 0.8rem', fontFamily: 'monospace',
+                    fontSize: '0.7rem', cursor: 'pointer', borderRadius: '4px'
+                }}
+            >
+                {isMuted ? 'UNMUTE AUDIO' : 'MUTE AUDIO'}
+            </button>
+
+            {/* COVER SCREEN */}
+            {gameStage === 'cover' && (
+                <div className="relative flex flex-col items-center justify-center text-center p-6 border-4 border-dashed border-purple-500 bg-[#0d0726]/90 rounded-2xl max-w-sm w-full z-10"
+                    style={{ boxShadow: '0 0 30px rgba(168, 85, 247, 0.4)' }}>
+                    <div style={{ fontSize: '3rem', animation: 'bounceArcade 1s infinite alternate' }}>🎮</div>
+                    <h1 className="text-3xl font-extrabold tracking-wider text-green-400 mb-2 mt-4" style={{ fontFamily: 'monospace', textShadow: '0 0 10px #10b981' }}>
+                        RETRO ARCADE
+                    </h1>
+                    <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#c084fc', marginBottom: '2rem' }}>
+                        INSERT COIN TO START THE MISSION
+                    </p>
+
+                    <button 
+                        onClick={handleInsertCoin}
+                        className="px-6 py-3 bg-[#fbbf24] text-amber-950 font-bold border-4 border-amber-600 rounded-lg active:scale-95 transition-transform"
+                        style={{ fontFamily: 'monospace', fontSize: '1rem', boxShadow: '0 4px 0 #b45309' }}
+                    >
+                        🪙 INSERT COIN
+                    </button>
+                    
+                    <div className="mt-4 text-xs text-slate-400" style={{ fontFamily: 'monospace' }}>
+                        CREDITS: {credit}
+                    </div>
+                </div>
+            )}
+
+            {/* PLAYING SCREEN */}
+            {gameStage === 'playing' && (
+                <div className="relative flex flex-col items-center justify-center z-10 border-4 border-[#334155] rounded-xl overflow-hidden bg-[#090d16]">
+                    <div className="w-full bg-[#1e293b] px-4 py-1 text-center font-bold tracking-widest text-[#fbbf24] border-b-2 border-slate-600 text-xs" style={{ fontFamily: 'monospace' }}>
+                        MISSION 1: BREAK THE BLOCK
+                    </div>
+                    <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto', display: 'block' }} />
+                </div>
+            )}
+
+            {/* REVEALED CONTENT */}
+            {gameStage === 'revealed' && (
+                <div className="relative z-10 max-w-md w-full flex flex-col items-center justify-center bg-[#07050f]/95 border-2 border-purple-500 rounded-2xl p-6 overflow-y-auto max-h-[90vh]"
+                    style={{ boxShadow: '0 0 35px rgba(168,85,247,0.3)' }}>
+                    <div className="text-center w-full mb-4">
+                        <div className="inline-block px-3 py-1 bg-red-600/30 border border-red-500 text-red-300 font-bold text-xs rounded mb-2" style={{ fontFamily: 'monospace' }}>
+                            ★ HIGH SCORE ACQUIRED ★
+                        </div>
+                        <h2 className="text-2xl font-black text-yellow-400" style={{ fontFamily: 'monospace' }}>
+                            {card.title}
+                        </h2>
+                        <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#a78bfa', marginTop: '4px' }}>
+                            FOR: {card.recipient_name}
+                        </p>
+                    </div>
+
+                    {/* Photos in Polaroid Frames */}
+                    {card.photos && card.photos.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-4 my-4">
+                            {card.photos.map((p, idx) => (
+                                <div key={idx} 
+                                    onClick={() => setActivePhoto(p)}
+                                    className="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer transform hover:scale-105 transition-transform"
+                                    style={{ width: '120px' }}
+                                >
+                                    <img src={p} alt="Polaroid capture" className="w-full h-24 object-cover rounded" />
+                                    <div className="text-[0.5rem] font-mono text-center text-slate-500 mt-1">PIC_00{idx+1}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Score Typing Box */}
+                    <div className="w-full p-4 bg-[#110c24] border border-purple-900 rounded-xl font-mono text-xs leading-relaxed text-[#22d3ee] min-h-[100px] border-dashed">
+                        {displayText}
+                        {!typingDone && <span className="animate-pulse">_</span>}
+                    </div>
+
+                    {/* Sender Sign */}
+                    <div className="mt-5 text-right w-full font-mono text-xs text-amber-400">
+                        — FROM: {card.sender_name}
+                    </div>
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL */}
+            {activePhoto && (
+                <div onClick={() => setActivePhoto(null)} className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4">
+                    <div onClick={(e)=>e.stopPropagation()} className="relative max-w-lg w-full bg-slate-950 p-2 border border-slate-700 rounded-2xl">
+                        <button onClick={() => setActivePhoto(null)} className="absolute -top-10 right-0 text-white font-mono text-sm border border-white/30 bg-white/10 px-2 py-1 rounded">CLOSE [X]</button>
+                        <img src={activePhoto} alt="Zoomed capture" className="w-full h-auto rounded-lg max-h-[80vh] object-contain" />
+                    </div>
+                </div>
+            )}
+
+            {/* Styling */}
+            <style>{`
+                @keyframes bounceArcade { 
+                    0% { transform: translateY(0) scale(1); } 
+                    100% { transform: translateY(-8px) scale(1.05); } 
+                }
+                .scanlines {
+                    background: linear-gradient(
+                        rgba(18, 16, 16, 0) 50%, 
+                        rgba(0, 0, 0, 0.25) 50%
+                    );
+                    background-size: 100% 4px;
+                }
+                .crt-screen::before {
+                    content: " ";
+                    display: block;
+                    position: absolute;
+                    top: 0; left: 0; bottom: 0; right: 0;
+                    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+                    z-index: 2;
+                    background-size: 100% 2px, 3px 100%;
+                    pointer-events: none;
+                }
+            `}</style>
+        </div>
+    );
+}
+
+
+function CyberpunkFull({ card }) {
+    const canvasRef = useRef(null);
+    const audioCtxRef = useRef(null);
+    const ambientHumRef = useRef(null);
+    const holdIntervalRef = useRef(null);
+    const scanOscRef = useRef(null);
+    const scanGainRef = useRef(null);
+
+    const [decryptProgress, setDecryptProgress] = useState(0);
+    const [gameStage, setGameStage] = useState('cover'); // 'cover' | 'decrypted'
+    const [isMuted, setIsMuted] = useState(true);
+    const [displayText, setDisplayText] = useState('');
+    const [typingDone, setTypingDone] = useState(false);
+    const [activePhoto, setActivePhoto] = useState(null);
+    const [laserY, setLaserY] = useState(0);
+
+    const mainMessage = card.messages?.[0] || 'DECRYPTION COMPLETE. Accessing high-priority birthday greetings. May your next cycle be full of high-tech adventures and positive energy!';
+
+    // Sound Synthesis (Web Audio API)
+    const initAudio = () => {
+        if (!audioCtxRef.current) {
+            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+            audioCtxRef.current.resume();
+        }
+        return audioCtxRef.current;
+    };
+
+    const startAmbientHum = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.value = 55; // Low A hum
+            
+            filter.type = 'lowpass';
+            filter.frequency.value = 120;
+            
+            gain.gain.value = 0.05;
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            ambientHumRef.current = { osc, gain };
+        } catch(e){}
+    };
+
+    const stopAmbientHum = () => {
+        if (ambientHumRef.current) {
+            try {
+                ambientHumRef.current.osc.stop();
+            } catch(e){}
+            ambientHumRef.current = null;
+        }
+    };
+
+    const playSuccessChime = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(880, now); // A5
+            osc1.frequency.exponentialRampToValueAtTime(1760, now + 0.4); // A6
+            
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(440, now); // A4
+            osc2.frequency.exponentialRampToValueAtTime(1320, now + 0.45); // E6
+
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc1.start(now);
+            osc1.stop(now + 0.8);
+            osc2.start(now);
+            osc2.stop(now + 0.8);
+        } catch(e){}
+    };
+
+    const startScanSynth = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.value = 100;
+            gain.gain.value = 0.02;
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            
+            scanOscRef.current = osc;
+            scanGainRef.current = gain;
+        } catch(e){}
+    };
+
+    const updateScanSynth = (prog) => {
+        if (scanOscRef.current && scanGainRef.current) {
+            const ctx = initAudio();
+            const freq = 100 + (prog * 6); // Sweep from 100Hz up to 700Hz
+            scanOscRef.current.frequency.setValueAtTime(freq, ctx.currentTime);
+            scanGainRef.current.gain.setValueAtTime(0.02 + (prog * 0.0006), ctx.currentTime);
+        }
+    };
+
+    const stopScanSynth = () => {
+        if (scanOscRef.current) {
+            try {
+                scanOscRef.current.stop();
+            } catch(e){}
+            scanOscRef.current = null;
+        }
+        scanGainRef.current = null;
+    };
+
+    // Scan Hold interaction
+    const handleScanStart = (e) => {
+        e.preventDefault();
+        initAudio();
+        startScanSynth();
+        
+        if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+        let curProg = 0;
+        
+        holdIntervalRef.current = setInterval(() => {
+            curProg += 4;
+            if (curProg >= 100) {
+                curProg = 100;
+                setDecryptProgress(100);
+                clearInterval(holdIntervalRef.current);
+                stopScanSynth();
+                playSuccessChime();
+                setTimeout(() => {
+                    setGameStage('decrypted');
+                    startAmbientHum();
+                }, 500);
+            } else {
+                setDecryptProgress(curProg);
+                updateScanSynth(curProg);
+            }
+        }, 60);
+    };
+
+    const handleScanEnd = () => {
+        if (holdIntervalRef.current) {
+            clearInterval(holdIntervalRef.current);
+            holdIntervalRef.current = null;
+        }
+        stopScanSynth();
+        setDecryptProgress(0);
+    };
+
+    const handleMuteToggle = () => {
+        const nextMute = !isMuted;
+        setIsMuted(nextMute);
+        if (!nextMute) {
+            initAudio();
+            if (gameStage === 'decrypted') {
+                startAmbientHum();
+            }
+        } else {
+            stopAmbientHum();
+            stopScanSynth();
+        }
+    };
+
+    // Cyber Node Grid Canvas
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+
+        const handleResize = () => {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+
+        const nodes = Array.from({ length: 45 }, () => ({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() - 0.5) * 1.5,
+            r: Math.random() * 2 + 1
+        }));
+
+        let mouse = { x: null, y: null };
+        const handleMouseMove = (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        };
+        const handleMouseLeave = () => {
+            mouse.x = null;
+            mouse.y = null;
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseleave', handleMouseLeave);
+
+        const loop = () => {
+            ctx.fillStyle = '#030712';
+            ctx.fillRect(0, 0, W, H);
+
+            // Draw grid lines (subtle background grid)
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.04)';
+            ctx.lineWidth = 1;
+            const gridSz = 40;
+            for (let x = 0; x < W; x += gridSz) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+            }
+            for (let y = 0; y < H; y += gridSz) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+            }
+
+            // Draw nodes
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
+            nodes.forEach(n => {
+                n.x += n.vx;
+                n.y += n.vy;
+                if (n.x < 0 || n.x > W) n.vx *= -1;
+                if (n.y < 0 || n.y > H) n.vy *= -1;
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw connection lines
+            ctx.lineWidth = 0.8;
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+                    if (dist < 100) {
+                        ctx.strokeStyle = 'rgba(6, 182, 212, ' + (1 - dist / 100) * 0.15 + ')';
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[i].x, nodes[i].y);
+                        ctx.lineTo(nodes[j].x, nodes[j].y);
+                        ctx.stroke();
+                    }
+                }
+
+                // Connect to mouse
+                if (mouse.x !== null) {
+                    const distMouse = Math.hypot(nodes[i].x - mouse.x, nodes[i].y - mouse.y);
+                    if (distMouse < 140) {
+                        ctx.strokeStyle = 'rgba(236, 72, 153, ' + (1 - distMouse / 140) * 0.35 + ')';
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[i].x, nodes[i].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            animId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        return () => {
+            cancelAnimationFrame(animId);
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseleave', handleMouseLeave);
+        };
+    }, []);
+
+    // Laser scan sweep line (cover animation)
+    useEffect(() => {
+        if (gameStage !== 'cover') return;
+        let dir = 1;
+        let y = 0;
+        const intv = setInterval(() => {
+            y += dir * 2.5;
+            if (y > 100 || y < 0) dir *= -1;
+            setLaserY(y);
+        }, 30);
+        return () => clearInterval(intv);
+    }, [gameStage]);
+
+    // Typewriter message
+    useEffect(() => {
+        if (gameStage !== 'decrypted') return;
+        let idx = 0;
+        setDisplayText('');
+        setTypingDone(false);
+        const interval = setInterval(() => {
+            if (idx < mainMessage.length) {
+                setDisplayText(prev => prev + mainMessage.charAt(idx));
+                idx++;
+            } else {
+                clearInterval(interval);
+                setTypingDone(true);
+            }
+        }, 35);
+        return () => clearInterval(interval);
+    }, [gameStage]);
+
+    return (
+        <div className="fixed inset-0 overflow-hidden flex flex-col items-center justify-center p-4 bg-[#030712] text-cyan-400 select-none">
+            {/* Cyberpunk canvas background grid */}
+            <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }} />
+
+            {/* Mute Button */}
+            <button 
+                onClick={handleMuteToggle} 
+                style={{
+                    position: 'absolute', top: '15px', right: '15px', zIndex: 60,
+                    border: '1px solid rgba(6, 182, 212, 0.4)', background: 'rgba(6, 182, 212, 0.1)',
+                    color: '#22d3ee', padding: '0.4rem 0.8rem', fontFamily: 'monospace',
+                    fontSize: '0.7rem', cursor: 'pointer', borderRadius: '4px', textShadow: '0 0 5px #06b6d4'
+                }}
+            >
+                {isMuted ? 'UNMUTE AUDIO' : 'MUTE AUDIO'}
+            </button>
+
+            {/* DECRYPT SCANNER LAYER */}
+            {gameStage === 'cover' && (
+                <div className="relative flex flex-col items-center justify-center text-center p-6 border border-cyan-500/30 bg-slate-950/85 backdrop-blur-md rounded-2xl max-w-sm w-full z-10"
+                    style={{ boxShadow: '0 0 35px rgba(6,182,212,0.15)' }}>
+                    
+                    {/* Laser line overlay inside the box */}
+                    <div style={{
+                        position: 'absolute', left: 0, right: 0, height: '2px',
+                        background: '#ec4899', boxShadow: '0 0 10px #ec4899',
+                        top: `${laserY}%`, pointerEvents: 'none', transition: 'top 0.05s linear'
+                    }} />
+
+                    <h1 className="text-2xl font-bold tracking-widest text-cyan-300 mb-2" style={{ fontFamily: 'monospace', textShadow: '0 0 8px #06b6d4' }}>
+                        SECURE TERMINAL
+                    </h1>
+                    <p style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: 'rgba(34, 211, 238, 0.6)', marginBottom: '2rem' }}>
+                        HOLD SCANNER FOR BIOMETRIC ACCESS
+                    </p>
+
+                    {/* Fingerprint scan trigger */}
+                    <div className="relative w-28 h-28 rounded-full border-2 border-cyan-500/40 bg-[#070e22] flex items-center justify-center cursor-pointer select-none active:scale-95 transition-transform"
+                        onMouseDown={handleScanStart}
+                        onMouseUp={handleScanEnd}
+                        onMouseLeave={handleScanEnd}
+                        onTouchStart={handleScanStart}
+                        onTouchEnd={handleScanEnd}
+                        style={{
+                            boxShadow: decryptProgress > 0 ? '0 0 25px rgba(236,72,153,0.5)' : 'none',
+                            borderColor: decryptProgress > 0 ? '#ec4899' : 'rgba(6, 182, 212, 0.4)'
+                        }}
+                    >
+                        <div className="text-5xl" style={{ opacity: decryptProgress > 0 ? 1.0 : 0.5 }}>
+                            👤
+                        </div>
+                        {/* Ring progress border */}
+                        {decryptProgress > 0 && (
+                            <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                                <circle cx="56" cy="56" r="52" fill="transparent" stroke="#ec4899" strokeWidth="4"
+                                    strokeDasharray={2 * Math.PI * 52}
+                                    strokeDashoffset={2 * Math.PI * 52 * (1 - decryptProgress / 100)}
+                                />
+                            </svg>
+                        )}
+                    </div>
+
+                    <div className="mt-6 w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-cyan-500/20">
+                        <div className="bg-pink-500 h-full transition-all duration-75" style={{ width: `${decryptProgress}%` }} />
+                    </div>
+
+                    <div className="mt-2 text-xs font-mono text-cyan-300">
+                        DECRYPTING: {decryptProgress}%
+                    </div>
+                </div>
+            )}
+
+            {/* DECRYPTED REVEALED WRAPPER */}
+            {gameStage === 'decrypted' && (
+                <div className="relative z-10 max-w-md w-full flex flex-col items-center justify-center bg-slate-950/90 border border-cyan-500/40 backdrop-blur-lg rounded-2xl p-6 overflow-y-auto max-h-[90vh]"
+                    style={{ boxShadow: '0 0 45px rgba(6,182,212,0.25)' }}>
+                    
+                    <div className="text-center w-full mb-4">
+                        <div className="inline-block px-3 py-1 bg-pink-500/20 border border-pink-500 text-pink-300 font-bold text-xs rounded mb-2" style={{ fontFamily: 'monospace' }}>
+                            [ ACCESS GRANTED ]
+                        </div>
+                        <h2 className="text-2xl font-black text-cyan-300" style={{ fontFamily: 'monospace', textShadow: '0 0 10px rgba(6,182,212,0.5)' }}>
+                            {card.title}
+                        </h2>
+                        <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(34, 211, 238, 0.7)', marginTop: '4px' }}>
+                            RECIPIENT_ID: {card.recipient_name}
+                        </p>
+                    </div>
+
+                    {/* Digital Glitched Photo gallery */}
+                    {card.photos && card.photos.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-4 my-4">
+                            {card.photos.map((p, idx) => (
+                                <div key={idx} 
+                                    onClick={() => setActivePhoto(p)}
+                                    className="p-1 border border-cyan-500/30 rounded bg-slate-900 cursor-pointer overflow-hidden transform hover:scale-105 transition-transform"
+                                    style={{ width: '110px' }}
+                                >
+                                    <div className="relative">
+                                        <img src={p} alt="Secure content capture" className="w-full h-24 object-cover rounded" />
+                                        <div className="absolute inset-0 bg-cyan-500/10 pointer-events-none mix-blend-overlay" />
+                                    </div>
+                                    <div className="text-[0.55rem] font-mono text-center text-cyan-500/60 mt-1">FRAME_DATA_0{idx+1}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Console Typewriter */}
+                    <div className="w-full p-4 bg-[#020617] border border-cyan-500/30 rounded-xl font-mono text-xs leading-relaxed text-cyan-300 min-h-[120px] shadow-inner"
+                        style={{ borderLeft: '3px solid #ec4899' }}>
+                        <span style={{ color: '#ec4899', marginRight: '5px' }}>$</span>
+                        {displayText}
+                        {!typingDone && <span className="animate-ping">|</span>}
+                    </div>
+
+                    {/* Sign-off */}
+                    <div className="mt-5 text-right w-full font-mono text-xs text-pink-400">
+                        // SENDER_SIGN: {card.sender_name}
+                    </div>
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL */}
+            {activePhoto && (
+                <div onClick={() => setActivePhoto(null)} className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
+                    <div onClick={(e)=>e.stopPropagation()} className="relative max-w-lg w-full bg-slate-950 p-2 border border-cyan-500/50 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.4)]">
+                        <button onClick={() => setActivePhoto(null)} className="absolute -top-10 right-0 text-cyan-400 font-mono text-sm border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 rounded">CLOSE [X]</button>
+                        <img src={activePhoto} alt="Decrypted capture" className="w-full h-auto rounded-lg max-h-[80vh] object-contain" />
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+
+function BioluminescentFull({ card }) {
+    const canvasRef = useRef(null);
+    const audioCtxRef = useRef(null);
+    const ambientHumRef = useRef(null);
+    const harpTimeoutRef = useRef(null);
+
+    const [gameStage, setGameStage] = useState('cover'); // 'cover' | 'opened'
+    const [hatchSpin, setHatchSpin] = useState(0);
+    const [chestOpen, setChestOpen] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
+    const [displayText, setDisplayText] = useState('');
+    const [typingDone, setTypingDone] = useState(false);
+    const [activePhoto, setActivePhoto] = useState(null);
+
+    const mainMessage = card.messages?.[0] || 'MESSAGE FOUND IN THE DEEP: Semoga keindahan rahasia samudera menyertai setiap langkah perjalanan hebatmu di tahun yang baru ini!';
+
+    // Sound Synthesis (Web Audio API)
+    const initAudio = () => {
+        if (!audioCtxRef.current) {
+            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+            audioCtxRef.current.resume();
+        }
+        return audioCtxRef.current;
+    };
+
+    const playHatchCreakAndSteam = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            
+            // 1. Heavy creak osc
+            const creakOsc = ctx.createOscillator();
+            const creakGain = ctx.createGain();
+            creakOsc.type = 'sawtooth';
+            creakOsc.frequency.setValueAtTime(80, now);
+            creakOsc.frequency.linearRampToValueAtTime(35, now + 0.8);
+            creakGain.gain.setValueAtTime(0, now);
+            creakGain.gain.linearRampToValueAtTime(0.08, now + 0.1);
+            creakGain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+            creakOsc.connect(creakGain);
+            creakGain.connect(ctx.destination);
+            creakOsc.start(now);
+            creakOsc.stop(now + 0.8);
+
+            // 2. Steam hiss (noise)
+            const bufferSize = ctx.sampleRate * 1.5;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(2000, now);
+            filter.frequency.exponentialRampToValueAtTime(400, now + 1.2);
+            
+            const noiseGain = ctx.createGain();
+            noiseGain.gain.setValueAtTime(0, now);
+            noiseGain.gain.linearRampToValueAtTime(0.12, now + 0.15);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+            
+            noise.connect(filter);
+            filter.connect(noiseGain);
+            noiseGain.connect(ctx.destination);
+            noise.start(now);
+            noise.stop(now + 1.5);
+        } catch(e){}
+    };
+
+    const playSonarPing = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1450, now);
+
+            filter.type = 'bandpass';
+            filter.Q.value = 15;
+            filter.frequency.setValueAtTime(1450, now);
+
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.15, now + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.8);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + 3.0);
+        } catch(e){}
+    };
+
+    const playBubblePop = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(900, now + 0.08);
+
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } catch(e){}
+    };
+
+    const playChestOpenSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            
+            // Wooden friction/latch creak
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.linearRampToValueAtTime(70, now + 0.6);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.6);
+            
+            // Success chime magic harp splash
+            setTimeout(() => {
+                const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const oscH = ctx.createOscillator();
+                    const gainH = ctx.createGain();
+                    oscH.type = 'sine';
+                    oscH.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+                    gainH.gain.setValueAtTime(0, ctx.currentTime);
+                    gainH.gain.linearRampToValueAtTime(0.04, ctx.currentTime + idx * 0.08 + 0.01);
+                    gainH.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.08 + 0.6);
+                    oscH.connect(gainH);
+                    gainH.connect(ctx.destination);
+                    oscH.start(ctx.currentTime + idx * 0.08);
+                    oscH.stop(ctx.currentTime + idx * 0.08 + 0.6);
+                });
+            }, 100);
+        } catch(e){}
+    };
+
+    // Ambient Deep Sea sound loops
+    const startAmbientHum = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            
+            // Low water rumble
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 65;
+            gain.gain.value = 0.08;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            ambientHumRef.current = { osc, gain };
+
+            // Start playing periodic harp drone arpeggios
+            const playHarpCascade = () => {
+                if (isMuted) return;
+                const baseNotes = [130.81, 164.81, 196.00, 220.00, 261.63, 329.63, 392.00];
+                const root = baseNotes[Math.floor(Math.random() * baseNotes.length)];
+                const chords = [1, 1.2, 1.5, 1.8, 2.0]; // intervals
+                
+                chords.forEach((mult, idx) => {
+                    const hOsc = ctx.createOscillator();
+                    const hGain = ctx.createGain();
+                    hOsc.type = 'sine';
+                    hOsc.frequency.setValueAtTime(root * mult, ctx.currentTime + idx * 0.15);
+                    hGain.gain.setValueAtTime(0, ctx.currentTime);
+                    hGain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + idx * 0.15 + 0.02);
+                    hGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.15 + 1.8);
+                    
+                    hOsc.connect(hGain);
+                    hGain.connect(ctx.destination);
+                    hOsc.start(ctx.currentTime + idx * 0.15);
+                    hOsc.stop(ctx.currentTime + idx * 0.15 + 2.0);
+                });
+                
+                harpTimeoutRef.current = setTimeout(playHarpCascade, 9000 + Math.random() * 6000);
+            };
+            
+            // Initial delay before first ambient harp loop
+            harpTimeoutRef.current = setTimeout(playHarpCascade, 3000);
+        } catch(e){}
+    };
+
+    const stopAmbientHum = () => {
+        if (ambientHumRef.current) {
+            try {
+                ambientHumRef.current.osc.stop();
+            } catch(e){}
+            ambientHumRef.current = null;
+        }
+        if (harpTimeoutRef.current) {
+            clearTimeout(harpTimeoutRef.current);
+            harpTimeoutRef.current = null;
+        }
+    };
+
+    const handleMuteToggle = () => {
+        const nextMute = !isMuted;
+        setIsMuted(nextMute);
+        if (!nextMute) {
+            initAudio();
+            if (gameStage === 'opened') {
+                startAmbientHum();
+            }
+        } else {
+            stopAmbientHum();
+        }
+    };
+
+    const handleHatchClick = () => {
+        playHatchCreakAndSteam();
+        setHatchSpin(360);
+        setTimeout(() => {
+            setGameStage('opened');
+            startAmbientHum();
+        }, 1200);
+    };
+
+    const handleChestClick = () => {
+        if (chestOpen) return;
+        setChestOpen(true);
+        playChestOpenSound();
+    };
+
+    // Bioluminescent Canvas (Jellyfish + Bubbles + Ripples)
+    useEffect(() => {
+        if (gameStage !== 'opened') return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+
+        const handleResize = () => {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+
+        // Neon Jellyfish objects
+        const jellies = Array.from({ length: 6 }, (_, i) => ({
+            x: Math.random() * W,
+            y: H * 0.4 + Math.random() * H * 0.4,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: -0.2 - Math.random() * 0.4,
+            size: 20 + Math.random() * 15,
+            hue: [180, 280, 310, 45][i % 4], // neon cyan, purple, pink, yellow
+            wobbleSpeed: 0.02 + Math.random() * 0.02,
+            t: Math.random() * 10,
+            tentacles: Array.from({ length: 5 }, () => ({ length: 40 + Math.random() * 30, phase: Math.random() * Math.PI }))
+        }));
+
+        // Bubble particles
+        const bubbles = Array.from({ length: 30 }, () => ({
+            x: Math.random() * W,
+            y: H + Math.random() * 100,
+            r: Math.random() * 4 + 1.5,
+            speed: 0.8 + Math.random() * 1.2,
+            wobble: Math.random() * 10,
+            wobbleSpeed: 0.02 + Math.random() * 0.03
+        }));
+
+        // Ripples
+        let ripples = [];
+
+        const handleCanvasClick = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const cx = e.clientX - rect.left;
+            const cy = e.clientY - rect.top;
+            
+            ripples.push({ x: cx, y: cy, r: 0, maxR: 120, alpha: 0.8 });
+            playSonarPing();
+            playBubblePop();
+
+            // Push jellies away from click point
+            jellies.forEach(j => {
+                const dist = Math.hypot(j.x - cx, j.y - cy);
+                if (dist < 150) {
+                    const angle = Math.atan2(j.y - cy, j.x - cx);
+                    j.vx += Math.cos(angle) * 2.5;
+                    j.vy += Math.sin(angle) * 1.5;
+                }
+            });
+        };
+        canvas.addEventListener('click', handleCanvasClick);
+
+        const loop = () => {
+            ctx.fillStyle = '#02101b';
+            ctx.fillRect(0, 0, W, H);
+
+            // Draw deep ocean light gradient beams
+            const lightGrad = ctx.createLinearGradient(W/2, 0, W/2, H);
+            lightGrad.addColorStop(0, 'rgba(6, 182, 212, 0.08)');
+            lightGrad.addColorStop(0.5, 'rgba(6, 182, 212, 0.01)');
+            lightGrad.addColorStop(1, 'transparent');
+            ctx.fillStyle = lightGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Update & Draw Bubbles
+            ctx.strokeStyle = 'rgba(34, 211, 238, 0.35)';
+            ctx.lineWidth = 1.2;
+            bubbles.forEach(b => {
+                b.y -= b.speed;
+                b.wobble += b.wobbleSpeed;
+                const bx = b.x + Math.sin(b.wobble) * 3;
+                if (b.y < -20) {
+                    b.y = H + Math.random() * 50;
+                    b.x = Math.random() * W;
+                }
+                ctx.beginPath();
+                ctx.arc(bx, b.y, b.r, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Small shine spot on bubble
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.beginPath();
+                ctx.arc(bx - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.25, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Update & Draw Ripples
+            ripples.forEach((r, idx) => {
+                r.r += 2.5;
+                r.alpha -= 0.015;
+                if (r.alpha <= 0) {
+                    ripples.splice(idx, 1);
+                    return;
+                }
+                ctx.strokeStyle = 'rgba(6, 182, 212, ' + r.alpha + ')';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+
+            // Update & Draw Jellyfish
+            jellies.forEach(j => {
+                j.t += j.wobbleSpeed;
+                j.x += j.vx;
+                j.y += j.vy;
+
+                // Friction
+                j.vx *= 0.96;
+                if (Math.abs(j.vy) > 0.4) j.vy *= 0.97;
+
+                // Wrap or bounce boundaries
+                if (j.x < -j.size) j.x = W + j.size;
+                if (j.x > W + j.size) j.x = -j.size;
+                if (j.y < -j.size) j.y = H + j.size;
+                if (j.y > H + j.size) j.y = -j.size;
+
+                const wobble = Math.sin(j.t);
+                const currentWidth = j.size * (1 + wobble * 0.12);
+                const currentHeight = j.size * (1 - wobble * 0.15);
+
+                // Draw Jellyfish Tentacles (Bezier curves that sway)
+                ctx.strokeStyle = 'hsla(' + j.hue + ', 90%, 75%, 0.45)';
+                ctx.lineWidth = 1.8;
+                j.tentacles.forEach((t, idx) => {
+                    const txOffset = ((idx - 2) * currentWidth) * 0.3;
+                    const startX = j.x + txOffset;
+                    const startY = j.y + currentHeight * 0.3;
+
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    
+                    // Bezier points swaying with sine waves
+                    const cp1x = startX + Math.sin(j.t + t.phase) * 12;
+                    const cp1y = startY + t.length * 0.35;
+                    const cp2x = startX + Math.cos(j.t * 0.8 + t.phase) * 16;
+                    const cp2y = startY + t.length * 0.7;
+                    const endX = startX + Math.sin(j.t * 0.6 + t.phase) * 20;
+                    const endY = startY + t.length;
+
+                    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+                    ctx.stroke();
+                });
+
+                // Draw Glowing Head/Cap
+                const grad = ctx.createRadialGradient(j.x, j.y - currentHeight * 0.2, 0, j.x, j.y, currentWidth);
+                grad.addColorStop(0, 'hsla(' + j.hue + ', 95%, 85%, 0.85)');
+                grad.addColorStop(0.5, 'hsla(' + j.hue + ', 80%, 60%, 0.6)');
+                grad.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.ellipse(j.x, j.y, currentWidth, currentHeight, 0, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            animId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        return () => {
+            cancelAnimationFrame(animId);
+            canvas.removeEventListener('click', handleCanvasClick);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [gameStage]);
+
+    // Typewriter message inside pearl bubble
+    useEffect(() => {
+        if (!chestOpen) return;
+        let idx = 0;
+        setDisplayText('');
+        setTypingDone(false);
+        const interval = setInterval(() => {
+            if (idx < mainMessage.length) {
+                setDisplayText(prev => prev + mainMessage.charAt(idx));
+                idx++;
+            } else {
+                clearInterval(interval);
+                setTypingDone(true);
+            }
+        }, 40);
+        return () => clearInterval(interval);
+    }, [chestOpen]);
+
+    return (
+        <div className="fixed inset-0 overflow-hidden flex flex-col items-center justify-center bg-[#020b14] text-cyan-200 select-none">
+            {/* Viewport content canvas */}
+            {gameStage === 'opened' && (
+                <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 1, cursor: 'pointer' }} />
+            )}
+
+            {/* Mute Button */}
+            <button 
+                onClick={handleMuteToggle} 
+                style={{
+                    position: 'absolute', top: '15px', right: '15px', zIndex: 60,
+                    border: '1px solid rgba(6, 182, 212, 0.4)', background: 'rgba(6, 182, 212, 0.1)',
+                    color: '#06b6d4', padding: '0.4rem 0.8rem', fontFamily: 'monospace',
+                    fontSize: '0.7rem', cursor: 'pointer', borderRadius: '4px', textShadow: '0 0 4px #06b6d4'
+                }}
+            >
+                {isMuted ? 'UNMUTE AUDIO' : 'MUTE AUDIO'}
+            </button>
+
+            {/* COVER SCREEN: Submarine cabin viewport door lock */}
+            {gameStage === 'cover' && (
+                <div className="relative flex flex-col items-center justify-center text-center p-8 z-10 w-full h-full"
+                    style={{ background: 'radial-gradient(circle, #021a2c 0%, #010811 90%)' }}>
+                    
+                    {/* Viewport Frame */}
+                    <div className="relative w-80 h-80 rounded-full border-[10px] border-[#083344] bg-[#02111d] flex flex-col items-center justify-center shadow-[0_0_50px_rgba(6,182,212,0.3),inset_0_0_30px_rgba(0,0,0,0.9)]">
+                        {/* Rivets */}
+                        {[...Array(8)].map((_, i) => (
+                            <div key={i} className="absolute w-3 h-3 rounded-full bg-cyan-400/40" style={{
+                                transform: `rotate(${i * 45}deg) translateY(-145px)`
+                            }} />
+                        ))}
+
+                        {/* Hatch locking steering wheel lever */}
+                        <div 
+                            onClick={handleHatchClick}
+                            className="relative w-44 h-44 rounded-full border-8 border-cyan-600 flex items-center justify-center cursor-pointer hover:border-cyan-400 active:scale-95 transition-all duration-1000"
+                            style={{ 
+                                transform: `rotate(${hatchSpin}deg)`,
+                                boxShadow: '0 0 25px rgba(6,182,212,0.4)',
+                                background: 'radial-gradient(circle, #033043 30%, #021526 80%)'
+                            }}
+                        >
+                            {/* Wheel Spokes */}
+                            <div className="absolute w-2 h-full bg-cyan-600" />
+                            <div className="absolute h-2 w-full bg-cyan-600" />
+                            <div className="absolute w-12 h-12 rounded-full bg-cyan-500 border-4 border-cyan-700 flex items-center justify-center">
+                                <span className="text-xl">🔒</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 text-[0.62rem] font-mono tracking-[4px] text-cyan-300 animate-pulse">
+                            CLICK WHEEL TO DIVE
+                        </div>
+                    </div>
+
+                    <div className="mt-8">
+                        <h1 className="text-3xl font-extrabold tracking-[8px] text-cyan-400" style={{ fontFamily: 'monospace', textShadow: '0 0 10px #06b6d4' }}>
+                            BIOLUMINESCENT
+                        </h1>
+                        <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#0891b2', marginTop: '6px' }}>
+                            SUBSEA VIEWPORT ACCESS MODULE
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* OPENED DEEP SEA WRAPPER */}
+            {gameStage === 'opened' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-between p-6 z-10 pointer-events-none">
+                    
+                    {/* Header HUD */}
+                    <div className="text-center w-full mt-4">
+                        <div className="inline-block px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-bold text-xs rounded mb-1" style={{ fontFamily: 'monospace' }}>
+                            ✦ DEEP OCEAN VIEWPORT ACTIVE ✦
+                        </div>
+                        <p style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(6, 182, 212, 0.5)' }}>
+                            TAP WATER TO SEND SONAR PING
+                        </p>
+                    </div>
+
+                    {/* TREASURE CHEST IN THE ABYSS */}
+                    <div className="w-full flex flex-col items-center justify-center pointer-events-auto mb-16">
+                        {!chestOpen ? (
+                            <div 
+                                onClick={handleChestClick}
+                                className="flex flex-col items-center justify-center cursor-pointer transform hover:scale-105 transition-transform"
+                            >
+                                <div className="text-7xl filter drop-shadow-[0_0_15px_rgba(234,179,8,0.4)] animate-bounce" style={{ animationDuration: '3s' }}>
+                                    📦
+                                </div>
+                                <div className="mt-3 px-4 py-1.5 bg-[#021526]/80 border border-teal-500/30 rounded text-cyan-300" style={{ 
+                                    fontFamily: 'monospace', fontSize: '0.55rem', letterSpacing: '2px', textTransform: 'uppercase', boxShadow: '0 0 10px rgba(6, 182, 212, 0.2)' 
+                                }}>
+                                    Open Subsea Chest
+                                </div>
+                            </div>
+                        ) : (
+                            // Pearl Bubble revealed
+                            <div className="relative max-w-sm w-full flex flex-col items-center justify-center p-6 rounded-full border border-cyan-300/40 bg-cyan-950/75 backdrop-blur-md text-center"
+                                style={{
+                                    boxShadow: '0 0 50px rgba(6,182,212,0.4), inset 0 0 30px rgba(255,255,255,0.1)',
+                                    aspectRatio: '1/1',
+                                    animation: 'pearlBubbleFloating 6s ease-in-out infinite'
+                                }}
+                            >
+                                <div className="w-full max-h-[85%] overflow-y-auto flex flex-col items-center justify-center px-4">
+                                    <h2 className="text-xl font-bold text-cyan-200" style={{ fontFamily: 'monospace', textShadow: '0 0 8px rgba(6,182,212,0.5)' }}>
+                                        {card.title}
+                                    </h2>
+                                    <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a5f3fc', margin: '4px 0 10px 0' }}>
+                                        TO: {card.recipient_name}
+                                    </p>
+
+                                    {/* Moments Images inside Pearl */}
+                                    {card.photos && card.photos.length > 0 && (
+                                        <div className="flex justify-center gap-2 mb-3">
+                                            {card.photos.map((p, idx) => (
+                                                <div key={idx} 
+                                                    onClick={() => setActivePhoto(p)}
+                                                    className="w-14 h-14 border border-cyan-300/30 rounded-full overflow-hidden cursor-pointer transform hover:scale-110 transition-transform"
+                                                >
+                                                    <img src={p} alt="Sea moment" className="w-full h-full object-cover" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Pearl Typewriter text */}
+                                    <div className="font-mono text-[0.7rem] leading-relaxed text-cyan-100 max-h-[100px] overflow-y-auto pr-1">
+                                        {displayText}
+                                        {!typingDone && <span className="animate-pulse">|</span>}
+                                    </div>
+
+                                    <div className="mt-4 text-xs font-mono text-amber-400">
+                                        — {card.sender_name}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL */}
+            {activePhoto && (
+                <div onClick={() => setActivePhoto(null)} className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
+                    <div onClick={(e)=>e.stopPropagation()} className="relative max-w-lg w-full bg-[#02101b] p-2 border border-cyan-500/50 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.4)]">
+                        <button onClick={() => setActivePhoto(null)} className="absolute -top-10 right-0 text-cyan-400 font-mono text-sm border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 rounded">CLOSE [X]</button>
+                        <img src={activePhoto} alt="Sea capture" className="w-full h-auto rounded-lg max-h-[80vh] object-contain" />
+                    </div>
+                </div>
+            )}
+
+            {/* Keyframe animations */}
+            <style>{`
+                @keyframes pearlBubbleFloating {
+                    0%, 100% { transform: translateY(0) scale(1); }
+                    50% { transform: translateY(-12px) scale(1.02); }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+
+function MysticForestFull({ card }) {
+    const canvasRef = useRef(null);
+    const audioCtxRef = useRef(null);
+    const cricketIntervalRef = useRef(null);
+
+    const [scrollState, setScrollState] = useState('closed'); // 'closed' | 'untied' | 'open'
+    const [isMuted, setIsMuted] = useState(true);
+    const [displayText, setDisplayText] = useState('');
+    const [typingDone, setTypingDone] = useState(false);
+    const [activePhoto, setActivePhoto] = useState(null);
+    const [activeLanternMsg, setActiveLanternMsg] = useState(null);
+
+    const mainMessage = card.messages?.[0] || 'PESAN DARI HUTAN MISTIK: Semoga keajaiban dan cahaya lentera harapan menerangi jalan hidupmu dengan penuh kebahagiaan dan kesuksesan!';
+
+    // Sound Synthesis (Web Audio API)
+    const initAudio = () => {
+        if (!audioCtxRef.current) {
+            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+            audioCtxRef.current.resume();
+        }
+        return audioCtxRef.current;
+    };
+
+    const playMagicChime = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            
+            // Magical arpeggiated sweep
+            const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98]; // C5 E5 G5 C6 E6 G6
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.05, now + idx * 0.05 + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.05 + 0.5);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + idx * 0.05);
+                osc.stop(now + idx * 0.05 + 0.5);
+            });
+        } catch(e){}
+    };
+
+    const playScrollRustle = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            
+            // White noise rustle
+            const bufferSize = ctx.sampleRate * 0.6;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+            
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(800, now);
+            filter.frequency.exponentialRampToValueAtTime(300, now + 0.5);
+            
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.06, now + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+            
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            noise.start(now);
+            noise.stop(now + 0.6);
+        } catch(e){}
+    };
+
+    const playLanternChime = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(659.25, now); // E5
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.4); // A5
+            
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.08, now + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.start(now);
+            osc.stop(now + 1.2);
+        } catch(e){}
+    };
+
+    const startCricketLoop = () => {
+        if (isMuted) return;
+        const ctx = initAudio();
+        
+        cricketIntervalRef.current = setInterval(() => {
+            if (isMuted) return;
+            try {
+                const now = ctx.currentTime;
+                // Fast cricket chirps: 3 bursts of 15ms high pitch sine sweeps
+                for (let i = 0; i < 3; i++) {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(4200, now + i * 0.05);
+                    osc.frequency.exponentialRampToValueAtTime(3200, now + i * 0.05 + 0.02);
+                    
+                    gain.gain.setValueAtTime(0.008, now + i * 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.05 + 0.02);
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + i * 0.05);
+                    osc.stop(now + i * 0.05 + 0.03);
+                }
+            } catch(e){}
+        }, 1800 + Math.random() * 800);
+    };
+
+    const stopCricketLoop = () => {
+        if (cricketIntervalRef.current) {
+            clearInterval(cricketIntervalRef.current);
+            cricketIntervalRef.current = null;
+        }
+    };
+
+    const handleMuteToggle = () => {
+        const nextMute = !isMuted;
+        setIsMuted(nextMute);
+        if (!nextMute) {
+            initAudio();
+            if (scrollState === 'open') {
+                startCricketLoop();
+            }
+        } else {
+            stopCricketLoop();
+        }
+    };
+
+    const handleUntieRibbon = () => {
+        playScrollRustle();
+        setScrollState('untied');
+    };
+
+    const handleUnrollScroll = () => {
+        playMagicChime();
+        setScrollState('open');
+        startCricketLoop();
+    };
+
+    // Mystic Forest Fireflies Canvas
+    useEffect(() => {
+        if (scrollState !== 'open') return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+
+        const handleResize = () => {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+
+        // Firefly particle objects
+        const fireflies = Array.from({ length: 25 }, () => ({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            angle: Math.random() * Math.PI * 2,
+            speed: 0.3 + Math.random() * 0.4,
+            r: Math.random() * 2.5 + 1.2,
+            wobble: Math.random() * 10,
+            pulseSpeed: 0.01 + Math.random() * 0.02,
+            pulsePhase: Math.random() * Math.PI
+        }));
+
+        let mouse = { x: null, y: null };
+        const sparkles = [];
+
+        const handleMouseMove = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+
+            // Spawn sparkles on move
+            if (Math.random() < 0.3) {
+                sparkles.push({
+                    x: mouse.x,
+                    y: mouse.y,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: (Math.random() - 0.5) * 1.5 - 0.3,
+                    alpha: 1.0,
+                    size: Math.random() * 3 + 1,
+                    decay: 0.02 + Math.random() * 0.015
+                });
+            }
+        };
+        canvas.addEventListener('mousemove', handleMouseMove);
+
+        const loop = () => {
+            // Draw background night forest gradient
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+            bgGrad.addColorStop(0, '#06130b'); // Dark pine green
+            bgGrad.addColorStop(1, '#020704');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Draw Fireflies
+            fireflies.forEach(f => {
+                f.angle += (Math.random() - 0.5) * 0.15;
+                f.x += Math.cos(f.angle) * f.speed;
+                f.y += Math.sin(f.angle) * f.speed;
+
+                // Bounce edges
+                if (f.x < 0 || f.x > W) f.angle = Math.PI - f.angle;
+                if (f.y < 0 || f.y > H) f.angle = -f.angle;
+
+                f.wobble += f.pulseSpeed;
+                const brightness = 0.45 + 0.45 * Math.sin(f.wobble + f.pulsePhase);
+
+                // Glow ring
+                const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 5);
+                g.addColorStop(0, 'rgba(163, 230, 53, ' + brightness * 0.45 + ')');
+                g.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.r * 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Firefly core
+                ctx.fillStyle = 'rgba(217, 249, 157, ' + brightness + ')';
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Update & Draw Sparkles
+            sparkles.forEach((s, idx) => {
+                s.x += s.vx;
+                s.y += s.vy;
+                s.vy += 0.02; // gravity
+                s.alpha -= s.decay;
+                if (s.alpha <= 0) {
+                    sparkles.splice(idx, 1);
+                    return;
+                }
+                ctx.fillStyle = 'rgba(253, 224, 71, ' + s.alpha + ')';
+                ctx.fillRect(s.x, s.y, s.size, s.size);
+            });
+
+            animId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        return () => {
+            cancelAnimationFrame(animId);
+            canvas.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [scrollState]);
+
+    // Typewriter message when scroll is open
+    useEffect(() => {
+        if (scrollState !== 'open') return;
+        let idx = 0;
+        setDisplayText('');
+        setTypingDone(false);
+        const interval = setInterval(() => {
+            if (idx < mainMessage.length) {
+                setDisplayText(prev => prev + mainMessage.charAt(idx));
+                idx++;
+            } else {
+                clearInterval(interval);
+                setTypingDone(true);
+            }
+        }, 40);
+        return () => clearInterval(interval);
+    }, [scrollState]);
+
+    const handleLanternClick = (msg) => {
+        playLanternChime();
+        setActiveLanternMsg(msg);
+        setTimeout(() => setActiveLanternMsg(null), 5000);
+    };
+
+    return (
+        <div className="fixed inset-0 overflow-hidden flex flex-col items-center justify-center bg-[#030a05] text-[#d9f99d] select-none">
+            {/* Forest canvas background */}
+            {scrollState === 'open' && (
+                <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }} />
+            )}
+
+            {/* Mute Button */}
+            <button 
+                onClick={handleMuteToggle} 
+                style={{
+                    position: 'absolute', top: '15px', right: '15px', zIndex: 60,
+                    border: '1px solid rgba(163, 230, 53, 0.4)', background: 'rgba(163, 230, 53, 0.1)',
+                    color: '#a3e635', padding: '0.4rem 0.8rem', fontFamily: 'monospace',
+                    fontSize: '0.7rem', cursor: 'pointer', borderRadius: '4px', textShadow: '0 0 4px #a3e635'
+                }}
+            >
+                {isMuted ? 'UNMUTE AUDIO' : 'MUTE AUDIO'}
+            </button>
+
+            {/* SCROLL CLOSED / UNTIED LAYER */}
+            {scrollState !== 'open' && (
+                <div className="relative flex flex-col items-center justify-center text-center p-8 z-10 w-full h-full bg-[#030a05]/95">
+                    
+                    {/* Ancient Scroll visual representation */}
+                    <div className="relative flex flex-col items-center justify-center p-6 border border-[#a3e635]/20 bg-[#0d1c10]/90 rounded-2xl max-w-sm w-full"
+                        style={{ boxShadow: '0 0 25px rgba(163,230,53,0.1)' }}>
+                        <div className="text-6xl mb-6">📜</div>
+                        <h1 className="text-xl font-bold tracking-widest text-[#a3e635] mb-2" style={{ fontFamily: 'Georgia, serif', textShadow: '0 0 8px rgba(163,230,53,0.3)' }}>
+                            MAGICAL SCROLL
+                        </h1>
+                        <p style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: 'rgba(163, 230, 53, 0.6)', marginBottom: '2rem' }}>
+                            {scrollState === 'closed' ? 'UNTIE THE SCROLL TO DISCOVER ITS MESSAGE' : 'THE SCROLL IS READY TO BE UNROLLED'}
+                        </p>
+
+                        {scrollState === 'closed' ? (
+                            <button 
+                                onClick={handleUntieRibbon}
+                                className="px-5 py-2.5 bg-red-800 border border-red-500 hover:bg-red-700 text-white rounded-md text-xs font-bold tracking-widest active:scale-95 transition-all"
+                                style={{ fontFamily: 'monospace', boxShadow: '0 0 10px rgba(239, 68, 68, 0.3)' }}
+                            >
+                                🎗 UNTIE RIBBON
+                            </button>
+                        ) : (
+                            <button 
+                                onClick={handleUnrollScroll}
+                                className="px-5 py-2.5 bg-lime-700 border border-lime-500 hover:bg-lime-600 text-white rounded-md text-xs font-bold tracking-widest active:scale-95 transition-all"
+                                style={{ fontFamily: 'monospace', boxShadow: '0 0 10px rgba(163, 230, 53, 0.4)' }}
+                            >
+                                📜 UNROLL SCROLL
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* UNROLLED SCROLL WRAPPER */}
+            {scrollState === 'open' && (
+                <div className="relative z-10 max-w-md w-full flex flex-col items-center justify-center p-6 overflow-y-auto max-h-[95vh] text-center">
+                    
+                    {/* Parchment scroll background */}
+                    <div className="w-full flex flex-col items-center justify-center bg-[#fefcbf] border-y-[12px] border-[#a16207] border-x border-[#ca8a04] shadow-[0_0_35px_rgba(0,0,0,0.6)] p-6 rounded-md text-[#78350f]"
+                        style={{
+                            backgroundImage: 'radial-gradient(#fef9c3 30%, #fef08a 100%)',
+                            animation: 'scrollOpenAnim 0.8s ease-out forwards'
+                        }}
+                    >
+                        <div className="w-full">
+                            <div className="inline-block px-3 py-1 bg-amber-800/10 border border-amber-800/30 text-amber-900 font-bold text-xs rounded mb-2" style={{ fontFamily: 'monospace' }}>
+                                ✦ ANCIENT WISH SCROLL ✦
+                            </div>
+                            <h2 className="text-2xl font-black text-amber-900" style={{ fontFamily: 'Georgia, serif' }}>
+                                {card.title}
+                            </h2>
+                            <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#b45309', margin: '4px 0 12px 0' }}>
+                                RECIPIENT: {card.recipient_name}
+                            </p>
+                        </div>
+
+                        {/* Moments Gallery */}
+                        {card.photos && card.photos.length > 0 && (
+                            <div className="flex flex-wrap justify-center gap-3 my-4">
+                                {card.photos.map((p, idx) => (
+                                    <div key={idx} 
+                                        onClick={() => setActivePhoto(p)}
+                                        className="p-1 border-2 border-[#a16207]/30 bg-white/70 shadow-sm rounded cursor-pointer overflow-hidden transform hover:scale-105 transition-transform"
+                                        style={{ width: '90px', transform: `rotate(${(idx % 2 === 0 ? -2 : 2)}deg)` }}
+                                    >
+                                        <img src={p} alt="Moment capture" className="w-full h-16 object-cover rounded" />
+                                        <div className="text-[0.45rem] font-mono text-center text-amber-800/60 mt-1">MOMENT_0{idx+1}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Typewriter message */}
+                        <div className="w-full p-4 bg-amber-500/10 border border-amber-700/20 rounded-xl font-mono text-xs leading-relaxed text-[#78350f] min-h-[110px] shadow-inner text-left"
+                            style={{ borderLeft: '3px solid #b45309' }}>
+                            {displayText}
+                            {!typingDone && <span className="animate-pulse">_</span>}
+                        </div>
+
+                        {/* Sign-off */}
+                        <div className="mt-5 text-right w-full font-mono text-xs text-amber-800">
+                            — SENDER: {card.sender_name}
+                        </div>
+                    </div>
+
+                    {/* Sky Lanterns Floating overlay in the background/edges */}
+                    <div className="absolute inset-0 z-[-1] pointer-events-none overflow-hidden">
+                        {/* Interactive floating lanterns (drawn with html elements for easier clicks) */}
+                        {[...Array(4)].map((_, i) => (
+                            <div 
+                                key={i}
+                                onClick={() => handleLanternClick(card.messages?.[i % card.messages.length] || mainMessage)}
+                                className="absolute pointer-events-auto cursor-pointer rounded-t-full bg-amber-500/30 border border-amber-400 flex items-center justify-center text-center text-[0.5rem]"
+                                style={{
+                                    width: '45px', height: '65px',
+                                    bottom: '-80px',
+                                    left: `${15 + i * 22}%`,
+                                    animation: `lanternFloat ${12 + i * 4}s linear infinite`,
+                                    animationDelay: `${i * 3}s`,
+                                    boxShadow: '0 0 15px rgba(245, 158, 11, 0.4)'
+                                }}
+                            >
+                                <div className="text-amber-200 mt-2 font-mono">🏮</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Lantern wish popup banner */}
+                    {activeLanternMsg && (
+                        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50 p-4 border border-amber-300 bg-amber-950/90 text-amber-200 rounded-xl max-w-xs font-mono text-xs shadow-2xl animate-bounce"
+                            style={{ borderLeft: '4px solid #f59e0b' }}
+                        >
+                            🏮 "{activeLanternMsg}"
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL */}
+            {activePhoto && (
+                <div onClick={() => setActivePhoto(null)} className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
+                    <div onClick={(e)=>e.stopPropagation()} className="relative max-w-lg w-full bg-[#1c1917] p-2 border border-amber-500/50 rounded-2xl shadow-[0_0_50px_rgba(245,158,11,0.3)]">
+                        <button onClick={() => setActivePhoto(null)} className="absolute -top-10 right-0 text-amber-400 font-mono text-sm border border-amber-500/30 bg-amber-500/10 px-2 py-1 rounded">CLOSE [X]</button>
+                        <img src={activePhoto} alt="Scroll capture" className="w-full h-auto rounded-lg max-h-[80vh] object-contain" />
+                    </div>
+                </div>
+            )}
+
+            {/* Keyframe animations */}
+            <style>{`
+                @keyframes scrollOpenAnim {
+                    0% { transform: scaleY(0.01); opacity: 0; }
+                    100% { transform: scaleY(1); opacity: 1; }
+                }
+                @keyframes lanternFloat {
+                    0% { transform: translateY(0) rotate(0deg); opacity: 0.1; }
+                    10% { opacity: 0.8; }
+                    90% { opacity: 0.8; }
+                    100% { transform: translateY(-110vh) rotate(15deg); opacity: 0; }
+                }
+            `}</style>
+        </div>
+    );
+}
+
 
 /* ─────────────────────────────────────────────────────────
    ROOT PREVIEW PAGE (Safe React Error Boundary Wrapper)
@@ -1196,6 +5164,7 @@ function GreetingCardPreviewContent({ card }) {
         type:           card?.type || 'anniversary',
         type_label:     card?.type_label || 'Ucapan Spesial',
         photo_url:      card?.photo_url || '',
+        og_image_url:   card?.og_image_url || '',
         photos:         Array.isArray(card?.photos)
             ? card.photos
             : (typeof card?.photos === 'string'
@@ -1228,6 +5197,21 @@ function GreetingCardPreviewContent({ card }) {
                 <title>{`${normalizedCard.title} — Untuk ${normalizedCard.recipient_name}`}</title>
                 <meta name="description" content={`Kartu ucapan spesial untuk ${normalizedCard.recipient_name} dari ${normalizedCard.sender_name}`} />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+                
+                {/* Open Graph / Facebook / WhatsApp */}
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content={`${normalizedCard.title} — Untuk ${normalizedCard.recipient_name}`} />
+                <meta property="og:description" content={`Kartu ucapan spesial untuk ${normalizedCard.recipient_name} dari ${normalizedCard.sender_name}`} />
+                {normalizedCard.og_image_url && <meta property="og:image" content={normalizedCard.og_image_url} />}
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
+                
+                {/* Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={`${normalizedCard.title} — Untuk ${normalizedCard.recipient_name}`} />
+                <meta name="twitter:description" content={`Kartu ucapan spesial untuk ${normalizedCard.recipient_name} dari ${normalizedCard.sender_name}`} />
+                {normalizedCard.og_image_url && <meta name="twitter:image" content={normalizedCard.og_image_url} />}
+
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Fredoka:wght@400;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet" />
@@ -1235,6 +5219,18 @@ function GreetingCardPreviewContent({ card }) {
 
             {normalizedCard.template === 'stillwithyou' ? (
                 <StillWithYouFull card={normalizedCard} />
+            ) : normalizedCard.template === 'giftforanita' ? (
+                <GiftForAnitaFull card={normalizedCard} />
+            ) : normalizedCard.template === 'cosmicdrift' ? (
+                <CosmicDriftFull card={normalizedCard} />
+            ) : normalizedCard.template === 'retroarcade' ? (
+                <RetroArcadeFull card={normalizedCard} />
+            ) : normalizedCard.template === 'cyberpunk' ? (
+                <CyberpunkFull card={normalizedCard} />
+            ) : normalizedCard.template === 'bioluminescent' ? (
+                <BioluminescentFull card={normalizedCard} />
+            ) : normalizedCard.template === 'mysticforest' ? (
+                <MysticForestFull card={normalizedCard} />
             ) : (
                 <GiftForAnitaFull card={normalizedCard} />
             )}
