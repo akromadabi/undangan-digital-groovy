@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cosmic Drift — Kartu Ucapan Deep Space</title>
+    <meta name="description" content="Kartu ucapan premium bertema luar angkasa dengan nebula parallax, konstelasi bintang, dan roket cinta.">
+
+    <!-- Preconnect fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="/cosmicdrift/style.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     CANVAS LAYERS (back to front)
+     ════════════════════════════════════════ -->
+<canvas id="cd-stars"          title="Stars &amp; Shooting Stars"></canvas>
+<canvas id="cd-nebula"         title="Nebula Layer"></canvas>
+<canvas id="cd-dust"           title="Stardust Layer"></canvas>
+<canvas id="cd-constellations" title="Constellation Lines"></canvas>
+<canvas id="cd-effects"        title="Interactive Effects"></canvas>
+
+<!-- ════════════════════════════════════════
+     HUD OVERLAYS (corner brackets)
+     ════════════════════════════════════════ -->
+<div class="cd-hud cd-hud--tl">
+    <div class="cd-hud-corner"></div>
+    <div class="cd-hud-text" style="margin-top:.4rem;">
+        COSMIC DRIFT v1.0<br>
+        SECTOR: ANDROMEDA-7
+    </div>
+</div>
+<div class="cd-hud cd-hud--tr">
+    <div class="cd-hud-corner"></div>
+    <div class="cd-hud-text" style="margin-top:.4rem;text-align:right;">
+        STATUS: LIVE<br>
+        <span style="color:rgba(34,211,238,.5);">● SIGNAL ACQUIRED</span>
+    </div>
+</div>
+<div class="cd-hud cd-hud--bl">
+    <div class="cd-hud-text" style="margin-bottom:.4rem;">
+        CLICK ANYWHERE → SHOOTING STAR<br>
+        DRAG → PARALLAX
+    </div>
+    <div class="cd-hud-corner"></div>
+</div>
+<div class="cd-hud cd-hud--br">
+    <div class="cd-hud-text" style="margin-bottom:.4rem;text-align:right;">
+        CONSTELLATION: ❤ ACTIVE<br>
+        NEBULA: ONLINE
+    </div>
+    <div class="cd-hud-corner"></div>
+</div>
+
+<!-- ════════════════════════════════════════
+     LIVE COORDINATES
+     ════════════════════════════════════════ -->
+<div id="cd-coords" class="cd-coordinates">03°22'14"S  116°44'09"E  ALT: 408KM</div>
+
+<!-- ════════════════════════════════════════
+     COVER / GATE
+     ════════════════════════════════════════ -->
+<div id="cd-cover">
+    <!-- Pulsing rings -->
+    <div class="cd-cover-ring"></div>
+    <div class="cd-cover-ring"></div>
+    <div class="cd-cover-ring"></div>
+
+    <div class="cd-cover-content">
+        <!-- Planet icon -->
+        <div class="cd-cover-icon">
+            <div class="cd-cover-planet"></div>
+        </div>
+
+        <!-- Title -->
+        <div>
+            <p class="cd-cover-eyebrow">A Message From The Universe</p>
+            <h1 class="cd-cover-title">COSMIC<br>DRIFT</h1>
+            <p class="cd-cover-subtitle">
+                Sebuah surat cinta yang dikirimkan melewati bintang-bintang, menuju orang yang paling berarti.
+            </p>
+        </div>
+
+        <!-- Open button -->
+        <button id="cd-open-btn" class="cd-open-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Buka Pesanmu
+        </button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MAIN CONTENT
+     ════════════════════════════════════════ -->
+<div id="cd-main">
+
+    <!-- ── MESSAGE CARD ── -->
+    <div id="cd-message-card">
+        <!-- Eyebrow -->
+        <p class="cd-card-eyebrow">✦ TRANSMISI DARI GALAKSI M31 ✦</p>
+
+        <!-- Greeting & Recipient -->
+        <h2 class="cd-card-greeting" id="cd-greeting">Selamat Ulang Tahun</h2>
+        <p style="font-family:'Orbitron',monospace;font-size:.62rem;letter-spacing:3px;color:rgba(196,181,253,.7);margin-bottom:1rem;" id="cd-recipient">Bunda Tercinta</p>
+
+        <!-- Divider line -->
+        <div class="cd-card-divider"></div>
+
+        <!-- Main message -->
+        <p class="cd-card-message" id="cd-message">
+            Di antara milyaran bintang yang bertebaran di galaksi ini, tidak satupun yang bisa menandingi
+            cahaya cintamu yang menerangi hidupku setiap hari. Terima kasih sudah menjadi bintang
+            <strong>paling terang</strong> di semestaku.
+        </p>
+
+        <!-- Sender -->
+        <p class="cd-card-sender" id="cd-sender">— Dari Ananda, dengan sepenuh cinta</p>
+
+        <!-- Action buttons -->
+        <div class="cd-actions">
+            <button id="cd-launch-btn" class="cd-btn cd-btn--launch" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2l6-6M12 13l-3-3M15 4l5 5"/>
+                    <path d="M3 21l7-7"/>
+                </svg>
+                Kirim ke Orbit 🚀
+            </button>
+
+            <button id="cd-write-btn" class="cd-btn cd-btn--write" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                Tulis Pesanmu
+            </button>
+
+            <button id="cd-audio-btn" class="cd-btn cd-btn--audio" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18V5l12-2v13"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="18" cy="16" r="3"/>
+                </svg>
+                <span class="cd-audio-label">Space Audio</span>
+            </button>
+        </div>
+    </div>
+
+</div><!-- /cd-main -->
+
+<!-- ════════════════════════════════════════
+     WRITE MESSAGE MODAL
+     ════════════════════════════════════════ -->
+<div id="cd-write-modal" role="dialog" aria-modal="true" aria-label="Tulis Pesan">
+    <div class="cd-modal-box">
+        <p class="cd-modal-title">✦ Transmisikan Pesanmu ke Bintang</p>
+
+        <div class="cd-modal-field">
+            <label for="cd-modal-name">Nama Pengirim (opsional)</label>
+            <input id="cd-modal-name" class="cd-modal-input" type="text" placeholder="Mis: Anya" maxlength="50">
+        </div>
+
+        <div class="cd-modal-field">
+            <label for="cd-modal-msg">Pesanmu</label>
+            <textarea id="cd-modal-msg" class="cd-modal-textarea" placeholder="Tulis doa atau ucapan yang akan melayang di antariksa..." maxlength="200" rows="4"></textarea>
+        </div>
+
+        <div class="cd-modal-actions">
+            <button id="cd-modal-send" class="cd-modal-send" type="button">Kirim ke Semesta ✦</button>
+            <button id="cd-modal-cancel" class="cd-modal-cancel" type="button">Batal</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ROCKET LAUNCH OVERLAY
+     ════════════════════════════════════════ -->
+<div id="cd-rocket-overlay" role="dialog" aria-modal="true" aria-label="Peluncuran Roket">
+
+    <!-- Close button -->
+    <button id="cd-rocket-close" class="cd-launch-close" type="button" aria-label="Tutup">✕</button>
+
+    <!-- Orbit success message (shown after launch) -->
+    <div id="cd-orbit-msg" class="cd-orbit-msg">
+        <h3>PESAN TERKIRIM 🛸</h3>
+        <p>Pesanmu kini mengorbit di<br>antara bintang-bintang...</p>
+    </div>
+
+    <!-- Rocket emoji -->
+    <div id="cd-rocket" class="cd-rocket">
+        🚀
+        <span class="cd-launch-exhaust"></span>
+    </div>
+
+    <!-- Launch log text -->
+    <p id="cd-launch-log" class="cd-launch-log">Menginisialisasi sistem...</p>
+
+    <!-- Progress bar -->
+    <div class="cd-launch-progress">
+        <div id="cd-launch-bar" class="cd-launch-progress-bar"></div>
+    </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     TOAST
+     ════════════════════════════════════════ -->
+<div id="cd-toast" role="status" aria-live="polite"></div>
+
+<!-- ════════════════════════════════════════
+     SCRIPTS
+     ════════════════════════════════════════ -->
+<script src="/cosmicdrift/app.js"></script>
+
+</body>
+</html>

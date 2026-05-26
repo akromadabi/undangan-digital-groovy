@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Rizki & Aisyah - The Wedding | Dusk Mosque Theme</title>
+    <meta name="description" content="Undangan pernikahan digital Islami premium bertema Dusk Mosque - Rizki & Aisyah, 20 Juni 2027.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome for Nav Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous">
+
+    <!-- Theme Styles -->
+    <link rel="stylesheet" href="/dusk-mosque/style.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     GOLD DUST PARTICLES CANVAS
+     ═══════════════════════════════════════ -->
+<canvas id="dusk-particles"></canvas>
+
+<!-- ═══════════════════════════════════════
+     PRELOADER
+     ═══════════════════════════════════════ -->
+<div id="dusk-preloader" class="dusk-mosque-preloader">
+    <div class="dusk-mosque-loader-spin"></div>
+    <p style="margin-top:18px;font-family:'Playfair Display',serif;letter-spacing:4px;color:var(--gold-light);font-size:0.85rem;">DUSK MOSQUE</p>
+</div>
+
+<!-- ═══════════════════════════════════════
+     COVER GATE
+     ═══════════════════════════════════════ -->
+<div id="dusk-cover" class="dusk-mosque-cover">
+    <!-- Background Photo -->
+    <div class="dusk-mosque-cover__bg" style="background-image:url('/themes/dusk-mosque/asset/background.webp')"></div>
+    <!-- Dark Overlay -->
+    <div class="dusk-mosque-cover__overlay"></div>
+
+    <!-- Content -->
+    <div class="dusk-mosque-cover__content">
+        <!-- Top: Circular Monogram -->
+        <div class="dusk-mosque-cover__monogram-container">
+            <div class="dusk-mosque-cover__circle-logo">
+                <svg viewBox="0 0 100 100">
+                    <path id="circlePath" fill="none" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0"/>
+                    <text>
+                        <textPath href="#circlePath" startOffset="0%">
+                            • THE WEDDING OF • THE WEDDING OF
+                        </textPath>
+                    </text>
+                </svg>
+                <div class="dusk-mosque-cover__monogram">RA</div>
+            </div>
+        </div>
+
+        <!-- Center: Names -->
+        <div>
+            <p class="dusk-mosque-cover__intro">The Wedding of</p>
+            <h1 class="dusk-mosque-cover__names">Rizki &amp; Aisyah</h1>
+            <p class="dusk-mosque-cover__date">Sabtu, 20 Juni 2027</p>
+        </div>
+
+        <!-- Bottom: Guest & Open Button -->
+        <div class="dusk-mosque-cover__bottom">
+            <p class="dusk-mosque-cover__greeting">Kepada Yth. Bapak/Ibu/Saudara/i</p>
+            <div class="dusk-mosque-cover__guest">Tamu Undangan</div>
+            <button id="dusk-open-btn" class="dusk-mosque-cover__btn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Buka Undangan
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     3D PARALLAX STAGE (Fixed Background)
+     ═══════════════════════════════════════ -->
+<div id="dusk-stage" class="dusk-mosque-stage">
+    <div id="dusk-scene" class="dusk-mosque-scene active-slide-0">
+
+        <!-- Layer 1: Background Sky -->
+        <div class="dusk-mosque-layer dusk-mosque-layer--background">
+            <img src="/themes/dusk-mosque/asset/background.webp" alt="">
+        </div>
+
+        <!-- Layer 2: Kurma Leaves Left -->
+        <div class="dusk-mosque-layer dusk-mosque-layer--kurma-left">
+            <img src="/themes/dusk-mosque/asset/kurma.webp" alt="">
+        </div>
+
+        <!-- Layer 3: Kurma Leaves Right (mirrored) -->
+        <div class="dusk-mosque-layer dusk-mosque-layer--kurma-right">
+            <img src="/themes/dusk-mosque/asset/kurma.webp" alt="">
+        </div>
+
+        <!-- Layer 4: Birds -->
+        <div class="dusk-mosque-layer dusk-mosque-layer--birds">
+            <img src="/themes/dusk-mosque/asset/birds.webp" alt="">
+        </div>
+
+        <!-- Layer 5: Couple Silhouette -->
+        <div class="dusk-mosque-layer dusk-mosque-layer--couple">
+            <img src="/themes/dusk-mosque/asset/couple.webp" alt="">
+        </div>
+
+        <!-- Layer 6: Stage Info Cards (only show in slide mode) -->
+        <div class="dusk-mosque-layer dusk-mosque-layer--info">
+
+            <!-- Card 0: Verse / Opening -->
+            <div class="dusk-mosque-card" data-slide="0">
+                <div class="dusk-mosque-verse">
+                    <span class="dusk-mosque-verse-hashtag">#AisyahRizki</span>
+                    <span class="dusk-mosque-verse-text">
+                        "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu istri-istri dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya, dan dijadikan-Nya di antaramu rasa kasih dan sayang."
+                    </span>
+                    <span class="dusk-mosque-verse-ref">QS. Ar-Rum: 21</span>
+                </div>
+            </div>
+
+            <!-- Card 1: Bride -->
+            <div class="dusk-mosque-card" data-slide="1">
+                <div class="dusk-mosque-couple-avatar-fallback"
+                     style="background-image:url('/themes/dusk-mosque/asset/couple.webp');background-size:cover;background-position:center;border:2px solid var(--warm);">
+                </div>
+                <h2 class="dusk-mosque-couple-short">Aisyah</h2>
+                <h3 class="dusk-mosque-couple-full">Aisyah Khairunnisa</h3>
+                <p class="dusk-mosque-couple-relation">PUTRI KEDUA DARI</p>
+                <p class="dusk-mosque-couple-parents">Bapak Ahmad Fauzi &amp; Ibu Aminah Latifah</p>
+                <a class="dusk-mosque-couple-ig" href="https://instagram.com/aisyah.kn" target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                    </svg>
+                    <span>@aisyah.kn</span>
+                </a>
+            </div>
+
+            <!-- Card 2: Groom -->
+            <div class="dusk-mosque-card" data-slide="2">
+                <div class="dusk-mosque-couple-avatar-fallback"
+                     style="background-image:url('/themes/dusk-mosque/asset/couple.webp');background-size:cover;background-position:center;border:2px solid var(--warm);">
+                </div>
+                <h2 class="dusk-mosque-couple-short">Rizki</h2>
+                <h3 class="dusk-mosque-couple-full">Muhammad Rizki Pratama</h3>
+                <p class="dusk-mosque-couple-relation">PUTRA PERTAMA DARI</p>
+                <p class="dusk-mosque-couple-parents">Bapak Hidayat Pratama &amp; Ibu Siti Maryam</p>
+                <a class="dusk-mosque-couple-ig" href="https://instagram.com/rizki.pratama" target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                    </svg>
+                    <span>@rizki.pratama</span>
+                </a>
+            </div>
+
+            <!-- Card 3: Events & Countdown -->
+            <div class="dusk-mosque-card dusk-mosque-event-card" data-slide="3">
+                <div class="dusk-mosque-event-container">
+                    <!-- Countdown -->
+                    <div style="margin-bottom:.5rem;border-bottom:1px solid rgba(115,91,63,.1);padding-bottom:1.5rem;">
+                        <p class="dusk-mosque-countdown-title">Menghitung Mundur Hari Bahagia</p>
+                        <div class="dusk-mosque-countdown-grid">
+                            <div class="dusk-mosque-countdown-unit">
+                                <span class="dusk-mosque-countdown-value" id="cd-days">365</span>
+                                <span class="dusk-mosque-countdown-label">Hari</span>
+                            </div>
+                            <div class="dusk-mosque-countdown-unit">
+                                <span class="dusk-mosque-countdown-value" id="cd-hours">0</span>
+                                <span class="dusk-mosque-countdown-label">Jam</span>
+                            </div>
+                            <div class="dusk-mosque-countdown-unit">
+                                <span class="dusk-mosque-countdown-value" id="cd-mins">0</span>
+                                <span class="dusk-mosque-countdown-label">Menit</span>
+                            </div>
+                            <div class="dusk-mosque-countdown-unit">
+                                <span class="dusk-mosque-countdown-value" id="cd-secs">0</span>
+                                <span class="dusk-mosque-countdown-label">Detik</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Akad -->
+                    <div class="dusk-mosque-event-block">
+                        <h3 class="dusk-mosque-event-label">Akad Nikah</h3>
+                        <p class="dusk-mosque-event-date">Sabtu, 20 Juni 2027</p>
+                        <p class="dusk-mosque-event-date">08:00 – 10:00 WIB</p>
+                        <p class="dusk-mosque-event-venue">Masjid Istiqlal Jakarta</p>
+                        <p class="dusk-mosque-event-address">Jl. Taman Wijaya Kusuma, Pasar Baru, Jakarta Pusat 10710</p>
+                        <a class="dusk-mosque-event-map-btn" href="https://maps.google.com/?q=Masjid+Istiqlal+Jakarta" target="_blank" rel="noopener noreferrer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            <span>Lihat Lokasi</span>
+                        </a>
+                    </div>
+
+                    <!-- Resepsi -->
+                    <div class="dusk-mosque-event-block">
+                        <h3 class="dusk-mosque-event-label">Resepsi</h3>
+                        <p class="dusk-mosque-event-date">Sabtu, 20 Juni 2027</p>
+                        <p class="dusk-mosque-event-date">11:00 – 14:00 WIB</p>
+                        <p class="dusk-mosque-event-venue">Masjid Istiqlal Jakarta</p>
+                        <p class="dusk-mosque-event-address">Jl. Taman Wijaya Kusuma, Pasar Baru, Jakarta Pusat 10710</p>
+                        <a class="dusk-mosque-event-map-btn" href="https://maps.google.com/?q=Masjid+Istiqlal+Jakarta" target="_blank" rel="noopener noreferrer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            <span>Lihat Lokasi</span>
+                        </a>
+                    </div>
+
+                    <!-- Dresscode -->
+                    <div class="dusk-mosque-dresscode">
+                        <p class="dusk-mosque-dresscode-title">Dress Code</p>
+                        <p class="dusk-mosque-dresscode-desc">Kami mengharapkan tamu berkenan mengenakan busana muslim dengan palet warna golden hour.</p>
+                        <div class="dusk-mosque-dresscode-palette">
+                            <span class="dusk-mosque-dresscode-swatch" style="background:#4A3826" title="Warm Brown"></span>
+                            <span class="dusk-mosque-dresscode-swatch" style="background:#8E7152" title="Bronze"></span>
+                            <span class="dusk-mosque-dresscode-swatch" style="background:#C8B680" title="Gold Olive"></span>
+                            <span class="dusk-mosque-dresscode-swatch" style="background:#FAF3EA" title="Cream"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /dusk-mosque-layer--info -->
+
+        <!-- Layer 7: Golden Arches Foreground -->
+        <div class="dusk-mosque-layer dusk-mosque-layer--foreground">
+            <img src="/themes/dusk-mosque/asset/foreground.webp" alt="">
+        </div>
+
+    </div><!-- /dusk-scene -->
+</div><!-- /dusk-stage -->
+
+<!-- ═══════════════════════════════════════
+     SWIPE HINT
+     ═══════════════════════════════════════ -->
+<div id="dusk-swipe-hint" class="dusk-mosque-swipe-hint">
+    <span class="dusk-mosque-swipe-hint-arrow"></span>
+    <span style="font-size:.65rem">Swipe</span>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN CONTENT AREA
+     ═══════════════════════════════════════ -->
+<div id="dusk-main" class="dusk-mosque-main--slide dusk-mosque-main--slide-h">
+
+    <!-- ── SLIDE 0: Verse / Opening (handled by stage card) ── -->
+    <div class="dusk-mosque-slide-container is-active" data-idx="0"></div>
+
+    <!-- ── SLIDE 1: Bride (handled by stage card) ── -->
+    <div class="dusk-mosque-slide-container is-next" data-idx="1"></div>
+
+    <!-- ── SLIDE 2: Groom (handled by stage card) ── -->
+    <div class="dusk-mosque-slide-container is-next" data-idx="2"></div>
+
+    <!-- ── SLIDE 3: Events (handled by stage card) ── -->
+    <div class="dusk-mosque-slide-container is-next" data-idx="3"></div>
+
+    <!-- ── SLIDE 4: Kisah Cinta ── -->
+    <div class="dusk-mosque-slide-container is-next" data-idx="4" id="love_story">
+        <div style="width:100%;max-width:600px;margin:0 auto;padding:2rem 1rem;">
+            <section class="dusk-mosque-post-section" style="background:rgba(250,243,234,0.95);border-radius:20px;border:1px solid rgba(115,91,63,0.15);box-shadow:0 10px 30px rgba(42,31,23,.3);">
+                <h2 class="dusk-mosque-section-eyebrow">Our Journey</h2>
+                <h2 class="dusk-mosque-section-title">Kisah Cinta</h2>
+                <p class="dusk-mosque-section-subtitle">Setiap kisah cinta itu indah, tapi milik kami yang paling istimewa.</p>
+
+                <div class="dusk-mosque-story-path">
+                    <div class="dusk-mosque-story-row dusk-mosque-story-row--left">
+                        <span class="dusk-mosque-story-dot"></span>
+                        <div class="dusk-mosque-story-card">
+                            <h3 class="dusk-mosque-story-chapter-title">Awal Bertemu</h3>
+                            <p class="dusk-mosque-story-chapter-text">Berkenalan lewat halaqah kampus, dari salam yang singkat menjadi obrolan tentang masa depan yang panjang.</p>
+                        </div>
+                    </div>
+                    <div class="dusk-mosque-story-row dusk-mosque-story-row--right">
+                        <span class="dusk-mosque-story-dot"></span>
+                        <div class="dusk-mosque-story-card">
+                            <h3 class="dusk-mosque-story-chapter-title">Ta'aruf</h3>
+                            <p class="dusk-mosque-story-chapter-text">Dengan niat baik dan restu keluarga, kami melangkah ke proses ta'aruf yang membawa hati kami lebih dekat.</p>
+                        </div>
+                    </div>
+                    <div class="dusk-mosque-story-row dusk-mosque-story-row--left">
+                        <span class="dusk-mosque-story-dot"></span>
+                        <div class="dusk-mosque-story-card">
+                            <h3 class="dusk-mosque-story-chapter-title">Khitbah</h3>
+                            <p class="dusk-mosque-story-chapter-text">Di hadapan kedua keluarga, Rizki datang dengan niat tulus dan mengikat janji untuk melamar Aisyah.</p>
+                        </div>
+                    </div>
+                    <div class="dusk-mosque-story-row dusk-mosque-story-row--right">
+                        <span class="dusk-mosque-story-dot"></span>
+                        <div class="dusk-mosque-story-card">
+                            <h3 class="dusk-mosque-story-chapter-title">Hari Akad</h3>
+                            <p class="dusk-mosque-story-chapter-text">Dan di sinilah kami sekarang, di ambang janji suci yang akan menyatukan kami dalam ridho-Nya.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ── SLIDE 5: Gallery ── -->
+    <div class="dusk-mosque-slide-container is-next" data-idx="5" id="gallery">
+        <div style="width:100%;max-width:600px;margin:0 auto;padding:2rem 1rem;">
+            <section class="dusk-mosque-post-section" style="background:rgba(250,243,234,0.95);border-radius:20px;border:1px solid rgba(115,91,63,0.15);box-shadow:0 10px 30px rgba(42,31,23,.3);">
+                <h2 class="dusk-mosque-section-eyebrow">Our Memories</h2>
+                <h2 class="dusk-mosque-section-title">Galeri</h2>
+                <p class="dusk-mosque-section-subtitle">Momen indah yang tertangkap waktu, terbekukan selamanya.</p>
+
+                <div class="dusk-mosque-gallery-grid">
+                    <div class="dusk-mosque-gallery-item"><img src="/themes/dusk-mosque/asset/gallery-1.webp" alt="Galeri 1" loading="lazy"></div>
+                    <div class="dusk-mosque-gallery-item"><img src="/themes/dusk-mosque/asset/gallery-2.webp" alt="Galeri 2" loading="lazy"></div>
+                    <div class="dusk-mosque-gallery-item"><img src="/themes/dusk-mosque/asset/gallery-3.webp" alt="Galeri 3" loading="lazy"></div>
+                    <div class="dusk-mosque-gallery-item"><img src="/themes/dusk-mosque/asset/gallery-4.webp" alt="Galeri 4" loading="lazy"></div>
+                    <div class="dusk-mosque-gallery-item"><img src="/themes/dusk-mosque/asset/gallery-6.webp" alt="Galeri 5" loading="lazy"></div>
+                    <div class="dusk-mosque-gallery-item"><img src="/themes/dusk-mosque/asset/gallery-7.webp" alt="Galeri 6" loading="lazy"></div>
+                    <div class="dusk-mosque-gallery-item"><img src="/themes/dusk-mosque/asset/gallery-8.webp" alt="Galeri 7" loading="lazy"></div>
+                    <div class="dusk-mosque-gallery-item"><img src="/themes/dusk-mosque/asset/gallery-9.webp" alt="Galeri 8" loading="lazy"></div>
+                    <div class="dusk-mosque-gallery-item"><img src="/themes/dusk-mosque/asset/gallery-10.webp" alt="Galeri 9" loading="lazy"></div>
+                </div>
+
+                <blockquote class="dusk-mosque-gallery-quote">
+                    <p>"Sebaik-baik perhiasan dunia adalah wanita yang sholehah."</p>
+                    <cite>HR. Muslim</cite>
+                </blockquote>
+            </section>
+        </div>
+    </div>
+
+    <!-- ── SLIDE 6: RSVP & Guestbook ── -->
+    <div class="dusk-mosque-slide-container is-next" data-idx="6" id="rsvp">
+        <div style="width:100%;max-width:600px;margin:0 auto;padding:2rem 1rem;">
+            <section class="dusk-mosque-post-section" style="background:rgba(250,243,234,0.95);border-radius:20px;border:1px solid rgba(115,91,63,0.15);box-shadow:0 10px 30px rgba(42,31,23,.3);">
+                <h2 class="dusk-mosque-section-eyebrow">Wishes &amp; Attendance</h2>
+                <h2 class="dusk-mosque-section-title">Konfirmasi Kehadiran</h2>
+                <p class="dusk-mosque-section-subtitle">Mohon konfirmasi kehadiran Bapak/Ibu/Saudara/i agar kami dapat mempersiapkan dengan sebaik-baiknya.</p>
+
+                <div class="dusk-mosque-rsvp-box">
+                    <!-- Form -->
+                    <form id="dusk-rsvp-form" class="dusk-mosque-rsvp-form">
+                        <div class="dusk-mosque-rsvp-field">
+                            <label for="rsvp-name">Nama</label>
+                            <input id="rsvp-name" class="dusk-mosque-rsvp-input" type="text" placeholder="Nama Anda" required maxlength="100">
+                        </div>
+
+                        <div class="dusk-mosque-rsvp-field">
+                            <label>Kehadiran</label>
+                            <div class="dusk-mosque-rsvp-choices">
+                                <span class="dusk-mosque-rsvp-choice-wrapper">
+                                    <input id="att-hadir" type="radio" name="attendance" class="dusk-mosque-rsvp-choice-input" value="hadir" checked>
+                                    <label for="att-hadir" class="dusk-mosque-rsvp-choice-label">Hadir</label>
+                                </span>
+                                <span class="dusk-mosque-rsvp-choice-wrapper">
+                                    <input id="att-tidak" type="radio" name="attendance" class="dusk-mosque-rsvp-choice-input" value="tidak">
+                                    <label for="att-tidak" class="dusk-mosque-rsvp-choice-label">Tidak Hadir</label>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="dusk-mosque-rsvp-field">
+                            <label for="rsvp-msg">Doa &amp; Ucapan</label>
+                            <textarea id="rsvp-msg" class="dusk-mosque-rsvp-textarea" rows="3" placeholder="Tulis doa atau ucapan untuk kami..." required maxlength="1000"></textarea>
+                            <p class="dusk-mosque-rsvp-counter" id="rsvp-counter">0/1000</p>
+                        </div>
+
+                        <button type="submit" class="dusk-mosque-rsvp-submit">Kirim Ucapan</button>
+
+                        <p id="dusk-rsvp-success" style="display:none;color:#28a745;font-size:.85rem;font-weight:600;margin-top:10px;text-align:center;">
+                            Doa &amp; Ucapan berhasil dikirim! 🌙
+                        </p>
+                    </form>
+
+                    <!-- Guestbook -->
+                    <div class="dusk-mosque-wishes-container">
+                        <p class="dusk-mosque-wishes-label">Ucapan Tamu</p>
+                        <div class="dusk-mosque-wishes-list" id="dusk-guestbook-list">
+                            <!-- Rendered by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ── SLIDE 7: Kado Digital ── -->
+    <div class="dusk-mosque-slide-container is-next" data-idx="7" id="bank">
+        <div style="width:100%;max-width:600px;margin:0 auto;padding:2rem 1rem;">
+            <section class="dusk-mosque-post-section" style="background:rgba(250,243,234,0.95);border-radius:20px;border:1px solid rgba(115,91,63,0.15);box-shadow:0 10px 30px rgba(42,31,23,.3);">
+                <h2 class="dusk-mosque-section-eyebrow">Tanda Kasih</h2>
+                <h2 class="dusk-mosque-section-title">Kado Digital</h2>
+                <p class="dusk-mosque-section-subtitle">Doa restu Anda sudah lebih dari cukup. Namun bagi yang ingin mengirimkan kado, dapat mengirimkannya di bawah ini.</p>
+
+                <!-- Tabs -->
+                <div class="dusk-mosque-gift-tabs" style="margin-bottom:1.5rem;">
+                    <button class="dusk-mosque-gift-tab" type="button">Amplop Digital</button>
+                    <button class="dusk-mosque-gift-tab" type="button">Kirim Kado</button>
+                </div>
+
+                <!-- Panel: Bank Accounts -->
+                <div class="dusk-bank-panel">
+                    <!-- BCA -->
+                    <div class="dusk-mosque-bank-card">
+                        <img class="dusk-mosque-bank-logo" src="/themes/dusk-mosque/asset/bca.png" alt="BCA">
+                        <p class="dusk-mosque-bank-holder">Sinta Dewi Paramitha</p>
+                        <p class="dusk-mosque-bank-number">0123456789</p>
+                        <button class="dusk-mosque-copy-btn" type="button" data-copy="0123456789">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            Salin Rekening
+                        </button>
+                    </div>
+                    <!-- GoPay -->
+                    <div class="dusk-mosque-bank-card">
+                        <img class="dusk-mosque-bank-logo" src="/themes/dusk-mosque/asset/gopay.png" alt="GoPay">
+                        <p class="dusk-mosque-bank-holder">Arya Wicaksana</p>
+                        <p class="dusk-mosque-bank-number">081234567890</p>
+                        <button class="dusk-mosque-copy-btn" type="button" data-copy="081234567890">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            Salin Rekening
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel: Gift Address -->
+                <div class="dusk-bank-panel" style="display:none;">
+                    <div class="dusk-mosque-bank-card">
+                        <h4 style="font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--warm);margin-bottom:.75rem;">Alamat Pengiriman</h4>
+                        <p class="dusk-mosque-address-block" id="gift-address-text">
+                            Jl. Masjid Istiqlal No. 1, Pasar Baru,<br>Jakarta Pusat 10710,<br>DKI Jakarta, Indonesia
+                        </p>
+                        <button class="dusk-mosque-copy-btn" type="button" data-copy="Jl. Masjid Istiqlal No. 1, Pasar Baru, Jakarta Pusat 10710, DKI Jakarta, Indonesia">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            Salin Alamat
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ── SLIDE 8: Closing ── -->
+    <div class="dusk-mosque-slide-container is-next" data-idx="8" id="closing">
+        <div style="width:100%;max-width:600px;margin:0 auto;padding:2rem 1rem;">
+            <section class="dusk-mosque-post-section dusk-mosque-closing-section" style="background:rgba(250,243,234,0.95);border-radius:20px;border:1px solid rgba(115,91,63,0.15);box-shadow:0 10px 30px rgba(42,31,23,.3);">
+                <h2 class="dusk-mosque-closing-salam">Wassalamu'alaikum Warahmatullahi Wabarakatuh</h2>
+                <p class="dusk-mosque-section-subtitle">
+                    Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa dan restu.
+                </p>
+                <h3 class="dusk-mosque-closing-sig">Kami Yang Berbahagia,</h3>
+                <p style="font-family:'Great Vibes',cursive;font-size:3.5rem;color:var(--warm);margin:1rem 0;">Rizki &amp; Aisyah</p>
+
+                <div class="dusk-mosque-signature-block">
+                    <div>Kel. Bapak Ahmad Fauzi &amp; Ibu Aminah Latifah</div>
+                    <div>Kel. Bapak Hidayat Pratama &amp; Ibu Siti Maryam</div>
+                </div>
+
+                <!-- Logo / Watermark -->
+                <p class="dusk-mosque-watermark" style="padding-bottom:90px;">
+                    Made with ❤️ by Momentus Invitation
+                </p>
+            </section>
+        </div>
+    </div>
+
+    <!-- ════ SCROLL MODE OVERLAY (hidden until scroll mode active) ════ -->
+    <div class="dusk-mosque-overlay" id="dusk-scroll-overlay" style="display:none;">
+        <div class="dusk-mosque-post-immersive">
+
+            <!-- Opening / Verse -->
+            <div class="dusk-mosque-card" style="position:relative;opacity:1;transform:none;margin:90vh auto 250px auto;width:90%;max-width:420px;pointer-events:auto;" id="opening">
+                <div class="dusk-mosque-verse">
+                    <span class="dusk-mosque-verse-hashtag">#AisyahRizki</span>
+                    <span class="dusk-mosque-verse-text">"Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu istri-istri dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya, dan dijadikan-Nya di antaramu rasa kasih dan sayang."</span>
+                    <span class="dusk-mosque-verse-ref">QS. Ar-Rum: 21</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- /dusk-main -->
+
+<!-- ═══════════════════════════════════════
+     FLOATING CONTROLS
+     ═══════════════════════════════════════ -->
+
+<!-- WhatsApp Float -->
+<div id="dusk-whatsapp-float" class="dusk-mosque-whatsapp-float dusk-mosque-whatsapp-float--raised" style="opacity:0;">
+    <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" class="dusk-mosque-whatsapp-btn" title="Hubungi Mempelai">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 2.119.55 4.108 1.516 5.845L.03 23.518a.747.747 0 0 0 .95.95l5.377-1.486A11.91 11.91 0 0 0 12 24.297c6.63 0 12-5.373 12-12 0-6.627-5.37-12-12-12zm6.657 16.592c-.255.722-1.503 1.341-2.078 1.408-.528.06-1.21.092-1.924-.138a10.96 10.96 0 0 1-4.707-2.923c-1.396-1.395-2.482-3.056-2.922-4.706-.23-.863-.127-1.63-.047-2.124.095-.589.658-1.282 1.378-1.52.247-.082.493-.124.74-.124.166 0 .324.004.464.014.394.025.59.049.852.678.272.656.924 2.25.998 2.398.074.148.11.32.012.518-.098.197-.222.42-.37.587-.148.168-.308.35-.444.475-.15.138-.306.29-.13.593a8.1 8.1 0 0 0 1.95 2.41 7.22 7.22 0 0 0 2.822 1.737c.3.148.475.127.653-.078.18-.204.776-.902.983-1.21.206-.308.412-.257.69-.153.28.103 1.772.836 2.08 1 .308.163.515.247.59.37.075.124.075.722-.18 1.444z"/>
+        </svg>
+    </a>
+</div>
+
+<!-- Music Button (Vinyl) -->
+<button id="dusk-music-btn" class="dusk-mosque-music-btn dusk-mosque-music-btn--raised" type="button" title="Toggle Musik">
+    <span class="dusk-mosque-vinyl"></span>
+    <span class="dusk-mosque-tonearm"></span>
+</button>
+
+<!-- Fullscreen Button -->
+<button id="dusk-fullscreen-btn" class="dusk-mosque-fullscreen-btn dusk-mosque-fullscreen-btn--raised" type="button" title="Layar Penuh">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+    </svg>
+</button>
+
+<!-- Layout Switcher Button -->
+<button id="dusk-layout-btn" class="dusk-mosque-layout-btn dusk-mosque-layout-btn--raised" type="button" title="Ganti Mode Tampilan">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+</button>
+
+<!-- ═══════════════════════════════════════
+     BOTTOM NAV
+     ═══════════════════════════════════════ -->
+<nav id="dusk-nav" class="dusk-mosque-nav">
+    <button class="dusk-mosque-nav-item is-active" type="button" data-section="opening">
+        <i class="fas fa-envelope-open"></i>
+        <span>Sampul</span>
+    </button>
+    <button class="dusk-mosque-nav-item" type="button" data-section="bride_groom">
+        <i class="fas fa-heart"></i>
+        <span>Mempelai</span>
+    </button>
+    <button class="dusk-mosque-nav-item" type="button" data-section="event">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Acara</span>
+    </button>
+    <button class="dusk-mosque-nav-item" type="button" data-section="gallery">
+        <i class="fas fa-images"></i>
+        <span>Galeri</span>
+    </button>
+    <button class="dusk-mosque-nav-item" type="button" data-section="rsvp">
+        <i class="fas fa-edit"></i>
+        <span>RSVP</span>
+    </button>
+    <button class="dusk-mosque-nav-item" type="button" data-section="bank">
+        <i class="fas fa-gift"></i>
+        <span>Kado</span>
+    </button>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     TOAST NOTIFICATION
+     ═══════════════════════════════════════ -->
+<div id="dusk-toast" class="dusk-toast"></div>
+
+<!-- ═══════════════════════════════════════
+     APP SCRIPT
+     ═══════════════════════════════════════ -->
+<script src="/dusk-mosque/app.js"></script>
+
+</body>
+</html>

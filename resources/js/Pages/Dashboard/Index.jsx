@@ -304,6 +304,28 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                     </div>
                 )}
 
+                {/* ═══ Kartu Ucapan CTA ═══ */}
+                <div className="bg-gradient-to-br from-[#1e050d] via-[#3a0e1f] to-[#07060a] rounded-xl lg:rounded-2xl p-4 lg:p-5 relative overflow-hidden border border-pink-900/20">
+                    {/* Decorative */}
+                    <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-pink-500/5" />
+                    <div className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full bg-pink-500/5" />
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative z-10">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: 'rgba(255,77,128,0.15)' }}>
+                                💌
+                            </div>
+                            <div>
+                                <div className="font-semibold text-white text-sm">Kartu Ucapan Interaktif</div>
+                                <div className="text-pink-300/70 text-xs">Buat kartu ucapan premium dengan efek kembang api atau buku 3D flip</div>
+                            </div>
+                        </div>
+                        <Link href="/greeting-card" className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white hover:scale-105 transition-all whitespace-nowrap inline-flex items-center gap-1.5 self-start sm:self-auto" style={{ background: 'linear-gradient(135deg, #ff4d80, #e91e8c)', boxShadow: '0 4px 15px rgba(255,77,128,0.3)' }}>
+                            💌 Buat Kartu
+                            <Icon d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" className="w-3.5 h-3.5" />
+                        </Link>
+                    </div>
+                </div>
+
                 {/* ═══ Menu Cepat ═══ */}
                 <div>
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">

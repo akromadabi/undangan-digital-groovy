@@ -1,0 +1,1246 @@
+/* ═══════════════════════════════════════════════════════
+   DUSK MOSQUE - Static Theme Style.css
+   Premium Dusk-Toned Islamic Wedding Invitation
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── 1. Custom Properties ─── */
+:root {
+    --bg-deep:    #1A0F07;
+    --bg-mid:     #2A1F17;
+    --warm:       #735B3F;
+    --warm-dark:  #4A3826;
+    --gold:       #C8A655;
+    --gold-light: #E8C97A;
+    --gold-pale:  #F5E5C0;
+    --cream:      #FAF3EA;
+    --cream-dark: #EFE3D0;
+    --text-dark:  #2A1F17;
+    --text-mid:   #5C4A36;
+    --text-light: #8C7B68;
+    --shadow:     rgba(42,31,23,0.35);
+    --glass:      rgba(250,243,234,0.12);
+    --radius:     18px;
+    --nav-h:      72px;
+    --font-script: 'Great Vibes', cursive;
+    --font-serif:  'Playfair Display', Georgia, serif;
+    --font-sans:   'Cabin', system-ui, sans-serif;
+}
+
+/* ─── 2. Reset & Base ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bg-deep);
+    color: var(--text-dark);
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    user-select: none;
+}
+
+img { display: block; max-width: 100%; }
+a   { text-decoration: none; }
+button { cursor: pointer; border: none; background: none; }
+
+/* ─── 3. Particles Canvas ─── */
+#dusk-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ═══════════════════════════════════════
+   4. PRELOADER
+   ═══════════════════════════════════════ */
+.dusk-mosque-preloader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-deep);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity .5s ease, visibility .5s ease;
+}
+.dusk-mosque-preloader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.dusk-mosque-loader-spin {
+    width: 46px;
+    height: 46px;
+    border: 3px solid rgba(212,175,55,.15);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: dusk-spin 1s linear infinite;
+}
+@keyframes dusk-spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════
+   5. COVER GATE
+   ═══════════════════════════════════════ */
+.dusk-mosque-cover {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity .9s cubic-bezier(.4,0,.2,1), visibility .9s;
+    overflow: hidden;
+}
+.dusk-mosque-cover.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.dusk-mosque-cover__bg {
+    position: absolute;
+    inset: -5%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(3px) brightness(.6);
+    transform: scale(1.08);
+}
+.dusk-mosque-cover__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(26,15,7,.3) 0%,
+        rgba(26,15,7,.55) 40%,
+        rgba(26,15,7,.8) 100%
+    );
+}
+
+.dusk-mosque-cover__content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 4vh 24px;
+    text-align: center;
+    gap: 1rem;
+}
+
+/* Circular monogram */
+.dusk-mosque-cover__monogram-container {
+    margin-top: 1rem;
+}
+.dusk-mosque-cover__circle-logo {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+.dusk-mosque-cover__circle-logo svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    animation: dusk-spin 18s linear infinite;
+}
+.dusk-mosque-cover__circle-logo svg text {
+    fill: var(--gold-light);
+    font-size: 9.5px;
+    letter-spacing: 2px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+}
+.dusk-mosque-cover__monogram {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-script);
+    font-size: 2.2rem;
+    color: var(--gold-light);
+    text-shadow: 0 0 16px rgba(212,175,55,.6);
+}
+
+.dusk-mosque-cover__intro {
+    font-family: var(--font-sans);
+    font-size: .75rem;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    opacity: .8;
+}
+.dusk-mosque-cover__names {
+    font-family: var(--font-script);
+    font-size: clamp(2.8rem, 10vw, 4.5rem);
+    color: #fff;
+    text-shadow: 0 2px 20px rgba(212,175,55,.5);
+    line-height: 1.1;
+    margin-top: .35rem;
+}
+.dusk-mosque-cover__date {
+    font-family: var(--font-serif);
+    font-size: .85rem;
+    letter-spacing: 3px;
+    color: var(--gold-light);
+    margin-top: .5rem;
+}
+
+.dusk-mosque-cover__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+.dusk-mosque-cover__greeting {
+    font-size: .72rem;
+    letter-spacing: 1px;
+    color: var(--gold-pale);
+    opacity: .7;
+}
+.dusk-mosque-cover__guest {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: .5px;
+}
+.dusk-mosque-cover__btn {
+    margin-top: .5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .85rem 2.4rem;
+    background: linear-gradient(135deg, var(--gold), #A07833);
+    border-radius: 100px;
+    font-family: var(--font-sans);
+    font-size: .9rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(200,166,85,.45);
+    transition: transform .2s, box-shadow .2s;
+    animation: dusk-float 3s ease-in-out infinite;
+}
+.dusk-mosque-cover__btn:active { transform: scale(.96); }
+.dusk-mosque-cover__btn svg { width: 18px; height: 18px; }
+
+@keyframes dusk-float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* ═══════════════════════════════════════
+   6. 3D PARALLAX STAGE
+   ═══════════════════════════════════════ */
+.dusk-mosque-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+}
+.dusk-mosque-scene {
+    position: absolute;
+    inset: 0;
+    perspective: 900px;
+}
+
+/* All layers are fixed to stage */
+.dusk-mosque-layer {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    transition: transform .12s linear;
+}
+.dusk-mosque-layer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+/* Layer depths */
+.dusk-mosque-layer--background  { transform: translate3d(0,0,0) scale(1.1); z-index: 1; }
+.dusk-mosque-layer--kurma-left  { z-index: 2; transform: translate3d(-20px,-20px,0) scale(1.3); transform-origin: bottom left; }
+.dusk-mosque-layer--kurma-right { z-index: 2; transform: scaleX(-1) translate3d(-20px,-20px,0) scale(1.3); transform-origin: bottom right; }
+.dusk-mosque-layer--birds       { z-index: 3; transform: translate3d(-30px,-50px,0) scale(1.05); }
+.dusk-mosque-layer--couple      { z-index: 4; transform: translate3d(0,40px,0) scale(1.15); transform-origin: bottom center; }
+.dusk-mosque-layer--foreground  { z-index: 6; transform: translate3d(0,0,0) scale(1.25); transform-origin: bottom center; pointer-events: none; }
+
+/* Info/card layer */
+.dusk-mosque-layer--info {
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+
+/* ─── Scene camera states ─── */
+/* active-slide-0 = verse / opening overlay (birds higher) */
+.active-slide-0 .dusk-mosque-layer--birds  { transform: translate3d(-30px,-80px,0) scale(1.1); }
+.active-slide-0 .dusk-mosque-layer--couple { transform: translate3d(0,40px,0) scale(1.15); }
+.active-slide-0 .dusk-mosque-layer--kurma-left { transform: translate3d(-20px,-30px,0) scale(1.35); }
+
+/* active-slide-1 = bride */
+.active-slide-1 .dusk-mosque-layer--couple { transform: translate3d(-80px, 30px, 0) scale(1.3); }
+.active-slide-1 .dusk-mosque-layer--background { transform: translate3d(-20px, 0, 0) scale(1.12); }
+
+/* active-slide-2 = groom */
+.active-slide-2 .dusk-mosque-layer--couple { transform: translate3d(80px, 30px, 0) scale(1.3); }
+.active-slide-2 .dusk-mosque-layer--background { transform: translate3d(20px, 0, 0) scale(1.12); }
+
+/* active-slide-3 = event */
+.active-slide-3 .dusk-mosque-layer--couple { transform: translate3d(0, 60px, 0) scale(1.1); }
+.active-slide-3 .dusk-mosque-layer--birds  { transform: translate3d(-20px, -40px, 0) scale(1.05); }
+
+/* post slides */
+.active-slide-post .dusk-mosque-layer--couple { opacity: .3; }
+.active-slide-post .dusk-mosque-layer--birds  { opacity: .3; }
+.active-slide-post .dusk-mosque-layer--background { filter: brightness(.4); }
+.active-slide-post .dusk-mosque-layer--foreground { opacity: .2; }
+
+/* ═══════════════════════════════════════
+   7. STAGE OVERLAY CARDS (on top of parallax)
+   ═══════════════════════════════════════ */
+.dusk-mosque-card {
+    background: rgba(26,15,7,.75);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border: 1px solid rgba(212,175,55,.25);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
+    width: min(88vw, 400px);
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.7), inset 0 1px 0 rgba(212,175,55,.1);
+    color: var(--cream);
+
+    /* Hidden by default in slide mode */
+    opacity: 0;
+    transform: translateY(28px) scale(.97);
+    pointer-events: none;
+    transition: opacity .55s cubic-bezier(.4,0,.2,1), transform .55s cubic-bezier(.4,0,.2,1);
+}
+.dusk-mosque-card.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Event card overrides (taller) */
+.dusk-mosque-event-card {
+    width: min(92vw, 460px);
+    padding: 1.5rem 1.5rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold) transparent;
+}
+.dusk-mosque-event-container { display: flex; flex-direction: column; gap: .85rem; }
+
+/* ─── Verse Card ─── */
+.dusk-mosque-verse { display: flex; flex-direction: column; gap: .75rem; }
+.dusk-mosque-verse-hashtag {
+    font-family: var(--font-sans);
+    font-size: .7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    opacity: .7;
+}
+.dusk-mosque-verse-text {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: clamp(.9rem, 2.5vw, 1.1rem);
+    line-height: 1.8;
+    color: var(--cream);
+}
+.dusk-mosque-verse-ref {
+    font-size: .72rem;
+    color: var(--gold-light);
+    letter-spacing: 1px;
+}
+
+/* ─── Couple Card ─── */
+.dusk-mosque-couple-avatar-fallback {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px rgba(200,166,85,.2);
+}
+.dusk-mosque-couple-short {
+    font-family: var(--font-script);
+    font-size: 3rem;
+    color: var(--gold-light);
+    line-height: 1;
+}
+.dusk-mosque-couple-full {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-top: .3rem;
+    letter-spacing: .5px;
+}
+.dusk-mosque-couple-relation {
+    font-size: .65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    opacity: .65;
+    margin-top: .8rem;
+}
+.dusk-mosque-couple-parents {
+    font-size: .88rem;
+    color: var(--cream);
+    margin-top: .2rem;
+    line-height: 1.5;
+}
+.dusk-mosque-couple-ig {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: .9rem;
+    font-size: .78rem;
+    color: var(--gold-light);
+    border: 1px solid rgba(212,175,55,.3);
+    padding: .4rem .9rem;
+    border-radius: 100px;
+    transition: background .2s;
+}
+.dusk-mosque-couple-ig:hover { background: rgba(212,175,55,.1); }
+.dusk-mosque-couple-ig svg { width: 14px; height: 14px; }
+
+/* ─── Countdown ─── */
+.dusk-mosque-countdown-title {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: .8rem;
+    color: var(--gold-light);
+    margin-bottom: .75rem;
+}
+.dusk-mosque-countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: .5rem;
+}
+.dusk-mosque-countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(212,175,55,.15);
+    border-radius: 12px;
+    padding: .6rem .2rem;
+}
+.dusk-mosque-countdown-value {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1;
+}
+.dusk-mosque-countdown-label {
+    font-size: .55rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-pale);
+    opacity: .6;
+    margin-top: .2rem;
+}
+
+/* ─── Event Blocks ─── */
+.dusk-mosque-event-block {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(212,175,55,.12);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+}
+.dusk-mosque-event-label {
+    font-family: var(--font-script);
+    font-size: 1.6rem;
+    color: var(--gold-light);
+    margin-bottom: .4rem;
+}
+.dusk-mosque-event-date {
+    font-family: var(--font-serif);
+    font-size: .85rem;
+    color: #fff;
+    line-height: 1.6;
+}
+.dusk-mosque-event-venue {
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--cream);
+    margin-top: .4rem;
+}
+.dusk-mosque-event-address {
+    font-size: .75rem;
+    color: var(--gold-pale);
+    opacity: .7;
+    margin-top: .2rem;
+    line-height: 1.5;
+}
+.dusk-mosque-event-map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: .7rem;
+    background: linear-gradient(135deg, var(--gold), #A07833);
+    color: #fff;
+    border-radius: 100px;
+    padding: .45rem 1.1rem;
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .5px;
+    box-shadow: 0 4px 14px rgba(200,166,85,.35);
+    transition: transform .15s, box-shadow .15s;
+}
+.dusk-mosque-event-map-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(200,166,85,.45); }
+.dusk-mosque-event-map-btn svg { width: 13px; height: 13px; }
+
+/* ─── Dress Code ─── */
+.dusk-mosque-dresscode {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(212,175,55,.12);
+    border-radius: 12px;
+    padding: .9rem;
+    text-align: center;
+}
+.dusk-mosque-dresscode-title {
+    font-family: var(--font-serif);
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--gold-light);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: .4rem;
+}
+.dusk-mosque-dresscode-desc {
+    font-size: .76rem;
+    color: var(--cream);
+    opacity: .75;
+    line-height: 1.5;
+    margin-bottom: .65rem;
+}
+.dusk-mosque-dresscode-palette {
+    display: flex;
+    gap: .4rem;
+    justify-content: center;
+}
+.dusk-mosque-dresscode-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+/* ═══════════════════════════════════════
+   8. MAIN CONTENT AREA
+   ═══════════════════════════════════════ */
+.dusk-mosque-main--slide {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+/* Slide containers are invisible touch-target panels */
+.dusk-mosque-slide-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* Scroll mode */
+.dusk-mosque-main--scroll {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    padding-bottom: calc(var(--nav-h) + 2rem);
+}
+
+/* ─── Post-stage sections ─── */
+.dusk-mosque-post-section {
+    padding: 2rem 1.5rem;
+}
+
+/* ═══════════════════════════════════════
+   9. SECTION TYPOGRAPHY
+   ═══════════════════════════════════════ */
+.dusk-mosque-section-eyebrow {
+    font-family: var(--font-sans);
+    font-size: .65rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: .35rem;
+}
+.dusk-mosque-section-title {
+    font-family: var(--font-script);
+    font-size: 2.8rem;
+    color: var(--warm);
+    line-height: 1.1;
+    margin-bottom: .5rem;
+}
+.dusk-mosque-section-subtitle {
+    font-size: .85rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+/* ═══════════════════════════════════════
+   10. LOVE STORY TIMELINE
+   ═══════════════════════════════════════ */
+.dusk-mosque-story-path {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding: .5rem 0;
+}
+.dusk-mosque-story-path::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--gold-light), var(--warm));
+    transform: translateX(-50%);
+    opacity: .3;
+}
+.dusk-mosque-story-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+.dusk-mosque-story-row--left  { padding-right: calc(50% + 1rem); justify-content: flex-end; }
+.dusk-mosque-story-row--right { padding-left:  calc(50% + 1rem); justify-content: flex-start; }
+.dusk-mosque-story-dot {
+    position: absolute;
+    left: 50%;
+    top: .5rem;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(200,166,85,.2);
+}
+.dusk-mosque-story-card {
+    background: rgba(115,91,63,.08);
+    border: 1px solid rgba(115,91,63,.15);
+    border-radius: 12px;
+    padding: .85rem 1rem;
+    max-width: 180px;
+    text-align: left;
+}
+.dusk-mosque-story-chapter-title {
+    font-family: var(--font-serif);
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--warm);
+    margin-bottom: .35rem;
+}
+.dusk-mosque-story-chapter-text {
+    font-size: .75rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════
+   11. GALLERY GRID
+   ═══════════════════════════════════════ */
+.dusk-mosque-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+}
+.dusk-mosque-gallery-item {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--cream-dark);
+}
+.dusk-mosque-gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .35s ease;
+}
+.dusk-mosque-gallery-item:hover img { transform: scale(1.06); }
+
+.dusk-mosque-gallery-quote {
+    border-left: 3px solid var(--gold);
+    padding: .75rem 1rem;
+    background: rgba(200,166,85,.06);
+    border-radius: 0 12px 12px 0;
+}
+.dusk-mosque-gallery-quote p {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: .9rem;
+    color: var(--text-dark);
+    line-height: 1.7;
+}
+.dusk-mosque-gallery-quote cite {
+    font-size: .72rem;
+    color: var(--text-light);
+    margin-top: .35rem;
+    display: block;
+}
+
+/* ═══════════════════════════════════════
+   12. RSVP & GUESTBOOK
+   ═══════════════════════════════════════ */
+.dusk-mosque-rsvp-box { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.dusk-mosque-rsvp-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.dusk-mosque-rsvp-field { display: flex; flex-direction: column; gap: .4rem; }
+.dusk-mosque-rsvp-field > label {
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--warm);
+}
+
+.dusk-mosque-rsvp-input,
+.dusk-mosque-rsvp-textarea {
+    background: #fff;
+    border: 1.5px solid var(--cream-dark);
+    border-radius: 10px;
+    padding: .7rem 1rem;
+    font-family: var(--font-sans);
+    font-size: .9rem;
+    color: var(--text-dark);
+    transition: border-color .2s, box-shadow .2s;
+    resize: vertical;
+}
+.dusk-mosque-rsvp-input:focus,
+.dusk-mosque-rsvp-textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(200,166,85,.15);
+}
+
+.dusk-mosque-rsvp-counter {
+    font-size: .7rem;
+    color: var(--text-light);
+    text-align: right;
+    margin-top: .2rem;
+}
+
+/* Radio choices */
+.dusk-mosque-rsvp-choices { display: flex; gap: .75rem; flex-wrap: wrap; }
+.dusk-mosque-rsvp-choice-wrapper { position: relative; }
+.dusk-mosque-rsvp-choice-input { position: absolute; opacity: 0; width: 0; height: 0; }
+.dusk-mosque-rsvp-choice-label {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .4rem 1rem;
+    border: 1.5px solid var(--cream-dark);
+    border-radius: 100px;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all .2s;
+}
+.dusk-mosque-rsvp-choice-input:checked + .dusk-mosque-rsvp-choice-label {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #fff;
+}
+
+.dusk-mosque-rsvp-submit {
+    background: linear-gradient(135deg, var(--gold), #A07833);
+    color: #fff;
+    border-radius: 100px;
+    padding: .8rem;
+    font-family: var(--font-sans);
+    font-size: .9rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    box-shadow: 0 6px 20px rgba(200,166,85,.4);
+    transition: transform .15s, box-shadow .15s;
+}
+.dusk-mosque-rsvp-submit:active { transform: scale(.97); }
+
+/* Guestbook */
+.dusk-mosque-wishes-label {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--warm);
+    margin-bottom: .75rem;
+}
+.dusk-mosque-wishes-container {}
+.dusk-mosque-wishes-list { display: flex; flex-direction: column; gap: .75rem; max-height: 300px; overflow-y: auto; }
+.dusk-mosque-wish-card {
+    background: rgba(200,166,85,.07);
+    border: 1px solid rgba(200,166,85,.15);
+    border-radius: 12px;
+    padding: .85rem 1rem;
+}
+.dusk-mosque-wish-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: .35rem;
+}
+.dusk-mosque-wish-name {
+    font-weight: 700;
+    font-size: .85rem;
+    color: var(--warm);
+}
+.dusk-mosque-wish-date {
+    font-size: .65rem;
+    color: var(--text-light);
+}
+.dusk-mosque-wish-status {
+    display: inline-block;
+    font-size: .6rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: .2rem .6rem;
+    border-radius: 100px;
+    margin-bottom: .4rem;
+    font-weight: 600;
+}
+.dusk-mosque-wish-status--hadir   { background: rgba(40,167,69,.12); color: #28a745; }
+.dusk-mosque-wish-status--tidak   { background: rgba(220,53,69,.12); color: #dc3545; }
+.dusk-mosque-wish-message {
+    font-size: .82rem;
+    color: var(--text-mid);
+    line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════
+   13. BANK / GIFT
+   ═══════════════════════════════════════ */
+.dusk-mosque-gift-tabs {
+    display: flex;
+    gap: .5rem;
+}
+.dusk-mosque-gift-tab {
+    flex: 1;
+    padding: .6rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--cream-dark);
+    font-family: var(--font-sans);
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    background: #fff;
+    transition: all .2s;
+}
+.dusk-mosque-gift-tab.is-active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #fff;
+}
+
+.dusk-mosque-bank-card {
+    background: rgba(200,166,85,.06);
+    border: 1px solid rgba(200,166,85,.2);
+    border-radius: 14px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+.dusk-mosque-bank-logo {
+    max-height: 36px;
+    max-width: 110px;
+    object-fit: contain;
+    margin: 0 auto .75rem;
+}
+.dusk-mosque-bank-holder {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+.dusk-mosque-bank-number {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--warm);
+    letter-spacing: 2px;
+    margin: .35rem 0;
+}
+
+.dusk-mosque-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: .4rem;
+    padding: .5rem 1.2rem;
+    background: linear-gradient(135deg, var(--gold), #A07833);
+    color: #fff;
+    border-radius: 100px;
+    font-size: .78rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(200,166,85,.3);
+    transition: transform .15s, background .25s;
+}
+.dusk-mosque-copy-btn:active { transform: scale(.96); }
+
+.dusk-mosque-address-block {
+    font-size: .85rem;
+    line-height: 1.7;
+    color: var(--text-mid);
+    margin: .5rem 0;
+}
+
+/* ═══════════════════════════════════════
+   14. CLOSING SECTION
+   ═══════════════════════════════════════ */
+.dusk-mosque-closing-section { text-align: center; }
+.dusk-mosque-closing-salam {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: clamp(.85rem, 2.4vw, 1rem);
+    color: var(--warm);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+.dusk-mosque-closing-sig {
+    font-family: var(--font-serif);
+    font-size: .9rem;
+    color: var(--text-mid);
+    margin-top: 1.5rem;
+}
+.dusk-mosque-signature-block {
+    margin-top: 1rem;
+    font-size: .82rem;
+    color: var(--text-light);
+    line-height: 2;
+}
+.dusk-mosque-watermark {
+    font-size: .7rem;
+    color: var(--text-light);
+    opacity: .5;
+    margin-top: 2rem;
+}
+
+/* ═══════════════════════════════════════
+   15. BOTTOM NAVIGATION
+   ═══════════════════════════════════════ */
+.dusk-mosque-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-h);
+    background: rgba(26,15,7,.92);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    border-top: 1px solid rgba(212,175,55,.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 .5rem;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 100;
+
+    /* Start hidden */
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity .5s ease, transform .5s ease;
+    pointer-events: none;
+}
+.dusk-mosque-nav.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.dusk-mosque-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .25rem;
+    padding: .4rem .5rem;
+    border-radius: 12px;
+    font-family: var(--font-sans);
+    font-size: .55rem;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.4);
+    transition: color .2s, background .2s;
+    min-width: 44px;
+}
+.dusk-mosque-nav-item i {
+    font-size: 1rem;
+    transition: color .2s, transform .2s;
+}
+.dusk-mosque-nav-item.is-active {
+    color: var(--gold-light);
+}
+.dusk-mosque-nav-item.is-active i {
+    color: var(--gold);
+    transform: scale(1.15);
+}
+.dusk-mosque-nav-item:active { background: rgba(212,175,55,.08); }
+
+/* ═══════════════════════════════════════
+   16. FLOATING CONTROLS
+   ═══════════════════════════════════════ */
+
+/* ─── WhatsApp Float ─── */
+.dusk-mosque-whatsapp-float {
+    position: fixed;
+    right: 16px;
+    z-index: 200;
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+    opacity: 0;
+    transition: opacity .4s ease, bottom .4s ease;
+}
+.dusk-mosque-whatsapp-float--raised {
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+}
+.dusk-mosque-whatsapp-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    background: #25D366;
+    border-radius: 50%;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(37,211,102,.5);
+    transition: transform .2s, box-shadow .2s;
+}
+.dusk-mosque-whatsapp-btn:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(37,211,102,.6); }
+
+/* ─── Music Button (Vinyl Disk) ─── */
+.dusk-mosque-music-btn {
+    position: fixed;
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 66px);
+    right: 16px;
+    width: 46px;
+    height: 46px;
+    background: rgba(26,15,7,.85);
+    border: 1.5px solid rgba(212,175,55,.4);
+    border-radius: 50%;
+    backdrop-filter: blur(12px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(.8);
+    transition: opacity .5s ease, transform .5s ease;
+}
+.dusk-mosque-music-btn.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.dusk-mosque-vinyl {
+    position: absolute;
+    inset: 3px;
+    background: conic-gradient(
+        #1a0f07 0deg,
+        #2a1f17 30deg,
+        #1a0f07 60deg,
+        #2a1f17 90deg,
+        #1a0f07 120deg,
+        #2a1f17 150deg,
+        #1a0f07 180deg,
+        #2a1f17 210deg,
+        #1a0f07 240deg,
+        #2a1f17 270deg,
+        #1a0f07 300deg,
+        #2a1f17 330deg,
+        #1a0f07 360deg
+    );
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    transition: animation-play-state .3s;
+}
+.dusk-mosque-music-btn.is-playing .dusk-mosque-vinyl {
+    animation: dusk-spin 3s linear infinite;
+}
+
+.dusk-mosque-tonearm {
+    position: absolute;
+    width: 2px;
+    height: 16px;
+    background: var(--gold);
+    transform-origin: top center;
+    top: 4px;
+    right: 10px;
+    border-radius: 2px;
+    transform: rotate(35deg);
+    transition: transform .5s ease;
+}
+.dusk-mosque-music-btn.is-playing .dusk-mosque-tonearm {
+    transform: rotate(15deg);
+}
+
+/* ─── Fullscreen & Layout Buttons ─── */
+.dusk-mosque-fullscreen-btn,
+.dusk-mosque-layout-btn {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    background: rgba(26,15,7,.8);
+    border: 1.5px solid rgba(212,175,55,.35);
+    border-radius: 50%;
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    transform: scale(.8);
+    transition: opacity .5s ease, transform .5s ease, background .2s;
+}
+.dusk-mosque-fullscreen-btn.is-visible,
+.dusk-mosque-layout-btn.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+.dusk-mosque-fullscreen-btn svg,
+.dusk-mosque-layout-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: var(--gold-light);
+}
+.dusk-mosque-fullscreen-btn:hover,
+.dusk-mosque-layout-btn:hover {
+    background: rgba(200,166,85,.15);
+}
+
+.dusk-mosque-fullscreen-btn {
+    top: 14px;
+    right: 14px;
+}
+.dusk-mosque-layout-btn {
+    top: 62px;
+    right: 14px;
+}
+
+/* ─── Raised state (when nav is visible) ─── */
+.dusk-mosque-music-btn--raised {}
+.dusk-mosque-fullscreen-btn--raised {}
+.dusk-mosque-layout-btn--raised {}
+
+/* ═══════════════════════════════════════
+   17. SWIPE HINT
+   ═══════════════════════════════════════ */
+.dusk-mosque-swipe-hint {
+    position: fixed;
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .3rem;
+    color: rgba(255,255,255,.5);
+    font-size: .65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    animation: dusk-swipe-hint 2.5s ease-in-out 2s forwards;
+}
+@keyframes dusk-swipe-hint {
+    0%   { opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; }
+}
+.dusk-mosque-swipe-hint.is-hidden { display: none; }
+.dusk-mosque-swipe-hint-arrow {
+    display: block;
+    width: 24px;
+    height: 24px;
+    border-right: 2px solid rgba(255,255,255,.4);
+    border-bottom: 2px solid rgba(255,255,255,.4);
+    transform: rotate(45deg);
+    animation: dusk-bounce 1.4s ease-in-out infinite;
+}
+@keyframes dusk-bounce {
+    0%,100% { transform: rotate(45deg) translateY(0); }
+    50%      { transform: rotate(45deg) translateY(4px); }
+}
+
+/* ═══════════════════════════════════════
+   18. TOAST NOTIFICATION
+   ═══════════════════════════════════════ */
+.dusk-toast {
+    position: fixed;
+    bottom: calc(var(--nav-h) + 60px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(42,31,23,.95);
+    backdrop-filter: blur(12px);
+    color: var(--gold-light);
+    border: 1px solid rgba(212,175,55,.3);
+    border-radius: 100px;
+    padding: .55rem 1.3rem;
+    font-size: .8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease, transform .3s ease;
+}
+.dusk-toast.is-show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ═══════════════════════════════════════
+   19. RESPONSIVE
+   ═══════════════════════════════════════ */
+@media (max-width: 400px) {
+    .dusk-mosque-countdown-value { font-size: 1.4rem; }
+    .dusk-mosque-card { width: 94vw; padding: 1.5rem 1.25rem; }
+    .dusk-mosque-section-title { font-size: 2.2rem; }
+    .dusk-mosque-couple-short { font-size: 2.4rem; }
+}
+
+@media (min-width: 768px) {
+    :root { --nav-h: 80px; }
+    .dusk-mosque-card { width: min(70vw, 480px); }
+    .dusk-mosque-nav-item { min-width: 60px; font-size: .65rem; }
+    .dusk-mosque-nav-item i { font-size: 1.1rem; }
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar        { width: 4px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--gold); border-radius: 4px; }

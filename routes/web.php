@@ -13,6 +13,7 @@ use App\Http\Controllers\Dashboard\ContentController;
 use App\Http\Controllers\Dashboard\LiveTamuController;
 use App\Http\Controllers\Dashboard\SettingsController;
 use App\Http\Controllers\Dashboard\ThemeSettingsController;
+use App\Http\Controllers\Dashboard\GreetingCardController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -111,6 +112,9 @@ Route::post('/u/{slug}/wish', [InvitationController::class, 'submitWish'])->name
 Route::post('/u/{slug}/opened', [InvitationController::class, 'markOpened'])->name('invitation.opened');
 Route::get('/u/{slug}/checkin', [InvitationController::class, 'checkin'])->name('invitation.checkin');
 Route::get('/demo/{slug}', [InvitationController::class, 'demo'])->name('demo.theme');
+
+// Public Greeting Card Preview (no auth)
+Route::get('/card/{slug}', [GreetingCardController::class, 'preview'])->name('greeting-card.preview');
 
 // Demo tema — hanya untuk user yang login (mencegah ekspos template ke publik)
 Route::middleware(['auth'])->group(function () {
@@ -268,6 +272,16 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
     Route::post('/theme/{theme}/like', [ThemeSettingsController::class, 'toggleLike'])->name('theme.like');
     Route::post('/theme/sections', [ThemeSettingsController::class, 'updateSections'])->name('theme.sections');
 
+    // Greeting Card (Kartu Ucapan)
+    Route::prefix('greeting-card')->name('greeting-card.')->group(function () {
+        Route::get('/', [GreetingCardController::class, 'index'])->name('index');
+        Route::get('/create', [GreetingCardController::class, 'create'])->name('create');
+        Route::post('/', [GreetingCardController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [GreetingCardController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [GreetingCardController::class, 'update'])->name('update');
+        Route::delete('/{id}', [GreetingCardController::class, 'destroy'])->name('destroy');
+    });
+
     // File Upload
     Route::post('/upload', [DashboardController::class, 'upload'])->name('upload');
 
@@ -330,6 +344,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 // ═══════════════════════════════════════
 Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
     Route::get('/', [\App\Http\Controllers\SuperAdmin\SuperAdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Static Previews
+    Route::get('/static-previews', function () {
+        return Inertia::render('SuperAdmin/StaticPreviews');
+    })->name('static-previews.index');
 
     // Reseller Management
     Route::resource('resellers', \App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class);
