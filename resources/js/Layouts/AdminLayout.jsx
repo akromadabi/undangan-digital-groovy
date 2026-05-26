@@ -156,7 +156,9 @@ export default function AdminLayout({ children, title }) {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <RoleSwitcher auth={auth} />
+                        <div className="hidden sm:block">
+                            <RoleSwitcher auth={auth} />
+                        </div>
                         <div className="hidden lg:flex items-center gap-2 text-sm text-[#999]">
                             <span>Admin:</span>
                             <span className="font-medium text-[#555]">{auth.user?.name}</span>
@@ -188,6 +190,12 @@ export default function AdminLayout({ children, title }) {
                                     <div className="px-4 py-3 border-b border-[#f0ede8]">
                                         <div className="text-sm font-semibold text-[#333]">{auth.user?.name}</div>
                                         <div className="text-xs text-[#999] mt-0.5">{auth.user?.email || 'Administrator'}</div>
+                                    </div>
+
+                                    {/* Switch role on mobile only */}
+                                    <div className="sm:hidden px-4 py-2 border-b border-[#f0ede8] bg-gray-50/50">
+                                        <div className="text-[9px] font-bold text-[#999] tracking-wider mb-1.5 uppercase">Switch Role</div>
+                                        <RoleSwitcher auth={auth} />
                                     </div>
 
                                     {/* Menu items */}

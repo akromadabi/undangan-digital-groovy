@@ -30,6 +30,23 @@ function formatDate(d) {
     if (!d) return '';
     return new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
+function formatStoryDate(dateStr) {
+    if (!dateStr) return '';
+    const datePattern = /^\d{4}-\d{2}-\d{2}/;
+    if (datePattern.test(dateStr)) {
+        try {
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                return d.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+            }
+        } catch (e) {}
+    }
+    return dateStr;
+}
 function formatTime(t) {
     if (!t || t === 'Selesai') return t || '';
     return String(t).substring(0, 5);
@@ -542,7 +559,7 @@ function TimelineCard({ story, index }) {
                         <span className="nf-badge">Part {index + 1}</span>{story.title}
                     </p>
                     {(story.story_date || story.date) && (
-                        <p className="nf-story-item__date">{story.story_date || story.date}</p>
+                        <p className="nf-story-item__date">{formatStoryDate(story.story_date || story.date)}</p>
                     )}
                     <p className="nf-story-item__desc">{story.description || story.story}</p>
                 </div>

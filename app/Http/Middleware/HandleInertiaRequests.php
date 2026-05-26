@@ -68,10 +68,12 @@ class HandleInertiaRequests extends Middleware
                 }
             }
         }
+        $globalSiteName = \App\Models\GlobalSetting::where('setting_key', 'site_name')->value('setting_value');
+        $globalSiteLogo = \App\Models\GlobalSetting::where('setting_key', 'site_logo')->value('setting_value');
 
         $appName = $resellerSetting && $resellerSetting->brand_name 
             ? $resellerSetting->brand_name 
-            : (config('app.name') === 'Laravel' ? 'Undangan Digital' : config('app.name', 'Undangan Digital'));
+            : ($globalSiteName ?: (config('app.name') === 'Laravel' ? 'Undangan Digital' : config('app.name', 'Undangan Digital')));
 
         return [
             ...parent::share($request),
@@ -110,7 +112,9 @@ class HandleInertiaRequests extends Middleware
             ) : null,
             'features' => $featureAccess,
             'appName' => $appName,
-            'brandLogo' => $resellerSetting && $resellerSetting->brand_logo ? '/storage/' . $resellerSetting->brand_logo : null,
+            'brandLogo' => $resellerSetting && $resellerSetting->brand_logo 
+                ? '/storage/' . $resellerSetting->brand_logo 
+                : ($globalSiteLogo ? '/storage/' . $globalSiteLogo : null),
             'adminRoutePrefix' => str_starts_with($request->path(), 'super-admin') ? '/super-admin' : '/admin',
             'resellerSubdomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->subdomain : null,
             'resellerCustomDomain' => $user && $user->role === 'admin' ? optional($user->resellerSettings)->custom_domain : null,

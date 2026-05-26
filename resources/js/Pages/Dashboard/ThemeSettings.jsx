@@ -923,101 +923,6 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                     </button>
                                 </div>
 
-                                {/* Modal Pengaturan Partikel */}
-                                {isParticleModalOpen && (
-                                    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
-                                        <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-[scaleIn_0.2s_ease-out] border border-gray-100">
-                                            {/* Header */}
-                                            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                                                <div>
-                                                    <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-                                                        <span className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center text-[#c24b33]">
-                                                            ✨
-                                                        </span>
-                                                        Pengaturan Efek Partikel
-                                                    </h3>
-                                                    <p className="text-[10px] text-gray-400 mt-0.5">Pilih efek visual melayang di layar undangan digital</p>
-                                                </div>
-                                                <button 
-                                                    onClick={() => setIsParticleModalOpen(false)}
-                                                    className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
-                                                    title="Tutup"
-                                                >
-                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-
-                                            {/* Content */}
-                                            <div className="p-6 space-y-4">
-                                                {/* Jenis Partikel */}
-                                                <div>
-                                                    <label className="block text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wider">Pilih Jenis Partikel</label>
-                                                    <div className="grid grid-cols-4 gap-1.5">
-                                                        {PARTICLE_OPTIONS.map(p => {
-                                                            const isSelected = particleType === p.key;
-                                                            return (
-                                                                <button key={p.key} type="button" 
-                                                                    onClick={() => { setParticleType(p.key); handleParticleSave({ type: p.key }); }}
-                                                                    className={`p-2 rounded-xl text-center transition-all border ${isSelected ? 'bg-orange-50 border-[#E5654B] shadow-sm scale-[1.03]' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
-                                                                    <div className="flex justify-center mb-1">{PIcons[p.key]?.('w-5 h-5')}</div>
-                                                                    <div className="text-[8px] font-bold text-gray-600 leading-none truncate">{p.label}</div>
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-
-                                                {/* Jumlah Partikel */}
-                                                <div className="pt-2">
-                                                    <div className="flex items-center justify-between mb-1.5">
-                                                        <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Jumlah Partikel</label>
-                                                        <span className="text-[10px] font-bold text-[#c24b33] bg-orange-50 px-2 py-0.5 rounded-full">{particleCount} pcs</span>
-                                                    </div>
-                                                    <input type="range" min="5" max="80" step="5" value={particleCount} onChange={(e) => setParticleCount(parseInt(e.target.value))} onMouseUp={(e) => handleParticleSave({ count: parseInt(e.target.value) })} onTouchEnd={(e) => handleParticleSave({ count: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#E5654B]" />
-                                                </div>
-
-                                                {/* Kecepatan */}
-                                                <div className="pt-2">
-                                                    <label className="block text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wider">Kecepatan Gerakan</label>
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        {[
-                                                            { val: 'slow', label: 'Lambat', icon: <svg className="w-3.5 h-3.5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
-                                                            { val: 'normal', label: 'Normal', icon: <svg className="w-3.5 h-3.5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg> },
-                                                            { val: 'fast', label: 'Cepat', icon: <svg className="w-3.5 h-3.5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> },
-                                                        ].map(s => {
-                                                            const isSelected = particleSpeed === s.val;
-                                                            return (
-                                                                <button key={s.val} type="button" onClick={() => { setParticleSpeed(s.val); handleParticleSave({ speed: s.val }); }}
-                                                                    className={`p-2 rounded-xl text-center transition-all border ${isSelected ? 'bg-orange-50 border-[#E5654B] font-bold' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
-                                                                    <div className="mb-1">{s.icon}</div>
-                                                                    <div className="text-[10px] text-gray-600 font-semibold">{s.label}</div>
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Footer Action */}
-                                            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center gap-2">
-                                                {particleType && (
-                                                    <button type="button" onClick={() => { setParticleType(null); handleParticleSave({ type: null }); }}
-                                                        className="flex-1 py-2 px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
-                                                        ❌ Nonaktifkan
-                                                    </button>
-                                                )}
-                                                <button 
-                                                    onClick={() => setIsParticleModalOpen(false)}
-                                                    className="flex-1 py-2 px-3 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-xl text-xs font-semibold shadow-md shadow-orange-100 transition-all text-center"
-                                                >
-                                                    Simpan & Tutup
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     )}
@@ -1058,6 +963,109 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                     </div>
                 </div>
             </div>
+
+            {/* Modal Pengaturan Partikel (moved to root level to prevent clipping) */}
+            {isParticleModalOpen && (
+                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
+                    <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-[scaleIn_0.2s_ease-out] border border-gray-100">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <div>
+                                <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                    <span className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center text-[#c24b33]">
+                                        ✨
+                                    </span>
+                                    Pengaturan Efek Partikel
+                                </h3>
+                                <p className="text-[10px] text-gray-400 mt-0.5">Pilih efek visual melayang di layar undangan digital</p>
+                            </div>
+                            <button 
+                                onClick={() => setIsParticleModalOpen(false)}
+                                className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
+                                title="Tutup"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-4">
+                            {/* Jenis Partikel */}
+                            <div>
+                                <label className="block text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wider">Pilih Jenis Partikel</label>
+                                <div className="grid grid-cols-4 gap-1.5">
+                                    {PARTICLE_OPTIONS.map(p => {
+                                        const isSelected = particleType === p.key;
+                                        return (
+                                            <button key={p.key} type="button" 
+                                                onClick={() => { setParticleType(p.key); handleParticleSave({ type: p.key }); }}
+                                                className={`p-2 rounded-xl text-center transition-all border ${isSelected ? 'bg-orange-50 border-[#E5654B] shadow-sm scale-[1.03]' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
+                                                <div className="flex justify-center mb-1">{PIcons[p.key]?.('w-5 h-5')}</div>
+                                                <div className="text-[8px] font-bold text-gray-600 leading-none truncate">{p.label}</div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Jumlah Partikel */}
+                            <div className="pt-2">
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Jumlah Partikel</label>
+                                    <span className="text-[10px] font-bold text-[#c24b33] bg-orange-50 px-2 py-0.5 rounded-full">{particleCount} pcs</span>
+                                </div>
+                                <input type="range" min="5" max="80" step="5" value={particleCount} onChange={(e) => setParticleCount(parseInt(e.target.value))} onMouseUp={(e) => handleParticleSave({ count: parseInt(e.target.value) })} onTouchEnd={(e) => handleParticleSave({ count: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#E5654B]" />
+                            </div>
+
+                            {/* Kecepatan */}
+                            <div className="pt-2">
+                                <label className="block text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wider">Kecepatan Gerakan</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        { val: 'slow', label: 'Lambat', icon: <svg className="w-3.5 h-3.5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
+                                        { val: 'normal', label: 'Normal', icon: <svg className="w-3.5 h-3.5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg> },
+                                        { val: 'fast', label: 'Cepat', icon: <svg className="w-3.5 h-3.5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> },
+                                    ].map(s => {
+                                        const isSelected = particleSpeed === s.val;
+                                        return (
+                                            <button key={s.val} type="button" onClick={() => { setParticleSpeed(s.val); handleParticleSave({ speed: s.val }); }}
+                                                className={`p-2 rounded-xl text-center transition-all border ${isSelected ? 'bg-orange-50 border-[#E5654B] font-bold' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
+                                                <div className="mb-1">{s.icon}</div>
+                                                <div className="text-[10px] text-gray-600 font-semibold">{s.label}</div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer Action */}
+                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center gap-2">
+                            {particleType && (
+                                <button type="button" onClick={() => { setParticleType(null); handleParticleSave({ type: null }); }}
+                                    className="flex-1 py-2 px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
+                                    ❌ Nonaktifkan
+                                </button>
+                            )}
+                            <button 
+                                onClick={() => setIsParticleModalOpen(false)}
+                                className="flex-1 py-2 px-3 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-xl text-xs font-semibold shadow-md shadow-orange-100 transition-all text-center"
+                            >
+                                Simpan & Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Domain Tutorial Modal (rendered correctly here) */}
+            <CustomDomainTutorialModal
+                isOpen={isTutorialOpen}
+                onClose={() => setIsTutorialOpen(false)}
+                centralHost={centralHost}
+            />
 
             {/* Toast notification */}
             {toast && (

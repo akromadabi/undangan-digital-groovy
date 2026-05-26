@@ -1,0 +1,33 @@
+document.addEventListener('DOMContentLoaded',function(){console.log('IDGO WA: Script Initializing...');const container=document.getElementById('idgo-wa-container');if(!container){console.warn('IDGO WA: Container #idgo-wa-container not found in footer.');return}
+let config;try{config=JSON.parse(container.getAttribute('data-config'));console.log('IDGO WA: Config loaded',config)}catch(e){console.error('IDGO WA: Failed to parse config',e);return}
+const{position,bottom_offset,side_offset,icon_color,icon_size,header_color,widget_title,widget_desc,is_offline,offline_msg,greeting_tooltip_text,greeting_tooltip_delay,agents}=config;container.style.setProperty('--idgo-wa-bottom',bottom_offset);container.style.setProperty('--idgo-wa-side',side_offset);container.style.setProperty('--idgo-wa-icon-color',icon_color);container.style.setProperty('--idgo-wa-icon-size',icon_size);container.style.setProperty('--idgo-wa-header-color',header_color);const shadow=container.attachShadow({mode:'open'});const styleLink=document.createElement('link');styleLink.setAttribute('rel','stylesheet');const revealWidget=()=>{if(container.classList.contains('is-ready'))return;console.log('IDGO WA: Revealing widget.');container.classList.remove('idgo-loading');container.classList.add('is-ready');container.style.setProperty('visibility','visible','important');container.style.setProperty('opacity','1','important')};styleLink.onload=revealWidget;styleLink.setAttribute('href',config.css_url);shadow.appendChild(styleLink);const wrapper=document.createElement('div');wrapper.className=`idgo-wa-wrapper idgo-wa-pos-${position}`;let agentsHtml='';if(is_offline){agentsHtml=`<div class="idgo-wa-offline-notice">${offline_msg}</div>`}else{agents.forEach(agent=>{const waUrl=`https://wa.me/${agent.phone}?text=${encodeURIComponent(agent.message)}`;let avatarContent='';if(agent.photo){avatarContent=`<img src="${agent.photo}" alt="${agent.name}" width="48" height="48" style="width:48px;height:48px;object-fit:cover;display:block;border-radius:50%;">`}else{const initial=agent.name?agent.name.charAt(0).toUpperCase():'A';avatarContent=initial}
+agentsHtml+=`
+                <a href="${waUrl}" class="idgo-wa-agent-item" target="_blank" rel="noopener">
+                    <div class="idgo-wa-agent-avatar">${avatarContent}</div>
+                    <div class="idgo-wa-agent-info">
+                        <b>${agent.name}</b>
+                        ${agent.category ? `<span class="idgo-wa-category">${agent.category}</span>` : ''}
+                        <span>Online Sekarang</span>
+                    </div>
+                </a>
+            `})}
+wrapper.innerHTML=`
+        <div class="idgo-wa-popup" id="idgo-wa-popup">
+            <div class="idgo-wa-header">
+                <h3>${widget_title || 'WhatsApp Support'}</h3>
+                <p>${is_offline ? offline_msg : (widget_desc || 'Halo! Ada yang bisa kami bantu?')}</p>
+            </div>
+            <div class="idgo-wa-body">
+                ${agentsHtml}
+            </div>
+        </div>
+        <button class="idgo-wa-button" id="idgo-wa-toggle" aria-label="Open WhatsApp Chat">
+            <svg viewBox="0 0 32 32">
+                <path d="M16 0c-8.837 0-16 7.163-16 16 0 2.825.737 5.48 2.025 7.79l-2.025 7.79 8.019-2.019c2.256 1.156 4.819 1.838 7.544 1.838 8.837 0 16-7.163 16-16s-7.163-16-16-16zM16 29.333c-2.456 0-4.756-.633-6.767-1.744l-.489-.267-4.756 1.2 1.222-4.689-.289-.467c-1.222-1.956-1.922-4.289-1.922-6.756 0-7.356 5.978-13.333 13.333-13.333s13.333 5.978 13.333 13.333-5.978 13.333-13.333 13.333zM22.9 19.333c-.378-.189-2.222-1.089-2.567-1.222s-.6-.189-.856.189c-.256.378-.978 1.222-1.2 1.478s-.444.278-.822.089c-.378-.189-1.6-.589-3.044-1.878-1.122-1-1.878-2.233-2.1-2.611s-.022-.578.167-.767c.167-.167.378-.444.567-.667s.256-.378.378-.633.067-.489-.033-.678c-.1-.189-.856-2.067-1.178-2.833-.311-.744-.633-.644-.856-.656s-.467-.011-.722-.011-.667.1-1.011.478c-.344.378-1.311 1.278-1.311 3.122s1.344 3.622 1.533 3.878c.189.256 2.644 4.044 6.411 5.667 4.044 1.733 4.044 1.156 4.778 1.089s2.356-.967 2.689-1.9c.333-.933.333-1.733.233-1.9s-.356-.278-.733-.467z"></path>
+            </svg>
+        </button>
+        ${greeting_tooltip_text ? `<div class="idgo-wa-tooltip" id="idgo-wa-tooltip">${greeting_tooltip_text}</div>` : ''}
+    `;shadow.appendChild(wrapper);const toggle=shadow.getElementById('idgo-wa-toggle');const popup=shadow.getElementById('idgo-wa-popup');if(toggle&&popup){const tooltip=shadow.getElementById('idgo-wa-tooltip');if(tooltip&&greeting_tooltip_delay>0){setTimeout(()=>{if(!popup.classList.contains('is-active')){tooltip.classList.add('is-active')}},greeting_tooltip_delay*1000)}
+toggle.addEventListener('click',function(e){e.stopPropagation();popup.classList.toggle('is-active');if(tooltip)tooltip.classList.remove('is-active');});document.addEventListener('click',function(){if(popup.classList.contains('is-active')){popup.classList.remove('is-active')}});popup.addEventListener('click',function(e){e.stopPropagation()})}
+setTimeout(revealWidget,1500)})
+;

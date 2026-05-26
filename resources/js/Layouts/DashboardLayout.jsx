@@ -249,7 +249,9 @@ export default function DashboardLayout({ children, title }) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <RoleSwitcher auth={auth} />
+                        <div className="hidden sm:block">
+                            <RoleSwitcher auth={auth} />
+                        </div>
                         {/* Desktop buttons */}
                         <a
                             href={`/u/${auth.user?.invitation_slug || ''}`}
@@ -282,19 +284,25 @@ export default function DashboardLayout({ children, title }) {
                             {avatarOpen && (
                                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-[#e8e5e0] py-2 z-50">
                                     <div className="px-4 py-3 border-b border-[#f0ede8]">
-                                    <div className="text-sm font-semibold text-[#333]">{auth.user?.name}</div>
-                                    <div className="text-xs text-[#999] mt-0.5">{auth.user?.email || ''}</div>
-                                    {subscription && (
-                                        <div className="mt-2 flex items-center gap-1.5">
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${subscription.plan?.slug === 'free' ? 'bg-amber-100 text-amber-700' : 'bg-orange-100 text-[#E5654B]'}`}>
-                                                {subscription.plan?.name || 'Free'}
-                                            </span>
-                                            {subscription.expires_at && (
-                                                <span className="text-[10px] text-gray-400">s/d {new Date(subscription.expires_at).toLocaleDateString('id-ID')}</span>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                                        <div className="text-sm font-semibold text-[#333]">{auth.user?.name}</div>
+                                        <div className="text-xs text-[#999] mt-0.5">{auth.user?.email || ''}</div>
+                                        {subscription && (
+                                            <div className="mt-2 flex items-center gap-1.5">
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${subscription.plan?.slug === 'free' ? 'bg-amber-100 text-amber-700' : 'bg-orange-100 text-[#E5654B]'}`}>
+                                                    {subscription.plan?.name || 'Free'}
+                                                </span>
+                                                {subscription.expires_at && (
+                                                    <span className="text-[10px] text-gray-400">s/d {new Date(subscription.expires_at).toLocaleDateString('id-ID')}</span>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Switch role on mobile only */}
+                                    <div className="sm:hidden px-4 py-2 border-b border-[#f0ede8] bg-gray-50/50">
+                                        <div className="text-[9px] font-bold text-[#999] tracking-wider mb-1.5 uppercase">Switch Role</div>
+                                        <RoleSwitcher auth={auth} />
+                                    </div>
                                     <div className="py-1">
                                         <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#555] hover:bg-[#f5f3f0] transition-colors"
                                             onClick={() => setAvatarOpen(false)}>

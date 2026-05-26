@@ -11,12 +11,18 @@
     $pathParts = explode('/', $path);
     $currentUrl = request()->url();
 
-    // 1. Set default branding fallbacks
-    $brandName = 'Undangan Digital';
-    $faviconUrl = asset('favicon.ico');
-    $metaTitle = $brandName;
-    $metaDescription = 'Buat undangan pernikahan digital elegan dengan mudah, cepat, dan murah.';
-    $metaImage = null;
+    // 1. Set default branding fallbacks from global settings
+    $globalSiteName = \App\Models\GlobalSetting::where('setting_key', 'site_name')->value('setting_value');
+    $globalSiteLogo = \App\Models\GlobalSetting::where('setting_key', 'site_logo')->value('setting_value');
+    $globalSiteFavicon = \App\Models\GlobalSetting::where('setting_key', 'site_favicon')->value('setting_value');
+    $globalMetaTitle = \App\Models\GlobalSetting::where('setting_key', 'meta_title')->value('setting_value');
+    $globalMetaDescription = \App\Models\GlobalSetting::where('setting_key', 'meta_description')->value('setting_value');
+
+    $brandName = $globalSiteName ?: 'Undangan Digital';
+    $faviconUrl = $globalSiteFavicon ? asset('storage/' . $globalSiteFavicon) : ($globalSiteLogo ? asset('storage/' . $globalSiteLogo) : asset('favicon.ico'));
+    $metaTitle = $globalMetaTitle ?: ($brandName . ' - Undangan Digital Premium');
+    $metaDescription = $globalMetaDescription ?: 'Buat undangan pernikahan digital elegan dengan mudah, cepat, dan murah.';
+    $metaImage = $globalSiteLogo ? asset('storage/' . $globalSiteLogo) : null;
 
     // 2. Resolve active reseller setting
     $resellerSetting = null;
