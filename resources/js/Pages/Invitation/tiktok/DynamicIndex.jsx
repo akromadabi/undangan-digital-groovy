@@ -174,7 +174,7 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
 /* ═══════════════════════════════════════
    COVER SECTION (TikTok Login screen design)
    ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, language, fallbackPhoto, onToast }) {
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, language, fallbackPhoto, onToast, onLanguageChange }) {
     const { t, locale } = useTranslation(language);
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -266,9 +266,19 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
             <div className="ttk-scanlines" />
 
             <div className="ttk-cover__inner">
-                {/* Header mimicking TikTok feed tabs */}
-                <div className="ttk-cover__header">
-                    <i className="fas fa-bars" style={{ opacity: 0.8 }} />
+                {/* Header mimicking TikTok feed tabs with Lang selector */}
+                <div className="ttk-cover__header" style={{ position: 'relative', zIndex: 12 }}>
+                    {/* Left: Language Switcher */}
+                    <div 
+                        style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.08)' }}
+                        onClick={() => onLanguageChange && onLanguageChange(language === 'en' ? 'id' : 'en')}
+                        title={language === 'en' ? "Switch to Indonesian" : "Ubah ke Bahasa Inggris"}
+                    >
+                        <i className="fas fa-globe" style={{ opacity: 0.9, fontSize: '13px', color: '#fff' }} />
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#fff', opacity: 0.9 }}>
+                            {language === 'en' ? 'EN' : 'ID'}
+                        </span>
+                    </div>
                     <div className="ttk-cover__tabs">
                         <span className="ttk-cover__tab">{locale === 'en' ? 'Following' : 'Mengikuti'}</span>
                         <span className="ttk-cover__tab active">{locale === 'en' ? 'For You' : 'Untuk Anda'}</span>
@@ -1671,7 +1681,7 @@ export default function TikTokTheme(props) {
     const audioRef = useRef(null);
     const slideContainerRef = useRef(null);
 
-    const activeLanguage = invitation?.default_locale || 'id';
+    const [activeLanguage, setActiveLanguage] = useState(invitation?.default_locale || invitation?.language || 'id');
 
     // Global override toggles setup
     const enableRsvp = parseBool(invitation?.enable_rsvp, true);
@@ -2087,13 +2097,14 @@ export default function TikTokTheme(props) {
                     language={activeLanguage}
                     fallbackPhoto={randomGalleryPhoto}
                     onToast={triggerToast}
+                    onLanguageChange={setActiveLanguage}
                 />
 
                 {/* ══════ MAIN CONTENT ══════ */}
                 {isOpened && (
                     <main className={`ttk-main ${isSlideMode ? 'ttk-main--slide' : ''}`}>
                         
-                        {/* Interactive Persistent Sidebar on Right Screen (menu samping seperti tiktok) */}
+                         {/* Interactive Persistent Sidebar on Right Screen (menu samping seperti tiktok) */}
                         <div className="ttk-persistent-sidebar">
                             
                             {/* Profile Monogram Trigger with perfectly positioned '+' sign overlay */}
@@ -2154,6 +2165,18 @@ export default function TikTokTheme(props) {
                                     <i className={autoScrollEnabled ? "fas fa-pause" : "fas fa-arrow-down"} />
                                 </div>
                                 <span>{autoScrollEnabled ? (activeLanguage === 'en' ? 'Pause' : 'Jeda') : (activeLanguage === 'en' ? 'Scroll' : 'Turun')}</span>
+                            </div>
+
+                            {/* Language Switcher Action Button in Sidebar */}
+                            <div className="ttk-cover__action" onClick={() => {
+                                const nextLang = activeLanguage === 'en' ? 'id' : 'en';
+                                setActiveLanguage(nextLang);
+                                triggerToast(nextLang === 'en' ? 'Language switched to English 🇬🇧' : 'Bahasa diubah ke Bahasa Indonesia 🇮🇩');
+                            }}>
+                                <div className="ttk-cover__action-circle">
+                                    <i className="fas fa-globe" />
+                                </div>
+                                <span>{activeLanguage === 'en' ? 'EN' : 'ID'}</span>
                             </div>
 
                             {/* Spinning Music Vinyl disc linked to music playback state (pauses if muted!) */}

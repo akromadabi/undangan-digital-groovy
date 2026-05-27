@@ -128,7 +128,7 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
 /* ═══════════════════════════════════════
    COVER SECTION (Instagram Profile Cover UI)
    ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, language, fallbackPhoto, onJump }) {
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, language, fallbackPhoto, onJump, onLanguageChange }) {
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0];
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1];
@@ -162,9 +162,38 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                     </div>
                 </div>
 
-                {/* IG Login Page UI */}
-                <div className="ig-login-logo-container">
-                    <span className="ig-login-logo">{isEn ? 'wedding of' : 'pernikahan'}</span>
+                {/* IG Language Selector at top (functional switcher using ig-login-lang-select class from style.css!) */}
+                <div className="ig-login-lang-select">
+                    <select 
+                        className="ig-login-lang-dropdown" 
+                        value={language}
+                        onChange={(e) => onLanguageChange && onLanguageChange(e.target.value)}
+                    >
+                        <option value="id">Bahasa Indonesia</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                {/* IG Login Page UI - Dynamic Couple names with signature IG gradient overlay! */}
+                <div className="ig-login-logo-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', margin: '10px auto 20px' }}>
+                    <span className="ig-login-logo" style={{ marginBottom: '0px', lineHeight: 1.1 }}>
+                        {isEn ? 'wedding of' : 'pernikahan'}
+                    </span>
+                    <div style={{
+                        fontSize: '20px',
+                        fontWeight: 800,
+                        color: '#fff',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase',
+                        marginTop: '8px',
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                    }}>
+                        {groom?.nickname && bride?.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bimo & Raras'}
+                    </div>
                 </div>
 
                 <form className="ig-login-form" onSubmit={(e) => { e.preventDefault(); onOpen(); }}>
@@ -173,7 +202,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                             type="text"
                             value={guestNameInput}
                             onChange={(e) => setGuestNameInput(e.target.value)}
-                            placeholder="Phone number, username, or email"
+                            placeholder={isEn ? "Phone number, username, or email" : "Nomor telepon, nama pengguna, atau email"}
                             className="ig-login-input"
                         />
                     </div>
@@ -182,7 +211,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                             type="password"
                             value="weddingdate"
                             disabled
-                            placeholder="Password"
+                            placeholder={isEn ? "Password" : "Kata Sandi"}
                             className="ig-login-input"
                         />
                         <span className="ig-login-show-pwd" onClick={onOpen}>{isEn ? 'Show' : 'Lihat'}</span>
@@ -200,7 +229,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
                 <div className="ig-login-fb" onClick={onOpen}>
                     <i className="fab fa-facebook-square" />
-                    <span>Log in with Facebook</span>
+                    <span>{isEn ? 'Log in with Facebook' : 'Masuk dengan Facebook'}</span>
                 </div>
 
                 {/* Guest Details Badge Inside Login Screen */}
@@ -211,7 +240,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                 </div>
 
                 <div className="ig-login-footer">
-                    <span>Don't have an account? <strong onClick={onOpen} style={{ color: 'var(--ig-blue)', cursor: 'pointer' }}>Sign up.</strong></span>
+                    <span>{isEn ? "Don't have an account? " : "Belum punya akun? "}<strong onClick={onOpen} style={{ color: 'var(--ig-blue)', cursor: 'pointer' }}>{isEn ? "Sign up." : "Daftar."}</strong></span>
                 </div>
 
                 {/* simulated bottom navigation bar - ACTIVE */}
@@ -230,7 +259,8 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 /* ═══════════════════════════════════════
    STORIES NAVIGATION TRAY
    ═══════════════════════════════════════ */
-function StoriesTray({ resolvedSections, activeSectionId, isSlideMode, activeSlideIdx, onJump }) {
+function StoriesTray({ resolvedSections, activeSectionId, isSlideMode, activeSlideIdx, onJump, language }) {
+    const isEn = language === 'en';
     const sectionIcons = {
         opening: 'fas fa-book-open',
         bride_groom: 'fas fa-user-friends',
@@ -245,16 +275,16 @@ function StoriesTray({ resolvedSections, activeSectionId, isSlideMode, activeSli
     };
 
     const sectionLabels = {
-        opening: 'Intro',
-        bride_groom: 'Couple',
-        love_story: 'Kisah',
-        event: 'Acara',
+        opening: isEn ? 'Intro' : 'Intro',
+        bride_groom: isEn ? 'Couple' : 'Mempelai',
+        love_story: isEn ? 'Story' : 'Kisah',
+        event: isEn ? 'Event' : 'Acara',
         livestream: 'Live',
-        gallery: 'Galeri',
-        bank: 'Kado',
+        gallery: isEn ? 'Gallery' : 'Galeri',
+        bank: isEn ? 'Gift' : 'Kado',
         rsvp: 'RSVP',
-        wishes: 'Wishes',
-        closing: 'Outro'
+        wishes: isEn ? 'Wishes' : 'Doa',
+        closing: isEn ? 'Outro' : 'Penutup'
     };
 
     return (
@@ -1251,7 +1281,8 @@ function ClosingSection({ invitation, brideGrooms, language }) {
 /* ═══════════════════════════════════════
    BOTTOM NAVIGATION CONTROLLER (Sticky navigation widget)
    ═══════════════════════════════════════ */
-function BottomPlayer({ isSlideMode, onPrevSlide, onNextSlide, activeSectionId, resolvedSections, onJump }) {
+function BottomPlayer({ isSlideMode, onPrevSlide, onNextSlide, activeSectionId, resolvedSections, onJump, language, onLanguageChange }) {
+    const isEn = language === 'en';
     // Persistent IG-style bottom app bar - dynamically built from active sections
     const sectionIconMap = {
         opening:    'fas fa-home',
@@ -1277,6 +1308,30 @@ function BottomPlayer({ isSlideMode, onPrevSlide, onNextSlide, activeSectionId, 
 
     return (
         <div className="ig-bottom-player-sticky">
+            {/* Dynamic Music & Language Switcher sticky bar (uses ig-sticky-audio-controls-row class from style.css!) */}
+            <div className="ig-sticky-audio-controls-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="ig-music-disc is-playing" style={{ width: '20px', height: '20px', fontSize: '0.65rem' }}>
+                        <i className="fas fa-music" />
+                    </div>
+                    <span className="ig-sticky-audio-label" style={{ fontSize: '11px', color: '#fff', fontWeight: 600 }}>
+                        {isEn ? 'Instagram Wedding Album' : 'Album Pernikahan Instagram'}
+                    </span>
+                </div>
+                
+                {/* Language Toggler Button (uses ig-sticky-lang-control style.css!) */}
+                <div 
+                    className="ig-sticky-lang-control" 
+                    onClick={() => onLanguageChange && onLanguageChange(language === 'en' ? 'id' : 'en')}
+                    title={isEn ? "Switch to Indonesian" : "Ubah ke Bahasa Inggris"}
+                >
+                    <i className="fas fa-globe" style={{ fontSize: '11px' }} />
+                    <span className="ig-sticky-lang-label" style={{ padding: '1px 5px', borderRadius: '3px', fontSize: '10px' }}>
+                        {language === 'en' ? 'EN' : 'ID'}
+                    </span>
+                </div>
+            </div>
+
             {/* IG-style Bottom Nav Bar */}
             <div className="ig-sticky-nav-slots">
                 {navItems.map((item) => {
@@ -1315,7 +1370,7 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
     const audioRef = useRef(null);
     const slideContainerRef = useRef(null);
 
-    const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
+    const [activeLanguage, setActiveLanguage] = useState(invitation?.language || invitation?.default_locale || 'id');
 
     const enableQr = parseBool(invitation?.enable_qr ?? true) && parseBool(invitation?.show_qr_code ?? true);
     const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
@@ -1568,6 +1623,7 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
                     language={activeLanguage}
                     fallbackPhoto={randomGalleryPhoto}
                     onJump={jumpToSection}
+                    onLanguageChange={setActiveLanguage}
                 />
 
                 {/* ══════ MAIN APP PANEL ══════ */}
@@ -1581,6 +1637,7 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
                             isSlideMode={isSlideMode}
                             activeSlideIdx={activeSlideIdx}
                             onJump={jumpToSection}
+                            language={activeLanguage}
                         />
 
                         {/* Floating player and Auto scroll togglers */}
@@ -1639,6 +1696,8 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
                             activeSectionId={activeSectionId}
                             resolvedSections={resolvedSections}
                             onJump={jumpToSection}
+                            language={activeLanguage}
+                            onLanguageChange={setActiveLanguage}
                         />
                     </main>
                 )}
