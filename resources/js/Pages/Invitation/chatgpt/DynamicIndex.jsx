@@ -1380,17 +1380,14 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
         };
     }, []);
 
-    // Scroll viewport to bottom on new updates
+    // Scroll viewport to top of the latest section on new updates
     useEffect(() => {
         if (!isOpened) return;
-        const viewport = viewportRef.current;
-        if (viewport) {
-            viewport.scrollTo({
-                top: viewport.scrollHeight,
-                behavior: 'smooth'
-            });
+        const latestKey = revealedSections[revealedSections.length - 1];
+        if (latestKey) {
+            scrollToKey(latestKey);
         }
-    }, [revealedSections.length, isTypingAi, isTypingUser, isOpened]);
+    }, [revealedSections.length, isOpened, scrollToKey]);
 
     // Initial typing trigger
     useEffect(() => {
