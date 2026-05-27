@@ -678,6 +678,39 @@ function LoveStorySection({ loveStories, language }) {
     const { t, locale } = useTranslation(language);
     const stories = safeArr(loveStories).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     const [activeIdx, setActiveIdx] = useState(0);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const lines = container.querySelectorAll('.spty-lyrics__line');
+        if (lines.length === 0) return;
+
+        const options = {
+            root: null, // viewport
+            rootMargin: '-30% 0px -40% 0px', // targets the middle band of the screen
+            threshold: 0
+        };
+
+        const callback = (entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const idxAttr = entry.target.getAttribute('data-index');
+                    if (idxAttr !== null) {
+                        setActiveIdx(parseInt(idxAttr, 10));
+                    }
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(callback, options);
+        lines.forEach(line => observer.observe(line));
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [stories]);
 
     if (stories.length === 0) return null;
 
@@ -691,13 +724,14 @@ function LoveStorySection({ loveStories, language }) {
                     <i className="fas fa-music" /> {locale === 'en' ? 'Lyrics synchronized with our hearts' : 'Lirik disinkronkan dengan hati kami'}
                 </div>
 
-                <div className="spty-lyrics__list">
+                <div ref={containerRef} className="spty-lyrics__list">
                     {stories.map((story, idx) => {
                         const formattedDate = story.story_date ? formatStoryDate(story.story_date) : '';
                         const isActive = activeIdx === idx;
                         return (
                             <div
                                 key={story.id || idx}
+                                data-index={idx}
                                 className={`spty-lyrics__line${isActive ? ' is-active' : ''}`}
                                 onClick={() => setActiveIdx(idx)}
                             >
@@ -1118,7 +1152,7 @@ function ClosingSection({ invitation, brideGrooms, language }) {
 /* ═══════════════════════════════════════
    SPOTIFY NOW PLAYING BOTTOM CONTROL BAR
    ═══════════════════════════════════════ */
-function BottomPlayer({ invitation, brideGrooms, isPlaying, onTogglePlay, isSlideMode, onPrevSlide, onNextSlide, progress, language, fallbackPhoto }) {
+function BottomPlayer({ invitation, brideGrooms, isPlaying, onTogglePlay, isSlideMode, onPrevSlide, onNextSlide, progress, language, fallbackPhoto, onSeek }) {
     const { t, locale } = useTranslation(language);
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0];
@@ -1130,6 +1164,9 @@ function BottomPlayer({ invitation, brideGrooms, isPlaying, onTogglePlay, isSlid
 
     const artUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto;
     const [bottomArtSrc, setBottomArtSrc] = useState(artUrl);
+
+    const seekContainerRef = useRef(null);
+    const isDraggingRef = useRef(false);
 
     useEffect(() => {
         setBottomArtSrc(artUrl);
@@ -1143,12 +1180,74 @@ function BottomPlayer({ invitation, brideGrooms, isPlaying, onTogglePlay, isSlid
         }
     };
 
+    const handleSeekEvent = useCallback((clientX) => {
+        const container = seekContainerRef.current;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const width = rect.width;
+        if (width <= 0) return;
+        
+        let offsetX = clientX - rect.left;
+        offsetX = Math.max(0, Math.min(offsetX, width));
+        const percentage = offsetX / width;
+        
+        if (onSeek) {
+            onSeek(percentage);
+        }
+    }, [onSeek]);
+
+    const handleMouseDown = (e) => {
+        if (e.button !== 0) return; // only left click
+        isDraggingRef.current = true;
+        handleSeekEvent(e.clientX);
+        
+        const handleMouseMove = (moveEvent) => {
+            if (!isDraggingRef.current) return;
+            handleSeekEvent(moveEvent.clientX);
+        };
+
+        const handleMouseUp = () => {
+            isDraggingRef.current = false;
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleTouchStart = (e) => {
+        isDraggingRef.current = true;
+        handleSeekEvent(e.touches[0].clientX);
+
+        const handleTouchMove = (moveEvent) => {
+            if (!isDraggingRef.current) return;
+            handleSeekEvent(moveEvent.touches[0].clientX);
+        };
+
+        const handleTouchEnd = () => {
+            isDraggingRef.current = false;
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+        };
+
+        document.addEventListener('touchmove', handleTouchMove, { passive: true });
+        document.addEventListener('touchend', handleTouchEnd);
+    };
+
     return (
         <div className="spty-player">
             {/* Seeker / Scroll progress visual */}
-            <div className="spty-player__seek-container">
-                <div className="spty-player__seek-progress" style={{ width: `${progress * 100}%` }}>
-                    <div className="spty-player__seek-handle" />
+            <div 
+                ref={seekContainerRef}
+                className="spty-player__seek-container"
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
+            >
+                <div className="spty-player__seek-track">
+                    <div className="spty-player__seek-progress" style={{ width: `${progress * 100}%` }}>
+                        <div className="spty-player__seek-handle" />
+                    </div>
                 </div>
             </div>
 
@@ -1218,6 +1317,9 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
     const [scrollProgress, setScrollProgress] = useState(0);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showQr, setShowQr] = useState(false);
+    const enableQr = parseBool(invitation?.enable_qr, true) && parseBool(invitation?.show_qr_code, true);
+    const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
 
     const audioRef = useRef(null);
     const slideContainerRef = useRef(null);
@@ -1514,6 +1616,20 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
         }
     };
 
+    const handleSeek = useCallback((percentage) => {
+        if (isSlideMode) {
+            const targetIdx = Math.round(percentage * (resolvedSections.length - 1));
+            jumpToSlide(targetIdx);
+        } else {
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const targetScrollY = percentage * scrollHeight;
+            window.scrollTo({
+                top: targetScrollY,
+                behavior: 'auto'
+            });
+        }
+    }, [isSlideMode, resolvedSections.length]);
+
     // Map section key to actual React Component
     const renderSection = (key) => {
         const props = { invitation, brideGrooms, events, wishes, galleries, loveStories, bankAccounts, guest, enableRsvp, enableWishes, language: activeLanguage, fallbackPhoto: randomGalleryPhoto };
@@ -1576,10 +1692,21 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
                         
                         {/* Auto Scroll Floating Controls & Fullscreen */}
                         <div style={{ position: 'fixed', right: 16, bottom: 96, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 89 }}>
+                            {/* QR Code Check-in Button */}
+                            {enableQr && activeGuest && (
+                                <button
+                                    onClick={() => setShowQr(true)}
+                                    style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.6)', border: '1px solid var(--spty-border)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', outline: 'none' }}
+                                    title={activeLanguage === 'en' ? 'QR Code Check-in' : 'Presensi QR Code'}
+                                    className="spty-float"
+                                >
+                                    <i className="fas fa-qrcode" style={{ margin: 'auto' }} />
+                                </button>
+                            )}
                             {/* Fullscreen Button */}
                             <button
                                 onClick={toggleFullscreen}
-                                style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.6)', border: '1px solid var(--spty-border)', color: '#fff', display: 'flex', alignItems: 'center', justifyCentent: 'center', cursor: 'pointer', outline: 'none' }}
+                                style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.6)', border: '1px solid var(--spty-border)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', outline: 'none' }}
                                 title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Mode'}
                                 className="spty-float"
                             >
@@ -1588,7 +1715,7 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
                             {/* Auto-Scroll Toggle Button */}
                             <button
                                 onClick={() => setAutoScrollEnabled(!autoScrollEnabled)}
-                                style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: autoScrollEnabled ? 'var(--spty-green)' : 'rgba(0,0,0,0.6)', border: '1px solid var(--spty-border)', color: autoScrollEnabled ? '#000' : '#fff', display: 'flex', alignItems: 'center', justifyCentent: 'center', cursor: 'pointer', outline: 'none', transition: 'background-color 0.2s' }}
+                                style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: autoScrollEnabled ? 'var(--spty-green)' : 'rgba(0,0,0,0.6)', border: '1px solid var(--spty-border)', color: autoScrollEnabled ? '#000' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', outline: 'none', transition: 'background-color 0.2s' }}
                                 title={autoScrollEnabled ? 'Pause Auto Scroll' : 'Play Auto Scroll'}
                                 className="spty-float"
                             >
@@ -1605,7 +1732,7 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
                                 onScroll={handleSlideContainerScroll}
                                 onTouchStart={handleTouchStart}
                                 onTouchEnd={handleTouchEnd}
-                            >
+                             >
                                 {resolvedSections.map((s, idx) => {
                                     const isActive = idx === activeSlideIdx;
                                     return (
@@ -1637,7 +1764,33 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
                             progress={calculatedProgress}
                             language={activeLanguage}
                             fallbackPhoto={randomGalleryPhoto}
+                            onSeek={handleSeek}
                         />
+
+                        {/* QR Code Check-in Modal */}
+                        {enableQr && showQr && activeGuest && (
+                            <div className="spty-qr-overlay" onClick={() => setShowQr(false)}>
+                                <div className="spty-qr-modal" onClick={e => e.stopPropagation()}>
+                                    <h3 className="spty-qr-title">{activeLanguage === 'en' ? 'QR Code Check-in' : 'Presensi QR Code'}</h3>
+                                    <p className="spty-qr-guest">{activeGuest.name}</p>
+                                    <div className="spty-qr-code-box">
+                                        <img
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=1db954&data=${encodeURIComponent(window.location.origin + '/u/' + invitation.slug + '/checkin?to=' + activeGuest.slug)}`}
+                                            alt="QR Code"
+                                            className="spty-qr-img"
+                                        />
+                                    </div>
+                                    <p className="spty-qr-desc">
+                                        {activeLanguage === 'en'
+                                            ? 'Show this QR code to the event crew to check in'
+                                            : 'Tunjukkan kode QR ini ke petugas penerima tamu'}
+                                    </p>
+                                    <button onClick={() => setShowQr(false)} className="spty-qr-close">
+                                        {activeLanguage === 'en' ? 'Close' : 'Tutup'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </main>
                 )}
             </div>

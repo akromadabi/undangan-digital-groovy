@@ -479,6 +479,21 @@ export const FAQ_DATABASE = [
             'Kirimkan bukti bayar jika memilih manual. Paket Anda akan aktif secara instan begitu pembayaran terkonfirmasi oleh sistem.'
         ],
         mockup: null
+    },
+    {
+        id: 'faq-qr-code',
+        category: 'fitur-tambahan',
+        question: '21. Bagaimana cara menggunakan fitur QR Code Presensi / Check-in Tamu?',
+        answer: 'Fitur QR Code Presensi digunakan untuk mendata kedatangan tamu secara cepat di lokasi acara dengan memindai kode QR unik masing-masing tamu.',
+        keywords: ['qr', 'qrcode', 'scan', 'presensi', 'checkin', 'hadir', 'kehadiran', 'penerima tamu', 'cetak qr'],
+        steps: [
+            'Pastikan Anda telah mengaktifkan opsi "QR Code Presensi" di menu "Desain & Tema" -> tab "Pengaturan" di dashboard Anda.',
+            'Nama tamu yang didaftarkan pada daftar tamu otomatis memiliki QR Code unik masing-masing.',
+            'Ketika tamu membuka undangan digital mereka, akan muncul tombol melayang ikon QR Code di layar undangan (untuk tema-tema yang mendukung).',
+            'Tamu cukup mengeklik tombol tersebut untuk menampilkan kode QR mereka kepada penerima tamu.',
+            'Petugas penerima tamu di lokasi dapat langsung memindai (scan) kode QR tersebut menggunakan kamera ponsel untuk mencatat kehadiran tamu secara real-time ke dalam sistem.'
+        ],
+        mockup: null
     }
 ];
 
@@ -694,7 +709,7 @@ export default function Tutorial() {
                 {/* ═══ FAQ Accordion List ═══ */}
                 <div className="space-y-3">
                     {filteredFAQs.length > 0 ? (
-                        filteredFAQs.map((faq) => {
+                        filteredFAQs.map((faq, idx) => {
                             const isOpen = activeId === faq.id;
                             return (
                                 <div
@@ -709,10 +724,10 @@ export default function Tutorial() {
                                     <button
                                         type="button"
                                         onClick={() => toggleAccordion(faq.id)}
-                                        className="w-full flex items-center justify-between text-left p-4 focus:outline-none transition-colors hover:bg-gray-50/40"
+                                        className="w-full flex items-start justify-between text-left p-4 focus:outline-none transition-colors hover:bg-gray-50/40"
                                     >
-                                        <span className={`text-sm font-semibold pr-4 transition-colors ${isOpen ? 'text-[#E5654B]' : 'text-gray-800'}`}>
-                                            {faq.question}
+                                        <span className={`text-sm font-semibold pr-4 transition-colors ${isOpen ? 'text-[#E5654B]' : 'text-gray-800'} pt-0.5`}>
+                                            {idx + 1}. {faq.question.replace(/^\d+\.\s*/, '')}
                                         </span>
                                         <span className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
                                             isOpen ? 'bg-orange-50 text-[#E5654B] rotate-180' : 'bg-gray-50 text-gray-400'

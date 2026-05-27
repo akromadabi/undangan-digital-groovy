@@ -199,6 +199,8 @@ class DatabaseSeeder extends Seeder
             WayangThemeSeeder::class,
             ShopeeThemeSeeder::class,
             SpotifyThemeSeeder::class,
+            InstagramThemeSeeder::class,
+            TiktokThemeSeeder::class,
         ]);
 
         $defaultTheme = Theme::where('slug', 'utary')->first();

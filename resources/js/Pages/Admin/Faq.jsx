@@ -522,7 +522,7 @@ export default function Faq() {
                                             className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                             title="Cari menggunakan suara"
                                         >
-                                            <Icon d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" className="w-4.5 h-4.5" />
+                                            <Icon d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" className="w-5 h-5" />
                                         </button>
                                     )}
                                     {searchQuery && (
@@ -562,7 +562,7 @@ export default function Faq() {
                 {/* ═══ FAQ List (Accordion style) ═══ */}
                 <div className="space-y-3.5">
                     {filteredFAQs.length > 0 ? (
-                        filteredFAQs.map((faq) => {
+                        filteredFAQs.map((faq, idx) => {
                             const isOpen = activeId === faq.id;
                             return (
                                 <div
@@ -577,12 +577,12 @@ export default function Faq() {
                                     <button
                                         type="button"
                                         onClick={() => toggleAccordion(faq.id)}
-                                        className="w-full flex items-center justify-between text-left p-4.5 focus:outline-none transition-colors hover:bg-gray-50/30"
+                                        className="w-full flex items-start justify-between text-left p-4 focus:outline-none transition-colors hover:bg-gray-50/30"
                                     >
-                                        <span className={`text-sm font-bold pr-4 transition-colors ${isOpen ? 'text-[#E5654B]' : 'text-gray-800'}`}>
-                                            {faq.question}
+                                        <span className={`text-sm font-bold pr-4 transition-colors ${isOpen ? 'text-[#E5654B]' : 'text-gray-800'} pt-0.5`}>
+                                            {idx + 1}. {faq.question.replace(/^\d+\.\s*/, '')}
                                         </span>
-                                        <span className={`flex-shrink-0 w-6.5 h-6.5 rounded-lg flex items-center justify-center transition-all ${
+                                        <span className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
                                             isOpen ? 'bg-orange-50 text-[#E5654B] rotate-180' : 'bg-[#f5f3f0] text-gray-400'
                                         }`}>
                                             <Icon d="M19 9l-7 7-7-7" className="w-4 h-4" strokeWidth={2.5} />
@@ -642,8 +642,8 @@ export default function Faq() {
                 <div className="bg-white border border-[#e8e5e0] rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                     <div className="flex items-center gap-3.5">
                         <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#E5654B] flex items-center justify-center flex-shrink-0">
-                            <Icon d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" className="w-5.5 h-5.5" />
-                        </div>
+                                    <Icon d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" className="w-6 h-6" />
+                                </div>
                         <div>
                             <h4 className="font-bold text-gray-800 text-sm">Butuh Bantuan Lebih Lanjut?</h4>
                             <p className="text-gray-400 text-xs mt-0.5">Ajukan kendala teknis atau pertanyaan sistem langsung ke tim pengembang.</p>

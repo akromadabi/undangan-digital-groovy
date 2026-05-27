@@ -188,7 +188,25 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const [enableQr, setEnableQr] = useState(invitation?.enable_qr ?? true);
     const [isTutorialOpen, setIsTutorialOpen] = useState(false);
     const [isParticleModalOpen, setIsParticleModalOpen] = useState(false);
+    const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
     const [settingsSaving, setSettingsSaving] = useState(false);
+
+    const SECTION_EDIT_ROUTES = {
+        cover: null,
+        opening: '/content/teks-sambutan',
+        closing: '/content/teks-sambutan',
+        mempelai: '/content/mempelai',
+        countdown: '/content/teks-sambutan',
+        love_story: '/content/kisah',
+        event: '/content/acara',
+        gallery: '/content/galeri',
+        rsvp: '/settings/tamu',
+        wishes: '/content/guestbook',
+        bank: '/content/bank',
+        livestream: '/content/acara',
+    };
+
+    const isPhotoSection = (key) => ['cover', 'mempelai', 'gallery', 'love_story'].includes(key);
 
     const saveSetting = useCallback(async (key, val) => {
         try {
@@ -593,6 +611,31 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                 {layoutLocked && <span className="ml-1 text-[9px] text-gray-400 font-normal">(terkunci)</span>}
                                                 {planLocked && <span className="ml-1 text-[9px] text-amber-500 font-bold">(terkunci paket)</span>}
                                             </span>
+                                            {!locked && SECTION_EDIT_ROUTES.hasOwnProperty(section.section_key) && (
+                                                <button
+                                                    onClick={() => {
+                                                        if (section.section_key === 'cover') {
+                                                            setIsCoverModalOpen(true);
+                                                        } else {
+                                                            router.visit(SECTION_EDIT_ROUTES[section.section_key]);
+                                                        }
+                                                    }}
+                                                    type="button"
+                                                    className="mr-1.5 p-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-[#E5654B] hover:text-[#c24b33] transition-all duration-200"
+                                                    title={isPhotoSection(section.section_key) ? "Upload/Ubah Foto" : "Edit Konten"}
+                                                >
+                                                    {isPhotoSection(section.section_key) ? (
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                            )}
                                             {locked ? (
                                                 <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${planLocked ? 'bg-amber-50 text-amber-600 border border-amber-100 shadow-xs' : 'bg-gray-200 text-gray-500'}`}>
                                                     {planLocked ? 'Locked' : 'Aktif'}
@@ -1107,6 +1150,85 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                 onClose={() => setIsTutorialOpen(false)}
                 centralHost={centralHost}
             />
+
+            {/* Modal Upload Cover (rendered at root level using React Portal to prevent clipping) */}
+            {isCoverModalOpen && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
+                    <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-[scaleIn_0.2s_ease-out] border border-gray-100">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <div>
+                                <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                    <span className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center text-[#c24b33]">
+                                        🖼️
+                                    </span>
+                                    Ubah Foto Cover
+                                </h3>
+                                <p className="text-[10px] text-gray-400 mt-0.5">Unggah foto terbaik sebagai gambar sampul undangan Anda</p>
+                            </div>
+                            <button 
+                                onClick={() => setIsCoverModalOpen(false)}
+                                className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
+                                title="Tutup"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-4">
+                            <div className="relative aspect-[9/16] max-w-[160px] mx-auto rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm">
+                                {coverImage ? (
+                                    <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                                        <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <div className="text-[10px] mt-1">Belum ada gambar</div>
+                                    </div>
+                                )}
+                                {coverUploading && (
+                                    <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center text-white text-xs font-semibold">
+                                        Uploading...
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="text-center">
+                                <label className="inline-block px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 rounded-xl text-xs font-semibold cursor-pointer transition-colors shadow-xs">
+                                    {coverUploading ? 'Uploading...' : 'Pilih Foto Baru'}
+                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleCoverImageUpload(e.target.files[0])} disabled={coverUploading} />
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-2">
+                            <button
+                                onClick={() => setIsCoverModalOpen(false)}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-semibold transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    await saveCover();
+                                    setIsCoverModalOpen(false);
+                                }}
+                                disabled={coverSaving || coverUploading}
+                                className="px-4 py-2 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl text-xs font-semibold hover:shadow-md disabled:opacity-50 transition-all"
+                            >
+                                {coverSaving ? 'Menyimpan...' : 'Simpan Foto'}
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
 
             {/* Toast notification */}
             {toast && (

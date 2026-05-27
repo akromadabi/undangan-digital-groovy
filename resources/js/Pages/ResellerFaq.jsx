@@ -501,6 +501,21 @@ const FAQ_DATABASE = [
             'Kirimkan bukti bayar jika memilih manual. Paket Anda akan aktif secara instan begitu pembayaran terkonfirmasi oleh sistem.'
         ],
         mockup: null
+    },
+    {
+        id: 'faq-qr-code',
+        category: 'fitur-tambahan',
+        question: '21. Bagaimana cara menggunakan fitur QR Code Presensi / Check-in Tamu?',
+        answer: 'Fitur QR Code Presensi digunakan untuk mendata kedatangan tamu secara cepat di lokasi acara dengan memindai kode QR unik masing-masing tamu.',
+        keywords: ['qr', 'qrcode', 'scan', 'presensi', 'checkin', 'hadir', 'kehadiran', 'penerima tamu', 'cetak qr'],
+        steps: [
+            'Pastikan Anda telah mengaktifkan opsi "QR Code Presensi" di menu "Desain & Tema" -> tab "Pengaturan" di dashboard Anda.',
+            'Nama tamu yang didaftarkan pada daftar tamu otomatis memiliki QR Code unik masing-masing.',
+            'Ketika tamu membuka undangan digital mereka, akan muncul tombol melayang ikon QR Code di layar undangan (untuk tema-tema yang mendukung).',
+            'Tamu cukup mengeklik tombol tersebut untuk menampilkan kode QR mereka kepada penerima tamu.',
+            'Petugas penerima tamu di lokasi dapat langsung memindai (scan) kode QR tersebut menggunakan kamera ponsel untuk mencatat kehadiran tamu secara real-time ke dalam sistem.'
+        ],
+        mockup: null
     }
 ];
 
@@ -916,7 +931,7 @@ export default function ResellerFaq({ reseller }) {
                 {/* ═══ FAQ Accordion List ═══ */}
                 <div className="space-y-4 mb-10 text-left">
                     {filteredFAQs.length > 0 ? (
-                        filteredFAQs.map((faq) => {
+                        filteredFAQs.map((faq, idx) => {
                             const isOpen = activeId === faq.id;
                             return (
                                 <div
@@ -930,7 +945,7 @@ export default function ResellerFaq({ reseller }) {
                                         className="rl-faq-trigger"
                                     >
                                         <span className="rl-faq-question">
-                                            {faq.question}
+                                            {idx + 1}. {faq.question.replace(/^\d+\.\s*/, '')}
                                         </span>
                                         <span className="rl-faq-icon-wrap">
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

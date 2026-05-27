@@ -214,6 +214,31 @@ Jika `invitation?.show_animations === false` (atau bernilai `0`):
   ```
   *(Catatan khusus Shopee: Letakkan watermark ini di bagian paling bawah tab Beranda/Home dengan `padding-bottom: 80px` agar tidak tertutup navigation bar bawah).*
 
+### 4.8 Fitur QR Code Presensi / Check-in Tamu (`enableQr` / `showQr`)
+Setiap tema baru wajib mendukung fitur QR Code Presensi secara otomatis jika diaktifkan dari dashboard.
+1. **Helper & State Setup**:
+   Definisikan state `showQr` dan variabel `enableQr` di komponen utama `DynamicIndex.jsx`:
+   ```js
+   const [showQr, setShowQr] = useState(false);
+   const enableQr = parseBool(invitation?.enable_qr, true) && parseBool(invitation?.show_qr_code, true);
+   const activeGuest = guest || null;
+   ```
+2. **Tombol Trigger**:
+   - Tampilkan tombol pemicu QR Code (ikon `fas fa-qrcode`) jika `enableQr && activeGuest` bernilai true.
+   - Letakkan di lokasi yang mudah diakses (misalnya: di bar navigasi/header, atau sebagai floating button di atas/samping tombol auto-scroll/audio).
+3. **Modal Overlay QR Code**:
+   - Modal wajib ter-render secara kondisional: `{enableQr && showQr && activeGuest && ( ... )}`.
+   - Di dalam modal, tampilkan QR Code dinamis menggunakan API QR Server gratis:
+     ```jsx
+     <img 
+         src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=COLOR_HEX&data=${encodeURIComponent(window.location.origin + '/u/' + invitation.slug + '/checkin?to=' + activeGuest.slug)}`} 
+         alt="QR Code Presensi" 
+     />
+     ```
+     *(Ganti `COLOR_HEX` dengan warna hex primer tema tanpa tanda pagar, contoh: `1db954` untuk Spotify atau `ee4d2d` untuk Shopee)*.
+   - Sediakan tombol tutup untuk mengubah state `setShowQr(false)`.
+   - Pastikan overlay memiliki latar belakang gelap transparan (`rgba(0, 0, 0, 0.8)`) dengan efek blur (`backdrop-filter: blur(8px)`) agar tampak premium.
+
 ---
 
 ## 5. Layout Mode & Mesin Transisi Halaman (Swipe & Scroll)
