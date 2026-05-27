@@ -445,7 +445,7 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto }) {
 /* ═══════════════════════════════════════
    MEMPELAI SECTION (Bride & Groom cards styled like TikTok user profile page)
    ═══════════════════════════════════════ */
-function BrideGroomSection({ brideGrooms, invitation, galleries, language }) {
+function BrideGroomSection({ brideGrooms, invitation, galleries, language, onToast }) {
     const { t } = useTranslation(language);
     const couples = safeArr(brideGrooms);
     const groom = couples.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || couples[0] || {};
@@ -455,10 +455,14 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language }) {
 
     const [activeProfilePhotoIdx, setActiveProfilePhotoIdx] = useState(null);
     const [likedProfiles, setLikedProfiles] = useState({});
+    const [bookmarkedProfiles, setBookmarkedProfiles] = useState({});
     const scrollContainerRef = useRef(null);
 
     const toggleLikeProfile = (idx) => {
         setLikedProfiles(prev => ({ ...prev, [idx]: !prev[idx] }));
+    };
+    const toggleBookmarkProfile = (idx) => {
+        setBookmarkedProfiles(prev => ({ ...prev, [idx]: !prev[idx] }));
     };
 
     useEffect(() => {
@@ -598,12 +602,29 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language }) {
                                 <img src={getStorageUrl(groom.photo, '')} className="ttk-gallery-fullscreen-img" alt={groom.full_name} />
                                 
                                 {/* Sidebar actions */}
-                                <div className="ttk-gallery-sidebar" style={{ bottom: '80px' }}>
+                                <div className="ttk-gallery-sidebar">
                                     <div className="ttk-gallery-sidebar__action" onClick={() => toggleLikeProfile(0)}>
                                         <div className={`ttk-gallery-sidebar__circle ${likedProfiles[0] ? 'liked' : ''}`}>
                                             <i className="fas fa-heart" />
                                         </div>
                                         <span>{likedProfiles[0] ? '2.5M' : '2.4M'}</span>
+                                    </div>
+                                    <div className="ttk-gallery-sidebar__action" onClick={() => toggleBookmarkProfile(0)}>
+                                        <div className={`ttk-gallery-sidebar__circle ${bookmarkedProfiles[0] ? 'bookmarked' : ''}`}>
+                                            <i className="fas fa-bookmark" />
+                                        </div>
+                                        <span>{bookmarkedProfiles[0] ? '12.5K' : '12.4K'}</span>
+                                    </div>
+                                    <div className="ttk-gallery-sidebar__action" onClick={() => {
+                                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                                            navigator.clipboard.writeText(window.location.href);
+                                        }
+                                        onToast ? onToast('Link disalin! 📋') : alert('Link disalin! 📋');
+                                    }}>
+                                        <div className="ttk-gallery-sidebar__circle">
+                                            <i className="fas fa-share" />
+                                        </div>
+                                        <span>Share</span>
                                     </div>
                                 </div>
                                 
@@ -639,12 +660,29 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language }) {
                                 <img src={getStorageUrl(bride.photo, '')} className="ttk-gallery-fullscreen-img" alt={bride.full_name} />
                                 
                                 {/* Sidebar actions */}
-                                <div className="ttk-gallery-sidebar" style={{ bottom: '80px' }}>
+                                <div className="ttk-gallery-sidebar">
                                     <div className="ttk-gallery-sidebar__action" onClick={() => toggleLikeProfile(1)}>
                                         <div className={`ttk-gallery-sidebar__circle ${likedProfiles[1] ? 'liked' : ''}`}>
                                             <i className="fas fa-heart" />
                                         </div>
                                         <span>{likedProfiles[1] ? '1.8M' : '1.7M'}</span>
+                                    </div>
+                                    <div className="ttk-gallery-sidebar__action" onClick={() => toggleBookmarkProfile(1)}>
+                                        <div className={`ttk-gallery-sidebar__circle ${bookmarkedProfiles[1] ? 'bookmarked' : ''}`}>
+                                            <i className="fas fa-bookmark" />
+                                        </div>
+                                        <span>{bookmarkedProfiles[1] ? '8.5K' : '8.4K'}</span>
+                                    </div>
+                                    <div className="ttk-gallery-sidebar__action" onClick={() => {
+                                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                                            navigator.clipboard.writeText(window.location.href);
+                                        }
+                                        onToast ? onToast('Link disalin! 📋') : alert('Link disalin! 📋');
+                                    }}>
+                                        <div className="ttk-gallery-sidebar__circle">
+                                            <i className="fas fa-share" />
+                                        </div>
+                                        <span>Share</span>
                                     </div>
                                 </div>
                                 
@@ -989,7 +1027,7 @@ function LoveStorySection({ loveStories, language }) {
 /* ═══════════════════════════════════════
    GALLERY SECTION (Excluded in hide_photos mode)
    ═══════════════════════════════════════ */
-function GallerySection({ galleries, language }) {
+function GallerySection({ galleries, language, onToast }) {
     const { t } = useTranslation(language);
     const photos = safeArr(galleries).sort((a, b) => a.sort_order - b.sort_order);
 
@@ -1080,12 +1118,29 @@ function GallerySection({ galleries, language }) {
                                     <img src={imgUrl} className="ttk-gallery-fullscreen-img" alt={ph.caption || 'Pre-wedding'} />
                                     
                                     {/* Sidebar actions */}
-                                    <div className="ttk-gallery-sidebar" style={{ bottom: '80px' }}>
+                                    <div className="ttk-gallery-sidebar">
                                         <div className="ttk-gallery-sidebar__action" onClick={() => toggleLike(idx)}>
                                             <div className={`ttk-gallery-sidebar__circle ${likedPhotos[idx] ? 'liked' : ''}`}>
                                                 <i className="fas fa-heart" />
                                             </div>
                                             <span>{likedPhotos[idx] ? '1,501' : '1,500'}</span>
+                                        </div>
+                                        <div className="ttk-gallery-sidebar__action" onClick={() => toggleBookmark(idx)}>
+                                            <div className={`ttk-gallery-sidebar__circle ${bookmarkedPhotos[idx] ? 'bookmarked' : ''}`}>
+                                                <i className="fas fa-bookmark" />
+                                            </div>
+                                            <span>{bookmarkedPhotos[idx] ? '681' : '680'}</span>
+                                        </div>
+                                        <div className="ttk-gallery-sidebar__action" onClick={() => {
+                                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                                navigator.clipboard.writeText(window.location.href);
+                                            }
+                                            onToast ? onToast('Link disalin! 📋') : alert('Link disalin! 📋');
+                                        }}>
+                                            <div className="ttk-gallery-sidebar__circle">
+                                                <i className="fas fa-share" />
+                                            </div>
+                                            <span>Share</span>
                                         </div>
                                     </div>
                                     
