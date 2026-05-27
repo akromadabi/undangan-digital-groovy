@@ -242,7 +242,7 @@
 /* Simulated TikTok login buttons */
 .ttk-cover__login-btn {
     width: 100%;
-    height: 42px;
+    height: 38px;
     border-radius: 6px;
     border: 1px solid var(--ttk-border);
     background-color: rgba(255, 255, 255, 0.04);
@@ -250,12 +250,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    font-size: 12.5px;
+    gap: 10px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s;
     outline: none;
+    padding: 0 16px;
 }
 
 .ttk-cover__login-btn:hover {
@@ -274,21 +275,11 @@
 }
 
 .ttk-cover__login-btn i {
-    position: absolute;
-    left: 16px;
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .ttk-cover__login-btn--primary i {
     color: #000000;
-}
-
-.ttk-cover__login-btn--google i {
-    color: #ea4335;
-}
-
-.ttk-cover__login-btn--facebook i {
-    color: #1877f2;
 }
 
 /* Persistent Sidebar Action Icons (Always Visible) */
@@ -1680,10 +1671,18 @@
 }
 
 .ttk-login-success-badge {
-    font-size: 56px;
-    color: #25F4EE;
+    width: 64px;
+    height: 64px;
+    background-color: #25F4EE;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #010101; /* Dark checkmark */
+    font-size: 26px; /* Sized beautifully inside the circle */
     filter: drop-shadow(0 0 15px rgba(37, 244, 238, 0.5));
     animation: ttk-pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    margin-bottom: 12px;
 }
 
 @keyframes ttk-fade-in {

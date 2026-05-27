@@ -259,6 +259,20 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
    ═══════════════════════════════════════ */
 function StoriesTray({ resolvedSections, activeSectionId, isSlideMode, activeSlideIdx, onJump, language }) {
     const isEn = language === 'en';
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        if (!containerRef.current) return;
+        const activeChild = containerRef.current.querySelector('.ig-story-tray-item.is-active');
+        if (activeChild) {
+            activeChild.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
+    }, [activeSectionId, activeSlideIdx, isSlideMode]);
+
     const sectionIcons = {
         opening: 'fas fa-book-open',
         bride_groom: 'fas fa-user-friends',
@@ -286,7 +300,7 @@ function StoriesTray({ resolvedSections, activeSectionId, isSlideMode, activeSli
     };
 
     return (
-        <div className="ig-stories-tray">
+        <div ref={containerRef} className="ig-stories-tray">
             {resolvedSections.map((s, idx) => {
                 const icon = sectionIcons[s.section_key] || 'fas fa-star';
                 const label = sectionLabels[s.section_key] || s.section_name;

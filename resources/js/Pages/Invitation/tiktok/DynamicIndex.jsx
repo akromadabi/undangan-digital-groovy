@@ -256,7 +256,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                         ) : (
                             <>
                                 <div className="ttk-login-success-badge">
-                                    <i className="fas fa-check-circle" />
+                                    <i className="fas fa-check" />
                                 </div>
                                 <div className="ttk-login-overlay__text success">
                                     {locale === 'en' ? 'Success! Opening Invitation' : 'Masuk Berhasil! Membuka Undangan'}
@@ -321,26 +321,6 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                         >
                             <i className="fab fa-tiktok" />
                             <strong>{locale === 'en' ? `Continue as Guest (${guestName})` : `Lanjutkan sebagai Tamu (${guestName})`}</strong>
-                        </button>
-
-                        {/* Option 2: Simulated Google Login option */}
-                        <button 
-                            onClick={() => handleLoginClick('Google')} 
-                            className="ttk-cover__login-btn ttk-cover__login-btn--google"
-                            type="button"
-                        >
-                            <i className="fab fa-google" />
-                            <span>{locale === 'en' ? 'Continue with Google' : 'Lanjutkan dengan Google'}</span>
-                        </button>
-
-                        {/* Option 3: Simulated Facebook Login option */}
-                        <button 
-                            onClick={() => handleLoginClick('Facebook')} 
-                            className="ttk-cover__login-btn ttk-cover__login-btn--facebook"
-                            type="button"
-                        >
-                            <i className="fab fa-facebook" />
-                            <span>{locale === 'en' ? 'Continue with Facebook' : 'Lanjutkan dengan Facebook'}</span>
                         </button>
                     </div>
 

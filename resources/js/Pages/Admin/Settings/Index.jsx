@@ -27,12 +27,19 @@ export default function Index({ settings }) {
     };
 
     const updateSettingValue = (key, val) => {
-        const idx = data.settings.findIndex(s => s.key === key);
-        if (idx !== -1) {
-            const updated = [...data.settings];
-            updated[idx] = { ...updated[idx], value: val };
-            setData('settings', updated);
-        }
+        setData(prevData => {
+            const updated = [...prevData.settings];
+            const idx = updated.findIndex(s => s.key === key);
+            if (idx !== -1) {
+                updated[idx] = { ...updated[idx], value: val };
+            } else {
+                updated.push({ key, value: val });
+            }
+            return {
+                ...prevData,
+                settings: updated
+            };
+        });
     };
 
     const handleFileUpload = async (e, key, setUploading) => {
@@ -101,7 +108,6 @@ export default function Index({ settings }) {
 
     const tabs = [
         { id: 'general', label: 'Umum & Branding', desc: 'Nama aplikasi, domain, logo & favicon utama.', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l-3 3m3-3l3 3" /></svg> },
-        { id: 'seo', label: 'SEO & Metadata', desc: 'Optimasi mesin pencari Google (Meta Title/Description).', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg> },
         { id: 'payment', label: 'Gerbang Pembayaran', desc: 'Kunci API Xendit, Midtrans & rekening transfer manual.', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg> },
         { id: 'whatsapp', label: 'WhatsApp Gateway', desc: 'Integrasi pengiriman notifikasi via API Gateway.', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> },
         { id: 'footer', label: 'Informasi Footer', desc: 'Kontak, media sosial & deskripsi di kaki halaman.', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" /></svg> },
@@ -233,27 +239,7 @@ export default function Index({ settings }) {
                             </div>
                         )}
 
-                        {/* ═══ TAB 2: SEO & METADATA ═══ */}
-                        {activeTab === 'seo' && (
-                            <div className="space-y-5">
-                                <div className="border-b border-gray-100 pb-3">
-                                    <h3 className="font-bold text-gray-800 text-sm">Optimasi Search Engine (SEO)</h3>
-                                    <p className="text-[10px] text-gray-400 mt-0.5">Atur judul dan deskripsi default yang akan terbaca oleh mesin pencari Google saat link utama dibagikan.</p>
-                                </div>
 
-                                <div>
-                                    <label className={labelClass}>Meta Title Default</label>
-                                    <input type="text" value={getSettingValue('meta_title')} onChange={(e) => updateSettingValue('meta_title', e.target.value)} className={inputClass} placeholder="Undangan Digital Premium" />
-                                    <p className="text-[10px] text-gray-400 mt-1.5">Disarankan di bawah 60 karakter agar tidak terpotong di Google.</p>
-                                </div>
-
-                                <div>
-                                    <label className={labelClass}>Meta Description Default</label>
-                                    <textarea value={getSettingValue('meta_description')} onChange={(e) => updateSettingValue('meta_description', e.target.value)} className={`${inputClass} resize-none`} rows={4} placeholder="Buat undangan digital premium yang indah, interaktif, dan mudah dibagikan..." />
-                                    <p className="text-[10px] text-gray-400 mt-1.5">Disarankan di bawah 160 karakter untuk deskripsi pencarian yang ideal.</p>
-                                </div>
-                            </div>
-                        )}
 
                         {/* ═══ TAB 3: GERBANG PEMBAYARAN ═══ */}
                         {activeTab === 'payment' && (

@@ -170,10 +170,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
         <div className={`gpt-cover${isOpened ? ' is-opened' : ''}`}>
             <div className="gpt-cover-backdrop">
                 <div className="gpt-auth-modal">
-                    {/* Close button */}
-                    <button type="button" className="gpt-auth-close-btn" onClick={onOpen}>
-                        <i className="fas fa-times" />
-                    </button>
+
 
                     {/* Logo/Icon on top */}
                     <div style={{ marginBottom: '24px', display: 'inline-block' }}>
@@ -196,9 +193,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                             <strong>{guestName}</strong>
                             <span>{guestEmail}</span>
                         </div>
-                        <button type="button" className="gpt-auth-account-remove" onClick={(e) => { e.stopPropagation(); onOpen(); }}>
-                            <i className="fas fa-times" />
-                        </button>
+
                     </div>
 
                     <div className="gpt-auth-apology" style={{ fontSize: '0.68rem', color: '#8e8ea0', fontStyle: 'italic', marginBottom: '20px', lineHeight: '1.4' }}>
@@ -1769,7 +1764,7 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
                                 </div>
                                 <div className="gpt-sidebar-user-info">
                                     <strong>{activeGuest.name}</strong>
-                                    <span>Free Plan</span>
+
                                 </div>
                             </div>
                         </div>
@@ -1878,7 +1873,7 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
                                     <div className="gpt-input-actions-right">
                                         <i className="fas fa-microphone" style={{ opacity: 0.5, fontSize: 13 }} />
                                         <div className="gpt-circular-audio-wave">
-                                            <i className="fas fa-volume-up" style={{ color: '#fff', fontSize: 11 }} />
+                                            <i className="fas fa-volume-up" style={{ color: '#1f1f1f', fontSize: 11 }} />
                                         </div>
                                     </div>
                                 </div>

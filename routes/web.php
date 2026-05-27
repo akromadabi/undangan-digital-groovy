@@ -57,7 +57,7 @@ Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => false,
-        'appName' => config('app.name'),
+        'appName' => \App\Models\GlobalSetting::where('setting_key', 'site_name')->value('setting_value') ?: 'Undangan Digital',
         'themes' => $themes,
         'recentInvitations' => $recentInvitations,
         'resellerCount' => $resellerCount,
@@ -91,7 +91,7 @@ Route::get('/katalog-tema', function () {
 
     return Inertia::render('Themes', [
         'themes' => $themes,
-        'appName' => config('app.name'),
+        'appName' => \App\Models\GlobalSetting::where('setting_key', 'site_name')->value('setting_value') ?: 'Undangan Digital',
     ]);
 })->name('themes');
 

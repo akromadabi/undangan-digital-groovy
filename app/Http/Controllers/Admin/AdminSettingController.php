@@ -23,9 +23,38 @@ class AdminSettingController extends Controller
             'settings.*.value' => 'nullable',
         ]);
 
+        // Save all settings submitted
         foreach ($request->settings as $item) {
-            GlobalSetting::where('setting_key', $item['key'])
-                ->update(['setting_value' => $item['value']]);
+            GlobalSetting::updateOrCreate(
+                ['setting_key' => $item['key']],
+                ['setting_value' => $item['value']]
+            );
+        }
+
+        // Automatically synchronize meta_title with site_name
+        $siteName = GlobalSetting::where('setting_key', 'site_name')->value('setting_value');
+        if ($siteName) {
+            GlobalSetting::updateOrCreate(
+                ['setting_key' => 'meta_title'],
+                [
+                    'setting_value' => $siteName,
+                    'setting_type' => 'string',
+                    'category' => 'seo'
+                ]
+            );
+        }
+
+        // Automatically synchronize meta_description with site_tagline
+        $siteTagline = GlobalSetting::where('setting_key', 'site_tagline')->value('setting_value');
+        if ($siteTagline) {
+            GlobalSetting::updateOrCreate(
+                ['setting_key' => 'meta_description'],
+                [
+                    'setting_value' => $siteTagline,
+                    'setting_type' => 'string',
+                    'category' => 'seo'
+                ]
+            );
         }
 
         return back()->with('success', 'Pengaturan berhasil disimpan.');
