@@ -452,11 +452,29 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language }) {
     const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
 
     const isEn = t('invitation.save_the_date') === 'Save The Date';
-    
-    // Pick first 3 photos from galleries for simulated profile videos tab
-    const samplePhotos = useMemo(() => {
-        return safeArr(galleries).slice(0, 3);
-    }, [galleries]);
+
+    const [activeProfilePhotoIdx, setActiveProfilePhotoIdx] = useState(null);
+    const [likedProfiles, setLikedProfiles] = useState({});
+    const scrollContainerRef = useRef(null);
+
+    const toggleLikeProfile = (idx) => {
+        setLikedProfiles(prev => ({ ...prev, [idx]: !prev[idx] }));
+    };
+
+    useEffect(() => {
+        if (activeProfilePhotoIdx !== null && scrollContainerRef.current) {
+            const child = scrollContainerRef.current.children[activeProfilePhotoIdx];
+            if (child) {
+                scrollContainerRef.current.style.scrollSnapType = 'none';
+                child.scrollIntoView({ block: 'start' });
+                setTimeout(() => {
+                    if (scrollContainerRef.current) {
+                        scrollContainerRef.current.style.scrollSnapType = 'y mandatory';
+                    }
+                }, 100);
+            }
+        }
+    }, [activeProfilePhotoIdx]);
 
     const renderProfile = (person, type) => {
         if (!person || !person.full_name) return null;
@@ -473,7 +491,11 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language }) {
         return (
             <div className="ttk-profile-card">
                 {/* Profile Top Avatar Area */}
-                <div className="ttk-profile-card__avatar-wrap">
+                <div 
+                    className="ttk-profile-card__avatar-wrap" 
+                    onClick={() => setActiveProfilePhotoIdx(type === 'groom' ? 0 : 1)}
+                    style={{ cursor: 'pointer' }}
+                >
                     {globalShowPhotos && photoUrl ? (
                         <img src={photoUrl} alt={person.nickname} className="ttk-profile-card__avatar" />
                     ) : (
@@ -533,7 +555,7 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language }) {
                         {childOrderTranslated}
                     </div>
                     <div style={{ fontSize: 13, color: '#fff' }}>
-                        {isEn ? `${fatherClean} & ${motherClean}` : `${fatherClean} & ${motherClean}`}
+                        {fatherClean} & {motherClean}
                     </div>
                 </div>
             </div>
@@ -562,6 +584,98 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language }) {
                     {renderProfile(bride, 'bride')}
                 </Reveal>
             </div>
+
+            {activeProfilePhotoIdx !== null && (
+                <div className="ttk-gallery-fullscreen-overlay">
+                    <div className="ttk-gallery-fullscreen-close" onClick={() => setActiveProfilePhotoIdx(null)}>
+                        <i className="fas fa-arrow-left" />
+                    </div>
+                    
+                    <div className="ttk-gallery-fullscreen-scroll-container" ref={scrollContainerRef}>
+                        {/* Groom slide */}
+                        {groom.full_name && (
+                            <div className="ttk-gallery-fullscreen-slide">
+                                <img src={getStorageUrl(groom.photo, '')} className="ttk-gallery-fullscreen-img" alt={groom.full_name} />
+                                
+                                {/* Sidebar actions */}
+                                <div className="ttk-gallery-sidebar" style={{ bottom: '80px' }}>
+                                    <div className="ttk-gallery-sidebar__action" onClick={() => toggleLikeProfile(0)}>
+                                        <div className={`ttk-gallery-sidebar__circle ${likedProfiles[0] ? 'liked' : ''}`}>
+                                            <i className="fas fa-heart" />
+                                        </div>
+                                        <span>{likedProfiles[0] ? '2.5M' : '2.4M'}</span>
+                                    </div>
+                                </div>
+                                
+                                {/* Caption Box */}
+                                <div className="ttk-gallery-caption-box">
+                                    <div className="ttk-gallery-user-row">
+                                        <div className="ttk-gallery-user-avatar">🤵</div>
+                                        <span className="ttk-gallery-username">@{groom.nickname?.toLowerCase() || 'groom'}</span>
+                                        <i className="fas fa-check-circle ttk-gallery-verified-badge" />
+                                    </div>
+                                    <p className="ttk-gallery-desc">
+                                        {groom.full_name}, {translateChildOrder(groom.child_order, groom.gender, language)} dari {formatParentName(groom.father_name, isEn ? 'Mr.' : 'Bapak')} &amp; {formatParentName(groom.mother_name, isEn ? 'Mrs.' : 'Ibu')}. 💍✨
+                                    </p>
+                                    <div className="ttk-gallery-tags">#groom #weddingday #happycouple</div>
+                                    <div className="ttk-gallery-music-row">
+                                        <i className="fas fa-music" />
+                                        <div className="ttk-gallery-music-scroll">
+                                            <div className="ttk-gallery-music-text">Original Sound - @{groom.nickname?.toLowerCase() || 'groom'}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Spinning disc */}
+                                <div className="ttk-gallery-music-disc">
+                                    <div className="ttk-gallery-music-disc-inner" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Bride slide */}
+                        {bride.full_name && (
+                            <div className="ttk-gallery-fullscreen-slide">
+                                <img src={getStorageUrl(bride.photo, '')} className="ttk-gallery-fullscreen-img" alt={bride.full_name} />
+                                
+                                {/* Sidebar actions */}
+                                <div className="ttk-gallery-sidebar" style={{ bottom: '80px' }}>
+                                    <div className="ttk-gallery-sidebar__action" onClick={() => toggleLikeProfile(1)}>
+                                        <div className={`ttk-gallery-sidebar__circle ${likedProfiles[1] ? 'liked' : ''}`}>
+                                            <i className="fas fa-heart" />
+                                        </div>
+                                        <span>{likedProfiles[1] ? '1.8M' : '1.7M'}</span>
+                                    </div>
+                                </div>
+                                
+                                {/* Caption Box */}
+                                <div className="ttk-gallery-caption-box">
+                                    <div className="ttk-gallery-user-row">
+                                        <div className="ttk-gallery-user-avatar">👰</div>
+                                        <span className="ttk-gallery-username">@{bride.nickname?.toLowerCase() || 'bride'}</span>
+                                        <i className="fas fa-check-circle ttk-gallery-verified-badge" />
+                                    </div>
+                                    <p className="ttk-gallery-desc">
+                                        {bride.full_name}, {translateChildOrder(bride.child_order, bride.gender, language)} dari {formatParentName(bride.father_name, isEn ? 'Mr.' : 'Bapak')} &amp; {formatParentName(bride.mother_name, isEn ? 'Mrs.' : 'Ibu')}. 💐✨
+                                    </p>
+                                    <div className="ttk-gallery-tags">#bride #weddingday #beautifulinwhite</div>
+                                    <div className="ttk-gallery-music-row">
+                                        <i className="fas fa-music" />
+                                        <div className="ttk-gallery-music-scroll">
+                                            <div className="ttk-gallery-music-text">Original Sound - @{bride.nickname?.toLowerCase() || 'bride'}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Spinning disc */}
+                                <div className="ttk-gallery-music-disc">
+                                    <div className="ttk-gallery-music-disc-inner" />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
@@ -966,24 +1080,12 @@ function GallerySection({ galleries, language }) {
                                     <img src={imgUrl} className="ttk-gallery-fullscreen-img" alt={ph.caption || 'Pre-wedding'} />
                                     
                                     {/* Sidebar actions */}
-                                    <div className="ttk-gallery-sidebar">
+                                    <div className="ttk-gallery-sidebar" style={{ bottom: '80px' }}>
                                         <div className="ttk-gallery-sidebar__action" onClick={() => toggleLike(idx)}>
                                             <div className={`ttk-gallery-sidebar__circle ${likedPhotos[idx] ? 'liked' : ''}`}>
                                                 <i className="fas fa-heart" />
                                             </div>
                                             <span>{likedPhotos[idx] ? '1,501' : '1,500'}</span>
-                                        </div>
-                                        <div className="ttk-gallery-sidebar__action" onClick={() => toggleBookmark(idx)}>
-                                            <div className={`ttk-gallery-sidebar__circle ${bookmarkedPhotos[idx] ? 'bookmarked' : ''}`}>
-                                                <i className="fas fa-bookmark" />
-                                            </div>
-                                            <span>{bookmarkedPhotos[idx] ? '681' : '680'}</span>
-                                        </div>
-                                        <div className="ttk-gallery-sidebar__action">
-                                            <div className="ttk-gallery-sidebar__circle">
-                                                <i className="fas fa-share" />
-                                            </div>
-                                            <span>Share</span>
                                         </div>
                                     </div>
                                     
@@ -1942,21 +2044,6 @@ export default function TikTokTheme(props) {
                                 <span>2.0K</span>
                             </div>
 
-                            {/* Bookmark / Favorite widget */}
-                            <div className="ttk-cover__action" onClick={handleBookmarkClick}>
-                                <div className="ttk-cover__action-circle">
-                                    <i className={`fas fa-bookmark ${isBookmarked ? 'bookmarked' : ''}`} style={isBookmarked ? { color: '#FACD34' } : {}} />
-                                </div>
-                                <span>{formatNumberK(bookmarkCount)}</span>
-                            </div>
-
-                            {/* Share link widget */}
-                            <div className="ttk-cover__action" onClick={handleShareClick}>
-                                <div className="ttk-cover__action-circle">
-                                    <i className="fas fa-share" />
-                                </div>
-                                <span>Share</span>
-                            </div>
 
                             {/* Fullscreen Button in Sidebar */}
                             <div className="ttk-cover__action" onClick={toggleFullscreen}>
