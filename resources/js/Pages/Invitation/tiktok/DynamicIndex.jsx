@@ -1818,41 +1818,18 @@ export default function TikTokTheme(props) {
                                 <span>{isFullscreen ? (activeLanguage === 'en' ? 'Exit' : 'Keluar') : (activeLanguage === 'en' ? 'Full' : 'Layar')}</span>
                             </div>
 
-                            {/* Auto-Scroll / Next Section Button in Sidebar */}
+                            {/* Auto-Scroll Toggle Button in Sidebar */}
                             <div className="ttk-cover__action" onClick={() => {
-                                if (isSlideMode) {
-                                    const nextIdx = Math.min(activeSlideIdx + 1, resolvedSections.length - 1);
-                                    if (nextIdx !== activeSlideIdx) {
-                                        setActiveSlideIdx(nextIdx);
-                                        triggerToast(activeLanguage === 'en' ? 'Next Slide ➔' : 'Slide Berikutnya ➔');
-                                    } else {
-                                        setActiveSlideIdx(0);
-                                        triggerToast(activeLanguage === 'en' ? 'Back to Start ➔' : 'Kembali ke Awal ➔');
-                                    }
-                                } else {
-                                    // In scroll mode, find next section element and scroll
-                                    const currentKey = resolvedSections[activeSlideIdx]?.section_key;
-                                    const currentIdx = resolvedSections.findIndex(s => s.section_key === currentKey);
-                                    const nextSec = resolvedSections[currentIdx + 1];
-                                    if (nextSec) {
-                                        const el = document.getElementById(nextSec.section_key);
-                                        if (el) {
-                                            el.scrollIntoView({ behavior: 'smooth' });
-                                            triggerToast(activeLanguage === 'en' ? 'Scrolling Down ➔' : 'Scroll ke Bawah ➔');
-                                        }
-                                    } else {
-                                        const el = document.getElementById(resolvedSections[0]?.section_key);
-                                        if (el) {
-                                            el.scrollIntoView({ behavior: 'smooth' });
-                                            triggerToast(activeLanguage === 'en' ? 'Back to Top ➔' : 'Kembali ke Atas ➔');
-                                        }
-                                    }
-                                }
+                                setAutoScrollEnabled(!autoScrollEnabled);
+                                triggerToast(!autoScrollEnabled 
+                                    ? (activeLanguage === 'en' ? 'Auto Scroll Active ➔' : 'Auto Scroll Aktif ➔')
+                                    : (activeLanguage === 'en' ? 'Auto Scroll Paused ⏸' : 'Auto Scroll Jeda ⏸')
+                                );
                             }}>
-                                <div className="ttk-cover__action-circle">
-                                    <i className="fas fa-arrow-down" />
+                                <div className="ttk-cover__action-circle" style={autoScrollEnabled ? { backgroundColor: 'var(--ttk-red)', borderColor: 'var(--ttk-red)' } : {}}>
+                                    <i className={autoScrollEnabled ? "fas fa-pause" : "fas fa-arrow-down"} />
                                 </div>
-                                <span>{isSlideMode ? (activeLanguage === 'en' ? 'Next' : 'Lanjut') : (activeLanguage === 'en' ? 'Scroll' : 'Turun')}</span>
+                                <span>{autoScrollEnabled ? (activeLanguage === 'en' ? 'Pause' : 'Jeda') : (activeLanguage === 'en' ? 'Scroll' : 'Turun')}</span>
                             </div>
 
                             {/* Spinning Music Vinyl disc linked to music playback state (pauses if muted!) */}
