@@ -140,7 +140,9 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Bimo & Raras');
+        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
+            ? invitation.cover_title
+            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
     const initials = useMemo(() => {
         const first = groom?.nickname?.charAt(0) || 'B';
@@ -251,7 +253,9 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
 
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Bimo & Raras');
+        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
+            ? invitation.cover_title
+            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
     const coverBg = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null) || fallbackPhoto;
     const [playlistSrc, setPlaylistSrc] = useState(coverBg);
@@ -1160,7 +1164,9 @@ function BottomPlayer({ invitation, brideGrooms, isPlaying, onTogglePlay, isSlid
 
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Bimo & Raras');
+        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
+            ? invitation.cover_title
+            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
     const artUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto;
     const [bottomArtSrc, setBottomArtSrc] = useState(artUrl);

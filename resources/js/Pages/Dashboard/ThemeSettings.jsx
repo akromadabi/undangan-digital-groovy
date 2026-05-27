@@ -698,61 +698,6 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                     {/* ═══ TAB: Pengaturan ═══ */}
                     {activeTab === 'pengaturan' && (
                         <div className="space-y-3">
-                            {/* 1. Cover Undangan */}
-                            <div className="bg-white rounded-2xl border border-gray-200">
-                                <button onClick={isLockedByPlan('cover') ? undefined : () => setShowCover(!showCover)} 
-                                    className={`w-full px-4 py-3 flex items-center justify-between text-left ${isLockedByPlan('cover') ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                                    <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
-                                        <span className="w-6 h-6 rounded-lg bg-rose-100 flex items-center justify-center relative">
-                                            <svg className="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                            {isLockedByPlan('cover') && (
-                                                <div className="absolute -top-1 -right-1 bg-amber-400 text-white rounded-full p-0.5 shadow-sm">
-                                                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                        </span>
-                                        Cover Undangan
-                                        {isLockedByPlan('cover') && (
-                                            <span className="inline-flex items-center gap-0.5 text-[9px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full font-bold border border-amber-100">
-                                                Locked
-                                            </span>
-                                        )}
-                                    </h3>
-                                    {!isLockedByPlan('cover') && (
-                                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${showCover ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                                    )}
-                                </button>
-                                {showCover && !isLockedByPlan('cover') && (
-                                    <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
-                                        <div className="relative aspect-[9/16] max-w-[160px] mx-auto rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
-                                            {coverImage ? <img src={coverImage} alt="Cover" className="w-full h-full object-cover" /> : (
-                                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                                                    <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                                    <div className="text-[10px] mt-1">Belum ada gambar</div>
-                                                </div>
-                                            )}
-                                            {coverImage && (
-                                                <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-white">
-                                                    <p className="text-[9px] uppercase tracking-widest opacity-80">{coverTitle}</p>
-                                                    <p className="text-xs font-bold font-serif mt-0.5">{coverSubtitle || 'Nama & Nama'}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="text-center">
-                                            <label className="inline-block px-3 py-1.5 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-lg text-xs font-medium cursor-pointer transition-colors">
-                                                {coverUploading ? 'Uploading...' : 'Upload Cover'}
-                                                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleCoverImageUpload(e.target.files[0])} disabled={coverUploading} />
-                                            </label>
-                                        </div>
-                                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Teks Atas Cover</label><input type="text" value={coverTitle} onChange={(e) => setCoverTitle(e.target.value)} placeholder="The Wedding Of" className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-orange-300" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Nama Pasangan</label><input type="text" value={coverSubtitle} onChange={(e) => setCoverSubtitle(e.target.value)} placeholder="Mira & Randi" className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-orange-300" /></div>
-                                        <button onClick={saveCover} disabled={coverSaving} className="w-full py-2 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all disabled:opacity-50">{coverSaving ? 'Menyimpan...' : 'Simpan Cover'}</button>
-                                    </div>
-                                )}
-                            </div>
-
                             {/* Model Transisi */}
                             <div className={`bg-white rounded-2xl border border-gray-200 p-4 transition-opacity ${isLockedByPlan('template') ? 'opacity-60' : ''}`}>
                                 <div className="flex items-center justify-between gap-4">

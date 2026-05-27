@@ -294,7 +294,9 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
 
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Bimo & Raras');
+        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
+            ? invitation.cover_title
+            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
     const coverBg = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto || '/images/demo/korea-11-768x512.jpg';
     const openingBg = getStorageUrl(invitation?.opening_image, null) || coverBg;

@@ -207,7 +207,9 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 
     const coupleName = (bride.nickname && groom.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Bimo & Raras');
+        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
+            ? invitation.cover_title
+            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
     const coverBg = getThemeAssetUrl(invitation?.cover_image, null);
 
@@ -249,7 +251,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 // 2. Opening Section
 function OpeningSection({ invitation, brideGrooms, events, language }) {
     const { t } = useTranslation(language);
-    const coverBg = getThemeAssetUrl(invitation?.cover_image, null);
+    const coverBg = getThemeAssetUrl(invitation?.opening_image || invitation?.cover_image, null);
 
     // Couples names
     const couples = safeArr(brideGrooms);
@@ -257,7 +259,9 @@ function OpeningSection({ invitation, brideGrooms, events, language }) {
     const groom = couples.find(b => b.gender === 'pria' || String(b.gender).toLowerCase() === 'male') || couples[1] || couples[0] || {};
     const coupleName = (bride.nickname && groom.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Bimo & Raras');
+        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
+            ? invitation.cover_title
+            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
     // Date and Countdown
     const targetDate = invitation?.countdown_target_date || '';

@@ -186,7 +186,9 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Bimo & Raras');
+        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
+            ? invitation.cover_title
+            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
     const coverUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto;
     const [coverSrc, setCoverSrc] = useState(coverUrl);
@@ -206,9 +208,11 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
     const groomTag = groom?.nickname ? groom.nickname.replace(/\s+/g, '') : 'Groom';
     const brideTag = bride?.nickname ? bride.nickname.replace(/\s+/g, '') : 'Bride';
     const defaultHashTags = `#${groomTag}${brideTag}Wedding #PernikahanViral`;
-    const hashTags = invitation?.cover_subtitle && invitation.cover_subtitle.includes('#') 
-        ? invitation.cover_subtitle 
-        : defaultHashTags;
+    
+    let hashTags = invitation?.cover_subtitle || '';
+    if (!hashTags || !hashTags.includes('#') || hashTags.toLowerCase().includes('bimo') || hashTags.toLowerCase().includes('raras')) {
+        hashTags = defaultHashTags;
+    }
 
     const handleLoginClick = (method) => {
         onToast(locale === 'en' ? `Logged in via ${method}! 🔓` : `Masuk sukses via ${method}! 🔓`);
@@ -250,7 +254,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                 {/* Simulated TikTok Mobile Login screen options card (bukaundangan pakai login tiktok saja) */}
                 <div className="ttk-cover__bottom-info" style={{ maxWidth: '100%' }}>
                     <div className="ttk-cover__handle" style={{ textAlign: 'center', marginBottom: 2 }}>
-                        @{groom?.nickname?.toLowerCase() || 'bimo'}_dan_{bride?.nickname?.toLowerCase() || 'raras'}
+                        @{groom?.nickname?.toLowerCase() || 'groom'}_dan_{bride?.nickname?.toLowerCase() || 'bride'}
                     </div>
                     <div className="ttk-cover__tags" style={{ textAlign: 'center', marginBottom: 15, fontSize: 12 }}>
                         {hashTags}
@@ -320,14 +324,18 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto }) {
     const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Bimo & Raras');
+        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
+            ? invitation.cover_title
+            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
     const groomTag = groom?.nickname ? groom.nickname.replace(/\s+/g, '') : 'Groom';
     const brideTag = bride?.nickname ? bride.nickname.replace(/\s+/g, '') : 'Bride';
     const defaultHashTags = `#${groomTag}${brideTag}Wedding #PernikahanViral`;
-    const hashTags = invitation?.cover_subtitle && invitation.cover_subtitle.includes('#') 
-        ? invitation.cover_subtitle 
-        : defaultHashTags;
+    
+    let hashTags = invitation?.cover_subtitle || '';
+    if (!hashTags || !hashTags.includes('#') || hashTags.toLowerCase().includes('bimo') || hashTags.toLowerCase().includes('raras')) {
+        hashTags = defaultHashTags;
+    }
 
     return (
         <section className="ttk-section" id="opening" style={{ padding: '0 0 20px 0' }}>
