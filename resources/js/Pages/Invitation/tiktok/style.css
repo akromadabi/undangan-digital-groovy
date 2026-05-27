@@ -89,7 +89,8 @@
 }
 
 .ttk-cover.is-opened {
-    transform: translate(-50%, -100%);
+    transform: translate(-50%, -110%) scale(0.96);
+    opacity: 0;
     pointer-events: none;
 }
 
@@ -1507,4 +1508,358 @@
 .ttk-reveal.is-visible {
     opacity: 1;
     transform: none;
+}
+
+/* TikTok Custom Login Overlay styles */
+.ttk-login-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    animation: ttk-fade-in 0.3s ease-out;
+}
+.ttk-login-overlay__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.ttk-login-overlay__text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-top: 15px;
+    letter-spacing: 0.5px;
+    animation: ttk-pulse-text 1.5s infinite;
+}
+.ttk-login-overlay__text.success {
+    color: #25F4EE;
+    text-shadow: 0 0 10px rgba(37, 244, 238, 0.3);
+    animation: none;
+}
+
+.ttk-loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+.ttk-spinner-dot {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+}
+.ttk-spinner-dot--cyan {
+    background-color: #25F4EE;
+    animation: ttk-orbit-cyan 1s infinite ease-in-out;
+    box-shadow: 0 0 10px rgba(37, 244, 238, 0.6);
+}
+.ttk-spinner-dot--red {
+    background-color: #FE2C55;
+    animation: ttk-orbit-red 1s infinite ease-in-out;
+    box-shadow: 0 0 10px rgba(254, 44, 85, 0.6);
+}
+
+.ttk-login-success-badge {
+    font-size: 56px;
+    color: #25F4EE;
+    filter: drop-shadow(0 0 15px rgba(37, 244, 238, 0.5));
+    animation: ttk-pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes ttk-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes ttk-pulse-text {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+@keyframes ttk-orbit-cyan {
+    0% { transform: translate(-18px, 0) scale(1); z-index: 2; }
+    50% { transform: translate(18px, 0) scale(1.2); z-index: 1; }
+    100% { transform: translate(-18px, 0) scale(1); z-index: 2; }
+}
+@keyframes ttk-orbit-red {
+    0% { transform: translate(18px, 0) scale(1.2); z-index: 1; }
+    50% { transform: translate(-18px, 0) scale(1); z-index: 2; }
+    100% { transform: translate(18px, 0) scale(1.2); z-index: 1; }
+}
+@keyframes ttk-pop-in {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* TikTok Fullscreen vertical-scroll snaps gallery overlay */
+.ttk-gallery-fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: 100vh;
+    height: 100dvh;
+    background-color: #000000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: ttk-fade-in 0.25s ease-out;
+}
+
+.ttk-gallery-fullscreen-scroll-container {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar for standard browsers */
+.ttk-gallery-fullscreen-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+.ttk-gallery-fullscreen-scroll-container {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.ttk-gallery-fullscreen-slide {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    position: relative;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000000;
+}
+
+.ttk-gallery-fullscreen-img {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Fullscreen Gallery Header & Close button */
+.ttk-gallery-fullscreen-close {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.2s ease;
+}
+.ttk-gallery-fullscreen-close:hover {
+    background-color: rgba(254, 44, 85, 0.85);
+    border-color: #FE2C55;
+    transform: scale(1.05);
+}
+.ttk-gallery-fullscreen-close:active {
+    transform: scale(0.95);
+}
+
+/* Sidebar vertical action items for Fullscreen Gallery */
+.ttk-gallery-sidebar {
+    position: absolute;
+    right: 12px;
+    bottom: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    z-index: 1000;
+}
+
+.ttk-gallery-sidebar__action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.ttk-gallery-sidebar__circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: rgba(30, 30, 40, 0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #ffffff;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ttk-gallery-sidebar__action:hover .ttk-gallery-sidebar__circle {
+    transform: scale(1.1);
+}
+
+.ttk-gallery-sidebar__circle.liked {
+    color: #FE2C55;
+    background-color: rgba(254, 44, 85, 0.15);
+    border-color: rgba(254, 44, 85, 0.4);
+    animation: ttk-heart-pulse 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.ttk-gallery-sidebar__circle.bookmarked {
+    color: #FACC15;
+    background-color: rgba(250, 204, 21, 0.15);
+    border-color: rgba(250, 204, 21, 0.4);
+}
+
+.ttk-gallery-sidebar__action span {
+    font-size: 11px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-top: 5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Captions Overlay for Fullscreen Gallery */
+.ttk-gallery-caption-box {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 60px 16px 20px 16px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0) 100%);
+    color: #ffffff;
+    z-index: 999;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ttk-gallery-caption-box * {
+    pointer-events: auto;
+}
+
+.ttk-gallery-user-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ttk-gallery-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #25f4ee 0%, #fe2c55 100%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.ttk-gallery-username {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.ttk-gallery-verified-badge {
+    color: #25F4EE;
+    font-size: 11px;
+}
+
+.ttk-gallery-desc {
+    font-size: 12.5px;
+    line-height: 1.4;
+    font-weight: 400;
+    opacity: 0.95;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    max-width: 85%;
+}
+
+.ttk-gallery-tags {
+    font-size: 12px;
+    font-weight: 600;
+    color: #25F4EE;
+}
+
+.ttk-gallery-music-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    opacity: 0.85;
+    margin-top: 4px;
+    max-width: 70%;
+}
+
+.ttk-gallery-music-scroll {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.ttk-gallery-music-text {
+    display: inline-block;
+    animation: ttk-marquee 15s linear infinite;
+    padding-left: 100%;
+}
+
+/* Spinning disc inner container */
+.ttk-gallery-music-disc {
+    position: absolute;
+    right: 12px;
+    bottom: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #111111;
+    border: 6px solid #222222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: ttk-spin 4s linear infinite;
+    z-index: 1000;
+}
+
+.ttk-gallery-music-disc-inner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #25f4ee 0%, #fe2c55 100%);
+}
+
+@keyframes ttk-heart-pulse {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.3); }
+    60% { transform: scale(0.9); }
+    100% { transform: scale(1); }
 }

@@ -214,15 +214,49 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
         hashTags = defaultHashTags;
     }
 
+    const [loginState, setLoginState] = useState(null); // 'connecting', 'success', null
+    const [loginMethod, setLoginMethod] = useState('');
+
     const handleLoginClick = (method) => {
-        onToast(locale === 'en' ? `Logged in via ${method}! 🔓` : `Masuk sukses via ${method}! 🔓`);
+        setLoginMethod(method);
+        setLoginState('connecting');
         setTimeout(() => {
-            onOpen();
-        }, 800);
+            setLoginState('success');
+            setTimeout(() => {
+                setLoginState(null);
+                onOpen();
+            }, 900);
+        }, 1200);
     };
 
     return (
         <div className={`ttk-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'ttk-no-photo-mode' : ''}`}>
+            {loginState && (
+                <div className="ttk-login-overlay">
+                    <div className="ttk-login-overlay__content">
+                        {loginState === 'connecting' ? (
+                            <>
+                                <div className="ttk-loading-spinner">
+                                    <div className="ttk-spinner-dot ttk-spinner-dot--cyan" />
+                                    <div className="ttk-spinner-dot ttk-spinner-dot--red" />
+                                </div>
+                                <div className="ttk-login-overlay__text">
+                                    {locale === 'en' ? `Connecting to ${loginMethod}...` : `Menghubungkan ke ${loginMethod}...`}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="ttk-login-success-badge">
+                                    <i className="fas fa-check-circle" />
+                                </div>
+                                <div className="ttk-login-overlay__text success">
+                                    {locale === 'en' ? 'Success! Opening Invitation' : 'Masuk Berhasil! Membuka Undangan'}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
             {globalShowPhotos && coverSrc ? (
                 <div className="ttk-cover__bg" style={{ backgroundImage: `url(${coverSrc})` }} onError={handleCoverError} />
             ) : (
@@ -849,6 +883,43 @@ function GallerySection({ galleries, language }) {
 
     const isEn = t('invitation.save_the_date') === 'Save The Date';
 
+    const [activePhotoIdx, setActivePhotoIdx] = useState(null);
+    const [likedPhotos, setLikedPhotos] = useState({});
+    const [bookmarkedPhotos, setBookmarkedPhotos] = useState({});
+    const scrollContainerRef = useRef(null);
+
+    const toggleLike = (idx) => {
+        setLikedPhotos(prev => ({ ...prev, [idx]: !prev[idx] }));
+    };
+    const toggleBookmark = (idx) => {
+        setBookmarkedPhotos(prev => ({ ...prev, [idx]: !prev[idx] }));
+    };
+
+    const romanticCaptions = [
+        "Menghitung hari bahagia bersama selamanya. 💍✨",
+        "Momen manis terindah yang terabadikan dalam cinta. ❤️",
+        "Dua hati, satu cinta, melangkah bersama selamanya. 🌹",
+        "Dalam tatapmu, kutemukan dunia masa depanku. 💫💖",
+        "Setiap senyuman adalah bab baru kisah bahagia kita. ✨🏡",
+        "Bersamamu, perjalanan ini terasa sangat sempurna. 🗺️💞",
+        "Cinta bukanlah tentang saling menatap, tapi melangkah ke arah yang sama. 🥂"
+    ];
+
+    useEffect(() => {
+        if (activePhotoIdx !== null && scrollContainerRef.current) {
+            const child = scrollContainerRef.current.children[activePhotoIdx];
+            if (child) {
+                scrollContainerRef.current.style.scrollSnapType = 'none';
+                child.scrollIntoView({ block: 'start' });
+                setTimeout(() => {
+                    if (scrollContainerRef.current) {
+                        scrollContainerRef.current.style.scrollSnapType = 'y mandatory';
+                    }
+                }, 100);
+            }
+        }
+    }, [activePhotoIdx]);
+
     return (
         <section className="ttk-section" id="gallery">
             {/* Post Header */}
@@ -870,13 +941,79 @@ function GallerySection({ galleries, language }) {
                         if (!imgUrl) return null;
 
                         return (
-                            <div key={ph.id || idx} className="ttk-gallery__item">
+                            <div key={ph.id || idx} className="ttk-gallery__item" onClick={() => setActivePhotoIdx(idx)} style={{ cursor: 'pointer' }}>
                                 <img src={imgUrl} alt={ph.caption || 'Pre-wedding'} />
                             </div>
                         );
                     })}
                 </div>
             </Reveal>
+
+            {activePhotoIdx !== null && (
+                <div className="ttk-gallery-fullscreen-overlay">
+                    <div className="ttk-gallery-fullscreen-close" onClick={() => setActivePhotoIdx(null)}>
+                        <i className="fas fa-arrow-left" />
+                    </div>
+                    
+                    <div className="ttk-gallery-fullscreen-scroll-container" ref={scrollContainerRef}>
+                        {photos.map((ph, idx) => {
+                            const imgUrl = getStorageUrl(ph.image_url, '');
+                            if (!imgUrl) return null;
+                            const captionText = ph.caption || romanticCaptions[idx % romanticCaptions.length];
+                            
+                            return (
+                                <div key={ph.id || idx} className="ttk-gallery-fullscreen-slide">
+                                    <img src={imgUrl} className="ttk-gallery-fullscreen-img" alt={ph.caption || 'Pre-wedding'} />
+                                    
+                                    {/* Sidebar actions */}
+                                    <div className="ttk-gallery-sidebar">
+                                        <div className="ttk-gallery-sidebar__action" onClick={() => toggleLike(idx)}>
+                                            <div className={`ttk-gallery-sidebar__circle ${likedPhotos[idx] ? 'liked' : ''}`}>
+                                                <i className="fas fa-heart" />
+                                            </div>
+                                            <span>{likedPhotos[idx] ? '1,501' : '1,500'}</span>
+                                        </div>
+                                        <div className="ttk-gallery-sidebar__action" onClick={() => toggleBookmark(idx)}>
+                                            <div className={`ttk-gallery-sidebar__circle ${bookmarkedPhotos[idx] ? 'bookmarked' : ''}`}>
+                                                <i className="fas fa-bookmark" />
+                                            </div>
+                                            <span>{bookmarkedPhotos[idx] ? '681' : '680'}</span>
+                                        </div>
+                                        <div className="ttk-gallery-sidebar__action">
+                                            <div className="ttk-gallery-sidebar__circle">
+                                                <i className="fas fa-share" />
+                                            </div>
+                                            <span>Share</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Caption Box */}
+                                    <div className="ttk-gallery-caption-box">
+                                        <div className="ttk-gallery-user-row">
+                                            <div className="ttk-gallery-user-avatar">📸</div>
+                                            <span className="ttk-gallery-username">prewedding_diaries</span>
+                                            <i className="fas fa-check-circle ttk-gallery-verified-badge" />
+                                        </div>
+                                        <p className="ttk-gallery-desc">{captionText}</p>
+                                        <div className="ttk-gallery-tags">#prewedding #wedding #love #viral</div>
+                                        <div className="ttk-gallery-music-row">
+                                            <i className="fas fa-music" />
+                                            <div className="ttk-gallery-music-scroll">
+                                                <div className="ttk-gallery-music-text">Original Sound - prewedding_diaries</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Spinning disc */}
+                                    <div className="ttk-gallery-music-disc">
+                                        <div className="ttk-gallery-music-disc-inner" />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
