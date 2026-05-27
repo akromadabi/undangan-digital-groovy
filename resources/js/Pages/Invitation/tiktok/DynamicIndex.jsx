@@ -312,6 +312,9 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto }) {
     const defaultOpeningPhoto = 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';
     const photoUrl = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null) || fallbackPhoto || defaultOpeningPhoto;
 
+    const isIdenticalQuote = invitation?.opening_ayat && invitation?.opening_ayat_translation &&
+        invitation.opening_ayat.trim().toLowerCase() === invitation.opening_ayat_translation.trim().toLowerCase();
+
     const couples = safeArr(brideGrooms);
     const groom = couples.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || couples[0] || {};
     const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
@@ -372,7 +375,7 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto }) {
                                 <p className="ttk-opening__ayat" style={{ fontSize: '14px', fontFamily: 'serif', direction: 'rtl', margin: '0 0 6px 0', textAlign: 'right', color: '#fff' }}>
                                     {invitation.opening_ayat}
                                 </p>
-                                {invitation?.opening_ayat_translation && (
+                                {invitation?.opening_ayat_translation && !isIdenticalQuote && (
                                     <p className="ttk-opening__ayat" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.85)', margin: 0, lineStyle: 'normal' }}>
                                         "{invitation.opening_ayat_translation}"
                                     </p>
