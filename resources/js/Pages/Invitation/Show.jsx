@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
 
 // ═══ Scroll-triggered animation component (re-triggers on every viewport entry) ═══
 const AnimateIn = ({ children, type = 'fadeUp', delay = 0, className = '', duration = 700 }) => {
@@ -449,12 +450,15 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                     <div className={`fixed inset-0 z-50 flex ${invitation.cover_image ? 'flex-col' : 'items-center justify-center'} overflow-hidden`} style={{ backgroundColor: colors.bg }}>
                         {/* Full-screen cover image background with gradient overlay — ALL themes */}
                         {invitation.cover_image && (
-                            <>
-                                <img src={invitation.cover_image} alt="" className="absolute inset-0 w-full h-full object-cover z-0" />
-                                <div className="absolute inset-0 z-[1]" style={{
+                            <PremiumSlideshow
+                                images={invitation.cover_image.split(',')}
+                                positionX={invitation.cover_position_x}
+                                positionY={invitation.cover_position_y}
+                                zoom={invitation.cover_zoom}
+                                overlayGradient={{
                                     background: `linear-gradient(to bottom, transparent 0%, ${colors.bg}30 30%, ${colors.bg}b0 60%, ${colors.bg} 85%)`
-                                }} />
-                            </>
+                                }}
+                            />
                         )}
                         {isTraditional && (
                             <div className="absolute top-0 left-0 right-0 pointer-events-none z-10">
@@ -490,8 +494,13 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                     {/* Circular couple photo */}
                                     {showPhotos && invitation.cover_image && (
                                         <div className="relative w-40 h-40 mx-auto mb-4 sp02-breathe">
-                                            <div className="w-full h-full rounded-full overflow-hidden" style={{ border: `3px solid ${colors.primary}30`, boxShadow: `0 4px 30px ${colors.primary}15` }}>
-                                                <img src={invitation.cover_image} alt="" className="w-full h-full object-cover" />
+                                            <div className="w-full h-full rounded-full overflow-hidden relative" style={{ border: `3px solid ${colors.primary}30`, boxShadow: `0 4px 30px ${colors.primary}15` }}>
+                                                <PremiumSlideshow
+                                                    images={invitation.cover_image.split(',')}
+                                                    positionX={invitation.cover_position_x}
+                                                    positionY={invitation.cover_position_y}
+                                                    zoom={invitation.cover_zoom}
+                                                />
                                             </div>
                                             <img src={S.frame} alt="" className="absolute -right-4 bottom-2 w-20 pointer-events-none" />
                                         </div>
@@ -597,8 +606,13 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                         )}
                                                         {invitation.opening_image && (
                                                             <AnimateIn type="scaleIn" delay={150}>
-                                                                <div className="mx-auto rounded-2xl overflow-hidden my-4 max-w-[320px] shadow-lg border-4 border-white" style={{ borderColor: '#ffffff', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}>
-                                                                    <img src={invitation.opening_image} alt="Opening Photo" className="w-full h-auto object-cover aspect-[4/3]" />
+                                                                <div className="mx-auto rounded-2xl overflow-hidden my-4 max-w-[320px] shadow-lg border-4 border-white relative aspect-[4/3]" style={{ borderColor: '#ffffff', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}>
+                                                                    <PremiumSlideshow
+                                                                        images={invitation.opening_image.split(',')}
+                                                                        positionX={invitation.opening_position_x}
+                                                                        positionY={invitation.opening_position_y}
+                                                                        zoom={invitation.opening_zoom}
+                                                                    />
                                                                 </div>
                                                             </AnimateIn>
                                                         )}
@@ -638,7 +652,15 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                     <AnimateIn type="scaleIn" delay={300 + i * 400}>
                                                                         <div className={`mx-auto rounded-full overflow-hidden mb-3 relative ${isSpesial02 ? 'w-36 h-36' : 'w-32 h-32'}`}
                                                                             style={{ border: `3px solid ${colors.primary}${isSpesial02 ? '30' : ''}`, boxShadow: `0 0 20px ${colors.primary}${isSpesial02 ? '15' : '25'}` }}>
-                                                                            <img src={bg.photo} alt={bg.full_name} className="w-full h-full object-cover" />
+                                                                            <img 
+                                                                                src={bg.photo} 
+                                                                                alt={bg.full_name} 
+                                                                                className="w-full h-full object-cover" 
+                                                                                style={{
+                                                                                    objectPosition: `${bg.photo_position_x ?? 50}% ${bg.photo_position_y ?? 50}%`,
+                                                                                    transform: `scale(${bg.photo_zoom ?? 1.0})`,
+                                                                                }}
+                                                                            />
                                                                         </div>
                                                                         {isSpesial02 && (
                                                                             <img src={S.frame} alt="" className="absolute -right-2 bottom-4 w-16 pointer-events-none" style={{ zIndex: 10 }} />

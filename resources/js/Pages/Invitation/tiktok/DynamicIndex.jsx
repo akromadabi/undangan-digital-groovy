@@ -2,6 +2,7 @@ import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useForm } from '@inertiajs/react';
 import './style.css';
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
 
 /* ─── Standard Blueprint Helpers ─── */
 function safeArr(val) {
@@ -40,6 +41,9 @@ function parseEventDate(dateString) {
 
 function getStorageUrl(url, fallback) {
     if (!url || url === 'null' || url === 'undefined' || url === '/storage/' || url === 'storage/') return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
     let cleanUrl = url.replace(/\\/g, '/');
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
     if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
@@ -190,6 +194,11 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
             ? invitation.cover_title
             : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
+    const coverImages = useMemo(() => {
+        if (!invitation?.cover_image) return [];
+        return invitation.cover_image.split(',').map(url => getStorageUrl(url, fallbackPhoto)).filter(Boolean);
+    }, [invitation?.cover_image, fallbackPhoto]);
+
     const coverUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto;
     const [coverSrc, setCoverSrc] = useState(coverUrl);
 
@@ -199,7 +208,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
     const handleCoverError = () => {
         if (coverSrc !== fallbackPhoto && fallbackPhoto) {
-            setCoverSrc(fallbackPhoto);
+            setCoverSrc(coverUrl);
         } else {
             setCoverSrc(null);
         }
@@ -257,8 +266,15 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                     </div>
                 </div>
             )}
-            {globalShowPhotos && coverSrc ? (
-                <div className="ttk-cover__bg" style={{ backgroundImage: `url(${coverSrc})` }} onError={handleCoverError} />
+            {globalShowPhotos && coverImages.length > 0 ? (
+                <PremiumSlideshow
+                    images={coverImages}
+                    positionX={invitation?.cover_position_x}
+                    positionY={invitation?.cover_position_y}
+                    zoom={invitation?.cover_zoom}
+                    className="ttk-cover__bg z-[1]"
+                    imgClassName="absolute inset-0 w-full h-full object-cover filter brightness-[0.5]"
+                />
             ) : (
                 <div className="ttk-cover__bg" style={{ background: 'linear-gradient(135deg, #09090b 0%, #161823 100%)' }} />
             )}
@@ -266,24 +282,12 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
             <div className="ttk-scanlines" />
 
             <div className="ttk-cover__inner">
-                {/* Header mimicking TikTok feed tabs with Lang selector */}
-                <div className="ttk-cover__header" style={{ position: 'relative', zIndex: 12 }}>
-                    {/* Left: Language Switcher */}
-                    <div 
-                        style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.08)' }}
-                        onClick={() => onLanguageChange && onLanguageChange(language === 'en' ? 'id' : 'en')}
-                        title={language === 'en' ? "Switch to Indonesian" : "Ubah ke Bahasa Inggris"}
-                    >
-                        <i className="fas fa-globe" style={{ opacity: 0.9, fontSize: '13px', color: '#fff' }} />
-                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#fff', opacity: 0.9 }}>
-                            {language === 'en' ? 'EN' : 'ID'}
-                        </span>
-                    </div>
+                {/* Header mimicking TikTok feed tabs */}
+                <div className="ttk-cover__header" style={{ position: 'relative', zIndex: 12, justifyContent: 'center' }}>
                     <div className="ttk-cover__tabs">
                         <span className="ttk-cover__tab">{locale === 'en' ? 'Following' : 'Mengikuti'}</span>
                         <span className="ttk-cover__tab active">{locale === 'en' ? 'For You' : 'Untuk Anda'}</span>
                     </div>
-                    <i className="fas fa-search" style={{ opacity: 0.8 }} />
                 </div>
 
                 {/* Main center dynamic couple title */}
@@ -358,6 +362,11 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
     const isEn = t('invitation.save_the_date') === 'Save The Date';
     // Premium fallback Unsplash prewedding image so that it never looks like a plain black box
     const defaultOpeningPhoto = 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';
+    const openingImages = useMemo(() => {
+        const rawSource = invitation?.opening_image || invitation?.cover_image;
+        if (!rawSource) return [];
+        return rawSource.split(',').map(url => getStorageUrl(url, fallbackPhoto || defaultOpeningPhoto)).filter(Boolean);
+    }, [invitation?.opening_image, invitation?.cover_image, fallbackPhoto, defaultOpeningPhoto]);
     const photoUrl = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null) || fallbackPhoto || defaultOpeningPhoto;
 
     const isIdenticalQuote = invitation?.opening_ayat && invitation?.opening_ayat_translation &&
@@ -427,8 +436,15 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
             {/* Photo opening card designed like a real TikTok video layout (pembuka pakai foto opening seperti tiktok biasa) */}
             <Reveal variant="zoom" delay={100}>
                 <div className="ttk-live__container" style={{ aspectRatio: '9/14', height: 'auto', minHeight: '480px', margin: '0 15px' }}>
-                    {globalShowPhotos && photoUrl ? (
-                        <div className="ttk-live__stream-bg" style={{ backgroundImage: `url(${photoUrl})` }} />
+                    {globalShowPhotos && openingImages.length > 0 ? (
+                        <PremiumSlideshow
+                            images={openingImages}
+                            positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
+                            positionY={invitation?.opening_position_y ?? invitation?.cover_position_y}
+                            zoom={invitation?.opening_zoom ?? invitation?.cover_zoom}
+                            className="absolute inset-0 w-full h-full z-0"
+                            imgClassName="absolute inset-0 w-full h-full object-cover filter brightness-[0.65]"
+                        />
                     ) : (
                         <div className="ttk-live__stream-bg" style={{ background: 'linear-gradient(135deg, #09090b 0%, #161823 100%)' }} />
                     )}
@@ -1681,7 +1697,7 @@ export default function TikTokTheme(props) {
     const audioRef = useRef(null);
     const slideContainerRef = useRef(null);
 
-    const [activeLanguage, setActiveLanguage] = useState(invitation?.default_locale || invitation?.language || 'id');
+    const activeLanguage = invitation?.default_locale || invitation?.language || 'id';
 
     // Global override toggles setup
     const enableRsvp = parseBool(invitation?.enable_rsvp, true);
@@ -2097,7 +2113,6 @@ export default function TikTokTheme(props) {
                     language={activeLanguage}
                     fallbackPhoto={randomGalleryPhoto}
                     onToast={triggerToast}
-                    onLanguageChange={setActiveLanguage}
                 />
 
                 {/* ══════ MAIN CONTENT ══════ */}
@@ -2165,18 +2180,6 @@ export default function TikTokTheme(props) {
                                     <i className={autoScrollEnabled ? "fas fa-pause" : "fas fa-arrow-down"} />
                                 </div>
                                 <span>{autoScrollEnabled ? (activeLanguage === 'en' ? 'Pause' : 'Jeda') : (activeLanguage === 'en' ? 'Scroll' : 'Turun')}</span>
-                            </div>
-
-                            {/* Language Switcher Action Button in Sidebar */}
-                            <div className="ttk-cover__action" onClick={() => {
-                                const nextLang = activeLanguage === 'en' ? 'id' : 'en';
-                                setActiveLanguage(nextLang);
-                                triggerToast(nextLang === 'en' ? 'Language switched to English 🇬🇧' : 'Bahasa diubah ke Bahasa Indonesia 🇮🇩');
-                            }}>
-                                <div className="ttk-cover__action-circle">
-                                    <i className="fas fa-globe" />
-                                </div>
-                                <span>{activeLanguage === 'en' ? 'EN' : 'ID'}</span>
                             </div>
 
                             {/* Spinning Music Vinyl disc linked to music playback state (pauses if muted!) */}

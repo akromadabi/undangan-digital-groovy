@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useForm, Head } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
 
 // Import theme assets via Vite
 import ornamenAtas from './asset/ornamen-atas.png';
@@ -111,7 +112,10 @@ const translateChildOrder = (childOrder, gender, isEn = false) => {
 };
 
 const getStorageUrl = (url, fallback) => {
-    if (!url) return fallback;
+    if (!url || url === 'null' || url === 'undefined' || url === '/storage/' || url === 'storage/') return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
     let cleanUrl = url.replace(/\\/g, '/');
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
     if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
@@ -211,13 +215,23 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
             ? invitation.cover_title
             : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
 
-    const coverBg = getThemeAssetUrl(invitation?.cover_image, null);
+    const coverImages = useMemo(() => {
+        if (!invitation?.cover_image) return [];
+        return invitation.cover_image.split(',').map(url => getThemeAssetUrl(url, null)).filter(Boolean);
+    }, [invitation?.cover_image]);
 
     return (
         <div className={`wy-cover${isOpened ? ' wy-slide--hidden' : ''}`}>
-            {globalShowPhotos && coverBg && (
-                <div className="wy-cover-bg-image" style={{ backgroundImage: `url(${coverBg})` }} />
-            )}
+            {globalShowPhotos && coverImages.length > 0 ? (
+                <PremiumSlideshow
+                    images={coverImages}
+                    positionX={invitation?.cover_position_x}
+                    positionY={invitation?.cover_position_y}
+                    zoom={invitation?.cover_zoom}
+                    className="wy-cover-bg-image"
+                    imgClassName="absolute inset-0 w-full h-full object-cover filter brightness-[0.55]"
+                />
+            ) : null}
             <div className="wy-cover-wrapper">
                 {/* Rotating Circle Logo Text with Javanese Gunungan in center */}
                 <div className="wy-cover-circle-logo">
@@ -251,7 +265,11 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 // 2. Opening Section
 function OpeningSection({ invitation, brideGrooms, events, language }) {
     const { t } = useTranslation(language);
-    const coverBg = getThemeAssetUrl(invitation?.opening_image || invitation?.cover_image, null);
+    const openingImages = useMemo(() => {
+        const rawSource = invitation?.opening_image || invitation?.cover_image;
+        if (!rawSource) return [];
+        return rawSource.split(',').map(url => getThemeAssetUrl(url, null)).filter(Boolean);
+    }, [invitation?.opening_image, invitation?.cover_image]);
 
     // Couples names
     const couples = safeArr(brideGrooms);
@@ -282,10 +300,19 @@ function OpeningSection({ invitation, brideGrooms, events, language }) {
     return (
         <section 
             id="opening" 
-            className={`wy-opening-section-hero ${globalShowPhotos && coverBg ? 'wy-has-bg' : ''}`}
-            style={globalShowPhotos && coverBg ? { backgroundImage: `url(${coverBg})` } : undefined}
+            className={`wy-opening-section-hero ${globalShowPhotos && openingImages.length > 0 ? 'wy-has-bg' : ''}`}
         >
-            {globalShowPhotos && coverBg && <div className="wy-opening-overlay" />}
+            {globalShowPhotos && openingImages.length > 0 && (
+                <PremiumSlideshow
+                    images={openingImages}
+                    positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
+                    positionY={invitation?.opening_position_y ?? invitation?.cover_position_y}
+                    zoom={invitation?.opening_zoom ?? invitation?.cover_zoom}
+                    className="absolute inset-0 w-full h-full z-0"
+                    imgClassName="absolute inset-0 w-full h-full object-cover"
+                />
+            )}
+            {globalShowPhotos && openingImages.length > 0 && <div className="wy-opening-overlay" />}
             
             {/* 1. Fullscreen Hero Block */}
             <div className="wy-opening-hero-block">

@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import { Mail } from 'lucide-react';
 
 const featureRoutes = {
     cover: '/theme',
@@ -311,8 +312,8 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                     <div className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full bg-pink-500/5" />
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative z-10">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: 'rgba(255,77,128,0.15)' }}>
-                                💌
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,77,128,0.15)' }}>
+                                <Mail size={18} className="text-[#ff4d80]" />
                             </div>
                             <div>
                                 <div className="font-semibold text-white text-sm">Kartu Ucapan Interaktif</div>
@@ -320,7 +321,8 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                             </div>
                         </div>
                         <Link href="/greeting-card" className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white hover:scale-105 transition-all whitespace-nowrap inline-flex items-center gap-1.5 self-start sm:self-auto" style={{ background: 'linear-gradient(135deg, #ff4d80, #e91e8c)', boxShadow: '0 4px 15px rgba(255,77,128,0.3)' }}>
-                            💌 Buat Kartu
+                            <Mail size={14} className="flex-shrink-0" />
+                            <span>Buat Kartu</span>
                             <Icon d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" className="w-3.5 h-3.5" />
                         </Link>
                     </div>

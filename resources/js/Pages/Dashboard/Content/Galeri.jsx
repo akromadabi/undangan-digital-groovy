@@ -1,17 +1,180 @@
-import { Head, useForm, usePage, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, usePage, router } from '@inertiajs/react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import { Trash2, Save, Settings, Check, Sparkles, Loader2, Info, Link as LinkIcon, Maximize2, Minimize2, Smile, RotateCcw } from 'lucide-react';
 
-export default function Galeri({ galleries, maxGalleries, galleryMode }) {
+export default function Galeri({ 
+    galleries: initialGalleries, 
+    maxGalleries, 
+    galleryMode, 
+    mediaAssets = [], 
+    invitation: initialInvitation, 
+    brideGrooms: initialBrideGrooms 
+}) {
     const { flash } = usePage().props;
+    
+    // Sync props to local states for immediate fluid UI updates
+    const [localInvitation, setLocalInvitation] = useState(initialInvitation || {});
+    const [localBrideGrooms, setLocalBrideGrooms] = useState(initialBrideGrooms || []);
+    const [localGalleries, setLocalGalleries] = useState(initialGalleries || []);
+    
     const [uploading, setUploading] = useState(false);
-    const [caption, setCaption] = useState('');
-    const [mode, setMode] = useState(galleryMode || 'grid');
-    const [savingMode, setSavingMode] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('');
     const [isDragOver, setIsDragOver] = useState(false);
+    
+    // Gallery display mode
+    const [mode, setMode] = useState(galleryMode || 'grid');
+    const [savingMode, setSavingMode] = useState(false);
+    
+    // Side-over drawer state
+    const [selectedAsset, setSelectedAsset] = useState(null);
+    const [activeCropTarget, setActiveCropTarget] = useState(null); // 'cover', 'opening', 'groom', 'bride'
+    
+    // Bulk select prewedding gallery mode states
+    const [bulkMode, setBulkMode] = useState(false);
+    const [bulkSelectedIds, setBulkSelectedIds] = useState([]);
+    const [savingBulk, setSavingBulk] = useState(false);
+    const [togglingAssetId, setTogglingAssetId] = useState(null);
 
+    // Freeze body scroll when setting modal is open
+    useEffect(() => {
+        if (selectedAsset) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [selectedAsset]);
+
+    // Focal point adjustment states
+    const [posX, setPosX] = useState(50);
+    const [posY, setPosY] = useState(50);
+    const [zoom, setZoom] = useState(1.0);
+    const [savingPosition, setSavingPosition] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0, posX: 50, posY: 50 });
+    const previewContainerRef = useRef(null);
+
+    // Sync state when props change
+    useEffect(() => {
+        if (initialInvitation) setLocalInvitation(initialInvitation);
+        if (initialBrideGrooms) setLocalBrideGrooms(initialBrideGrooms);
+        if (initialGalleries) setLocalGalleries(initialGalleries);
+    }, [initialInvitation, initialBrideGrooms, initialGalleries]);
+
+    // Update uploader remaining count
+    const remaining = maxGalleries - (localGalleries?.length || 0);
+
+    // Check where a photo is active
+    const getPhotoUsages = (path) => {
+        const usages = [];
+        const coverImages = localInvitation.cover_image ? localInvitation.cover_image.split(',').filter(Boolean) : [];
+        const openingImages = localInvitation.opening_image ? localInvitation.opening_image.split(',').filter(Boolean) : [];
+
+        if (coverImages.includes(path)) usages.push({ type: 'cover', label: 'Sampul', color: 'bg-orange-500 text-white' });
+        if (openingImages.includes(path)) usages.push({ type: 'opening', label: 'Pembuka', color: 'bg-blue-500 text-white' });
+        
+        const groom = localBrideGrooms.find(bg => bg.gender === 'pria');
+        const bride = localBrideGrooms.find(bg => bg.gender === 'wanita');
+        
+        if (groom && groom.photo === path) usages.push({ type: 'groom', label: 'Mempelai Pria', color: 'bg-emerald-600 text-white' });
+        if (bride && bride.photo === path) usages.push({ type: 'bride', label: 'Mempelai Wanita', color: 'bg-rose-500 text-white' });
+        
+        const inGallery = localGalleries.some(g => g.image_url === path);
+        if (inGallery) usages.push({ type: 'gallery', label: 'Galeri', color: 'bg-teal-500 text-white' });
+        
+        return usages;
+    };
+
+    // Bulk manage mode helpers
+    const startBulkMode = () => {
+        const initialIds = mediaAssets
+            .filter(asset => {
+                const url = '/storage/' + asset.file_path;
+                return localGalleries.some(g => g.image_url === url);
+            })
+            .map(asset => asset.id);
+        setBulkSelectedIds(initialIds);
+        setBulkMode(true);
+    };
+
+    const toggleBulkSelect = (id) => {
+        if (bulkSelectedIds.includes(id)) {
+            setBulkSelectedIds(prev => prev.filter(x => x !== id));
+        } else {
+            if (bulkSelectedIds.length >= maxGalleries) {
+                alert(`Oops! Batas kuota galeri Anda adalah ${maxGalleries} foto. Kurangi pilihan lain terlebih dahulu.`);
+                return;
+            }
+            setBulkSelectedIds(prev => [...prev, id]);
+        }
+    };
+
+    const handleSaveBulk = async () => {
+        setSavingBulk(true);
+        try {
+            const response = await axios.post(route('theme.media.sync-gallery'), {
+                asset_ids: bulkSelectedIds
+            });
+            if (response.data.success) {
+                setLocalGalleries(response.data.galleries);
+                setBulkMode(false);
+                alert('Galeri prewedding berhasil diperbarui secara masal!');
+            }
+        } catch (e) {
+            console.error('Bulk gallery save error:', e);
+            alert('Gagal menyinkronkan galeri secara masal.');
+        } finally {
+            setSavingBulk(false);
+        }
+    };
+
+    // Triggered when clicking a photo card to open Slide-Over Drawer
+    const handleSelectAsset = (asset) => {
+        const url = '/storage/' .concat(asset.file_path);
+        setSelectedAsset(asset);
+        
+        // Find which usage targets are currently active for this photo
+        const usages = getPhotoUsages(url);
+        const coordinateUsages = usages.filter(u => ['cover', 'opening', 'groom', 'bride'].includes(u.type));
+        
+        // Set the active crop target to the first active usage, or default to first available
+        if (coordinateUsages.length > 0) {
+            setActiveCropTarget(coordinateUsages[0].type);
+        } else {
+            setActiveCropTarget('cover');
+        }
+    };
+
+    // Load active crop target coordinates into sliders
+    useEffect(() => {
+        if (!selectedAsset) return;
+        const url = '/storage/' .concat(selectedAsset.file_path);
+        
+        if (activeCropTarget === 'cover') {
+            setPosX(localInvitation.cover_position_x ?? 50);
+            setPosY(localInvitation.cover_position_y ?? 50);
+            setZoom(Number(localInvitation.cover_zoom ?? 1.0));
+        } else if (activeCropTarget === 'opening') {
+            setPosX(localInvitation.opening_position_x ?? 50);
+            setPosY(localInvitation.opening_position_y ?? 50);
+            setZoom(Number(localInvitation.opening_zoom ?? 1.0));
+        } else if (activeCropTarget === 'groom') {
+            const groom = localBrideGrooms.find(bg => bg.gender === 'pria');
+            setPosX(groom?.photo_position_x ?? 50);
+            setPosY(groom?.photo_position_y ?? 50);
+            setZoom(Number(groom?.photo_zoom ?? 1.0));
+        } else if (activeCropTarget === 'bride') {
+            const bride = localBrideGrooms.find(bg => bg.gender === 'wanita');
+            setPosX(bride?.photo_position_x ?? 50);
+            setPosY(bride?.photo_position_y ?? 50);
+            setZoom(Number(bride?.photo_zoom ?? 1.0));
+        }
+    }, [selectedAsset, activeCropTarget, localInvitation, localBrideGrooms]);
+
+    // Handle Drag & Drop Uploader
     const handleDragOver = (e) => {
         e.preventDefault();
         setIsDragOver(true);
@@ -33,61 +196,207 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
         if (!files || files.length === 0) return;
         const fileArray = Array.from(files);
 
-        if (fileArray.length > remaining) {
-            alert(`Oops! Kuota sisa Anda adalah ${remaining} foto. Silakan pilih maksimal ${remaining} foto.`);
-            return;
-        }
-
         setUploading(true);
-        const uploadedImages = [];
+        let successCount = 0;
 
         for (let i = 0; i < fileArray.length; i++) {
-            setUploadStatus(`Mengupload ${i + 1} dari ${fileArray.length} foto...`);
+            setUploadStatus(`Mengunggah ${i + 1} dari ${fileArray.length} foto...`);
             const file = fileArray[i];
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('folder', 'galeri');
 
             try {
-                const response = await axios.post(route('upload'), formData, {
+                await axios.post(route('theme.media.upload'), formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
-                uploadedImages.push({
-                    image_url: response.data.url,
-                    caption: fileArray.length === 1 ? caption : '',
-                });
+                successCount++;
             } catch (e) {
-                console.error(`Gagal mengupload file ke-${i + 1}:`, e);
+                console.error(`Gagal mengunggah file ke-${i + 1}:`, e);
+                const errMsg = e.response?.data?.error || 'Gagal mengunggah beberapa berkas.';
+                alert(errMsg);
             }
         }
 
-        if (uploadedImages.length > 0) {
-            setUploadStatus('Menyimpan ke galeri...');
-            router.post(route('content.galeri.save'), {
-                images: uploadedImages,
-            }, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setCaption('');
-                },
-                onFinish: () => {
-                    setUploading(false);
-                    setUploadStatus('');
+        setUploadStatus('Sinkronisasi album...');
+        router.reload({
+            preserveScroll: true,
+            onFinish: () => {
+                setUploading(false);
+                setUploadStatus('');
+                if (successCount > 0) {
+                    alert(`${successCount} foto berhasil ditambahkan ke Album.`);
                 }
+            }
+        });
+    };
+
+    // Toggle photo usage status (Cover, Opening, Groom, Bride, Gallery)
+    const handleToggleUsage = async (target, currentValue) => {
+        if (!selectedAsset) return;
+        
+        const newValue = !currentValue;
+        
+        // Quota safety validation for Gallery
+        if (target === 'gallery' && newValue && remaining <= 0) {
+            alert(`Oops! Batas kuota galeri Anda adalah ${maxGalleries} foto. Hapus foto galeri lain terlebih dahulu.`);
+            return;
+        }
+
+        try {
+            const response = await axios.post(route('theme.media.toggle-usage'), {
+                asset_id: selectedAsset.id,
+                target: target,
+                active: newValue
             });
-        } else {
-            alert('Gagal mengunggah foto. Silakan coba lagi.');
-            setUploading(false);
-            setUploadStatus('');
+
+            if (response.data.success) {
+                // Update local states immediately for instant UI feedback
+                if (response.data.invitation) {
+                    setLocalInvitation(prev => ({ ...prev, ...response.data.invitation }));
+                }
+                if (response.data.brideGrooms) {
+                    setLocalBrideGrooms(response.data.brideGrooms);
+                }
+                if (response.data.galleries) {
+                    setLocalGalleries(response.data.galleries);
+                }
+
+                // If we activated a coordinate-based usage, focus on it for cropping
+                if (newValue && ['cover', 'opening', 'groom', 'bride'].includes(target)) {
+                    setActiveCropTarget(target);
+                }
+            }
+        } catch (e) {
+            console.error('Usage toggle error:', e);
+            const msg = e.response?.data?.error || 'Gagal merubah status penggunaan foto.';
+            alert(msg);
         }
     };
 
-    const handleDelete = (id) => {
-        if (confirm('Hapus foto ini?')) {
-            router.delete(route('content.galeri.delete', id), { preserveScroll: true });
+    // Quick-toggle prewedding gallery checkbox on grid card
+    const handleQuickToggleGallery = async (asset, currentValue) => {
+        const newValue = !currentValue;
+        
+        // Quota safety validation
+        if (newValue && remaining <= 0) {
+            alert(`Oops! Batas kuota galeri Anda adalah ${maxGalleries} foto. Hapus foto galeri lain terlebih dahulu.`);
+            return;
+        }
+
+        setTogglingAssetId(asset.id);
+        try {
+            const response = await axios.post(route('theme.media.toggle-usage'), {
+                asset_id: asset.id,
+                target: 'gallery',
+                active: newValue
+            });
+
+            if (response.data.success) {
+                if (response.data.galleries) {
+                    setLocalGalleries(response.data.galleries);
+                }
+            }
+        } catch (e) {
+            console.error('Quick toggle error:', e);
+            const msg = e.response?.data?.error || 'Gagal merubah status galeri.';
+            alert(msg);
+        } finally {
+            setTogglingAssetId(null);
         }
     };
 
+    // Save visual crop / zoom values to server database
+    const handleSavePosition = async () => {
+        if (!selectedAsset || !activeCropTarget) return;
+
+        setSavingPosition(true);
+        try {
+            const response = await axios.post(route('theme.media.save-position'), {
+                target: activeCropTarget,
+                position_x: posX,
+                position_y: posY,
+                zoom: zoom
+            });
+
+            if (response.data.success) {
+                if (response.data.invitation) {
+                    setLocalInvitation(prev => ({ ...prev, ...response.data.invitation }));
+                }
+                if (response.data.brideGrooms) {
+                    setLocalBrideGrooms(response.data.brideGrooms);
+                }
+                alert('Fokus visual & perbesaran berhasil disimpan!');
+            }
+        } catch (e) {
+            console.error('Position save error:', e);
+            alert('Gagal menyimpan posisi foto.');
+        } finally {
+            setSavingPosition(false);
+        }
+    };
+
+    // Drag-to-pan implementation inside visual preview canvas
+    const handleMouseDown = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+        setDragStart({ x: e.clientX, y: e.clientY, posX: posX, posY: posY });
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - dragStart.x;
+        const dy = e.clientY - dragStart.y;
+        
+        // Multiplier controls drag speed sensitivity inside the container
+        let newX = dragStart.posX - Math.round(dx / 2.5);
+        let newY = dragStart.posY - Math.round(dy / 2.5);
+        
+        newX = Math.max(0, Math.min(100, newX));
+        newY = Math.max(0, Math.min(100, newY));
+        
+        setPosX(newX);
+        setPosY(newY);
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    useEffect(() => {
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging, dragStart]);
+
+    // Handle Asset Deletion
+    const handleDeleteAsset = async () => {
+        if (!selectedAsset) return;
+        if (!confirm('Apakah Anda yakin ingin menghapus foto ini dari album? Tindakan ini akan menghapusnya dari semua posisi undangan Anda.')) return;
+
+        try {
+            const response = await axios.delete(route('theme.media.destroy', selectedAsset.id));
+            if (response.data.success) {
+                setSelectedAsset(null);
+                // Force Inertia reload to sync everything cleanly
+                router.reload({
+                    preserveScroll: true,
+                    onFinish: () => {
+                        alert('Foto berhasil dihapus secara permanen.');
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Delete asset error:', e);
+            alert('Gagal menghapus foto.');
+        }
+    };
+
+    // Save Gallery Display Mode (Grid / Carousel / Slide)
     const handleModeChange = (newMode) => {
         setMode(newMode);
         setSavingMode(true);
@@ -97,8 +406,6 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
         });
     };
 
-    const remaining = maxGalleries - (galleries?.length || 0);
-
     const modes = [
         { value: 'grid', label: 'Grid', desc: 'Tampilan kotak-kotak', icon: 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z' },
         { value: 'carousel', label: 'Carousel', desc: 'Geser kiri-kanan', icon: 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z' },
@@ -106,43 +413,71 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
     ];
 
     return (
-        <DashboardLayout title="Galeri">
-            <Head title="Galeri" />
-            <div className="max-w-3xl mx-auto space-y-6">
+        <DashboardLayout title="Pustaka Media & Album Foto Terpadu">
+            <Head title="Pustaka Media Terpadu" />
+            <div className="max-w-5xl mx-auto space-y-6 px-2 sm:px-4">
+                
+                {/* Global Success Notification */}
                 {flash?.success && (
-                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
+                        <svg className="w-4 h-4 text-[#E5654B] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg> 
+                        <span>{flash.success}</span>
+                    </div>
                 )}
 
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
-                    <span className="text-xl"><svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg></span>
-                    <div>
-                        <div className="font-medium text-blue-800 text-sm">Galeri Foto</div>
-                        <div className="text-blue-600 text-xs mt-0.5">
-                            Upload foto-foto terbaik Anda. Kuota: <strong>{galleries?.length || 0}/{maxGalleries}</strong> foto.
+                {/* Modern Unified Media Header */}
+                <div className="bg-gradient-to-r from-orange-50 to-orange-100/50 border border-orange-100 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="space-y-1">
+                        <div className="inline-flex items-center gap-2 bg-[#E5654B]/10 text-[#b03a24] px-3.5 py-1 rounded-full text-xs font-semibold">
+                            <Sparkles size={12} className="text-[#E5654B]" />
+                            <span>Sistem Foto Terpadu V2</span>
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-800 tracking-tight">Pustaka Media & Album Foto</h2>
+                        <p className="text-xs text-gray-500 max-w-xl">
+                            Upload seluruh foto Anda sekali saja di sini. Anda bisa menghubungkan foto yang sama ke <strong>Sampul, Pembuka, Foto Mempelai,</strong> maupun <strong>Galeri</strong> sekaligus secara dinamis!
+                        </p>
+                    </div>
+                    
+                    {/* Active Usages Summary Badge Widget */}
+                    <div className="bg-white/80 backdrop-blur border border-gray-100 rounded-2xl p-4 flex gap-4 text-center shadow-sm">
+                        <div className="px-2">
+                            <div className="text-xs text-gray-400 font-medium">Isi Galeri</div>
+                            <div className="text-lg font-bold text-gray-700">{localGalleries?.length || 0}<span className="text-xs text-gray-400 font-normal">/{maxGalleries}</span></div>
+                        </div>
+                        <div className="w-px bg-gray-200 self-stretch"></div>
+                        <div className="px-2">
+                            <div className="text-xs text-gray-400 font-medium">Total Album</div>
+                            <div className="text-lg font-bold text-orange-600">{mediaAssets?.length || 0}</div>
                         </div>
                     </div>
                 </div>
 
                 {/* ═══ Gallery Mode Selector ═══ */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <h4 className="text-sm font-semibold text-gray-700">Model Tampilan Galeri</h4>
-                            <p className="text-xs text-gray-400 mt-0.5">Pilih cara foto ditampilkan di undangan</p>
+                            <h4 className="text-sm font-semibold text-gray-700">Model Tampilan Galeri Prewedding</h4>
+                            <p className="text-xs text-gray-400 mt-0.5">Pilih cara foto yang diaktifkan sebagai "Galeri" muncul di halaman undangan</p>
                         </div>
                         {savingMode && <span className="text-xs text-[#E5654B] animate-pulse">Menyimpan...</span>}
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {modes.map((m) => (
                             <button key={m.value} type="button" onClick={() => handleModeChange(m.value)}
-                                className={`relative p-4 rounded-xl border-2 text-center transition-all ${mode === m.value ? 'border-[#E5654B] bg-orange-50 shadow-sm' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}>
-                                <div className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center mb-2 ${mode === m.value ? 'bg-[#E5654B] text-white' : 'bg-gray-200 text-gray-500'}`}>
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d={m.icon} />
-                                    </svg>
+                                className={`relative p-4 rounded-2xl border-2 text-left transition-all ${mode === m.value ? 'border-[#E5654B] bg-orange-50/40 shadow-sm' : 'border-gray-100 bg-gray-50/50 hover:border-gray-200'}`}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${mode === m.value ? 'bg-[#E5654B] text-white shadow-md shadow-orange-500/20' : 'bg-gray-200 text-gray-500'}`}>
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d={m.icon} />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div className={`text-xs font-bold ${mode === m.value ? 'text-[#b03a24]' : 'text-gray-700'}`}>{m.label}</div>
+                                        <div className="text-[10px] text-gray-400 mt-0.5">{m.desc}</div>
+                                    </div>
                                 </div>
-                                <div className={`text-xs font-bold ${mode === m.value ? 'text-[#b03a24]' : 'text-gray-600'}`}>{m.label}</div>
-                                <div className="text-[10px] text-gray-400 mt-0.5">{m.desc}</div>
                                 {mode === m.value && (
                                     <div className="absolute top-2 right-2 w-4 h-4 bg-[#E5654B] rounded-full flex items-center justify-center">
                                         <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
@@ -154,98 +489,624 @@ export default function Galeri({ galleries, maxGalleries, galleryMode }) {
                 </div>
 
                 {/* Upload Area */}
-                {remaining > 0 ? (
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Upload Foto Baru (Mendukung Upload Masal)</h4>
-                        <div className="space-y-3">
-                            <input
-                                type="text"
-                                value={caption}
-                                onChange={(e) => setCaption(e.target.value)}
-                                placeholder="Caption foto (opsional, hanya untuk upload 1 foto)"
-                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300 focus:border-[#e87058]"
-                            />
-                            {caption && (
-                                <p className="text-[10px] text-amber-600 font-medium px-1">
-                                    * Catatan: Caption hanya akan digunakan jika Anda mengunggah 1 foto saja.
-                                </p>
-                            )}
-                            <label className="block cursor-pointer">
-                                <div 
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={handleDrop}
-                                    className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                                        isDragOver 
-                                            ? 'border-[#E5654B] bg-orange-50 scale-[1.01]' 
-                                            : 'border-gray-300 hover:border-[#e87058] hover:bg-orange-50/50'
-                                    }`}
-                                >
-                                    {uploading ? (
-                                        <div className="text-[#E5654B] font-medium">
-                                            <svg className="w-5 h-5 inline mr-2 -mt-0.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-sm font-semibold text-gray-700">Unggah Foto Baru ke Album</h4>
+                        <span className="text-xs text-gray-400">Unggah sekaligus banyak didukung (multi-upload)</span>
+                    </div>
+                    <div className="space-y-3">
+                        <label className="block cursor-pointer">
+                            <div 
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                                className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
+                                    isDragOver 
+                                        ? 'border-[#E5654B] bg-orange-50/50 scale-[1.01]' 
+                                        : 'border-gray-200 hover:border-[#e87058] hover:bg-orange-50/10'
+                                }`}
+                            >
+                                {uploading ? (
+                                    <div className="text-[#E5654B] font-semibold flex flex-col items-center justify-center gap-2 py-4">
+                                        <svg className="w-6 h-6 animate-spin text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        <span className="text-sm font-medium">{uploadStatus || 'Sedang memproses...'}</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="text-4xl mb-2 text-gray-300 flex justify-center">
+                                            <svg className="w-12 h-12 text-[#E5654B]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
-                                            {uploadStatus || 'Uploading...'}
                                         </div>
-                                    ) : (
-                                        <>
-                                            <div className="text-4xl mb-2">
-                                                <svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
-                                            </div>
-                                            <div className="text-sm font-medium text-gray-600">Klik atau seret (drag & drop) foto-foto di sini untuk upload masal</div>
-                                            <div className="text-xs text-gray-400 mt-1">Bisa memilih banyak foto sekaligus • JPG, PNG, WEBP • Max 5MB per file</div>
-                                        </>
-                                    )}
-                                </div>
-                                <input type="file" accept="image/*" className="hidden" multiple
-                                    onChange={(e) => handleUpload(e.target.files)} disabled={uploading} />
-                            </label>
-                        </div>
-                        <div className="mt-3 text-xs text-gray-400 text-right">Sisa kuota: {remaining} foto</div>
+                                        <div className="text-sm font-semibold text-gray-600">Pilih atau Drag & Drop foto di sini</div>
+                                        <div className="text-xs text-gray-400 mt-1">Mendukung format JPG, PNG, WEBP • Maks 10MB per file</div>
+                                        <div className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full text-[10px] font-medium mt-3">
+                                            <Info size={11} className="text-orange-600 flex-shrink-0" />
+                                            <span>Baru diunggah otomatis diaktifkan di Galeri jika kuota masih ada</span>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            <input type="file" accept="image/*" className="hidden" multiple
+                                onChange={(e) => handleUpload(e.target.files)} disabled={uploading} />
+                        </label>
                     </div>
-                ) : (
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
-                        <span className="text-xl"><svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></span>
-                        <div>
-                            <div className="font-medium text-amber-800 text-sm">Kuota foto penuh</div>
-                            <div className="text-amber-600 text-xs">Hapus foto lama atau upgrade paket untuk menambah kuota.</div>
-                        </div>
-                    </div>
-                )}
+                </div>
 
-                {/* Gallery Grid */}
-                {galleries?.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        {galleries.map((photo) => (
-                            <div key={photo.id} className="group relative bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                                <div className="aspect-square">
-                                    <img src={photo.image_url} alt={photo.caption || 'Foto'} className="w-full h-full object-cover" />
-                                </div>
-                                <div className="p-3">
-                                    {photo.caption && <p className="text-xs text-gray-600 truncate">{photo.caption}</p>}
-                                </div>
-                                {/* Delete overlay */}
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button onClick={() => handleDelete(photo.id)}
-                                        className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors">
-                                        Hapus
+                {/* Unified Photo Grid */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between bg-orange-50/10 border border-orange-100/50 p-4 rounded-2xl">
+                        <div>
+                            <h3 className="text-xs font-extrabold uppercase tracking-wider text-orange-950">
+                                {bulkMode ? 'Mode Pilihan Masal Galeri Prewedding' : 'Semua Foto Album'}
+                            </h3>
+                            <p className="text-[10px] text-gray-500 mt-0.5">
+                                {bulkMode 
+                                    ? `Ketuk foto untuk menceklis. Batas kuota: ${bulkSelectedIds.length}/${maxGalleries} foto terpilih.` 
+                                    : 'Ketuk pada foto untuk mengatur reposisi visual atau pemakaian cover, mempelai, dll.'}
+                            </p>
+                        </div>
+                        
+                        {mediaAssets?.length > 0 && (
+                            <div className="flex-shrink-0">
+                                {bulkMode ? (
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setBulkMode(false)}
+                                            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-bold transition-all active:scale-[0.98]"
+                                        >
+                                            Batal
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleSaveBulk}
+                                            disabled={savingBulk}
+                                            className="px-3 py-1.5 bg-[#E5654B] hover:bg-[#b03a24] text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-orange-500/10 active:scale-[0.98]"
+                                        >
+                                            {savingBulk ? (
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                            ) : (
+                                                <Check className="w-3.5 h-3.5" />
+                                            )}
+                                            <span>Terapkan Masal</span>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={startBulkMode}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100/80 border border-orange-100 rounded-xl text-xs font-bold text-orange-700 transition-all active:scale-[0.98]"
+                                    >
+                                        <Sparkles className="w-3.5 h-3.5 text-orange-600" />
+                                        <span>Kelola Galeri Masal</span>
                                     </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {mediaAssets?.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {mediaAssets.map((asset) => {
+                                const url = '/storage/' .concat(asset.file_path);
+                                const usages = getPhotoUsages(url);
+                                const isBulkSelected = bulkSelectedIds.includes(asset.id);
+                                const isGalleryUsed = usages.some(u => u.type === 'gallery');
+                                
+                                return (
+                                    <div 
+                                        key={asset.id} 
+                                        onClick={() => bulkMode ? toggleBulkSelect(asset.id) : handleSelectAsset(asset)}
+                                        className={`group relative bg-white rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md hover:scale-[1.02] flex flex-col ${
+                                            bulkMode
+                                                ? (isBulkSelected ? 'border-orange-500 ring-2 ring-orange-100' : 'border-gray-200 opacity-80 hover:opacity-100')
+                                                : (selectedAsset?.id === asset.id 
+                                                    ? 'border-[#E5654B] ring-2 ring-orange-100' 
+                                                    : 'border-gray-200')
+                                        }`}
+                                    >
+                                        <div className="aspect-square w-full overflow-hidden bg-gray-50 relative">
+                                            <img 
+                                                src={url} 
+                                                alt={asset.file_name} 
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                                            />
+                                            
+                                            {/* Custom Hover/Selection states depending on bulkMode */}
+                                            {bulkMode ? (
+                                                /* Selection Checkbox overlays for Bulk Mode */
+                                                isBulkSelected ? (
+                                                    <div className="absolute inset-0 bg-orange-500/10 flex items-center justify-center z-10 shadow-inner">
+                                                        <div className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white text-white font-extrabold shadow-lg animate-scale-in">
+                                                            ✓
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="absolute top-2.5 right-2.5 w-6 h-6 bg-white/80 backdrop-blur rounded-full flex items-center justify-center border border-gray-300 z-10 shadow-sm">
+                                                        <span className="text-[10px] text-gray-400 font-bold">+</span>
+                                                    </div>
+                                                )
+                                            ) : (
+                                                <>
+                                                    {/* Standard Hover Zoom & Eye Icon overlay */}
+                                                    <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                                                        <div className="bg-white/90 backdrop-blur text-gray-800 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                                                            <Settings className="w-3.5 h-3.5" />
+                                                            <span>Atur Foto</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Quick Gallery Toggle Checkbox (Instant add/remove) */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // Prevents opening modal
+                                                            handleQuickToggleGallery(asset, isGalleryUsed);
+                                                        }}
+                                                        className={`absolute top-2.5 right-2.5 z-25 w-7 h-7 rounded-full flex items-center justify-center border transition-all shadow-md hover:scale-110 active:scale-95 ${
+                                                            isGalleryUsed 
+                                                                ? 'bg-teal-600 border-teal-600 text-white font-extrabold' 
+                                                                : 'bg-white/90 backdrop-blur border-gray-300 text-gray-400 group-hover:border-teal-500 opacity-60 group-hover:opacity-100 hover:text-teal-600'
+                                                        }`}
+                                                        title={isGalleryUsed ? 'Hapus dari Galeri Prewedding' : 'Aktifkan ke Galeri Prewedding'}
+                                                    >
+                                                        {togglingAssetId === asset.id ? (
+                                                            <svg className="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: isGalleryUsed ? '#ffffff' : '#0d9488' }}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                            </svg>
+                                                        ) : (
+                                                            <span className="text-[12px] leading-none">✓</span>
+                                                        )}
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            {/* Active Usage Badges Overlays */}
+                                            {usages.length > 0 && !bulkMode && (
+                                                <div className="absolute top-2 left-2 max-w-[calc(100%-36px)] flex flex-wrap gap-1 z-20 pointer-events-none">
+                                                    {usages.map((u, idx) => (
+                                                        <span 
+                                                            key={idx} 
+                                                            className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full shadow-sm tracking-wide uppercase ${u.color}`}
+                                                        >
+                                                            {u.label}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="p-3 border-t border-gray-100 bg-gray-50/50 flex flex-col justify-between flex-grow">
+                                            <p className="text-[11px] font-medium text-gray-500 truncate" title={asset.file_name}>
+                                                {asset.file_name}
+                                            </p>
+                                            <div className="text-[10px] text-gray-400 mt-0.5 flex justify-between">
+                                                <span>{(asset.file_size / 1024 / 1024).toFixed(2)} MB</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-3xl border border-gray-200 p-16 text-center shadow-sm">
+                            <div className="text-5xl mb-3 flex justify-center">
+                                <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div className="text-gray-500 font-bold text-base">Belum Ada Foto di Album</div>
+                            <p className="text-gray-400 text-xs mt-1 max-w-sm mx-auto">
+                                Silakan unggah foto-foto prewedding atau profil mempelai Anda menggunakan kolom uploader di atas.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* ═══ PREMIUM CENTRED MEDIA SETTINGS MODAL POPUP ═══ */}
+            {selectedAsset && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-3xl w-full max-w-xl shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden animate-scale-in">
+                        
+                        {/* Modal Header */}
+                        <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <div>
+                                <h3 className="font-bold text-gray-800 text-sm">Pengaturan Penggunaan Foto</h3>
+                                <p className="text-[10px] text-gray-400 truncate max-w-[280px]" title={selectedAsset.file_name}>
+                                    {selectedAsset.file_name}
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => setSelectedAsset(null)}
+                                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Modal Scrollable Content */}
+                        <div className="flex-grow overflow-y-auto p-5 space-y-6">
+                            
+                            {/* Selected Photo Thumbnail */}
+                            <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden border border-gray-100 shadow-inner bg-gray-900 flex items-center justify-center relative">
+                                <img 
+                                    src={'/storage/' .concat(selectedAsset.file_path)} 
+                                    alt="Selected" 
+                                    className="w-full h-full object-contain" 
+                                />
+                            </div>
+
+                            {/* Section 1: Usage Switcher Dashboard (Toggles) */}
+                            <div className="bg-orange-50/20 border border-orange-100/50 rounded-2xl p-4 space-y-3">
+                                <h4 className="text-xs font-extrabold text-orange-950 uppercase tracking-wider flex items-center gap-1.5">
+                                    <LinkIcon size={12} className="text-orange-600" />
+                                    <span>Hubungkan Foto Ke Halaman:</span>
+                                </h4>
+                                
+                                <div className="space-y-2.5 mt-2">
+                                    {/* Cover Switch */}
+                                    <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                                        <div>
+                                            <span className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block"></span>
+                                                Sampul Undangan (Cover)
+                                            </span>
+                                            <p className="text-[10px] text-gray-400">Muncul di layar pertama undangan dibuka</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => handleToggleUsage('cover', localInvitation.cover_image?.split(',').filter(Boolean).includes('/storage/' .concat(selectedAsset.file_path)))}
+                                            className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                                localInvitation.cover_image?.split(',').filter(Boolean).includes('/storage/' .concat(selectedAsset.file_path)) ? 'bg-orange-500' : 'bg-gray-200'
+                                            }`}
+                                        >
+                                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                localInvitation.cover_image?.split(',').filter(Boolean).includes('/storage/' .concat(selectedAsset.file_path)) ? 'translate-x-5' : 'translate-x-0'
+                                            }`} />
+                                        </button>
+                                    </div>
+
+                                    {/* Opening Switch */}
+                                    <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                                        <div>
+                                            <span className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
+                                                Gambar Pembuka (Opening)
+                                            </span>
+                                            <p className="text-[10px] text-gray-400">Muncul sebagai foto selamat datang utama</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => handleToggleUsage('opening', localInvitation.opening_image?.split(',').filter(Boolean).includes('/storage/' .concat(selectedAsset.file_path)))}
+                                            className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                                localInvitation.opening_image?.split(',').filter(Boolean).includes('/storage/' .concat(selectedAsset.file_path)) ? 'bg-blue-500' : 'bg-gray-200'
+                                            }`}
+                                        >
+                                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                localInvitation.opening_image?.split(',').filter(Boolean).includes('/storage/' .concat(selectedAsset.file_path)) ? 'translate-x-5' : 'translate-x-0'
+                                            }`} />
+                                        </button>
+                                    </div>
+
+                                    {/* Groom Switch */}
+                                    <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                                        <div>
+                                            <span className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
+                                                Profil Mempelai Pria
+                                            </span>
+                                            <p className="text-[10px] text-gray-400">Diatur di bingkai profil pria</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => handleToggleUsage('groom', localBrideGrooms.find(bg => bg.gender === 'pria')?.photo === '/storage/' .concat(selectedAsset.file_path))}
+                                            className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                                localBrideGrooms.find(bg => bg.gender === 'pria')?.photo === '/storage/' .concat(selectedAsset.file_path) ? 'bg-emerald-600' : 'bg-gray-200'
+                                            }`}
+                                        >
+                                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                localBrideGrooms.find(bg => bg.gender === 'pria')?.photo === '/storage/' .concat(selectedAsset.file_path) ? 'translate-x-5' : 'translate-x-0'
+                                            }`} />
+                                        </button>
+                                    </div>
+
+                                    {/* Bride Switch */}
+                                    <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                                        <div>
+                                            <span className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                                                Profil Mempelai Wanita
+                                            </span>
+                                            <p className="text-[10px] text-gray-400">Diatur di bingkai profil wanita</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => handleToggleUsage('bride', localBrideGrooms.find(bg => bg.gender === 'wanita')?.photo === '/storage/' .concat(selectedAsset.file_path))}
+                                            className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                                localBrideGrooms.find(bg => bg.gender === 'wanita')?.photo === '/storage/' .concat(selectedAsset.file_path) ? 'bg-rose-500' : 'bg-gray-200'
+                                            }`}
+                                        >
+                                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                localBrideGrooms.find(bg => bg.gender === 'wanita')?.photo === '/storage/' .concat(selectedAsset.file_path) ? 'translate-x-5' : 'translate-x-0'
+                                            }`} />
+                                        </button>
+                                    </div>
+
+                                    {/* Gallery Switch */}
+                                    <div className="flex items-center justify-between py-1.5">
+                                        <div>
+                                            <span className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-teal-500 inline-block"></span>
+                                                Galeri Foto Prewedding
+                                            </span>
+                                            <p className="text-[10px] text-gray-400">Masuk ke slider/grid prewedding</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => handleToggleUsage('gallery', localGalleries.some(g => g.image_url === '/storage/' .concat(selectedAsset.file_path)))}
+                                            className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                                localGalleries.some(g => g.image_url === '/storage/' .concat(selectedAsset.file_path)) ? 'bg-teal-500' : 'bg-gray-200'
+                                            }`}
+                                        >
+                                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                localGalleries.some(g => g.image_url === '/storage/' .concat(selectedAsset.file_path)) ? 'translate-x-5' : 'translate-x-0'
+                                            }`} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        ))}
+
+                            {/* Section 2: Non-destructive Cropping Workspace (Focal Point Visualizer) */}
+                            {getPhotoUsages('/storage/' .concat(selectedAsset.file_path)).some(u => ['cover', 'opening', 'groom', 'bride'].includes(u.type)) && (
+                                <div className="border border-gray-200 rounded-3xl p-5 space-y-4 bg-gray-50 shadow-sm">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-xs font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                                            <Settings size={12} className="text-orange-500" />
+                                            <span>Workspace Reposisi Visual</span>
+                                        </h4>
+                                    </div>
+
+                                    {/* Sub-tabs for Selecting Active Usage to Position */}
+                                    <div className="flex flex-wrap gap-1.5 bg-gray-200/50 p-1 rounded-xl">
+                                        {['cover', 'opening', 'groom', 'bride'].map((tab) => {
+                                            const url = '/storage/' .concat(selectedAsset.file_path);
+                                            const isActive = activeCropTarget === tab;
+                                            
+                                            // Only show the tab if the photo is actually active for that usage target
+                                            const isLinked = (tab === 'cover' && localInvitation.cover_image?.split(',').filter(Boolean).includes(url)) ||
+                                                             (tab === 'opening' && localInvitation.opening_image?.split(',').filter(Boolean).includes(url)) ||
+                                                             (tab === 'groom' && localBrideGrooms.find(bg => bg.gender === 'pria')?.photo === url) ||
+                                                             (tab === 'bride' && localBrideGrooms.find(bg => bg.gender === 'wanita')?.photo === url);
+
+                                            if (!isLinked) return null;
+
+                                            const labels = { cover: 'Sampul', opening: 'Pembuka', groom: 'Pria', bride: 'Wanita' };
+
+                                            return (
+                                                <button
+                                                    key={tab}
+                                                    type="button"
+                                                    onClick={() => setActiveCropTarget(tab)}
+                                                    className={`flex-grow px-2 py-1.5 rounded-lg text-[10px] font-extrabold uppercase transition-all ${
+                                                        isActive 
+                                                            ? 'bg-[#E5654B] text-white shadow-sm' 
+                                                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                                                    }`}
+                                                >
+                                                    {labels[tab]}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Preview Mask Container */}
+                                    <div className="flex flex-col items-center py-2">
+                                        {['groom', 'bride'].includes(activeCropTarget) ? (
+                                            /* Circle Mask Frame for BrideGrooms */
+                                            <div 
+                                                ref={previewContainerRef}
+                                                onMouseDown={handleMouseDown}
+                                                className="w-36 h-36 rounded-full overflow-hidden border-4 border-orange-100 bg-gray-200 relative shadow-inner cursor-move select-none"
+                                                title="Geser langsung gambar di dalam lingkaran untuk reposisi"
+                                            >
+                                                <img 
+                                                    src={'/storage/' .concat(selectedAsset.file_path)} 
+                                                    alt="Circle Preview" 
+                                                    draggable={false}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover',
+                                                        objectPosition: `${posX}% ${posY}%`,
+                                                        transform: `scale(${zoom})`,
+                                                        transformOrigin: 'center'
+                                                    }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            /* Vertical Mobile Frame for Cover / Opening (Portrait 9:16) */
+                                            <div 
+                                                ref={previewContainerRef}
+                                                onMouseDown={handleMouseDown}
+                                                className="w-48 h-80 rounded-[2.2rem] overflow-hidden border-[8px] border-gray-800 bg-gray-200 relative shadow-2xl cursor-move select-none flex items-center justify-center"
+                                                title="Geser langsung gambar di dalam bingkai HP untuk reposisi"
+                                            >
+                                                {/* Simulated camera notch / Dynamic Island inside crop mask */}
+                                                <div className="absolute top-2.5 w-14 h-3.5 bg-black rounded-full z-10 pointer-events-none opacity-85" />
+                                                
+                                                <img 
+                                                    src={'/storage/' .concat(selectedAsset.file_path)} 
+                                                    alt="Rect Preview" 
+                                                    draggable={false}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover',
+                                                        objectPosition: `${posX}% ${posY}%`,
+                                                        transform: `scale(${zoom})`,
+                                                        transformOrigin: 'center'
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+                                        <span className="text-[10px] text-gray-400 font-medium mt-2 flex items-center justify-center gap-1 text-center w-full">
+                                            Geser foto di atas atau atur menggunakan slider di bawah
+                                        </span>
+                                    </div>
+
+                                    {/* Quick Preset Buttons (Edit Cepat) */}
+                                    <div className="bg-gray-100/60 p-3 rounded-2xl border border-gray-200/50 space-y-2">
+                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider text-center">
+                                            Penyesuaian Cepat (Presets)
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-1.5">
+                                            <button
+                                                type="button"
+                                                onClick={() => { setZoom(1.0); setPosX(50); setPosY(50); }}
+                                                className="px-2 py-1.5 border border-gray-200 hover:border-[#E5654B] hover:text-[#E5654B] bg-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1 shadow-sm"
+                                                title="Tampilkan seluruh foto tanpa perbesaran"
+                                            >
+                                                <Minimize2 size={10} />
+                                                <span>Sesuaikan</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setZoom(1.15); setPosX(50); setPosY(20); }}
+                                                className="px-2 py-1.5 border border-gray-200 hover:border-[#E5654B] hover:text-[#E5654B] bg-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1 shadow-sm"
+                                                title="Fokus ke bagian atas gambar (wajah mempelai)"
+                                            >
+                                                <Smile size={10} />
+                                                <span>Fokus Wajah</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setZoom(1.4); setPosX(50); setPosY(50); }}
+                                                className="px-2 py-1.5 border border-gray-200 hover:border-[#E5654B] hover:text-[#E5654B] bg-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1 shadow-sm"
+                                                title="Perbesar gambar untuk memenuhi lebar horizontal"
+                                            >
+                                                <Maximize2 size={10} />
+                                                <span>Penuhi Lebar</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setZoom(1.2); setPosX(50); setPosY(30); }}
+                                                className="px-2 py-1.5 border border-gray-200 hover:border-[#E5654B] hover:text-[#E5654B] bg-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1 shadow-sm"
+                                                title="Perbesar gambar untuk memenuhi tinggi vertikal"
+                                            >
+                                                <Maximize2 size={10} />
+                                                <span>Penuhi Tinggi</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setZoom(1.6); setPosX(50); setPosY(35); }}
+                                                className="px-2 py-1.5 border border-gray-200 hover:border-[#E5654B] hover:text-[#E5654B] bg-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1 shadow-sm"
+                                                title="Perbesar penuh untuk foto dekat"
+                                            >
+                                                <Maximize2 size={10} />
+                                                <span>Close-up</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setZoom(1.0); setPosX(50); setPosY(50); }}
+                                                className="px-2 py-1.5 border border-gray-200 hover:border-red-400 hover:text-red-500 bg-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1 shadow-sm"
+                                                title="Kembalikan ke posisi awal"
+                                            >
+                                                <RotateCcw size={10} />
+                                                <span>Reset</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Range Sliders Controls */}
+                                    <div className="space-y-3.5 pt-2">
+                                        {/* Slider X */}
+                                        <div className="space-y-1">
+                                            <div className="flex justify-between text-[11px] font-bold text-gray-600">
+                                                <span>Fokus Horizontal (X)</span>
+                                                <span className="text-orange-600 font-mono">{posX}%</span>
+                                            </div>
+                                            <input 
+                                                type="range" min="0" max="100" value={posX}
+                                                onChange={(e) => setPosX(Number(e.target.value))}
+                                                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#E5654B]"
+                                            />
+                                        </div>
+
+                                        {/* Slider Y */}
+                                        <div className="space-y-1">
+                                            <div className="flex justify-between text-[11px] font-bold text-gray-600">
+                                                <span>Fokus Vertikal (Y)</span>
+                                                <span className="text-orange-600 font-mono">{posY}%</span>
+                                            </div>
+                                            <input 
+                                                type="range" min="0" max="100" value={posY}
+                                                onChange={(e) => setPosY(Number(e.target.value))}
+                                                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#E5654B]"
+                                            />
+                                        </div>
+
+                                        {/* Slider Zoom */}
+                                        <div className="space-y-1">
+                                            <div className="flex justify-between text-[11px] font-bold text-gray-600">
+                                                <span>Pembesaran (Zoom)</span>
+                                                <span className="text-orange-600 font-mono">{zoom.toFixed(2)}x</span>
+                                            </div>
+                                            <input 
+                                                type="range" min="1.0" max="3.0" step="0.05" value={zoom}
+                                                onChange={(e) => setZoom(Number(e.target.value))}
+                                                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#E5654B]"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Save Button */}
+                                    <button
+                                        type="button"
+                                        onClick={handleSavePosition}
+                                        disabled={savingPosition}
+                                        className="w-full py-2.5 px-4 bg-[#E5654B] text-white rounded-xl text-xs font-bold hover:bg-[#b03a24] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/10"
+                                    >
+                                        {savingPosition ? (
+                                            <>
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                <span>Menyimpan...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="w-3.5 h-3.5" />
+                                                <span>Simpan Posisi & Perbesaran</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+
+                        </div>
+
+                        {/* Modal Footer Actions */}
+                        <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <button
+                                type="button"
+                                onClick={handleDeleteAsset}
+                                className="py-2 px-3 border border-red-200 text-red-500 hover:bg-red-50 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Hapus Permanen</span>
+                            </button>
+                            
+                            <button
+                                type="button"
+                                onClick={() => setSelectedAsset(null)}
+                                className="py-2 px-4 bg-gray-800 text-white rounded-xl text-xs font-bold hover:bg-gray-700 transition-colors"
+                            >
+                                Tutup
+                            </button>
+                        </div>
                     </div>
-                ) : (
-                    <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                        <div className="text-5xl mb-3"><svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
-                        <div className="text-gray-500 font-medium">Belum ada foto</div>
-                        <div className="text-gray-400 text-sm mt-1">Upload foto pertama Anda di atas</div>
-                    </div>
-                )}
-            </div>
+                </div>,
+                document.body
+            )}
         </DashboardLayout>
     );
 }

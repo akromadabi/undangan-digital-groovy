@@ -1,0 +1,8 @@
+{
+  "Description": "\"Add cosmicdrift to validation rules in both store() and update() methods of the controller.\"",
+  "Instruction": "\"Add cosmicdrift to the validation in statements in store and update\"",
+  "ReplacementChunks": "[{\"AllowMultiple\":false,\"EndLine\":52,\"ReplacementContent\":\"            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze,cosmicdrift',\",\"StartLine\":52,\"TargetContent\":\"            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze',\"},{\"AllowMultiple\":false,\"EndLine\":107,\"ReplacementContent\":\"            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze,cosmicdrift',\",\"StartLine\":107,\"TargetContent\":\"            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze',\"}]",
+  "TargetFile": "\"c:\\\\laragon\\\\www\\\\Undangan Digital\\\\app\\\\Http\\\\Controllers\\\\Dashboard\\\\GreetingCardController.php\"",
+  "toolAction": "\"Add cosmicdrift to controller validation\"",
+  "toolSummary": "\"Edit GreetingCardController\""
+}

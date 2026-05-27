@@ -1,8 +1,9 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import { BookOpen } from 'lucide-react';
 
-const religionLabels = { islam: '☪️ Islam', kristen: '✝️ Kristen', hindu: '🕉️ Hindu', buddha: '☸️ Buddha', umum: '🌐 Umum' };
+const religionLabels = { islam: 'Islam', kristen: 'Kristen', hindu: 'Hindu', buddha: 'Buddha', umum: 'Umum' };
 
 const defaultOpeningTemplates = {
     islam: {
@@ -204,7 +205,10 @@ export default function TeksSambutan({ invitation, quoteTemplates = [] }) {
                             {/* Quote Template Selector */}
                             {filteredQuotes.length > 0 && (
                                 <div>
-                                    <label className="block text-xs font-medium text-[#b03a24] mb-2">📖 Pilih Template Kutipan</label>
+                                    <label className="block text-xs font-bold text-[#b03a24] mb-2 flex items-center gap-1">
+                                        <BookOpen size={13} className="text-[#b03a24] flex-shrink-0" />
+                                        <span>Pilih Template Kutipan</span>
+                                    </label>
                                     <select onChange={(e) => handleQuoteSelect(e.target.value)} defaultValue=""
                                         className="w-full border border-orange-200 bg-orange-50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300">
                                         <option value="">— Pilih template untuk auto-fill —</option>

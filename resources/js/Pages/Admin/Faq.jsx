@@ -286,6 +286,81 @@ const RESELLER_FAQ_DATABASE = [
     }
 ];
 
+// Stemming logic for smart search
+const stemWord = (word) => {
+    if (!word || word.length <= 1) return [word];
+    let w = word.toLowerCase().trim();
+    
+    // Remove suffixes: -kan, -an, -i, -nya, -lah, -kah
+    w = w.replace(/(kan|an|i|nya|lah|kah)$/, '');
+    
+    const roots = new Set([w]);
+    
+    // Prefix rules
+    if (w.startsWith('meng') || w.startsWith('peng')) {
+        const rest = w.slice(4);
+        roots.add(rest);
+        roots.add('k' + rest);
+    } else if (w.startsWith('meny') || w.startsWith('peny')) {
+        const rest = w.slice(4);
+        roots.add('s' + rest);
+        roots.add(rest);
+    } else if (w.startsWith('men') || w.startsWith('pen')) {
+        const rest = w.slice(3);
+        roots.add(rest);
+        if (/^[aeiou]/.test(rest)) {
+            roots.add('t' + rest);
+        }
+    } else if (w.startsWith('mem') || w.startsWith('pem')) {
+        const rest = w.slice(3);
+        roots.add(rest);
+        if (/^[aeiou]/.test(rest)) {
+            roots.add('p' + rest);
+        }
+    } else if (w.startsWith('me') || w.startsWith('pe')) {
+        roots.add(w.slice(2));
+    } else if (w.startsWith('di')) {
+        roots.add(w.slice(2));
+    } else if (w.startsWith('ber') || w.startsWith('per')) {
+        roots.add(w.slice(3));
+    } else if (w.startsWith('ter')) {
+        roots.add(w.slice(3));
+    } else if (w.startsWith('ke')) {
+        roots.add(w.slice(2));
+    }
+    
+    return Array.from(roots).filter(r => r.length > 1);
+};
+
+const isMatch = (targetText, queryText) => {
+    if (!queryText) return true;
+    const cleanQuery = queryText.toLowerCase().trim();
+    if (!targetText) return false;
+    const cleanTarget = targetText.toLowerCase();
+
+    // 1. Simple substring check first
+    if (cleanTarget.includes(cleanQuery)) return true;
+
+    // 2. Tokenize and stem query
+    const queryTokens = cleanQuery.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, " ").split(/\s+/).filter(Boolean);
+    if (queryTokens.length === 0) return false;
+
+    // Tokenize target
+    const targetTokens = cleanTarget.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, " ").split(/\s+/).filter(Boolean);
+
+    // Get all possible roots for target tokens
+    const targetRoots = new Set();
+    targetTokens.forEach(token => {
+        stemWord(token).forEach(r => targetRoots.add(r));
+    });
+
+    // For query, we want ALL words in query to have a matching root in the target text
+    return queryTokens.every(qToken => {
+        const qRoots = stemWord(qToken);
+        return qRoots.some(qRoot => targetRoots.has(qRoot) || cleanTarget.includes(qRoot));
+    });
+};
+
 export default function Faq() {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('semua');
@@ -318,11 +393,11 @@ export default function Faq() {
         return currentDatabase.filter(faq => {
             if (activeCategory !== 'semua' && faq.category !== activeCategory) return false;
             if (searchQuery.trim() !== '') {
-                const query = searchQuery.toLowerCase();
-                const matchesQuestion = faq.question.toLowerCase().includes(query);
-                const matchesAnswer = faq.answer.toLowerCase().includes(query);
-                const matchesKeywords = faq.keywords ? faq.keywords.some(kw => kw.toLowerCase().includes(query)) : false;
-                return matchesQuestion || matchesAnswer || matchesKeywords;
+                const matchesQuestion = isMatch(faq.question, searchQuery);
+                const matchesAnswer = isMatch(faq.answer, searchQuery);
+                const matchesKeywords = faq.keywords ? faq.keywords.some(kw => isMatch(kw, searchQuery)) : false;
+                const matchesSteps = faq.steps ? faq.steps.some(step => isMatch(step, searchQuery)) : false;
+                return matchesQuestion || matchesAnswer || matchesKeywords || matchesSteps;
             }
             return true;
         });

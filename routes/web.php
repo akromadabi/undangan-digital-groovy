@@ -273,6 +273,14 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
     Route::post('/theme/{theme}/like', [ThemeSettingsController::class, 'toggleLike'])->name('theme.like');
     Route::post('/theme/sections', [ThemeSettingsController::class, 'updateSections'])->name('theme.sections');
 
+    // Media Library APIs
+    Route::get('/theme/media', [\App\Http\Controllers\Dashboard\MediaAssetController::class, 'index'])->name('theme.media.index');
+    Route::post('/theme/media/upload', [\App\Http\Controllers\Dashboard\MediaAssetController::class, 'upload'])->name('theme.media.upload');
+    Route::delete('/theme/media/{id}', [\App\Http\Controllers\Dashboard\MediaAssetController::class, 'destroy'])->name('theme.media.destroy');
+    Route::post('/theme/media/toggle-usage', [\App\Http\Controllers\Dashboard\MediaAssetController::class, 'toggleUsage'])->name('theme.media.toggle-usage');
+    Route::post('/theme/media/save-position', [\App\Http\Controllers\Dashboard\MediaAssetController::class, 'savePosition'])->name('theme.media.save-position');
+    Route::post('/theme/media/sync-gallery', [\App\Http\Controllers\Dashboard\MediaAssetController::class, 'syncGallery'])->name('theme.media.sync-gallery');
+
     // Greeting Card (Kartu Ucapan)
     Route::prefix('greeting-card')->name('greeting-card.')->group(function () {
         Route::get('/', [GreetingCardController::class, 'index'])->name('index');

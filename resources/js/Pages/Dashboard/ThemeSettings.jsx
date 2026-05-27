@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
+import { Sparkles, X, ImageIcon } from 'lucide-react';
 import { PARTICLE_MAP } from '@/Components/ParticleEffect';
 
 // Locked sections — always visible, cannot be reordered
@@ -79,7 +80,7 @@ const ToggleSwitch = ({ checked, onChange, label, desc, icon, disabled = false }
     </div>
 );
 
-export default function ThemeSettings({ invitation, currentTheme, themes, sections, previewData, centralHost = 'undangan.com' }) {
+export default function ThemeSettings({ invitation, currentTheme, themes, sections, mediaAssets = [], previewData, centralHost = 'undangan.com' }) {
     const { auth, features, subscription } = usePage().props;
     const isUserAdminOrSuper = auth.user?.role === 'admin' || auth.user?.role === 'super_admin';
 
@@ -193,12 +194,88 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const [enableQr, setEnableQr] = useState(invitation?.enable_qr ?? true);
     const [isTutorialOpen, setIsTutorialOpen] = useState(false);
     const [isParticleModalOpen, setIsParticleModalOpen] = useState(false);
-    const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
-    const [isOpeningModalOpen, setIsOpeningModalOpen] = useState(false);
     const [openingImage, setOpeningImage] = useState(invitation?.opening_image || '');
-    const [openingUploading, setOpeningUploading] = useState(false);
-    const [openingSaving, setOpeningSaving] = useState(false);
     const [settingsSaving, setSettingsSaving] = useState(false);
+
+    // Media Library / Pustaka Media States & Functions
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [pickerActiveTab, setPickerActiveTab] = useState('album'); // 'album' | 'upload'
+    const [pickerTarget, setPickerTarget] = useState('cover'); // 'cover' | 'opening'
+    const [libraryAssets, setLibraryAssets] = useState(mediaAssets || []);
+    const [uploadingFile, setUploadingFile] = useState(false);
+
+    const openMediaPicker = (target) => {
+        setPickerTarget(target);
+        setPickerActiveTab('album');
+        setIsPickerOpen(true);
+    };
+
+    const handleMediaSelect = async (url) => {
+        setIsPickerOpen(false);
+        if (pickerTarget === 'cover') {
+            setCoverImage(url);
+            try {
+                await axios.post(route('settings.cover.save'), {
+                    cover_image: url,
+                    cover_title: coverTitle,
+                    cover_subtitle: coverSubtitle,
+                });
+                showToast('success', 'Foto Cover berhasil diubah!');
+                setTimeout(() => setPreviewKey(k => k + 1), 800);
+            } catch (e) {
+                console.error(e);
+                showToast('error', 'Gagal menyimpan foto cover');
+            }
+        } else if (pickerTarget === 'opening') {
+            setOpeningImage(url);
+            try {
+                await axios.post(route('content.opening.save'), {
+                    opening_image: url,
+                });
+                showToast('success', 'Foto Opening berhasil diubah!');
+                setTimeout(() => setPreviewKey(k => k + 1), 800);
+            } catch (e) {
+                console.error(e);
+                showToast('error', 'Gagal menyimpan foto opening');
+            }
+        }
+    };
+
+    const handleLibraryUpload = async (file) => {
+        if (!file) return;
+        setUploadingFile(true);
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const response = await axios.post(route('theme.media.upload'), formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            if (response.data.success) {
+                const newAsset = response.data.asset;
+                setLibraryAssets(prev => [newAsset, ...prev]);
+                handleMediaSelect('/storage/' + newAsset.file_path);
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('error', 'Gagal mengunggah foto');
+        }
+        setUploadingFile(false);
+    };
+
+    const handleLibraryDelete = async (e, assetId) => {
+        e.stopPropagation();
+        if (!confirm('Apakah Anda yakin ingin menghapus foto ini dari album?')) return;
+        try {
+            const response = await axios.delete(route('theme.media.destroy', assetId));
+            if (response.data.success) {
+                setLibraryAssets(prev => prev.filter(a => a.id !== assetId));
+                showToast('success', 'Foto dihapus dari album');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('error', 'Gagal menghapus foto');
+        }
+    };
 
     const SECTION_EDIT_ROUTES = {
         cover: null,
@@ -655,9 +732,9 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                 <button
                                                     onClick={() => {
                                                         if (section.section_key === 'cover') {
-                                                            setIsCoverModalOpen(true);
+                                                            openMediaPicker('cover');
                                                         } else if (section.section_key === 'opening') {
-                                                            setIsOpeningModalOpen(true);
+                                                            openMediaPicker('opening');
                                                         } else {
                                                             router.visit(SECTION_EDIT_ROUTES[section.section_key]);
                                                         }
@@ -915,8 +992,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                         </div>
                                         <select value={language} onChange={(e) => { setLanguage(e.target.value); saveSetting('language', e.target.value); }}
                                             className="border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] bg-white outline-none">
-                                            <option value="id">🇮🇩 Indonesia</option>
-                                            <option value="en">🇬🇧 English</option>
+                                            <option value="id">Indonesia</option>
+                                            <option value="en">English</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1043,7 +1120,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                             <div>
                                 <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
                                     <span className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center text-[#c24b33]">
-                                        ✨
+                                        <Sparkles size={14} />
                                     </span>
                                     Pengaturan Efek Partikel
                                 </h3>
@@ -1116,7 +1193,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                             {particleType && (
                                 <button type="button" onClick={() => { setParticleType(null); handleParticleSave({ type: null }); }}
                                     className="flex-1 py-2 px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
-                                    ❌ Nonaktifkan
+                                    <X size={13} className="text-red-500" />
+                                    <span>Nonaktifkan</span>
                                 </button>
                             )}
                             <button 
@@ -1138,23 +1216,23 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                 centralHost={centralHost}
             />
 
-            {/* Modal Upload Cover (rendered at root level using React Portal to prevent clipping) */}
-            {isCoverModalOpen && typeof document !== 'undefined' && createPortal(
+            {/* Modal Pustaka Media / Album Foto Terpusat (rendered at root level using React Portal) */}
+            {isPickerOpen && typeof document !== 'undefined' && createPortal(
                 <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
-                    <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-[scaleIn_0.2s_ease-out] border border-gray-100">
+                    <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl animate-[scaleIn_0.2s_ease-out] border border-gray-100 flex flex-col max-h-[90vh]">
                         {/* Header */}
                         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                             <div>
                                 <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
                                     <span className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center text-[#c24b33]">
-                                        🖼️
+                                        <ImageIcon size={14} />
                                     </span>
-                                    Ubah Foto Cover
+                                    {pickerTarget === 'cover' ? 'Pilih Foto Cover' : 'Pilih Foto Opening'}
                                 </h3>
-                                <p className="text-[10px] text-gray-400 mt-0.5">Unggah foto terbaik sebagai gambar sampul undangan Anda</p>
+                                <p className="text-[10px] text-gray-400 mt-0.5">Pilih foto dari album Anda atau unggah foto baru</p>
                             </div>
                             <button 
-                                onClick={() => setIsCoverModalOpen(false)}
+                                onClick={() => setIsPickerOpen(false)}
                                 className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
                                 title="Tutup"
                             >
@@ -1164,130 +1242,123 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                             </button>
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6 space-y-4">
-                            <div className="relative aspect-[9/16] max-w-[160px] mx-auto rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm">
-                                {coverImage ? (
-                                    <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                                        <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        <div className="text-[10px] mt-1">Belum ada gambar</div>
-                                    </div>
-                                )}
-                                {coverUploading && (
-                                    <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center text-white text-xs font-semibold">
-                                        Uploading...
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="text-center">
-                                <label className="inline-block px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 rounded-xl text-xs font-semibold cursor-pointer transition-colors shadow-xs">
-                                    {coverUploading ? 'Uploading...' : 'Pilih Foto Baru'}
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleCoverImageUpload(e.target.files[0])} disabled={coverUploading} />
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-2">
-                            <button
-                                onClick={() => setIsCoverModalOpen(false)}
-                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-semibold transition-colors"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    await saveCover();
-                                    setIsCoverModalOpen(false);
-                                }}
-                                disabled={coverSaving || coverUploading}
-                                className="px-4 py-2 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl text-xs font-semibold hover:shadow-md disabled:opacity-50 transition-all"
-                            >
-                                {coverSaving ? 'Menyimpan...' : 'Simpan Foto'}
-                            </button>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
-
-            {/* Modal Upload Opening (rendered at root level using React Portal to prevent clipping) */}
-            {isOpeningModalOpen && typeof document !== 'undefined' && createPortal(
-                <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
-                    <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-[scaleIn_0.2s_ease-out] border border-gray-100">
-                        {/* Header */}
-                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                            <div>
-                                <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-                                    <span className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center text-[#c24b33]">
-                                        🖼️
-                                    </span>
-                                    Ubah Foto Opening
-                                </h3>
-                                <p className="text-[10px] text-gray-400 mt-0.5">Unggah foto terbaik sebagai gambar pembuka undangan Anda</p>
-                            </div>
+                        {/* Tabs Selector */}
+                        <div className="px-6 pt-3 border-b border-gray-100 flex gap-4 bg-gray-50/20">
                             <button 
-                                onClick={() => setIsOpeningModalOpen(false)}
-                                className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
-                                title="Tutup"
+                                onClick={() => setPickerActiveTab('album')}
+                                className={`pb-2.5 text-xs font-semibold border-b-2 transition-colors ${
+                                    pickerActiveTab === 'album' 
+                                        ? 'border-[#E5654B] text-[#E5654B]' 
+                                        : 'border-transparent text-gray-400 hover:text-gray-600'
+                                }`}
                             >
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                Album Foto Anda
+                            </button>
+                            <button 
+                                onClick={() => setPickerActiveTab('upload')}
+                                className={`pb-2.5 text-xs font-semibold border-b-2 transition-colors ${
+                                    pickerActiveTab === 'upload' 
+                                        ? 'border-[#E5654B] text-[#E5654B]' 
+                                        : 'border-transparent text-gray-400 hover:text-gray-600'
+                                }`}
+                            >
+                                Unggah Baru
                             </button>
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6 space-y-4">
-                            <div className="relative aspect-[4/3] max-w-[280px] mx-auto rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm">
-                                {openingImage ? (
-                                    <img src={openingImage} alt="Opening" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                                        <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {/* Content Area */}
+                        <div className="p-6 overflow-y-auto flex-1">
+                            {pickerActiveTab === 'album' ? (
+                                libraryAssets.length === 0 ? (
+                                    <div className="py-12 text-center text-gray-400">
+                                        <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
-                                        <div className="text-[10px] mt-1">Belum ada gambar</div>
+                                        <p className="text-xs">Album Anda masih kosong</p>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setPickerActiveTab('upload')} 
+                                            className="mt-3 text-xs font-semibold text-[#E5654B] hover:underline"
+                                        >
+                                            Unggah foto pertama Anda
+                                        </button>
                                     </div>
-                                )}
-                                {openingUploading && (
-                                    <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center text-white text-xs font-semibold">
-                                        Uploading...
+                                ) : (
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {libraryAssets.map((asset) => {
+                                            const assetUrl = '/storage/' + asset.file_path;
+                                            const isActive = pickerTarget === 'cover' ? coverImage === assetUrl : openingImage === assetUrl;
+                                            
+                                            return (
+                                                <div 
+                                                    key={asset.id} 
+                                                    onClick={() => handleMediaSelect(assetUrl)}
+                                                    className={`relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer group shadow-xs transition-all ${
+                                                        isActive ? 'border-[#E5654B] ring-2 ring-orange-100 scale-[0.98]' : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <img src={assetUrl} alt={asset.file_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                    
+                                                    {/* Active Checkmark overlay */}
+                                                    {isActive && (
+                                                        <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                                                            <span className="w-6 h-6 rounded-full bg-[#E5654B] text-white flex items-center justify-center shadow-md font-bold text-xs border border-white">✓</span>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Hover actions (Trash icon) */}
+                                                    <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                        <button 
+                                                            type="button"
+                                                            onClick={(e) => handleLibraryDelete(e, asset.id)}
+                                                            className="w-6 h-6 rounded-lg bg-white/95 hover:bg-red-50 text-gray-500 hover:text-red-500 shadow-sm flex items-center justify-center transition-colors"
+                                                            title="Hapus foto dari album"
+                                                        >
+                                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                )}
-                            </div>
-
-                            <div className="text-center">
-                                <label className="inline-block px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 rounded-xl text-xs font-semibold cursor-pointer transition-colors shadow-xs">
-                                    {openingUploading ? 'Uploading...' : 'Pilih Foto Baru'}
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleOpeningImageUpload(e.target.files[0])} disabled={openingUploading} />
-                                </label>
-                            </div>
+                                )
+                            ) : (
+                                <div className="border-2 border-dashed border-gray-200 hover:border-[#E5654B] rounded-2xl p-8 text-center transition-colors cursor-pointer bg-gray-50/50 hover:bg-orange-50/20 relative group">
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="absolute inset-0 opacity-0 cursor-pointer" 
+                                        disabled={uploadingFile}
+                                        onChange={(e) => handleLibraryUpload(e.target.files[0])}
+                                    />
+                                    
+                                    {uploadingFile ? (
+                                        <div className="py-6 space-y-3">
+                                            <div className="w-10 h-10 border-4 border-orange-200 border-t-[#E5654B] rounded-full animate-spin mx-auto" />
+                                            <p className="text-xs text-gray-500 font-medium">Mengunggah dan mengoptimalkan gambar...</p>
+                                        </div>
+                                    ) : (
+                                        <div className="py-4 space-y-2">
+                                            <div className="w-12 h-12 bg-orange-100 text-[#E5654B] rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75Z" /></svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-semibold text-gray-700">Tarik dan lepas gambar Anda di sini</p>
+                                                <p className="text-[10px] text-gray-400 mt-0.5">Atau klik untuk memilih file dari perangkat (Maks. 10MB)</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Footer */}
                         <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-2">
                             <button
-                                onClick={() => setIsOpeningModalOpen(false)}
+                                onClick={() => setIsPickerOpen(false)}
                                 className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-semibold transition-colors"
                             >
-                                Batal
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    await saveOpening();
-                                    setIsOpeningModalOpen(false);
-                                }}
-                                disabled={openingSaving || openingUploading}
-                                className="px-4 py-2 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl text-xs font-semibold hover:shadow-md disabled:opacity-50 transition-all"
-                            >
-                                {openingSaving ? 'Menyimpan...' : 'Simpan Foto'}
+                                Tutup
                             </button>
                         </div>
                     </div>

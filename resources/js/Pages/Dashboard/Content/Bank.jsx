@@ -1,5 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import { Trash2 } from 'lucide-react';
 
 const emptyAccount = { bank_name: '', account_name: '', account_number: '' };
 
@@ -61,7 +62,10 @@ export default function Bank({ bankAccounts }) {
                                 </h4>
                                 {data.accounts.length > 1 && (
                                     <button type="button" onClick={() => removeAccount(index)}
-                                        className="text-red-400 hover:text-red-600 text-sm">✕ Hapus</button>
+                                        className="text-red-400 hover:text-red-600 text-xs font-bold flex items-center gap-1 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors">
+                                        <Trash2 size={12} />
+                                        <span>Hapus</span>
+                                    </button>
                                 )}
                             </div>
 

@@ -1,0 +1,452 @@
+function CyberpunkFull({ card }) {
+    const canvasRef = useRef(null);
+    const audioCtxRef = useRef(null);
+    const ambientHumRef = useRef(null);
+    const holdIntervalRef = useRef(null);
+    const scanOscRef = useRef(null);
+    const scanGainRef = useRef(null);
+
+    const [decryptProgress, setDecryptProgress] = useState(0);
+    const [gameStage, setGameStage] = useState('cover'); // 'cover' | 'decrypted'
+    const [isMuted, setIsMuted] = useState(true);
+    const [displayText, setDisplayText] = useState('');
+    const [typingDone, setTypingDone] = useState(false);
+    const [activePhoto, setActivePhoto] = useState(null);
+    const [laserY, setLaserY] = useState(0);
+
+    const mainMessage = card.messages?.[0] || 'DECRYPTION COMPLETE. Accessing high-priority birthday greetings. May your next cycle be full of high-tech adventures and positive energy!';
+
+    // Sound Synthesis (Web Audio API)
+    const initAudio = () => {
+        if (!audioCtxRef.current) {
+            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+            audioCtxRef.current.resume();
+        }
+        return audioCtxRef.current;
+    };
+
+    const startAmbientHum = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.value = 55; // Low A hum
+            
+            filter.type = 'lowpass';
+            filter.frequency.value = 120;
+            
+            gain.gain.value = 0.05;
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            ambientHumRef.current = { osc, gain };
+        } catch(e){}
+    };
+
+    const stopAmbientHum = () => {
+        if (ambientHumRef.current) {
+            try {
+                ambientHumRef.current.osc.stop();
+            } catch(e){}
+            ambientHumRef.current = null;
+        }
+    };
+
+    const playSuccessChime = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(880, now); // A5
+            osc1.frequency.exponentialRampToValueAtTime(1760, now + 0.4); // A6
+            
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(440, now); // A4
+            osc2.frequency.exponentialRampToValueAtTime(1320, now + 0.45); // E6
+
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc1.start(now);
+            osc1.stop(now + 0.8);
+            osc2.start(now);
+            osc2.stop(now + 0.8);
+        } catch(e){}
+    };
+
+    const startScanSynth = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.value = 100;
+            gain.gain.value = 0.02;
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            
+            scanOscRef.current = osc;
+            scanGainRef.current = gain;
+        } catch(e){}
+    };
+
+    const updateScanSynth = (prog) => {
+        if (scanOscRef.current && scanGainRef.current) {
+            const ctx = initAudio();
+            const freq = 100 + (prog * 6); // Sweep from 100Hz up to 700Hz
+            scanOscRef.current.frequency.setValueAtTime(freq, ctx.currentTime);
+            scanGainRef.current.gain.setValueAtTime(0.02 + (prog * 0.0006), ctx.currentTime);
+        }
+    };
+
+    const stopScanSynth = () => {
+        if (scanOscRef.current) {
+            try {
+                scanOscRef.current.stop();
+            } catch(e){}
+            scanOscRef.current = null;
+        }
+        scanGainRef.current = null;
+    };
+
+    // Scan Hold interaction
+    const handleScanStart = (e) => {
+        e.preventDefault();
+        initAudio();
+        startScanSynth();
+        
+        if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+        let curProg = 0;
+        
+        holdIntervalRef.current = setInterval(() => {
+            curProg += 4;
+            if (curProg >= 100) {
+                curProg = 100;
+                setDecryptProgress(100);
+                clearInterval(holdIntervalRef.current);
+                stopScanSynth();
+                playSuccessChime();
+                setTimeout(() => {
+                    setGameStage('decrypted');
+                    startAmbientHum();
+                }, 500);
+            } else {
+                setDecryptProgress(curProg);
+                updateScanSynth(curProg);
+            }
+        }, 60);
+    };
+
+    const handleScanEnd = () => {
+        if (holdIntervalRef.current) {
+            clearInterval(holdIntervalRef.current);
+            holdIntervalRef.current = null;
+        }
+        stopScanSynth();
+        setDecryptProgress(0);
+    };
+
+    const handleMuteToggle = () => {
+        const nextMute = !isMuted;
+        setIsMuted(nextMute);
+        if (!nextMute) {
+            initAudio();
+            if (gameStage === 'decrypted') {
+                startAmbientHum();
+            }
+        } else {
+            stopAmbientHum();
+            stopScanSynth();
+        }
+    };
+
+    // Cyber Node Grid Canvas
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+
+        const handleResize = () => {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+
+        const nodes = Array.from({ length: 45 }, () => ({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() - 0.5) * 1.5,
+            r: Math.random() * 2 + 1
+        }));
+
+        let mouse = { x: null, y: null };
+        const handleMouseMove = (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        };
+        const handleMouseLeave = () => {
+            mouse.x = null;
+            mouse.y = null;
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseleave', handleMouseLeave);
+
+        const loop = () => {
+            ctx.fillStyle = '#030712';
+            ctx.fillRect(0, 0, W, H);
+
+            // Draw grid lines (subtle background grid)
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.04)';
+            ctx.lineWidth = 1;
+            const gridSz = 40;
+            for (let x = 0; x < W; x += gridSz) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+            }
+            for (let y = 0; y < H; y += gridSz) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+            }
+
+            // Draw nodes
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
+            nodes.forEach(n => {
+                n.x += n.vx;
+                n.y += n.vy;
+                if (n.x < 0 || n.x > W) n.vx *= -1;
+                if (n.y < 0 || n.y > H) n.vy *= -1;
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw connection lines
+            ctx.lineWidth = 0.8;
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+                    if (dist < 100) {
+                        ctx.strokeStyle = 'rgba(6, 182, 212, ' + (1 - dist / 100) * 0.15 + ')';
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[i].x, nodes[i].y);
+                        ctx.lineTo(nodes[j].x, nodes[j].y);
+                        ctx.stroke();
+                    }
+                }
+
+                // Connect to mouse
+                if (mouse.x !== null) {
+                    const distMouse = Math.hypot(nodes[i].x - mouse.x, nodes[i].y - mouse.y);
+                    if (distMouse < 140) {
+                        ctx.strokeStyle = 'rgba(236, 72, 153, ' + (1 - distMouse / 140) * 0.35 + ')';
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[i].x, nodes[i].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            animId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        return () => {
+            cancelAnimationFrame(animId);
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseleave', handleMouseLeave);
+        };
+    }, []);
+
+    // Laser scan sweep line (cover animation)
+    useEffect(() => {
+        if (gameStage !== 'cover') return;
+        let dir = 1;
+        let y = 0;
+        const intv = setInterval(() => {
+            y += dir * 2.5;
+            if (y > 100 || y < 0) dir *= -1;
+            setLaserY(y);
+        }, 30);
+        return () => clearInterval(intv);
+    }, [gameStage]);
+
+    // Typewriter message
+    useEffect(() => {
+        if (gameStage !== 'decrypted') return;
+        let idx = 0;
+        setDisplayText('');
+        setTypingDone(false);
+        const interval = setInterval(() => {
+            if (idx < mainMessage.length) {
+                setDisplayText(prev => prev + mainMessage.charAt(idx));
+                idx++;
+            } else {
+                clearInterval(interval);
+                setTypingDone(true);
+            }
+        }, 35);
+        return () => clearInterval(interval);
+    }, [gameStage]);
+
+    return (
+        <div className="fixed inset-0 overflow-hidden flex flex-col items-center justify-center p-4 bg-[#030712] text-cyan-400 select-none">
+            {/* Cyberpunk canvas background grid */}
+            <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }} />
+
+            {/* Mute Button */}
+            <button 
+                onClick={handleMuteToggle} 
+                style={{
+                    position: 'absolute', top: '15px', right: '15px', zIndex: 60,
+                    border: '1px solid rgba(6, 182, 212, 0.4)', background: 'rgba(6, 182, 212, 0.1)',
+                    color: '#22d3ee', padding: '0.4rem 0.8rem', fontFamily: 'monospace',
+                    fontSize: '0.7rem', cursor: 'pointer', borderRadius: '4px', textShadow: '0 0 5px #06b6d4'
+                }}
+            >
+                {isMuted ? 'UNMUTE AUDIO' : 'MUTE AUDIO'}
+            </button>
+
+            {/* DECRYPT SCANNER LAYER */}
+            {gameStage === 'cover' && (
+                <div className="relative flex flex-col items-center justify-center text-center p-6 border border-cyan-500/30 bg-slate-950/85 backdrop-blur-md rounded-2xl max-w-sm w-full z-10"
+                    style={{ boxShadow: '0 0 35px rgba(6,182,212,0.15)' }}>
+                    
+                    {/* Laser line overlay inside the box */}
+                    <div style={{
+                        position: 'absolute', left: 0, right: 0, height: '2px',
+                        background: '#ec4899', boxShadow: '0 0 10px #ec4899',
+                        top: `${laserY}%`, pointerEvents: 'none', transition: 'top 0.05s linear'
+                    }} />
+
+                    <h1 className="text-2xl font-bold tracking-widest text-cyan-300 mb-2" style={{ fontFamily: 'monospace', textShadow: '0 0 8px #06b6d4' }}>
+                        SECURE TERMINAL
+                    </h1>
+                    <p style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: 'rgba(34, 211, 238, 0.6)', marginBottom: '2rem' }}>
+                        HOLD SCANNER FOR BIOMETRIC ACCESS
+                    </p>
+
+                    {/* Fingerprint scan trigger */}
+                    <div className="relative w-28 h-28 rounded-full border-2 border-cyan-500/40 bg-[#070e22] flex items-center justify-center cursor-pointer select-none active:scale-95 transition-transform"
+                        onMouseDown={handleScanStart}
+                        onMouseUp={handleScanEnd}
+                        onMouseLeave={handleScanEnd}
+                        onTouchStart={handleScanStart}
+                        onTouchEnd={handleScanEnd}
+                        style={{
+                            boxShadow: decryptProgress > 0 ? '0 0 25px rgba(236,72,153,0.5)' : 'none',
+                            borderColor: decryptProgress > 0 ? '#ec4899' : 'rgba(6, 182, 212, 0.4)'
+                        }}
+                    >
+                        <div className="text-5xl" style={{ opacity: decryptProgress > 0 ? 1.0 : 0.5 }}>
+                            👤
+                        </div>
+                        {/* Ring progress border */}
+                        {decryptProgress > 0 && (
+                            <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                                <circle cx="56" cy="56" r="52" fill="transparent" stroke="#ec4899" strokeWidth="4"
+                                    strokeDasharray={2 * Math.PI * 52}
+                                    strokeDashoffset={2 * Math.PI * 52 * (1 - decryptProgress / 100)}
+                                />
+                            </svg>
+                        )}
+                    </div>
+
+                    <div className="mt-6 w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-cyan-500/20">
+                        <div className="bg-pink-500 h-full transition-all duration-75" style={{ width: `${decryptProgress}%` }} />
+                    </div>
+
+                    <div className="mt-2 text-xs font-mono text-cyan-300">
+                        DECRYPTING: {decryptProgress}%
+                    </div>
+                </div>
+            )}
+
+            {/* DECRYPTED REVEALED WRAPPER */}
+            {gameStage === 'decrypted' && (
+                <div className="relative z-10 max-w-md w-full flex flex-col items-center justify-center bg-slate-950/90 border border-cyan-500/40 backdrop-blur-lg rounded-2xl p-6 overflow-y-auto max-h-[90vh]"
+                    style={{ boxShadow: '0 0 45px rgba(6,182,212,0.25)' }}>
+                    
+                    <div className="text-center w-full mb-4">
+                        <div className="inline-block px-3 py-1 bg-pink-500/20 border border-pink-500 text-pink-300 font-bold text-xs rounded mb-2" style={{ fontFamily: 'monospace' }}>
+                            [ ACCESS GRANTED ]
+                        </div>
+                        <h2 className="text-2xl font-black text-cyan-300" style={{ fontFamily: 'monospace', textShadow: '0 0 10px rgba(6,182,212,0.5)' }}>
+                            {card.title}
+                        </h2>
+                        <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(34, 211, 238, 0.7)', marginTop: '4px' }}>
+                            RECIPIENT_ID: {card.recipient_name}
+                        </p>
+                    </div>
+
+                    {/* Digital Glitched Photo gallery */}
+                    {card.photos && card.photos.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-4 my-4">
+                            {card.photos.map((p, idx) => (
+                                <div key={idx} 
+                                    onClick={() => setActivePhoto(p)}
+                                    className="p-1 border border-cyan-500/30 rounded bg-slate-900 cursor-pointer overflow-hidden transform hover:scale-105 transition-transform"
+                                    style={{ width: '110px' }}
+                                >
+                                    <div className="relative">
+                                        <img src={p} alt="Secure content capture" className="w-full h-24 object-cover rounded" />
+                                        <div className="absolute inset-0 bg-cyan-500/10 pointer-events-none mix-blend-overlay" />
+                                    </div>
+                                    <div className="text-[0.55rem] font-mono text-center text-cyan-500/60 mt-1">FRAME_DATA_0{idx+1}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Console Typewriter */}
+                    <div className="w-full p-4 bg-[#020617] border border-cyan-500/30 rounded-xl font-mono text-xs leading-relaxed text-cyan-300 min-h-[120px] shadow-inner"
+                        style={{ borderLeft: '3px solid #ec4899' }}>
+                        <span style={{ color: '#ec4899', marginRight: '5px' }}>$</span>
+                        {displayText}
+                        {!typingDone && <span className="animate-ping">|</span>}
+                    </div>
+
+                    {/* Sign-off */}
+                    <div className="mt-5 text-right w-full font-mono text-xs text-pink-400">
+                        // SENDER_SIGN: {card.sender_name}
+                    </div>
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL */}
+            {activePhoto && (
+                <div onClick={() => setActivePhoto(null)} className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
+                    <div onClick={(e)=>e.stopPropagation()} className="relative max-w-lg w-full bg-slate-950 p-2 border border-cyan-500/50 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.4)]">
+                        <button onClick={() => setActivePhoto(null)} className="absolute -top-10 right-0 text-cyan-400 font-mono text-sm border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 rounded">CLOSE [X]</button>
+                        <img src={activePhoto} alt="Decrypted capture" className="w-full h-auto rounded-lg max-h-[80vh] object-contain" />
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

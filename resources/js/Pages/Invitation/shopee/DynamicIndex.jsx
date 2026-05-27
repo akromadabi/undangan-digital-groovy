@@ -26,8 +26,13 @@ function formatTime(t) {
     return String(t).substring(0, 5);
 }
 
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
+
 function getStorageUrl(url, fallback = '') {
     if (!url) return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
     let cleanUrl = url.replace(/\\/g, '/');
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
     if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
@@ -270,7 +275,16 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGu
 
     return (
         <div className={`sp-cover${isOpened ? ' is-opened' : ''}`}>
-            {heroImg && <div className="sp-cover-bg" style={{ backgroundImage: `url(${heroImg})` }} />}
+            {invitation?.cover_image && (
+                <PremiumSlideshow
+                    images={invitation.cover_image.split(',')}
+                    positionX={invitation?.cover_position_x}
+                    positionY={invitation?.cover_position_y}
+                    zoom={invitation?.cover_zoom}
+                    className="sp-cover-bg"
+                    imgClassName="absolute inset-0 w-full h-full object-cover"
+                />
+            )}
             <div className="sp-cover-gradient" />
             
             <div className="sp-cover-body">
@@ -713,9 +727,16 @@ function LiveTab({ invitation, events }) {
     return (
         <div className="sp-live-tab">
             {/* Simulated Live Stream Player */}
-            <div className="sp-live-player-box">
-                {heroImg ? (
-                    <img src={heroImg} alt="Live Stream" className="sp-live-stream-img" />
+            <div className="sp-live-player-box relative overflow-hidden">
+                {invitation?.opening_image || invitation?.cover_image ? (
+                    <PremiumSlideshow
+                        images={invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : [])}
+                        positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
+                        positionY={invitation?.opening_position_y ?? invitation?.cover_position_y}
+                        zoom={invitation?.opening_zoom ?? invitation?.cover_zoom}
+                        className="absolute inset-0 w-full h-full z-0"
+                        imgClassName="absolute inset-0 w-full h-full object-cover"
+                    />
                 ) : (
                     <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%', background: '#111' }}>Live Frame</div>
                 )}

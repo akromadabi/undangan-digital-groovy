@@ -104,6 +104,7 @@ class ThemeSettingsController extends Controller
             'currentTheme' => $invitation?->theme,
             'themes' => $themes,
             'sections' => $sections,
+            'mediaAssets' => $invitation ? $invitation->mediaAssets()->latest()->get() : [],
             'previewData' => $this->getPreviewData($invitation),
             'centralHost' => $centralHost,
         ]);

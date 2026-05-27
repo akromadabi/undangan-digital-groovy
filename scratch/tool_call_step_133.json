@@ -1,0 +1,8 @@
+{
+  "Description": "\"Register cosmicdrift template in the model's $templates array so it appears in form selectors and controller validation.\"",
+  "Instruction": "\"Add cosmicdrift to $templates array\"",
+  "ReplacementChunks": "[{\"AllowMultiple\":false,\"EndLine\":43,\"ReplacementContent\":\"    // Template labels\\n    public static array $templates = [\\n        'stillwithyou' => 'Still With You 💗',\\n        'giftforanita'  => 'Gift For Anita 🎁',\\n        'oceanbreeze'   => 'Ocean Breeze 🌊',\\n        'cosmicdrift'   => 'Cosmic Drift 🌌',\\n    ];\",\"StartLine\":38,\"TargetContent\":\"    // Template labels\\n    public static array $templates = [\\n        'stillwithyou' => 'Still With You 💗',\\n        'giftforanita'  => 'Gift For Anita 🎁',\\n        'oceanbreeze'   => 'Ocean Breeze 🌊',\\n    ];\"}]",
+  "TargetFile": "\"c:\\\\laragon\\\\www\\\\Undangan Digital\\\\app\\\\Models\\\\GreetingCard.php\"",
+  "toolAction": "\"Add cosmicdrift to Model templates\"",
+  "toolSummary": "\"Edit GreetingCard model\""
+}

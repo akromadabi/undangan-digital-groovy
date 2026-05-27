@@ -57,8 +57,13 @@ function parseEventDate(dateString) {
     return { dayNum, dayName, monthName, year };
 }
 
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
+
 function getStorageUrl(url, fallback) {
     if (!url) return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
     let cleanUrl = url.replace(/\\/g, '/');
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
     if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
@@ -185,7 +190,16 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 
     return (
         <div className={`lx2-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'lx2-no-photo-mode' : ''}`}>
-            {globalShowPhotos && <div className="lx2-cover__bg" style={{ backgroundImage: `url(${coverBg})` }} />}
+            {globalShowPhotos && (
+                <PremiumSlideshow
+                    images={invitation?.cover_image ? invitation.cover_image.split(',') : [ASSETS.cover]}
+                    positionX={invitation?.cover_position_x}
+                    positionY={invitation?.cover_position_y}
+                    zoom={invitation?.cover_zoom}
+                    className="lx2-cover__bg"
+                    imgClassName="absolute inset-0 w-full h-full object-cover"
+                />
+            )}
             <div className="lx2-cover__overlay" />
             <div className="lx2-cover__content">
                 {/* Circular Text Path Logo */}
@@ -386,8 +400,13 @@ function OpeningSection({ invitation, brideGrooms }) {
                 )}
                 
                 {invitation.opening_image && (
-                    <div className="lx2-opening__photo-wrapper" style={{ margin: '30px auto', maxWidth: '320px', borderRadius: '16px', overflow: 'hidden', border: '4px solid #fff', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
-                        <img src={getStorageUrl(invitation.opening_image)} alt="Opening" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+                    <div className="lx2-opening__photo-wrapper relative aspect-[4/3]" style={{ margin: '30px auto', maxWidth: '320px', borderRadius: '16px', overflow: 'hidden', border: '4px solid #fff', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
+                        <PremiumSlideshow
+                            images={invitation.opening_image.split(',')}
+                            positionX={invitation.opening_position_x}
+                            positionY={invitation.opening_position_y}
+                            zoom={invitation.opening_zoom}
+                        />
                     </div>
                 )}
                 
@@ -471,7 +490,15 @@ function BrideGroomSection({ brideGrooms }) {
             <Reveal className="lx2-mempelai-card" variant="left">
                 {globalShowPhotos && groom.photo && (
                     <div className="lx2-mempelai-photo-wrap">
-                        <img src={groomPhoto} alt={groom.full_name || 'Groom'} className="lx2-mempelai-photo" />
+                        <img 
+                            src={groomPhoto} 
+                            alt={groom.full_name || 'Groom'} 
+                            className="lx2-mempelai-photo" 
+                            style={{
+                                objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                            }}
+                        />
                     </div>
                 )}
                 <div className="lx2-mempelai-details">
@@ -506,7 +533,15 @@ function BrideGroomSection({ brideGrooms }) {
             <Reveal className="lx2-mempelai-card" variant="right">
                 {globalShowPhotos && bride.photo && (
                     <div className="lx2-mempelai-photo-wrap">
-                        <img src={bridePhoto} alt={bride.full_name || 'Bride'} className="lx2-mempelai-photo" />
+                        <img 
+                            src={bridePhoto} 
+                            alt={bride.full_name || 'Bride'} 
+                            className="lx2-mempelai-photo" 
+                            style={{
+                                objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                            }}
+                        />
                     </div>
                 )}
                 <div className="lx2-mempelai-details">

@@ -19,7 +19,13 @@ class Invitation extends Model
         'closing_title',
         'closing_text',
         'cover_image',
+        'cover_position_x',
+        'cover_position_y',
+        'cover_zoom',
         'opening_image',
+        'opening_position_x',
+        'opening_position_y',
+        'opening_zoom',
         'cover_title',
         'cover_subtitle',
         'layout_mode',
@@ -142,6 +148,11 @@ class Invitation extends Model
     public function whatsappLogs()
     {
         return $this->hasMany(WhatsappLog::class);
+    }
+
+    public function mediaAssets()
+    {
+        return $this->hasMany(MediaAsset::class);
     }
 
     // ── Helpers ──

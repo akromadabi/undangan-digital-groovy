@@ -1,0 +1,857 @@
+function CosmicDriftFull({ card }) {
+    const starsRef      = useRef(null);
+    const nebulaRef     = useRef(null);
+    const constRef      = useRef(null);
+    const audioCtxRef   = useRef(null);
+    const masterGainRef = useRef(null);
+
+    const [opened, setOpened]                 = useState(false);
+    const [isPlaying, setIsPlaying]           = useState(false);
+    const [warpActive, setWarpActive]         = useState(false);
+    const [contentVisible, setContentVisible] = useState(false);
+    const [bubbles, setBubbles]               = useState([]);
+    const [coords, setCoords]                 = useState('03°22\'14"S  116°44\'09"E  ALT: 408KM');
+    const [activePhoto, setActivePhoto]       = useState(null);
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+
+    const typeGreeting = {
+        anniversary: 'Selamat Aniversari',
+        birthday:    'Selamat Ulang Tahun',
+        graduation:  'Selamat Wisuda',
+        wedding:     'Selamat Menikah',
+    };
+
+    // Dynamically compile user wishes for the floating bubbles
+    const floatMessages = useMemo(() => {
+        let msgs = [];
+        if (card.messages && card.messages.length > 0) {
+            card.messages.forEach(m => {
+                if (!m) return;
+                // Split by major punctuation to get beautiful short chunks
+                const parts = m.split(/[.\n;!]+/).map(p => p.trim()).filter(p => p.length > 3 && p.length < 50);
+                if (parts.length > 0) {
+                    msgs.push(...parts);
+                } else {
+                    if (m.length < 50) msgs.push(m);
+                }
+            });
+        }
+        
+        // Also add the primary wish strings in the mix
+        msgs.push(
+            `Selamat ${card.type_label || 'Hari Spesial'} ✨`,
+            `Untuk ${card.recipient_name} tercinta ❤️`,
+            `Dari ${card.sender_name} ✨`
+        );
+        
+        return [...new Set(msgs)];
+    }, [card.messages, card.recipient_name, card.sender_name, card.type_label]);
+
+    // ── Stars canvas (Perspective 3D & Radial Warp Speed & Stardust Trail) ──
+    useEffect(() => {
+        if (!opened) return;
+        const canvas = starsRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+        let W = canvas.width  = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+        const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; };
+        window.addEventListener('resize', onResize);
+
+        // 3D Star fields
+        const numStars = 220;
+        const stars = Array.from({ length: numStars }, () => ({
+            x: Math.random() * W - W / 2,
+            y: Math.random() * H - H / 2,
+            z: Math.random() * W,
+            size: Math.random() * 1.5 + 0.4,
+            hue: [195, 205, 220, 260, 45][Math.floor(Math.random() * 5)],
+            brightness: 0.5 + Math.random() * 0.5,
+        }));
+
+        let mouseX = W / 2, mouseY = H / 2;
+        const dustParticles = [];
+
+        const onMouse = (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            // Emit stardust
+            dustParticles.push({
+                x: mouseX,
+                y: mouseY,
+                vx: (Math.random() - 0.5) * 1.6,
+                vy: (Math.random() - 0.5) * 1.6 - 0.6,
+                alpha: 1.0,
+                decay: 0.015 + Math.random() * 0.01,
+                color: `hsla(${[190, 220, 260, 325][Math.floor(Math.random() * 4)]}, 85%, 75%, `,
+                size: Math.random() * 3 + 1.2
+            });
+            if (dustParticles.length > 60) dustParticles.shift();
+        };
+        window.addEventListener('mousemove', onMouse);
+
+        const shootingStars = [];
+        const handleClick = (e) => {
+            if (e.target.closest('button,input,textarea,a,img')) return;
+            const rect = canvas.getBoundingClientRect();
+            shootingStars.push({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+                vx: Math.cos(-Math.PI / 6) * (9 + Math.random() * 6),
+                vy: Math.sin(-Math.PI / 6) * (9 + Math.random() * 6),
+                life: 1,
+                decay: 0.02 + Math.random() * 0.012,
+                tail: [],
+            });
+        };
+        canvas.addEventListener('click', handleClick);
+
+        let currentSpeed = warpActive ? 32 : 0.45;
+
+        const draw = () => {
+            animId = requestAnimationFrame(draw);
+            
+            // Motion blur during warp speed, normal space color otherwise
+            ctx.fillStyle = warpActive ? 'rgba(2, 8, 23, 0.16)' : '#020817';
+            ctx.fillRect(0, 0, W, H);
+
+            // Interpolate speed smoothly
+            if (warpActive) {
+                currentSpeed += (45 - currentSpeed) * 0.08;
+            } else {
+                currentSpeed += (0.45 - currentSpeed) * 0.12;
+            }
+
+            const mx = (mouseX / W - 0.5) * 20;
+            const my = (mouseY / H - 0.5) * 20;
+
+            // Draw projected 3D stars
+            stars.forEach(s => {
+                s.z -= currentSpeed;
+                if (s.z <= 0) {
+                    s.z = W;
+                    s.x = Math.random() * W - W / 2;
+                    s.y = Math.random() * H - H / 2;
+                }
+
+                const k = 400 / s.z;
+                const px = s.x * k + W / 2 + mx * (1 - s.z / W);
+                const py = s.y * k + H / 2 + my * (1 - s.z / W);
+
+                if (px < 0 || px > W || py < 0 || py > H) return;
+
+                if (currentSpeed > 2.5) {
+                    // Warp speed lines stretching radially outward
+                    const prevK = 400 / (s.z + currentSpeed * 1.4);
+                    const ppx = s.x * prevK + W / 2 + mx * (1 - (s.z + currentSpeed * 1.4) / W);
+                    const ppy = s.y * prevK + H / 2 + my * (1 - (s.z + currentSpeed * 1.4) / W);
+
+                    ctx.beginPath();
+                    ctx.moveTo(px, py);
+                    ctx.lineTo(ppx, ppy);
+                    ctx.strokeStyle = `hsla(${s.hue}, 90%, 88%, ${s.brightness * 0.85})`;
+                    ctx.lineWidth = s.size * 1.8;
+                    ctx.stroke();
+                } else {
+                    // Normal floating twinkling stars
+                    ctx.beginPath();
+                    ctx.arc(px, py, s.size * (1 + 0.12 * Math.sin(Date.now() * 0.004 + s.z)), 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${s.hue}, 80%, 92%, ${s.brightness})`;
+                    ctx.fill();
+
+                    if (s.size > 1.2) {
+                        const g = ctx.createRadialGradient(px, py, 0, px, py, s.size * 3.5);
+                        g.addColorStop(0, `hsla(${s.hue}, 80%, 85%, ${s.brightness * 0.25})`);
+                        g.addColorStop(1, 'transparent');
+                        ctx.beginPath();
+                        ctx.arc(px, py, s.size * 3.5, 0, Math.PI * 2);
+                        ctx.fillStyle = g;
+                        ctx.fill();
+                    }
+                }
+            });
+
+            // Draw interactive stardust trail
+            for (let i = dustParticles.length - 1; i >= 0; i--) {
+                const d = dustParticles[i];
+                d.x += d.vx;
+                d.y += d.vy;
+                d.alpha -= d.decay;
+                if (d.alpha <= 0) {
+                    dustParticles.splice(i, 1);
+                    continue;
+                }
+                const g = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.size * 2.8);
+                g.addColorStop(0, d.color + d.alpha * 0.35 + ')');
+                g.addColorStop(1, 'transparent');
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.size * 2.8, 0, Math.PI * 2);
+                ctx.fillStyle = g;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.size * 0.8, 0, Math.PI * 2);
+                ctx.fillStyle = d.color + d.alpha + ')';
+                ctx.fill();
+            }
+
+            // Shooting stars
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                const ss = shootingStars[i];
+                ss.tail.push({ x: ss.x, y: ss.y });
+                if (ss.tail.length > 14) ss.tail.shift();
+                ss.x += ss.vx; ss.y += ss.vy; ss.life -= ss.decay;
+                if (ss.life <= 0) { shootingStars.splice(i, 1); continue; }
+                for (let j = 0; j < ss.tail.length - 1; j++) {
+                    const a = (j / ss.tail.length) * ss.life * 0.6;
+                    ctx.beginPath();
+                    ctx.moveTo(ss.tail[j].x, ss.tail[j].y);
+                    ctx.lineTo(ss.tail[j+1].x, ss.tail[j+1].y);
+                    ctx.strokeStyle = `rgba(255,255,255,${a})`;
+                    ctx.lineWidth = a * 1.8; ctx.stroke();
+                }
+                ctx.beginPath(); ctx.arc(ss.x, ss.y, 1.2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,255,255,${ss.life})`; ctx.fill();
+            }
+        };
+        draw();
+
+        // Spawn periodic shooting star
+        let sTimer = setTimeout(function spawn() {
+            if (currentSpeed < 2) {
+                shootingStars.push({
+                    x: Math.random() * W * 0.7,
+                    y: Math.random() * H * 0.4,
+                    vx: Math.cos(-Math.PI / 6) * (9 + Math.random() * 5),
+                    vy: Math.sin(-Math.PI / 6) * (9 + Math.random() * 5),
+                    life: 1, decay: 0.018 + Math.random() * 0.01, tail: [],
+                });
+            }
+            sTimer = setTimeout(spawn, 8000 + Math.random() * 7000);
+        }, 8000);
+
+        return () => {
+            cancelAnimationFrame(animId);
+            clearTimeout(sTimer);
+            canvas.removeEventListener('click', handleClick);
+            window.removeEventListener('mousemove', onMouse);
+            window.removeEventListener('resize', onResize);
+        };
+    }, [opened, warpActive]);
+
+    // ── Nebula canvas ──
+    useEffect(() => {
+        if (!opened) return;
+        const canvas = nebulaRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+        let W = canvas.width  = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+        const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; };
+        window.addEventListener('resize', onResize);
+
+        const blobs = [
+            { cx: W*0.3, cy: H*0.3, rx: W*0.55, ry: H*0.55, hue: 220, alpha: 0.12, t: 0, speed: 0.0003 },
+            { cx: W*0.7, cy: H*0.6, rx: W*0.5,  ry: H*0.5,  hue: 270, alpha: 0.09, t: 1, speed: 0.0004 },
+            { cx: W*0.5, cy: H*0.5, rx: W*0.65, ry: H*0.65, hue: 200, alpha: 0.07, t: 2, speed: 0.0002 },
+            { cx: W*0.2, cy: H*0.7, rx: W*0.35, ry: H*0.35, hue: 310, alpha: 0.06, t: 3, speed: 0.0005 },
+        ];
+
+        const draw = () => {
+            animId = requestAnimationFrame(draw);
+            ctx.clearRect(0, 0, W, H);
+            blobs.forEach(b => {
+                b.t += b.speed;
+                const wobble = Math.sin(b.t) * 0.1;
+                const rx = b.rx * (1 + wobble);
+                const ry = b.ry * (1 - wobble * 0.5);
+                const g = ctx.createRadialGradient(b.cx, b.cy, 0, b.cx, b.cy, Math.max(rx, ry));
+                g.addColorStop(0,   `hsla(${b.hue},80%,50%,${b.alpha})`);
+                g.addColorStop(0.4, `hsla(${b.hue+20},70%,35%,${b.alpha*0.5})`);
+                g.addColorStop(1,   'transparent');
+                ctx.save();
+                ctx.translate(b.cx, b.cy);
+                ctx.scale(rx / Math.max(rx,ry), ry / Math.max(rx,ry));
+                ctx.beginPath(); ctx.arc(0, 0, Math.max(rx,ry), 0, Math.PI*2);
+                ctx.fillStyle = g; ctx.fill();
+                ctx.restore();
+            });
+        };
+        draw();
+
+        return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', onResize); };
+    }, [opened]);
+
+    // ── Constellation canvas ──
+    useEffect(() => {
+        if (!opened || !contentVisible) return;
+        const canvas = constRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+        let W = canvas.width  = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+        const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; };
+        window.addEventListener('resize', onResize);
+
+        const pattern = [[0.38,0.35],[0.44,0.29],[0.50,0.27],[0.56,0.29],[0.62,0.35],[0.50,0.48],[0.38,0.35],[0.50,0.48],[0.62,0.35]];
+        const nodes   = pattern.map(([rx,ry]) => ({ x: rx*W, y: ry*H }));
+        const lines   = nodes.slice(1).map((_, i) => ({ from: i, to: i+1, progress: 0 }));
+        let totalProg = 0;
+
+        const draw = () => {
+            animId = requestAnimationFrame(draw);
+            if (totalProg < 1) totalProg = Math.min(1, totalProg + 0.004);
+            ctx.clearRect(0, 0, W, H);
+
+            lines.forEach((line, i) => {
+                const startAt = i / lines.length;
+                const endAt   = (i+1) / lines.length;
+                if (totalProg < startAt) return;
+                line.progress = Math.min(1, (totalProg - startAt) / (endAt - startAt));
+
+                const a = nodes[line.from], b = nodes[line.to];
+                const ex = a.x + (b.x - a.x) * line.progress;
+                const ey = a.y + (b.y - a.y) * line.progress;
+                ctx.save();
+                ctx.strokeStyle = 'rgba(96,165,250,0.35)';
+                ctx.lineWidth = 1.2;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = 'rgba(96,165,250,0.6)';
+                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(ex, ey); ctx.stroke();
+                ctx.restore();
+            });
+
+            nodes.forEach((n, i) => {
+                const prog = i === 0 ? 1 : (lines[i-1]?.progress ?? 0);
+                if (prog <= 0) return;
+                ctx.beginPath(); ctx.arc(n.x, n.y, 3, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(96,165,250,0.8)';
+                ctx.shadowBlur = 12; ctx.shadowColor = 'rgba(96,165,250,1)';
+                ctx.fill();
+            });
+        };
+        draw();
+
+        return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', onResize); };
+    }, [opened, contentVisible]);
+
+    // ── Floating wishes bubbles (Spawning a lot, flying all over the screen) ──
+    useEffect(() => {
+        if (!opened || !contentVisible) return;
+        let idx = 0;
+        const spawn = () => {
+            if (floatMessages.length === 0) return;
+            const msg = floatMessages[idx % floatMessages.length];
+            idx++;
+            const id  = Math.random().toString(36).slice(2);
+            const dur = 9 + Math.random() * 5; // Float duration 9s - 14s
+            setBubbles(prev => [...prev, {
+                id, msg,
+                left: `${3 + Math.random() * 92}%`, // Scatter completely across full screen width
+                bottom: `-12vh`, // Start below the viewport
+                dur,
+                scale: 0.82 + Math.random() * 0.4,
+                drift: (Math.random() - 0.5) * 80
+            }]);
+            setTimeout(() => setBubbles(prev => prev.filter(b => b.id !== id)), dur * 1000 + 500);
+        };
+
+        // Stagger spawn initial batch of messages (14 bubbles)
+        for (let i = 0; i < 14; i++) {
+            setTimeout(spawn, i * 350);
+        }
+
+        // Spawn a new bubble quickly (every 750ms) to create a rich stardust stream
+        const intv = setInterval(spawn, 750);
+        return () => clearInterval(intv);
+    }, [opened, contentVisible, floatMessages]);
+
+    // ── Rotating alternating photos timer ──
+    useEffect(() => {
+        if (!opened || !contentVisible || !card.photos || card.photos.length === 0) return;
+        const interval = setInterval(() => {
+            setCurrentPhotoIndex(prev => (prev + 1) % card.photos.length);
+        }, 6200); // Shift photo every 6.2s
+        return () => clearInterval(interval);
+    }, [opened, contentVisible, card.photos]);
+
+    // ── Live coordinates ticker ──
+    useEffect(() => {
+        let tick = 0;
+        const intv = setInterval(() => {
+            tick++;
+            setCoords(`03°22'${14 + (tick%6)}"S  116°44'${9 + (tick%9)}"E  ALT: ${408 + (tick%3)}KM`);
+        }, 1800);
+        return () => clearInterval(intv);
+    }, []);
+
+    // ── Web Audio ambient (with Warp Sweep Sound Effect) ──
+    const startAudio = (withWarp = false) => {
+        if (!window.AudioContext && !window.webkitAudioContext) return;
+        if (audioCtxRef.current) return;
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtxRef.current = ctx;
+        const master = ctx.createGain();
+        master.gain.setValueAtTime(0, ctx.currentTime);
+        master.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 3);
+        master.connect(ctx.destination);
+        masterGainRef.current = master;
+
+        // Base celestial oscillators
+        [[55,0.16,'sine'],[82,0.09,'sine'],[110,0.05,'triangle']].forEach(([freq,g,type]) => {
+            const osc = ctx.createOscillator();
+            const gn  = ctx.createGain();
+            osc.type = type; osc.frequency.value = freq; gn.gain.value = g;
+            osc.connect(gn); gn.connect(master); osc.start();
+        });
+
+        // Space pink noise
+        const bufSz = ctx.sampleRate * 4;
+        const buf   = ctx.createBuffer(1, bufSz, ctx.sampleRate);
+        const data  = buf.getChannelData(0);
+        for (let i = 0; i < bufSz; i++) data[i] = (Math.random() * 2 - 1);
+        const ns = ctx.createBufferSource();
+        ns.buffer = buf; ns.loop = true;
+        const bpf = ctx.createBiquadFilter();
+        bpf.type = 'bandpass'; bpf.frequency.value = 220; bpf.Q.value = 0.4;
+        const ng = ctx.createGain(); ng.gain.value = 0.06;
+        ns.connect(bpf); bpf.connect(ng); ng.connect(master); ns.start();
+
+        // Warp sound sweep
+        if (withWarp) {
+            const warpOsc = ctx.createOscillator();
+            const warpGain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+            
+            warpOsc.type = 'sawtooth';
+            filter.type = 'lowpass';
+            
+            filter.frequency.setValueAtTime(40, ctx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(650, ctx.currentTime + 1.3);
+            filter.frequency.exponentialRampToValueAtTime(75, ctx.currentTime + 2.3);
+
+            warpGain.gain.setValueAtTime(0, ctx.currentTime);
+            warpGain.gain.linearRampToValueAtTime(0.38, ctx.currentTime + 0.4);
+            warpGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
+
+            warpOsc.frequency.setValueAtTime(45, ctx.currentTime);
+            warpOsc.frequency.linearRampToValueAtTime(140, ctx.currentTime + 1.6);
+
+            warpOsc.connect(filter);
+            filter.connect(warpGain);
+            warpGain.connect(master);
+            warpOsc.start(ctx.currentTime);
+            warpOsc.stop(ctx.currentTime + 2.7);
+        }
+
+        const ping = () => {
+            const po = ctx.createOscillator();
+            const pe = ctx.createGain();
+            po.type = 'sine';
+            po.frequency.value = [528,432,396,639][Math.floor(Math.random()*4)];
+            pe.gain.setValueAtTime(0, ctx.currentTime);
+            pe.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.02);
+            pe.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.5);
+            po.connect(pe); pe.connect(master); po.start(ctx.currentTime); po.stop(ctx.currentTime + 4);
+            setTimeout(ping, 10000 + Math.random() * 8000);
+        };
+        ping();
+
+        setIsPlaying(true);
+    };
+
+    const toggleAudio = () => {
+        if (!audioCtxRef.current) { startAudio(false); return; }
+        const master = masterGainRef.current;
+        if (isPlaying) {
+            master.gain.setValueAtTime(0, audioCtxRef.current.currentTime);
+            setIsPlaying(false);
+        } else {
+            master.gain.linearRampToValueAtTime(0.5, audioCtxRef.current.currentTime + 1);
+            setIsPlaying(true);
+        }
+    };
+
+    // ── Open card with Warp Transition ──
+    const handleOpen = () => {
+        try {
+            const el = document.documentElement;
+            if (el.requestFullscreen) el.requestFullscreen();
+        } catch(e) {}
+        setOpened(true);
+        setWarpActive(true);
+        startAudio(true);
+        setTimeout(() => {
+            setWarpActive(false);
+            setContentVisible(true);
+        }, 2200);
+    };
+
+    return (
+        <div style={{ position:'fixed', inset:0, background:'#020817', overflow:'hidden', userSelect:'none', cursor:'crosshair' }}>
+            {/* Canvas layers */}
+            <canvas ref={starsRef}  style={{ position:'fixed', inset:0, zIndex:1, pointerEvents:'auto' }} />
+            <canvas ref={nebulaRef} style={{ position:'fixed', inset:0, zIndex:2, pointerEvents:'none', mixBlendMode:'screen' }} />
+            <canvas ref={constRef}  style={{ position:'fixed', inset:0, zIndex:3, pointerEvents:'none' }} />
+
+            {/* HUD corners */}
+            {opened && contentVisible && (
+                <>
+                    <div style={{ position:'fixed', top:14, left:14, zIndex:40, pointerEvents:'none' }}>
+                        <div style={{ width:16, height:16, borderTop:'2px solid rgba(96,165,250,.3)', borderLeft:'2px solid rgba(96,165,250,.3)' }} />
+                        <div style={{ fontFamily:'Orbitron,monospace', fontSize:'0.45rem', letterSpacing:'2.5px', color:'rgba(96,165,250,.3)', marginTop:'0.3rem', lineHeight:1.8 }}>
+                            COSMIC DRIFT v1.2<br/>SECTOR: ANDROMEDA-7
+                        </div>
+                    </div>
+                    <div style={{ position:'fixed', top:14, right:14, zIndex:40, pointerEvents:'none', textAlign:'right' }}>
+                        <div style={{ width:16, height:16, borderTop:'2px solid rgba(96,165,250,.3)', borderRight:'2px solid rgba(96,165,250,.3)', marginLeft:'auto' }} />
+                        <div style={{ fontFamily:'Orbitron,monospace', fontSize:'0.45rem', letterSpacing:'2.5px', color:'rgba(96,165,250,.3)', marginTop:'0.3rem', lineHeight:1.8 }}>
+                            STATUS: LIVE<br/><span style={{ color:'rgba(34,211,238,.45)' }}>● SIGNAL ACQUIRED</span>
+                        </div>
+                    </div>
+                    <div style={{ position:'fixed', bottom:20, left:14, zIndex:40, pointerEvents:'none' }}>
+                        <div style={{ fontFamily:'Orbitron,monospace', fontSize:'0.42rem', letterSpacing:'2px', color:'rgba(96,165,250,.28)', lineHeight:1.8, marginBottom:'0.3rem' }}>
+                            KLIK LAYAR → BINTANG JATUH<br/>CONSTELLATION: ❤ ACTIVE
+                        </div>
+                        <div style={{ width:16, height:16, borderBottom:'2px solid rgba(96,165,250,.3)', borderLeft:'2px solid rgba(96,165,250,.3)' }} />
+                    </div>
+                    <div style={{ position:'fixed', bottom:20, right:14, zIndex:40, pointerEvents:'none', textAlign:'right' }}>
+                        <div style={{ fontFamily:'Orbitron,monospace', fontSize:'0.42rem', letterSpacing:'2px', color:'rgba(96,165,250,.28)', lineHeight:1.8, marginBottom:'0.3rem' }}>
+                            NEBULA: ONLINE<br/>{coords}
+                        </div>
+                        <div style={{ width:16, height:16, borderBottom:'2px solid rgba(96,165,250,.3)', borderRight:'2px solid rgba(96,165,250,.3)', marginLeft:'auto' }} />
+                    </div>
+                </>
+            )}
+
+            {/* Floating wishes bubbles */}
+            {opened && contentVisible && bubbles.map(b => (
+                <div 
+                    key={b.id} 
+                    style={{
+                        position:'fixed', 
+                        zIndex:20, 
+                        left:b.left, 
+                        bottom:b.bottom, 
+                        pointerEvents:'none',
+                        fontFamily:'Exo 2,sans-serif', 
+                        fontSize:'clamp(0.72rem, 2vw, 0.92rem)',
+                        fontWeight: 600,
+                        color:'rgba(255, 255, 255, 0.95)',
+                        textShadow: '0 0 10px rgba(96, 165, 250, 0.6)',
+                        maxWidth:'min(300px, 75vw)', 
+                        lineHeight:1.75,
+                        textAlign:'center', 
+                        padding:'0.65rem 1.2rem',
+                        background:'rgba(5, 13, 31, 0.68)', 
+                        border:'1px solid rgba(96, 165, 250, 0.25)',
+                        borderRadius:20, 
+                        backdropFilter:'blur(12px)',
+                        animation: `cdBubble ${b.dur}s ease-in-out forwards`,
+                        '--cd-scale': b.scale,
+                        '--cd-drift': `${b.drift}px`,
+                        '--cd-drift-half': `${b.drift / 2}px`,
+                    }}
+                >
+                    {b.msg}
+                </div>
+            ))}
+
+            {/* Alternating Shooting Star Photo Gallery */}
+            {opened && contentVisible && card.photos && card.photos.length > 0 && (
+                <div 
+                    key={currentPhotoIndex}
+                    style={{
+                        position: 'fixed',
+                        zIndex: 30,
+                        top: '50%',
+                        left: '50%',
+                        marginLeft: '-110px', // Center offset (half of width 220px)
+                        marginTop: '-135px',  // Center offset (half of height 270px)
+                        pointerEvents: 'auto',
+                        // Triggers alternating shooting star trajectories based on index!
+                        animation: `cdShootDirection${currentPhotoIndex % 4} 6.2s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
+                    }}
+                >
+                    <div 
+                        onClick={() => setActivePhoto(card.photos[currentPhotoIndex])}
+                        style={{
+                            width: '220px',
+                            background: 'rgba(5, 13, 31, 0.72)',
+                            backdropFilter: 'blur(20px)',
+                            border: '1.5px solid rgba(34, 211, 238, 0.45)',
+                            borderRadius: '16px',
+                            padding: '8px 8px 24px 8px',
+                            boxShadow: '0 0 40px rgba(34, 211, 238, 0.35)',
+                            cursor: 'pointer',
+                            transition: 'transform 0.3s, border-color 0.3s, box-shadow 0.3s',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.06) rotate(1deg)';
+                            e.currentTarget.style.borderColor = 'rgba(34, 211, 238, 0.8)';
+                            e.currentTarget.style.boxShadow = '0 0 50px rgba(34, 211, 238, 0.6)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'none';
+                            e.currentTarget.style.borderColor = 'rgba(34, 211, 238, 0.45)';
+                            e.currentTarget.style.boxShadow = '0 0 40px rgba(34, 211, 238, 0.35)';
+                        }}
+                    >
+                        <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', overflow: 'hidden', borderRadius: '12px', marginBottom: '10px' }}>
+                            <img src={card.photos[currentPhotoIndex]} alt="Celestial capture" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            {/* Subtle pixel scanlines overlay */}
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(rgba(34, 211, 238, 0.05) 50%, rgba(0,0,0,0) 50%)', backgroundSize: '100% 4px', pointerEvents: 'none' }} />
+                        </div>
+                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.52rem', letterSpacing: '2px', color: 'rgba(34, 211, 238, 0.85)', display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
+                            <span>SAT-CAM {currentPhotoIndex + 1}</span>
+                            <span>ZOOM ACTIVE</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* COVER */}
+            {!opened && (
+                <div style={{ position:'fixed', inset:0, zIndex:900, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'radial-gradient(ellipse at 50% 50%, #0a1628 0%, #020817 70%)' }}>
+                    {[180,300,440].map(s => (
+                        <div key={s} style={{ position:'absolute', width:s, height:s, borderRadius:'50%', border:`1px solid rgba(${s===180?'59,130,246':s===300?'168,85,247':'34,211,238'},.${s===180?25:s===300?15:10})`, animation:'cdRing 4s ease-in-out infinite', animationDelay:`${(s-180)/260*0.7}s` }} />
+                    ))}
+                    <div style={{ position:'relative', zIndex:2, textAlign:'center', padding:'2rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'1.5rem' }}>
+                        <div style={{ width:60, height:60, borderRadius:'50%', background:'radial-gradient(circle at 35% 35%, #4f8ef7, #1a3a8f 60%, #0a1a4a)', boxShadow:'0 0 30px rgba(59,130,246,.7)', animation:'cdPlanet 6s ease-in-out infinite' }} />
+                        <div>
+                            <p style={{ fontFamily:'Orbitron,monospace', fontSize:'0.52rem', letterSpacing:'6px', textTransform:'uppercase', color:'#22d3ee', opacity:0.7 }}>A Message From The Universe</p>
+                            <h1 style={{ fontFamily:'Orbitron,monospace', fontSize:'clamp(1.8rem,7vw,3rem)', fontWeight:900, background:'linear-gradient(135deg,#60a5fa,#a78bfa,#67e8f9)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', letterSpacing:3, filter:'drop-shadow(0 0 18px rgba(96,165,250,.5))', lineHeight:1.1, marginTop:'0.5rem' }}>COSMIC<br/>DRIFT</h1>
+                            <p style={{ fontFamily:'Exo 2,sans-serif', fontStyle:'italic', fontSize:'0.85rem', color:'rgba(255,255,255,.5)', maxWidth:270, lineHeight:1.7, marginTop:'0.75rem' }}>Sebuah surat cinta melewati bintang-bintang, khusus untuk <strong style={{ color:'#c4b5fd' }}>{card.recipient_name}</strong></p>
+                        </div>
+                        <button onClick={handleOpen} style={{ display:'inline-flex', alignItems:'center', gap:'0.6rem', padding:'0.9rem 2.4rem', background:'linear-gradient(135deg,#3b82f6,#7c3aed)', border:'none', borderRadius:100, fontFamily:'Orbitron,monospace', fontSize:'0.75rem', fontWeight:700, letterSpacing:'2px', textTransform:'uppercase', color:'#fff', cursor:'pointer', boxShadow:'0 0 30px rgba(59,130,246,.5)', animation:'cdBtnGlow 3s ease-in-out infinite' }}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width:16,height:16 }}><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            Buka Pesanmu
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Sleek Floating bottom HUD bar for Ambient Audio controls */}
+            {opened && contentVisible && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '30px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 100,
+                    pointerEvents: 'auto',
+                    animation: 'cdContentFadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                }}>
+                    <button 
+                        onClick={toggleAudio} 
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.75rem 1.6rem',
+                            borderRadius: 100,
+                            fontFamily: 'Orbitron, monospace',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            letterSpacing: '2px',
+                            textTransform: 'uppercase',
+                            cursor: 'pointer',
+                            border: '1px solid rgba(168, 85, 247, 0.35)',
+                            background: 'rgba(13, 7, 38, 0.72)',
+                            backdropFilter: 'blur(16px)',
+                            color: '#c4b5fd',
+                            boxShadow: '0 0 25px rgba(168, 85, 247, 0.25)',
+                            transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                            e.currentTarget.style.boxShadow = '0 0 35px rgba(168, 85, 247, 0.45)';
+                            e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.6)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'none';
+                            e.currentTarget.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.25)';
+                            e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.35)';
+                        }}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width:14, height:14 }}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                        {isPlaying ? 'MUTE AUDIO' : 'UNMUTE AUDIO'}
+                    </button>
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL */}
+            {activePhoto && (
+                <div 
+                    onClick={() => setActivePhoto(null)}
+                    style={{
+                        position:'fixed', inset:0, zIndex:1000,
+                        background:'rgba(2,8,23,.92)', backdropFilter:'blur(16px)',
+                        display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem',
+                        animation: 'fadeIn 0.3s ease-out'
+                    }}
+                >
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            position:'relative',
+                            background:'rgba(5,13,31,.85)',
+                            border:'1px solid rgba(34,211,238,.3)',
+                            borderRadius:24, padding:'12px',
+                            maxWidth:'min(500px,90vw)', width:'100%',
+                            boxShadow:'0 0 50px rgba(34, 211, 238,.25)',
+                            animation: 'scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        }}
+                    >
+                        <button 
+                            onClick={() => setActivePhoto(null)}
+                            style={{
+                                position:'absolute', top:-16, right:-16,
+                                background:'rgba(5,13,31,.9)', border:'1px solid rgba(34,211,238,.4)',
+                                borderRadius:'50%', width:36, height:36,
+                                display:'flex', alignItems:'center', justifyContent:'center',
+                                color:'#22d3ee', cursor:'pointer', fontSize:'1rem',
+                                boxShadow:'0 0 15px rgba(34, 211, 238,.3)'
+                            }}
+                        >
+                            ✕
+                        </button>
+                        <div style={{ borderRadius:16, overflow:'hidden', border:'1px solid rgba(255,255,255,.08)' }}>
+                            <img src={activePhoto} alt="Zoomed celestial capture" style={{ width:'100%', height:'auto', display:'block', maxHeight:'70vh', objectFit:'contain' }} />
+                        </div>
+                        <div style={{ marginTop: '12px', fontFamily: 'Orbitron, monospace', fontSize: '0.52rem', letterSpacing: '2px', color: 'rgba(34, 211, 238, 0.7)', display: 'flex', justifyContent: 'space-between', padding: '0 8px' }}>
+                            <span>ENCRYPTED VISUAL TRANSMISSION</span>
+                            <span>SECURED</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Fonts + keyframes */}
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@700&display=swap');
+                @keyframes cdRing { 0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.04);opacity:1} }
+                @keyframes cdPlanet { 0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(5deg)} }
+                @keyframes cdBtnGlow { 0%,100%{box-shadow:0 0 30px rgba(59,130,246,.5)}50%{box-shadow:0 0 50px rgba(124,58,237,.7)} }
+                
+                @keyframes cdBubble { 
+                    0% {
+                        opacity: 0;
+                        transform: translateY(105vh) translateX(0) scale(var(--cd-scale, 1));
+                    }
+                    10% {
+                        opacity: 1;
+                        transform: translateY(85vh) translateX(var(--cd-drift-half, 15px)) scale(var(--cd-scale, 1));
+                    }
+                    90% {
+                        opacity: 0.95;
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: translateY(-12vh) translateX(var(--cd-drift, 30px)) scale(var(--cd-scale, 1));
+                    }
+                }
+                
+                @keyframes cdContentFadeIn { 0%{opacity:0;transform:scale(0.9) translateY(18px);filter:blur(8px)}100%{opacity:1;transform:scale(1) translateY(0);filter:blur(0)} }
+                
+                @keyframes cdShootDirection0 {
+                    0% {
+                        transform: translate3d(-40vw, -40vh, 0) scale(0.01) rotate(-35deg);
+                        opacity: 0;
+                        filter: blur(4px) brightness(2.5);
+                    }
+                    14% {
+                        transform: translate3d(0, 0, 0) scale(1) rotate(-4deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    82% {
+                        transform: translate3d(2vw, 2vh, 0) scale(1.06) rotate(-2deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    100% {
+                        transform: translate3d(40vw, 40vh, 0) scale(4.0) rotate(15deg);
+                        opacity: 0;
+                        filter: blur(6px) brightness(2);
+                    }
+                }
+                
+                @keyframes cdShootDirection1 {
+                    0% {
+                        transform: translate3d(40vw, -40vh, 0) scale(0.01) rotate(35deg);
+                        opacity: 0;
+                        filter: blur(4px) brightness(2.5);
+                    }
+                    14% {
+                        transform: translate3d(0, 0, 0) scale(1) rotate(4deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    82% {
+                        transform: translate3d(-2vw, 2vh, 0) scale(1.06) rotate(2deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    100% {
+                        transform: translate3d(-40vw, 40vh, 0) scale(4.0) rotate(-15deg);
+                        opacity: 0;
+                        filter: blur(6px) brightness(2);
+                    }
+                }
+                
+                @keyframes cdShootDirection2 {
+                    0% {
+                        transform: translate3d(-40vw, 40vh, 0) scale(0.01) rotate(-145deg);
+                        opacity: 0;
+                        filter: blur(4px) brightness(2.5);
+                    }
+                    14% {
+                        transform: translate3d(0, 0, 0) scale(1) rotate(-6deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    82% {
+                        transform: translate3d(2vw, -2vh, 0) scale(1.06) rotate(-4deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    100% {
+                        transform: translate3d(40vw, -40vh, 0) scale(4.0) rotate(15deg);
+                        opacity: 0;
+                        filter: blur(6px) brightness(2);
+                    }
+                }
+                
+                @keyframes cdShootDirection3 {
+                    0% {
+                        transform: translate3d(40vw, 40vh, 0) scale(0.01) rotate(145deg);
+                        opacity: 0;
+                        filter: blur(4px) brightness(2.5);
+                    }
+                    14% {
+                        transform: translate3d(0, 0, 0) scale(1) rotate(6deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    82% {
+                        transform: translate3d(-2vw, -2vh, 0) scale(1.06) rotate(4deg);
+                        opacity: 1;
+                        filter: blur(0px) brightness(1);
+                    }
+                    100% {
+                        transform: translate3d(-40vw, -40vh, 0) scale(4.0) rotate(-15deg);
+                        opacity: 0;
+                        filter: blur(6px) brightness(2);
+                    }
+                }
+
+                @keyframes fadeIn { 0%{opacity:0}100%{opacity:1} }
+                @keyframes scaleIn { 0%{opacity:0;transform:scale(0.85) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)} }
+            `}</style>
+        </div>
+    );
+}

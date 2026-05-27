@@ -214,25 +214,36 @@
     scrollbar-width: none !important;  /* Firefox */
 }
 
-/* Custom Scrollbar - Premium, Semi-Transparent, Clean */
+/* Smooth scrolling globally for dynamic feel */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Premium Custom Scrollbar - Smooth, Orange Branded, Floating Style */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: transparent; /* transparent track removes the vertical line */
-}
-::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.35); /* semi-transparent grey pill */
+    background: rgba(248, 247, 244, 0.4); /* translucent body matching background */
     border-radius: 9999px;
 }
+::-webkit-scrollbar-thumb {
+    background: rgba(229, 101, 75, 0.22); /* soft translucent theme orange #E5654B */
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+}
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(156, 163, 175, 0.6);
+    background: rgba(229, 101, 75, 0.55); /* vivid orange hover */
+    border: 2px solid transparent;
+    background-clip: padding-box;
 }
 
 /* Firefox support */
 * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(156, 163, 175, 0.35) transparent;
+    scrollbar-color: rgba(229, 101, 75, 0.22) transparent;
 }
 

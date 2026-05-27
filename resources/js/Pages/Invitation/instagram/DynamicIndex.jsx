@@ -4,6 +4,8 @@ import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
 
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
+
 /* ─── Helpers ─── */
 function safeArr(val) {
     if (Array.isArray(val)) return val;
@@ -41,6 +43,9 @@ function parseEventDate(dateString) {
 
 function getStorageUrl(url, fallback) {
     if (!url || url === 'null' || url === 'undefined' || url === '/storage/' || url === 'storage/') return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
     let cleanUrl = url.replace(/\\/g, '/');
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
     if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
@@ -141,8 +146,6 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
         guestName.replace(/\s+/g, '_').toLowerCase()
     );
 
-    const [pwdAlert, setPwdAlert] = React.useState(false);
-
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
         : 'the.wedding.album';
@@ -153,73 +156,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
     return (
         <div className={`ig-cover${isOpened ? ' is-opened' : ''}`}>
-            {/* Password Hint Popup */}
-            {pwdAlert && (
-                <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 'calc(100% - 80px)',
-                    maxWidth: '320px',
-                    backgroundColor: '#1c1c1e',
-                    border: '1px solid #2c2c2e',
-                    borderRadius: '14px',
-                    padding: '24px 20px',
-                    zIndex: 220,
-                    textAlign: 'center',
-                    boxShadow: '0 8px 30px rgba(0,0,0,0.85)',
-                    fontFamily: "'Plus Jakarta Sans', sans-serif"
-                }}>
-                    <div style={{
-                        width: '46px',
-                        height: '46px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto 14px'
-                    }}>
-                        <i className="fas fa-heart" style={{ color: '#fff', fontSize: '18px' }} />
-                    </div>
-                    <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 800, marginBottom: '8px' }}>
-                        {isEn ? "Password Hint" : "Petunjuk Kata Sandi"}
-                    </h4>
-                    <p style={{ color: '#a8a8a8', fontSize: '12px', lineHeight: 1.5, marginBottom: '20px' }}>
-                        {isEn 
-                            ? "The password is the happy wedding date of the couple! Click 'Log In' directly as well to open. 📅💖" 
-                            : "Kata sandinya adalah tanggal pernikahan bahagia kedua mempelai! Anda juga bisa langsung klik 'Masuk'. 📅💖"}
-                    </p>
-                    <button 
-                        onClick={() => setPwdAlert(false)}
-                        style={{
-                            width: '100%',
-                            backgroundColor: '#0095f6',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '25px',
-                            padding: '10px',
-                            fontSize: '12.5px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            outline: 'none'
-                        }}
-                    >
-                        {isEn ? "Tutup" : "Tutup"}
-                    </button>
-                </div>
-            )}
-
-            {/* Back-dimmed background for popup */}
-            {pwdAlert && (
-                <div 
-                    onClick={() => setPwdAlert(false)}
-                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 210 }}
-                />
-            )}
-
-            <div className="ig-device-container" style={{ justifyContent: 'space-between', paddingBottom: '10px' }}>
+            <div className="ig-device-container" style={{ justifyContent: 'space-between', paddingBottom: '20px' }}>
                 <div>
                     {/* Header status bar simulation */}
                     <div className="ig-phone-status-bar">
@@ -231,24 +168,8 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                         </div>
                     </div>
 
-                    {/* IG Language Selector at top (functional switcher using ig-login-lang-select class from style.css!) */}
-                    <div className="ig-login-lang-select" style={{ margin: '15px auto 10px' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: 'var(--ig-text-muted)', fontSize: '0.8rem' }}>
-                            <select 
-                                className="ig-login-lang-dropdown" 
-                                value={language}
-                                onChange={(e) => onLanguageChange && onLanguageChange(e.target.value)}
-                                style={{ fontWeight: 600, paddingRight: '2px' }}
-                            >
-                                <option value="id">Bahasa Indonesia</option>
-                                <option value="en">English</option>
-                            </select>
-                            <i className="fas fa-chevron-down" style={{ fontSize: '9px', opacity: 0.7 }} />
-                        </div>
-                    </div>
-
                     {/* IG Login Page UI - Official Gradient Camera Glyph Icon SVG & Couple names below! */}
-                    <div className="ig-login-logo-container" style={{ margin: '30px auto 15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                    <div className="ig-login-logo-container" style={{ margin: '50px auto 25px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
                         {/* High-fidelity official Instagram camera glyph logo SVG */}
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -312,71 +233,11 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                         </button>
                     </form>
 
-                    <div style={{ textAlign: 'center', marginTop: '16px' }}>
-                        <span 
-                            onClick={() => setPwdAlert(true)} 
-                            style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fff', cursor: 'pointer', opacity: 0.95 }}
-                        >
-                            {isEn ? "Forgot password?" : "Lupa kata sandi?"}
-                        </span>
-                    </div>
-
-                    <div className="ig-login-divider" style={{ margin: '20px 28px' }}>
-                        <div className="ig-divider-line"></div>
-                        <span className="ig-divider-text">OR</span>
-                        <div className="ig-divider-line"></div>
-                    </div>
-
-                    <div className="ig-login-fb" onClick={onOpen} style={{ color: '#0095f6', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
-                        <i className="fab fa-facebook-square" style={{ fontSize: '1.25rem' }} />
-                        <span>{isEn ? 'Log in with Facebook' : 'Masuk dengan Facebook'}</span>
-                    </div>
-
                     {/* Guest Details Badge Inside Login Screen */}
-                    <div className="ig-login-guest-badge" style={{ margin: '15px 28px', borderRadius: '12px', border: '1px solid #262626', backgroundColor: '#121212', padding: '16px' }}>
+                    <div className="ig-login-guest-badge" style={{ margin: '25px 28px 10px 28px', borderRadius: '12px', border: '1px solid #262626', backgroundColor: '#121212', padding: '16px' }}>
                         <p className="ig-guest-label" style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', color: 'var(--ig-pink)', fontWeight: 800, marginBottom: '6px' }}>{isEn ? 'Dear Guest' : 'Kepada Yth. Bapak/Ibu/Saudara/i'}</p>
                         <h3 className="ig-guest-name" style={{ fontSize: '1.15rem', color: '#fff', fontWeight: 800, marginBottom: '6px' }}>{guestName}</h3>
                         <p className="ig-guest-desc" style={{ fontSize: '0.75rem', color: 'var(--ig-text-muted)', lineHeight: 1.4 }}>{isEn ? 'We apologize if there are any spelling errors in names/titles.' : 'Mohon maaf apabila ada kesalahan penulisan nama atau gelar.'}</p>
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                    {/* Outlined Create New Account button matching modern IG login */}
-                    <button 
-                        type="button" 
-                        onClick={onOpen}
-                        style={{
-                            margin: '10px 28px 15px 28px',
-                            backgroundColor: 'transparent',
-                            border: '1px solid #0095f6',
-                            color: '#0095f6',
-                            borderRadius: '25px',
-                            padding: '10px',
-                            fontSize: '0.82rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            textAlign: 'center',
-                            outline: 'none'
-                        }}
-                    >
-                        {isEn ? 'Create new account' : 'Buat akun baru'}
-                    </button>
-
-                    {/* Simulated Meta Logo Footer at the bottom */}
-                    <div style={{
-                        padding: '10px 0',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '2px',
-                        opacity: 0.6
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#a8a8a8', fontWeight: 600 }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#a8a8a8" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: 'middle' }}>
-                                <path d="M16.924 7.617c-.966 0-1.884.34-2.613.978-.456.398-.823.902-1.111 1.488-.288-.586-.655-1.09-1.111-1.488a4.015 4.015 0 00-2.613-.978C7.14 7.617 5.23 9.4 5.23 11.597c0 2.2 1.91 3.983 4.236 3.983.966 0 1.884-.34 2.613-.978.456-.398.823-.902 1.111-1.488.288.586.655 1.09 1.111 1.488a4.015 4.015 0 00-2.613-.978c2.327 0 4.237-1.783 4.237-3.983 0-2.197-1.91-3.98-4.237-3.98zm-7.458 6.554c-1.396 0-2.542-1.077-2.542-2.395 0-1.319 1.146-2.395 2.542-2.395 1.397 0 2.542 1.076 2.542 2.395 0 1.318-1.145 2.395-2.542 2.395zm7.458 0c-1.396 0-2.542-1.077-2.542-2.395 0-1.319 1.146-2.395 2.542-2.395 1.397 0 2.542 1.076 2.542 2.395 0 1.318-1.145 2.395-2.542 2.395z"/>
-                            </svg>
-                            <span style={{ letterSpacing: '0.5px' }}>Meta</span>
-                        </div>
                     </div>
                 </div>
 
@@ -521,8 +382,15 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
             </div>
 
             <div className="ig-opening-bg-container">
-                {globalShowPhotos && openingBg && (
-                    <div className="ig-opening-bg" style={{ backgroundImage: `url(${openingBg})` }} />
+                {globalShowPhotos && (
+                    <PremiumSlideshow
+                        images={invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : [])}
+                        positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
+                        positionY={invitation?.opening_position_y ?? invitation?.cover_position_y}
+                        zoom={invitation?.opening_zoom ?? invitation?.cover_zoom}
+                        className="absolute inset-0 w-full h-full z-0"
+                        imgClassName="absolute inset-0 w-full h-full object-cover"
+                    />
                 )}
                 <div className="ig-opening-overlay" />
             </div>
@@ -1392,7 +1260,7 @@ function ClosingSection({ invitation, brideGrooms, language }) {
             <div className="ig-closing-card">
                 <i className="fas fa-heart ig-closing-heart" />
                 <h4 className="ig-closing-thanks-header">{invitation?.closing_title || (isEn ? 'THANK YOU' : 'TERIMA KASIH')}</h4>
-                <p className="ig-closing-thanks-text">{invitation?.closing_text || 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari pernikahan kami.'}</p>
+                <p className="ig-closing-thanks-text">{invitation?.closing_text || (isEn ? 'It is a great honor and joy for us if you would join us on our wedding day.' : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari pernikahan kami.')}</p>
                 
                 <div className="ig-closing-families">
                     {hasGroomParents && (
@@ -1418,14 +1286,14 @@ function ClosingSection({ invitation, brideGrooms, language }) {
 /* ═══════════════════════════════════════
    BOTTOM NAVIGATION CONTROLLER (Sticky navigation widget)
    ═══════════════════════════════════════ */
-function BottomPlayer({ isSlideMode, onPrevSlide, onNextSlide, activeSectionId, resolvedSections, onJump, language, onLanguageChange }) {
+function BottomPlayer({ isSlideMode, onPrevSlide, onNextSlide, activeSectionId, resolvedSections, onJump, language }) {
     const isEn = language === 'en';
     // Persistent IG-style bottom app bar - dynamically built from active sections
     const sectionIconMap = {
         opening:    'fas fa-home',
         bride_groom:'fas fa-search',
-        love_story: 'fas fa-play-circle',
-        event:      'fas fa-calendar-alt',
+        love_story: 'far fa-play-circle',
+        event:      'far fa-calendar-alt',
         gallery:    'fas fa-th',
         bank:       'fas fa-shopping-bag',
         rsvp:       'fas fa-user-circle',
@@ -1445,42 +1313,27 @@ function BottomPlayer({ isSlideMode, onPrevSlide, onNextSlide, activeSectionId, 
 
     return (
         <div className="ig-bottom-player-sticky">
-            {/* Dynamic Music & Language Switcher sticky bar (uses ig-sticky-audio-controls-row class from style.css!) */}
-            <div className="ig-sticky-audio-controls-row">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div className="ig-music-disc is-playing" style={{ width: '20px', height: '20px', fontSize: '0.65rem' }}>
-                        <i className="fas fa-music" />
-                    </div>
-                    <span className="ig-sticky-audio-label" style={{ fontSize: '11px', color: '#fff', fontWeight: 600 }}>
-                        {isEn ? 'Instagram Wedding Album' : 'Album Pernikahan Instagram'}
-                    </span>
-                </div>
-                
-                {/* Language Toggler Button (uses ig-sticky-lang-control style.css!) */}
-                <div 
-                    className="ig-sticky-lang-control" 
-                    onClick={() => onLanguageChange && onLanguageChange(language === 'en' ? 'id' : 'en')}
-                    title={isEn ? "Switch to Indonesian" : "Ubah ke Bahasa Inggris"}
-                >
-                    <i className="fas fa-globe" style={{ fontSize: '11px' }} />
-                    <span className="ig-sticky-lang-label" style={{ padding: '1px 5px', borderRadius: '3px', fontSize: '10px' }}>
-                        {language === 'en' ? 'EN' : 'ID'}
-                    </span>
-                </div>
-            </div>
-
             {/* IG-style Bottom Nav Bar */}
             <div className="ig-sticky-nav-slots">
                 {navItems.map((item) => {
                     const idx = resolvedSections.findIndex(s => s.section_key === item.key);
                     const isActive = activeSectionId === item.key;
+
+                    // Dynamic icon filled/outline toggle for reels and calendar
+                    let iconClass = item.icon;
+                    if (item.key === 'love_story') {
+                        iconClass = isActive ? 'fas fa-play-circle' : 'far fa-play-circle';
+                    } else if (item.key === 'event') {
+                        iconClass = isActive ? 'fas fa-calendar-alt' : 'far fa-calendar-alt';
+                    }
+
                     return (
                         <div
                             key={item.key}
                             className={`ig-nav-slot-btn ${isActive ? 'is-active' : ''}`}
                             onClick={() => { if (idx !== -1) onJump(idx, item.key); }}
                         >
-                            <i className={item.icon} />
+                            <i className={iconClass} />
                             {isActive && <span className="ig-nav-slot-dot" />}
                         </div>
                     );
@@ -1507,7 +1360,7 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
     const audioRef = useRef(null);
     const slideContainerRef = useRef(null);
 
-    const [activeLanguage, setActiveLanguage] = useState(invitation?.language || invitation?.default_locale || 'id');
+    const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
 
     const enableQr = parseBool(invitation?.enable_qr ?? true) && parseBool(invitation?.show_qr_code ?? true);
     const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
@@ -1760,7 +1613,6 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
                     language={activeLanguage}
                     fallbackPhoto={randomGalleryPhoto}
                     onJump={jumpToSection}
-                    onLanguageChange={setActiveLanguage}
                 />
 
                 {/* ══════ MAIN APP PANEL ══════ */}
@@ -1834,7 +1686,6 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
                             resolvedSections={resolvedSections}
                             onJump={jumpToSection}
                             language={activeLanguage}
-                            onLanguageChange={setActiveLanguage}
                         />
                     </main>
                 )}

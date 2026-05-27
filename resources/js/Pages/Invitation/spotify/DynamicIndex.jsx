@@ -39,8 +39,13 @@ function parseEventDate(dateString) {
     return { dayNum, dayName, monthName, year };
 }
 
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
+
 function getStorageUrl(url, fallback) {
     if (!url || url === 'null' || url === 'undefined' || url === '/storage/' || url === 'storage/') return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
     let cleanUrl = url.replace(/\\/g, '/');
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
     if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
@@ -167,8 +172,15 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
     return (
         <div className={`spty-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'spty-no-photo-mode' : ''}`}>
-            {globalShowPhotos && coverSrc && (
-                <div className="spty-cover__bg" style={{ backgroundImage: `url(${coverSrc})` }} />
+            {globalShowPhotos && invitation?.cover_image && (
+                <PremiumSlideshow
+                    images={invitation.cover_image.split(',')}
+                    positionX={invitation?.cover_position_x}
+                    positionY={invitation?.cover_position_y}
+                    zoom={invitation?.cover_zoom}
+                    className="spty-cover__bg"
+                    imgClassName="absolute inset-0 w-full h-full object-cover"
+                />
             )}
             <div className="spty-cover__inner">
                 <div className="spty-cover__device">
@@ -178,9 +190,16 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                         <i className="fas fa-ellipsis-v" />
                     </div>
 
-                    <div className="spty-cover__artwork-wrap">
-                        {globalShowPhotos && coverSrc ? (
-                            <img src={coverSrc} alt={coupleName} className="spty-cover__artwork" onError={handleCoverError} />
+                    <div className="spty-cover__artwork-wrap relative overflow-hidden">
+                        {globalShowPhotos && invitation?.cover_image ? (
+                            <PremiumSlideshow
+                                images={invitation.cover_image.split(',')}
+                                positionX={invitation?.cover_position_x}
+                                positionY={invitation?.cover_position_y}
+                                zoom={invitation?.cover_zoom}
+                                className="absolute inset-0 w-full h-full z-0"
+                                imgClassName="absolute inset-0 w-full h-full object-cover"
+                            />
                         ) : (
                             <div className="spty-cover__monogram-art">{initials}</div>
                         )}
@@ -284,8 +303,17 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
     return (
         <section id="opening" className="spty-section spty-opening">
             <div className="spty-opening__playlist-header">
-                {globalShowPhotos && playlistSrc ? (
-                    <img src={playlistSrc} alt="Playlist Cover" className="spty-opening__playlist-img" onError={handlePlaylistError} />
+                {globalShowPhotos && (invitation?.opening_image || invitation?.cover_image) ? (
+                    <div className="spty-opening__playlist-img relative overflow-hidden">
+                        <PremiumSlideshow
+                            images={invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : [])}
+                            positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
+                            positionY={invitation?.opening_position_y ?? invitation?.cover_position_y}
+                            zoom={invitation?.opening_zoom ?? invitation?.cover_zoom}
+                            className="absolute inset-0 w-full h-full z-0"
+                            imgClassName="absolute inset-0 w-full h-full object-cover"
+                        />
+                    </div>
                 ) : (
                     <div className="spty-opening__playlist-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--spty-green)', fontSize: '2.5rem', fontWeight: '800' }}>
                         {(groom?.nickname?.charAt(0) || 'B')}{(bride?.nickname?.charAt(0) || 'R')}

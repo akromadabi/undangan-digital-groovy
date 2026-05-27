@@ -404,16 +404,16 @@ body {
   padding: 2.5px;
   transition: transform 0.2s, box-shadow 0.2s;
   /* Pulsing glow effect to look permanently "unread" */
-  box-shadow: 0 0 8px 2px rgba(225, 48, 108, 0.45), 0 0 16px 4px rgba(188, 24, 136, 0.25);
+  box-shadow: 0 0 8px rgba(225, 48, 108, 0.65), 0 0 4px rgba(240, 148, 51, 0.45);
   animation: ig-story-ring-pulse 2.5s ease-in-out infinite alternate;
 }
 
 @keyframes ig-story-ring-pulse {
   0% {
-    box-shadow: 0 0 6px 2px rgba(225, 48, 108, 0.4), 0 0 12px 3px rgba(188, 24, 136, 0.2);
+    box-shadow: 0 0 6px rgba(225, 48, 108, 0.5), 0 0 3px rgba(240, 148, 51, 0.35);
   }
   100% {
-    box-shadow: 0 0 14px 4px rgba(225, 48, 108, 0.75), 0 0 24px 8px rgba(188, 24, 136, 0.45);
+    box-shadow: 0 0 12px rgba(225, 48, 108, 0.85), 0 0 6px rgba(240, 148, 51, 0.65);
   }
 }
 
@@ -421,16 +421,16 @@ body {
   /* Active: always keep gradient + scale up + stronger glow */
   background: var(--ig-story-gradient);
   transform: scale(1.08);
-  box-shadow: 0 0 18px 6px rgba(225, 48, 108, 0.8), 0 0 30px 10px rgba(188, 24, 136, 0.5);
+  box-shadow: 0 0 16px rgba(225, 48, 108, 0.95), 0 0 8px rgba(240, 148, 51, 0.75);
   animation: ig-story-ring-active-pulse 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes ig-story-ring-active-pulse {
   0% {
-    box-shadow: 0 0 14px 5px rgba(225, 48, 108, 0.7), 0 0 24px 8px rgba(188, 24, 136, 0.4);
+    box-shadow: 0 0 12px rgba(225, 48, 108, 0.85), 0 0 6px rgba(240, 148, 51, 0.65);
   }
   100% {
-    box-shadow: 0 0 22px 8px rgba(225, 48, 108, 0.95), 0 0 36px 14px rgba(188, 24, 136, 0.65);
+    box-shadow: 0 0 20px rgba(225, 48, 108, 1), 0 0 10px rgba(240, 148, 51, 0.85);
   }
 }
 

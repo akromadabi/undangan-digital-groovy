@@ -1,0 +1,12 @@
+{
+  "AllowMultiple": "false",
+  "Description": "\"Register COSMIC DRIFT in the Static Previews admin panel as a Ready greeting card.\"",
+  "EndLine": "16",
+  "Instruction": "\"Add COSMIC DRIFT greeting card to the greetingCards array\"",
+  "ReplacementContent": "\"    const greetingCards = [\\n        {\\n            id: 'cosmicdrift',\\n            title: 'Cosmic Drift 🌌',\\n            description: 'Kartu ucapan premium bertema luar angkasa — nebula parallax multi-lapis, konstelasi bintang yang tergambar sendiri, pesan cinta mengambang dari bintang ke bintang, roket peluncuran ke orbit, soundscape deep space dari Web Audio API, dan easter egg shooting star.',\\n            category: 'Greeting Card',\\n            status: 'Ready',\\n            previewUrl: '/cosmicdrift/index.html',\\n            badges: ['Nebula Parallax', 'Constellation', 'Rocket Launch', 'Space Audio'],\\n            bgGradient: 'from-[#020817] via-[#0a1628] to-[#050b1a]',\\n            glowColor: 'shadow-[0_0_25px_rgba(96,165,250,0.15)]',\\n            borderColor: 'border-[#60a5fa]/30',\\n        },\\n        {\\n            id: 'stillwithyou',\"",
+  "StartLine": "14",
+  "TargetContent": "\"    const greetingCards = [\\n        {\\n            id: 'stillwithyou',\"",
+  "TargetFile": "\"c:\\\\laragon\\\\www\\\\Undangan Digital\\\\resources\\\\js\\\\Pages\\\\SuperAdmin\\\\StaticPreviews.jsx\"",
+  "toolAction": "\"Register COSMIC DRIFT in admin panel\"",
+  "toolSummary": "\"Edit StaticPreviews.jsx\""
+}

@@ -1,8 +1,9 @@
 import { useTranslation } from '@/i18n';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
 
 // Asset imports
 import ornamentLeft from './asset/ornament-left.webp';
@@ -21,6 +22,27 @@ import utary3 from './asset/utary-3.webp';
 import utary4 from './asset/utary-4.webp';
 import utary5 from './asset/utary-5.webp';
 import utary6 from './asset/utary-6.webp';
+function getStorageUrl(url, fallback) {
+    if (!url || url === 'null' || url === 'undefined' || url === '/storage/' || url === 'storage/') return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
+    let cleanUrl = url.replace(/\\/g, '/');
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
+    if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
+        return cleanUrl.startsWith('/') ? cleanUrl : '/' + cleanUrl;
+    }
+    if (cleanUrl.startsWith('/storage/')) {
+        if (cleanUrl === '/storage/' || cleanUrl === '/storage/null' || cleanUrl === '/storage/undefined') return fallback;
+        return cleanUrl;
+    }
+    if (cleanUrl.startsWith('storage/')) {
+        if (cleanUrl === 'storage/' || cleanUrl === 'storage/null' || cleanUrl === 'storage/undefined') return '/' + cleanUrl;
+        return '/' + cleanUrl;
+    }
+    if (cleanUrl.startsWith('/')) return cleanUrl;
+    return `/storage/${cleanUrl}`;
+}
 
 /* ─────────────────────────────────────────────
    SVG Monogram Shield (gold outline, TF inside)
@@ -1536,6 +1558,12 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
 
     const guestName = guest?.name || new URLSearchParams(window.location.search).get('to');
     
+    const leftPanelImages = useMemo(() => {
+        const rawSource = invitation?.cover_image || (galleries?.length > 0 ? galleries[0].image_url : null);
+        if (!rawSource) return [couplePhoto];
+        return rawSource.split(',').map(url => getStorageUrl(url, couplePhoto)).filter(Boolean);
+    }, [invitation?.cover_image, galleries]);
+
     const showPhotos = invitation?.show_photos !== false && invitation?.show_photos !== 'false' && invitation?.show_photos !== 0 && invitation?.show_photos !== '0';
     const showAnimations = invitation?.show_animations !== false && invitation?.show_animations !== 'false' && invitation?.show_animations !== 0 && invitation?.show_animations !== '0';
     globalShowPhotos = showPhotos;
@@ -1920,7 +1948,16 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
             <div className="utary-main">
                 {/* Left Fixed Panel */}
                 <div className="utary-main__left">
-                    {globalShowPhotos && <img src={galleries?.[0]?.image_url || couplePhoto} alt={invitation?.cover_title} className="utary-main__left-img" />}
+                    {globalShowPhotos && leftPanelImages.length > 0 && (
+                        <PremiumSlideshow
+                            images={leftPanelImages}
+                            positionX={invitation?.cover_position_x}
+                            positionY={invitation?.cover_position_y}
+                            zoom={invitation?.cover_zoom}
+                            className="absolute inset-0 w-full h-full z-0"
+                            imgClassName="utary-main__left-img"
+                        />
+                    )}
                     <div className="utary-main__left-overlay">
                         <div className="utary-main__left-pretitle">
                             {(!invitation?.opening_title || invitation.opening_title.toUpperCase() === 'THE WEDDING OF' || invitation.opening_title.toUpperCase() === 'PERNIKAHAN') 

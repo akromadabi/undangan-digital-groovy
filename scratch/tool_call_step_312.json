@@ -1,0 +1,12 @@
+{
+  "AllowMultiple": "false",
+  "Description": "\"Register bioluminescent template key in GreetingCard.php model.\"",
+  "EndLine": "48",
+  "Instruction": "\"Add bioluminescent to templates array in GreetingCard.php\"",
+  "ReplacementContent": "\"        'cyberpunk'     => 'Cyberpunk Decryptor 🤖',\\n        'bioluminescent' => 'Bioluminescent Deep Dive 🌊',\\n    ];\"",
+  "StartLine": "44",
+  "TargetContent": "\"        'cyberpunk'     => 'Cyberpunk Decryptor 🤖',\\n    ];\"",
+  "TargetFile": "\"c:\\\\laragon\\\\www\\\\Undangan Digital\\\\app\\\\Models\\\\GreetingCard.php\"",
+  "toolAction": "\"Registering bioluminescent template in Model\"",
+  "toolSummary": "\"Registering bioluminescent template in Model\""
+}

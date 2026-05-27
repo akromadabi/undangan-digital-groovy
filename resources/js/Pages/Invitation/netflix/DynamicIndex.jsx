@@ -51,8 +51,13 @@ function formatTime(t) {
     if (!t || t === 'Selesai') return t || '';
     return String(t).substring(0, 5);
 }
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
+
 function getStorageUrl(url, fallback) {
     if (!url) return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
     let cleanUrl = url.replace(/\\/g, '/');
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
     if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
@@ -126,7 +131,16 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 
     return (
         <div className={`nf-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'nf-no-photo-mode' : ''}`}>
-            {globalShowPhotos && <div className="nf-cover__bg" style={{ backgroundImage: `url(${heroImg})` }} />}
+            {globalShowPhotos && (
+                <PremiumSlideshow
+                    images={invitation?.cover_image ? invitation.cover_image.split(',') : []}
+                    positionX={invitation?.cover_position_x}
+                    positionY={invitation?.cover_position_y}
+                    zoom={invitation?.cover_zoom}
+                    className="nf-cover__bg"
+                    imgClassName="absolute inset-0 w-full h-full object-cover"
+                />
+            )}
             <div className="nf-cover__overlay" />
             <div className="nf-cover__content">
                 <img src={ASSETS.logo} alt="THE WEDDING" className="nf-cover__logo" />
@@ -181,7 +195,16 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
 
     return (
         <section id={id || "opening"} className="nf-opening">
-            <div className="nf-opening__bg" style={{ backgroundImage: `url(${heroImg})` }} />
+            {globalShowPhotos && (
+                <PremiumSlideshow
+                    images={invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : [])}
+                    positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
+                    positionY={invitation?.opening_position_y ?? invitation?.cover_position_y}
+                    zoom={invitation?.opening_zoom ?? invitation?.cover_zoom}
+                    className="nf-opening__bg"
+                    imgClassName="absolute inset-0 w-full h-full object-cover"
+                />
+            )}
             <div className="nf-opening__overlay" />
             <div className="nf-opening__content">
                 <img src={ASSETS.logo} alt="THE WEDDING" className="nf-opening__logo" />

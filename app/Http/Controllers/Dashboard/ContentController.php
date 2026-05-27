@@ -68,6 +68,7 @@ class ContentController extends Controller
         $invitation = $this->getUserInvitation($request);
         return Inertia::render('Dashboard/Content/Mempelai', [
             'brideGrooms' => $invitation?->brideGrooms ?? [],
+            'mediaAssets' => $invitation?->mediaAssets()->latest()->get() ?? [],
         ]);
     }
 
@@ -162,6 +163,12 @@ class ContentController extends Controller
             'galleries' => $invitation?->galleries ?? [],
             'maxGalleries' => $request->user()->currentPlan()?->max_galleries ?? 3,
             'galleryMode' => $invitation?->gallery_mode ?? 'grid',
+            'mediaAssets' => $invitation?->mediaAssets()->latest()->get() ?? [],
+            'invitation' => $invitation ? $invitation->only([
+                'id', 'cover_image', 'cover_position_x', 'cover_position_y', 'cover_zoom',
+                'opening_image', 'opening_position_x', 'opening_position_y', 'opening_zoom'
+            ]) : null,
+            'brideGrooms' => $invitation?->brideGrooms ?? [],
         ]);
     }
 
@@ -241,6 +248,7 @@ class ContentController extends Controller
         $invitation = $this->getUserInvitation($request);
         return Inertia::render('Dashboard/Content/Kisah', [
             'stories' => $invitation?->loveStories ?? [],
+            'mediaAssets' => $invitation?->mediaAssets()->latest()->get() ?? [],
         ]);
     }
 

@@ -1,0 +1,471 @@
+function RetroArcadeFull({ card }) {
+    const canvasRef = useRef(null);
+    const audioCtxRef = useRef(null);
+    const bgmIntervalRef = useRef(null);
+    const heroXRef = useRef(50);
+    const heroYRef = useRef(0);
+    const heroVyRef = useRef(0);
+    const blockBounceRef = useRef(0);
+    const isJumpingRef = useRef(false);
+    const particlesRef = useRef([]);
+
+    const [credit, setCredit] = useState(0);
+    const [gameStage, setGameStage] = useState('cover'); // 'cover' | 'playing' | 'revealed'
+    const [isMuted, setIsMuted] = useState(true);
+    const [displayText, setDisplayText] = useState('');
+    const [typingDone, setTypingDone] = useState(false);
+    const [activePhoto, setActivePhoto] = useState(null);
+
+    const mainMessage = card.messages?.[0] || 'HAPPY LEVEL UP! Semoga hari-harimu selalu seru dan penuh keceriaan seperti game retro klasik ini!';
+
+    // Sound Synthesis (Web Audio API)
+    const initAudio = () => {
+        if (!audioCtxRef.current) {
+            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+            audioCtxRef.current.resume();
+        }
+        return audioCtxRef.current;
+    };
+
+    const playCoinSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(987.77, now); // B5
+            osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        } catch(e) {}
+    };
+
+    const playJumpSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(850, now + 0.15);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } catch(e) {}
+    };
+
+    const playBumpSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(120, now);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } catch(e) {}
+    };
+
+    const startBgm = () => {
+        if (bgmIntervalRef.current) clearInterval(bgmIntervalRef.current);
+        const ctx = initAudio();
+        let step = 0;
+        // Simple upbeat retro arpeggio melody
+        const melody = [
+            261.63, 329.63, 392.00, 523.25,
+            293.66, 349.23, 440.00, 587.33,
+            329.63, 392.00, 493.88, 659.25,
+            349.23, 440.00, 523.25, 698.46
+        ];
+        
+        bgmIntervalRef.current = setInterval(() => {
+            if (isMuted || gameStage === 'cover') return;
+            try {
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = melody[step % melody.length];
+                gain.gain.setValueAtTime(0.03, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+                step++;
+            } catch(e){}
+        }, 250);
+    };
+
+    const stopBgm = () => {
+        if (bgmIntervalRef.current) {
+            clearInterval(bgmIntervalRef.current);
+            bgmIntervalRef.current = null;
+        }
+    };
+
+    // Handle Mute Toggle
+    const handleMuteToggle = () => {
+        const nextMute = !isMuted;
+        setIsMuted(nextMute);
+        if (!nextMute) {
+            initAudio();
+            if (gameStage !== 'cover') {
+                startBgm();
+            }
+        } else {
+            stopBgm();
+        }
+    };
+
+    // Insert Coin Trigger
+    const handleInsertCoin = () => {
+        playCoinSound();
+        setCredit(c => c + 1);
+        setTimeout(() => {
+            setGameStage('playing');
+            if (!isMuted) startBgm();
+        }, 600);
+    };
+
+    // Game loop (Canvas)
+    useEffect(() => {
+        if (gameStage !== 'playing') return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+
+        canvas.width = 480;
+        canvas.height = 320;
+
+        heroXRef.current = 50;
+        heroYRef.current = 240;
+        heroVyRef.current = 0;
+        isJumpingRef.current = false;
+        particlesRef.current = [];
+
+        const blockX = 240;
+        const blockY = 160;
+        const blockW = 32;
+        const blockH = 32;
+
+        let hasHitBlock = false;
+
+        const update = () => {
+            // Apply gravity
+            if (isJumpingRef.current) {
+                heroYRef.current += heroVyRef.current;
+                heroVyRef.current += 0.8; // gravity
+                if (heroYRef.current >= 240) {
+                    heroYRef.current = 240;
+                    isJumpingRef.current = false;
+                    heroVyRef.current = 0;
+                }
+            }
+
+            // Move hero to block
+            if (!hasHitBlock) {
+                if (heroXRef.current < blockX) {
+                    heroXRef.current += 1.8;
+                } else {
+                    // Trigger Jump under the block
+                    if (!isJumpingRef.current) {
+                        isJumpingRef.current = true;
+                        heroVyRef.current = -11;
+                        playJumpSound();
+                    }
+                }
+            }
+
+            // Collision check with block (bottom check)
+            if (isJumpingRef.current && heroVyRef.current < 0 && !hasHitBlock) {
+                const headX = heroXRef.current + 12;
+                const headY = heroYRef.current;
+                if (headX >= blockX && headX <= blockX + blockW && headY <= blockY + blockH && headY >= blockY) {
+                    // HIT!
+                    hasHitBlock = true;
+                    heroVyRef.current = 3; // Bounce back down
+                    blockBounceRef.current = -12;
+                    playBumpSound();
+
+                    // Spawn pixel particles
+                    const pCols = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444'];
+                    for (let i = 0; i < 35; i++) {
+                        particlesRef.current.push({
+                            x: blockX + 16,
+                            y: blockY + 16,
+                            vx: (Math.random() - 0.5) * 6,
+                            vy: (Math.random() - 0.8) * 8,
+                            size: Math.random() * 4 + 2,
+                            color: pCols[Math.floor(Math.random() * pCols.length)],
+                            life: 1,
+                            decay: 0.02 + Math.random() * 0.02
+                        });
+                    }
+
+                    // Proceed to revealed stage shortly
+                    setTimeout(() => {
+                        setGameStage('revealed');
+                        stopBgm();
+                    }, 1500);
+                }
+            }
+
+            // Animate block bounce back
+            if (blockBounceRef.current < 0) {
+                blockBounceRef.current += 1.5;
+            } else {
+                blockBounceRef.current = 0;
+            }
+
+            // Update particles
+            particlesRef.current.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // gravity
+                p.life -= p.decay;
+                if (p.life <= 0) {
+                    particlesRef.current.splice(idx, 1);
+                }
+            });
+        };
+
+        const draw = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Sky
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ground (pixelated green line)
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(0, 260, canvas.width, 60);
+            ctx.fillStyle = '#047857';
+            ctx.fillRect(0, 260, canvas.width, 6);
+
+            // Draw Mystery Block
+            ctx.save();
+            ctx.translate(0, blockBounceRef.current);
+            ctx.fillStyle = hasHitBlock ? '#475569' : '#fbbf24';
+            ctx.fillRect(blockX, blockY, blockW, blockH);
+            // Draw Question Mark ?
+            if (!hasHitBlock) {
+                ctx.fillStyle = '#78350f';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('?', blockX + 10, blockY + 23);
+            }
+            ctx.restore();
+
+            // Draw Hero (Cute 8-bit character)
+            ctx.fillStyle = '#ef4444'; // Red shirt
+            ctx.fillRect(heroXRef.current + 4, heroYRef.current, 16, 20);
+            ctx.fillStyle = '#f59e0b'; // Head skin
+            ctx.fillRect(heroXRef.current + 6, heroYRef.current - 10, 12, 10);
+            ctx.fillStyle = '#000000'; // Eyes
+            ctx.fillRect(heroXRef.current + 14, heroYRef.current - 8, 2, 2);
+            ctx.fillStyle = '#1e3a8a'; // Pants
+            ctx.fillRect(heroXRef.current + 4, heroYRef.current + 20, 16, 4);
+            // Feet
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(heroXRef.current + 3, heroYRef.current + 24, 6, 2);
+            ctx.fillRect(heroXRef.current + 15, heroYRef.current + 24, 6, 2);
+
+            // Draw particles
+            particlesRef.current.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+            ctx.globalAlpha = 1.0;
+        };
+
+        const loop = () => {
+            update();
+            draw();
+            animId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        return () => {
+            cancelAnimationFrame(animId);
+        };
+    }, [gameStage]);
+
+    // Typewriter message
+    useEffect(() => {
+        if (gameStage !== 'revealed') return;
+        let idx = 0;
+        setDisplayText('');
+        setTypingDone(false);
+        const interval = setInterval(() => {
+            if (idx < mainMessage.length) {
+                setDisplayText(prev => prev + mainMessage.charAt(idx));
+                idx++;
+            } else {
+                clearInterval(interval);
+                setTypingDone(true);
+            }
+        }, 40);
+        return () => clearInterval(interval);
+    }, [gameStage]);
+
+    return (
+        <div className="fixed inset-0 overflow-hidden flex flex-col items-center justify-center p-4 bg-[#04020d] text-white select-none">
+            {/* CRT TV Filter Bezel */}
+            <div className="absolute inset-0 pointer-events-none z-50 crt-screen" style={{
+                background: 'radial-gradient(circle, transparent 70%, rgba(0,0,0,0.65) 100%)',
+                boxShadow: 'inset 0 0 100px rgba(0,0,0,0.8)'
+            }} />
+            <div className="absolute inset-0 pointer-events-none z-50 scanlines" />
+
+            {/* Mute Button */}
+            <button 
+                onClick={handleMuteToggle} 
+                style={{
+                    position: 'absolute', top: '15px', right: '15px', zIndex: 60,
+                    border: '2px solid #10b981', background: 'rgba(16, 185, 129, 0.1)',
+                    color: '#10b981', padding: '0.4rem 0.8rem', fontFamily: 'monospace',
+                    fontSize: '0.7rem', cursor: 'pointer', borderRadius: '4px'
+                }}
+            >
+                {isMuted ? 'UNMUTE AUDIO' : 'MUTE AUDIO'}
+            </button>
+
+            {/* COVER SCREEN */}
+            {gameStage === 'cover' && (
+                <div className="relative flex flex-col items-center justify-center text-center p-6 border-4 border-dashed border-purple-500 bg-[#0d0726]/90 rounded-2xl max-w-sm w-full z-10"
+                    style={{ boxShadow: '0 0 30px rgba(168, 85, 247, 0.4)' }}>
+                    <div style={{ fontSize: '3rem', animation: 'bounceArcade 1s infinite alternate' }}>🎮</div>
+                    <h1 className="text-3xl font-extrabold tracking-wider text-green-400 mb-2 mt-4" style={{ fontFamily: 'monospace', textShadow: '0 0 10px #10b981' }}>
+                        RETRO ARCADE
+                    </h1>
+                    <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#c084fc', marginBottom: '2rem' }}>
+                        INSERT COIN TO START THE MISSION
+                    </p>
+
+                    <button 
+                        onClick={handleInsertCoin}
+                        className="px-6 py-3 bg-[#fbbf24] text-amber-950 font-bold border-4 border-amber-600 rounded-lg active:scale-95 transition-transform"
+                        style={{ fontFamily: 'monospace', fontSize: '1rem', boxShadow: '0 4px 0 #b45309' }}
+                    >
+                        🪙 INSERT COIN
+                    </button>
+                    
+                    <div className="mt-4 text-xs text-slate-400" style={{ fontFamily: 'monospace' }}>
+                        CREDITS: {credit}
+                    </div>
+                </div>
+            )}
+
+            {/* PLAYING SCREEN */}
+            {gameStage === 'playing' && (
+                <div className="relative flex flex-col items-center justify-center z-10 border-4 border-[#334155] rounded-xl overflow-hidden bg-[#090d16]">
+                    <div className="w-full bg-[#1e293b] px-4 py-1 text-center font-bold tracking-widest text-[#fbbf24] border-b-2 border-slate-600 text-xs" style={{ fontFamily: 'monospace' }}>
+                        MISSION 1: BREAK THE BLOCK
+                    </div>
+                    <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto', display: 'block' }} />
+                </div>
+            )}
+
+            {/* REVEALED CONTENT */}
+            {gameStage === 'revealed' && (
+                <div className="relative z-10 max-w-md w-full flex flex-col items-center justify-center bg-[#07050f]/95 border-2 border-purple-500 rounded-2xl p-6 overflow-y-auto max-h-[90vh]"
+                    style={{ boxShadow: '0 0 35px rgba(168,85,247,0.3)' }}>
+                    <div className="text-center w-full mb-4">
+                        <div className="inline-block px-3 py-1 bg-red-600/30 border border-red-500 text-red-300 font-bold text-xs rounded mb-2" style={{ fontFamily: 'monospace' }}>
+                            ★ HIGH SCORE ACQUIRED ★
+                        </div>
+                        <h2 className="text-2xl font-black text-yellow-400" style={{ fontFamily: 'monospace' }}>
+                            {card.title}
+                        </h2>
+                        <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#a78bfa', marginTop: '4px' }}>
+                            FOR: {card.recipient_name}
+                        </p>
+                    </div>
+
+                    {/* Photos in Polaroid Frames */}
+                    {card.photos && card.photos.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-4 my-4">
+                            {card.photos.map((p, idx) => (
+                                <div key={idx} 
+                                    onClick={() => setActivePhoto(p)}
+                                    className="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer transform hover:scale-105 transition-transform"
+                                    style={{ width: '120px' }}
+                                >
+                                    <img src={p} alt="Polaroid capture" className="w-full h-24 object-cover rounded" />
+                                    <div className="text-[0.5rem] font-mono text-center text-slate-500 mt-1">PIC_00{idx+1}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Score Typing Box */}
+                    <div className="w-full p-4 bg-[#110c24] border border-purple-900 rounded-xl font-mono text-xs leading-relaxed text-[#22d3ee] min-h-[100px] border-dashed">
+                        {displayText}
+                        {!typingDone && <span className="animate-pulse">_</span>}
+                    </div>
+
+                    {/* Sender Sign */}
+                    <div className="mt-5 text-right w-full font-mono text-xs text-amber-400">
+                        — FROM: {card.sender_name}
+                    </div>
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL */}
+            {activePhoto && (
+                <div onClick={() => setActivePhoto(null)} className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4">
+                    <div onClick={(e)=>e.stopPropagation()} className="relative max-w-lg w-full bg-slate-950 p-2 border border-slate-700 rounded-2xl">
+                        <button onClick={() => setActivePhoto(null)} className="absolute -top-10 right-0 text-white font-mono text-sm border border-white/30 bg-white/10 px-2 py-1 rounded">CLOSE [X]</button>
+                        <img src={activePhoto} alt="Zoomed capture" className="w-full h-auto rounded-lg max-h-[80vh] object-contain" />
+                    </div>
+                </div>
+            )}
+
+            {/* Styling */}
+            <style>{`
+                @keyframes bounceArcade { 
+                    0% { transform: translateY(0) scale(1); } 
+                    100% { transform: translateY(-8px) scale(1.05); } 
+                }
+                .scanlines {
+                    background: linear-gradient(
+                        rgba(18, 16, 16, 0) 50%, 
+                        rgba(0, 0, 0, 0.25) 50%
+                    );
+                    background-size: 100% 4px;
+                }
+                .crt-screen::before {
+                    content: " ";
+                    display: block;
+                    position: absolute;
+                    top: 0; left: 0; bottom: 0; right: 0;
+                    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+                    z-index: 2;
+                    background-size: 100% 2px, 3px 100%;
+                    pointer-events: none;
+                }
+            `}</style>
+        </div>
+    );
+}

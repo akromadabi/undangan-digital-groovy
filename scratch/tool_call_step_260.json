@@ -1,0 +1,12 @@
+{
+  "AllowMultiple": "false",
+  "Description": "\"Register cyberpunk in GreetingCard model templates list.\"",
+  "EndLine": "47",
+  "Instruction": "\"Add cyberpunk to templates array in GreetingCard.php\"",
+  "ReplacementContent": "\"        'cosmicdrift'   => 'Cosmic Drift 🌌',\\n        'retroarcade'   => 'Retro Arcade 👾',\\n        'cyberpunk'     => 'Cyberpunk Decryptor 🤖',\\n    ];\"",
+  "StartLine": "43",
+  "TargetContent": "\"        'cosmicdrift'   => 'Cosmic Drift 🌌',\\n        'retroarcade'   => 'Retro Arcade 👾',\\n    ];\"",
+  "TargetFile": "\"c:\\\\laragon\\\\www\\\\Undangan Digital\\\\app\\\\Models\\\\GreetingCard.php\"",
+  "toolAction": "\"Registering cyberpunk template in Model\"",
+  "toolSummary": "\"Registering cyberpunk template in Model\""
+}

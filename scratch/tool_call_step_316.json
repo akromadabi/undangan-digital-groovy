@@ -1,0 +1,8 @@
+{
+  "Description": "\"Add bioluminescent to template validations in GreetingCardController.\"",
+  "Instruction": "\"Add bioluminescent template key to store and update validation lists\"",
+  "ReplacementChunks": "[{\"AllowMultiple\":false,\"EndLine\":53,\"ReplacementContent\":\"            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze,cosmicdrift,retroarcade,cyberpunk,bioluminescent',\",\"StartLine\":51,\"TargetContent\":\"            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze,cosmicdrift,retroarcade,cyberpunk',\"},{\"AllowMultiple\":false,\"EndLine\":108,\"ReplacementContent\":\"            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze,cosmicdrift,retroarcade,cyberpunk,bioluminescent',\",\"StartLine\":106,\"TargetContent\":\"            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze,cosmicdrift,retroarcade,cyberpunk',\"}]",
+  "TargetFile": "\"c:\\\\laragon\\\\www\\\\Undangan Digital\\\\app\\\\Http\\\\Controllers\\\\Dashboard\\\\GreetingCardController.php\"",
+  "toolAction": "\"Updating validation rules to support bioluminescent\"",
+  "toolSummary": "\"Updating validation rules to support bioluminescent\""
+}

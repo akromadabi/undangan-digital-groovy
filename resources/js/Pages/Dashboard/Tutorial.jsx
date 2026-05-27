@@ -494,8 +494,188 @@ export const FAQ_DATABASE = [
             'Petugas penerima tamu di lokasi dapat langsung memindai (scan) kode QR tersebut menggunakan kamera ponsel untuk mencatat kehadiran tamu secara real-time ke dalam sistem.'
         ],
         mockup: null
+    },
+    {
+        id: 'faq-tambah-foto',
+        category: 'mulai-cepat',
+        question: '22. Bagaimana cara menambah foto baru ke dalam pustaka media/galeri?',
+        answer: 'Anda dapat mengunggah foto baru (format JPG, PNG, atau WEBP) ke dalam pustaka media sebelum memasangnya sebagai foto mempelai, sampul, atau album galeri.',
+        keywords: ['tambah foto', 'unggah foto', 'upload gambar', 'masukkan foto', 'galeri', 'pustaka media', 'media library'],
+        steps: [
+            'Masuk ke menu "Galeri & Media" di sidebar dashboard.',
+            'Klik area bertuliskan "Upload Foto / Seret File Ke Sini" di bagian atas halaman.',
+            'Pilih file foto dari penyimpanan komputer atau handphone Anda (maksimal ukuran 5MB per file).',
+            'Tunggu hingga proses unggah selesai 100%.',
+            'Foto baru Anda akan otomatis muncul di barisan pertama grid album media dan siap untuk digunakan di berbagai bagian undangan.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-beda-album-galeri',
+        category: 'desain-tema',
+        question: '23. Apa perbedaan antara Album Galeri (Gallery) dan Pustaka Media?',
+        answer: 'Pustaka Media adalah tempat penyimpanan/gudang seluruh foto yang Anda unggah ke sistem. Sedangkan Album Galeri adalah foto-foto pilihan yang sengaja Anda aktifkan untuk tampil secara khusus di halaman undangan.',
+        keywords: ['beda album', 'galeri', 'gallery', 'pustaka media', 'tampil foto', 'album galeri', 'perbedaan'],
+        steps: [
+            'Pustaka Media menampung semua gambar yang Anda upload, baik yang digunakan sebagai foto mempelai, foto cover, maupun foto cadangan.',
+            'Foto di Pustaka Media tidak akan tampil di undangan sebelum Anda memberikan centang aktif (Quick-Toggle) atau menghubungkannya ke bagian tertentu.',
+            'Album Galeri adalah bagian section khusus di undangan digital yang menampilkan kompilasi foto-foto kebersamaan Anda dan pasangan.',
+            'Untuk menampilkan foto di Album Galeri, cukup centang kotak di pojok kanan atas foto pada grid Pustaka Media.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-cara-crop',
+        category: 'desain-tema',
+        question: '24. Bagaimana cara memotong (crop) foto mempelai atau sampul secara khusus?',
+        answer: 'Untuk memotong atau mengkrop foto dengan rasio tertentu (seperti lingkaran untuk mempelai atau portrait untuk sampul), Anda dapat menggunakan fitur reposisi interaktif langsung di dashboard.',
+        keywords: ['crop', 'krop', 'potong', 'pangkas', 'mempelai', 'lingkaran', 'bulat', 'potong foto'],
+        steps: [
+            'Buka menu "Galeri & Media" dan klik pada foto yang ingin Anda potong/crop.',
+            'Klik tombol "Edit / Crop" atau lihat pada panel detail di sebelah kanan.',
+            'Gunakan kontrol Zoom dan drag gambar langsung untuk mengarahkan fokus ke bagian yang ingin dipertahankan.',
+            'Pilih preset cepat yang sesuai (seperti Fokus Wajah, Penuhi Lebar, atau Sesuaikan) jika ingin pemotongan otomatis.',
+            'Klik "Simpan" atau "Terapkan Posisi" untuk memperbarui tampilan foto di undangan.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-foto-tidak-pas',
+        category: 'desain-tema',
+        question: '25. Mengapa posisi foto saya terlihat tidak pas, terpotong, atau tidak rata?',
+        answer: 'Hal ini biasanya disebabkan oleh perbedaan orientasi foto asli (landscape/lebar) dengan wadah tampilan undangan yang mayoritas berbentuk vertikal (portrait 9:16) untuk layar HP.',
+        keywords: ['tidak pas', 'terpotong', 'miring', 'tidak rata', 'pecah', 'kepotong', 'posisi salah', 'gepeng', 'lonjong'],
+        steps: [
+            'Gunakan foto berorientasi Portrait (tegak) untuk hasil terbaik di halaman Sampul/Cover dan Pembuka.',
+            'Jika menggunakan foto Landscape, gunakan fitur Reposisi Visual di Galeri untuk menggeser sumbu X/Y agar fokus gambar berada di tengah.',
+            'Gunakan slider Zoom untuk memperkecil gambar jika bagian penting foto terpotong di luar bingkai.',
+            'Gunakan tombol preset "Fokus Wajah" untuk menaikkan posisi fokus foto ke area atas bingkai agar kepala mempelai tidak terpotong.',
+            'Pastikan ukuran file foto Anda tidak terlalu besar agar proses muat ulang reposisi di server berjalan lancar.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-slideshow-cover',
+        category: 'desain-tema',
+        question: '26. Bagaimana cara mengaktifkan slideshow multi-foto pada Sampul atau Pembuka?',
+        answer: 'Anda dapat mengaktifkan lebih dari satu foto untuk dipasang di bagian Sampul (Cover) atau Pembuka (Opening) secara bersamaan. Sistem akan otomatis menampilkan slideshow dengan efek transisi Ken Burns (zoom-out lambat) dan cross-fade (opacity) yang sangat mulus secara bergantian setiap 6 detik. Fitur premium ini juga sudah didukung di seluruh 12 tema undangan digital.',
+        keywords: ['slideshow', 'multi-foto', 'banyak foto', 'sampul', 'cover', 'pembuka', 'opening', 'ken burns', 'ganti foto', 'slide', 'transisi'],
+        steps: [
+            'Masuk ke dashboard, lalu buka menu "Galeri & Media".',
+            'Pilih foto yang ingin Anda jadikan Sampul/Pembuka.',
+            'Pada detail pengaturan foto, aktifkan switch "Sampul Undangan (Cover)" atau "Foto Pembuka (Opening)".',
+            'Ulangi langkah di atas untuk memilih foto ke-2, ke-3, dst. yang ingin Anda gabungkan ke dalam slideshow.',
+            'Anda dapat melihat logo indikator "SAMPUL" atau "PEMBUKA" menyala di beberapa foto sekaligus pada grid galeri Anda.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-reposition-preset',
+        category: 'desain-tema',
+        question: '27. Bagaimana cara memotong (crop) atau mengatur posisi foto agar pas dengan layar HP?',
+        answer: 'Agar foto mempelai atau sampul tampil sempurna di layar HP tamu undangan, kami menyediakan fitur simulasi layar ponsel vertikal (9:16) interaktif. Anda dapat menggeser posisi foto secara langsung, mengatur zoom, atau menggunakan tombol preset edit cepat yang otomatis menyesuaikan rasio foto.',
+        keywords: ['crop', 'krop', 'potong', 'geser', 'reposisi', 'posisi foto', 'wajah', 'fokus', 'zoom', 'preset', 'edit cepat', 'vertikal', 'layar hp'],
+        steps: [
+            'Buka menu "Galeri & Media" di dashboard Anda.',
+            'Klik pada salah satu foto yang sudah terpasang sebagai Sampul, Pembuka, atau Mempelai.',
+            'Panel "Simulasi Tampilan HP" akan muncul. Anda dapat menggeser (drag) gambar secara langsung di layar HP simulator untuk menyesuaikan posisinya.',
+            'Gunakan slider Zoom untuk memperbesar/memperkecil gambar, atau geser sumbu X/Y.',
+            'Untuk edit cepat, klik salah satu tombol preset: "Fokus Wajah" (fokus area atas/wajah), "Penuhi Lebar" (memenuhi lebar layar), atau "Sesuaikan" (menampilkan seluruh gambar utuh).',
+            'Klik "Terapkan Posisi" di bagian bawah untuk menyimpan perubahan.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-bulk-toggle',
+        category: 'desain-tema',
+        question: '28. Bagaimana cara mengaktifkan atau menyembunyikan banyak foto sekaligus di album galeri?',
+        answer: 'Jika Anda memiliki puluhan foto di pustaka media dan ingin mengelola status tampilnya di album undangan secara cepat, Anda dapat menggunakan fitur Quick-Toggle (Bulk Checkbox) tanpa harus membuka detail foto satu per satu.',
+        keywords: ['centang', 'masal', 'bulk', 'banyak foto', 'aktifkan galeri', 'album', 'tampilkan foto', 'sembunyikan foto', 'cepat', 'checkbox'],
+        steps: [
+            'Masuk ke menu "Galeri & Media".',
+            'Pada pojok kanan atas setiap kartu foto di grid pustaka, terdapat kotak centang (Checkbox).',
+            'Cukup centang atau hilangkan centang pada kotak tersebut secara langsung.',
+            'Foto yang dicentang akan otomatis berstatus aktif dan langsung tampil di halaman Album Galeri undangan digital Anda.',
+            'Foto yang tidak dicentang akan tetap tersimpan di media library namun disembunyikan dari halaman undangan.'
+        ],
+        mockup: null
     }
 ];
+
+// Stemming logic for smart search
+const stemWord = (word) => {
+    if (!word || word.length <= 1) return [word];
+    let w = word.toLowerCase().trim();
+    
+    // Remove suffixes: -kan, -an, -i, -nya, -lah, -kah
+    w = w.replace(/(kan|an|i|nya|lah|kah)$/, '');
+    
+    const roots = new Set([w]);
+    
+    // Prefix rules
+    if (w.startsWith('meng') || w.startsWith('peng')) {
+        const rest = w.slice(4);
+        roots.add(rest);
+        roots.add('k' + rest);
+    } else if (w.startsWith('meny') || w.startsWith('peny')) {
+        const rest = w.slice(4);
+        roots.add('s' + rest);
+        roots.add(rest);
+    } else if (w.startsWith('men') || w.startsWith('pen')) {
+        const rest = w.slice(3);
+        roots.add(rest);
+        if (/^[aeiou]/.test(rest)) {
+            roots.add('t' + rest);
+        }
+    } else if (w.startsWith('mem') || w.startsWith('pem')) {
+        const rest = w.slice(3);
+        roots.add(rest);
+        if (/^[aeiou]/.test(rest)) {
+            roots.add('p' + rest);
+        }
+    } else if (w.startsWith('me') || w.startsWith('pe')) {
+        roots.add(w.slice(2));
+    } else if (w.startsWith('di')) {
+        roots.add(w.slice(2));
+    } else if (w.startsWith('ber') || w.startsWith('per')) {
+        roots.add(w.slice(3));
+    } else if (w.startsWith('ter')) {
+        roots.add(w.slice(3));
+    } else if (w.startsWith('ke')) {
+        roots.add(w.slice(2));
+    }
+    
+    return Array.from(roots).filter(r => r.length > 1);
+};
+
+const isMatch = (targetText, queryText) => {
+    if (!queryText) return true;
+    const cleanQuery = queryText.toLowerCase().trim();
+    if (!targetText) return false;
+    const cleanTarget = targetText.toLowerCase();
+
+    // 1. Simple substring check first
+    if (cleanTarget.includes(cleanQuery)) return true;
+
+    // 2. Tokenize and stem query
+    const queryTokens = cleanQuery.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, " ").split(/\s+/).filter(Boolean);
+    if (queryTokens.length === 0) return false;
+
+    // Tokenize target
+    const targetTokens = cleanTarget.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, " ").split(/\s+/).filter(Boolean);
+
+    // Get all possible roots for target tokens
+    const targetRoots = new Set();
+    targetTokens.forEach(token => {
+        stemWord(token).forEach(r => targetRoots.add(r));
+    });
+
+    // For query, we want ALL words in query to have a matching root in the target text
+    return queryTokens.every(qToken => {
+        const qRoots = stemWord(qToken);
+        return qRoots.some(qRoot => targetRoots.has(qRoot) || cleanTarget.includes(qRoot));
+    });
+};
 
 export default function Tutorial() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -565,13 +745,13 @@ export default function Tutorial() {
             if (activeCategory !== 'semua' && faq.category !== activeCategory) {
                 return false;
             }
-            // Filter by Search Query (keywords, title, answer)
+            // Filter by Search Query (keywords, title, answer, steps)
             if (searchQuery.trim() !== '') {
-                const query = searchQuery.toLowerCase();
-                const matchesQuestion = faq.question.toLowerCase().includes(query);
-                const matchesAnswer = faq.answer.toLowerCase().includes(query);
-                const matchesKeywords = faq.keywords.some(kw => kw.includes(query));
-                return matchesQuestion || matchesAnswer || matchesKeywords;
+                const matchesQuestion = isMatch(faq.question, searchQuery);
+                const matchesAnswer = isMatch(faq.answer, searchQuery);
+                const matchesKeywords = faq.keywords ? faq.keywords.some(kw => isMatch(kw, searchQuery)) : false;
+                const matchesSteps = faq.steps ? faq.steps.some(step => isMatch(step, searchQuery)) : false;
+                return matchesQuestion || matchesAnswer || matchesKeywords || matchesSteps;
             }
             return true;
         });

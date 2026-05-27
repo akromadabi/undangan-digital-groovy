@@ -1,5 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import { AlertTriangle, Trash2, Star } from 'lucide-react';
 
 const defaultEvent = {
     event_type: 'akad', event_name: 'Akad Nikah', event_date: '',
@@ -68,7 +69,7 @@ export default function Acara({ events }) {
 
                 {Object.keys(errors).length > 0 && (
                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-start gap-2.5 shadow-sm">
-                        <span className="text-lg">⚠️</span>
+                        <AlertTriangle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
                         <div>
                             <div className="font-semibold text-red-800">Gagal menyimpan data acara. Silakan periksa kembali:</div>
                             <ul className="list-disc list-inside text-xs mt-1 text-red-600 space-y-0.5">
@@ -91,7 +92,7 @@ export default function Acara({ events }) {
                 {/* Acara Utama Selector */}
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="text-lg">⭐</span>
+                        <Star size={16} className="text-amber-500 fill-amber-500 flex-shrink-0" />
                         <div className="font-semibold text-amber-800 text-sm">Acara Utama</div>
                     </div>
                     <p className="text-amber-600 text-xs mb-3">Pilih acara yang dijadikan referensi untuk countdown dan Save The Date di undangan.</p>
@@ -119,7 +120,10 @@ export default function Acara({ events }) {
                                 </h3>
                                 {data.events.length > 1 && (
                                     <button type="button" onClick={() => removeEvent(index)}
-                                        className="text-red-400 hover:text-red-600 text-sm font-medium">✕ Hapus</button>
+                                        className="text-red-400 hover:text-red-600 text-xs font-bold flex items-center gap-1 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors">
+                                        <Trash2 size={12} />
+                                        <span>Hapus</span>
+                                    </button>
                                 )}
                             </div>
 

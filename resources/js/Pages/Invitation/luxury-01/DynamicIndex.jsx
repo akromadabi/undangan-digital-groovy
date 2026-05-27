@@ -41,6 +41,8 @@ function formatDate(d) {
     return new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
+
 function formatTime(t) {
     if (!t || t === 'Selesai') return t || '';
     return String(t).substring(0, 5);
@@ -48,6 +50,9 @@ function formatTime(t) {
 
 function getStorageUrl(url, fallback) {
     if (!url) return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
     let cleanUrl = url.replace(/\\/g, '/');
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
     if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
@@ -730,10 +735,19 @@ export default function DynamicIndex({
         return (
             <section 
                 id="opening" 
-                className={`lx1-section lx1-section-opening lx1-opening-photo-mode ${!showPhotos ? 'lx1-no-photo-mode' : ''}`}
-                style={showPhotos && hasCoverPhoto ? { backgroundImage: `url(${getStorageUrl(openingBg)})` } : undefined}
+                className={`lx1-section lx1-section-opening lx1-opening-photo-mode ${!showPhotos ? 'lx1-no-photo-mode' : ''} relative overflow-hidden`}
             >
-                <div className="lx1-section-content">
+                {showPhotos && hasCoverPhoto && (
+                    <PremiumSlideshow
+                        images={openingBg.split(',')}
+                        positionX={hasOpeningPhoto ? invitation.opening_position_x : invitation.cover_position_x}
+                        positionY={hasOpeningPhoto ? invitation.opening_position_y : invitation.cover_position_y}
+                        zoom={hasOpeningPhoto ? invitation.opening_zoom : invitation.cover_zoom}
+                        className="absolute inset-0 w-full h-full z-0"
+                        imgClassName="absolute inset-0 w-full h-full object-cover"
+                    />
+                )}
+                <div className="lx1-section-content relative z-10">
                     <Reveal variant="down">
                         <h3 className="lx1-title-photo">{t('invitation.wedding_of')}</h3>
                     </Reveal>
@@ -803,6 +817,10 @@ export default function DynamicIndex({
                                                 src={getStorageUrl(groom.photo, ASSETS.groom)} 
                                                 alt={groom.nickname} 
                                                 className="lx1-mempelai-photo" 
+                                                style={{
+                                                    objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                                    transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                                }}
                                             />
                                         </div>
                                     )}
@@ -831,6 +849,10 @@ export default function DynamicIndex({
                                                 src={getStorageUrl(bride.photo, ASSETS.bride)} 
                                                 alt={bride.nickname} 
                                                 className="lx1-mempelai-photo" 
+                                                style={{
+                                                    objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                                    transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                                }}
                                             />
                                         </div>
                                     )}
@@ -1406,9 +1428,12 @@ export default function DynamicIndex({
 
             {/* Buka Undangan Overlay Cover */}
             <div 
-                className={`lx1-cover-overlay ${isOpened ? 'lx1-opened' : ''} ${!showPhotos ? 'lx1-no-photo-mode' : ''}`}
-                style={showPhotos ? { backgroundImage: `url(${coverBgUrl})` } : undefined}
-            >
+                                className={`lx1-cover-overlay ${isOpened ? 'lx1-opened' : ''} ${!showPhotos ? 'lx1-no-photo-mode' : ''}`}
+                                style={showPhotos ? { 
+                                    backgroundImage: `url(${coverBgUrl})`,
+                                    backgroundPosition: `${invitation?.cover_position_x ?? 50}% ${invitation?.cover_position_y ?? 50}%`
+                                } : undefined}
+                            >
                 <div className="lx1-cover-content">
                     <h3 className="lx1-cover-title">{t('invitation.wedding_of').toUpperCase()}</h3>
                     <h1 className="lx1-cover-names">

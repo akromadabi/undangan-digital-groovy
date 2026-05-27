@@ -1,0 +1,12 @@
+{
+  "AllowMultiple": "false",
+  "Description": "\"Register the 'retroarcade' template in GreetingCard model templates array.\"",
+  "EndLine": "45",
+  "Instruction": "\"Add the retroarcade option in the templates array in GreetingCard.php\"",
+  "ReplacementContent": "\"    // Template labels\\n    public static array $templates = [\\n        'stillwithyou' => 'Still With You 💗',\\n        'giftforanita'  => 'Gift For Anita 🎁',\\n        'oceanbreeze'   => 'Ocean Breeze 🌊',\\n        'cosmicdrift'   => 'Cosmic Drift 🌌',\\n        'retroarcade'   => 'Retro Arcade 👾',\\n    ];\"",
+  "StartLine": "38",
+  "TargetContent": "\"    // Template labels\\n    public static array $templates = [\\n        'stillwithyou' => 'Still With You 💗',\\n        'giftforanita'  => 'Gift For Anita 🎁',\\n        'oceanbreeze'   => 'Ocean Breeze 🌊',\\n        'cosmicdrift'   => 'Cosmic Drift 🌌',\\n    ];\"",
+  "TargetFile": "\"c:\\\\laragon\\\\www\\\\Undangan Digital\\\\app\\\\Models\\\\GreetingCard.php\"",
+  "toolAction": "\"Registering retroarcade template in Model\"",
+  "toolSummary": "\"Registering retroarcade template in Model\""
+}
