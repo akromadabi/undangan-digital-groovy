@@ -343,7 +343,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 /* ═══════════════════════════════════════
    OPENING SECTION (Stunning vertical card mockup replicating a real TikTok video post)
    ═══════════════════════════════════════ */
-function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto }) {
+function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onToast }) {
     const { t, locale } = useTranslation(language);
     const isEn = t('invitation.save_the_date') === 'Save The Date';
     // Premium fallback Unsplash prewedding image so that it never looks like a plain black box
@@ -373,11 +373,45 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto }) {
 
     return (
         <section className="ttk-section" id="opening" style={{ padding: '0 0 20px 0' }}>
-            {/* Post Header */}
-            <div className="ttk-card__post-header" style={{ paddingLeft: '15px', paddingRight: '15px' }}>
-                <div className="ttk-card__post-avatar">❤️</div>
-                <div className="ttk-card__post-handle">wedding_announcement</div>
-                <i className="fas fa-check-circle ttk-card__post-badge" />
+            {/* Authentic TikTok Feed Header with Simulated Mobile Status Bar */}
+            <div className="ttk-feed-header">
+                {/* Status Bar */}
+                <div className="ttk-status-bar">
+                    <span>09:41</span>
+                    <div className="ttk-status-icons">
+                        <i className="fas fa-signal" />
+                        <i className="fas fa-wifi" />
+                        <i className="fas fa-battery-full" style={{ fontSize: '12px' }} />
+                    </div>
+                </div>
+
+                {/* TikTok Header Navigation */}
+                <div className="ttk-tiktok-nav">
+                    {/* Left: TV icon and LIVE indicator */}
+                    <div className="ttk-tiktok-nav__left" onClick={() => onToast && onToast(language === 'en' ? 'LIVE Broadcast Mode active 🎥' : 'Mode Siaran Langsung aktif 🎥')}>
+                        <i className="fas fa-tv" />
+                        <span className="ttk-tiktok-nav__live-badge">LIVE</span>
+                    </div>
+
+                    {/* Center: Tabs */}
+                    <div className="ttk-tiktok-nav__center">
+                        <span 
+                            className="ttk-tiktok-nav__tab ttk-tiktok-nav__tab--inactive"
+                            onClick={() => onToast && onToast(language === 'en' ? 'Following feed loaded' : 'Umpan Mengikuti dimuat')}
+                        >
+                            {isEn ? 'Following' : 'Mengikuti'}
+                        </span>
+                        <div className="ttk-tiktok-nav__tab ttk-tiktok-nav__tab--active">
+                            <span>{isEn ? 'For You' : 'Untuk Anda'}</span>
+                            <div className="ttk-tiktok-nav__active-line" />
+                        </div>
+                    </div>
+
+                    {/* Right: Search icon */}
+                    <div className="ttk-tiktok-nav__right" onClick={() => onToast && onToast(language === 'en' ? 'Search feature active' : 'Fitur pencarian aktif')}>
+                        <i className="fas fa-search" />
+                    </div>
+                </div>
             </div>
 
             {/* Photo opening card designed like a real TikTok video layout (pembuka pakai foto opening seperti tiktok biasa) */}
