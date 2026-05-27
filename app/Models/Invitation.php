@@ -19,6 +19,7 @@ class Invitation extends Model
         'closing_title',
         'closing_text',
         'cover_image',
+        'opening_image',
         'cover_title',
         'cover_subtitle',
         'layout_mode',

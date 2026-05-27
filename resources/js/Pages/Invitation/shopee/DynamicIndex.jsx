@@ -326,8 +326,12 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
     const showPhotos = parseBool(invitation?.show_photos, true);
 
     const banners = safeArr(invitation?.galleries || []).slice(0, 3).map(g => getStorageUrl(g.image_url));
-    if (banners.length === 0 && invitation?.cover_image) {
-        banners.push(getStorageUrl(invitation.cover_image));
+    if (banners.length === 0) {
+        if (invitation?.opening_image) {
+            banners.push(getStorageUrl(invitation.opening_image));
+        } else if (invitation?.cover_image) {
+            banners.push(getStorageUrl(invitation.cover_image));
+        }
     }
     if (banners.length === 0) {
         banners.push('https://picsum.photos/450/200');
@@ -676,7 +680,7 @@ function VideoTab({ invitation, galleries, setActiveTab }) {
 function LiveTab({ invitation, events }) {
     const safeEvents = safeArr(events);
     const isEn = invitation?.language === 'en';
-    const heroImg = getStorageUrl(invitation?.cover_image, '');
+    const heroImg = getStorageUrl(invitation?.opening_image || invitation?.cover_image, '');
 
     // Floating hearts simulation
     const [hearts, setHearts] = useState([]);

@@ -177,7 +177,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
         : (invitation?.cover_title || 'The Wedding');
-    const heroImg = getStorageUrl(invitation?.cover_image, null);
+    const heroImg = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null);
 
     return (
         <section id={id || "opening"} className="nf-opening">

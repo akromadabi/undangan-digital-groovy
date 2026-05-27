@@ -133,8 +133,12 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const getInitialTab = () => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
-            if (params.get('tab') === 'pengaturan') {
-                return 'pengaturan';
+            const tabParam = params.get('tab');
+            if (tabParam) return tabParam;
+
+            const savedTab = localStorage.getItem('theme_active_tab');
+            if (savedTab && ['tampilan', 'konten', 'pengaturan'].includes(savedTab)) {
+                return savedTab;
             }
         }
         return 'tampilan';
@@ -144,6 +148,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const handleTabChange = (tabKey) => {
         setActiveTab(tabKey);
         if (typeof window !== 'undefined') {
+            localStorage.setItem('theme_active_tab', tabKey);
             const url = new URL(window.location.href);
             if (tabKey === 'tampilan') {
                 url.searchParams.delete('tab');
@@ -189,11 +194,15 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const [isTutorialOpen, setIsTutorialOpen] = useState(false);
     const [isParticleModalOpen, setIsParticleModalOpen] = useState(false);
     const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
+    const [isOpeningModalOpen, setIsOpeningModalOpen] = useState(false);
+    const [openingImage, setOpeningImage] = useState(invitation?.opening_image || '');
+    const [openingUploading, setOpeningUploading] = useState(false);
+    const [openingSaving, setOpeningSaving] = useState(false);
     const [settingsSaving, setSettingsSaving] = useState(false);
 
     const SECTION_EDIT_ROUTES = {
         cover: null,
-        opening: '/content/teks-sambutan',
+        opening: null, // Sekarang ditangani oleh modal unggah foto opening di tempat
         closing: '/content/teks-sambutan',
         mempelai: '/content/mempelai',
         countdown: '/content/teks-sambutan',
@@ -206,7 +215,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
         livestream: '/content/acara',
     };
 
-    const isPhotoSection = (key) => ['cover', 'mempelai', 'gallery', 'love_story'].includes(key);
+    const isPhotoSection = (key) => ['cover', 'opening', 'mempelai', 'gallery', 'love_story'].includes(key);
 
     const saveSetting = useCallback(async (key, val) => {
         try {
@@ -283,6 +292,37 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
             setSaveMsg('Gagal menyimpan cover');
         }
         setCoverSaving(false);
+        setTimeout(() => setSaveMsg(''), 3000);
+    };
+
+    const handleOpeningImageUpload = async (file) => {
+        if (!file) return;
+        setOpeningUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'openings');
+        try {
+            const response = await axios.post(route('upload'), formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            setOpeningImage(response.data.url);
+        } catch (e) { console.error(e); }
+        setOpeningUploading(false);
+    };
+
+    const saveOpening = async () => {
+        setOpeningSaving(true);
+        try {
+            await axios.post(route('content.opening.save'), {
+                opening_image: openingImage,
+            });
+            setSaveMsg('Opening tersimpan!');
+            setTimeout(() => setPreviewKey(k => k + 1), 800);
+        } catch (e) {
+            console.error(e);
+            setSaveMsg('Gagal menyimpan opening');
+        }
+        setOpeningSaving(false);
         setTimeout(() => setSaveMsg(''), 3000);
     };
 
@@ -611,11 +651,13 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                 {layoutLocked && <span className="ml-1 text-[9px] text-gray-400 font-normal">(terkunci)</span>}
                                                 {planLocked && <span className="ml-1 text-[9px] text-amber-500 font-bold">(terkunci paket)</span>}
                                             </span>
-                                            {!locked && SECTION_EDIT_ROUTES.hasOwnProperty(section.section_key) && (
+                                            {((!locked && SECTION_EDIT_ROUTES.hasOwnProperty(section.section_key)) || ['cover', 'opening'].includes(section.section_key)) && (
                                                 <button
                                                     onClick={() => {
                                                         if (section.section_key === 'cover') {
                                                             setIsCoverModalOpen(true);
+                                                        } else if (section.section_key === 'opening') {
+                                                            setIsOpeningModalOpen(true);
                                                         } else {
                                                             router.visit(SECTION_EDIT_ROUTES[section.section_key]);
                                                         }
@@ -1223,6 +1265,84 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                 className="px-4 py-2 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl text-xs font-semibold hover:shadow-md disabled:opacity-50 transition-all"
                             >
                                 {coverSaving ? 'Menyimpan...' : 'Simpan Foto'}
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* Modal Upload Opening (rendered at root level using React Portal to prevent clipping) */}
+            {isOpeningModalOpen && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
+                    <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-[scaleIn_0.2s_ease-out] border border-gray-100">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <div>
+                                <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                    <span className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center text-[#c24b33]">
+                                        🖼️
+                                    </span>
+                                    Ubah Foto Opening
+                                </h3>
+                                <p className="text-[10px] text-gray-400 mt-0.5">Unggah foto terbaik sebagai gambar pembuka undangan Anda</p>
+                            </div>
+                            <button 
+                                onClick={() => setIsOpeningModalOpen(false)}
+                                className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
+                                title="Tutup"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-4">
+                            <div className="relative aspect-[4/3] max-w-[280px] mx-auto rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm">
+                                {openingImage ? (
+                                    <img src={openingImage} alt="Opening" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                                        <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <div className="text-[10px] mt-1">Belum ada gambar</div>
+                                    </div>
+                                )}
+                                {openingUploading && (
+                                    <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center text-white text-xs font-semibold">
+                                        Uploading...
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="text-center">
+                                <label className="inline-block px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 rounded-xl text-xs font-semibold cursor-pointer transition-colors shadow-xs">
+                                    {openingUploading ? 'Uploading...' : 'Pilih Foto Baru'}
+                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleOpeningImageUpload(e.target.files[0])} disabled={openingUploading} />
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-2">
+                            <button
+                                onClick={() => setIsOpeningModalOpen(false)}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-semibold transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    await saveOpening();
+                                    setIsOpeningModalOpen(false);
+                                }}
+                                disabled={openingSaving || openingUploading}
+                                className="px-4 py-2 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl text-xs font-semibold hover:shadow-md disabled:opacity-50 transition-all"
+                            >
+                                {openingSaving ? 'Menyimpan...' : 'Simpan Foto'}
                             </button>
                         </div>
                     </div>

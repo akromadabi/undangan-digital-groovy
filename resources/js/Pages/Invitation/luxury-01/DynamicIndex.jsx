@@ -720,7 +720,9 @@ export default function DynamicIndex({
 
     // Render 1. Opening
     const renderOpening = () => {
-        const hasCoverPhoto = !!invitation?.cover_image;
+        const hasOpeningPhoto = !!invitation?.opening_image;
+        const openingBg = hasOpeningPhoto ? invitation.opening_image : invitation?.cover_image;
+        const hasCoverPhoto = !!openingBg;
         const couples = safeArr(brideGrooms);
         const coupleNames = couples.map(b => b.nickname).join(' & ');
         const dateStr = formatDate(invitation?.wedding_date || events?.[0]?.event_date);
@@ -729,7 +731,7 @@ export default function DynamicIndex({
             <section 
                 id="opening" 
                 className={`lx1-section lx1-section-opening lx1-opening-photo-mode ${!showPhotos ? 'lx1-no-photo-mode' : ''}`}
-                style={showPhotos && hasCoverPhoto ? { backgroundImage: `url(${getStorageUrl(invitation.cover_image)})` } : undefined}
+                style={showPhotos && hasCoverPhoto ? { backgroundImage: `url(${getStorageUrl(openingBg)})` } : undefined}
             >
                 <div className="lx1-section-content">
                     <Reveal variant="down">

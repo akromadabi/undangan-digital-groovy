@@ -388,6 +388,12 @@ function OpeningSection({ invitation, brideGrooms }) {
                     </div>
                 )}
                 
+                {invitation.opening_image && (
+                    <div className="lx4-opening__photo-wrapper" style={{ margin: '30px auto', maxWidth: '320px', borderRadius: '16px', overflow: 'hidden', border: '4px solid #fff', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
+                        <img src={getStorageUrl(invitation.opening_image)} alt="Opening" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+                    </div>
+                )}
+                
                 <p className="lx4-opening__text" style={{ marginTop: '30px' }}>
                     {invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami menyampaikan kabar bahagia mengenai hari pernikahan kami.'}
                 </p>

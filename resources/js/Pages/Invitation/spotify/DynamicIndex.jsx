@@ -253,7 +253,7 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
         ? `${groom.nickname} & ${bride.nickname}`
         : (invitation?.cover_title || 'Bimo & Raras');
 
-    const coverBg = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto;
+    const coverBg = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null) || fallbackPhoto;
     const [playlistSrc, setPlaylistSrc] = useState(coverBg);
     const totalWishes = safeArr(wishes).length;
 

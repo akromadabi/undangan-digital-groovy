@@ -24,6 +24,13 @@ export default function HeroSection({ RevealDiv, brideGrooms, invitation, events
                     <div className="utary-hero__date-text">{invitation.event_date_formatted || 'Desember 2026'}</div>
                     <div className="utary-hero__venue">{events?.[0]?.venue_name || 'Club House Jakarta Garden City'}</div>
                 </RevealDiv>
+                {invitation.opening_image && (
+                    <RevealDiv>
+                        <div className="utary-hero__photo-wrapper" style={{ margin: '20px auto', maxWidth: '320px', borderRadius: '16px', overflow: 'hidden', border: '4px solid #fff', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
+                            <img src={invitation.opening_image} alt="Opening" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                        </div>
+                    </RevealDiv>
+                )}
                 <RevealDiv>
                     <div className="utary-hero__verse">
                         <p>&ldquo;{invitation.opening_ayat || 'Dan segala sesuatu Kami ciptakan berpasang-pasangan agar kamu mengingat (kebesaran Allah).'}&rdquo;</p>

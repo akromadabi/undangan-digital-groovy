@@ -305,30 +305,39 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 /* ═══════════════════════════════════════
    OPENING SECTION (Stunning vertical card mockup replicating a real TikTok video post)
    ═══════════════════════════════════════ */
-function OpeningSection({ invitation, language, fallbackPhoto }) {
+function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto }) {
     const { t, locale } = useTranslation(language);
     const isEn = t('invitation.save_the_date') === 'Save The Date';
     // Premium fallback Unsplash prewedding image so that it never looks like a plain black box
     const defaultOpeningPhoto = 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';
-    const photoUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto || defaultOpeningPhoto;
+    const photoUrl = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null) || fallbackPhoto || defaultOpeningPhoto;
+
+    const couples = safeArr(brideGrooms);
+    const groom = couples.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || couples[0] || {};
+    const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
+    const coupleName = (groom?.nickname && bride?.nickname)
+        ? `${groom.nickname} & ${bride.nickname}`
+        : (invitation?.cover_title || 'Bimo & Raras');
+
+    const groomTag = groom?.nickname ? groom.nickname.replace(/\s+/g, '') : 'Groom';
+    const brideTag = bride?.nickname ? bride.nickname.replace(/\s+/g, '') : 'Bride';
+    const defaultHashTags = `#${groomTag}${brideTag}Wedding #PernikahanViral`;
+    const hashTags = invitation?.cover_subtitle && invitation.cover_subtitle.includes('#') 
+        ? invitation.cover_subtitle 
+        : defaultHashTags;
 
     return (
-        <section className="ttk-section" id="opening">
+        <section className="ttk-section" id="opening" style={{ padding: '0 0 20px 0' }}>
             {/* Post Header */}
-            <div className="ttk-card__post-header">
+            <div className="ttk-card__post-header" style={{ paddingLeft: '15px', paddingRight: '15px' }}>
                 <div className="ttk-card__post-avatar">❤️</div>
                 <div className="ttk-card__post-handle">wedding_announcement</div>
                 <i className="fas fa-check-circle ttk-card__post-badge" />
             </div>
 
-            <Reveal variant="up">
-                <h2 className="ttk-section-title">{isEn ? 'Opening' : 'Salam'}</h2>
-                <p className="ttk-section-subtitle">{isEn ? 'Momen kebahagiaan kami' : 'Momen kebahagiaan kami'}</p>
-            </Reveal>
-
             {/* Photo opening card designed like a real TikTok video layout (pembuka pakai foto opening seperti tiktok biasa) */}
             <Reveal variant="zoom" delay={100}>
-                <div className="ttk-live__container" style={{ aspectRatio: '9/14', height: 'auto', minHeight: '480px' }}>
+                <div className="ttk-live__container" style={{ aspectRatio: '9/14', height: 'auto', minHeight: '480px', margin: '0 15px' }}>
                     {globalShowPhotos && photoUrl ? (
                         <div className="ttk-live__stream-bg" style={{ backgroundImage: `url(${photoUrl})` }} />
                     ) : (
@@ -347,9 +356,20 @@ function OpeningSection({ invitation, language, fallbackPhoto }) {
 
                     {/* Captions overlayed inside the vertical image exactly like a real TikTok! */}
                     <div style={{ position: 'absolute', bottom: '15px', left: '15px', right: '15px', zIndex: 3, textAlign: 'left' }}>
+                        {/* TikTok User handle verified block */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                            <span style={{ fontSize: '13px', fontWeight: 800, color: '#fff' }}>@wedding_announcement</span>
+                            <i className="fas fa-check-circle" style={{ color: '#20d5ec', fontSize: '11px' }} />
+                        </div>
+
+                        {/* The Wedding of caption */}
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', marginBottom: 6 }}>
+                            {isEn ? `The Wedding of ${coupleName}` : `Pernikahan dari ${coupleName}`}
+                        </div>
+
                         {invitation?.opening_ayat && (
-                            <div style={{ marginBottom: 12, background: 'rgba(0,0,0,0.5)', padding: 10, borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <p className="ttk-opening__ayat" style={{ fontSize: '14.5px', fontFamily: 'serif', direction: 'rtl', margin: '0 0 6px 0', textAlign: 'right', color: '#fff' }}>
+                            <div style={{ marginBottom: 10, background: 'rgba(0,0,0,0.5)', padding: 10, borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <p className="ttk-opening__ayat" style={{ fontSize: '14px', fontFamily: 'serif', direction: 'rtl', margin: '0 0 6px 0', textAlign: 'right', color: '#fff' }}>
                                     {invitation.opening_ayat}
                                 </p>
                                 {invitation?.opening_ayat_translation && (
@@ -364,9 +384,12 @@ function OpeningSection({ invitation, language, fallbackPhoto }) {
                                 )}
                             </div>
                         )}
-                        <p style={{ fontSize: '12.5px', lineHeight: '1.5', color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.8)', margin: 0 }}>
+                        <p style={{ fontSize: '12px', lineHeight: '1.4', color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.8)', margin: '0 0 8px 0' }}>
                             {invitation?.opening_text || "Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Anda untuk merayakan hari bahagia pernikahan kami."}
                         </p>
+                        <div style={{ fontSize: '11.5px', color: 'var(--ttk-cyan)', fontWeight: 700 }}>
+                            {hashTags}
+                        </div>
                     </div>
                 </div>
             </Reveal>
@@ -460,50 +483,13 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language }) {
                 {/* Bio text REMOVED per user feedback ("bio tidak perlu, cukup pakai anak ke dan nama ortu") */}
 
                 {/* Family sign-off */}
-                <div className="ttk-profile-card__parents" style={{ marginBottom: 15 }}>
+                <div className="ttk-profile-card__parents" style={{ marginBottom: 5 }}>
                     <div style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: 11, letterSpacing: 0.5, color: 'var(--ttk-cyan)', marginBottom: 4 }}>
                         {childOrderTranslated}
                     </div>
                     <div style={{ fontSize: 13, color: '#fff' }}>
                         {isEn ? `${fatherClean} & ${motherClean}` : `${fatherClean} & ${motherClean}`}
                     </div>
-                </div>
-
-                {/* Simulated TikTok profile grid tabs (Videos tab displaying photos) */}
-                <div className="ttk-profile-grid-tabs">
-                    <div className="ttk-profile-grid-tab active">
-                        <i className="fas fa-th" style={{ marginRight: 6 }} /> Videos
-                    </div>
-                    <div className="ttk-profile-grid-tab">
-                        <i className="far fa-heart" />
-                    </div>
-                    <div className="ttk-profile-grid-tab">
-                        <i className="far fa-bookmark" />
-                    </div>
-                </div>
-                
-                {/* Videos tab thumbnails layout with fake view count */}
-                <div className="ttk-profile-grid-content">
-                    {globalShowPhotos && samplePhotos.length > 0 ? (
-                        samplePhotos.map((ph, photoIdx) => (
-                            <div key={ph.id || photoIdx} className="ttk-profile-grid-photo">
-                                <img src={getStorageUrl(ph.image_url, '')} alt="Video thumbnail" />
-                                <div className="ttk-profile-grid-photo-views">
-                                    <i className="fas fa-play" /> {['1.2M', '840K', '2.4M'][photoIdx] || '450K'}
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        // Placeholder blocks in no-photo mode fallback
-                        [1, 2, 3].map((num) => (
-                            <div key={num} className="ttk-profile-grid-photo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#161823' }}>
-                                <i className="fas fa-music" style={{ fontSize: 16, color: 'var(--ttk-cyan)' }} />
-                                <div className="ttk-profile-grid-photo-views">
-                                    <i className="fas fa-play" /> {num * 250}K
-                                </div>
-                            </div>
-                        ))
-                    )}
                 </div>
             </div>
         );
@@ -728,7 +714,7 @@ function LiveStreamingSection({ events, invitation, language, onToast }) {
                     <div className="ttk-live__container">
                         <div 
                             className="ttk-live__stream-bg" 
-                            style={{ backgroundImage: `url(${getStorageUrl(invitation?.cover_image, 'https://picsum.photos/seed/live/640/360')})` }}
+                            style={{ backgroundImage: `url(${getStorageUrl(invitation?.opening_image || invitation?.cover_image, 'https://picsum.photos/seed/live/640/360')})` }}
                         />
                         
                         {/* Top HUD bar */}
@@ -1271,23 +1257,12 @@ function TikTokBottomBar({ activeSection, onNavigate, hasStream, hasGallery, has
     const { locale } = useTranslation(language);
     const isEn = locale === 'en';
 
-    // Map categories
+    // Map categories exactly per user instructions
     const isHome = activeSection === 'opening';
-    const isBride = activeSection === 'bride_groom';
-    const isRsvp = activeSection === 'rsvp';
-    const isInbox = ['love_story', 'gallery', 'bank'].includes(activeSection);
-    const isEvent = ['event', 'livestream', 'closing'].includes(activeSection);
-
-    // Resolve where click tabs jump
-    const handleInboxClick = () => {
-        if (hasStory) onNavigate('love_story');
-        else if (hasGallery) onNavigate('gallery');
-        else if (hasBank) onNavigate('bank');
-    };
-
-    const handleProfileClick = () => {
-        onNavigate('event');
-    };
+    const isDiscover = activeSection === 'event';
+    const isPlus = activeSection === 'gallery';
+    const isInbox = activeSection === 'rsvp';
+    const isProfile = activeSection === 'bride_groom';
 
     return (
         <nav className="ttk-bottom-nav">
@@ -1297,27 +1272,27 @@ function TikTokBottomBar({ activeSection, onNavigate, hasStream, hasGallery, has
                 <span>{isEn ? 'Home' : 'Beranda'}</span>
             </div>
 
-            {/* Temukan -> Mempelai */}
-            <div onClick={() => onNavigate('bride_groom')} className={`ttk-nav-item ${isBride ? 'is-active' : ''}`}>
+            {/* Temukan -> Event */}
+            <div onClick={() => onNavigate('event')} className={`ttk-nav-item ${isDiscover ? 'is-active' : ''}`}>
                 <i className="fas fa-compass" />
                 <span>{isEn ? 'Discover' : 'Temukan'}</span>
             </div>
 
-            {/* Center Plus Button -> RSVP */}
-            <div onClick={() => onNavigate('rsvp')} className="ttk-nav-item">
+            {/* Center Plus Button -> Gallery */}
+            <div onClick={() => onNavigate('gallery')} className={`ttk-nav-item ${isPlus ? 'is-active' : ''}`}>
                 <div className="ttk-nav-plus">
                     <i className="fas fa-plus" />
                 </div>
             </div>
 
-            {/* Kotak Masuk -> Story/Gallery/Bank */}
-            <div onClick={handleInboxClick} className={`ttk-nav-item ${isInbox ? 'is-active' : ''}`}>
+            {/* Kotak Masuk -> RSVP */}
+            <div onClick={() => onNavigate('rsvp')} className={`ttk-nav-item ${isInbox ? 'is-active' : ''}`}>
                 <i className="fas fa-comment-alt" />
                 <span>{isEn ? 'Inbox' : 'Kotak Masuk'}</span>
             </div>
 
-            {/* Profil -> Event/Closing */}
-            <div onClick={handleProfileClick} className={`ttk-nav-item ${isEvent ? 'is-active' : ''}`}>
+            {/* Profil -> Mempelai */}
+            <div onClick={() => onNavigate('bride_groom')} className={`ttk-nav-item ${isProfile ? 'is-active' : ''}`}>
                 <i className="fas fa-user" />
                 <span>{isEn ? 'Profile' : 'Profil'}</span>
             </div>

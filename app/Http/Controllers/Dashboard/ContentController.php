@@ -53,10 +53,11 @@ class ContentController extends Controller
             'opening_ayat_translation' => 'nullable|string',
             'opening_ayat_source' => 'nullable|string|max:200',
             'religion' => 'nullable|in:islam,kristen,hindu,buddha,umum',
+            'opening_image' => 'nullable|string|max:500',
         ]);
 
         $invitation = $this->getUserInvitation($request);
-        $invitation->update($request->only(['opening_title', 'opening_text', 'opening_ayat', 'opening_ayat_translation', 'opening_ayat_source', 'religion']));
+        $invitation->update($request->only(['opening_title', 'opening_text', 'opening_ayat', 'opening_ayat_translation', 'opening_ayat_source', 'religion', 'opening_image']));
 
         return back()->with('success', 'Opening berhasil disimpan.');
     }

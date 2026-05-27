@@ -595,6 +595,13 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                 </p>
                                                             </AnimateIn>
                                                         )}
+                                                        {invitation.opening_image && (
+                                                            <AnimateIn type="scaleIn" delay={150}>
+                                                                <div className="mx-auto rounded-2xl overflow-hidden my-4 max-w-[320px] shadow-lg border-4 border-white" style={{ borderColor: '#ffffff', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}>
+                                                                    <img src={invitation.opening_image} alt="Opening Photo" className="w-full h-auto object-cover aspect-[4/3]" />
+                                                                </div>
+                                                            </AnimateIn>
+                                                        )}
                                                         {invitation.opening_ayat && (
                                                             <AnimateIn type="fadeUp" delay={200}>
                                                                 <p className="text-base leading-relaxed opacity-70 mt-3" dir="auto" style={{ fontFamily: fonts.heading }}>{invitation.opening_ayat}</p>

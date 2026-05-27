@@ -79,6 +79,7 @@ class ThemeSettingsController extends Controller
                 'show_side_menu' => $invitation->show_side_menu,
                 'slug' => $invitation->slug,
                 'cover_image' => $invitation->cover_image,
+                'opening_image' => $invitation->opening_image,
                 'cover_title' => $invitation->cover_title,
                 'cover_subtitle' => $invitation->cover_subtitle,
                 'is_private' => $invitation->is_private,

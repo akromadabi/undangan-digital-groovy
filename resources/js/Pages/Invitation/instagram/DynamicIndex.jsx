@@ -297,6 +297,7 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
         : (invitation?.cover_title || 'Bimo & Raras');
 
     const coverBg = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto || '/images/demo/korea-11-768x512.jpg';
+    const openingBg = getStorageUrl(invitation?.opening_image, null) || coverBg;
 
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
     const eventDateStr = primaryEvent?.event_date || primaryEvent?.date;
@@ -351,8 +352,8 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
             </div>
 
             <div className="ig-opening-bg-container">
-                {globalShowPhotos && coverBg && (
-                    <div className="ig-opening-bg" style={{ backgroundImage: `url(${coverBg})` }} />
+                {globalShowPhotos && openingBg && (
+                    <div className="ig-opening-bg" style={{ backgroundImage: `url(${openingBg})` }} />
                 )}
                 <div className="ig-opening-overlay" />
             </div>
