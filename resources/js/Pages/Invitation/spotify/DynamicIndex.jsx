@@ -1605,6 +1605,38 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
         touchStartRef.current = null;
     };
 
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpened || !autoScrollEnabled || isSlideMode) return;
+
+        const handleUserInteraction = (e) => {
+            // Ignore if interaction is on floating buttons, RSVP form, player bar, or inputs
+            if (
+                e.target.closest('button') || 
+                e.target.closest('.spty-player') || 
+                e.target.closest('.spty-float') || 
+                e.target.closest('.spty-qr-overlay') ||
+                e.target.closest('.spty-qr-modal') ||
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select')
+            ) {
+                return;
+            }
+            setAutoScrollEnabled(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpened, autoScrollEnabled, isSlideMode]);
+
     // Auto scroll timer
     useEffect(() => {
         if (!isOpened || !autoScrollEnabled) return;
@@ -1637,11 +1669,13 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
     }, [isOpened, autoScrollEnabled, isSlideMode, resolvedSections.length]);
 
     const nextSlide = () => {
+        setAutoScrollEnabled(false);
         setActiveSlideIdx(prev => Math.min(prev + 1, resolvedSections.length - 1));
     };
 
     const prevSlide = () => {
-        setActiveSlideIdx(prev => Math.max(prev - 0, 0));
+        setAutoScrollEnabled(false);
+        setActiveSlideIdx(prev => Math.max(prev - 1, 0));
     };
 
     const jumpToSlide = (idx) => {
@@ -1651,6 +1685,7 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
     };
 
     const handleSeek = useCallback((percentage) => {
+        setAutoScrollEnabled(false);
         if (isSlideMode) {
             const targetIdx = Math.round(percentage * (resolvedSections.length - 1));
             jumpToSlide(targetIdx);
