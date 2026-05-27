@@ -1403,22 +1403,7 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
         }
     }, [isOpened, revealedSections.length, resolvedSections, isTypingUser, isTypingAi, typeQuestion]);
 
-    // Auto scroll progression trigger
-    useEffect(() => {
-        if (!isOpened || !autoScrollEnabled || isTypingUser || isTypingAi) return;
-        if (revealedSections.length === 0) return;
 
-        const lastKey = revealedSections[revealedSections.length - 1];
-        const lastIdx = resolvedSections.findIndex(s => s.section_key === lastKey);
-
-        if (lastIdx !== -1 && lastIdx < resolvedSections.length - 1) {
-            const nextSection = resolvedSections[lastIdx + 1];
-            const timer = setTimeout(() => {
-                typeQuestion(nextSection.section_key);
-            }, 2000);
-            return () => clearTimeout(timer);
-        }
-    }, [isOpened, autoScrollEnabled, revealedSections, isTypingUser, isTypingAi, resolvedSections, typeQuestion]);
 
     const layoutMode = invitation?.layout_mode || 'scroll';
 
@@ -1486,9 +1471,19 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
                     // If scrollTop did not change, we have reached the bottom or it cannot scroll
                     if (Math.abs(viewport.scrollTop - prevScrollTop) < 0.1) {
                         const isBottom = viewport.scrollHeight - viewport.scrollTop <= viewport.clientHeight + 25;
-                        const isLastSectionRevealed = revealedSections.includes(resolvedSections[resolvedSections.length - 1]?.section_key);
-                        if (isBottom && viewport.scrollTop > 5 && isLastSectionRevealed) {
-                            setAutoScrollEnabled(false);
+                        if (isBottom) {
+                            const isLastSectionRevealed = revealedSections.includes(resolvedSections[resolvedSections.length - 1]?.section_key);
+                            if (isLastSectionRevealed) {
+                                setAutoScrollEnabled(false);
+                            } else if (!isTypingUser && !isTypingAi && !typingSectionKeyRef.current) {
+                                // Trigger typing the next section immediately when hit the bottom of currently revealed sections!
+                                const lastKey = revealedSections[revealedSections.length - 1];
+                                const lastIdx = resolvedSections.findIndex(s => s.section_key === lastKey);
+                                if (lastIdx !== -1 && lastIdx < resolvedSections.length - 1) {
+                                    const nextSection = resolvedSections[lastIdx + 1];
+                                    typeQuestion(nextSection.section_key);
+                                }
+                            }
                         }
                     }
                 }, 25);
@@ -1496,7 +1491,7 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
         }
 
         return () => { if (timer) clearInterval(timer); };
-    }, [isOpened, autoScrollEnabled, isSlideMode, resolvedSections.length, isTypingUser, isTypingAi, revealedSections]);
+    }, [isOpened, autoScrollEnabled, isSlideMode, resolvedSections, isTypingUser, isTypingAi, revealedSections, typeQuestion]);
 
     const nextSlide = () => {
         setActiveSlideIdx(prev => Math.min(prev + 1, resolvedSections.length - 1));
