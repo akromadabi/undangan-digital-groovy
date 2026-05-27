@@ -1380,14 +1380,7 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
         };
     }, []);
 
-    // Scroll viewport to top of the latest section on new updates
-    useEffect(() => {
-        if (!isOpened) return;
-        const latestKey = revealedSections[revealedSections.length - 1];
-        if (latestKey) {
-            scrollToKey(latestKey);
-        }
-    }, [revealedSections.length, isOpened, scrollToKey]);
+
 
     // Initial typing trigger
     useEffect(() => {
@@ -1509,6 +1502,15 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
             });
         }
     }, []);
+
+    // Scroll viewport to top of the latest section on new updates
+    useEffect(() => {
+        if (!isOpened) return;
+        const latestKey = revealedSections[revealedSections.length - 1];
+        if (latestKey) {
+            scrollToKey(latestKey);
+        }
+    }, [revealedSections.length, isOpened, scrollToKey]);
 
     const jumpToSection = (idx, key) => {
         setSidebarOpen(false); // Auto close sidebar
