@@ -78,6 +78,27 @@ function getStorageUrl(url, fallback) {
 }
 ```
 
+### 2.3 Integrasi Multilingual (i18n) & Penerjemahan Bahasa
+Semua tema wajib mendukung multi-bahasa (Indonesia/Inggris) secara dinamis menggunakan hooks dari `@/i18n`. Jangan sekali-kali men-hardcode teks bahasa Indonesia saja.
+1. **Setup Hooks**:
+   Ambil status bahasa aktif dari data undangan yang dikirim backend:
+   ```js
+   import { useTranslation } from '@/i18n';
+
+   // Di dalam komponen utama DynamicIndex:
+   const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
+   const { t, locale } = useTranslation(activeLanguage);
+   const isEn = locale === 'en';
+   ```
+2. **Translasi dengan Fungsi `t`**:
+   Bungkus setiap teks statis menggunakan fungsi `t('key')` yang terdaftar di `resources/js/i18n.js`:
+   - Contoh: `{t('invitation.open')}` untuk tombol buka undangan.
+   - Contoh: `{t('invitation.days')}`, `{t('invitation.hours')}` untuk countdown.
+3. **Pencabangan Dinamis (Bilingual Switch)**:
+   Untuk teks yang tidak terdaftar di file pemetaan `i18n.js` atau memiliki tata bahasa yang berbeda secara struktural, gunakan percabangan string berbasis variabel `locale` atau `isEn`:
+   - Contoh: `locale === 'en' ? 'Groom & Bride' : 'Kedua Mempelai'`
+   - Pastikan format penulisan dan tanda hubung disesuaikan dengan bahasa aktif.
+
 ---
 
 ## 3. Aturan Global Penonaktifan Fitur (Global Override Mode)
@@ -111,6 +132,26 @@ Jika `invitation?.show_animations === false` (atau bernilai `0`):
 
 ### 4.1 Seksi Sampul (`CoverSection` / `Cover`)
 - Tampilkan logo monogram inisial melingkar di tengah.
+- **Dukungan Banyak Foto (Cover Slideshow)**: Cover mendukung satu atau beberapa foto sekaligus. Wajib diparsing dan dirender menggunakan `<PremiumSlideshow>` agar transisinya mulus:
+  ```js
+  const coverImages = useMemo(() => {
+      return (invitation?.cover_image || '')
+          .split(',')
+          .map(img => getStorageUrl(img.trim()))
+          .filter(Boolean);
+  }, [invitation?.cover_image]);
+  ```
+  Di dalam render JSX:
+  ```jsx
+  {showPhotos && coverImages.length > 0 && (
+      <PremiumSlideshow
+          images={coverImages}
+          positionX={invitation?.cover_position_x}
+          positionY={invitation?.cover_position_y}
+          zoom={invitation?.cover_zoom}
+      />
+  )}
+  ```
 - Tombol **"Buka Undangan"** wajib memicu fungsi pembukaan yang memutar musik latar (`autoplay`), membuka kuncian gulir layar (`overflow: auto`), dan memicu Fullscreen mode browser secara otomatis:
   ```js
   if (document.documentElement.requestFullscreen) {
@@ -118,7 +159,37 @@ Jika `invitation?.show_animations === false` (atau bernilai `0`):
   }
   ```
 
-### 4.2 Seksi Mempelai (`bride_groom` / `couple`)
+### 4.2 Seksi Pembuka / Opening (`opening`)
+Seksi pembuka harus ada dan terstruktur dengan kriteria berikut:
+- **Dukungan Banyak Foto (Opening Slideshow)**: Foto pembuka mendukung beberapa foto (slideshow). Wajib diparsing dan dirender menggunakan `<PremiumSlideshow>` dengan aspek rasio `4/3` (atau sesuai desain tema):
+  ```js
+  const openingImages = useMemo(() => {
+      return (invitation?.opening_image || '')
+          .split(',')
+          .map(img => getStorageUrl(img.trim()))
+          .filter(Boolean);
+  }, [invitation?.opening_image]);
+  ```
+  Di dalam render JSX:
+  ```jsx
+  {showPhotos && openingImages.length > 0 && (
+      <div className="opening-slideshow-wrapper">
+          <PremiumSlideshow
+              images={openingImages}
+              positionX={invitation?.opening_position_x}
+              positionY={invitation?.opening_position_y}
+              zoom={invitation?.opening_zoom}
+          />
+      </div>
+  )}
+  ```
+- **Keterangan Mempelai (Monogram/Initials/Nama)**: Harus menampilkan inisial monogram atau nama panggilan mempelai (misal: "B & R") sebagai pengantar yang jelas sebelum masuk ke detail profil masing-masing mempelai.
+- **Salam Pembuka & Basmalah**: Menampilkan lafadz basmalah/kalimat pembuka (contoh: "Bismillah" atau pembuka bernuansa islami/universal) sesuai preferensi yang disimpan di database:
+  - Judul pembuka (`invitation?.opening_title` dengan fallback "Maha Suci Allah" atau sejenisnya).
+  - Ayat/kutipan pembuka (`invitation?.opening_ayat`).
+  - Teks deskripsi pembuka (`invitation?.opening_text`).
+
+### 4.3 Seksi Mempelai (`bride_groom` / `couple`)
 - **Deteksi Gender yang Kokoh**: Jangan andalkan urutan indeks array `couples[0]`/`couples[1]` saja. Selalu filter berdasarkan string jenis kelamin:
   ```js
   const couples = safeArr(brideGrooms);
@@ -131,13 +202,34 @@ Jika `invitation?.show_animations === false` (atau bernilai `0`):
   href={`https://instagram.com/${(bride.instagram || '').replace('@', '')}`}
   ```
 
-### 4.3 Seksi Acara & Countdown (`event`)
+### 4.4 Seksi Acara & Countdown (`event`)
 - **Penyatuan Countdown**: Countdown timer **WAJIB** digabungkan di seksi ini (diletakkan di bagian atas sebelum detail daftar acara). Tidak boleh ada seksi countdown terpisah!
+- **Kondisionalitas Countdown (Save The Date tidak selalu ada)**: Countdown timer **TIDAK** boleh di-hardcode selalu tampil. Tampilkan hanya jika status countdown aktif di database, ada tanggal acara utama, dan seksi countdown diizinkan tampil:
+  ```js
+  const showCountdown = parseBool(invitation?.show_countdown);
+  const showCountdownInEvent = useMemo(() => {
+      const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+      if (!primaryEvent?.event_date || !showCountdown) return false;
+      
+      const safeSections = safeArr(sections);
+      if (safeSections.length > 0) {
+          const cSection = safeSections.find(s => s.section_key === 'countdown');
+          return cSection ? !!cSection.is_visible : false;
+      }
+      return true;
+  }, [sections, events, showCountdown]);
+  ```
+  Di dalam render JSX:
+  ```jsx
+  {showCountdownInEvent && (
+      <CountdownTimer events={events} />
+  )}
+  ```
 - **Lokasi & Google Maps**: Menyediakan nama tempat, alamat lengkap, dan tombol pembuka **Google Maps** (`gmaps_link`) untuk memudahkan navigasi tamu.
 
-### 4.4 Seksi Live Streaming Mandiri (`livestream`)
+### 4.5 Seksi Live Streaming Mandiri (`livestream`)
 - **Satu-satunya Seksi Streaming**: Siaran langsung **HANYA** diperbolehkan tampil berupa seksi / halaman mandiri terdedikasi (`livestream`). Tidak diperbolehkan menyematkan tombol streaming di dalam kartu seksi acara (`event`) agar tata letak tetap konsisten.
-- **Auto-Hide Cerdas**: Seksi ini **WAJIB** otomatis menyembunyikan dirinya sendiri (kembali bernilai `null` atau terfilter keluar dari list sections) jika kolom list `streaming_url` dan `streamings` di database dalam keadaan kosong.
+- **Auto-Hide Cerdas**: Seksi ini **WAJIB** otomatis menyembunyikan dirinya sendiri (kembali bernilai `null` atau terfilter keluar dari list sections) jika kolom list `streaming_url` and `streamings` di database dalam keadaan kosong.
 - **Pola Komponen Standar**:
   ```jsx
   function LiveStreamingSection({ events, invitation }) {
@@ -177,7 +269,8 @@ Jika `invitation?.show_animations === false` (atau bernilai `0`):
   }
   ```
 
-### 4.5 Seksi Rekening & Kado (`bank`)
+### 4.6 Seksi Rekening & Kado (`bank`)
+- **UI Rekening Default**: Tampilan dan desain UI rekening secara default wajib mengikuti atau menyerupai UI rekening pada tema **Luxury 2** (luxury-02) demi menjaga standar estetika premium dan konsistensi visual.
 - **Safari & WebView Clipboard Copy Fallback**: `navigator.clipboard` diblokir pada in-app browser seluler (seperti saat membuka link dari Instagram / WhatsApp) serta perangkat Safari iOS yang tidak menggunakan koneksi HTTPS ketat. **WAJIB** gunakan skema fallback textarea dinamis:
   ```js
   const fallbackCopy = (text) => {
@@ -191,13 +284,13 @@ Jika `invitation?.show_animations === false` (atau bernilai `0`):
   };
   ```
 
-### 4.6 Seksi RSVP & Ucapan Terpadu (`rsvp` / `wishes`)
+### 4.7 Seksi RSVP & Ucapan Terpadu (`rsvp` / `wishes`)
 - **Unified Form**: RSVP dan Ucapan **WAJIB** berada dalam satu seksi terpadu untuk efisiensi ruang layar ponsel:
   - Form memiliki nama lengkap (otomatis terisi nama tamu dari URL `?to=slug` jika ada), pilihan kehadiran (Hadir / Tidak Hadir), jumlah orang (hanya muncul jika Kehadiran = Hadir), dan kolom pesan doa/ucapan.
-- **Scrollable Wishes List**: Batasi penampilan list ucapan maksimal **5 item terbaru** dengan kuncian CSS `max-height: 280px` dan `overflow-y: auto` agar halaman tidak memanjang tanpa batas di seluler.
+- **Scrollable Wishes List**: Batasi penampilan list ucapan maksimal **5 item terbaru** dengan kuncian CSS `max-height: 280px` and `overflow-y: auto` agar halaman tidak memanjang tanpa batas di seluler.
 - **Filter Duplikasi Section**: Jika RSVP aktif, hilangkan seksi `wishes` dari list sections agar tidak memicu duplikasi form di halaman.
 
-### 4.7 Seksi Penutup & Tanda Tangan Formal (`closing` / `footer`)
+### 4.8 Seksi Penutup & Tanda Tangan Formal (`closing` / `footer`)
 - **Tanda Tangan Formal Dinamis**: Menampilkan tanda tangan keluarga besar secara otomatis berdasarkan nama orang tua di database:
   ```jsx
   {hasGroomParents && <div>{isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`}</div>}
@@ -214,8 +307,8 @@ Jika `invitation?.show_animations === false` (atau bernilai `0`):
   ```
   *(Catatan khusus Shopee: Letakkan watermark ini di bagian paling bawah tab Beranda/Home dengan `padding-bottom: 80px` agar tidak tertutup navigation bar bawah).*
 
-### 4.8 Fitur QR Code Presensi / Check-in Tamu (`enableQr` / `showQr`)
-Setiap tema baru wajib mendukung fitur QR Code Presensi secara otomatis jika diaktifkan dari dashboard.
+### 4.9 Fitur QR Code Presensi / Check-in Tamu (`enableQr` / `showQr`)
+Every theme must support QR Code presence check-in automatically if enabled.
 1. **Helper & State Setup**:
    Definisikan state `showQr` dan variabel `enableQr` di komponen utama `DynamicIndex.jsx`:
    ```js
@@ -325,7 +418,7 @@ cmd /c mklink /J "public\storage" "storage\app\public"
 
 | Nama Tema | Direktori File Utama | Keunggulan Utama Sebagai Standard Referensi |
 |---|---|---|
-| **Luxury 02** | `resources/js/Pages/Invitation/luxury-02/` | Standard transisi swipe horizontal/vertikal termulus, multi-slideshow cover, auto-scroll, dan error boundary tangguh. |
+| **Luxury 02** | `resources/js/Pages/Invitation/luxury-02/` | Standard transisi swipe horizontal/vertikal termulus, multi-slideshow cover, auto-scroll, desain UI rekening default, dan error boundary tangguh. |
 | **Utary** | `resources/js/Pages/Invitation/utary/` | Standard penanganan countdown menyatu, copy rekening aman Safari, QR check-in, dan penanganan watermark dinamis. |
 
 *Dokumen ini adalah standarisasi mutlak. Jika tema baru Anda memiliki perilaku yang berbeda dari aturan di atas, Anda telah melanggar blueprint dan wajib merevisinya kembali.*

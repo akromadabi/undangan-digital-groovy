@@ -12,6 +12,7 @@ import chipAtm from './asset/chip-atm-1-2-1-1-1.png';
 import defaultCover from './asset/fres-G-14-e1725604862814.jpg';
 import defaultGroom from './asset/fres-PROFIL-CROP-Copy-2-e1725605032416.jpg';
 import defaultBride from './asset/fres-PROFIL-CROP-Copy-e1725605022377.jpg';
+import bgBank from '../luxury-01/asset/bg-bank-1-1.webp';
 
 const ASSETS = {
     dana: logoDana,
@@ -21,6 +22,7 @@ const ASSETS = {
     cover: defaultCover,
     groom: defaultGroom,
     bride: defaultBride,
+    bankBg: bgBank,
 };
 
 /* ─── Helpers ─── */
@@ -985,31 +987,37 @@ function BankSection({ bankAccounts, invitation }) {
                 <p className="lx3-section-subtitle">{t('invitation.gift_title')}</p>
             </Reveal>
 
-            {list.map((acc, idx) => {
-                const isDana = acc.bank_name?.toLowerCase().includes('dana');
-                const logo = isDana ? ASSETS.dana : ASSETS.bca;
+            <div className="lx3-bank-cards" style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {list.map((acc, idx) => {
+                    const isBca = acc.bank_name?.toLowerCase().includes('bca');
+                    const isDana = acc.bank_name?.toLowerCase().includes('dana');
 
-                return (
-                    <Reveal key={acc.id || idx} className="lx3-bank-card">
-                        <img src={ASSETS.chip} alt="atm chip" className="lx3-bank-card__chip" />
-                        <div className="lx3-bank-card__header">
-                            <img src={logo} alt={acc.bank_name} className="lx3-bank-card__logo" />
-                        </div>
-                        <div className="lx3-bank-card__number">{acc.account_number}</div>
-                        <div className="lx3-bank-card__holder-label">{invitation?.language === 'en' ? 'Account Holder:' : 'Pemilik Rekening:'}</div>
-                        <div className="lx3-bank-card__holder">{acc.account_holder || acc.account_name}</div>
-
-                        <button
-                            type="button"
-                            className="lx3-bank-card__copy-btn"
-                            onClick={() => handleCopy(acc.account_number, idx)}
-                        >
-                            <i className={copiedIdx === idx ? "fas fa-check" : "far fa-copy"} />
-                            {copiedIdx === idx ? t('invitation.gift_copied') : t('invitation.gift_copy')}
-                        </button>
-                    </Reveal>
-                );
-            })}
+                    return (
+                        <Reveal key={acc.id || idx} className="lx3-bank-card">
+                            <div className="lx3-bank-card__header">
+                                {isBca && <img src={ASSETS.bca} alt="BCA" className="lx3-bank-card__logo" />}
+                                {isDana && <img src={ASSETS.dana} alt="DANA" className="lx3-bank-card__logo" />}
+                                {!isBca && !isDana && <span style={{ fontWeight: 600, fontSize: '1.1rem', zIndex: 2 }}>{acc.bank_name}</span>}
+                                <img src={ASSETS.chip} alt="Chip" className="lx3-bank-card__chip" />
+                            </div>
+                            <div className="lx3-bank-card__body">
+                                <div className="lx3-bank-card__number">{acc.account_number}</div>
+                                <div className="lx3-bank-card__holder">{acc.account_holder || acc.account_name}</div>
+                            </div>
+                            <div className="lx3-bank-card__footer">
+                                <button
+                                    type="button"
+                                    className="lx3-bank-card__copy-btn"
+                                    onClick={() => handleCopy(acc.account_number, idx)}
+                                >
+                                    <i className={copiedIdx === idx ? "fas fa-check" : "far fa-copy"} />
+                                    <span>{copiedIdx === idx ? t('invitation.gift_copied') : t('invitation.gift_copy')}</span>
+                                </button>
+                            </div>
+                        </Reveal>
+                    );
+                })}
+            </div>
         </section>
     );
 }

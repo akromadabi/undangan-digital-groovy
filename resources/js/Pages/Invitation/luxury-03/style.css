@@ -882,79 +882,104 @@
    SECTION 8: BANK GIFT ENVELOPE
    ========================================================================== */
 .lx3-bank-card {
-  background: linear-gradient(135deg, #1b1b1b 0%, #080808 100%);
-  border: 1px solid var(--lx3-red-border);
-  border-radius: 12px;
+  background: linear-gradient(135deg, #2b060d 0%, #0d0203 65%, #1d0309 100%) !important;
+  border: 1px solid rgba(184, 45, 64, 0.35) !important;
+  background-size: cover;
+  background-position: center right;
+  border-radius: 20px;
   padding: 24px;
-  margin-bottom: 24px;
+  color: #ffffff;
+  width: 100%;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
   position: relative;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.lx3-bank-card__chip {
-  width: 42px;
-  margin-bottom: 20px;
+.lx3-bank-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 100%) !important;
+  z-index: 1;
 }
 
 .lx3-bank-card__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  z-index: 2;
+  margin-bottom: 25px;
 }
 
 .lx3-bank-card__logo {
-  height: 25px;
+  max-height: 25px;
+  width: auto;
   object-fit: contain;
+  filter: brightness(0) invert(1);
+  z-index: 2;
+}
+
+.lx3-bank-card__chip {
+  width: 32px;
+  height: auto;
+  z-index: 2;
+}
+
+.lx3-bank-card__body {
+  z-index: 2;
+  margin-bottom: 25px;
+  text-align: left;
 }
 
 .lx3-bank-card__number {
   font-family: var(--lx3-font-heading);
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 1.45rem;
   letter-spacing: 2px;
-  color: var(--lx3-text-light);
-  margin-bottom: 15px;
-}
-
-.lx3-bank-card__holder-label {
-  font-family: var(--lx3-font-body);
-  font-size: 10px;
-  color: var(--lx3-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: white;
 }
 
 .lx3-bank-card__holder {
   font-family: var(--lx3-font-heading);
-  font-size: 14px;
-  color: var(--lx3-red);
-  letter-spacing: 1px;
+  font-size: 0.85rem;
+  opacity: 0.85;
   text-transform: uppercase;
-  margin-top: 2px;
+  letter-spacing: 1px;
+  color: white;
+}
+
+.lx3-bank-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  z-index: 2;
 }
 
 .lx3-bank-card__copy-btn {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: transparent;
-  border: 1px solid var(--lx3-red);
-  color: var(--lx3-red);
-  padding: 6px 14px;
-  border-radius: 4px;
-  font-family: var(--lx3-font-heading);
-  font-size: 11px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-size: 0.8rem;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.3s;
+  gap: 8px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
 }
 
 .lx3-bank-card__copy-btn:hover {
-  background: var(--lx3-red);
-  color: var(--lx3-text-dark);
+  background-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* ==========================================================================

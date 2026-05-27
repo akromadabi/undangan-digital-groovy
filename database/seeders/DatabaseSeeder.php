@@ -201,6 +201,7 @@ class DatabaseSeeder extends Seeder
             SpotifyThemeSeeder::class,
             InstagramThemeSeeder::class,
             TiktokThemeSeeder::class,
+            ManchesterUnitedThemeSeeder::class,
         ]);
 
         $defaultTheme = Theme::where('slug', 'utary')->first();

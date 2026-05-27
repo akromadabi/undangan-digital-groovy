@@ -181,9 +181,10 @@
 .lx4-divider {
   width: 60%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--lx4-burgundy), transparent);
+  background: linear-gradient(90deg, transparent, var(--lx4-burgundy), transparent) !important;
   margin: 20px auto;
   position: relative;
+  border: none !important;
 }
 
 .lx4-divider-inner {
@@ -196,6 +197,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border: none !important;
 }
 
 /* --- Section Styling Base --- */
@@ -203,7 +205,9 @@
   padding: 60px 24px;
   width: 100%;
   position: relative;
-  border-bottom: 1px solid rgba(197, 168, 128, 0.08);
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
 }
 
 .lx4-section-title {
@@ -798,15 +802,15 @@
 .lx4-story__title {
   font-family: var(--lx4-font-heading);
   font-size: 16px;
-  font-weight: 500;
-  color: var(--lx4-text-light);
+  font-weight: 600;
+  color: var(--lx4-burgundy) !important;
   margin-bottom: 10px;
 }
 
 .lx4-story__desc {
   font-family: var(--lx4-font-body);
   font-size: 12.5px;
-  color: var(--lx4-text-muted);
+  color: var(--lx4-text-dark) !important;
   line-height: 1.6;
 }
 
@@ -887,80 +891,104 @@
    SECTION 8: BANK GIFT ENVELOPE
    ========================================================================== */
 .lx4-bank-card {
-  background: linear-gradient(135deg, #5c121d 0%, #2f050b 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  background: linear-gradient(135deg, #4a0e17 0%, #1d0307 65%, #3c0911 100%) !important;
+  border: 1px solid rgba(216, 195, 176, 0.25) !important;
+  background-size: cover;
+  background-position: center right;
+  border-radius: 20px;
   padding: 24px;
-  margin-bottom: 24px;
+  color: #ffffff;
+  width: 100%;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
   position: relative;
-  box-shadow: 0 8px 25px rgba(74, 14, 23, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.lx4-bank-card__chip {
-  width: 42px;
-  margin-bottom: 20px;
+.lx4-bank-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 100%) !important;
+  z-index: 1;
 }
 
 .lx4-bank-card__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  z-index: 2;
+  margin-bottom: 25px;
 }
 
 .lx4-bank-card__logo {
-  height: 25px;
+  max-height: 25px;
+  width: auto;
   object-fit: contain;
+  filter: brightness(0) invert(1);
+  z-index: 2;
+}
+
+.lx4-bank-card__chip {
+  width: 32px;
+  height: auto;
+  z-index: 2;
+}
+
+.lx4-bank-card__body {
+  z-index: 2;
+  margin-bottom: 25px;
+  text-align: left;
 }
 
 .lx4-bank-card__number {
   font-family: var(--lx4-font-heading);
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 1.45rem;
   letter-spacing: 2px;
-  color: var(--lx4-text-light);
-  margin-bottom: 15px;
-}
-
-.lx4-bank-card__holder-label {
-  font-family: var(--lx4-font-body);
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: white;
 }
 
 .lx4-bank-card__holder {
   font-family: var(--lx4-font-heading);
-  font-size: 14px;
-  color: #ffffff;
-  letter-spacing: 1px;
+  font-size: 0.85rem;
+  opacity: 0.85;
   text-transform: uppercase;
-  margin-top: 2px;
+  letter-spacing: 1px;
+  color: white;
+}
+
+.lx4-bank-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  z-index: 2;
 }
 
 .lx4-bank-card__copy-btn {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background-color: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  padding: 6px 14px;
-  border-radius: 4px;
-  font-family: var(--lx4-font-heading);
-  font-size: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-size: 0.8rem;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.3s;
+  gap: 8px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
 }
 
 .lx4-bank-card__copy-btn:hover {
-  background: #ffffff;
-  color: var(--lx4-burgundy);
-  border-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* ==========================================================================
@@ -1080,8 +1108,8 @@
 }
 
 .lx4-wish-bubble {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(197, 168, 128, 0.1);
+  background: rgba(74, 14, 23, 0.03);
+  border: 1px solid rgba(74, 14, 23, 0.08);
   border-radius: 10px;
   padding: 15px;
 }
@@ -1123,7 +1151,7 @@
 .lx4-wish-bubble__message {
   font-family: var(--lx4-font-body);
   font-size: 12px;
-  color: var(--lx4-text-light);
+  color: var(--lx4-text-dark);
   line-height: 1.6;
   white-space: pre-line;
 }
@@ -1215,7 +1243,7 @@
 .lx4-nav-menu__item {
   background: transparent;
   border: none;
-  color: var(--lx4-text-muted);
+  color: rgba(255, 255, 255, 0.6);
   padding: 12px 6px;
   gap: 4px;
   display: flex;
@@ -1242,8 +1270,8 @@
 }
 
 .lx4-nav-menu__item.active {
-  color: var(--lx4-burgundy);
-  background-color: rgba(74, 14, 23, 0.08);
+  color: #d8c3b0;
+  background-color: rgba(216, 195, 176, 0.12);
 }
 
 /* Floating Controls Area */

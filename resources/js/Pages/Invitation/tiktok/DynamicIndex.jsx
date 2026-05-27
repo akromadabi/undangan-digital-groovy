@@ -836,11 +836,24 @@ function CountdownTimer({ targetDate, language }) {
 /* ═══════════════════════════════════════
    EVENT SECTION (Countdown integrated inside the same event section)
    ═══════════════════════════════════════ */
-function EventSection({ events, invitation, language }) {
+function EventSection({ events, invitation, language, sections }) {
     const { t } = useTranslation(language);
     const eventList = safeArr(events);
 
     const isEn = t('invitation.save_the_date') === 'Save The Date';
+
+    const showCountdown = parseBool(invitation?.show_countdown, true);
+    const showCountdownInEvent = (() => {
+        const targetDate = invitation?.countdown_target_date;
+        if (!targetDate || !showCountdown) return false;
+        
+        const safeSections = safeArr(sections);
+        if (safeSections.length > 0) {
+            const cSection = safeSections.find(s => s.section_key === 'countdown');
+            return cSection ? !!cSection.is_visible : false;
+        }
+        return true;
+    })();
 
     return (
         <section className="ttk-section" id="event">
@@ -857,7 +870,7 @@ function EventSection({ events, invitation, language }) {
             </Reveal>
 
             {/* Countdown is STRICTLY integrated at top of event section */}
-            {invitation?.countdown_target_date && (
+            {showCountdownInEvent && (
                 <Reveal variant="zoom">
                     <div style={{ textAlign: 'center', marginBottom: 15 }}>
                         <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--ttk-gray)', fontWeight: 700, marginBottom: 5 }}>
@@ -1704,10 +1717,8 @@ export default function TikTokTheme(props) {
     const enableWishes = parseBool(invitation?.enable_wishes, true);
     const enableQr = parseBool(invitation?.enable_qr, true) && parseBool(invitation?.show_qr_code, true);
 
-    useEffect(() => {
-        globalShowPhotos = !parseBool(invitation?.hide_photos, false);
-        globalShowAnimations = parseBool(invitation?.show_animations, true);
-    }, [invitation]);
+    globalShowPhotos = parseBool(invitation?.show_photos, true) && !parseBool(invitation?.hide_photos, false);
+    globalShowAnimations = parseBool(invitation?.show_animations, true);
 
     const activeGuest = guest || null;
 
@@ -2047,7 +2058,8 @@ export default function TikTokTheme(props) {
             enableWishes, 
             language: activeLanguage, 
             fallbackPhoto: randomGalleryPhoto,
-            onToast: triggerToast
+            onToast: triggerToast,
+            sections
         };
         
         switch (key) {

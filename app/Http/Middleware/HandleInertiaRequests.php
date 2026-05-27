@@ -34,6 +34,12 @@ class HandleInertiaRequests extends Middleware
                         ->mapWithKeys(fn($pfa) => [$pfa->feature->slug => $pfa->is_enabled])
                         ->toArray();
                 }
+                
+                // Ensure basic features are always true in shared features prop
+                $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
+                foreach ($basicFeatures as $bf) {
+                    $featureAccess[$bf] = true;
+                }
             }
         }
 

@@ -8,7 +8,7 @@ import { Sparkles, X, ImageIcon } from 'lucide-react';
 import { PARTICLE_MAP } from '@/Components/ParticleEffect';
 
 // Locked sections — always visible, cannot be reordered
-const LOCKED_KEYS = ['cover', 'opening', 'closing'];
+const LOCKED_KEYS = ['cover', 'opening', 'closing', 'mempelai'];
 
 // SVG icon components for particle selector
 const PIcons = {
@@ -86,6 +86,11 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
 
     const isLockedByPlan = (featureSlug) => {
         if (isUserAdminOrSuper) return false;
+        
+        // Basic features are always unlocked for any plan
+        const basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
+        if (basicFeatures.includes(featureSlug)) return false;
+        
         if (!features) return true;
         return features[featureSlug] === false || features[featureSlug] === undefined;
     };
@@ -728,7 +733,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                 {layoutLocked && <span className="ml-1 text-[9px] text-gray-400 font-normal">(terkunci)</span>}
                                                 {planLocked && <span className="ml-1 text-[9px] text-amber-500 font-bold">(terkunci paket)</span>}
                                             </span>
-                                            {((!locked && SECTION_EDIT_ROUTES.hasOwnProperty(section.section_key)) || ['cover', 'opening'].includes(section.section_key)) && (
+                                            {((!planLocked && SECTION_EDIT_ROUTES[section.section_key]) || ['cover', 'opening'].includes(section.section_key)) && (
                                                 <button
                                                     onClick={() => {
                                                         if (section.section_key === 'cover') {

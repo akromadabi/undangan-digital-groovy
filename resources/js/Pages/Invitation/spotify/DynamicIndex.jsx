@@ -595,7 +595,7 @@ function CountdownTimer({ targetDate, language }) {
 /* ═══════════════════════════════════════
    ACARA SECTION (Concert Tour Dates UI)
    ═══════════════════════════════════════ */
-function EventSection({ events, invitation, language }) {
+function EventSection({ events, invitation, language, sections }) {
     const { t, locale } = useTranslation(language);
     const safeEvents = safeArr(events);
     const primaryEvent = safeEvents.find(e => e.is_primary) || safeEvents[0];
@@ -609,12 +609,23 @@ function EventSection({ events, invitation, language }) {
         return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((evt.event_name || '') + ' - ' + names)}&dates=${ds}T${st}/${ds}T${st}&location=${encodeURIComponent([evt.venue_name, evt.venue_address].filter(Boolean).join(', '))}&sf=true&output=xml`;
     };
 
+    const showCountdown = parseBool(invitation?.show_countdown, true);
+    const showCountdownInEvent = useMemo(() => {
+        if (!primaryEvent?.event_date || !showCountdown) return false;
+        const safeSections = safeArr(sections);
+        if (safeSections.length > 0) {
+            const cSection = safeSections.find(s => s.section_key === 'countdown');
+            return cSection ? !!cSection.is_visible : false;
+        }
+        return true;
+    }, [sections, primaryEvent?.event_date, showCountdown]);
+
     return (
         <section id="event" className="spty-section">
             <h3 className="spty-section-title"><span>#</span>Schedule</h3>
             <h4 className="spty-section-header">{locale === 'en' ? 'Live Events / Tour' : 'Jadwal Acara / Tur'}</h4>
 
-            {primaryEvent?.event_date && invitation?.show_countdown !== false && (
+            {showCountdownInEvent && (
                 <CountdownTimer targetDate={primaryEvent.event_date} language={language} />
             )}
 
@@ -1364,8 +1375,8 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
     const enableRsvp = parseBool(invitation?.enable_rsvp);
     const enableWishes = parseBool(invitation?.enable_wishes);
     const musicAutoplay = parseBool(invitation?.music_autoplay);
-    const showPhotos = parseBool(invitation?.show_photos, true);
-    const showAnimations = parseBool(invitation?.show_animations, true);
+    const showPhotos = parseBool(invitation?.show_photos ?? true) && !parseBool(invitation?.hide_photos ?? false);
+    const showAnimations = parseBool(invitation?.show_animations ?? true);
 
     globalShowPhotos = showPhotos;
     globalShowAnimations = showAnimations;
@@ -1701,7 +1712,7 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
 
     // Map section key to actual React Component
     const renderSection = (key) => {
-        const props = { invitation, brideGrooms, events, wishes, galleries, loveStories, bankAccounts, guest, enableRsvp, enableWishes, language: activeLanguage, fallbackPhoto: randomGalleryPhoto };
+        const props = { invitation, brideGrooms, events, wishes, galleries, loveStories, bankAccounts, guest, enableRsvp, enableWishes, language: activeLanguage, fallbackPhoto: randomGalleryPhoto, sections };
         
         switch (key) {
             case 'opening':
@@ -1743,7 +1754,7 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
                 <audio ref={audioRef} src={invitation.music_url} loop />
             )}
 
-            <div className="spty-wrapper">
+            <div className={`spty-wrapper ${!showAnimations ? 'theme-no-animations' : ''}`}>
                 {/* ══════ COVER PANEL ══════ */}
                 <CoverSection
                     invitation={invitation}

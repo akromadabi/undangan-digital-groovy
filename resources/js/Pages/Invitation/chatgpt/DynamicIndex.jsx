@@ -1280,6 +1280,9 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
         if (!globalShowPhotos) {
             list = list.filter(s => s.section_key !== 'gallery');
         }
+        if (!parseBool(invitation?.show_countdown, true)) {
+            list = list.filter(s => s.section_key !== 'countdown');
+        }
         const hasRsvp = list.some(s => s.section_key === 'rsvp');
         if (hasRsvp) {
             list = list.filter(s => s.section_key !== 'wishes');
@@ -1289,7 +1292,7 @@ function ChatgptThemeContent({ invitation, sections, brideGrooms, events, wishes
             if (b.section_key === 'opening') return 1;
             return (a.sort_order || 0) - (b.sort_order || 0);
         });
-    }, [sections]);
+    }, [sections, invitation]);
 
     const randomGalleryPhoto = useMemo(() => {
         const list = safeArr(galleries);

@@ -670,7 +670,7 @@ function formatStoryDate(dateStr) {
 /* ═══════════════════════════════════════
    ACARA SECTION (Instagram Live Video UI)
    ═══════════════════════════════════════ */
-function EventSection({ events, invitation, language }) {
+function EventSection({ events, invitation, language, sections }) {
     const { t, locale } = useTranslation(language);
     const safeEvents = safeArr(events);
     const primaryEvent = safeEvents.find(e => e.is_primary) || safeEvents[0];
@@ -684,13 +684,24 @@ function EventSection({ events, invitation, language }) {
         return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((evt.event_name || '') + ' - ' + names)}&dates=${ds}T${st}/${ds}T${st}&location=${encodeURIComponent([evt.venue_name, evt.venue_address].filter(Boolean).join(', '))}&sf=true&output=xml`;
     };
 
+    const showCountdown = parseBool(invitation?.show_countdown ?? true);
+    const showCountdownWidget = (() => {
+        if (!primaryEvent?.event_date || !showCountdown) return false;
+        const safeSections = safeArr(sections);
+        if (safeSections.length > 0) {
+            const cSection = safeSections.find(s => s.section_key === 'countdown');
+            return cSection ? !!cSection.is_visible : false;
+        }
+        return true;
+    })();
+
     return (
         <section id="event" className="ig-section ig-events-live">
             <h3 className="ig-section-tag">@wedding_live</h3>
             <h4 className="ig-section-title-custom">{locale === 'en' ? 'Wedding Broadcast Live' : 'Siaran Langsung Acara'}</h4>
 
             {/* Countdown Overlay Widget */}
-            {primaryEvent?.event_date && invitation?.show_countdown !== false && (
+            {showCountdownWidget && (
                 <CountdownTimer targetDate={primaryEvent.event_date} language={language} />
             )}
 
@@ -1568,7 +1579,7 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
 
     // Map keys to React elements
     const renderSection = (key) => {
-        const props = { invitation, brideGrooms, events, wishes, galleries, loveStories, bankAccounts, guest, enableRsvp, enableWishes, language: activeLanguage, fallbackPhoto: randomGalleryPhoto };
+        const props = { invitation, brideGrooms, events, wishes, galleries, loveStories, bankAccounts, guest, enableRsvp, enableWishes, language: activeLanguage, fallbackPhoto: randomGalleryPhoto, sections };
         switch (key) {
             case 'opening': return <OpeningSection key={key} {...props} onOpenMusic={toggleMusic} onStoryEnd={handleStoryEnd} />;
             case 'bride_groom': return <BrideGroomSection key={key} {...props} onOpenStory={openProfileStory} />;
@@ -1602,7 +1613,7 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
                 <audio ref={audioRef} src={invitation.music_url} loop />
             )}
 
-            <div className="ig-main-wrapper">
+            <div className={`ig-main-wrapper ${!globalShowAnimations ? 'theme-no-animations' : ''}`}>
                 {/* ══════ COVER ══════ */}
                 <CoverSection
                     invitation={invitation}

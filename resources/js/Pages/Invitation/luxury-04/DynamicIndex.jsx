@@ -12,6 +12,7 @@ import chipAtm from './asset/chip-atm-1-2-1-1-1.png';
 import defaultCover from './asset/fres-G-14-e1725604862814.jpg';
 import defaultGroom from './asset/fres-PROFIL-CROP-Copy-2-e1725605032416.jpg';
 import defaultBride from './asset/fres-PROFIL-CROP-Copy-e1725605022377.jpg';
+import bgBank from '../luxury-01/asset/bg-bank-1-1.webp';
 
 const ASSETS = {
     dana: logoDana,
@@ -21,6 +22,7 @@ const ASSETS = {
     cover: defaultCover,
     groom: defaultGroom,
     bride: defaultBride,
+    bankBg: bgBank,
 };
 
 /* ─── Helpers ─── */
@@ -155,9 +157,9 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
 function HeartDivider({ isDark }) {
     const bgColor = isDark ? 'var(--lx4-bg-dark)' : 'var(--lx4-bg-light)';
     return (
-        <div className="lx4-divider-wrapper" style={{ backgroundColor: bgColor, padding: '20px 0', width: '100%', display: 'block' }}>
-            <div className="lx4-divider" style={{ margin: '0 auto' }}>
-                <span className="lx4-divider-inner" style={{ backgroundColor: bgColor }}>
+        <div className="lx4-divider-wrapper" style={{ backgroundColor: bgColor, padding: '20px 0', width: '100%', display: 'block', border: 'none', borderTop: 'none', borderBottom: 'none' }}>
+            <div className="lx4-divider" style={{ margin: '0 auto', border: 'none' }}>
+                <span className="lx4-divider-inner" style={{ backgroundColor: bgColor, border: 'none' }}>
                     <img src={ASSETS.heart} alt="heart" style={{ width: 14, height: 14, display: 'inline-block' }} />
                 </span>
             </div>
@@ -627,7 +629,7 @@ function CountdownSection({ events, galleries }) {
     const sDigits = pad2(timeLeft.s).split('');
 
     return (
-        <div className="lx4-countdown-wrapper" style={{ position: 'relative', overflow: 'hidden', padding: '60px 24px', borderBottom: '1px solid var(--lx4-burgundy-border)' }}>
+        <div className="lx4-countdown-wrapper" style={{ position: 'relative', overflow: 'hidden', padding: '60px 24px' }}>
             {globalShowPhotos && bgImg && (
                 <>
                     <div className="lx4-section-bg" style={{ backgroundImage: `url(${bgImg})` }} />
@@ -988,31 +990,37 @@ function BankSection({ bankAccounts, invitation }) {
                 <p className="lx4-section-subtitle">{t('invitation.gift_title')}</p>
             </Reveal>
 
-            {list.map((acc, idx) => {
-                const isDana = acc.bank_name?.toLowerCase().includes('dana');
-                const logo = isDana ? ASSETS.dana : ASSETS.bca;
+            <div className="lx4-bank-cards" style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {list.map((acc, idx) => {
+                    const isBca = acc.bank_name?.toLowerCase().includes('bca');
+                    const isDana = acc.bank_name?.toLowerCase().includes('dana');
 
-                return (
-                    <Reveal key={acc.id || idx} className="lx4-bank-card">
-                        <img src={ASSETS.chip} alt="atm chip" className="lx4-bank-card__chip" />
-                        <div className="lx4-bank-card__header">
-                            <img src={logo} alt={acc.bank_name} className="lx4-bank-card__logo" />
-                        </div>
-                        <div className="lx4-bank-card__number">{acc.account_number}</div>
-                        <div className="lx4-bank-card__holder-label">{invitation?.language === 'en' ? 'Account Holder:' : 'Pemilik Rekening:'}</div>
-                        <div className="lx4-bank-card__holder">{acc.account_holder || acc.account_name}</div>
-
-                        <button
-                            type="button"
-                            className="lx4-bank-card__copy-btn"
-                            onClick={() => handleCopy(acc.account_number, idx)}
-                        >
-                            <i className={copiedIdx === idx ? "fas fa-check" : "far fa-copy"} />
-                            {copiedIdx === idx ? t('invitation.gift_copied') : t('invitation.gift_copy')}
-                        </button>
-                    </Reveal>
-                );
-            })}
+                    return (
+                        <Reveal key={acc.id || idx} className="lx4-bank-card">
+                            <div className="lx4-bank-card__header">
+                                {isBca && <img src={ASSETS.bca} alt="BCA" className="lx4-bank-card__logo" />}
+                                {isDana && <img src={ASSETS.dana} alt="DANA" className="lx4-bank-card__logo" />}
+                                {!isBca && !isDana && <span style={{ fontWeight: 600, fontSize: '1.1rem', zIndex: 2 }}>{acc.bank_name}</span>}
+                                <img src={ASSETS.chip} alt="Chip" className="lx4-bank-card__chip" />
+                            </div>
+                            <div className="lx4-bank-card__body">
+                                <div className="lx4-bank-card__number">{acc.account_number}</div>
+                                <div className="lx4-bank-card__holder">{acc.account_holder || acc.account_name}</div>
+                            </div>
+                            <div className="lx4-bank-card__footer">
+                                <button
+                                    type="button"
+                                    className="lx4-bank-card__copy-btn"
+                                    onClick={() => handleCopy(acc.account_number, idx)}
+                                >
+                                    <i className={copiedIdx === idx ? "fas fa-check" : "far fa-copy"} />
+                                    <span>{copiedIdx === idx ? t('invitation.gift_copied') : t('invitation.gift_copy')}</span>
+                                </button>
+                            </div>
+                        </Reveal>
+                    );
+                })}
+            </div>
         </section>
     );
 }
