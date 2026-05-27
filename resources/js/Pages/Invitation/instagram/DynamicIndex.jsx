@@ -141,8 +141,10 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
         guestName.replace(/\s+/g, '_').toLowerCase()
     );
 
+    const [pwdAlert, setPwdAlert] = React.useState(false);
+
     const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname.toLowerCase()}.${bride.nickname.toLowerCase()}`
+        ? `${groom.nickname} & ${bride.nickname}`
         : 'the.wedding.album';
 
     const artworkUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto || '/images/demo/korea-11-768x512.jpg';
@@ -151,100 +153,235 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
     return (
         <div className={`ig-cover${isOpened ? ' is-opened' : ''}`}>
-            <div className="ig-device-container">
-                {/* Header status bar simulation */}
-                <div className="ig-phone-status-bar">
-                    <span className="ig-status-time">09:41</span>
-                    <div className="ig-status-icons">
-                        <i className="fas fa-signal" />
-                        <i className="fas fa-wifi" />
-                        <i className="fas fa-battery-three-quarters" />
-                    </div>
-                </div>
-
-                {/* IG Language Selector at top (functional switcher using ig-login-lang-select class from style.css!) */}
-                <div className="ig-login-lang-select">
-                    <select 
-                        className="ig-login-lang-dropdown" 
-                        value={language}
-                        onChange={(e) => onLanguageChange && onLanguageChange(e.target.value)}
-                    >
-                        <option value="id">Bahasa Indonesia</option>
-                        <option value="en">English</option>
-                    </select>
-                </div>
-
-                {/* IG Login Page UI - Dynamic Couple names with signature IG gradient overlay! */}
-                <div className="ig-login-logo-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', margin: '10px auto 20px' }}>
-                    <span className="ig-login-logo" style={{ marginBottom: '0px', lineHeight: 1.1 }}>
-                        {isEn ? 'wedding of' : 'pernikahan'}
-                    </span>
+            {/* Password Hint Popup */}
+            {pwdAlert && (
+                <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 'calc(100% - 80px)',
+                    maxWidth: '320px',
+                    backgroundColor: '#1c1c1e',
+                    border: '1px solid #2c2c2e',
+                    borderRadius: '14px',
+                    padding: '24px 20px',
+                    zIndex: 220,
+                    textAlign: 'center',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.85)',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif"
+                }}>
                     <div style={{
-                        fontSize: '20px',
-                        fontWeight: 800,
-                        color: '#fff',
-                        letterSpacing: '1px',
-                        textTransform: 'uppercase',
-                        marginTop: '8px',
-                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        width: '46px',
+                        height: '46px',
+                        borderRadius: '50%',
                         background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 14px'
                     }}>
-                        {groom?.nickname && bride?.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bimo & Raras'}
+                        <i className="fas fa-heart" style={{ color: '#fff', fontSize: '18px' }} />
                     </div>
-                </div>
-
-                <form className="ig-login-form" onSubmit={(e) => { e.preventDefault(); onOpen(); }}>
-                    <div className="ig-login-input-wrap">
-                        <input
-                            type="text"
-                            value={guestNameInput}
-                            onChange={(e) => setGuestNameInput(e.target.value)}
-                            placeholder={isEn ? "Phone number, username, or email" : "Nomor telepon, nama pengguna, atau email"}
-                            className="ig-login-input"
-                        />
-                    </div>
-                    <div className="ig-login-input-wrap">
-                        <input
-                            type="password"
-                            value="weddingdate"
-                            disabled
-                            placeholder={isEn ? "Password" : "Kata Sandi"}
-                            className="ig-login-input"
-                        />
-                        <span className="ig-login-show-pwd" onClick={onOpen}>{isEn ? 'Show' : 'Lihat'}</span>
-                    </div>
-                    <button type="submit" className="ig-login-btn">
-                        {isEn ? 'Log In' : 'Masuk'}
+                    <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 800, marginBottom: '8px' }}>
+                        {isEn ? "Password Hint" : "Petunjuk Kata Sandi"}
+                    </h4>
+                    <p style={{ color: '#a8a8a8', fontSize: '12px', lineHeight: 1.5, marginBottom: '20px' }}>
+                        {isEn 
+                            ? "The password is the happy wedding date of the couple! Click 'Log In' directly as well to open. 📅💖" 
+                            : "Kata sandinya adalah tanggal pernikahan bahagia kedua mempelai! Anda juga bisa langsung klik 'Masuk'. 📅💖"}
+                    </p>
+                    <button 
+                        onClick={() => setPwdAlert(false)}
+                        style={{
+                            width: '100%',
+                            backgroundColor: '#0095f6',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '25px',
+                            padding: '10px',
+                            fontSize: '12.5px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            outline: 'none'
+                        }}
+                    >
+                        {isEn ? "Tutup" : "Tutup"}
                     </button>
-                </form>
+                </div>
+            )}
 
-                <div className="ig-login-divider">
-                    <div className="ig-divider-line"></div>
-                    <span className="ig-divider-text">OR</span>
-                    <div className="ig-divider-line"></div>
+            {/* Back-dimmed background for popup */}
+            {pwdAlert && (
+                <div 
+                    onClick={() => setPwdAlert(false)}
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 210 }}
+                />
+            )}
+
+            <div className="ig-device-container" style={{ justifyContent: 'space-between', paddingBottom: '10px' }}>
+                <div>
+                    {/* Header status bar simulation */}
+                    <div className="ig-phone-status-bar">
+                        <span className="ig-status-time">10:34</span>
+                        <div className="ig-status-icons">
+                            <i className="fas fa-signal" />
+                            <i className="fas fa-wifi" />
+                            <i className="fas fa-battery-three-quarters" />
+                        </div>
+                    </div>
+
+                    {/* IG Language Selector at top (functional switcher using ig-login-lang-select class from style.css!) */}
+                    <div className="ig-login-lang-select" style={{ margin: '15px auto 10px' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: 'var(--ig-text-muted)', fontSize: '0.8rem' }}>
+                            <select 
+                                className="ig-login-lang-dropdown" 
+                                value={language}
+                                onChange={(e) => onLanguageChange && onLanguageChange(e.target.value)}
+                                style={{ fontWeight: 600, paddingRight: '2px' }}
+                            >
+                                <option value="id">Bahasa Indonesia</option>
+                                <option value="en">English</option>
+                            </select>
+                            <i className="fas fa-chevron-down" style={{ fontSize: '9px', opacity: 0.7 }} />
+                        </div>
+                    </div>
+
+                    {/* IG Login Page UI - Official Gradient Camera Glyph Icon SVG & Couple names below! */}
+                    <div className="ig-login-logo-container" style={{ margin: '30px auto 15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                        {/* High-fidelity official Instagram camera glyph logo SVG */}
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="ig-cover-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor="#f09433"/>
+                                    <stop offset="25%" stopColor="#e6683c"/>
+                                    <stop offset="50%" stopColor="#dc2743"/>
+                                    <stop offset="75%" stopColor="#cc2366"/>
+                                    <stop offset="100%" stopColor="#bc1888"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="url(#ig-cover-gradient)"/>
+                        </svg>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
+                            <span className="ig-login-logo" style={{ fontSize: '2.5rem', marginBottom: '0px', lineHeight: 1.1, fontFamily: "'Pacifico', cursive", letterSpacing: '-0.5px' }}>
+                                {isEn ? 'wedding of' : 'pernikahan'}
+                            </span>
+                            <div style={{
+                                fontSize: '18px',
+                                fontWeight: 800,
+                                color: '#fff',
+                                letterSpacing: '1px',
+                                textTransform: 'uppercase',
+                                marginTop: '4px',
+                                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                                background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                textShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                            }}>
+                                {coupleName}
+                            </div>
+                        </div>
+                    </div>
+
+                    <form className="ig-login-form" onSubmit={(e) => { e.preventDefault(); onOpen(); }} style={{ padding: '0 28px' }}>
+                        <div className="ig-login-input-wrap" style={{ marginBottom: '8px' }}>
+                            <input
+                                type="text"
+                                value={guestNameInput}
+                                onChange={(e) => setGuestNameInput(e.target.value)}
+                                placeholder={isEn ? "Username, email, or mobile number" : "Nama pengguna, email, atau nomor ponsel"}
+                                className="ig-login-input"
+                                style={{ borderRadius: '8px', padding: '12px', border: '1px solid #3a3a3c', backgroundColor: '#1c1c1e', fontSize: '0.85rem' }}
+                            />
+                        </div>
+                        <div className="ig-login-input-wrap" style={{ marginBottom: '14px' }}>
+                            <input
+                                type="password"
+                                value="weddingdate"
+                                disabled
+                                placeholder={isEn ? "Password" : "Kata sandi"}
+                                className="ig-login-input"
+                                style={{ borderRadius: '8px', padding: '12px', border: '1px solid #3a3a3c', backgroundColor: '#1c1c1e', fontSize: '0.85rem' }}
+                            />
+                            <span className="ig-login-show-pwd" onClick={onOpen} style={{ fontSize: '0.8rem', color: '#fff' }}>{isEn ? 'Show' : 'Lihat'}</span>
+                        </div>
+                        <button type="submit" className="ig-login-btn" style={{ borderRadius: '25px', padding: '11px', fontSize: '0.9rem', width: '100%', border: 'none', backgroundColor: '#0095f6', color: '#fff', fontWeight: 700, cursor: 'pointer', transition: 'background-color 0.2s' }}>
+                            {isEn ? 'Log In' : 'Login'}
+                        </button>
+                    </form>
+
+                    <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                        <span 
+                            onClick={() => setPwdAlert(true)} 
+                            style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fff', cursor: 'pointer', opacity: 0.95 }}
+                        >
+                            {isEn ? "Forgot password?" : "Lupa kata sandi?"}
+                        </span>
+                    </div>
+
+                    <div className="ig-login-divider" style={{ margin: '20px 28px' }}>
+                        <div className="ig-divider-line"></div>
+                        <span className="ig-divider-text">OR</span>
+                        <div className="ig-divider-line"></div>
+                    </div>
+
+                    <div className="ig-login-fb" onClick={onOpen} style={{ color: '#0095f6', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <i className="fab fa-facebook-square" style={{ fontSize: '1.25rem' }} />
+                        <span>{isEn ? 'Log in with Facebook' : 'Masuk dengan Facebook'}</span>
+                    </div>
+
+                    {/* Guest Details Badge Inside Login Screen */}
+                    <div className="ig-login-guest-badge" style={{ margin: '15px 28px', borderRadius: '12px', border: '1px solid #262626', backgroundColor: '#121212', padding: '16px' }}>
+                        <p className="ig-guest-label" style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', color: 'var(--ig-pink)', fontWeight: 800, marginBottom: '6px' }}>{isEn ? 'Dear Guest' : 'Kepada Yth. Bapak/Ibu/Saudara/i'}</p>
+                        <h3 className="ig-guest-name" style={{ fontSize: '1.15rem', color: '#fff', fontWeight: 800, marginBottom: '6px' }}>{guestName}</h3>
+                        <p className="ig-guest-desc" style={{ fontSize: '0.75rem', color: 'var(--ig-text-muted)', lineHeight: 1.4 }}>{isEn ? 'We apologize if there are any spelling errors in names/titles.' : 'Mohon maaf apabila ada kesalahan penulisan nama atau gelar.'}</p>
+                    </div>
                 </div>
 
-                <div className="ig-login-fb" onClick={onOpen}>
-                    <i className="fab fa-facebook-square" />
-                    <span>{isEn ? 'Log in with Facebook' : 'Masuk dengan Facebook'}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    {/* Outlined Create New Account button matching modern IG login */}
+                    <button 
+                        type="button" 
+                        onClick={onOpen}
+                        style={{
+                            margin: '10px 28px 15px 28px',
+                            backgroundColor: 'transparent',
+                            border: '1px solid #0095f6',
+                            color: '#0095f6',
+                            borderRadius: '25px',
+                            padding: '10px',
+                            fontSize: '0.82rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                            outline: 'none'
+                        }}
+                    >
+                        {isEn ? 'Create new account' : 'Buat akun baru'}
+                    </button>
+
+                    {/* Simulated Meta Logo Footer at the bottom */}
+                    <div style={{
+                        padding: '10px 0',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '2px',
+                        opacity: 0.6
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#a8a8a8', fontWeight: 600 }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#a8a8a8" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: 'middle' }}>
+                                <path d="M16.924 7.617c-.966 0-1.884.34-2.613.978-.456.398-.823.902-1.111 1.488-.288-.586-.655-1.09-1.111-1.488a4.015 4.015 0 00-2.613-.978C7.14 7.617 5.23 9.4 5.23 11.597c0 2.2 1.91 3.983 4.236 3.983.966 0 1.884-.34 2.613-.978.456-.398.823-.902 1.111-1.488.288.586.655 1.09 1.111 1.488a4.015 4.015 0 00-2.613-.978c2.327 0 4.237-1.783 4.237-3.983 0-2.197-1.91-3.98-4.237-3.98zm-7.458 6.554c-1.396 0-2.542-1.077-2.542-2.395 0-1.319 1.146-2.395 2.542-2.395 1.397 0 2.542 1.076 2.542 2.395 0 1.318-1.145 2.395-2.542 2.395zm7.458 0c-1.396 0-2.542-1.077-2.542-2.395 0-1.319 1.146-2.395 2.542-2.395 1.397 0 2.542 1.076 2.542 2.395 0 1.318-1.145 2.395-2.542 2.395z"/>
+                            </svg>
+                            <span style={{ letterSpacing: '0.5px' }}>Meta</span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Guest Details Badge Inside Login Screen */}
-                <div className="ig-login-guest-badge">
-                    <p className="ig-guest-label">{isEn ? 'Dear Guest' : 'Kepada Yth. Bapak/Ibu/Saudara/i'}</p>
-                    <h3 className="ig-guest-name">{guestName}</h3>
-                    <p className="ig-guest-desc">{isEn ? 'We apologize if there are any spelling errors in names/titles.' : 'Mohon maaf apabila ada kesalahan penulisan nama atau gelar.'}</p>
-                </div>
-
-                <div className="ig-login-footer">
-                    <span>{isEn ? "Don't have an account? " : "Belum punya akun? "}<strong onClick={onOpen} style={{ color: 'var(--ig-blue)', cursor: 'pointer' }}>{isEn ? "Sign up." : "Daftar."}</strong></span>
-                </div>
-
-                {/* simulated bottom navigation bar - ACTIVE */}
-                <div className="ig-bottom-nav">
+                {/* simulated bottom navigation bar - ACTIVE (Unused but kept for layout size matching) */}
+                <div className="ig-bottom-nav" style={{ display: 'none' }}>
                     <i className="fas fa-home" onClick={() => { onOpen(); setTimeout(() => onJump(0, 'opening'), 150); }} />
                     <i className="fas fa-search" onClick={() => { onOpen(); setTimeout(() => onJump(1, 'bride_groom'), 150); }} />
                     <i className="far fa-plus-square" onClick={() => { onOpen(); setTimeout(() => onJump(3, 'event'), 150); }} />
