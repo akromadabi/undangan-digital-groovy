@@ -240,42 +240,35 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         return null;
     };
 
-    // Render dynamic reseller watermark
+    // Render dynamic reseller watermark in the bottom-left empty space
     const renderWatermark = () => {
         if (!reseller) return null;
 
         const isLuxury = theme.preview_bg_style === 'luxury-gold';
         const textClass = isLuxury 
-            ? 'text-amber-500/20 font-serif' 
-            : 'text-white/10 font-sans';
+            ? 'text-amber-500/35 font-serif' 
+            : 'text-white/25 font-sans';
+
+        const logoFilter = isLuxury
+            ? 'brightness(0) sepia(1) hue-rotate(15deg) saturate(3)'
+            : 'brightness(0) invert(1)';
+            
+        const logoOpacity = isLuxury ? 0.35 : 0.25;
 
         return (
-            <div className="absolute inset-0 z-20 pointer-events-none select-none flex flex-col justify-between p-4 overflow-hidden">
-                {/* Diagonal Large Watermark Text */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-70">
-                    <span className={`text-[20px] sm:text-[24px] uppercase font-black tracking-widest rotate-[-30deg] whitespace-nowrap select-none ${textClass}`}>
-                        {reseller.brand_name}
-                    </span>
-                </div>
-
-                {/* Bottom Premium Glassmorphic Badge */}
-                <div className="mt-auto mx-auto z-30">
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1 flex items-center gap-1.5 shadow-md scale-90 sm:scale-100">
-                        {reseller.brand_logo ? (
-                            <img 
-                                src={reseller.brand_logo} 
-                                alt="Logo" 
-                                className="h-4 sm:h-5 w-auto object-contain max-w-[80px]"
-                                onError={(e) => { e.target.style.display = 'none'; }}
-                            />
-                        ) : (
-                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
-                        )}
-                        <span className="text-[9px] sm:text-[10px] font-bold text-white tracking-wide uppercase">
-                            {reseller.brand_logo ? 'Verified' : reseller.brand_name}
-                        </span>
-                    </div>
-                </div>
+            <div className="absolute bottom-3.5 left-3.5 z-20 pointer-events-none select-none flex items-center gap-1.5">
+                {reseller.brand_logo && (
+                    <img 
+                        src={reseller.brand_logo} 
+                        alt="" 
+                        className="h-3 sm:h-3.5 w-auto object-contain max-w-[45px]"
+                        style={{ filter: logoFilter, opacity: logoOpacity }}
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                )}
+                <span className={`text-[8px] sm:text-[9px] font-bold tracking-widest uppercase ${textClass}`}>
+                    {reseller.brand_name}
+                </span>
             </div>
         );
     };
