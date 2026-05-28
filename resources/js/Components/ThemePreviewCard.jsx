@@ -240,12 +240,19 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         return null;
     };
 
-    // Render dynamic reseller watermark in the bottom-left empty space
+    // Render dynamic reseller watermark (both diagonal texture behind and clean bottom-left branding)
     const renderWatermark = () => {
         if (!reseller) return null;
 
         const isLuxury = theme.preview_bg_style === 'luxury-gold';
-        const textClass = isLuxury 
+        
+        // 1. Styling for diagonal background watermark
+        const diagonalTextClass = isLuxury 
+            ? 'text-amber-500/15 font-serif' 
+            : 'text-white/10 font-sans';
+            
+        // 2. Styling for bottom-left branding watermark
+        const cornerTextClass = isLuxury 
             ? 'text-amber-500/35 font-serif' 
             : 'text-white/25 font-sans';
 
@@ -256,20 +263,38 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         const logoOpacity = isLuxury ? 0.35 : 0.25;
 
         return (
-            <div className="absolute bottom-3.5 left-3.5 z-20 pointer-events-none select-none flex items-center gap-1.5">
-                {reseller.brand_logo && (
-                    <img 
-                        src={reseller.brand_logo} 
-                        alt="" 
-                        className="h-3 sm:h-3.5 w-auto object-contain max-w-[45px]"
-                        style={{ filter: logoFilter, opacity: logoOpacity }}
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                )}
-                <span className={`text-[8px] sm:text-[9px] font-bold tracking-widest uppercase ${textClass}`}>
-                    {reseller.brand_name}
-                </span>
-            </div>
+            <>
+                {/* Diagonal Multi-line Watermark Texture behind mockups */}
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none z-0">
+                    <div className="flex flex-col gap-3 sm:gap-5 rotate-[-25deg] opacity-60">
+                        <span className={`text-[14px] sm:text-[16px] uppercase font-black tracking-[0.2em] whitespace-nowrap translate-x-[-15%] ${diagonalTextClass}`}>
+                            {reseller.brand_name}
+                        </span>
+                        <span className={`text-[18px] sm:text-[20px] uppercase font-black tracking-[0.2em] whitespace-nowrap ${diagonalTextClass}`}>
+                            {reseller.brand_name}
+                        </span>
+                        <span className={`text-[14px] sm:text-[16px] uppercase font-black tracking-[0.2em] whitespace-nowrap translate-x-[15%] ${diagonalTextClass}`}>
+                            {reseller.brand_name}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Bottom-left clean branding watermark */}
+                <div className="absolute bottom-3.5 left-3.5 z-20 pointer-events-none select-none flex items-center gap-1.5">
+                    {reseller.brand_logo && (
+                        <img 
+                            src={reseller.brand_logo} 
+                            alt="" 
+                            className="h-3 sm:h-3.5 w-auto object-contain max-w-[45px]"
+                            style={{ filter: logoFilter, opacity: logoOpacity }}
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                    )}
+                    <span className={`text-[8px] sm:text-[9px] font-bold tracking-widest uppercase ${cornerTextClass}`}>
+                        {reseller.brand_name}
+                    </span>
+                </div>
+            </>
         );
     };
 
