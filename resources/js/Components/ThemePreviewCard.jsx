@@ -17,6 +17,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         'gradient-rose': 'bg-gradient-to-br from-[#ff9a9e] via-[#fecfef] to-[#a1c4fd]',
         'luxury-gold': 'bg-gradient-to-br from-[#111111] via-[#1a1a1a] to-[#0a0a0a] border border-amber-500/10',
         'glassmorphism': 'bg-gradient-to-br from-gray-100 to-gray-200 border border-white/40',
+        'studio-split': 'bg-[#bf6c54] overflow-hidden border border-white/10',
     };
 
     const activeBg = bgStyles[theme.preview_bg_style || 'gradient-indigo'] || bgStyles['gradient-indigo'];
@@ -127,6 +128,22 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                         <div className="absolute bottom-[35%] right-[22%] text-amber-500/20 text-[10px] animate-pulse" style={{ animationDelay: '1s' }}>✦</div>
                         {/* Dark ground depth shadow */}
                         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
+                    </div>
+                );
+            case 'studio-split':
+                return (
+                    <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#bf6c54] overflow-hidden">
+                        {/* Diagonal Left Split Panel (Deep Charcoal Green/Grey) */}
+                        <div 
+                            className="absolute inset-y-0 -left-[15%] w-[68%] bg-[#1b2421] transform skew-x-[-15deg] origin-top shadow-[15px_0_45px_rgba(0,0,0,0.45)] border-r border-white/5"
+                        />
+                        {/* Soft white spotlights for depth */}
+                        {/* Light source on left panel */}
+                        <div className="absolute top-[20%] left-[15%] w-64 h-64 rounded-full bg-white/5 blur-[65px]" />
+                        {/* Light source on right panel */}
+                        <div className="absolute top-[40%] right-[10%] w-72 h-72 rounded-full bg-white/10 blur-[80px]" />
+                        {/* Ambient room shadow bottom overlay */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
                     </div>
                 );
             case 'glassmorphism':

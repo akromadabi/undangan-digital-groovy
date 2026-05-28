@@ -445,6 +445,7 @@ export default function Form({ theme, plans = [] }) {
                                                 <option value="gradient-rose">Rose Gold Romance Gradient</option>
                                                 <option value="luxury-gold">Luxury Black & Radiant Gold</option>
                                                 <option value="glassmorphism">Glassmorphic Clean light</option>
+                                                <option value="studio-split">Creative Studio Dual-Tone Split</option>
                                             </select>
                                         </div>
                                     )}
