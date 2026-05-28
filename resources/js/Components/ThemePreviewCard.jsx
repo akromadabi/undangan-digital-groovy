@@ -48,11 +48,11 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                 }}
             >
                 {/* Speaker/Camera Bar */}
-                <div className="absolute top-[4px] sm:top-[6px] left-1/2 -translate-x-1/2 w-10 sm:w-14 h-2 sm:h-3.5 bg-black rounded-full z-30 flex items-center justify-center">
+                <div className="absolute top-[4px] sm:top-[6px] left-1/2 -translate-x-1/2 w-7 sm:w-9 h-1.5 sm:h-2 bg-black rounded-full z-30 flex items-center justify-center">
                     {/* Camera */}
-                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-[#222] rounded-full mr-1.5 sm:mr-2" />
+                    <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-[#111] rounded-full mr-1 sm:mr-1.5" />
                     {/* Speaker */}
-                    <div className="w-4 sm:w-6 h-0.5 bg-[#333] rounded-full" />
+                    <div className="w-2.5 sm:w-4 h-0.5 bg-[#222] rounded-full" />
                 </div>
                 
                 {/* Screen Container */}

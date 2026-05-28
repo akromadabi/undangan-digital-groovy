@@ -83,6 +83,36 @@ const ToggleSwitch = ({ checked, onChange, label, desc, icon, disabled = false }
 
 export default function ThemeSettings({ invitation, currentTheme, themes, sections, mediaAssets = [], previewData, centralHost = 'undangan.com' }) {
     const { auth, features, subscription } = usePage().props;
+    const invitationType = invitation?.type || auth?.user?.invitation_type || 'wedding';
+
+    const getDynamicLabel = (label) => {
+        if (invitationType === 'wedding') return label;
+
+        if (label === 'Mempelai') {
+            switch (invitationType) {
+                case 'graduation': return 'Profil Wisudawan';
+                case 'birthday': return 'Profil Utama';
+                case 'aqiqah': return 'Profil Anak';
+                case 'circumcision': return 'Profil Anak';
+                case 'anniversary': return 'Profil Pasangan';
+                default: return 'Profil Utama';
+            }
+        }
+
+        if (label === 'Kisah Cinta' || label === 'Kisah') {
+            switch (invitationType) {
+                case 'graduation': return 'Perjalanan Studi';
+                case 'birthday': return 'Milestone & Kisah';
+                case 'aqiqah': return 'Kisah Anak';
+                case 'circumcision': return 'Kisah Anak';
+                case 'anniversary': return 'Kisah Kebersamaan';
+                default: return 'Cerita & Kisah';
+            }
+        }
+
+        return label;
+    };
+
     const isUserAdminOrSuper = auth.user?.role === 'admin' || auth.user?.role === 'super_admin';
 
     const isLockedByPlan = (featureSlug) => {
@@ -724,7 +754,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                 )}
                                             </div>
                                             <span className={`flex-1 font-medium text-xs ${locked ? 'text-gray-500' : 'text-gray-700'}`}>
-                                                {section.section_name}
+                                                {getDynamicLabel(section.section_name)}
                                                 {layoutLocked && <span className="ml-1 text-[9px] text-gray-400 font-normal">(terkunci)</span>}
                                                 {planLocked && <span className="ml-1 text-[9px] text-amber-500 font-bold">(terkunci paket)</span>}
                                             </span>
@@ -1486,7 +1516,7 @@ function ThemePreview({ layoutMode, menuPosition, sections, theme, colors, fonts
         return (
             <div className="h-full relative" style={{ fontFamily: fonts.body }}>
                 <div className="h-full overflow-y-auto">
-                    {current && <SectionCard section={current} colors={colors} fonts={fonts} isJawa={isJawa} inv={inv} />}
+                    {current && <SectionCard section={current} colors={colors} fonts={fonts} isJawa={isJawa} inv={inv} getDynamicLabel={getDynamicLabel} />}
                 </div>
                 {/* Slide dots at bottom */}
                 <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1" style={{ zIndex: 5 }}>
@@ -1507,7 +1537,7 @@ function ThemePreview({ layoutMode, menuPosition, sections, theme, colors, fonts
         return (
             <div className="h-full relative" style={{ fontFamily: fonts.body }}>
                 <div className="h-full overflow-y-auto">
-                    {current && <SectionCard section={current} colors={colors} fonts={fonts} isJawa={isJawa} inv={inv} />}
+                    {current && <SectionCard section={current} colors={colors} fonts={fonts} isJawa={isJawa} inv={inv} getDynamicLabel={getDynamicLabel} />}
                 </div>
                 {/* Slide dots on side */}
                 <div className={`absolute ${dotSide} top-1/2 -translate-y-1/2 flex flex-col gap-1`} style={{ zIndex: 5 }}>
@@ -1526,7 +1556,7 @@ function ThemePreview({ layoutMode, menuPosition, sections, theme, colors, fonts
     return (
         <div className="relative" style={{ fontFamily: fonts.body }}>
             {sections.map((section) => (
-                <SectionCard key={section.id} section={section} colors={colors} fonts={fonts} isJawa={isJawa} inv={inv} />
+                <SectionCard key={section.id} section={section} colors={colors} fonts={fonts} isJawa={isJawa} inv={inv} getDynamicLabel={getDynamicLabel} />
             ))}
             <MenuIndicator />
         </div>
@@ -1534,8 +1564,24 @@ function ThemePreview({ layoutMode, menuPosition, sections, theme, colors, fonts
 }
 
 // ═══ Preview Card per section ═══
-function SectionCard({ section, colors, fonts, isJawa, inv }) {
+function SectionCard({ section, colors, fonts, isJawa, inv, getDynamicLabel }) {
     const key = section.section_key;
+    const invitationType = inv?.type || 'wedding';
+
+    const getNicknameHeader = () => {
+        const bg = inv?.bride_grooms || [];
+        if (bg.length === 0) {
+            if (invitationType === 'graduation') return 'Nama Wisudawan';
+            if (invitationType === 'birthday') return 'Nama Penerima';
+            if (invitationType === 'aqiqah' || invitationType === 'circumcision') return 'Nama Anak';
+            return 'Nama Mempelai';
+        }
+        if (invitationType && ['wedding', 'anniversary'].includes(invitationType)) {
+            return `${bg[0]?.nickname || 'Mempelai'} & ${bg[1]?.nickname || 'Mempelai'}`;
+        }
+        // Single subject
+        return bg[0]?.nickname || 'Nama Penerima';
+    };
 
     const OrnamentTop = () => isJawa ? <img src="/themes/adat-jawa/ornamen-bunga.png" alt="" className="w-full h-auto" style={{ opacity: 0.85 }} /> : null;
     const OrnamentBottom = () => isJawa ? <img src="/themes/adat-jawa/ornamen-wayang.png" alt="" className="w-full h-auto" style={{ opacity: 0.7 }} /> : null;
@@ -1552,9 +1598,16 @@ function SectionCard({ section, colors, fonts, isJawa, inv }) {
                 {isJawa && <OrnamentTop />}
                 <div className="px-4 py-8">
                     {isJawa && <img src="/themes/adat-jawa/the-wedding.png" alt="" className="w-28 mx-auto mb-2 opacity-80" />}
-                    <p className="text-[10px] uppercase tracking-[0.2em] mb-1" style={{ color: colors.primary }}>The Wedding Of</p>
+                    <p className="text-[10px] uppercase tracking-[0.2em] mb-1" style={{ color: colors.primary }}>
+                        {invitationType === 'wedding' ? 'The Wedding Of' :
+                         invitationType === 'graduation' ? 'Happy Graduation' :
+                         invitationType === 'birthday' ? 'Happy Birthday' :
+                         invitationType === 'aqiqah' ? 'Walimatul Aqiqah' :
+                         invitationType === 'circumcision' ? 'Walimatul Khitan' :
+                         invitationType === 'anniversary' ? 'Happy Anniversary' : 'Acara Syukuran'}
+                    </p>
                     <h2 className="text-xl font-bold" style={{ fontFamily: fonts.script, color: colors.primary }}>
-                        {inv?.bride_grooms?.[0]?.nickname || 'Mempelai'} & {inv?.bride_grooms?.[1]?.nickname || 'Mempelai'}
+                        {getNicknameHeader()}
                     </h2>
                     <SwirlDiv />
                     <p className="text-[10px] mt-1 opacity-60">Kepada Yth. Tamu Undangan</p>
@@ -1591,9 +1644,9 @@ function SectionCard({ section, colors, fonts, isJawa, inv }) {
                 {isJawa && <OrnamentTop />}
                 <div className="px-4 py-4">
                     <SwirlDiv />
-                    <h3 className="text-[10px] uppercase tracking-widest mb-2" style={{ color: colors.primary }}>Mempelai</h3>
+                    <h3 className="text-[10px] uppercase tracking-widest mb-2" style={{ color: colors.primary }}>{getDynamicLabel('Mempelai')}</h3>
                     <SwirlDiv />
-                    {[0, 1].map(i => (
+                    {(invitationType && ['wedding', 'anniversary'].includes(invitationType) ? [0, 1] : [0]).map(i => (
                         <div key={i} className="mb-3">
                             <div className="w-14 h-14 mx-auto rounded-full mb-1 overflow-hidden" style={{ border: `2px solid ${colors.primary}` }}>
                                 {inv?.bride_grooms?.[i]?.photo
@@ -1604,11 +1657,18 @@ function SectionCard({ section, colors, fonts, isJawa, inv }) {
                                 }
                             </div>
                             <p className="text-base font-bold" style={{ fontFamily: fonts.script, color: colors.primary }}>
-                                {inv?.bride_grooms?.[i]?.full_name || (i === 0 ? 'Mempelai Wanita' : 'Mempelai Pria')}
+                                {inv?.bride_grooms?.[i]?.full_name || (
+                                    invitationType === 'graduation' ? 'Nama Wisudawan' :
+                                    invitationType === 'birthday' ? 'Nama Penerima' :
+                                    invitationType === 'aqiqah' ? 'Nama Anak' :
+                                    invitationType === 'circumcision' ? 'Nama Anak' :
+                                    invitationType === 'anniversary' ? (i === 0 ? 'Pasangan Wanita' : 'Pasangan Pria') :
+                                    (i === 0 ? 'Mempelai Wanita' : 'Mempelai Pria')
+                                )}
                             </p>
                             <p className="text-[9px] opacity-50 mt-0.5">
                                 {inv?.bride_grooms?.[i]?.father_name
-                                    ? `Putri/Putra dari Bpk. ${inv.bride_grooms[i].father_name} & Ibu ${inv.bride_grooms[i].mother_name}`
+                                    ? `Putra/Putri dari Bpk. ${inv.bride_grooms[i].father_name} & Ibu ${inv.bride_grooms[i].mother_name}`
                                     : 'Putra/Putri dari Bapak ... & Ibu ...'}
                             </p>
                             {i === 0 && <SwirlDiv />}
