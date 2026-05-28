@@ -282,19 +282,19 @@ html {
 
 /* Specific overrides for triple-phone layout */
 .triple-phone-layout .phone-rotate-left.phone-back {
-    transform: rotateY(10deg) rotateZ(-1.5deg) scale(0.88);
+    transform: scale(0.84);
 }
 .triple-phone-layout .phone-rotate-left.phone-back:hover,
 .group:hover .triple-phone-layout .phone-rotate-left.phone-back {
-    transform: rotateY(5deg) rotateZ(-0.8deg) scale(0.91) translate(-2px, -2px);
+    transform: scale(0.87);
 }
 
 .triple-phone-layout .phone-rotate-right.phone-back {
-    transform: rotateY(-10deg) rotateZ(1.5deg) scale(0.88);
+    transform: scale(0.84);
 }
 .triple-phone-layout .phone-rotate-right.phone-back:hover,
 .group:hover .triple-phone-layout .phone-rotate-right.phone-back {
-    transform: rotateY(-5deg) rotateZ(0.8deg) scale(0.91) translate(2px, -2px);
+    transform: scale(0.87);
 }
 
 
