@@ -169,6 +169,7 @@ export default function Form({ theme, plans = [] }) {
         preview_template: theme?.preview_template || 'full-mockup',
         preview_bg_style: theme?.preview_bg_style || 'gradient-indigo',
         category: theme?.category || 'elegant', 
+        type: theme?.type || 'wedding', 
         is_premium: theme?.is_premium || false, 
         allowed_plans: theme?.allowed_plans || [],
         is_active: theme?.is_active ?? true,
@@ -192,6 +193,7 @@ export default function Form({ theme, plans = [] }) {
                 preview_template: theme.preview_template || 'full-mockup',
                 preview_bg_style: theme.preview_bg_style || 'gradient-indigo',
                 category: theme.category || 'elegant',
+                type: theme.type || 'wedding',
                 is_premium: theme.is_premium || false,
                 allowed_plans: theme.allowed_plans || [],
                 is_active: theme.is_active ?? true,
@@ -278,11 +280,21 @@ export default function Form({ theme, plans = [] }) {
             const result = await response.json();
             const nextImages = [...(data.preview_images || [])];
             nextImages[index] = result.url;
-            setData('preview_images', nextImages);
 
             const nextPreviews = [...previewImagesPreviews];
             nextPreviews[index] = getThumbnailUrl(result.url);
             setPreviewImagesPreviews(nextPreviews);
+
+            if (index === 0) {
+                setData({
+                    ...data,
+                    preview_images: nextImages,
+                    thumbnail: result.url
+                });
+                setThumbnailPreview(getThumbnailUrl(result.url));
+            } else {
+                setData('preview_images', nextImages);
+            }
         } catch (err) {
             console.error('Upload failed:', err);
         } finally {
@@ -293,11 +305,21 @@ export default function Form({ theme, plans = [] }) {
     const clearPreviewImage = (index) => {
         const nextImages = [...(data.preview_images || [])];
         nextImages.splice(index, 1);
-        setData('preview_images', nextImages);
 
         const nextPreviews = [...previewImagesPreviews];
         nextPreviews.splice(index, 1);
         setPreviewImagesPreviews(nextPreviews);
+
+        if (index === 0) {
+            setData({
+                ...data,
+                preview_images: nextImages,
+                thumbnail: ''
+            });
+            setThumbnailPreview('');
+        } else {
+            setData('preview_images', nextImages);
+        }
     };
 
     // Helper untuk memperbarui nilai Color Scheme di dalam string JSON
@@ -447,104 +469,6 @@ export default function Form({ theme, plans = [] }) {
                                 {errors.slug && <p className="text-red-500 text-xs mt-1">{errors.slug}</p>}
                             </div>
 
-                            {/* UPLOAD THUMBNAIL */}
-                            <div className="col-span-2">
-                                <label className={labelClass}>
-                                    {data.preview_template === 'full-mockup' ? 'Foto Preview Utama (Mockup Statis) *' : 'Foto Fallback Thumbnail (Cadangan) *'}
-                                </label>
-                                <div className="flex items-start gap-4 bg-[#faf9f7] p-4 rounded-xl border border-[#e8e5e0]/60">
-                                    {/* Preview Box */}
-                                    <div
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="w-24 h-24 rounded-lg border-2 border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer bg-white hover:border-[#E5654B] hover:bg-[#fef2f0] transition-all overflow-hidden flex-shrink-0 relative shadow-sm group"
-                                    >
-                                        {thumbnailPreview ? (
-                                            <div className="relative w-full h-full group">
-                                                <img src={thumbnailPreview} alt="Thumbnail Preview" className="w-full h-full object-cover" />
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setLightboxImage(thumbnailPreview);
-                                                    }}
-                                                    className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
-                                                    title="Perbesar Gambar"
-                                                >
-                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
-                                                </button>
-                                                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
-                                            </div>
-                                        ) : (
-                                            <div className="text-center p-2">
-                                                <svg className="w-6 h-6 mx-auto text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v13.5a2.25 2.25 0 002.25 2.25z" />
-                                                </svg>
-                                                <span className="text-[9px] text-gray-400">Pilih Foto</span>
-                                            </div>
-                                        )}
-                                        {uploading && (
-                                            <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
-                                                <div className="w-5 h-5 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    
-                                    {/* Action Buttons & Info */}
-                                    <div className="flex-1 space-y-2">
-                                        <input
-                                            ref={fileInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleThumbnailUpload}
-                                            className="hidden"
-                                        />
-                                        <div className="flex flex-wrap gap-2">
-                                            <button 
-                                                type="button" 
-                                                onClick={() => fileInputRef.current?.click()}
-                                                className="px-3.5 py-1.5 bg-white border border-[#e8e5e0] hover:bg-gray-50 rounded-lg text-xs font-semibold text-[#555] transition-colors inline-flex items-center gap-1.5 shadow-sm"
-                                            >
-                                                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                                                </svg>
-                                                Ganti Gambar
-                                            </button>
-                                            
-                                            {thumbnailPreview && (
-                                                <button 
-                                                    type="button" 
-                                                    onClick={() => setLightboxImage(thumbnailPreview)}
-                                                    className="px-3.5 py-1.5 bg-white border border-[#e8e5e0] hover:bg-gray-50 rounded-lg text-xs font-semibold text-[#555] transition-colors inline-flex items-center gap-1.5 shadow-sm"
-                                                >
-                                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
-                                                    Lihat Gambar
-                                                </button>
-                                            )}
-                                        </div>
-                                        <p className="text-[10px] text-gray-400">
-                                            {data.preview_template === 'full-mockup' 
-                                                ? 'Unggah gambar mockup tema jadi yang akan langsung digunakan sebagai tampilan utama di katalog.' 
-                                                : 'Unggah gambar cadangan yang akan ditampilkan jika mockup HP dinamis gagal dimuat atau sebagai cover katalog di area tertentu.'}
-                                        </p>
-                                        {errors.thumbnail && <p className="text-red-500 text-xs mt-1 font-medium">{errors.thumbnail}</p>}
-                                        {data.thumbnail && (
-                                            <div className="text-[10px] text-emerald-600 font-semibold truncate max-w-[300px] bg-emerald-50 border border-emerald-500/10 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
-                                                <svg className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                Foto tersimpan: {data.thumbnail}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
                             {/* DYNAMIC CSS MOCKUP CONFIGURATION */}
                             <div className="col-span-2 border-t border-[#f5f3f0] pt-5 space-y-5">
                                 <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 mb-1">
@@ -587,142 +511,224 @@ export default function Form({ theme, plans = [] }) {
                                         </div>
                                     </div>
 
-                                    {/* Visual Background Palette Selector */}
-                                    {data.preview_template !== 'full-mockup' && (
-                                        <div className="space-y-2 border-t border-[#f5f3f0] pt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <label className={labelClass}>Gaya Background Preview</label>
-                                            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
-                                                {bgStyleOptions.map((opt) => {
-                                                    const isActive = data.preview_bg_style === opt.value;
-                                                    return (
-                                                        <button
-                                                            key={opt.value}
-                                                            type="button"
-                                                            onClick={() => setData('preview_bg_style', opt.value)}
-                                                            className={`flex flex-col p-2.5 rounded-xl border text-left transition-all ${
-                                                                isActive 
-                                                                    ? 'border-[#E5654B] bg-[#fef5f3] ring-1 ring-[#E5654B] shadow-xs' 
-                                                                    : 'border-[#e8e5e0] bg-white hover:border-gray-300'
-                                                            }`}
-                                                        >
-                                                            <div className="mb-2 w-full">
-                                                                {opt.renderPreview()}
-                                                            </div>
-                                                            <span className={`text-[9.5px] font-bold block truncate w-full ${isActive ? 'text-[#E5654B]' : 'text-gray-600'}`}>
-                                                                {opt.label}
-                                                            </span>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 
-                            {/* UPLOAD SCREENSHOTS FOR DYNAMIC MOCKUPS */}
+                            {/* Visual Background Palette Selector */}
                             {data.preview_template !== 'full-mockup' && (
-                                <div className="col-span-2 space-y-3 bg-[#faf9f7] p-4 rounded-2xl border border-[#e8e5e0]/60">
-                                    <label className={labelClass}>Unggah Foto Screenshot Mentah (Rasio Portrait HP)</label>
-                                    <p className="text-[10px] text-gray-400 leading-normal mb-2">
-                                        Unggah screenshot polos dari halaman depan/utama undangan. Gambar akan di-render di dalam frame HP CSS dan dapat digeser (scroll) saat kursor diarahkan ke preview.
-                                    </p>
-                                                                       <div className={`grid gap-3.5 ${
-                                        data.preview_template === 'single-phone' 
-                                            ? 'grid-cols-1 max-w-[145px] mx-auto' 
-                                            : data.preview_template === 'double-phone' 
-                                                ? 'grid-cols-2 max-w-[300px] mx-auto' 
-                                                : 'grid-cols-3'
-                                    }`}>
-                                        {[0, 1, 2].map((idx) => {
-                                            // Determine if this index is needed based on template selection
-                                            const isNeeded = idx === 0 || 
-                                                (data.preview_template === 'double-phone' && idx < 2) || 
-                                                (data.preview_template === 'triple-phone');
-                                                
-                                            if (!isNeeded) return null;
-
-                                            let slotLabel = `HP #${idx + 1}`;
-                                            if (data.preview_template === 'single-phone') slotLabel = 'Layar HP Utama';
-                                            else if (data.preview_template === 'double-phone') {
-                                                slotLabel = idx === 0 ? 'HP Utama (Depan)' : 'HP Kedua (Belakang)';
-                                            } else if (data.preview_template === 'triple-phone') {
-                                                if (idx === 0) slotLabel = 'HP Utama (Tengah)';
-                                                else if (idx === 1) slotLabel = 'HP Kiri (Belakang)';
-                                                else slotLabel = 'HP Kanan (Belakang)';
-                                            }
-
+                                <div className="col-span-2 space-y-2 border-t border-[#f5f3f0] pt-5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <label className={labelClass}>Gaya Background Preview</label>
+                                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+                                        {bgStyleOptions.map((opt) => {
+                                            const isActive = data.preview_bg_style === opt.value;
                                             return (
-                                                <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm hover:border-gray-300 transition-colors">
-                                                    <span className="text-[10px] font-bold text-gray-500 mb-2 tracking-wide uppercase">{slotLabel}</span>
-                                                    
-                                                    <div 
-                                                        onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
-                                                        className="w-16 h-24 rounded-md border border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer overflow-hidden relative hover:border-[#E5654B] bg-[#faf9f7] transition-all group"
-                                                    >
-                                                        {previewImagesPreviews[idx] ? (
-                                                            <div className="relative w-full h-full group">
-                                                                <img src={previewImagesPreviews[idx]} className="w-full h-full object-cover" />
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setLightboxImage(previewImagesPreviews[idx]);
-                                                                    }}
-                                                                    className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
-                                                                    title="Perbesar Gambar"
-                                                                >
-                                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                    </svg>
-                                                                </button>
-                                                                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
-                                                            </div>
-                                                        ) : (
-                                                            <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4" />
-                                                            </svg>
-                                                        )}
-                                                        {uploadingIndex === idx && (
-                                                            <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
-                                                                <div className="w-4 h-4 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
-                                                            </div>
-                                                        )}
+                                                <button
+                                                    key={opt.value}
+                                                    type="button"
+                                                    onClick={() => setData('preview_bg_style', opt.value)}
+                                                    className={`flex flex-col p-2.5 rounded-xl border text-left transition-all ${
+                                                        isActive 
+                                                            ? 'border-[#E5654B] bg-[#fef5f3] ring-1 ring-[#E5654B] shadow-xs' 
+                                                            : 'border-[#e8e5e0] bg-white hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <div className="mb-2 w-full">
+                                                        {opt.renderPreview()}
                                                     </div>
-
-                                                    <input 
-                                                        id={`screenshot-upload-${idx}`}
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={(e) => handlePreviewImageUpload(idx, e)}
-                                                        className="hidden"
-                                                    />
-
-                                                    <div className="flex gap-1.5 mt-2.5 w-full">
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
-                                                            className="flex-1 py-1 text-[9px] font-bold bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded"
-                                                        >
-                                                            Upload
-                                                        </button>
-                                                        {data.preview_images[idx] && (
-                                                            <button 
-                                                                type="button"
-                                                                onClick={() => clearPreviewImage(idx)}
-                                                                className="px-1.5 py-1 text-[9px] font-bold bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 rounded"
-                                                            >
-                                                                Hapus
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
+                                                    <span className={`text-[9.5px] font-bold block truncate w-full ${isActive ? 'text-[#E5654B]' : 'text-gray-600'}`}>
+                                                        {opt.label}
+                                                    </span>
+                                                </button>
                                             );
                                         })}
                                     </div>
                                 </div>
                             )}
+
+                            {/* DYNAMIC UPLOAD AREA (ADAPTS IN PLACE) */}
+                            <div className="col-span-2 space-y-3 bg-[#faf9f7] p-4 rounded-2xl border border-[#e8e5e0]/60">
+                                {data.preview_template === 'full-mockup' ? (
+                                    <>
+                                        <label className={labelClass}>Foto Preview Utama (Mockup Statis) *</label>
+                                        <p className="text-[10px] text-gray-400 leading-normal mb-2">
+                                            Unggah gambar mockup tema jadi yang akan langsung digunakan sebagai tampilan utama di katalog.
+                                        </p>
+                                        <div className="max-w-[145px] mx-auto">
+                                            <div className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm hover:border-gray-300 transition-colors">
+                                                <span className="text-[10px] font-bold text-gray-500 mb-2 tracking-wide uppercase">Mockup Statis</span>
+                                                
+                                                <div 
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    className="w-16 h-24 rounded-md border border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer overflow-hidden relative hover:border-[#E5654B] bg-[#faf9f7] transition-all group"
+                                                >
+                                                    {thumbnailPreview ? (
+                                                        <div className="relative w-full h-full group">
+                                                            <img src={thumbnailPreview} className="w-full h-full object-cover" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setLightboxImage(thumbnailPreview);
+                                                                }}
+                                                                className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
+                                                                title="Perbesar Gambar"
+                                                            >
+                                                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                </svg>
+                                                            </button>
+                                                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
+                                                        </div>
+                                                    ) : (
+                                                        <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    )}
+                                                    {uploading && (
+                                                        <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
+                                                            <div className="w-4 h-4 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <input 
+                                                    ref={fileInputRef}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleThumbnailUpload}
+                                                    className="hidden"
+                                                />
+
+                                                <div className="flex gap-1.5 mt-2.5 w-full">
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => fileInputRef.current?.click()}
+                                                        className="flex-1 py-1 text-[9px] font-bold bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded"
+                                                    >
+                                                        Upload
+                                                    </button>
+                                                </div>
+                                                {errors.thumbnail && (
+                                                    <p className="text-red-500 text-[10px] mt-1.5 font-medium leading-tight">{errors.thumbnail}</p>
+                                                )}
+                                                {data.thumbnail && (
+                                                    <div className="text-[9px] text-emerald-600 font-semibold truncate max-w-full bg-emerald-50 border border-emerald-500/10 px-2 py-0.5 mt-2 rounded inline-flex items-center gap-1 justify-center w-full">
+                                                        <svg className="w-3 h-3 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        Tersimpan
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <label className={labelClass}>Unggah Foto Screenshot Mentah (Rasio Portrait HP) *</label>
+                                        <p className="text-[10px] text-gray-400 leading-normal mb-2">
+                                            Unggah screenshot polos dari halaman depan/utama undangan. Gambar akan di-render di dalam frame HP CSS dan dapat digeser (scroll) saat kursor diarahkan ke preview.
+                                        </p>
+                                        <div className={`grid gap-3.5 ${
+                                            data.preview_template === 'single-phone' 
+                                                ? 'grid-cols-1 max-w-[145px] mx-auto' 
+                                                : data.preview_template === 'double-phone' 
+                                                    ? 'grid-cols-2 max-w-[300px] mx-auto' 
+                                                    : 'grid-cols-3'
+                                        }`}>
+                                            {[0, 1, 2].map((idx) => {
+                                                // Determine if this index is needed based on template selection
+                                                const isNeeded = idx === 0 || 
+                                                    (data.preview_template === 'double-phone' && idx < 2) || 
+                                                    (data.preview_template === 'triple-phone');
+                                                    
+                                                if (!isNeeded) return null;
+
+                                                let slotLabel = `HP #${idx + 1}`;
+                                                if (data.preview_template === 'single-phone') slotLabel = 'Layar HP Utama';
+                                                else if (data.preview_template === 'double-phone') {
+                                                    slotLabel = idx === 0 ? 'HP Utama (Depan)' : 'HP Kedua (Belakang)';
+                                                } else if (data.preview_template === 'triple-phone') {
+                                                    if (idx === 0) slotLabel = 'HP Utama (Tengah)';
+                                                    else if (idx === 1) slotLabel = 'HP Kiri (Belakang)';
+                                                    else slotLabel = 'HP Kanan (Belakang)';
+                                                }
+
+                                                return (
+                                                    <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm hover:border-gray-300 transition-colors">
+                                                        <span className="text-[10px] font-bold text-gray-500 mb-2 tracking-wide uppercase">{slotLabel}</span>
+                                                        
+                                                        <div 
+                                                            onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
+                                                            className="w-16 h-24 rounded-md border border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer overflow-hidden relative hover:border-[#E5654B] bg-[#faf9f7] transition-all group"
+                                                        >
+                                                            {previewImagesPreviews[idx] ? (
+                                                                <div className="relative w-full h-full group">
+                                                                    <img src={previewImagesPreviews[idx]} className="w-full h-full object-cover" />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setLightboxImage(previewImagesPreviews[idx]);
+                                                                        }}
+                                                                        className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
+                                                                        title="Perbesar Gambar"
+                                                                    >
+                                                                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                        </svg>
+                                                                    </button>
+                                                                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
+                                                                </div>
+                                                            ) : (
+                                                                <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4" />
+                                                                </svg>
+                                                            )}
+                                                            {uploadingIndex === idx && (
+                                                                <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
+                                                                    <div className="w-4 h-4 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <input 
+                                                            id={`screenshot-upload-${idx}`}
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => handlePreviewImageUpload(idx, e)}
+                                                            className="hidden"
+                                                        />
+
+                                                        <div className="flex gap-1.5 mt-2.5 w-full">
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
+                                                                className="flex-1 py-1 text-[9px] font-bold bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded"
+                                                            >
+                                                                Upload
+                                                            </button>
+                                                            {data.preview_images[idx] && (
+                                                                <button 
+                                                                    type="button"
+                                                                    onClick={() => clearPreviewImage(idx)}
+                                                                    className="px-1.5 py-1 text-[9px] font-bold bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 rounded"
+                                                                >
+                                                                    Hapus
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        {idx === 0 && errors.thumbnail && (
+                                                            <p className="text-red-500 text-[10px] mt-1.5 font-medium leading-tight">{errors.thumbnail}</p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
 
                             {/* INTERACTIVE LIVE PREVIEW RENDER */}
                             <div className="col-span-2 border-t border-[#f5f3f0] pt-5">
@@ -759,6 +765,21 @@ export default function Form({ theme, plans = [] }) {
                                     <option value="rustic">Rustic</option>
                                     <option value="minimalist">Minimalist</option>
                                 </select>
+                            </div>
+                            
+                            <div>
+                                <label className={labelClass}>Tipe Acara (Event Type)</label>
+                                <select value={data.type} onChange={(e) => setData('type', e.target.value)}
+                                    className={inputClass}>
+                                    <option value="wedding">💍 Pernikahan (Wedding)</option>
+                                    <option value="birthday">🎂 Ulang Tahun (Birthday)</option>
+                                    <option value="graduation">🎓 Wisuda (Graduation)</option>
+                                    <option value="aqiqah">👶 Aqiqah</option>
+                                    <option value="circumcision">♂️ Sunatan (Khitanan)</option>
+                                    <option value="anniversary">💖 Anniversary / Syukuran</option>
+                                    <option value="general">🌍 Umum / General (Semua Acara)</option>
+                                </select>
+                                {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type}</p>}
                             </div>
                             
                             <div>
