@@ -514,37 +514,6 @@ export default function Form({ theme, plans = [] }) {
                                 </div>
                             </div>
 
-                            {/* Visual Background Palette Selector */}
-                            {data.preview_template !== 'full-mockup' && (
-                                <div className="col-span-2 space-y-2 border-t border-[#f5f3f0] pt-5 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <label className={labelClass}>Gaya Background Preview</label>
-                                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
-                                        {bgStyleOptions.map((opt) => {
-                                            const isActive = data.preview_bg_style === opt.value;
-                                            return (
-                                                <button
-                                                    key={opt.value}
-                                                    type="button"
-                                                    onClick={() => setData('preview_bg_style', opt.value)}
-                                                    className={`flex flex-col p-2.5 rounded-xl border text-left transition-all ${
-                                                        isActive 
-                                                            ? 'border-[#E5654B] bg-[#fef5f3] ring-1 ring-[#E5654B] shadow-xs' 
-                                                            : 'border-[#e8e5e0] bg-white hover:border-gray-300'
-                                                    }`}
-                                                >
-                                                    <div className="mb-2 w-full">
-                                                        {opt.renderPreview()}
-                                                    </div>
-                                                    <span className={`text-[9.5px] font-bold block truncate w-full ${isActive ? 'text-[#E5654B]' : 'text-gray-600'}`}>
-                                                        {opt.label}
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-
                             {/* DYNAMIC UPLOAD AREA (ADAPTS IN PLACE) */}
                             <div className="col-span-2 space-y-3 bg-[#faf9f7] p-4 rounded-2xl border border-[#e8e5e0]/60">
                                 {data.preview_template === 'full-mockup' ? (
@@ -729,6 +698,37 @@ export default function Form({ theme, plans = [] }) {
                                     </>
                                 )}
                             </div>
+
+                            {/* Visual Background Palette Selector */}
+                            {data.preview_template !== 'full-mockup' && (
+                                <div className="col-span-2 space-y-2 border-t border-[#f5f3f0] pt-5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <label className={labelClass}>Gaya Background Preview</label>
+                                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+                                        {bgStyleOptions.map((opt) => {
+                                            const isActive = data.preview_bg_style === opt.value;
+                                            return (
+                                                <button
+                                                    key={opt.value}
+                                                    type="button"
+                                                    onClick={() => setData('preview_bg_style', opt.value)}
+                                                    className={`flex flex-col p-2.5 rounded-xl border text-left transition-all ${
+                                                        isActive 
+                                                            ? 'border-[#E5654B] bg-[#fef5f3] ring-1 ring-[#E5654B] shadow-xs' 
+                                                            : 'border-[#e8e5e0] bg-white hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <div className="mb-2 w-full">
+                                                        {opt.renderPreview()}
+                                                    </div>
+                                                    <span className={`text-[9.5px] font-bold block truncate w-full ${isActive ? 'text-[#E5654B]' : 'text-gray-600'}`}>
+                                                        {opt.label}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* INTERACTIVE LIVE PREVIEW RENDER */}
                             <div className="col-span-2 border-t border-[#f5f3f0] pt-5">
