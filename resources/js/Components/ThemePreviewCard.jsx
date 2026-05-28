@@ -18,6 +18,9 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         'luxury-gold': 'bg-gradient-to-br from-[#111111] via-[#1a1a1a] to-[#0a0a0a] border border-amber-500/10',
         'glassmorphism': 'bg-gradient-to-br from-gray-100 to-gray-200 border border-white/40',
         'studio-split': 'bg-[#bf6c54] overflow-hidden border border-white/10',
+        'studio-clay-sand': 'bg-[#e8dcd3] overflow-hidden border border-white/10',
+        'studio-velvet-rose': 'bg-[#dcb3a6] overflow-hidden border border-white/10',
+        'studio-sage-cream': 'bg-[#ece7df] overflow-hidden border border-white/10',
     };
 
     const activeBg = bgStyles[theme.preview_bg_style || 'gradient-indigo'] || bgStyles['gradient-indigo'];
@@ -144,6 +147,48 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                         <div className="absolute top-[40%] right-[10%] w-72 h-72 rounded-full bg-white/10 blur-[80px]" />
                         {/* Ambient room shadow bottom overlay */}
                         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
+                    </div>
+                );
+            case 'studio-clay-sand':
+                return (
+                    <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#e8dcd3] overflow-hidden">
+                        {/* Skewed Left Panel: Organic Terracotta Clay */}
+                        <div 
+                            className="absolute inset-y-0 -left-[20%] w-[70%] bg-[#a3563f] transform skew-x-[-12deg] origin-top shadow-[12px_0_35px_rgba(0,0,0,0.3)] border-r border-white/5"
+                        />
+                        {/* Spotlights */}
+                        <div className="absolute top-[15%] left-[20%] w-60 h-60 rounded-full bg-white/5 blur-[70px]" />
+                        <div className="absolute top-[35%] right-[10%] w-64 h-64 rounded-full bg-white/20 blur-[60px]" />
+                        {/* Ground Ambient shadow */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/25 via-black/5 to-transparent" />
+                    </div>
+                );
+            case 'studio-velvet-rose':
+                return (
+                    <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#dcb3a6] overflow-hidden">
+                        {/* Skewed Left Panel: Deep Velvet Slate */}
+                        <div 
+                            className="absolute inset-y-0 -left-[18%] w-[68%] bg-[#231f30] transform skew-x-[-18deg] origin-top shadow-[20px_0_50px_rgba(0,0,0,0.45)] border-r border-white/5"
+                        />
+                        {/* Spotlights */}
+                        <div className="absolute top-[20%] left-[25%] w-72 h-72 rounded-full bg-[#dcb3a6]/10 blur-[85px]" />
+                        <div className="absolute top-[30%] right-[15%] w-60 h-60 rounded-full bg-white/15 blur-[65px]" />
+                        {/* Ground Ambient shadow */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
+                    </div>
+                );
+            case 'studio-sage-cream':
+                return (
+                    <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#ece7df] overflow-hidden">
+                        {/* Skewed Left Panel: Nordic Sage Green */}
+                        <div 
+                            className="absolute inset-y-0 -left-[15%] w-[65%] bg-[#5f7065] transform skew-x-[-15deg] origin-top shadow-[15px_0_40px_rgba(0,0,0,0.25)] border-r border-white/5"
+                        />
+                        {/* Spotlights */}
+                        <div className="absolute top-[25%] left-[20%] w-60 h-60 rounded-full bg-white/5 blur-[70px]" />
+                        <div className="absolute top-[35%] right-[15%] w-64 h-64 rounded-full bg-white/25 blur-[75px]" />
+                        {/* Ground Ambient shadow */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
                     </div>
                 );
             case 'glassmorphism':

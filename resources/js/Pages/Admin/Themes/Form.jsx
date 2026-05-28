@@ -445,7 +445,10 @@ export default function Form({ theme, plans = [] }) {
                                                 <option value="gradient-rose">Rose Gold Romance Gradient</option>
                                                 <option value="luxury-gold">Luxury Black & Radiant Gold</option>
                                                 <option value="glassmorphism">Glassmorphic Clean light</option>
-                                                <option value="studio-split">Creative Studio Dual-Tone Split</option>
+                                                <option value="studio-split">Creative Studio Dual-Tone Split (Clay & Forest)</option>
+                                                <option value="studio-clay-sand">Creative Studio Dual-Tone (Clay & Desert Sand)</option>
+                                                <option value="studio-velvet-rose">Creative Studio Dual-Tone (Velvet & Rose Gold)</option>
+                                                <option value="studio-sage-cream">Creative Studio Dual-Tone (Nordic Sage & Cream)</option>
                                             </select>
                                         </div>
                                     )}
