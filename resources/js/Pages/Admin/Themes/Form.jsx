@@ -134,15 +134,27 @@ const bgStyleOptions = [
     }
 ];
 
+const eventTypes = [
+    { id: 'wedding', name: '💍 Pernikahan (Wedding)', desc: 'Izinkan tema digunakan untuk Pernikahan.' },
+    { id: 'birthday', name: '🎂 Ulang Tahun (Birthday)', desc: 'Izinkan tema digunakan untuk Ulang Tahun.' },
+    { id: 'graduation', name: '🎓 Wisuda (Graduation)', desc: 'Izinkan tema digunakan untuk Wisuda.' },
+    { id: 'aqiqah', name: '👶 Aqiqah', desc: 'Izinkan tema digunakan untuk Aqiqah.' },
+    { id: 'circumcision', name: '♂️ Sunatan (Khitanan)', desc: 'Izinkan tema digunakan untuk Sunatan.' },
+    { id: 'anniversary', name: '💖 Anniversary / Syukuran', desc: 'Izinkan tema digunakan untuk Anniversary / Syukuran.' },
+    { id: 'general', name: '🌍 Umum / General (Semua Acara)', desc: 'Izinkan tema digunakan untuk Semua jenis acara.' },
+];
+
 export default function Form({ theme, plans = [] }) {
     const { adminRoutePrefix } = usePage().props;
     const isEdit = !!theme;
     const fileInputRef = useRef(null);
     const dropdownRef = useRef(null);
+    const eventDropdownRef = useRef(null);
     
     const [thumbnailPreview, setThumbnailPreview] = useState('');
     const [uploading, setUploading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
     
     // States for dynamic preview screenshots
     const [previewImagesPreviews, setPreviewImagesPreviews] = useState([]);
@@ -169,7 +181,7 @@ export default function Form({ theme, plans = [] }) {
         preview_template: theme?.preview_template || 'full-mockup',
         preview_bg_style: theme?.preview_bg_style || 'gradient-indigo',
         category: theme?.category || 'elegant', 
-        type: theme?.type || 'wedding', 
+        type: Array.isArray(theme?.type) ? theme.type : (theme?.type ? [theme.type] : ['wedding']), 
         is_premium: theme?.is_premium || false, 
         allowed_plans: theme?.allowed_plans || [],
         is_active: theme?.is_active ?? true,
@@ -193,7 +205,7 @@ export default function Form({ theme, plans = [] }) {
                 preview_template: theme.preview_template || 'full-mockup',
                 preview_bg_style: theme.preview_bg_style || 'gradient-indigo',
                 category: theme.category || 'elegant',
-                type: theme.type || 'wedding',
+                type: Array.isArray(theme.type) ? theme.type : (theme.type ? [theme.type] : []),
                 is_premium: theme.is_premium || false,
                 allowed_plans: theme.allowed_plans || [],
                 is_active: theme.is_active ?? true,
@@ -210,11 +222,14 @@ export default function Form({ theme, plans = [] }) {
         }
     }, [theme?.id, theme?.thumbnail, theme?.preview_images]);
 
-    // Click outside listener untuk menutup dropdown paket
+    // Click outside listener untuk menutup dropdown paket & event
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
+            }
+            if (eventDropdownRef.current && !eventDropdownRef.current.contains(event.target)) {
+                setIsEventDropdownOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -354,6 +369,18 @@ export default function Form({ theme, plans = [] }) {
             currentPlans.push(planId);
         }
         setData('allowed_plans', currentPlans);
+    };
+
+    // Helper untuk mengaktifkan/menonaktifkan type event
+    const handleEventTypeToggle = (typeId) => {
+        const currentTypes = [...(data.type || [])];
+        const index = currentTypes.indexOf(typeId);
+        if (index > -1) {
+            currentTypes.splice(index, 1);
+        } else {
+            currentTypes.push(typeId);
+        }
+        setData('type', currentTypes);
     };
 
     const handleSubmit = (e) => {
@@ -772,18 +799,80 @@ export default function Form({ theme, plans = [] }) {
                             </div>
                             
                             <div>
+                            <div className="relative" ref={eventDropdownRef}>
                                 <label className={labelClass}>Tipe Acara (Event Type)</label>
-                                <select value={data.type} onChange={(e) => setData('type', e.target.value)}
-                                    className={inputClass}>
-                                    <option value="wedding">💍 Pernikahan (Wedding)</option>
-                                    <option value="birthday">🎂 Ulang Tahun (Birthday)</option>
-                                    <option value="graduation">🎓 Wisuda (Graduation)</option>
-                                    <option value="aqiqah">👶 Aqiqah</option>
-                                    <option value="circumcision">♂️ Sunatan (Khitanan)</option>
-                                    <option value="anniversary">💖 Anniversary / Syukuran</option>
-                                    <option value="general">🌍 Umum / General (Semua Acara)</option>
-                                </select>
+                                <p className="text-[9px] text-gray-400 leading-normal mb-1.5">
+                                    Pilih jenis acara yang didukung oleh tema ini. Jika dikosongkan, tema bersifat <strong>Umum/General</strong> untuk semua acara.
+                                </p>
+                                
+                                {/* Trigger Button Dropdown */}
+                                <div 
+                                    onClick={() => setIsEventDropdownOpen(!isEventDropdownOpen)}
+                                    className="w-full min-h-[44px] bg-[#fcfbfa] border border-[#e8e5e0] rounded-xl px-4 py-2 flex items-center justify-between cursor-pointer hover:border-[#E5654B] transition-all select-none shadow-xs"
+                                >
+                                    <div className="flex flex-wrap gap-1.5 items-center">
+                                        {(data.type || []).length === 0 ? (
+                                            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 border border-emerald-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                                                🌍 Semua Acara (Gratis/Umum)
+                                            </span>
+                                        ) : (
+                                            (data.type || []).map(typeId => {
+                                                const eventType = eventTypes.find(e => e.id === typeId);
+                                                if (!eventType) return null;
+                                                return (
+                                                    <span 
+                                                        key={typeId} 
+                                                        className="text-[10px] font-bold bg-[#E5654B]/5 text-[#E5654B] border border-[#E5654B]/10 pl-2.5 pr-1.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm hover:bg-[#E5654B]/10 transition-colors"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEventTypeToggle(typeId);
+                                                        }}
+                                                    >
+                                                        {eventType.name.split(' ')[1] || eventType.name}
+                                                        <button type="button" className="text-[#E5654B] hover:text-[#d4523a] font-bold w-4 h-4 rounded-full bg-white flex items-center justify-center text-[10px]">&times;</button>
+                                                    </span>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                    
+                                    <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${isEventDropdownOpen ? 'rotate-180 text-[#E5654B]' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+
+                                {/* Dropdown Options List */}
+                                {isEventDropdownOpen && (
+                                    <div className="absolute z-20 left-0 right-0 top-[100%] mt-1.5 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl overflow-hidden max-h-[220px] overflow-y-auto p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                        {eventTypes.map((eventType) => {
+                                            const isChecked = (data.type || []).includes(eventType.id);
+                                            return (
+                                                <div 
+                                                    key={eventType.id}
+                                                    onClick={() => handleEventTypeToggle(eventType.id)}
+                                                    className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all select-none hover:bg-gray-50 ${isChecked ? 'bg-[#E5654B]/5' : ''}`}
+                                                >
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={isChecked}
+                                                        onChange={() => {}} // Controlled by div parent onClick
+                                                        className="rounded border-gray-300 text-[#E5654B] focus:ring-[#E5654B]" 
+                                                    />
+                                                    <div className="flex-1 min-w-0">
+                                                        <span className={`text-xs font-bold block ${isChecked ? 'text-[#E5654B]' : 'text-gray-700'}`}>
+                                                            {eventType.name}
+                                                        </span>
+                                                        <span className="text-[8px] text-gray-400 block mt-0.5 truncate">
+                                                            {eventType.desc}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                                 {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type}</p>}
+                            </div>
                             </div>
                             
                             <div>

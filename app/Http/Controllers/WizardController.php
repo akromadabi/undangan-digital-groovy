@@ -104,13 +104,19 @@ class WizardController extends Controller
         return Inertia::render('Wizard/Profile', [
             'step' => 2,
             'brideGrooms' => $brideGrooms,
+            'eventType' => $invitation ? $invitation->type : 'wedding',
         ]);
     }
 
     public function saveProfile(Request $request)
     {
+        $user = $request->user();
+        $invitation = $user->invitation;
+        $type = $invitation->type ?? 'wedding';
+        $size = in_array($type, ['wedding', 'anniversary']) ? 2 : 1;
+
         $request->validate([
-            'bride_grooms' => 'required|array|size:2',
+            'bride_grooms' => "required|array|size:{$size}",
             'bride_grooms.*.full_name' => 'required|string|max:150',
             'bride_grooms.*.nickname' => 'nullable|string|max:50',
             'bride_grooms.*.father_name' => 'nullable|string|max:150',
@@ -124,8 +130,8 @@ class WizardController extends Controller
             'bride_grooms.*.facebook' => 'nullable|string|max:100',
         ]);
 
-        $user = $request->user();
-        $invitation = $user->invitation;
+        // Delete extra records
+        $invitation->brideGrooms()->where('order_number', '>', $size)->delete();
 
         foreach ($request->bride_grooms as $index => $data) {
             BrideGroom::updateOrCreate(
@@ -151,6 +157,7 @@ class WizardController extends Controller
         return Inertia::render('Wizard/Events', [
             'step' => 3,
             'events' => $events,
+            'eventType' => $invitation ? $invitation->type : 'wedding',
         ]);
     }
 
@@ -202,7 +209,18 @@ class WizardController extends Controller
     {
         $user = $request->user();
         $invitation = $user->invitation;
-        $themes = Theme::active()->orderBy('sort_order')->get();
+        
+        $themes = Theme::active()
+            ->where(function ($query) use ($invitation) {
+                if ($invitation && $invitation->type) {
+                    $query->whereJsonContains('type', $invitation->type)
+                          ->orWhereJsonContains('type', 'general')
+                          ->orWhere('type', $invitation->type)
+                          ->orWhere('type', 'general');
+                }
+            })
+            ->orderBy('sort_order')
+            ->get();
 
         return Inertia::render('Wizard/Template', [
             'step' => 4,
@@ -244,12 +262,13 @@ class WizardController extends Controller
         }
 
         // Assign Free plan if no subscription
-        if (!$user->activeSubscription) {
+        if (!$invitation->activeSubscription) {
             $freePlan = SubscriptionPlan::where('slug', 'free')->first();
             if ($freePlan) {
                 Subscription::create([
                     'user_id' => $user->id,
                     'plan_id' => $freePlan->id,
+                    'invitation_id' => $invitation->id,
                     'status' => 'active',
                     'starts_at' => now(),
                     'expires_at' => null,

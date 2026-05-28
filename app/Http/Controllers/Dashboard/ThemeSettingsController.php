@@ -68,7 +68,17 @@ class ThemeSettingsController extends Controller
             }
         }
 
-        $themes = Theme::active()->orderBy('sort_order')->get();
+        $themes = Theme::active()
+            ->where(function ($query) use ($invitation) {
+                if ($invitation && $invitation->type) {
+                    $query->whereJsonContains('type', $invitation->type)
+                          ->orWhereJsonContains('type', 'general')
+                          ->orWhere('type', $invitation->type)
+                          ->orWhere('type', 'general');
+                }
+            })
+            ->orderBy('sort_order')
+            ->get();
         $centralHost = parse_url(config('app.url'), PHP_URL_HOST) ?: 'undangan.com';
 
         return Inertia::render('Dashboard/ThemeSettings', [
