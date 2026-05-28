@@ -297,4 +297,29 @@ html {
     transform: scale(0.87);
 }
 
+/* Make phone borders and corner radius sleek and proportional for the scaled down 3-phone mockup */
+.triple-phone-layout .phone-mockup {
+    border-width: 2px !important;
+    border-radius: 12px !important;
+}
+.triple-phone-layout .phone-mockup > div.w-full.h-full {
+    border-radius: 9px !important;
+}
+.triple-phone-layout .phone-mockup > div.w-full.h-full > div.pointer-events-none {
+    border-radius: 9px !important;
+}
+
+@media (min-width: 640px) {
+    .triple-phone-layout .phone-mockup {
+        border-width: 2.5px !important;
+        border-radius: 15px !important;
+    }
+    .triple-phone-layout .phone-mockup > div.w-full.h-full {
+        border-radius: 12px !important;
+    }
+    .triple-phone-layout .phone-mockup > div.w-full.h-full > div.pointer-events-none {
+        border-radius: 12px !important;
+    }
+}
+
 
