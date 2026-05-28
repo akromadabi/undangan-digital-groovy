@@ -75,7 +75,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
     const renderGroundShadow = (offsetClass = '', widthClass = 'w-[50%] max-w-[135px]', opacity = 'opacity-55', bottomClass = 'bottom-[12%]') => {
         return (
             <div 
-                className={`absolute ${bottomClass} left-1/2 -translate-x-1/2 ${widthClass} h-2.5 bg-black/45 rounded-full blur-[6px] pointer-events-none select-none z-0 transform ${opacity} ${offsetClass}`}
+                className={`absolute ${bottomClass} left-1/2 -translate-x-1/2 ${widthClass} h-3.5 bg-black/30 rounded-full blur-md pointer-events-none select-none z-0 transform ${opacity} ${offsetClass}`}
             />
         );
     };
@@ -275,24 +275,24 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                     {renderBackgroundDecorations(theme.preview_bg_style)}
                     
                     {/* Left phone shadow */}
-                    {renderGroundShadow('-translate-x-[48%] rotate-[0deg]', 'w-[44%] max-w-[120px]', 'opacity-35', 'bottom-[11%]')}
+                    {renderGroundShadow('-translate-x-[46%] rotate-[0deg]', 'w-[46%] max-w-[130px]', 'opacity-25', 'bottom-[10%]')}
                     
                     {/* Right phone shadow */}
-                    {renderGroundShadow('translate-x-[48%] rotate-[0deg]', 'w-[44%] max-w-[120px]', 'opacity-35', 'bottom-[11%]')}
+                    {renderGroundShadow('translate-x-[46%] rotate-[0deg]', 'w-[46%] max-w-[130px]', 'opacity-25', 'bottom-[10%]')}
                     
                     {/* Center phone shadow */}
-                    {renderGroundShadow('translate-x-[0%] rotate-[0deg]', 'w-[44%] max-w-[120px]', 'opacity-65', 'bottom-[7%]')}
+                    {renderGroundShadow('translate-x-[0%] rotate-[0deg]', 'w-[46%] max-w-[130px]', 'opacity-50', 'bottom-[7%]')}
                     
                     {/* Left Back Phone */}
-                    <div className="absolute w-[44%] max-w-[120px] -translate-x-[48%] -translate-y-[5%] transform transition-transform duration-500 group-hover:-translate-x-[56%] z-10">
+                    <div className="absolute w-[46%] max-w-[130px] -translate-x-[46%] -translate-y-[4%] transform transition-transform duration-500 group-hover:-translate-x-[53%] z-10">
                         {renderPhone(images[1] || images[0], true, '', true, false)}
                     </div>
                     {/* Right Back Phone */}
-                    <div className="absolute w-[44%] max-w-[120px] translate-x-[48%] -translate-y-[5%] transform transition-transform duration-500 group-hover:translate-x-[56%] z-10">
+                    <div className="absolute w-[46%] max-w-[130px] translate-x-[46%] -translate-y-[4%] transform transition-transform duration-500 group-hover:translate-x-[53%] z-10">
                         {renderPhone(images[2] || images[0], true, '', false, true)}
                     </div>
                     {/* Center Front Phone */}
-                    <div className="absolute w-[44%] max-w-[120px] translate-y-[5%] z-20 transform transition-transform duration-500 group-hover:scale-[1.03] group-hover:translate-y-[3%]">
+                    <div className="absolute w-[46%] max-w-[130px] translate-y-[5%] z-20 transform transition-transform duration-500 group-hover:scale-[1.03] group-hover:translate-y-[3%]">
                         {renderPhone(images[0], false, '', false, false)}
                     </div>
                 </div>

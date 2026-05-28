@@ -282,19 +282,19 @@ html {
 
 /* Specific overrides for triple-phone layout */
 .triple-phone-layout .phone-rotate-left.phone-back {
-    transform: scale(0.84);
+    transform: scale(0.86);
 }
 .triple-phone-layout .phone-rotate-left.phone-back:hover,
 .group:hover .triple-phone-layout .phone-rotate-left.phone-back {
-    transform: scale(0.87);
+    transform: scale(0.89);
 }
 
 .triple-phone-layout .phone-rotate-right.phone-back {
-    transform: scale(0.84);
+    transform: scale(0.86);
 }
 .triple-phone-layout .phone-rotate-right.phone-back:hover,
 .group:hover .triple-phone-layout .phone-rotate-right.phone-back {
-    transform: scale(0.87);
+    transform: scale(0.89);
 }
 
 /* Make phone borders and corner radius sleek and proportional for the scaled down 3-phone mockup */
