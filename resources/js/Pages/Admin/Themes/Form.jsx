@@ -4,6 +4,136 @@ import { createPortal } from 'react-dom';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
+// Pilihan template mockup visual
+const templateOptions = [
+    { 
+        value: 'full-mockup', 
+        label: 'Gambar Statis', 
+        desc: 'Mockup jadi / custom upload',
+        renderIcon: () => (
+            <div className="w-8 h-10 bg-gray-200 border border-gray-300 rounded flex items-center justify-center relative overflow-hidden">
+                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 003.75 21z" />
+                </svg>
+            </div>
+        )
+    },
+    { 
+        value: 'single-phone', 
+        label: '1 HP (Dinamis)', 
+        desc: '1 screenshot melayang',
+        renderIcon: () => (
+            <div className="w-8 h-10 flex items-center justify-center">
+                <div className="w-5 h-9 bg-gray-800 border-[1.5px] border-gray-700 rounded-md shadow-sm relative flex items-center justify-center">
+                    <div className="w-2 h-0.5 bg-black rounded-full absolute top-[1px]" />
+                    <div className="w-3 h-7 bg-gray-200/20 rounded-xs" />
+                </div>
+            </div>
+        )
+    },
+    { 
+        value: 'double-phone', 
+        label: '2 HP (Dinamis)', 
+        desc: '2 screenshot bertumpuk',
+        renderIcon: () => (
+            <div className="relative w-8 h-10 flex items-center justify-center">
+                {/* Back phone */}
+                <div className="absolute w-4 h-8 bg-gray-400 border border-gray-300 rounded shadow-sm -translate-x-1.5 -translate-y-0.5" />
+                {/* Front phone */}
+                <div className="absolute w-4 h-8 bg-gray-800 border-[1px] border-gray-700 rounded shadow-md translate-x-1 translate-y-1 z-10 flex items-center justify-center">
+                    <div className="w-1.5 h-0.5 bg-black rounded-full absolute top-[1px]" />
+                </div>
+            </div>
+        )
+    },
+    { 
+        value: 'triple-phone', 
+        label: '3 HP (Dinamis)', 
+        desc: '3 screenshot bertumpuk',
+        renderIcon: () => (
+            <div className="relative w-10 h-10 flex items-center justify-center">
+                {/* Left back */}
+                <div className="absolute w-3.5 h-7 bg-gray-400 border border-gray-300 rounded shadow-sm -translate-x-2.5 -translate-y-0.5" />
+                {/* Right back */}
+                <div className="absolute w-3.5 h-7 bg-gray-400 border border-gray-300 rounded shadow-sm translate-x-2.5 -translate-y-0.5" />
+                {/* Center front */}
+                <div className="absolute w-3.5 h-7 bg-gray-800 border-[1px] border-gray-700 rounded shadow-md translate-y-0.5 z-10 flex items-center justify-center">
+                    <div className="w-1.5 h-0.5 bg-black rounded-full absolute top-[1px]" />
+                </div>
+            </div>
+        )
+    }
+];
+
+// Pilihan background visual
+const bgStyleOptions = [
+    { 
+        value: 'gradient-indigo', 
+        label: 'Indigo Blue', 
+        renderPreview: () => <div className="w-full h-8 rounded-md bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] shadow-inner" /> 
+    },
+    { 
+        value: 'gradient-emerald', 
+        label: 'Emerald Green', 
+        renderPreview: () => <div className="w-full h-8 rounded-md bg-gradient-to-br from-[#11998e] to-[#38ef7d] shadow-inner" /> 
+    },
+    { 
+        value: 'gradient-rose', 
+        label: 'Rose Gold', 
+        renderPreview: () => <div className="w-full h-8 rounded-md bg-gradient-to-br from-[#ff9a9e] via-[#fecfef] to-[#a1c4fd] shadow-inner" /> 
+    },
+    { 
+        value: 'luxury-gold', 
+        label: 'Luxury Gold', 
+        renderPreview: () => <div className="w-full h-8 rounded-md bg-gradient-to-br from-[#111111] via-[#1a1a1a] to-[#0a0a0a] border border-amber-500/20 shadow-inner" /> 
+    },
+    { 
+        value: 'glassmorphism', 
+        label: 'Beige Studio', 
+        renderPreview: () => (
+            <div className="w-full h-8 rounded-md bg-[#9e9590] relative overflow-hidden shadow-inner">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white/20 blur-[2px]" />
+            </div>
+        ) 
+    },
+    { 
+        value: 'studio-split', 
+        label: 'Clay & Forest', 
+        renderPreview: () => (
+            <div className="w-full h-8 rounded-md bg-[#bf6c54] relative overflow-hidden shadow-inner">
+                <div className="absolute inset-y-0 -left-[10%] w-[55%] bg-[#1b2421] transform skew-x-[-15deg] origin-top shadow-[2px_0_5px_rgba(0,0,0,0.25)] border-r border-white/5" />
+            </div>
+        ) 
+    },
+    { 
+        value: 'studio-clay-sand', 
+        label: 'Clay & Sand', 
+        renderPreview: () => (
+            <div className="w-full h-8 rounded-md bg-[#e8dcd3] relative overflow-hidden shadow-inner">
+                <div className="absolute inset-y-0 -left-[10%] w-[55%] bg-[#a3563f] transform skew-x-[-15deg] origin-top shadow-[2px_0_5px_rgba(0,0,0,0.25)] border-r border-white/5" />
+            </div>
+        ) 
+    },
+    { 
+        value: 'studio-velvet-rose', 
+        label: 'Velvet & Rose', 
+        renderPreview: () => (
+            <div className="w-full h-8 rounded-md bg-[#dcb3a6] relative overflow-hidden shadow-inner">
+                <div className="absolute inset-y-0 -left-[10%] w-[55%] bg-[#231f30] transform skew-x-[-15deg] origin-top shadow-[2px_0_5px_rgba(0,0,0,0.25)] border-r border-white/5" />
+            </div>
+        ) 
+    },
+    { 
+        value: 'studio-sage-cream', 
+        label: 'Sage & Cream', 
+        renderPreview: () => (
+            <div className="w-full h-8 rounded-md bg-[#ece7df] relative overflow-hidden shadow-inner">
+                <div className="absolute inset-y-0 -left-[10%] w-[55%] bg-[#5f7065] transform skew-x-[-15deg] origin-top shadow-[2px_0_5px_rgba(0,0,0,0.25)] border-r border-white/5" />
+            </div>
+        ) 
+    }
+];
+
 export default function Form({ theme, plans = [] }) {
     const { adminRoutePrefix } = usePage().props;
     const isEdit = !!theme;
@@ -319,7 +449,9 @@ export default function Form({ theme, plans = [] }) {
 
                             {/* UPLOAD THUMBNAIL */}
                             <div className="col-span-2">
-                                <label className={labelClass}>Foto Preview Utama (Thumbnail / Full Mockup) *</label>
+                                <label className={labelClass}>
+                                    {data.preview_template === 'full-mockup' ? 'Foto Preview Utama (Mockup Statis) *' : 'Foto Fallback Thumbnail (Cadangan) *'}
+                                </label>
                                 <div className="flex items-start gap-4 bg-[#faf9f7] p-4 rounded-xl border border-[#e8e5e0]/60">
                                     {/* Preview Box */}
                                     <div
@@ -395,7 +527,11 @@ export default function Form({ theme, plans = [] }) {
                                                 </button>
                                             )}
                                         </div>
-                                        <p className="text-[10px] text-gray-400">Digunakan sebagai gambar utama saat memilih mode full-mockup (atau sebagai fallback).</p>
+                                        <p className="text-[10px] text-gray-400">
+                                            {data.preview_template === 'full-mockup' 
+                                                ? 'Unggah gambar mockup tema jadi yang akan langsung digunakan sebagai tampilan utama di katalog.' 
+                                                : 'Unggah gambar cadangan yang akan ditampilkan jika mockup HP dinamis gagal dimuat atau sebagai cover katalog di area tertentu.'}
+                                        </p>
                                         {errors.thumbnail && <p className="text-red-500 text-xs mt-1 font-medium">{errors.thumbnail}</p>}
                                         {data.thumbnail && (
                                             <div className="text-[10px] text-emerald-600 font-semibold truncate max-w-[300px] bg-emerald-50 border border-emerald-500/10 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
@@ -410,46 +546,75 @@ export default function Form({ theme, plans = [] }) {
                             </div>
 
                             {/* DYNAMIC CSS MOCKUP CONFIGURATION */}
-                            <div className="col-span-2 border-t border-[#f5f3f0] pt-5 space-y-4">
-                                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                            <div className="col-span-2 border-t border-[#f5f3f0] pt-5 space-y-5">
+                                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                                     <span className="w-1.5 h-3 bg-[#E5654B] rounded-full inline-block"></span>
                                     Tipe & Desain Preview Katalog
                                 </h4>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
+                                <div className="space-y-5">
+                                    {/* Visual Mockup Template Selector */}
+                                    <div className="space-y-2">
                                         <label className={labelClass}>Template Mockup Preview</label>
-                                        <select 
-                                            value={data.preview_template} 
-                                            onChange={(e) => setData('preview_template', e.target.value)}
-                                            className={inputClass}
-                                        >
-                                            <option value="full-mockup">Gambar Tunggal (Sistem Lama / Kustom)</option>
-                                            <option value="single-phone">1 HP Mockup CSS (Dinamis)</option>
-                                            <option value="double-phone">2 HP Bertumpuk CSS (Dinamis)</option>
-                                            <option value="triple-phone">3 HP Bertumpuk CSS (Dinamis)</option>
-                                        </select>
-                                        <span className="text-[10px] text-gray-400 mt-1 block">Tentukan cara merender tampilan katalog tema Anda.</span>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                            {templateOptions.map((opt) => {
+                                                const isActive = data.preview_template === opt.value;
+                                                return (
+                                                    <button
+                                                        key={opt.value}
+                                                        type="button"
+                                                        onClick={() => setData('preview_template', opt.value)}
+                                                        className={`flex flex-col items-center justify-between p-3.5 rounded-xl border text-center transition-all ${
+                                                            isActive 
+                                                                ? 'border-[#E5654B] bg-[#fef5f3] ring-1 ring-[#E5654B] shadow-xs' 
+                                                                : 'border-[#e8e5e0] bg-white hover:border-gray-300'
+                                                        }`}
+                                                    >
+                                                        <div className="mb-2.5 h-10 flex items-center justify-center">
+                                                            {opt.renderIcon()}
+                                                        </div>
+                                                        <div className="space-y-0.5">
+                                                            <span className={`text-[11px] font-bold block ${isActive ? 'text-[#E5654B]' : 'text-gray-700'}`}>
+                                                                {opt.label}
+                                                            </span>
+                                                            <span className="text-[9px] text-gray-400 block leading-tight">
+                                                                {opt.desc}
+                                                            </span>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
 
+                                    {/* Visual Background Palette Selector */}
                                     {data.preview_template !== 'full-mockup' && (
-                                        <div>
+                                        <div className="space-y-2 border-t border-[#f5f3f0] pt-4 animate-in fade-in slide-in-from-top-2 duration-200">
                                             <label className={labelClass}>Gaya Background Preview</label>
-                                            <select 
-                                                value={data.preview_bg_style} 
-                                                onChange={(e) => setData('preview_bg_style', e.target.value)}
-                                                className={inputClass}
-                                            >
-                                                <option value="gradient-indigo">Indigo Deep Blue Gradient</option>
-                                                <option value="gradient-emerald">Emerald Fresh Nature Gradient</option>
-                                                <option value="gradient-rose">Rose Gold Romance Gradient</option>
-                                                <option value="luxury-gold">Luxury Black & Radiant Gold</option>
-                                                <option value="glassmorphism">Glassmorphic Clean light</option>
-                                                <option value="studio-split">Creative Studio Dual-Tone Split (Clay & Forest)</option>
-                                                <option value="studio-clay-sand">Creative Studio Dual-Tone (Clay & Desert Sand)</option>
-                                                <option value="studio-velvet-rose">Creative Studio Dual-Tone (Velvet & Rose Gold)</option>
-                                                <option value="studio-sage-cream">Creative Studio Dual-Tone (Nordic Sage & Cream)</option>
-                                            </select>
+                                            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+                                                {bgStyleOptions.map((opt) => {
+                                                    const isActive = data.preview_bg_style === opt.value;
+                                                    return (
+                                                        <button
+                                                            key={opt.value}
+                                                            type="button"
+                                                            onClick={() => setData('preview_bg_style', opt.value)}
+                                                            className={`flex flex-col p-2.5 rounded-xl border text-left transition-all ${
+                                                                isActive 
+                                                                    ? 'border-[#E5654B] bg-[#fef5f3] ring-1 ring-[#E5654B] shadow-xs' 
+                                                                    : 'border-[#e8e5e0] bg-white hover:border-gray-300'
+                                                            }`}
+                                                        >
+                                                            <div className="mb-2 w-full">
+                                                                {opt.renderPreview()}
+                                                            </div>
+                                                            <span className={`text-[9.5px] font-bold block truncate w-full ${isActive ? 'text-[#E5654B]' : 'text-gray-600'}`}>
+                                                                {opt.label}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -462,8 +627,13 @@ export default function Form({ theme, plans = [] }) {
                                     <p className="text-[10px] text-gray-400 leading-normal mb-2">
                                         Unggah screenshot polos dari halaman depan/utama undangan. Gambar akan di-render di dalam frame HP CSS dan dapat digeser (scroll) saat kursor diarahkan ke preview.
                                     </p>
-                                    
-                                    <div className="grid grid-cols-3 gap-3">
+                                                                       <div className={`grid gap-3.5 ${
+                                        data.preview_template === 'single-phone' 
+                                            ? 'grid-cols-1 max-w-[145px] mx-auto' 
+                                            : data.preview_template === 'double-phone' 
+                                                ? 'grid-cols-2 max-w-[300px] mx-auto' 
+                                                : 'grid-cols-3'
+                                    }`}>
                                         {[0, 1, 2].map((idx) => {
                                             // Determine if this index is needed based on template selection
                                             const isNeeded = idx === 0 || 
@@ -472,9 +642,19 @@ export default function Form({ theme, plans = [] }) {
                                                 
                                             if (!isNeeded) return null;
 
+                                            let slotLabel = `HP #${idx + 1}`;
+                                            if (data.preview_template === 'single-phone') slotLabel = 'Layar HP Utama';
+                                            else if (data.preview_template === 'double-phone') {
+                                                slotLabel = idx === 0 ? 'HP Utama (Depan)' : 'HP Kedua (Belakang)';
+                                            } else if (data.preview_template === 'triple-phone') {
+                                                if (idx === 0) slotLabel = 'HP Utama (Tengah)';
+                                                else if (idx === 1) slotLabel = 'HP Kiri (Belakang)';
+                                                else slotLabel = 'HP Kanan (Belakang)';
+                                            }
+
                                             return (
-                                                <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm">
-                                                    <span className="text-[10px] font-bold text-gray-500 mb-2">HP #{idx + 1} {idx === 0 ? '(Utama/Depan)' : '(Belakang)'}</span>
+                                                <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm hover:border-gray-300 transition-colors">
+                                                    <span className="text-[10px] font-bold text-gray-500 mb-2 tracking-wide uppercase">{slotLabel}</span>
                                                     
                                                     <div 
                                                         onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
