@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
 import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
@@ -25,19 +25,34 @@ export default function Create({ centralHost = 'undangan.com' }) {
         custom_domain: '',
     });
 
-    const handleCheckSubdomain = async () => {
-        if (!data.subdomain) return;
+    // Automatic real-time debounced subdomain check
+    useEffect(() => {
+        if (!data.subdomain) {
+            setSubdomainStatus(null);
+            return;
+        }
+
+        if (data.subdomain.length < 3) {
+            setSubdomainStatus({ available: false, message: 'Subdomain minimal 3 karakter.' });
+            return;
+        }
+
         setCheckingSubdomain(true);
         setSubdomainStatus(null);
-        try {
-            const response = await axios.get(`/api/check-subdomain?subdomain=${data.subdomain}`);
-            setSubdomainStatus(response.data);
-        } catch (error) {
-            setSubdomainStatus({ available: false, message: 'Gagal memeriksa ketersediaan.' });
-        } finally {
-            setCheckingSubdomain(false);
-        }
-    };
+
+        const timer = setTimeout(async () => {
+            try {
+                const response = await axios.get(`/api/check-subdomain?subdomain=${data.subdomain}`);
+                setSubdomainStatus(response.data);
+            } catch (error) {
+                setSubdomainStatus({ available: false, message: 'Gagal memeriksa ketersediaan subdomain.' });
+            } finally {
+                setCheckingSubdomain(false);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [data.subdomain]);
 
     const submit = (e) => {
         e.preventDefault();
@@ -131,14 +146,9 @@ export default function Create({ centralHost = 'undangan.com' }) {
                                 
                                 <div className="mt-1.5 flex items-center justify-between">
                                     <span className="text-[10px] text-gray-400">Hanya huruf kecil, angka, dan hubung (-)</span>
-                                    <button
-                                        type="button"
-                                        onClick={handleCheckSubdomain}
-                                        disabled={checkingSubdomain || !data.subdomain}
-                                        className="text-xs font-semibold text-[#E5654B] hover:text-[#d55a42] transition-colors disabled:opacity-50 inline-flex items-center gap-1 bg-transparent border-none cursor-pointer"
-                                    >
-                                        {checkingSubdomain ? 'Memeriksa...' : 'Cek Ketersediaan'}
-                                    </button>
+                                    {checkingSubdomain && (
+                                        <span className="text-[10px] text-[#E5654B] animate-pulse font-semibold">Memeriksa ketersediaan...</span>
+                                    )}
                                 </div>
 
                                 {subdomainStatus && (

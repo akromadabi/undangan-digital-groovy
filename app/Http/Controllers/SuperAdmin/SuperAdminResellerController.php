@@ -153,6 +153,7 @@ class SuperAdminResellerController extends Controller
                 'brand_name' => $request->brand_name,
                 'subdomain' => $request->subdomain,
                 'custom_domain' => $request->custom_domain,
+                'is_active' => $reseller->is_active, // Sync is_active status to reseller settings
             ]
         );
 
@@ -210,5 +211,21 @@ class SuperAdminResellerController extends Controller
         }
 
         return back()->with('success', 'Harga reseller berhasil diperbarui.');
+    }
+
+    /**
+     * Toggle status aktif/nonaktif reseller
+     */
+    public function toggleStatus(User $reseller)
+    {
+        abort_if($reseller->role !== 'admin', 404);
+
+        $newStatus = !$reseller->is_active;
+
+        $reseller->update(['is_active' => $newStatus]);
+        $reseller->resellerSettings()->update(['is_active' => $newStatus]);
+
+        $statusStr = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('success', "Reseller {$reseller->name} berhasil {$statusStr}.");
     }
 }

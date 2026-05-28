@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import AnimatedLikeButton from '@/Components/AnimatedLikeButton';
+import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
 /* ─────────────────────────────────────────────────────────
    TINY SVG HELPERS
@@ -187,7 +188,15 @@ export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
     const [showContactModal, setShowContactModal] = useState(false);
     const marqueeRef = useRef(null);
 
-    const hasContact = !!(reseller.footer_whatsapp || reseller.footer_phone || reseller.footer_email || reseller.footer_instagram || reseller.footer_tiktok || reseller.footer_address);
+    const hasContact = !!(
+        reseller.footer_whatsapp ||
+        reseller.footer_phone ||
+        reseller.footer_email ||
+        reseller.footer_instagram ||
+        reseller.footer_tiktok ||
+        reseller.footer_address ||
+        (reseller.social_links && reseller.social_links.length > 0)
+    );
 
     const getWhatsappLink = (number, text = 'Halo, saya ingin bertanya tentang undangan digital.') => {
         if (!number) return '#';
@@ -200,13 +209,106 @@ export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
         return `https://wa.me/${cleaned}?text=${encodeURIComponent(text)}`;
     };
 
+    const getSocialLinkInfo = (platform, value) => {
+        let href = value;
+        let label = platform.toUpperCase();
+        let displayValue = value;
+        let iconSvg = null;
+
+        const cleanValue = value.startsWith('@') ? value.slice(1) : value;
+
+        switch (platform.toLowerCase()) {
+            case 'instagram':
+                href = value.startsWith('http') ? value : `https://instagram.com/${cleanValue}`;
+                label = 'Instagram';
+                displayValue = value.startsWith('@') ? value : `@${value}`;
+                iconSvg = (
+                    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="w-5 h-5" style={{ flexShrink: 0 }}>
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                        <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01"/>
+                    </svg>
+                );
+                break;
+            case 'tiktok':
+                href = value.startsWith('http') ? value : `https://tiktok.com/@${cleanValue}`;
+                label = 'TikTok';
+                displayValue = value.startsWith('@') ? value : `@${value}`;
+                iconSvg = (
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5" style={{ flexShrink: 0 }}>
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.29 0 .57.04.84.13V9.25A6.33 6.33 0 0 0 5 10.12a6.34 6.34 0 0 0 6.13 6.55 6.34 6.34 0 0 0 6.13-6.55V8.16a7.65 7.65 0 0 0 4.31 1.33V6.69z"/>
+                    </svg>
+                );
+                break;
+            case 'facebook':
+                href = value.startsWith('http') ? value : `https://facebook.com/${cleanValue}`;
+                label = 'Facebook';
+                iconSvg = (
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5" style={{ flexShrink: 0 }}>
+                        <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
+                    </svg>
+                );
+                break;
+            case 'telegram':
+                href = value.startsWith('http') ? value : `https://t.me/${cleanValue}`;
+                label = 'Telegram';
+                displayValue = value.startsWith('@') ? value : `@${value}`;
+                iconSvg = (
+                    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="w-5 h-5" style={{ flexShrink: 0 }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                    </svg>
+                );
+                break;
+            case 'youtube':
+                href = value.startsWith('http') ? value : `https://youtube.com/${cleanValue}`;
+                label = 'YouTube';
+                iconSvg = (
+                    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="w-5 h-5" style={{ flexShrink: 0 }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
+                    </svg>
+                );
+                break;
+            case 'whatsapp':
+                href = getWhatsappLink(value);
+                label = 'WhatsApp';
+                iconSvg = (
+                    <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24" className="w-5.5 h-5.5" style={{ flexShrink: 0 }}><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.739-1.456L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.45 5.489 0 9.952-4.43 9.955-9.885.002-2.643-1.019-5.127-2.87-6.983-1.852-1.855-4.316-2.877-6.97-2.878-5.49 0-9.953 4.43-9.957 9.886-.002 2.125.567 4.197 1.65 6.023L2.098 21.95l6.549-1.706c.001-.001 0 0 0 0z"/></svg>
+                );
+                break;
+            case 'email':
+                href = `mailto:${value}`;
+                label = 'Email';
+                iconSvg = (
+                    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="w-5 h-5" style={{ flexShrink: 0 }}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                );
+                break;
+            case 'phone':
+                href = `tel:${value}`;
+                label = 'Telepon';
+                iconSvg = (
+                    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="w-5 h-5" style={{ flexShrink: 0 }}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.824-1.802-5.14-4.117-6.942-6.942l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+                );
+                break;
+            default:
+                iconSvg = (
+                    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="w-5 h-5" style={{ flexShrink: 0 }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                    </svg>
+                );
+        }
+
+        return { href, label, displayValue, iconSvg };
+    };
+
     const handleContactClick = () => {
         const contacts = [];
         if (reseller.footer_whatsapp) contacts.push({ type: 'wa', val: reseller.footer_whatsapp });
         if (reseller.footer_phone) contacts.push({ type: 'phone', val: reseller.footer_phone });
         if (reseller.footer_email) contacts.push({ type: 'email', val: reseller.footer_email });
 
-        if (contacts.length === 1) {
+        const hasSocialLinks = reseller.social_links && reseller.social_links.length > 0;
+
+        if (contacts.length === 1 && !hasSocialLinks) {
             const c = contacts[0];
             if (c.type === 'wa') {
                 window.open(getWhatsappLink(c.val), '_blank', 'noopener,noreferrer');
@@ -518,40 +620,11 @@ export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
                     <div className="rl-themes-scroll-wrap">
                         <div className="rl-themes-scroll" id="themes-scroll">
                             {themes.map(theme => (
-                                <div key={theme.id} className="rl-theme-card">
-                                    <div className="rl-theme-card__img-wrap">
-                                        {theme.thumbnail ? (
-                                            <img src={getThumbnailUrl(theme.thumbnail)} alt={theme.name} className="rl-theme-card__img" />
-                                        ) : (
-                                            <div className="rl-theme-card__img-placeholder">
-                                                <Svg d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" size={40} color="var(--text-muted)" />
-                                            </div>
-                                        )}
-                                        <div className="rl-theme-card__overlay">
-                                            <a href={theme.preview_url || '#'} target="_blank" rel="noreferrer" className="rl-theme-card__action-btn">
-                                                <Svg d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" size={16} color="currentColor" />
-                                                Preview
-                                            </a>
-                                            <a href={`${registerUrl}&theme=${theme.slug}`} className="rl-theme-card__action-btn rl-theme-card__action-btn--accent">
-                                                <Svg d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" size={16} color="currentColor" />
-                                                Pakai Tema
-                                            </a>
-                                        </div>
-                                        <span className={`rl-theme-card__badge ${theme.is_premium ? 'rl-theme-card__badge--premium' : 'rl-theme-card__badge--free'}`}>
-                                            {theme.is_premium ? 'PREMIUM' : 'GRATIS'}
-                                        </span>
-                                    </div>
-                                    <div className="rl-theme-card__info">
-                                        <div className="rl-theme-card__name-row">
-                                            <h4 className="rl-theme-card__name">{theme.name}</h4>
-                                            <AnimatedLikeButton
-                                                count={likes[theme.id] ?? ((theme.base_likes || 0) + (theme.real_likes || 0))}
-                                                liked={!!likedThemes[theme.id]}
-                                                onClick={() => handleLike(theme)}
-                                            />
-                                        </div>
-                                        <span className="rl-theme-card__cat">{theme.category || 'Umum'}</span>
-                                    </div>
+                                <div key={theme.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
+                                    <ThemePreviewCard 
+                                        theme={theme}
+                                        reseller={reseller}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -848,6 +921,20 @@ export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
                                     </div>
                                 </a>
                             )}
+                            {reseller.social_links && reseller.social_links.map((link, idx) => {
+                                const { href, label, displayValue, iconSvg } = getSocialLinkInfo(link.platform, link.value);
+                                return (
+                                    <a key={idx} href={href} target="_blank" rel="noopener noreferrer" className={`rl-contact-row rl-contact-row--${link.platform}`}>
+                                        <div className="rl-contact-icon">
+                                            {iconSvg}
+                                        </div>
+                                        <div className="rl-contact-info">
+                                            <span className="rl-contact-label">{label}</span>
+                                            <span className="rl-contact-value">{displayValue}</span>
+                                        </div>
+                                    </a>
+                                );
+                            })}
                             {reseller.footer_address && (
                                 <div className="rl-contact-row rl-contact-row--address">
                                     <div className="rl-contact-icon">

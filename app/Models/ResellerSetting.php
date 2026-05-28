@@ -27,12 +27,16 @@ class ResellerSetting extends Model
         'footer_tiktok',
         'footer_address',
         'footer_description',
+        'bank_accounts',
+        'social_links',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'bank_accounts' => 'array',
+            'social_links' => 'array',
         ];
     }
 

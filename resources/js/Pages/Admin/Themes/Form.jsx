@@ -1,19 +1,29 @@
 import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
+import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
 export default function Form({ theme, plans = [] }) {
     const { adminRoutePrefix } = usePage().props;
     const isEdit = !!theme;
     const fileInputRef = useRef(null);
     const dropdownRef = useRef(null);
+    
     const [thumbnailPreview, setThumbnailPreview] = useState('');
     const [uploading, setUploading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
+    // States for dynamic preview screenshots
+    const [previewImagesPreviews, setPreviewImagesPreviews] = useState([]);
+    const [uploadingIndex, setUploadingIndex] = useState(null);
+
     // State untuk mengontrol tab editor ("visual" vs "json")
     const [colorTab, setColorTab] = useState('visual');
     const [fontTab, setFontTab] = useState('visual');
+    
+    // Lightbox image preview state
+    const [lightboxImage, setLightboxImage] = useState(null);
 
     const getThumbnailUrl = (path) => {
         if (!path) return '';
@@ -25,6 +35,9 @@ export default function Form({ theme, plans = [] }) {
         name: theme?.name || '', 
         slug: theme?.slug || '', 
         thumbnail: theme?.thumbnail || '',
+        preview_images: theme?.preview_images || [],
+        preview_template: theme?.preview_template || 'full-mockup',
+        preview_bg_style: theme?.preview_bg_style || 'gradient-indigo',
         category: theme?.category || 'elegant', 
         is_premium: theme?.is_premium || false, 
         allowed_plans: theme?.allowed_plans || [],
@@ -45,6 +58,9 @@ export default function Form({ theme, plans = [] }) {
                 name: theme.name || '',
                 slug: theme.slug || '',
                 thumbnail: theme.thumbnail || '',
+                preview_images: theme.preview_images || [],
+                preview_template: theme.preview_template || 'full-mockup',
+                preview_bg_style: theme.preview_bg_style || 'gradient-indigo',
                 category: theme.category || 'elegant',
                 is_premium: theme.is_premium || false,
                 allowed_plans: theme.allowed_plans || [],
@@ -58,8 +74,9 @@ export default function Form({ theme, plans = [] }) {
                 base_likes: theme.base_likes || 0,
             });
             setThumbnailPreview(getThumbnailUrl(theme.thumbnail));
+            setPreviewImagesPreviews((theme.preview_images || []).map(p => getThumbnailUrl(p)));
         }
-    }, [theme?.id, theme?.thumbnail]);
+    }, [theme?.id, theme?.thumbnail, theme?.preview_images]);
 
     // Click outside listener untuk menutup dropdown paket
     useEffect(() => {
@@ -101,6 +118,56 @@ export default function Form({ theme, plans = [] }) {
         } finally {
             setUploading(false);
         }
+    };
+
+    const handlePreviewImageUpload = async (index, e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Tampilkan preview base64 secara instan
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const nextPreviews = [...previewImagesPreviews];
+            nextPreviews[index] = ev.target.result;
+            setPreviewImagesPreviews(nextPreviews);
+        };
+        reader.readAsDataURL(file);
+
+        // Unggah file ke server
+        setUploadingIndex(index);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'themes');
+
+        try {
+            const response = await fetch(`${adminRoutePrefix}/upload`, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
+            });
+            const result = await response.json();
+            const nextImages = [...(data.preview_images || [])];
+            nextImages[index] = result.url;
+            setData('preview_images', nextImages);
+
+            const nextPreviews = [...previewImagesPreviews];
+            nextPreviews[index] = getThumbnailUrl(result.url);
+            setPreviewImagesPreviews(nextPreviews);
+        } catch (err) {
+            console.error('Upload failed:', err);
+        } finally {
+            setUploadingIndex(null);
+        }
+    };
+
+    const clearPreviewImage = (index) => {
+        const nextImages = [...(data.preview_images || [])];
+        nextImages.splice(index, 1);
+        setData('preview_images', nextImages);
+
+        const nextPreviews = [...previewImagesPreviews];
+        nextPreviews.splice(index, 1);
+        setPreviewImagesPreviews(nextPreviews);
     };
 
     // Helper untuk memperbarui nilai Color Scheme di dalam string JSON
@@ -252,15 +319,32 @@ export default function Form({ theme, plans = [] }) {
 
                             {/* UPLOAD THUMBNAIL */}
                             <div className="col-span-2">
-                                <label className={labelClass}>Foto Preview Tema (Thumbnail) *</label>
+                                <label className={labelClass}>Foto Preview Utama (Thumbnail / Full Mockup) *</label>
                                 <div className="flex items-start gap-4 bg-[#faf9f7] p-4 rounded-xl border border-[#e8e5e0]/60">
                                     {/* Preview Box */}
                                     <div
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="w-24 h-24 rounded-lg border-2 border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer bg-white hover:border-[#E5654B] hover:bg-[#fef2f0] transition-all overflow-hidden flex-shrink-0 relative shadow-sm"
+                                        className="w-24 h-24 rounded-lg border-2 border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer bg-white hover:border-[#E5654B] hover:bg-[#fef2f0] transition-all overflow-hidden flex-shrink-0 relative shadow-sm group"
                                     >
                                         {thumbnailPreview ? (
-                                            <img src={thumbnailPreview} alt="Thumbnail Preview" className="w-full h-full object-cover" />
+                                            <div className="relative w-full h-full group">
+                                                <img src={thumbnailPreview} alt="Thumbnail Preview" className="w-full h-full object-cover" />
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setLightboxImage(thumbnailPreview);
+                                                    }}
+                                                    className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
+                                                    title="Perbesar Gambar"
+                                                >
+                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                </button>
+                                                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
+                                            </div>
                                         ) : (
                                             <div className="text-center p-2">
                                                 <svg className="w-6 h-6 mx-auto text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -270,7 +354,7 @@ export default function Form({ theme, plans = [] }) {
                                             </div>
                                         )}
                                         {uploading && (
-                                            <div className="absolute inset-0 bg-white/90 flex items-center justify-center">
+                                            <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
                                                 <div className="w-5 h-5 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
                                             </div>
                                         )}
@@ -285,17 +369,33 @@ export default function Form({ theme, plans = [] }) {
                                             onChange={handleThumbnailUpload}
                                             className="hidden"
                                         />
-                                        <button 
-                                            type="button" 
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="px-3.5 py-1.5 bg-white border border-[#e8e5e0] hover:bg-gray-50 rounded-lg text-xs font-semibold text-[#555] transition-colors inline-flex items-center gap-1.5 shadow-sm"
-                                        >
-                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                                            </svg>
-                                            Ganti Gambar
-                                        </button>
-                                        <p className="text-[10px] text-gray-400">Format: JPG, PNG, WebP. Ukuran Maksimum: 5MB</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            <button 
+                                                type="button" 
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="px-3.5 py-1.5 bg-white border border-[#e8e5e0] hover:bg-gray-50 rounded-lg text-xs font-semibold text-[#555] transition-colors inline-flex items-center gap-1.5 shadow-sm"
+                                            >
+                                                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                                </svg>
+                                                Ganti Gambar
+                                            </button>
+                                            
+                                            {thumbnailPreview && (
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setLightboxImage(thumbnailPreview)}
+                                                    className="px-3.5 py-1.5 bg-white border border-[#e8e5e0] hover:bg-gray-50 rounded-lg text-xs font-semibold text-[#555] transition-colors inline-flex items-center gap-1.5 shadow-sm"
+                                                >
+                                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    Lihat Gambar
+                                                </button>
+                                            )}
+                                        </div>
+                                        <p className="text-[10px] text-gray-400">Digunakan sebagai gambar utama saat memilih mode full-mockup (atau sebagai fallback).</p>
                                         {errors.thumbnail && <p className="text-red-500 text-xs mt-1 font-medium">{errors.thumbnail}</p>}
                                         {data.thumbnail && (
                                             <div className="text-[10px] text-emerald-600 font-semibold truncate max-w-[300px] bg-emerald-50 border border-emerald-500/10 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
@@ -306,6 +406,161 @@ export default function Form({ theme, plans = [] }) {
                                             </div>
                                         )}
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* DYNAMIC CSS MOCKUP CONFIGURATION */}
+                            <div className="col-span-2 border-t border-[#f5f3f0] pt-5 space-y-4">
+                                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                                    <span className="w-1.5 h-3 bg-[#E5654B] rounded-full inline-block"></span>
+                                    Tipe & Desain Preview Katalog
+                                </h4>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className={labelClass}>Template Mockup Preview</label>
+                                        <select 
+                                            value={data.preview_template} 
+                                            onChange={(e) => setData('preview_template', e.target.value)}
+                                            className={inputClass}
+                                        >
+                                            <option value="full-mockup">Gambar Tunggal (Sistem Lama / Kustom)</option>
+                                            <option value="single-phone">1 HP Mockup CSS (Dinamis)</option>
+                                            <option value="double-phone">2 HP Bertumpuk CSS (Dinamis)</option>
+                                            <option value="triple-phone">3 HP Bertumpuk CSS (Dinamis)</option>
+                                        </select>
+                                        <span className="text-[10px] text-gray-400 mt-1 block">Tentukan cara merender tampilan katalog tema Anda.</span>
+                                    </div>
+
+                                    {data.preview_template !== 'full-mockup' && (
+                                        <div>
+                                            <label className={labelClass}>Gaya Background Preview</label>
+                                            <select 
+                                                value={data.preview_bg_style} 
+                                                onChange={(e) => setData('preview_bg_style', e.target.value)}
+                                                className={inputClass}
+                                            >
+                                                <option value="gradient-indigo">Indigo Deep Blue Gradient</option>
+                                                <option value="gradient-emerald">Emerald Fresh Nature Gradient</option>
+                                                <option value="gradient-rose">Rose Gold Romance Gradient</option>
+                                                <option value="luxury-gold">Luxury Black & Radiant Gold</option>
+                                                <option value="glassmorphism">Glassmorphic Clean light</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* UPLOAD SCREENSHOTS FOR DYNAMIC MOCKUPS */}
+                            {data.preview_template !== 'full-mockup' && (
+                                <div className="col-span-2 space-y-3 bg-[#faf9f7] p-4 rounded-2xl border border-[#e8e5e0]/60">
+                                    <label className={labelClass}>Unggah Foto Screenshot Mentah (Rasio Portrait HP)</label>
+                                    <p className="text-[10px] text-gray-400 leading-normal mb-2">
+                                        Unggah screenshot polos dari halaman depan/utama undangan. Gambar akan di-render di dalam frame HP CSS dan dapat digeser (scroll) saat kursor diarahkan ke preview.
+                                    </p>
+                                    
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {[0, 1, 2].map((idx) => {
+                                            // Determine if this index is needed based on template selection
+                                            const isNeeded = idx === 0 || 
+                                                (data.preview_template === 'double-phone' && idx < 2) || 
+                                                (data.preview_template === 'triple-phone');
+                                                
+                                            if (!isNeeded) return null;
+
+                                            return (
+                                                <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm">
+                                                    <span className="text-[10px] font-bold text-gray-500 mb-2">HP #{idx + 1} {idx === 0 ? '(Utama/Depan)' : '(Belakang)'}</span>
+                                                    
+                                                    <div 
+                                                        onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
+                                                        className="w-16 h-24 rounded-md border border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer overflow-hidden relative hover:border-[#E5654B] bg-[#faf9f7] transition-all group"
+                                                    >
+                                                        {previewImagesPreviews[idx] ? (
+                                                            <div className="relative w-full h-full group">
+                                                                <img src={previewImagesPreviews[idx]} className="w-full h-full object-cover" />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setLightboxImage(previewImagesPreviews[idx]);
+                                                                    }}
+                                                                    className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
+                                                                    title="Perbesar Gambar"
+                                                                >
+                                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                    </svg>
+                                                                </button>
+                                                                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
+                                                            </div>
+                                                        ) : (
+                                                            <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4" />
+                                                            </svg>
+                                                        )}
+                                                        {uploadingIndex === idx && (
+                                                            <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
+                                                                <div className="w-4 h-4 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <input 
+                                                        id={`screenshot-upload-${idx}`}
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(e) => handlePreviewImageUpload(idx, e)}
+                                                        className="hidden"
+                                                    />
+
+                                                    <div className="flex gap-1.5 mt-2.5 w-full">
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
+                                                            className="flex-1 py-1 text-[9px] font-bold bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded"
+                                                        >
+                                                            Upload
+                                                        </button>
+                                                        {data.preview_images[idx] && (
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => clearPreviewImage(idx)}
+                                                                className="px-1.5 py-1 text-[9px] font-bold bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 rounded"
+                                                            >
+                                                                Hapus
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* INTERACTIVE LIVE PREVIEW RENDER */}
+                            <div className="col-span-2 border-t border-[#f5f3f0] pt-5">
+                                <label className={labelClass}>Live Preview Kartu Katalog (Interaktif)</label>
+                                <div className="max-w-[240px] mx-auto p-2 bg-[#faf9f7] border border-[#e8e5e0]/60 rounded-2xl shadow-inner mt-2">
+                                    <ThemePreviewCard 
+                                        theme={{
+                                            name: data.name || 'Nama Tema',
+                                            slug: data.slug || 'slug',
+                                            thumbnail: data.thumbnail,
+                                            preview_template: data.preview_template,
+                                            preview_images: data.preview_images,
+                                            preview_bg_style: data.preview_bg_style,
+                                            category: data.category,
+                                            is_premium: data.is_premium
+                                        }}
+                                        reseller={{
+                                            brand_name: 'Watermark Demo',
+                                            brand_logo: null
+                                        }}
+                                        isDemoLink={false}
+                                    />
                                 </div>
                             </div>
 
@@ -621,6 +876,30 @@ export default function Form({ theme, plans = [] }) {
                     </button>
                 </form>
             </div>
+            {/* Lightbox Modal */}
+            {lightboxImage && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-xs p-4 animate-in fade-in duration-200" onClick={() => setLightboxImage(null)}>
+                    {/* Close button at the top-right of the viewport, outside the preview box */}
+                    <button 
+                        type="button" 
+                        onClick={() => setLightboxImage(null)} 
+                        className="absolute top-6 right-6 w-11 h-11 rounded-full bg-black/60 hover:bg-[#E5654B] text-white flex items-center justify-center text-3xl transition-all font-light z-50 hover:scale-110 active:scale-95 shadow-lg border border-white/10"
+                        title="Tutup"
+                    >
+                        &times;
+                    </button>
+                    
+                    {/* Floating Image Wrapper - No white card background/padding */}
+                    <div className="relative max-w-4xl max-h-[85vh] flex items-center justify-center animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <img 
+                            src={lightboxImage} 
+                            alt="Large Preview" 
+                            className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-white/10" 
+                        />
+                    </div>
+                </div>,
+                document.body
+            )}
         </DynamicAdminLayout>
     );
 }

@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect, useMemo } from 'react';
 import AnimatedLikeButton from '@/Components/AnimatedLikeButton';
+import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -332,41 +333,11 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                 {/* Themes Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     {filteredThemes.map((theme) => (
-                        <div key={theme.id} className="rl-theme-card" style={{ width: 'auto' }}>
-                            <div className="rl-theme-card__img-wrap">
-                                {theme.thumbnail ? (
-                                    <img src={getThumbnailUrl(theme.thumbnail)} alt={theme.name} className="rl-theme-card__img" />
-                                ) : (
-                                    <div className="rl-theme-card__img-placeholder">
-                                        <Icon d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" className="w-10 h-10 text-gray-400" />
-                                    </div>
-                                )}
-                                <div className="rl-theme-card__overlay">
-                                    <a href={theme.preview_url || '#'} target="_blank" rel="noreferrer" className="rl-theme-card__action-btn">
-                                        <Icon d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-4 h-4" />
-                                        Preview
-                                    </a>
-                                    <a href={`${reseller.reseller_url || ''}/register?ref=${reseller.ref}&theme=${theme.slug}`} className="rl-theme-card__action-btn rl-theme-card__action-btn--accent">
-                                        <Icon d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" className="w-4 h-4" />
-                                        Pakai Tema
-                                    </a>
-                                </div>
-                                <span className={`rl-theme-card__badge ${theme.is_premium ? 'rl-theme-card__badge--premium' : 'rl-theme-card__badge--free'}`}>
-                                    {theme.is_premium ? 'PREMIUM' : 'GRATIS'}
-                                </span>
-                            </div>
-                            <div className="rl-theme-card__info">
-                                <div className="rl-theme-card__name-row">
-                                    <h4 className="rl-theme-card__name">{theme.name}</h4>
-                                    <AnimatedLikeButton
-                                        count={likes[theme.id] ?? getLikesCount(theme)}
-                                        liked={!!likedThemes[theme.id]}
-                                        onClick={() => handleLike(theme)}
-                                    />
-                                </div>
-                                <span className="rl-theme-card__cat">{theme.category || 'Umum'}</span>
-                            </div>
-                        </div>
+                        <ThemePreviewCard 
+                            key={theme.id} 
+                            theme={theme}
+                            reseller={reseller}
+                        />
                     ))}
 
                     {filteredThemes.length === 0 && (

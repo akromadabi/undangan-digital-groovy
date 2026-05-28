@@ -22,6 +22,15 @@ export default function Index({ resellers, filters }) {
         }
     };
 
+    const handleToggleStatus = (id, name, isActive) => {
+        const action = isActive ? 'menonaktifkan' : 'mengaktifkan';
+        if (confirm(`Apakah Anda yakin ingin ${action} reseller "${name}"?`)) {
+            router.post(`/super-admin/resellers/${id}/toggle-status`, {}, {
+                preserveScroll: true,
+            });
+        }
+    };
+
     return (
         <SuperAdminLayout title="Kelola Reseller">
             <Head title="Reseller — Super Admin" />
@@ -86,9 +95,14 @@ export default function Index({ resellers, filters }) {
                                             <span className="text-sm font-medium text-[#333]">{r.reseller_users_count || 0}</span>
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${r.reseller_settings?.is_active !== false ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
-                                                {r.reseller_settings?.is_active !== false ? 'Aktif' : 'Nonaktif'}
-                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleToggleStatus(r.id, r.name, r.is_active === 1 || r.is_active === true)}
+                                                className={`text-xs px-2.5 py-1.5 rounded-full font-semibold transition-all hover:scale-105 active:scale-95 cursor-pointer ${r.is_active === 1 || r.is_active === true ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
+                                                title="Klik untuk mengubah status aktif/nonaktif reseller"
+                                            >
+                                                {r.is_active === 1 || r.is_active === true ? 'Aktif' : 'Nonaktif'}
+                                            </button>
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">

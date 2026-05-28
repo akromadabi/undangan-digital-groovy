@@ -34,7 +34,7 @@ Route::get('/', function () {
 
     $themes = \App\Models\Theme::where('is_active', true)
         ->orderBy('sort_order')
-        ->get(['id', 'name', 'slug', 'thumbnail', 'preview_url', 'category', 'is_premium'])
+        ->get(['id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'preview_url', 'category', 'is_premium'])
         ->map(function ($theme) {
             $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
             return $theme;
@@ -81,7 +81,7 @@ Route::get('/katalog-tema', function () {
 
     // Domain utama: tampilkan katalog semua tema global
     $themes = \App\Models\Theme::where('is_active', true)
-        ->select('id', 'name', 'slug', 'thumbnail', 'category', 'is_premium', 'preview_url')
+        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'preview_url')
         ->orderBy('sort_order')
         ->get()
         ->map(function ($theme) {
@@ -138,41 +138,41 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/verify-otp', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'show'])->name('verification.otp.show');
     Route::post('/verify-otp/send', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'send'])->name('verification.otp.send');
     Route::post('/verify-otp/check', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'verify'])->name('verification.otp.verify');
-    
-    // Subdomain Availability Check
-    Route::get('/api/check-subdomain', function (\Illuminate\Http\Request $request) {
-        $subdomain = strtolower($request->query('subdomain'));
-        
-        if (empty($subdomain) || !preg_match('/^[a-z0-9-]+$/', $subdomain)) {
-            return response()->json(['available' => false, 'message' => 'Subdomain tidak valid. Hanya huruf, angka, dan tanda hubung (-)']);
-        }
-        
-        $reserved = ['admin', 'super-admin', 'www', 'api', 'assets', 'dashboard', 'reseller', 'customer', 'login', 'register', 'u', 'r'];
-        if (in_array($subdomain, $reserved)) {
-            return response()->json(['available' => false, 'message' => 'Subdomain tidak dapat digunakan (kata terpesan)']);
-        }
-        
-        $query = \App\Models\ResellerSetting::where('subdomain', $subdomain);
-        
-        if ($excludeUserId = $request->query('exclude_user_id')) {
-            $query->where('user_id', '!=', $excludeUserId);
-        } elseif ($excludeResellerSettingId = $request->query('exclude_setting_id')) {
-            $query->where('id', '!=', $excludeResellerSettingId);
-        } elseif (auth()->check() && auth()->user()->role === 'admin') {
-            $currentSettings = \App\Models\ResellerSetting::where('user_id', auth()->id())->first();
-            if ($currentSettings) {
-                $query->where('id', '!=', $currentSettings->id);
-            }
-        }
-        
-        $exists = $query->exists();
-        
-        return response()->json([
-            'available' => !$exists,
-            'message' => $exists ? 'Subdomain sudah digunakan' : 'Subdomain tersedia!'
-        ]);
-    })->name('subdomain.check');
 });
+
+// Subdomain Availability Check (Publicly accessible for guest resellers and logged-in admins)
+Route::get('/api/check-subdomain', function (\Illuminate\Http\Request $request) {
+    $subdomain = strtolower($request->query('subdomain'));
+    
+    if (empty($subdomain) || !preg_match('/^[a-z0-9-]+$/', $subdomain)) {
+        return response()->json(['available' => false, 'message' => 'Subdomain tidak valid. Hanya huruf, angka, dan tanda hubung (-)']);
+    }
+    
+    $reserved = ['admin', 'super-admin', 'www', 'api', 'assets', 'dashboard', 'reseller', 'customer', 'login', 'register', 'u', 'r'];
+    if (in_array($subdomain, $reserved)) {
+        return response()->json(['available' => false, 'message' => 'Subdomain tidak dapat digunakan (kata terpesan)']);
+    }
+    
+    $query = \App\Models\ResellerSetting::where('subdomain', $subdomain);
+    
+    if ($excludeUserId = $request->query('exclude_user_id')) {
+        $query->where('user_id', '!=', $excludeUserId);
+    } elseif ($excludeResellerSettingId = $request->query('exclude_setting_id')) {
+        $query->where('id', '!=', $excludeResellerSettingId);
+    } elseif (auth()->check() && auth()->user()->role === 'admin') {
+        $currentSettings = \App\Models\ResellerSetting::where('user_id', auth()->id())->first();
+        if ($currentSettings) {
+            $query->where('id', '!=', $currentSettings->id);
+        }
+    }
+    
+    $exists = $query->exists();
+    
+    return response()->json([
+        'available' => !$exists,
+        'message' => $exists ? 'Subdomain sudah digunakan' : 'Subdomain tersedia!'
+    ]);
+})->name('subdomain.check');
 
 // ═══════════════════════════════════════
 // Onboarding Wizard
@@ -363,6 +363,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::resource('resellers', \App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class);
     Route::post('/resellers/{reseller}/prices', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'updatePrices'])->name('resellers.prices');
     Route::post('/resellers/{reseller}/reset-password', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'resetPassword'])->name('resellers.resetPassword');
+    Route::post('/resellers/{reseller}/toggle-status', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'toggleStatus'])->name('resellers.toggleStatus');
 
     // Global Management (themes, plans, music, quotes, settings)
     Route::resource('plans', AdminPlanController::class);
@@ -411,6 +412,116 @@ Route::post('/webhooks/xendit', [PaymentController::class, 'webhook'])->name('we
 Route::middleware(['auth'])->group(function () {
     Route::post('/impersonate/leave', [\App\Http\Controllers\Auth\ImpersonateController::class, 'leave'])->name('impersonate.leave');
     Route::post('/impersonate/switch-role/{role}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'switchRole'])->name('impersonate.switch-role');
+    
+    // Dashboard Real-time Notifications Data API
+    Route::get('/admin/notifications-data', function (\Illuminate\Http\Request $request) {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['notifications' => [], 'count' => 0]);
+        }
+
+        $lastViewedAt = $request->query('last_viewed_at');
+        $lastViewed = $lastViewedAt ? \Carbon\Carbon::parse($lastViewedAt) : null;
+
+        $notifications = [];
+        $count = 0;
+
+        if ($user->isSuperAdmin()) {
+            // 1. Pending Resellers (awaiting activation)
+            $pendingResellers = \App\Models\User::where('role', 'admin')
+                ->where('is_active', false)
+                ->latest()
+                ->get();
+                
+            foreach ($pendingResellers as $reseller) {
+                $isUnread = $lastViewed ? ($reseller->created_at ? $reseller->created_at->gt($lastViewed) : true) : true;
+                $notifications[] = [
+                    'id' => 'reseller-pending-' . $reseller->id,
+                    'type' => 'reseller_pending',
+                    'title' => 'Pendaftaran Reseller Baru (Aktivasi)',
+                    'message' => "Reseller '{$reseller->name}' mendaftar dan menunggu aktivasi Anda.",
+                    'time' => $reseller->created_at ? $reseller->created_at->diffForHumans() : 'baru saja',
+                    'action_url' => '/super-admin/resellers',
+                    'is_unread' => $isUnread,
+                    'badge' => 'Aktivasi'
+                ];
+                if ($isUnread) $count++;
+            }
+
+            // 2. Recently Registered Resellers (active, last 7 days)
+            $recentResellers = \App\Models\User::where('role', 'admin')
+                ->where('is_active', true)
+                ->where('created_at', '>=', now()->subDays(7))
+                ->latest()
+                ->take(10)
+                ->get();
+
+            foreach ($recentResellers as $reseller) {
+                $isUnread = $lastViewed ? ($reseller->created_at ? $reseller->created_at->gt($lastViewed) : true) : false;
+                $notifications[] = [
+                    'id' => 'reseller-recent-' . $reseller->id,
+                    'type' => 'reseller_recent',
+                    'title' => 'Reseller Baru Aktif',
+                    'message' => "Reseller '{$reseller->name}' telah resmi bergabung dan aktif.",
+                    'time' => $reseller->created_at ? $reseller->created_at->diffForHumans() : 'baru saja',
+                    'action_url' => '/super-admin/resellers',
+                    'is_unread' => $isUnread,
+                    'badge' => 'Reseller Baru'
+                ];
+                if ($isUnread) $count++;
+            }
+
+            // 3. Recently Registered Users (last 7 days)
+            $recentUsers = \App\Models\User::where('role', 'user')
+                ->where('created_at', '>=', now()->subDays(7))
+                ->latest()
+                ->take(15)
+                ->get();
+
+            foreach ($recentUsers as $newUser) {
+                $isUnread = $lastViewed ? ($newUser->created_at ? $newUser->created_at->gt($lastViewed) : true) : true;
+                $notifications[] = [
+                    'id' => 'user-recent-' . $newUser->id,
+                    'type' => 'user_recent',
+                    'title' => 'User Client Baru Terdaftar',
+                    'message' => "User '{$newUser->name}' ({$newUser->email}) mendaftar di platform.",
+                    'time' => $newUser->created_at ? $newUser->created_at->diffForHumans() : 'baru saja',
+                    'action_url' => '/super-admin/users',
+                    'is_unread' => $isUnread,
+                    'badge' => 'User Baru'
+                ];
+                if ($isUnread) $count++;
+            }
+        } elseif ($user->isReseller()) {
+            // 1. Recently Registered Users under this Reseller (last 7 days)
+            $recentUsers = \App\Models\User::where('role', 'user')
+                ->where('reseller_id', $user->id)
+                ->where('created_at', '>=', now()->subDays(7))
+                ->latest()
+                ->take(15)
+                ->get();
+
+            foreach ($recentUsers as $newUser) {
+                $isUnread = $lastViewed ? ($newUser->created_at ? $newUser->created_at->gt($lastViewed) : true) : true;
+                $notifications[] = [
+                    'id' => 'reseller-user-recent-' . $newUser->id,
+                    'type' => 'reseller_user_recent',
+                    'title' => 'Klien Baru Terdaftar',
+                    'message' => "Klien baru '{$newUser->name}' ({$newUser->email}) mendaftar di bawah brand Anda.",
+                    'time' => $newUser->created_at ? $newUser->created_at->diffForHumans() : 'baru saja',
+                    'action_url' => '/admin/users',
+                    'is_unread' => $isUnread,
+                    'badge' => 'User Baru'
+                ];
+                if ($isUnread) $count++;
+            }
+        }
+
+        return response()->json([
+            'notifications' => $notifications,
+            'count' => $count
+        ]);
+    })->name('admin.notifications-data');
 });
 
 require __DIR__ . '/auth.php';

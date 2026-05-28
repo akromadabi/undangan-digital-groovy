@@ -45,6 +45,51 @@ export default function SuperAdminLayout({ children, title }) {
     const [menuSheetOpen, setMenuSheetOpen] = useState(false);
     const avatarRef = useRef(null);
 
+    // Notification Dropdown state
+    const [notifications, setNotifications] = useState([]);
+    const [notifCount, setNotifCount] = useState(0);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const notifRef = useRef(null);
+
+    // Fetch notifications from the backend
+    const fetchNotifications = async () => {
+        try {
+            const lastViewed = localStorage.getItem('notifications_viewed_at') || '';
+            const response = await fetch(`/admin/notifications-data?last_viewed_at=${encodeURIComponent(lastViewed)}`);
+            if (response.ok) {
+                const data = await response.json();
+                setNotifications(data.notifications || []);
+                setNotifCount(data.count || 0);
+            }
+        } catch (e) {
+            console.error('Failed to fetch notifications:', e);
+        }
+    };
+
+    const handleOpenNotif = () => {
+        setNotifOpen(!notifOpen);
+        if (!notifOpen) {
+            setNotifCount(0);
+            localStorage.setItem('notifications_viewed_at', new Date().toISOString());
+        }
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+        // Poll every 30 seconds for dynamic updates
+        const interval = setInterval(fetchNotifications, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Close notification dropdown when clicking outside
+    useEffect(() => {
+        const handleClick = (e) => {
+            if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
     useEffect(() => {
         const handleClick = (e) => {
             if (avatarRef.current && !avatarRef.current.contains(e.target)) setAvatarOpen(false);
@@ -131,6 +176,77 @@ export default function SuperAdminLayout({ children, title }) {
                         <div className="hidden lg:flex items-center gap-2 text-sm text-[#999]">
                             <span>Super Admin:</span>
                             <span className="font-medium text-[#555]">{auth.user?.name}</span>
+                        </div>
+
+                        {/* ═══ Notification Bell Dropdown ═══ */}
+                        <div className="relative" ref={notifRef}>
+                            <button
+                                onClick={handleOpenNotif}
+                                className="relative p-2 rounded-xl text-gray-500 hover:text-[#E5654B] hover:bg-gray-50 transition-colors focus:outline-none"
+                            >
+                                <svg className="w-5.5 h-5.5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                </svg>
+                                {notifCount > 0 && (
+                                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-white">
+                                        {notifCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {notifOpen && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#e8e5e0] py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                                    <div className="px-4 py-2.5 border-b border-[#f0ede8] flex items-center justify-between">
+                                        <span className="font-bold text-sm text-[#1a1a1a]">Notifikasi</span>
+                                        {notifCount > 0 && (
+                                            <span className="text-xs bg-[#E5654B]/10 text-[#E5654B] font-bold px-2 py-0.5 rounded-full">
+                                                {notifCount} baru
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="max-h-64 overflow-y-auto divide-y divide-[#f0ede8]">
+                                        {notifications.length > 0 ? (
+                                            notifications.map((notif) => (
+                                                <a
+                                                    key={notif.id}
+                                                    href={notif.action_url}
+                                                    className={`block p-4 hover:bg-gray-50/80 transition-colors text-left ${
+                                                        notif.is_unread ? 'bg-orange-50/10' : ''
+                                                    }`}
+                                                    onClick={() => setNotifOpen(false)}
+                                                >
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                                            notif.type === 'reseller_pending'
+                                                                ? 'bg-amber-100 text-amber-700'
+                                                                : notif.type === 'reseller_recent'
+                                                                    ? 'bg-blue-100 text-blue-700'
+                                                                    : 'bg-emerald-100 text-emerald-700'
+                                                        }`}>
+                                                            {notif.badge}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400 font-medium">{notif.time}</span>
+                                                    </div>
+                                                    <div className="text-xs font-semibold text-gray-800 mt-1.5 leading-snug">
+                                                        {notif.title}
+                                                    </div>
+                                                    <div className="text-[11px] text-gray-500 mt-1 leading-normal">
+                                                        {notif.message}
+                                                    </div>
+                                                    <div className="text-[10px] text-[#E5654B] font-bold mt-2 flex items-center gap-1">
+                                                        Tindak Lanjut →
+                                                    </div>
+                                                </a>
+                                            ))
+                                        ) : (
+                                            <div className="p-8 text-center text-gray-400 text-xs">
+                                                Tidak ada notifikasi baru
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="relative" ref={avatarRef}>

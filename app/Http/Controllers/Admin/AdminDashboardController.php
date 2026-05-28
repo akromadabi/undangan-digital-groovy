@@ -23,11 +23,17 @@ class AdminDashboardController extends Controller
 
         $invitationQuery = Invitation::where('is_active', true);
         $paymentQuery = Payment::query();
+        $invitationStatsQuery = Invitation::query();
+        
         if ($isReseller) {
             $userIds = User::where('reseller_id', $user->id)->pluck('id');
             $invitationQuery->whereIn('user_id', $userIds);
             $paymentQuery->whereIn('user_id', $userIds);
+            $invitationStatsQuery->whereIn('user_id', $userIds);
         }
+
+        $totalViews = (clone $invitationStatsQuery)->sum('views_count');
+        $uniqueViews = (clone $invitationStatsQuery)->sum('unique_views_count');
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
@@ -35,6 +41,8 @@ class AdminDashboardController extends Controller
                 'active_invitations' => (clone $invitationQuery)->count(),
                 'total_revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
                 'pending_payments' => (clone $paymentQuery)->where('status', 'pending')->count(),
+                'total_views' => $totalViews,
+                'unique_views' => $uniqueViews,
             ],
             'recentUsers' => (clone $userQuery)->latest()->take(10)->get(['id', 'name', 'email', 'created_at']),
             'recentPayments' => (clone $paymentQuery)->with('user:id,name', 'plan:id,name')

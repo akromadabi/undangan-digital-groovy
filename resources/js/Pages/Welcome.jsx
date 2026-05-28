@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
 // Brand Partnership Logos (10 Distinct Premium Brands for Infinite Scrolling Ticker)
 const PARTNERS = [
@@ -318,9 +319,9 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                         Masuk
                                     </Link>
                                 )}
-                                <button onClick={() => handleWhatsAppRedirect()} className="px-5 py-2.5 bg-gradient-to-r from-[#E5654B] to-[#f97316] text-white rounded-full text-xs font-bold hover:shadow-lg hover:shadow-[#E5654B]/30 transition-all hover:scale-[1.03] duration-300">
+                                <Link href="/register/reseller" className="px-5 py-2.5 bg-gradient-to-r from-[#E5654B] to-[#f97316] text-white rounded-full text-xs font-bold hover:shadow-lg hover:shadow-[#E5654B]/30 transition-all hover:scale-[1.03] duration-300 inline-block text-center">
                                     Daftar Partner
-                                </button>
+                                </Link>
                             </>
                         )}
                     </div>
@@ -352,9 +353,9 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                     </p>
                     
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mt-12">
-                        <button onClick={() => handleWhatsAppRedirect()} className="glow-button w-full sm:w-auto px-9 py-4 bg-gradient-to-r from-[#E5654B] via-[#f97316] to-[#f59e0b] text-white rounded-2xl text-sm font-black tracking-wide shadow-2xl shadow-[#E5654B]/35 transition-all hover:scale-[1.05] duration-300">
+                        <Link href="/register/reseller" className="glow-button w-full sm:w-auto px-9 py-4 bg-gradient-to-r from-[#E5654B] via-[#f97316] to-[#f59e0b] text-white rounded-2xl text-sm font-black tracking-wide shadow-2xl shadow-[#E5654B]/35 transition-all hover:scale-[1.05] duration-300 inline-block text-center">
                             Mulai Kemitraan Sekarang
-                        </button>
+                        </Link>
                         <a href="#kalkulator" className="w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-xl text-white rounded-2xl text-sm font-extrabold tracking-wide hover:bg-white/10 transition-all border border-white/10 text-center hover:scale-[1.05] duration-300">
                             Simulasi Profit Agensi
                         </a>
@@ -617,34 +618,10 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
 
                     <div id="theme-scroll" className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         {themes.map((theme) => (
-                            <div key={theme.id} className="group relative bg-white rounded-3xl border border-gray-150 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 flex-shrink-0 w-[240px] sm:w-[280px] snap-start shadow-xl shadow-gray-50">
-                                <div className="aspect-[3/4] bg-gray-100 overflow-hidden relative">
-                                    {theme.thumbnail ? (
-                                        <img src={theme.thumbnail} alt={theme.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50">
-                                            <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159" />
-                                            </svg>
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                                        <a href={theme.preview_url} target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 bg-white text-gray-900 rounded-xl text-xs font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">
-                                            Pratinjau Tema
-                                        </a>
-                                    </div>
-                                </div>
-                                <div className="p-5">
-                                    <h4 className="font-extrabold text-sm text-gray-800">{theme.name}</h4>
-                                    <div className="flex items-center justify-between mt-2">
-                                        <span className="text-xs text-gray-400 capitalize">{theme.category || 'Umum'}</span>
-                                        {theme.is_premium ? (
-                                            <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full">PREMIUM</span>
-                                        ) : (
-                                            <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full">GRATIS</span>
-                                        )}
-                                    </div>
-                                </div>
+                            <div key={theme.id} className="w-[240px] sm:w-[280px] flex-shrink-0 snap-start">
+                                <ThemePreviewCard 
+                                    theme={theme}
+                                />
                             </div>
                         ))}
                     </div>

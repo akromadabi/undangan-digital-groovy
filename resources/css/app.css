@@ -247,3 +247,37 @@ html {
     scrollbar-color: rgba(229, 101, 75, 0.22) transparent;
 }
 
+/* 3D Phone Mockup Transforms */
+.phone-rotate-default {
+    transform: none;
+}
+.phone-rotate-default:hover,
+.group:hover .phone-rotate-default {
+    transform: scale(1.03);
+}
+
+.phone-rotate-left {
+    transform: none;
+}
+.phone-rotate-left:hover,
+.group:hover .phone-rotate-left {
+    transform: scale(1.03);
+}
+
+.phone-rotate-right {
+    transform: none;
+}
+.phone-rotate-right:hover,
+.group:hover .phone-rotate-right {
+    transform: scale(1.03);
+}
+
+.phone-rotate-scaled {
+    transform: none;
+}
+.phone-rotate-scaled:hover,
+.group:hover .phone-rotate-scaled {
+    transform: scale(1.03);
+}
+
+

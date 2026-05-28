@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
+import ThemePreviewCard from '@/Components/ThemePreviewCard';
 import { Sparkles, X, ImageIcon } from 'lucide-react';
 import { PARTICLE_MAP } from '@/Components/ParticleEffect';
 
@@ -618,27 +619,21 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                     }}
                                                     className={`w-full group relative rounded-2xl overflow-hidden border-2 text-left transition-all duration-300 focus:outline-none ${
                                                         isSelected 
-                                                            ? 'border-[#E5654B] ring-4 ring-orange-100 shadow-md scale-[1.01] cursor-pointer' 
+                                                            ? 'border-[#E5654B] ring-4 ring-orange-100 shadow-xl scale-[1.01] cursor-pointer' 
                                                             : isThemeLocked(theme)
-                                                                ? 'border-gray-200 cursor-not-allowed'
-                                                                : 'border-gray-200 hover:border-orange-300 hover:shadow-sm cursor-pointer'
+                                                                ? 'border-gray-200 cursor-not-allowed opacity-75'
+                                                                : 'border-gray-200 hover:border-[#E5654B]/50 hover:shadow-lg hover:-translate-y-1 cursor-pointer'
                                                     }`}>
                                                     {/* Card Image */}
                                                     <div className={`aspect-[3/4] w-full bg-gray-50 overflow-hidden relative ${isThemeLocked(theme) ? 'opacity-65' : ''}`}>
-                                                        {theme.thumbnail ? (
-                                                            <img src={theme.thumbnail} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={theme.name} />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                                                                <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                                            </div>
-                                                        )}
+                                                        <ThemePreviewCard onlyMockup={true} theme={theme} reseller={null} aspectClass="" />
                                                         {/* Category tag */}
-                                                        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-[8px] text-white px-2 py-0.5 rounded-full font-medium tracking-wide uppercase">
+                                                        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-[8px] text-white px-2 py-0.5 rounded-full font-medium tracking-wide uppercase z-10">
                                                             {theme.category || 'Premium'}
                                                         </div>
                                                         {/* Selected overlay checkmark */}
                                                         {isSelected && (
-                                                            <div className="absolute inset-0 bg-[#E5654B]/10 backdrop-blur-[1px] flex items-center justify-center">
+                                                            <div className="absolute inset-0 bg-[#E5654B]/10 backdrop-blur-[1px] flex items-center justify-center z-10">
                                                                 <div className="bg-[#E5654B] text-white rounded-full p-1.5 shadow-md transform scale-110">
                                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                                                                 </div>
@@ -656,7 +651,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                     {/* Card Info */}
                                                     <div className="p-2.5 bg-white border-t border-gray-100 flex items-center justify-between">
                                                         <div className={`min-w-0 flex-1 ${isThemeLocked(theme) ? 'opacity-65' : ''}`}>
-                                                            <div className="font-bold text-gray-800 text-xs truncate group-hover:text-[#c24b33] transition-colors" title={theme.name}>{theme.name}</div>
+                                                            <div className="font-bold text-gray-800 text-xs truncate group-hover:text-[#E5654B] transition-colors" title={theme.name}>{theme.name}</div>
                                                             {/* Color Scheme Dots */}
                                                             <div className="flex gap-1 mt-1">
                                                                 {theme.color_scheme && Object.entries(theme.color_scheme).slice(0, 4).map(([key, val]) => (
@@ -668,7 +663,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                                             {/* Preview Eye Button */}
                                                             <a href={route('demo.theme', theme.slug)} target="_blank" rel="noopener noreferrer"
-                                                                className="flex items-center justify-center p-1.5 rounded-full bg-[#E5654B] text-white hover:bg-[#c24b33] hover:scale-105 active:scale-95 transition-all duration-200 shadow-xs cursor-pointer"
+                                                                className="flex items-center justify-center p-1.5 rounded-full bg-[#E5654B] text-white hover:bg-[#d4523a] hover:scale-105 active:scale-95 transition-all duration-200 shadow-xs cursor-pointer"
                                                                 title="Lihat Preview Demo">
                                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />

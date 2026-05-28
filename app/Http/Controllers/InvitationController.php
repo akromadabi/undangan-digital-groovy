@@ -28,6 +28,14 @@ class InvitationController extends Controller
             ])
             ->firstOrFail();
 
+        // Increment views_count and unique_views_count
+        $invitation->increment('views_count');
+        $sessionKey = 'viewed_invitation_' . $invitation->id;
+        if (!session()->has($sessionKey)) {
+            $invitation->increment('unique_views_count');
+            session()->put($sessionKey, true);
+        }
+
         $guestSlug = $request->query('to');
         $guest = null;
 

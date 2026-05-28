@@ -191,12 +191,22 @@ class PaymentController extends Controller
         $resellerSetting = \App\Models\ResellerSetting::where('user_id', $payment->user->reseller_id)->first();
         
         $bankAccounts = [];
-        if ($resellerSetting && $resellerSetting->bank_name) {
-            $bankAccounts[] = [
-                'bank_name' => $resellerSetting->bank_name,
-                'account_number' => $resellerSetting->bank_account,
-                'account_name' => $resellerSetting->bank_holder,
-            ];
+        if ($resellerSetting) {
+            if (!empty($resellerSetting->bank_accounts) && is_array($resellerSetting->bank_accounts)) {
+                foreach ($resellerSetting->bank_accounts as $acc) {
+                    $bankAccounts[] = [
+                        'bank_name' => $acc['bank_name'] ?? '',
+                        'account_number' => $acc['account_number'] ?? '',
+                        'account_name' => $acc['account_name'] ?? '',
+                    ];
+                }
+            } elseif ($resellerSetting->bank_name) {
+                $bankAccounts[] = [
+                    'bank_name' => $resellerSetting->bank_name,
+                    'account_number' => $resellerSetting->bank_account,
+                    'account_name' => $resellerSetting->bank_holder,
+                ];
+            }
         }
 
         $resellerContact = null;

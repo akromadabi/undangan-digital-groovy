@@ -1,6 +1,7 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import WizardLayout from '@/Layouts/WizardLayout';
+import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
 export default function Template({ step, themes, selectedThemeId }) {
     const [selected, setSelected] = useState(selectedThemeId || null);
@@ -45,41 +46,37 @@ export default function Template({ step, themes, selectedThemeId }) {
                         <div
                             key={theme.id}
                             onClick={locked ? undefined : () => handleSelect(theme.id)}
-                            className={`relative rounded-2xl overflow-hidden transition-all group border ${
+                            className={`relative rounded-2xl overflow-hidden transition-all duration-300 group border ${
                                 locked 
                                     ? 'opacity-60 cursor-not-allowed border-gray-200' 
                                     : isSelected
-                                        ? 'ring-3 ring-[#E5654B] shadow-lg scale-[1.02] border-[#E5654B]'
-                                        : 'border-gray-200 hover:shadow-md hover:-translate-y-1 cursor-pointer'
+                                        ? 'ring-3 ring-[#E5654B] shadow-xl scale-[1.02] border-[#E5654B]'
+                                        : 'border-gray-200 hover:shadow-xl hover:-translate-y-1 cursor-pointer'
                             }`}
                         >
                             {/* Theme thumbnail */}
-                            <div className="aspect-[9/16] bg-gradient-to-br from-gray-100 to-gray-200 relative">
-                                {theme.thumbnail ? (
-                                    <img src={theme.thumbnail} alt={theme.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-4xl"><svg className="w-10 h-10 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg></div>
-                                )}
+                            <div className="aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+                                <ThemePreviewCard onlyMockup={true} theme={theme} reseller={null} aspectClass="" />
                                 {locked ? (
-                                    <div className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+                                    <div className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md z-10">
                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                                         </svg>
                                         LOCKED
                                     </div>
                                 ) : theme.is_premium ? (
-                                    <div className="absolute top-2 right-2 bg-[#E5654B] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-md uppercase tracking-wider">
+                                    <div className="absolute top-2 right-2 bg-[#E5654B] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-md uppercase tracking-wider z-10">
                                         PREMIUM
                                     </div>
                                 ) : null}
                                 {isSelected && !locked && (
-                                    <div className="absolute inset-0 bg-[#E5654B]/20 flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-[#E5654B]/20 flex items-center justify-center z-10">
                                         <div className="w-12 h-12 bg-[#E5654B] rounded-full flex items-center justify-center text-white text-2xl">✓</div>
                                     </div>
                                 )}
                             </div>
                             <div className="p-3 bg-white">
-                                <h4 className="font-semibold text-sm text-gray-800 truncate" title={theme.name}>{theme.name}</h4>
+                                <h4 className="font-semibold text-sm text-gray-800 group-hover:text-[#E5654B] transition-colors truncate" title={theme.name}>{theme.name}</h4>
                                 <button
                                     disabled={locked}
                                     onClick={(e) => { e.stopPropagation(); if (!locked) handleSelect(theme.id); }}

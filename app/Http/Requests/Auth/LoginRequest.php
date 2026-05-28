@@ -86,6 +86,19 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if ($authenticatedUser->is_active === false) {
+            RateLimiter::hit($this->throttleKey());
+
+            $message = 'Akun Anda belum aktif atau telah dinonaktifkan oleh administrator. Silakan hubungi administrator untuk melakukan aktivasi.';
+            if ($authenticatedUser->role === 'admin') {
+                $message = 'Pendaftaran Anda sebagai partner reseller berhasil diterima. Akun Anda saat ini sedang menunggu aktivasi oleh Super Admin. Silakan hubungi admin utama untuk mempercepat proses aktivasi.';
+            }
+
+            throw ValidationException::withMessages([
+                'email' => $message,
+            ]);
+        }
+
         Auth::login($authenticatedUser, $this->boolean('remember'));
         RateLimiter::clear($this->throttleKey());
     }

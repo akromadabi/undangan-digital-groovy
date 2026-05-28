@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
+import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
 const getThumbnailUrl = (path) => {
     if (!path) return '';
@@ -119,52 +120,10 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                     {filteredThemes.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
                             {filteredThemes.map((theme) => (
-                                <div key={theme.id} className="group relative bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                                    {/* Thumbnail */}
-                                    <div className="aspect-[3/4] bg-gray-100 overflow-hidden relative">
-                                        {theme.thumbnail ? (
-                                            <img
-                                                src={getThumbnailUrl(theme.thumbnail)}
-                                                alt={theme.name}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50">
-                                                <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                                                </svg>
-                                            </div>
-                                        )}
-                                        {/* Overlay actions on hover */}
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                            {theme.preview_url && (
-                                                <a
-                                                    href={theme.preview_url}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="px-3 py-1.5 bg-white rounded-full text-xs font-semibold text-[#1a1a1a] hover:bg-gray-100 transition-colors"
-                                                    title="Lihat Pratinjau"
-                                                >
-                                                    Pratinjau
-                                                </a>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {/* Info */}
-                                    <div className="p-3.5 flex-1 flex flex-col">
-                                        <h4 className="font-semibold text-sm text-[#1a1a1a] truncate" title={theme.name}>
-                                            {theme.name}
-                                        </h4>
-                                        <div className="flex items-center justify-between mt-1.5">
-                                            <span className="text-[11px] text-gray-400 capitalize">{theme.category || 'Umum'}</span>
-                                            {theme.is_premium ? (
-                                                <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">PREMIUM</span>
-                                            ) : (
-                                                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">GRATIS</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                                <ThemePreviewCard 
+                                    key={theme.id} 
+                                    theme={theme}
+                                />
                             ))}
                         </div>
                     ) : (

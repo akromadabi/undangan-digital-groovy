@@ -37,6 +37,8 @@ export default function Dashboard({ stats, recentUsers, recentPayments }) {
     const activeInvitations = stats?.active_invitations || 0;
     const totalRevenue = stats?.total_revenue || 0;
     const pendingPayments = stats?.pending_payments || 0;
+    const totalViews = stats?.total_views || 0;
+    const uniqueViews = stats?.unique_views || 0;
     const paidPayments = (recentPayments || []).filter(p => p.status === 'paid').length;
     const totalPayments = (recentPayments || []).length;
 
@@ -74,7 +76,7 @@ export default function Dashboard({ stats, recentUsers, recentPayments }) {
                 </div>
 
                 {/* ═══ Stats Grid ═══ */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                     {/* Total Users */}
                     <div className="bg-white rounded-2xl border border-[#e8e5e0] p-5 hover:shadow-md transition-all group">
                         <div className="flex items-start justify-between">
@@ -154,6 +156,24 @@ export default function Dashboard({ stats, recentUsers, recentPayments }) {
                             </div>
                         </div>
                         <MiniBar value={pendingPayments} max={Math.max(pendingPayments + paidPayments, 1)} color={pendingPayments > 0 ? '#f59e0b' : '#8b5cf6'} />
+                    </div>
+
+                    {/* Website Dikunjungi */}
+                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-5 hover:shadow-md transition-all group">
+                        <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                                <p className="text-xs font-semibold text-[#999] uppercase tracking-wider">Website Dikunjungi</p>
+                                <p className="text-3xl font-bold text-[#1a1a1a] mt-2">{totalViews}</p>
+                                <p className="text-xs text-[#999] mt-1.5 flex items-center gap-1">
+                                    <Icon d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" className="w-3.5 h-3.5 text-indigo-500" />
+                                    <span><strong className="text-indigo-600 font-semibold">{uniqueViews}</strong> pengunjung unik</span>
+                                </p>
+                            </div>
+                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform flex-shrink-0">
+                                <Icon d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-5 h-5 text-white" />
+                            </div>
+                        </div>
+                        <MiniBar value={uniqueViews} max={Math.max(totalViews, 1)} color="#06b6d4" />
                     </div>
                 </div>
 

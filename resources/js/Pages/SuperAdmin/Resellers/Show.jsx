@@ -17,6 +17,13 @@ export default function Show({ reseller, users, stats, plans, centralHost = 'und
         }
     };
 
+    const handleToggleStatus = () => {
+        const action = (reseller.is_active === 1 || reseller.is_active === true) ? 'menonaktifkan' : 'mengaktifkan';
+        if (confirm(`Apakah Anda yakin ingin ${action} reseller "${reseller.name}"?`)) {
+            router.post(`/super-admin/resellers/${reseller.id}/toggle-status`);
+        }
+    };
+
     return (
         <SuperAdminLayout title="Detail Reseller">
             <Head title={`${reseller.name} — Reseller`} />
@@ -31,6 +38,13 @@ export default function Show({ reseller, users, stats, plans, centralHost = 'und
                         <p className="text-[#999] text-sm">{reseller.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={handleToggleStatus}
+                            className={`px-4 py-2 text-white text-sm font-medium rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer ${reseller.is_active === 1 || reseller.is_active === true ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                        >
+                            {reseller.is_active === 1 || reseller.is_active === true ? 'Nonaktifkan' : 'Aktifkan'}
+                        </button>
                         <Link href={`/super-admin/resellers/${reseller.id}/edit`}
                             className="px-4 py-2 bg-[#E5654B] text-white text-sm font-medium rounded-xl hover:bg-[#d55a42] transition-colors">
                             Edit
@@ -75,7 +89,7 @@ export default function Show({ reseller, users, stats, plans, centralHost = 'und
                             ['Subdomain', settings?.subdomain ? `${settings.subdomain}.${centralHost}` : '-'],
                             ['Custom Domain', settings?.custom_domain || '-'],
                             ['Landing Page', settings?.landing_page_template || 'default'],
-                            ['Status', settings?.is_active !== false ? '✅ Aktif' : '❌ Nonaktif'],
+                            ['Status', (reseller.is_active === 1 || reseller.is_active === true) ? '✅ Aktif' : '❌ Nonaktif/Pending'],
                         ].map(([label, value]) => (
                             <div key={label} className="flex justify-between items-center">
                                 <span className="text-sm text-[#999]">{label}</span>

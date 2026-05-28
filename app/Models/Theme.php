@@ -10,6 +10,9 @@ class Theme extends Model
         'name',
         'slug',
         'thumbnail',
+        'preview_images',
+        'preview_template',
+        'preview_bg_style',
         'preview_url',
         'category',
         'color_scheme',
@@ -30,6 +33,7 @@ class Theme extends Model
     protected function casts(): array
     {
         return [
+            'preview_images' => 'array',
             'color_scheme' => 'array',
             'font_config' => 'array',
             'default_data' => 'array',

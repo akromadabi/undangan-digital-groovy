@@ -49,7 +49,7 @@ class ResellerLandingPageController extends Controller
 
         // Get themes for gallery
         $themes = \App\Models\Theme::where('is_active', true)
-            ->select('id', 'name', 'slug', 'thumbnail', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
             ->latest()
             ->take(8)
             ->get()
@@ -86,6 +86,7 @@ class ResellerLandingPageController extends Controller
                 'footer_tiktok' => $setting->footer_tiktok,
                 'footer_address' => $setting->footer_address,
                 'footer_description' => $setting->footer_description,
+                'social_links' => $setting->social_links ?: [],
             ],
             'plans' => $plansData,
             'themes' => $themes,
@@ -109,7 +110,7 @@ class ResellerLandingPageController extends Controller
         $reseller = $setting->reseller;
  
         $themes = \App\Models\Theme::where('is_active', true)
-            ->select('id', 'name', 'slug', 'thumbnail', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
             ->orderBy('sort_order')
             ->get()
             ->map(function ($theme) {
@@ -145,6 +146,7 @@ class ResellerLandingPageController extends Controller
                 'footer_tiktok' => $setting->footer_tiktok,
                 'footer_address' => $setting->footer_address,
                 'footer_description' => $setting->footer_description,
+                'social_links' => $setting->social_links ?: [],
             ],
             'themes' => $themes,
         ]);
@@ -194,6 +196,7 @@ class ResellerLandingPageController extends Controller
                 'footer_tiktok' => $setting->footer_tiktok,
                 'footer_address' => $setting->footer_address,
                 'footer_description' => $setting->footer_description,
+                'social_links' => $setting->social_links ?: [],
             ],
         ]);
     }

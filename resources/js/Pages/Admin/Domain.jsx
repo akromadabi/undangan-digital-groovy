@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
@@ -20,19 +20,40 @@ export default function Domain({ settings, centralHost = 'undangan.com' }) {
         custom_domain: settings?.custom_domain || '',
     });
 
-    const handleCheckSubdomain = async () => {
-        if (!data.subdomain) return;
+    // Automatic real-time debounced subdomain check
+    useEffect(() => {
+        if (!data.subdomain) {
+            setSubdomainStatus(null);
+            return;
+        }
+
+        // If subdomain is the same as original, it is available
+        if (data.subdomain === settings?.subdomain) {
+            setSubdomainStatus({ available: true, message: 'Subdomain ini adalah subdomain saat ini.' });
+            return;
+        }
+
+        if (data.subdomain.length < 3) {
+            setSubdomainStatus({ available: false, message: 'Subdomain minimal 3 karakter.' });
+            return;
+        }
+
         setCheckingSubdomain(true);
         setSubdomainStatus(null);
-        try {
-            const response = await axios.get(`/api/check-subdomain?subdomain=${data.subdomain}`);
-            setSubdomainStatus(response.data);
-        } catch (error) {
-            setSubdomainStatus({ available: false, message: 'Gagal memeriksa ketersediaan.' });
-        } finally {
-            setCheckingSubdomain(false);
-        }
-    };
+
+        const timer = setTimeout(async () => {
+            try {
+                const response = await axios.get(`/api/check-subdomain?subdomain=${data.subdomain}`);
+                setSubdomainStatus(response.data);
+            } catch (error) {
+                setSubdomainStatus({ available: false, message: 'Gagal memeriksa ketersediaan subdomain.' });
+            } finally {
+                setCheckingSubdomain(false);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [data.subdomain]);
 
     const submit = (e) => {
         e.preventDefault();
@@ -75,22 +96,9 @@ export default function Domain({ settings, centralHost = 'undangan.com' }) {
                         
                         <div className="mt-2 flex items-center justify-between">
                             <p className="text-xs text-[#bbb]">Hanya huruf kecil, angka, dan tanda hubung (-)</p>
-                            <button
-                                type="button"
-                                onClick={handleCheckSubdomain}
-                                disabled={checkingSubdomain || !data.subdomain}
-                                className="text-xs font-semibold text-[#E5654B] hover:text-[#d55a42] transition-colors disabled:opacity-50 inline-flex items-center gap-1 bg-transparent border-none cursor-pointer"
-                            >
-                                {checkingSubdomain ? (
-                                    <>
-                                        <svg className="animate-spin h-3.5 w-3.5 text-[#E5654B]" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                        </svg>
-                                        Memeriksa...
-                                    </>
-                                ) : 'Cek Ketersediaan'}
-                            </button>
+                            {checkingSubdomain && (
+                                <span className="text-xs text-[#E5654B] animate-pulse font-semibold">Memeriksa ketersediaan...</span>
+                            )}
                         </div>
 
                         {subdomainStatus && (
