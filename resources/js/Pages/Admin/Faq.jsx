@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Head } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { FAQ_DATABASE as CLIENT_FAQ_DATABASE } from '../Dashboard/Tutorial';
 
 // TINY SVG HELPER
 const Icon = ({ d, className = 'w-5 h-5', strokeWidth = 1.8 }) => (
@@ -283,6 +282,49 @@ const RESELLER_FAQ_DATABASE = [
             'Server pengiriman email (SMTP) dan link asset media dikonfigurasi agar anonim demi kenyamanan bisnis Anda.'
         ],
         mockup: null
+    },
+    {
+        id: 'reseller-brand-safety',
+        category: 'domain-branding',
+        question: '10. Apakah tema parodi (seperti Spotivite, YouInvite, Wedflix, dll) aman dijual secara komersial oleh reseller?',
+        answer: 'Sangat aman. Kami telah merancang ulang seluruh tema populer tersebut menjadi versi parodi kreatif dengan menggunakan nama-nama plesetan estetik dan mengganti seluruh logo/ikon resmi dengan ilustrasi kustom yang orisinal.',
+        keywords: ['aman', 'hak cipta', 'tuntut', 'lisensi', 'merek', 'brand', 'youtube', 'spotify', 'netflix', 'logo', 'copyright', 'trademark', 'komersial', 'legal', 'hukum', 'parodi', 'spotivite', 'youinvite', 'wedflix', 'vitegpt', 'unitedinvite'],
+        steps: [
+            'Seluruh nama platform komersial telah diganti (misalnya Spotify menjadi Spotivite, YouTube menjadi YouInvite, Netflix menjadi Wedflix, Manchester United menjadi UnitedInVite).',
+            'Logo resmi (seperti logo OpenAI swirl pada ChatGPT atau logo camera glyph Instagram) telah diganti dengan ilustrasi kustom bertema pernikahan (ikon hati, camera-lens hati, play-button hati).',
+            'Perubahan ini membebaskan reseller dari segala risiko pelanggaran hak kekayaan intelektual (copyright & trademark infringement) sehingga Anda dapat memasarkan tema premium ini secara bebas, legal, dan percaya diri.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'reseller-preview-catalog',
+        category: 'domain-branding',
+        question: '11. Bagaimana cara merubah preview katalog tema di halaman reseller?',
+        answer: 'Anda dapat merubah preview katalog tema dengan menyesuaikan gaya mockup (Flat 2-Phone vs 3D Triple-Phone ultra-realistis) serta mengganti background menjadi Creative Studio Dual-Tone Split yang modern di menu edit tema.',
+        keywords: ['katalog', 'preview', 'mockup', 'triple-phone', 'background', 'dual-tone', 'clay-sand', 'velvet-rose', 'sage-cream', 'merubah preview'],
+        steps: [
+            'Buka menu "Katalog Tema" pada dashboard Admin reseller.',
+            'Pilih salah satu tema yang ingin Anda sesuaikan dan klik tombol "Edit".',
+            'Di bagian pengaturan preview, Anda dapat merubah format tampilan antara format Flat 2-Phone atau format 3D Triple-Phone.',
+            'Pilih skema background visual premium seperti "Creative Studio Dual-Tone Split" dengan pilihan warna (Clay-Sand, Velvet-Rose, Sage-Cream) yang elegan.',
+            'Klik "Simpan" untuk merubah tampilan preview katalog tema Anda secara instan dan sangat profesional.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'reseller-theme-compatibility',
+        category: 'transaksi-klien',
+        question: '12. Bagaimana cara membatasi tema agar hanya muncul untuk tipe undangan tertentu?',
+        answer: 'Anda dapat membatasi kompatibilitas tema melalui pengaturan "Tipe Acara (Event Type)" di form edit tema untuk memastikan tema tersebut tampil sesuai dengan jenis undangan yang dibuat klien.',
+        keywords: ['tipe acara', 'event type', 'membatasi tema', 'kompatibilitas', 'kategori tema', 'pilihan tema'],
+        steps: [
+            'Buka halaman "Katalog Tema" di dashboard Admin reseller Anda, lalu klik "Edit" pada tema pilihan.',
+            'Cari kolom "Tipe Acara (Event Type)".',
+            'Pilih satu atau beberapa jenis acara yang kompatibel dengan tema tersebut (misalnya: Ulang Tahun, Wisuda, Aqiqah, dll.) menggunakan pemilih kustom multi-select.',
+            'Jika dikosongkan, tema otomatis berstatus "Umum/General" yang berarti dapat digunakan untuk semua jenis acara klien.',
+            'Klik "Simpan Perubahan". Tema hanya akan muncul di katalog klien ketika mereka membuat undangan dengan jenis acara yang sesuai.'
+        ],
+        mockup: null
     }
 ];
 
@@ -367,25 +409,19 @@ export default function Faq() {
     const [activeId, setActiveId] = useState(''); // Accordion active state
     const [isListening, setIsListening] = useState(false);
 
-    // Unified Category Tabs Configuration (combining Reseller & Client/User guides)
+    // Category Tabs Configuration
     const categories = useMemo(() => {
         return [
-            { id: 'semua', label: 'Semua Panduan' },
-            { id: 'domain-branding', label: 'Reseller: Domain & Branding' },
-            { id: 'pricing-revenue', label: 'Reseller: Harga & Pencairan' },
-            { id: 'transaksi-klien', label: 'Reseller: Transaksi & Klien' },
-            { id: 'mulai-cepat', label: 'Klien: Mulai Cepat' },
-            { id: 'desain-tema', label: 'Klien: Desain & Tema' },
-            { id: 'tamu-undangan', label: 'Klien: Tamu & Undangan' },
-            { id: 'fitur-tambahan', label: 'Klien: Fitur Tambahan' }
+            { id: 'semua', label: 'Semua Panduan Reseller' },
+            { id: 'domain-branding', label: 'Domain & Branding' },
+            { id: 'pricing-revenue', label: 'Harga & Pencairan' },
+            { id: 'transaksi-klien', label: 'Transaksi & Klien' }
         ];
     }, []);
 
-    // Combined Active Database containing both reseller specific and client guides
+    // Active Database containing reseller specific guides
     const currentDatabase = useMemo(() => {
-        const resellers = RESELLER_FAQ_DATABASE.map(item => ({ ...item, isReseller: true }));
-        const clients = CLIENT_FAQ_DATABASE.map(item => ({ ...item, isReseller: false }));
-        return [...resellers, ...clients];
+        return RESELLER_FAQ_DATABASE.map(item => ({ ...item, isReseller: true }));
     }, []);
 
     // Filter FAQ list based on Search & Category
@@ -452,94 +488,7 @@ export default function Faq() {
         }
     };
 
-    // Client Mockup Component Renderer (Inline mapping)
-    // Avoid re-declaring huge components, keep simplified or map cleanly
-    const renderClientMockup = (type) => {
-        // Simplified visual guides for client guides inside admin view
-        const mockupStyle = "mt-4 p-4 bg-gray-50 border border-gray-150 rounded-xl max-w-sm text-left text-xs text-gray-500";
-        switch (type) {
-            case 'aktif':
-                return (
-                    <div className={mockupStyle}>
-                        <span className="font-bold text-gray-700 block mb-1">Masa Aktif Paket</span>
-                        <div className="bg-white border rounded p-2 flex justify-between items-center">
-                            <span>Premium Gold</span>
-                            <span className="bg-[#E5654B] text-white px-2 py-0.5 rounded text-[10px]">Aktif (365 Hari)</span>
-                        </div>
-                    </div>
-                );
-            case 'wa':
-                return (
-                    <div className={mockupStyle}>
-                        <span className="font-bold text-gray-700 block mb-1">Template Broadcast WA</span>
-                        <div className="bg-white border rounded p-2 text-[10px] font-mono text-gray-600">
-                            "Halo Bapak/Ibu... Kami mengundang Anda menghadiri..."
-                        </div>
-                    </div>
-                );
-            case 'tambah-tamu':
-                return (
-                    <div className={mockupStyle}>
-                        <span className="font-bold text-gray-700 block mb-1">Opsi Daftar Tamu</span>
-                        <div className="flex gap-2">
-                            <span className="border px-2 py-1 rounded bg-white font-semibold text-gray-700">+ Tambah Manual</span>
-                            <span className="border px-2 py-1 rounded bg-white font-semibold text-gray-700">Import Excel</span>
-                        </div>
-                    </div>
-                );
-            case 'tema':
-                return (
-                    <div className={mockupStyle}>
-                        <span className="font-bold text-gray-700 block mb-1">Ganti Tema Instan</span>
-                        <div className="flex gap-2">
-                            <div className="w-12 h-8 bg-pink-100 border border-pink-300 rounded text-[8px] flex items-center justify-center font-bold text-pink-700">Pink Modern</div>
-                            <div className="w-12 h-8 bg-amber-50 border border-amber-300 rounded text-[8px] flex items-center justify-center font-bold text-amber-800">Joglo Jawa</div>
-                        </div>
-                    </div>
-                );
-            case 'streaming':
-                return (
-                    <div className={mockupStyle}>
-                        <span className="font-bold text-gray-700 block mb-1">Platform Live Streaming</span>
-                        <div className="bg-white border rounded p-2 flex items-center gap-1.5">
-                            <span className="text-[#E5654B] font-bold">YouTube Live</span>
-                            <span className="text-gray-400">|</span>
-                            <span className="text-gray-400 truncate">https://youtube.com/...</span>
-                        </div>
-                    </div>
-                );
-            case 'musik':
-                return (
-                    <div className={mockupStyle}>
-                        <span className="font-bold text-gray-700 block mb-1">Audio Background</span>
-                        <div className="bg-white border rounded p-2 flex items-center gap-2">
-                            <span className="w-4 h-4 rounded-full bg-[#E5654B] text-white flex items-center justify-center text-[8px] animate-spin">♫</span>
-                            <span className="font-medium text-gray-800">BeautifulInWhite.mp3</span>
-                        </div>
-                    </div>
-                );
-            case 'hadiah':
-                return (
-                    <div className={mockupStyle}>
-                        <span className="font-bold text-gray-700 block mb-1">E-Wallet & Bank Transfer</span>
-                        <div className="bg-white border rounded p-2 flex justify-between items-center">
-                            <span className="font-bold text-blue-700">BCA - 1234567890</span>
-                            <span className="text-gray-400 text-[10px]">a.n Pengantin</span>
-                        </div>
-                    </div>
-                );
-            case 'domain':
-                return (
-                    <div className={mockupStyle}>
-                        <span className="font-bold text-gray-700 block mb-1">Custom Domain Klien</span>
-                        <div className="bg-white border rounded p-2 font-mono text-[10px] text-gray-600">
-                            www.pernikahanbudi.com &rarr; A 103.174.112.56
-                        </div>
-                    </div>
-                );
-            default: return null;
-        }
-    };
+
 
     return (
         <AdminLayout title="FAQ & Panduan">
@@ -689,10 +638,7 @@ export default function Faq() {
                                             {/* Render Specific Mockup Simulator */}
                                             {faq.mockup && (
                                                 <div className="flex justify-center mt-4">
-                                                    {faq.isReseller
-                                                        ? renderResellerMockup(faq.mockup)
-                                                        : renderClientMockup(faq.mockup)
-                                                    }
+                                                    {renderResellerMockup(faq.mockup)}
                                                 </div>
                                             )}
                                         </div>

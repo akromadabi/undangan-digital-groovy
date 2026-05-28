@@ -11,29 +11,7 @@ class GreetingCardController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        $cards = GreetingCard::where('user_id', $user->id)
-            ->latest()
-            ->get()
-            ->map(fn ($card) => [
-                'id'             => $card->id,
-                'title'          => $card->title,
-                'template'       => $card->template,
-                'template_label' => $card->template_label,
-                'type'           => $card->type,
-                'type_label'     => $card->type_label,
-                'recipient_name' => $card->recipient_name,
-                'sender_name'    => $card->sender_name,
-                'photo_url'      => $card->photo_url,
-                'custom_url'     => $card->custom_url,
-                'share_url'      => $card->getShareUrl(),
-                'is_active'      => $card->is_active,
-                'created_at'     => $card->created_at->format('d M Y'),
-            ]);
-
-        return Inertia::render('Dashboard/GreetingCard/Index', [
-            'cards' => $cards,
-        ]);
+        return redirect()->route('dashboard.invitations', ['tab' => 'cards']);
     }
 
     public function create()

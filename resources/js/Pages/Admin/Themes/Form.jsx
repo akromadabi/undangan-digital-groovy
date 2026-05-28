@@ -135,13 +135,13 @@ const bgStyleOptions = [
 ];
 
 const eventTypes = [
-    { id: 'wedding', name: '💍 Pernikahan (Wedding)', desc: 'Izinkan tema digunakan untuk Pernikahan.' },
-    { id: 'birthday', name: '🎂 Ulang Tahun (Birthday)', desc: 'Izinkan tema digunakan untuk Ulang Tahun.' },
-    { id: 'graduation', name: '🎓 Wisuda (Graduation)', desc: 'Izinkan tema digunakan untuk Wisuda.' },
-    { id: 'aqiqah', name: '👶 Aqiqah', desc: 'Izinkan tema digunakan untuk Aqiqah.' },
-    { id: 'circumcision', name: '♂️ Sunatan (Khitanan)', desc: 'Izinkan tema digunakan untuk Sunatan.' },
-    { id: 'anniversary', name: '💖 Anniversary / Syukuran', desc: 'Izinkan tema digunakan untuk Anniversary / Syukuran.' },
-    { id: 'general', name: '🌍 Umum / General (Semua Acara)', desc: 'Izinkan tema digunakan untuk Semua jenis acara.' },
+    { id: 'wedding', name: 'Pernikahan (Wedding)', desc: 'Izinkan tema digunakan untuk Pernikahan.' },
+    { id: 'birthday', name: 'Ulang Tahun (Birthday)', desc: 'Izinkan tema digunakan untuk Ulang Tahun.' },
+    { id: 'graduation', name: 'Wisuda (Graduation)', desc: 'Izinkan tema digunakan untuk Wisuda.' },
+    { id: 'aqiqah', name: 'Aqiqah', desc: 'Izinkan tema digunakan untuk Aqiqah.' },
+    { id: 'circumcision', name: 'Sunatan (Khitanan)', desc: 'Izinkan tema digunakan untuk Sunatan.' },
+    { id: 'anniversary', name: 'Anniversary / Syukuran', desc: 'Izinkan tema digunakan untuk Anniversary / Syukuran.' },
+    { id: 'general', name: 'Umum / General (Semua Acara)', desc: 'Izinkan tema digunakan untuk Semua jenis acara.' },
 ];
 
 export default function Form({ theme, plans = [] }) {
@@ -150,17 +150,21 @@ export default function Form({ theme, plans = [] }) {
     const fileInputRef = useRef(null);
     const dropdownRef = useRef(null);
     const eventDropdownRef = useRef(null);
+    const bgDropdownRef = useRef(null);
     
     const [thumbnailPreview, setThumbnailPreview] = useState('');
     const [uploading, setUploading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
+    const [isBgDropdownOpen, setIsBgDropdownOpen] = useState(false);
     
     // States for dynamic preview screenshots
     const [previewImagesPreviews, setPreviewImagesPreviews] = useState([]);
     const [uploadingIndex, setUploadingIndex] = useState(null);
 
-    // State untuk mengontrol tab editor ("visual" vs "json")
+
+
+    // State untuk mengontrol tab editor ("visual" vs "json") - maintained for backend compatibility
     const [colorTab, setColorTab] = useState('visual');
     const [fontTab, setFontTab] = useState('visual');
     
@@ -222,7 +226,7 @@ export default function Form({ theme, plans = [] }) {
         }
     }, [theme?.id, theme?.thumbnail, theme?.preview_images]);
 
-    // Click outside listener untuk menutup dropdown paket & event
+    // Click outside listener untuk menutup dropdown paket, event, & background
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -230,6 +234,9 @@ export default function Form({ theme, plans = [] }) {
             }
             if (eventDropdownRef.current && !eventDropdownRef.current.contains(event.target)) {
                 setIsEventDropdownOpen(false);
+            }
+            if (bgDropdownRef.current && !bgDropdownRef.current.contains(event.target)) {
+                setIsBgDropdownOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -417,31 +424,6 @@ export default function Form({ theme, plans = [] }) {
         }
     };
 
-    // Parsing data JSON untuk kebutuhan Visual Editor
-    let parsedColorScheme = { primary: '#B76E79', secondary: '#D4A373', bg: '#FFF9F5', text: '#2D2D2D', accent: '#D4A373' };
-    try {
-        parsedColorScheme = { ...parsedColorScheme, ...JSON.parse(data.color_scheme || '{}') };
-    } catch (e) {}
-
-    let parsedFontConfig = { heading: 'Playfair Display', body: 'Poppins', script: 'Great Vibes' };
-    try {
-        parsedFontConfig = { ...parsedFontConfig, ...JSON.parse(data.font_config || '{}') };
-    } catch (e) {}
-
-    const colorKeys = [
-        { key: 'bg', label: 'Latar Belakang (bg)', desc: 'Warna dasar background undangan.' },
-        { key: 'text', label: 'Teks Utama (text)', desc: 'Warna tulisan agar kontras dan mudah dibaca.' },
-        { key: 'primary', label: 'Warna Utama (primary)', desc: 'Warna dominan untuk tombol, link, dan highlight.' },
-        { key: 'secondary', label: 'Warna Sekunder (secondary)', desc: 'Warna pendukung elemen undangan.' },
-        { key: 'accent', label: 'Warna Aksen (accent)', desc: 'Warna dekorasi ornamen, garis, atau ikon.' },
-    ];
-
-    const fontKeys = [
-        { key: 'heading', label: 'Font Judul (heading)', placeholder: 'Contoh: Playfair Display', desc: 'Digunakan untuk nama mempelai & judul utama undangan.' },
-        { key: 'body', label: 'Font Teks (body)', placeholder: 'Contoh: Poppins', desc: 'Digunakan untuk teks rincian acara, alamat, dan informasi umum.' },
-        { key: 'script', label: 'Font Aksara/Cursive (script)', placeholder: 'Contoh: Great Vibes', desc: 'Digunakan untuk kutipan ayat/pemanis bergaya tulisan sambung.' },
-    ];
-
     const inputClass = 'w-full bg-[#fcfbfa] border border-[#e8e5e0] rounded-xl px-4 py-2.5 text-sm text-[#333] placeholder-[#ccc] focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] disabled:opacity-50 disabled:bg-[#f8f7f4] transition-all';
     const labelClass = 'text-xs font-semibold text-[#888] block mb-1.5 tracking-wide';
 
@@ -473,462 +455,137 @@ export default function Form({ theme, plans = [] }) {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* CARD 1: INFO UTAMA TEMA */}
+                    {/* CARD 1: PENGATURAN DATA TEMA */}
                     <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-5 shadow-sm">
                         <h3 className="font-bold text-[#1a1a1a] text-lg border-b border-[#f5f3f0] pb-3 flex items-center gap-2">
                             <span className="w-1.5 h-5 bg-[#E5654B] rounded-full inline-block"></span>
-                            Info Utama Tema
+                            Pengaturan Data Tema
                         </h3>
                         
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className={labelClass}>Nama Tema *</label>
-                                <input type="text" value={data.name} onChange={(e) => setData('name', e.target.value)}
-                                    className={inputClass} required placeholder="Contoh: Utary" />
-                                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-                            </div>
-                            
-                            <div>
-                                <label className={labelClass}>Slug (URL Tema) *</label>
-                                <input type="text" value={data.slug} onChange={(e) => setData('slug', e.target.value)} disabled={isEdit}
-                                    className={inputClass} required={!isEdit} placeholder="Contoh: utary" />
-                                <span className="text-[10px] text-gray-400 mt-1 block">Digunakan sistem sebagai penanda tema (tidak bisa diubah).</span>
-                                {errors.slug && <p className="text-red-500 text-xs mt-1">{errors.slug}</p>}
-                            </div>
-
-                            {/* DYNAMIC CSS MOCKUP CONFIGURATION */}
-                            <div className="col-span-2 border-t border-[#f5f3f0] pt-5 space-y-5">
-                                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                                    <span className="w-1.5 h-3 bg-[#E5654B] rounded-full inline-block"></span>
-                                    Tipe & Desain Preview Katalog
-                                </h4>
-
-                                <div className="space-y-5">
-                                    {/* Visual Mockup Template Selector */}
-                                    <div className="space-y-2">
-                                        <label className={labelClass}>Template Mockup Preview</label>
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                            {templateOptions.map((opt) => {
-                                                const isActive = data.preview_template === opt.value;
-                                                return (
-                                                    <button
-                                                        key={opt.value}
-                                                        type="button"
-                                                        onClick={() => setData('preview_template', opt.value)}
-                                                        className={`flex flex-col items-center justify-between p-3.5 rounded-xl border text-center transition-all ${
-                                                            isActive 
-                                                                ? 'border-[#E5654B] bg-[#fef5f3] ring-1 ring-[#E5654B] shadow-xs' 
-                                                                : 'border-[#e8e5e0] bg-white hover:border-gray-300'
-                                                        }`}
-                                                    >
-                                                        <div className="mb-2.5 h-10 flex items-center justify-center">
-                                                            {opt.renderIcon()}
-                                                        </div>
-                                                        <div className="space-y-0.5">
-                                                            <span className={`text-[11px] font-bold block ${isActive ? 'text-[#E5654B]' : 'text-gray-700'}`}>
-                                                                {opt.label}
-                                                            </span>
-                                                            <span className="text-[9px] text-gray-400 block leading-tight">
-                                                                {opt.desc}
-                                                            </span>
-                                                        </div>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label className={labelClass}>Nama Tema *</label>
+                                    <input type="text" value={data.name} onChange={(e) => setData('name', e.target.value)}
+                                        className={inputClass} required placeholder="Contoh: Utary" />
+                                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                                 </div>
-                            </div>
-
-                            {/* DYNAMIC UPLOAD AREA (ADAPTS IN PLACE) */}
-                            <div className="col-span-2 space-y-3 bg-[#faf9f7] p-4 rounded-2xl border border-[#e8e5e0]/60">
-                                {data.preview_template === 'full-mockup' ? (
-                                    <>
-                                        <label className={labelClass}>Foto Preview Utama (Mockup Statis) *</label>
-                                        <p className="text-[10px] text-gray-400 leading-normal mb-2">
-                                            Unggah gambar mockup tema jadi yang akan langsung digunakan sebagai tampilan utama di katalog.
-                                        </p>
-                                        <div className="max-w-[145px] mx-auto">
-                                            <div className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm hover:border-gray-300 transition-colors">
-                                                <span className="text-[10px] font-bold text-gray-500 mb-2 tracking-wide uppercase">Mockup Statis</span>
-                                                
-                                                <div 
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    className="w-16 h-24 rounded-md border border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer overflow-hidden relative hover:border-[#E5654B] bg-[#faf9f7] transition-all group"
-                                                >
-                                                    {thumbnailPreview ? (
-                                                        <div className="relative w-full h-full group">
-                                                            <img src={thumbnailPreview} className="w-full h-full object-cover" />
-                                                            <button
-                                                                type="button"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setLightboxImage(thumbnailPreview);
-                                                                }}
-                                                                className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
-                                                                title="Perbesar Gambar"
-                                                            >
-                                                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                </svg>
-                                                            </button>
-                                                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
-                                                        </div>
-                                                    ) : (
-                                                        <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4" />
-                                                        </svg>
-                                                    )}
-                                                    {uploading && (
-                                                        <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
-                                                            <div className="w-4 h-4 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <input 
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleThumbnailUpload}
-                                                    className="hidden"
-                                                />
-
-                                                <div className="flex gap-1.5 mt-2.5 w-full">
-                                                    <button 
-                                                        type="button"
-                                                        onClick={() => fileInputRef.current?.click()}
-                                                        className="flex-1 py-1 text-[9px] font-bold bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded"
-                                                    >
-                                                        Upload
-                                                    </button>
-                                                    {data.thumbnail && (
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setData('thumbnail', '');
-                                                                setThumbnailPreview('');
-                                                            }}
-                                                            className="px-1.5 py-1 text-[9px] font-bold bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 rounded"
-                                                        >
-                                                            Hapus
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                {errors.thumbnail && (
-                                                    <p className="text-red-500 text-[10px] mt-1.5 font-medium leading-tight">{errors.thumbnail}</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <label className={labelClass}>Unggah Foto Screenshot Mentah (Rasio Portrait HP) *</label>
-                                        <p className="text-[10px] text-gray-400 leading-normal mb-2">
-                                            Unggah screenshot polos dari halaman depan/utama undangan. Gambar akan di-render di dalam frame HP CSS dan dapat digeser (scroll) saat kursor diarahkan ke preview.
-                                        </p>
-                                        <div className={`grid gap-3.5 ${
-                                            data.preview_template === 'single-phone' 
-                                                ? 'grid-cols-1 max-w-[145px] mx-auto' 
-                                                : data.preview_template === 'double-phone' 
-                                                    ? 'grid-cols-2 max-w-[300px] mx-auto' 
-                                                    : 'grid-cols-3'
-                                        }`}>
-                                            {[0, 1, 2].map((idx) => {
-                                                // Determine if this index is needed based on template selection
-                                                const isNeeded = idx === 0 || 
-                                                    (data.preview_template === 'double-phone' && idx < 2) || 
-                                                    (data.preview_template === 'triple-phone');
-                                                    
-                                                if (!isNeeded) return null;
-
-                                                let slotLabel = `HP #${idx + 1}`;
-                                                if (data.preview_template === 'single-phone') slotLabel = 'Layar HP Utama';
-                                                else if (data.preview_template === 'double-phone') {
-                                                    slotLabel = idx === 0 ? 'HP Utama (Depan)' : 'HP Kedua (Belakang)';
-                                                } else if (data.preview_template === 'triple-phone') {
-                                                    if (idx === 0) slotLabel = 'HP Utama (Tengah)';
-                                                    else if (idx === 1) slotLabel = 'HP Kiri (Belakang)';
-                                                    else slotLabel = 'HP Kanan (Belakang)';
-                                                }
-
-                                                return (
-                                                    <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm hover:border-gray-300 transition-colors">
-                                                        <span className="text-[10px] font-bold text-gray-500 mb-2 tracking-wide uppercase">{slotLabel}</span>
-                                                        
-                                                        <div 
-                                                            onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
-                                                            className="w-16 h-24 rounded-md border border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer overflow-hidden relative hover:border-[#E5654B] bg-[#faf9f7] transition-all group"
-                                                        >
-                                                            {previewImagesPreviews[idx] ? (
-                                                                <div className="relative w-full h-full group">
-                                                                    <img src={previewImagesPreviews[idx]} className="w-full h-full object-cover" />
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            setLightboxImage(previewImagesPreviews[idx]);
-                                                                        }}
-                                                                        className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
-                                                                        title="Perbesar Gambar"
-                                                                    >
-                                                                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                        </svg>
-                                                                    </button>
-                                                                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
-                                                                </div>
-                                                            ) : (
-                                                                <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4" />
-                                                                </svg>
-                                                            )}
-                                                            {uploadingIndex === idx && (
-                                                                <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
-                                                                    <div className="w-4 h-4 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        <input 
-                                                            id={`screenshot-upload-${idx}`}
-                                                            type="file"
-                                                            accept="image/*"
-                                                            onChange={(e) => handlePreviewImageUpload(idx, e)}
-                                                            className="hidden"
-                                                        />
-
-                                                        <div className="flex gap-1.5 mt-2.5 w-full">
-                                                            <button 
-                                                                type="button"
-                                                                onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
-                                                                className="flex-1 py-1 text-[9px] font-bold bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded"
-                                                            >
-                                                                Upload
-                                                            </button>
-                                                            {data.preview_images[idx] && (
-                                                                <button 
-                                                                    type="button"
-                                                                    onClick={() => clearPreviewImage(idx)}
-                                                                    className="px-1.5 py-1 text-[9px] font-bold bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 rounded"
-                                                                >
-                                                                    Hapus
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                        {idx === 0 && errors.thumbnail && (
-                                                            <p className="text-red-500 text-[10px] mt-1.5 font-medium leading-tight">{errors.thumbnail}</p>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Visual Background Palette Selector */}
-                            {data.preview_template !== 'full-mockup' && (
-                                <div className="col-span-2 space-y-2 border-t border-[#f5f3f0] pt-5 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <label className={labelClass}>Gaya Background Preview</label>
-                                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
-                                        {bgStyleOptions.map((opt) => {
-                                            const isActive = data.preview_bg_style === opt.value;
-                                            return (
-                                                <button
-                                                    key={opt.value}
-                                                    type="button"
-                                                    onClick={() => setData('preview_bg_style', opt.value)}
-                                                    className={`flex flex-col p-2.5 rounded-xl border text-left transition-all ${
-                                                        isActive 
-                                                            ? 'border-[#E5654B] bg-[#fef5f3] ring-1 ring-[#E5654B] shadow-xs' 
-                                                            : 'border-[#e8e5e0] bg-white hover:border-gray-300'
-                                                    }`}
-                                                >
-                                                    <div className="mb-2 w-full">
-                                                        {opt.renderPreview()}
-                                                    </div>
-                                                    <span className={`text-[9.5px] font-bold block truncate w-full ${isActive ? 'text-[#E5654B]' : 'text-gray-600'}`}>
-                                                        {opt.label}
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* INTERACTIVE LIVE PREVIEW RENDER */}
-                            <div className="col-span-2 border-t border-[#f5f3f0] pt-5">
-                                <label className={labelClass}>Live Preview Kartu Katalog (Interaktif)</label>
-                                <div className="max-w-[240px] mx-auto p-2 bg-[#faf9f7] border border-[#e8e5e0]/60 rounded-2xl shadow-inner mt-2">
-                                    <ThemePreviewCard 
-                                        theme={{
-                                            name: data.name || 'Nama Tema',
-                                            slug: data.slug || 'slug',
-                                            thumbnail: data.thumbnail,
-                                            preview_template: data.preview_template,
-                                            preview_images: data.preview_images,
-                                            preview_bg_style: data.preview_bg_style,
-                                            category: data.category,
-                                            is_premium: data.is_premium
-                                        }}
-                                        reseller={{
-                                            brand_name: 'Watermark Demo',
-                                            brand_logo: null
-                                        }}
-                                        isDemoLink={false}
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className={labelClass}>Kategori Desain</label>
-                                <select value={data.category} onChange={(e) => setData('category', e.target.value)}
-                                    className={inputClass}>
-                                    <option value="elegant">Elegant</option>
-                                    <option value="modern">Modern</option>
-                                    <option value="floral">Floral</option>
-                                    <option value="islamic">Islamic</option>
-                                    <option value="rustic">Rustic</option>
-                                    <option value="minimalist">Minimalist</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                            <div className="relative" ref={eventDropdownRef}>
-                                <label className={labelClass}>Tipe Acara (Event Type)</label>
-                                <p className="text-[9px] text-gray-400 leading-normal mb-1.5">
-                                    Pilih jenis acara yang didukung oleh tema ini. Jika dikosongkan, tema bersifat <strong>Umum/General</strong> untuk semua acara.
-                                </p>
                                 
-                                {/* Trigger Button Dropdown */}
-                                <div 
-                                    onClick={() => setIsEventDropdownOpen(!isEventDropdownOpen)}
-                                    className="w-full min-h-[44px] bg-[#fcfbfa] border border-[#e8e5e0] rounded-xl px-4 py-2 flex items-center justify-between cursor-pointer hover:border-[#E5654B] transition-all select-none shadow-xs"
-                                >
-                                    <div className="flex flex-wrap gap-1.5 items-center">
-                                        {(data.type || []).length === 0 ? (
-                                            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 border border-emerald-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                                                🌍 Semua Acara (Gratis/Umum)
-                                            </span>
-                                        ) : (
-                                            (data.type || []).map(typeId => {
-                                                const eventType = eventTypes.find(e => e.id === typeId);
-                                                if (!eventType) return null;
-                                                return (
-                                                    <span 
-                                                        key={typeId} 
-                                                        className="text-[10px] font-bold bg-[#E5654B]/5 text-[#E5654B] border border-[#E5654B]/10 pl-2.5 pr-1.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm hover:bg-[#E5654B]/10 transition-colors"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleEventTypeToggle(typeId);
-                                                        }}
-                                                    >
-                                                        {eventType.name.split(' ')[1] || eventType.name}
-                                                        <button type="button" className="text-[#E5654B] hover:text-[#d4523a] font-bold w-4 h-4 rounded-full bg-white flex items-center justify-center text-[10px]">&times;</button>
-                                                    </span>
-                                                );
-                                            })
-                                        )}
-                                    </div>
-                                    
-                                    <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${isEventDropdownOpen ? 'rotate-180 text-[#E5654B]' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                <div>
+                                    <label className={labelClass}>Slug (URL Tema) *</label>
+                                    <input type="text" value={data.slug} onChange={(e) => setData('slug', e.target.value)} disabled={isEdit}
+                                        className={inputClass} required={!isEdit} placeholder="Contoh: utary" />
+                                    {errors.slug && <p className="text-red-500 text-xs mt-1">{errors.slug}</p>}
                                 </div>
 
-                                {/* Dropdown Options List */}
-                                {isEventDropdownOpen && (
-                                    <div className="absolute z-20 left-0 right-0 top-[100%] mt-1.5 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl overflow-hidden max-h-[220px] overflow-y-auto p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
-                                        {eventTypes.map((eventType) => {
-                                            const isChecked = (data.type || []).includes(eventType.id);
-                                            return (
-                                                <div 
-                                                    key={eventType.id}
-                                                    onClick={() => handleEventTypeToggle(eventType.id)}
-                                                    className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all select-none hover:bg-gray-50 ${isChecked ? 'bg-[#E5654B]/5' : ''}`}
-                                                >
-                                                    <input 
-                                                        type="checkbox" 
-                                                        checked={isChecked}
-                                                        onChange={() => {}} // Controlled by div parent onClick
-                                                        className="rounded border-gray-300 text-[#E5654B] focus:ring-[#E5654B]" 
-                                                    />
-                                                    <div className="flex-1 min-w-0">
-                                                        <span className={`text-xs font-bold block ${isChecked ? 'text-[#E5654B]' : 'text-gray-700'}`}>
-                                                            {eventType.name}
-                                                        </span>
-                                                        <span className="text-[8px] text-gray-400 block mt-0.5 truncate">
-                                                            {eventType.desc}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                                {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type}</p>}
-                            </div>
-                            </div>
-                            
-                            <div>
-                                <label className={labelClass}>Like Dasar (Base Likes)</label>
-                                <input type="number" min="0" value={data.base_likes} onChange={(e) => setData('base_likes', parseInt(e.target.value) || 0)}
-                                    className={inputClass} placeholder="Contoh: 150" />
-                                <span className="text-[10px] text-gray-400 mt-1 block">Angka awal menyukai tema untuk mendongkrak popularitas.</span>
-                                {errors.base_likes && <p className="text-red-500 text-xs mt-1">{errors.base_likes}</p>}
-                            </div>
-                        </div>
-
-                        {/* GRUP CHECKLIST: DIPISAH SESUAI KEGUNAAN */}
-                        <div className="border-t border-[#f5f3f0] pt-5 space-y-6">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                {/* Kategori 1: Status & Akses */}
-                                <div className="space-y-3">
-                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5f3f0] pb-2">
-                                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Status & Publikasi Tema
-                                    </h4>
-                                    <div className="grid grid-cols-1 gap-3">
-                                        {/* is_active */}
-                                        <label className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${data.is_active ? 'bg-emerald-50/20 border-emerald-500/20' : 'bg-gray-50 border-gray-200/60'}`}>
-                                            <input type="checkbox" checked={data.is_active} onChange={(e) => setData('is_active', e.target.checked)}
-                                                className="mt-0.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
-                                            <div>
-                                                <span className={`text-xs font-bold block ${data.is_active ? 'text-emerald-700' : 'text-gray-700'}`}>Publish Tema</span>
-                                                <span className="text-[9px] text-gray-400 block mt-0.5">Jika aktif, tema ini muncul dan bisa digunakan langsung oleh pengguna.</span>
-                                            </div>
-                                        </label>
-                                    </div>
+                                <div>
+                                    <label className={labelClass}>Kategori Desain</label>
+                                    <select value={data.category} onChange={(e) => setData('category', e.target.value)}
+                                        className={inputClass}>
+                                        <option value="elegant">Elegant</option>
+                                        <option value="modern">Modern</option>
+                                        <option value="floral">Floral</option>
+                                        <option value="islamic">Islamic</option>
+                                        <option value="rustic">Rustic</option>
+                                        <option value="minimalist">Minimalist</option>
+                                    </select>
                                 </div>
-
-                                {/* Kategori Baru: Pembatasan Kelas Paket */}
-                                <div className="space-y-3 relative" ref={dropdownRef}>
-                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5f3f0] pb-2">
-                                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Akses Kelas Paket (Subscription Plans)
-                                    </h4>
-                                    <p className="text-[9px] text-gray-400 leading-normal">
-                                        Pilih paket yang diizinkan menggunakan tema ini. Jika dikosongkan, tema bersifat <strong>Gratis/Umum</strong> untuk semua paket.
-                                    </p>
+                                
+                                <div className={`relative ${isEventDropdownOpen ? 'z-40' : 'z-10'}`} ref={eventDropdownRef}>
+                                    <label className={labelClass}>Tipe Acara (Event Type)</label>
                                     
                                     {/* Trigger Button Dropdown */}
                                     <div 
-                                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                        onClick={() => {
+                                            setIsEventDropdownOpen(!isEventDropdownOpen);
+                                            setIsDropdownOpen(false);
+                                            setIsBgDropdownOpen(false);
+                                        }}
+                                        className="w-full min-h-[44px] bg-[#fcfbfa] border border-[#e8e5e0] rounded-xl px-4 py-2 flex items-center justify-between cursor-pointer hover:border-[#E5654B] transition-all select-none shadow-xs"
+                                    >
+                                        <div className="flex flex-wrap gap-1.5 items-center">
+                                            {(data.type || []).length === 0 ? (
+                                                <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 border border-emerald-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                                                    Semua Acara (Umum/General)
+                                                </span>
+                                            ) : (
+                                                (data.type || []).map(typeId => {
+                                                    const eventType = eventTypes.find(e => e.id === typeId);
+                                                    if (!eventType) return null;
+                                                    return (
+                                                        <span 
+                                                            key={typeId} 
+                                                            className="text-[10px] font-bold bg-[#E5654B]/5 text-[#E5654B] border border-[#E5654B]/10 pl-2.5 pr-1.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm hover:bg-[#E5654B]/10 transition-colors"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEventTypeToggle(typeId);
+                                                            }}
+                                                        >
+                                                            {eventType.name}
+                                                            <button type="button" className="text-[#E5654B] hover:text-[#d4523a] font-bold w-4 h-4 rounded-full bg-white flex items-center justify-center text-[10px]">&times;</button>
+                                                        </span>
+                                                    );
+                                                })
+                                            )}
+                                        </div>
+                                        
+                                        <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${isEventDropdownOpen ? 'rotate-180 text-[#E5654B]' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+
+                                    {/* Dropdown Options List */}
+                                    {isEventDropdownOpen && (
+                                        <div className="absolute z-25 left-0 right-0 top-[100%] mt-1.5 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl overflow-hidden max-h-[220px] overflow-y-auto p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                            {eventTypes.map((eventType) => {
+                                                const isChecked = (data.type || []).includes(eventType.id);
+                                                return (
+                                                    <div 
+                                                        key={eventType.id}
+                                                        onClick={() => handleEventTypeToggle(eventType.id)}
+                                                        className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all select-none hover:bg-gray-50 ${isChecked ? 'bg-[#E5654B]/5' : ''}`}
+                                                    >
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={isChecked}
+                                                            onChange={() => {}} // Controlled by div parent onClick
+                                                            className="rounded border-gray-300 text-[#E5654B] focus:ring-[#E5654B]" 
+                                                        />
+                                                        <div className="flex-1 min-w-0">
+                                                            <span className={`text-xs font-bold block ${isChecked ? 'text-[#E5654B]' : 'text-gray-700'}`}>
+                                                                {eventType.name}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                    {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type}</p>}
+                                </div>
+
+                                <div>
+                                    <label className={labelClass}>Like Dasar (Base Likes)</label>
+                                    <input type="number" min="0" value={data.base_likes} onChange={(e) => setData('base_likes', parseInt(e.target.value) || 0)}
+                                        className={inputClass} placeholder="Contoh: 150" />
+                                    {errors.base_likes && <p className="text-red-500 text-xs mt-1">{errors.base_likes}</p>}
+                                </div>
+
+                                <div className={`space-y-1.5 relative ${isDropdownOpen ? 'z-40' : 'z-10'}`} ref={dropdownRef}>
+                                    <label className={labelClass}>Akses Kelas Paket (Subscription Plans)</label>
+                                    
+                                    {/* Trigger Button Dropdown */}
+                                    <div 
+                                        onClick={() => {
+                                            setIsDropdownOpen(!isDropdownOpen);
+                                            setIsEventDropdownOpen(false);
+                                            setIsBgDropdownOpen(false);
+                                        }}
                                         className="w-full min-h-[44px] bg-[#fcfbfa] border border-[#e8e5e0] rounded-xl px-4 py-2 flex items-center justify-between cursor-pointer hover:border-[#E5654B] transition-all select-none shadow-xs"
                                     >
                                         <div className="flex flex-wrap gap-1.5 items-center">
                                             {(data.allowed_plans || []).length === 0 ? (
                                                 <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 border border-emerald-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                                                    🔓 Semua Paket (Gratis/Umum)
+                                                    Semua Paket (Gratis/Umum)
                                                 </span>
                                             ) : (
                                                 (data.allowed_plans || []).map(planId => {
@@ -958,7 +615,7 @@ export default function Form({ theme, plans = [] }) {
 
                                     {/* Dropdown Options List */}
                                     {isDropdownOpen && (
-                                        <div className="absolute z-20 left-0 right-0 top-[100%] mt-1.5 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl overflow-hidden max-h-[190px] overflow-y-auto p-1.5 space-y-0.5">
+                                        <div className="absolute z-25 left-0 right-0 top-[100%] mt-1.5 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl overflow-hidden max-h-[190px] overflow-y-auto p-1.5 space-y-0.5">
                                             {plans.length === 0 ? (
                                                 <div className="text-center text-xs text-gray-400 py-4">Belum ada paket yang terdaftar.</div>
                                             ) : (
@@ -980,9 +637,6 @@ export default function Form({ theme, plans = [] }) {
                                                                 <span className={`text-xs font-bold block ${isChecked ? 'text-amber-800' : 'text-gray-700'}`}>
                                                                     Paket {plan.name}
                                                                 </span>
-                                                                <span className="text-[8px] text-gray-400 block mt-0.5 truncate">
-                                                                    Izinkan pengguna paket {plan.name} untuk memakai tema ini.
-                                                                </span>
                                                             </div>
                                                         </div>
                                                     );
@@ -991,172 +645,332 @@ export default function Form({ theme, plans = [] }) {
                                         </div>
                                     )}
                                 </div>
-                            </div>
 
-                            {/* Kategori 2: Tipe Layout / Navigasi */}
-                            <div className="space-y-2">
-                                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-                                    </svg>
-                                    Fitur Navigasi / Tipe Layout Tema
-                                </h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    {/* supports_scroll */}
-                                    <label className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${data.supports_scroll ? 'bg-[#E5654B]/5 border-[#E5654B]/20' : 'bg-gray-50 border-gray-200/60'}`}>
-                                        <input type="checkbox" checked={data.supports_scroll} onChange={(e) => setData('supports_scroll', e.target.checked)}
-                                            className="mt-0.5 rounded border-gray-300 text-[#E5654B] focus:ring-[#E5654B]" />
-                                        <div>
-                                            <span className={`text-xs font-bold block ${data.supports_scroll ? 'text-[#E5654B]' : 'text-gray-700'}`}>Tipe Scroll</span>
-                                            <span className="text-[9px] text-gray-400 block mt-0.5">Mendukung gulir ke bawah satu halaman penuh.</span>
+                                <div className="sm:col-span-2 border-t border-[#f5f3f0] pt-5">
+                                    <div className="flex items-center justify-between bg-[#faf9f7] border border-[#e8e5e0]/60 p-4 rounded-xl">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-bold text-gray-700">Publish Tema</span>
                                         </div>
-                                    </label>
-                                    {/* supports_slide */}
-                                    <label className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${data.supports_slide ? 'bg-[#E5654B]/5 border-[#E5654B]/20' : 'bg-gray-50 border-gray-200/60'}`}>
-                                        <input type="checkbox" checked={data.supports_slide} onChange={(e) => setData('supports_slide', e.target.checked)}
-                                            className="mt-0.5 rounded border-gray-300 text-[#E5654B] focus:ring-[#E5654B]" />
-                                        <div>
-                                            <span className={`text-xs font-bold block ${data.supports_slide ? 'text-[#E5654B]' : 'text-gray-700'}`}>Tipe Slide</span>
-                                            <span className="text-[9px] text-gray-400 block mt-0.5">Mendukung navigasi geser halaman (slide horizontal).</span>
-                                        </div>
-                                    </label>
-                                    {/* supports_tab */}
-                                    <label className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${data.supports_tab ? 'bg-[#E5654B]/5 border-[#E5654B]/20' : 'bg-gray-50 border-gray-200/60'}`}>
-                                        <input type="checkbox" checked={data.supports_tab} onChange={(e) => setData('supports_tab', e.target.checked)}
-                                            className="mt-0.5 rounded border-gray-300 text-[#E5654B] focus:ring-[#E5654B]" />
-                                        <div>
-                                            <span className={`text-xs font-bold block ${data.supports_tab ? 'text-[#E5654B]' : 'text-gray-700'}`}>Tipe Tab Menu</span>
-                                            <span className="text-[9px] text-gray-400 block mt-0.5">Mendukung menu tab bawah/samping sebagai navigasi halaman.</span>
-                                        </div>
-                                    </label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setData('is_active', !data.is_active)}
+                                            className={`${
+                                                data.is_active ? 'bg-emerald-500' : 'bg-gray-200'
+                                            } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none`}
+                                        >
+                                            <span
+                                                aria-hidden="true"
+                                                className={`${
+                                                    data.is_active ? 'translate-x-5' : 'translate-x-0'
+                                                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out`}
+                                            />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* CARD 2: COLOR SCHEME */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-4 shadow-sm relative overflow-hidden">
-                        <div className="flex items-center justify-between border-b border-[#f5f3f0] pb-3">
-                            <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2">
+                        {/* CARD 2: PENAMPILAN KATALOG TEMA */}
+                        <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-5 shadow-sm">
+                            <h3 className="font-bold text-[#1a1a1a] text-lg border-b border-[#f5f3f0] pb-3 flex items-center gap-2">
                                 <span className="w-1.5 h-5 bg-[#E5654B] rounded-full inline-block"></span>
-                                Palet Warna Tema (Color Scheme)
+                                Penampilan Katalog Tema
                             </h3>
-                            
-                            {/* Tab Toggle */}
-                            <div className="bg-[#f5f3f0] p-0.5 rounded-lg flex shadow-inner">
-                                <button type="button" onClick={() => setColorTab('visual')}
-                                    className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${colorTab === 'visual' ? 'bg-white text-[#E5654B] shadow-sm' : 'text-[#777] hover:text-[#333]'}`}>
-                                    Visual Editor
-                                </button>
-                                <button type="button" onClick={() => setColorTab('json')}
-                                    className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${colorTab === 'json' ? 'bg-white text-[#E5654B] shadow-sm' : 'text-[#777] hover:text-[#333]'}`}>
-                                    Raw JSON
-                                </button>
-                            </div>
-                        </div>
+                            <div className="space-y-5 animate-in fade-in duration-200">
+                                {/* Visual Mockup Template Selector */}
+                                <div className="space-y-2">
+                                    <label className={labelClass}>Template Mockup Preview</label>
+                                    <select
+                                        value={data.preview_template}
+                                        onChange={(e) => setData('preview_template', e.target.value)}
+                                        className={inputClass}
+                                    >
+                                        {templateOptions.map((opt) => (
+                                            <option key={opt.value} value={opt.value}>
+                                                {opt.label} — {opt.desc}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                        {/* INFO PENJELASAN */}
-                        <div className="bg-blue-50/40 border border-blue-500/10 rounded-xl p-3.5 text-xs text-blue-800 leading-relaxed">
-                            <span className="font-bold block mb-0.5">💡 Apa itu Color Scheme?</span>
-                            Konfigurasi ini menentukan palet warna yang akan otomatis diterapkan ke seluruh halaman undangan customer. Warna background, teks, tombol RSVP, ornamen pembatas, dan link navigasi akan mengikuti aturan warna ini agar undangan tampil harmonis.
-                        </div>
+                                {/* Visual Background Palette Selector */}
+                                {data.preview_template !== 'full-mockup' && (
+                                    <div className={`space-y-2 relative ${isBgDropdownOpen ? 'z-40' : 'z-10'}`} ref={bgDropdownRef}>
+                                        <label className={labelClass}>Gaya Background Preview</label>
+                                        <div className="relative">
+                                            {/* Trigger Button */}
+                                            <div 
+                                                onClick={() => {
+                                                    setIsBgDropdownOpen(!isBgDropdownOpen);
+                                                    setIsEventDropdownOpen(false);
+                                                    setIsDropdownOpen(false);
+                                                }}
+                                                className="w-full bg-[#fcfbfa] border border-[#e8e5e0] rounded-xl px-4 py-2 flex items-center justify-between cursor-pointer hover:border-[#E5654B] transition-all select-none shadow-xs min-h-[44px]"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    {/* Spill Warna inside active button selection */}
+                                                    <div className="w-8 h-5 flex-shrink-0 bg-white border border-[#e8e5e0]/60 p-0.5 rounded-md shadow-xs flex items-center justify-center overflow-hidden">
+                                                        {(() => {
+                                                            const activeOpt = bgStyleOptions.find(o => o.value === data.preview_bg_style);
+                                                            return activeOpt ? (
+                                                                <div className="w-full h-full rounded-xs overflow-hidden">
+                                                                    {activeOpt.renderPreview()}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="w-full h-full bg-gray-100 rounded-xs" />
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-gray-700">
+                                                        {bgStyleOptions.find(o => o.value === data.preview_bg_style)?.label || 'Pilih Background'}
+                                                    </span>
+                                                </div>
+                                                
+                                                <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${isBgDropdownOpen ? 'rotate-180 text-[#E5654B]' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
 
-                        {/* TAB CONTENT: VISUAL EDITOR */}
-                        {colorTab === 'visual' ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                                {colorKeys.map(({ key, label, desc }) => (
-                                    <div key={key} className="bg-[#fcfbfa] border border-[#e8e5e0]/60 p-3 rounded-xl flex items-center gap-4 transition-all hover:border-[#E5654B]/20 shadow-sm">
-                                        {/* Color Circle Preview / Native Picker */}
-                                        <div className="relative w-12 h-12 rounded-full overflow-hidden border border-[#e8e5e0] shadow-sm flex-shrink-0">
-                                            <input 
-                                                type="color" 
-                                                value={parsedColorScheme[key] || '#ffffff'} 
-                                                onChange={(e) => updateColorSchemeKey(key, e.target.value)} 
-                                                className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer scale-150" 
-                                            />
-                                        </div>
-                                        
-                                        {/* Input & Info */}
-                                        <div className="flex-1 space-y-1">
-                                            <label className="text-xs font-bold text-gray-700 block">{label}</label>
-                                            <p className="text-[9px] text-gray-400 block leading-tight">{desc}</p>
-                                            <input 
-                                                type="text" 
-                                                value={parsedColorScheme[key] || ''} 
-                                                onChange={(e) => updateColorSchemeKey(key, e.target.value)}
-                                                placeholder="#FFFFFF" 
-                                                className="w-full text-xs font-mono uppercase bg-white border border-[#e8e5e0] rounded-lg px-2.5 py-1 focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all"
-                                            />
+                                            {/* Dropdown Options List */}
+                                            {isBgDropdownOpen && (
+                                                <div className="absolute z-35 left-0 right-0 top-[100%] mt-1.5 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl overflow-hidden max-h-[220px] overflow-y-auto p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                                    {bgStyleOptions.map((opt) => {
+                                                        const isSelected = data.preview_bg_style === opt.value;
+                                                        return (
+                                                            <div 
+                                                                key={opt.value}
+                                                                onClick={() => {
+                                                                    setData('preview_bg_style', opt.value);
+                                                                    setIsBgDropdownOpen(false);
+                                                                }}
+                                                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all select-none hover:bg-gray-50 ${isSelected ? 'bg-[#E5654B]/5' : ''}`}
+                                                            >
+                                                                {/* Spill Warna inside option */}
+                                                                <div className="w-8 h-5 flex-shrink-0 bg-white border border-[#e8e5e0]/60 p-0.5 rounded-md shadow-xs flex items-center justify-center overflow-hidden">
+                                                                    <div className="w-full h-full rounded-xs overflow-hidden">
+                                                                        {opt.renderPreview()}
+                                                                    </div>
+                                                                </div>
+                                                                <span className={`text-xs font-semibold ${isSelected ? 'text-[#E5654B] font-bold' : 'text-gray-700'}`}>
+                                                                    {opt.label}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        ) : (
-                            /* TAB CONTENT: RAW JSON EDITOR */
-                            <div className="space-y-1.5 pt-2">
-                                <textarea value={data.color_scheme} onChange={(e) => setData('color_scheme', e.target.value)}
-                                    className={`${inputClass} font-mono resize-y min-h-[160px] bg-gray-50/50`} placeholder="Masukkan JSON Color Scheme..." />
-                                <span className="text-[10px] text-gray-400 block">Pastikan format JSON valid dengan tanda kurung kurawal `{}` dan petik dua `""`.</span>
-                            </div>
-                        )}
-                    </div>
+                                )}
 
-                    {/* CARD 3: FONT CONFIG */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-4 shadow-sm relative overflow-hidden">
-                        <div className="flex items-center justify-between border-b border-[#f5f3f0] pb-3">
-                            <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2">
-                                <span className="w-1.5 h-5 bg-[#E5654B] rounded-full inline-block"></span>
-                                Konfigurasi Huruf (Font Config)
-                            </h3>
-                            
-                            {/* Tab Toggle */}
-                            <div className="bg-[#f5f3f0] p-0.5 rounded-lg flex shadow-inner">
-                                <button type="button" onClick={() => setFontTab('visual')}
-                                    className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${fontTab === 'visual' ? 'bg-white text-[#E5654B] shadow-sm' : 'text-[#777] hover:text-[#333]'}`}>
-                                    Visual Editor
-                                </button>
-                                <button type="button" onClick={() => setFontTab('json')}
-                                    className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${fontTab === 'json' ? 'bg-white text-[#E5654B] shadow-sm' : 'text-[#777] hover:text-[#333]'}`}>
-                                    Raw JSON
-                                </button>
-                            </div>
-                        </div>
+                                {/* DYNAMIC UPLOAD AREA (ADAPTS IN PLACE) */}
+                                <div className="space-y-3 bg-[#faf9f7] p-4 rounded-2xl border border-[#e8e5e0]/60">
+                                    {data.preview_template === 'full-mockup' ? (
+                                        <>
+                                            <label className={labelClass}>Foto Preview Utama (Mockup Statis) *</label>
+                                            <div className="max-w-[145px] mx-auto">
+                                                <div className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm hover:border-gray-300 transition-colors">
+                                                    <span className="text-[10px] font-bold text-gray-500 mb-2 tracking-wide uppercase">Mockup Statis</span>
+                                                    
+                                                    <div 
+                                                        onClick={() => fileInputRef.current?.click()}
+                                                        className="w-16 h-24 rounded-md border border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer overflow-hidden relative hover:border-[#E5654B] bg-[#faf9f7] transition-all group"
+                                                    >
+                                                        {thumbnailPreview ? (
+                                                            <div className="relative w-full h-full group">
+                                                                <img src={thumbnailPreview} className="w-full h-full object-cover" />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setLightboxImage(thumbnailPreview);
+                                                                    }}
+                                                                    className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
+                                                                    title="Perbesar Gambar"
+                                                                >
+                                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                    </svg>
+                                                                </button>
+                                                                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
+                                                            </div>
+                                                        ) : (
+                                                            <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4" />
+                                                            </svg>
+                                                        )}
+                                                        {uploading && (
+                                                            <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
+                                                                <div className="w-4 h-4 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
+                                                            </div>
+                                                        )}
+                                                    </div>
 
-                        {/* INFO PENJELASAN */}
-                        <div className="bg-blue-50/40 border border-blue-500/10 rounded-xl p-3.5 text-xs text-blue-800 leading-relaxed">
-                            <span className="font-bold block mb-0.5">💡 Apa itu Font Config?</span>
-                            Digunakan untuk menentukan kombinasi jenis huruf Google Fonts yang diterapkan di undangan. Admin dapat mengelompokkan jenis font yang elegan untuk judul, font bersih yang mudah dibaca untuk informasi detail, dan font tulisan sambung estetik untuk dekorasi.
-                        </div>
+                                                    <input 
+                                                        ref={fileInputRef}
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleThumbnailUpload}
+                                                        className="hidden"
+                                                    />
 
-                        {/* TAB CONTENT: VISUAL EDITOR */}
-                        {fontTab === 'visual' ? (
-                            <div className="space-y-4 pt-2">
-                                {fontKeys.map(({ key, label, placeholder, desc }) => (
-                                    <div key={key} className="bg-[#fcfbfa] border border-[#e8e5e0]/60 p-4 rounded-xl space-y-1.5 transition-all hover:border-[#E5654B]/20 shadow-sm">
-                                        <div className="flex items-center justify-between">
-                                            <label className="text-xs font-bold text-gray-700">{label}</label>
-                                            <span className="text-[10px] text-gray-400 font-mono italic">Kunci: {key}</span>
-                                        </div>
-                                        <p className="text-[10px] text-gray-400 leading-normal">{desc}</p>
-                                        <input 
-                                            type="text" 
-                                            value={parsedFontConfig[key] || ''} 
-                                            onChange={(e) => updateFontConfigKey(key, e.target.value)}
-                                            placeholder={placeholder} 
-                                            className="w-full text-xs bg-white border border-[#e8e5e0] rounded-lg px-3 py-2 focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all"
+                                                    <div className="flex gap-1.5 mt-2.5 w-full">
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => fileInputRef.current?.click()}
+                                                            className="flex-1 py-1 text-[9px] font-bold bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded"
+                                                        >
+                                                            Upload
+                                                        </button>
+                                                        {data.thumbnail && (
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setData('thumbnail', '');
+                                                                    setThumbnailPreview('');
+                                                                }}
+                                                                className="px-1.5 py-1 text-[9px] font-bold bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 rounded"
+                                                            >
+                                                                Hapus
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    {errors.thumbnail && (
+                                                        <p className="text-red-500 text-[10px] mt-1.5 font-medium leading-tight">{errors.thumbnail}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <label className={labelClass}>Unggah Foto Screenshot Mentah (Rasio Portrait HP) *</label>
+                                            <div className={`grid gap-3.5 ${
+                                                data.preview_template === 'single-phone' 
+                                                    ? 'grid-cols-1 max-w-[145px] mx-auto' 
+                                                    : data.preview_template === 'double-phone' 
+                                                        ? 'grid-cols-2 max-w-[300px] mx-auto' 
+                                                        : 'grid-cols-3'
+                                            }`}>
+                                                {[0, 1, 2].map((idx) => {
+                                                    // Determine if this index is needed based on template selection
+                                                    const isNeeded = idx === 0 || 
+                                                        (data.preview_template === 'double-phone' && idx < 2) || 
+                                                        (data.preview_template === 'triple-phone');
+                                                        
+                                                    if (!isNeeded) return null;
+
+                                                    let slotLabel = `HP #${idx + 1}`;
+                                                    if (data.preview_template === 'single-phone') slotLabel = 'Layar HP Utama';
+                                                    else if (data.preview_template === 'double-phone') {
+                                                        slotLabel = idx === 0 ? 'HP Utama (Depan)' : 'HP Kedua (Belakang)';
+                                                    } else if (data.preview_template === 'triple-phone') {
+                                                        if (idx === 0) slotLabel = 'HP Utama (Tengah)';
+                                                        else if (idx === 1) slotLabel = 'HP Kiri (Belakang)';
+                                                        else slotLabel = 'HP Kanan (Belakang)';
+                                                    }
+
+                                                    return (
+                                                        <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e5e0]/60 flex flex-col items-center justify-between text-center relative shadow-sm hover:border-gray-300 transition-colors">
+                                                            <span className="text-[10px] font-bold text-gray-500 mb-2 tracking-wide uppercase">{slotLabel}</span>
+                                                            
+                                                            <div 
+                                                                onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
+                                                                className="w-16 h-24 rounded-md border border-dashed border-[#e8e5e0] flex items-center justify-center cursor-pointer overflow-hidden relative hover:border-[#E5654B] bg-[#faf9f7] transition-all group"
+                                                            >
+                                                                {previewImagesPreviews[idx] ? (
+                                                                    <div className="relative w-full h-full group">
+                                                                        <img src={previewImagesPreviews[idx]} className="w-full h-full object-cover" />
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setLightboxImage(previewImagesPreviews[idx]);
+                                                                            }}
+                                                                            className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-[#E5654B] backdrop-blur-xs rounded-full text-white transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-95 z-25"
+                                                                            title="Perbesar Gambar"
+                                                                        >
+                                                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                            </svg>
+                                                                        </button>
+                                                                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10" />
+                                                                    </div>
+                                                                ) : (
+                                                                    <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4" />
+                                                                    </svg>
+                                                                )}
+                                                                {uploadingIndex === idx && (
+                                                                    <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-20">
+                                                                        <div className="w-4 h-4 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            <input 
+                                                                id={`screenshot-upload-${idx}`}
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={(e) => handlePreviewImageUpload(idx, e)}
+                                                                className="hidden"
+                                                            />
+
+                                                            <div className="flex gap-1.5 mt-2.5 w-full">
+                                                                <button 
+                                                                    type="button"
+                                                                    onClick={() => document.getElementById(`screenshot-upload-${idx}`).click()}
+                                                                    className="flex-1 py-1 text-[9px] font-bold bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded"
+                                                                >
+                                                                    Upload
+                                                                </button>
+                                                                {data.preview_images[idx] && (
+                                                                    <button 
+                                                                        type="button"
+                                                                        onClick={() => clearPreviewImage(idx)}
+                                                                        className="px-1.5 py-1 text-[9px] font-bold bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 rounded"
+                                                                    >
+                                                                        Hapus
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                            {idx === 0 && errors.thumbnail && (
+                                                                <p className="text-red-500 text-[10px] mt-1.5 font-medium leading-tight">{errors.thumbnail}</p>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* INTERACTIVE LIVE PREVIEW RENDER */}
+                                <div className="border-t border-[#f5f3f0] pt-5">
+                                    <label className={labelClass}>Live Preview Kartu Katalog (Interaktif)</label>
+                                    <div className="max-w-[240px] mx-auto p-2 bg-[#faf9f7] border border-[#e8e5e0]/60 rounded-2xl shadow-inner mt-2">
+                                        <ThemePreviewCard 
+                                            theme={{
+                                                name: data.name || 'Nama Tema',
+                                                slug: data.slug || 'slug',
+                                                thumbnail: data.thumbnail,
+                                                preview_template: data.preview_template,
+                                                preview_images: data.preview_images,
+                                                preview_bg_style: data.preview_bg_style,
+                                                category: data.category,
+                                                is_premium: data.is_premium
+                                            }}
+                                            reseller={{
+                                                brand_name: 'Watermark Demo',
+                                                brand_logo: null
+                                            }}
+                                            isDemoLink={false}
                                         />
                                     </div>
-                                ))}
+                                </div>
                             </div>
-                        ) : (
-                            /* TAB CONTENT: RAW JSON EDITOR */
-                            <div className="space-y-1.5 pt-2">
-                                <textarea value={data.font_config} onChange={(e) => setData('font_config', e.target.value)}
-                                    className={`${inputClass} font-mono resize-y min-h-[140px] bg-gray-50/50`} placeholder="Masukkan JSON Font Config..." />
-                                <span className="text-[10px] text-gray-400 block">Pastikan nama font ditulis persis sesuai dengan nama font di Google Fonts (case-sensitive).</span>
-                            </div>
-                        )}
-                    </div>
+                        </div>
 
                     {/* SUBMIT BUTTON */}
                     <button type="submit" disabled={processing || uploading}

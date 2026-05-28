@@ -26,7 +26,9 @@ class HandleInertiaRequests extends Middleware
                     ->mapWithKeys(fn($slug) => [$slug => true])
                     ->toArray();
             } else {
-                $plan = $user->currentPlan();
+                $invitation = $user->invitation;
+                $activeSub = $invitation ? $invitation->activeSubscription : null;
+                $plan = $activeSub ? $activeSub->plan : $user->currentPlan();
                 if ($plan) {
                     $featureAccess = $plan->featureAccess()
                         ->with('feature')
@@ -93,6 +95,7 @@ class HandleInertiaRequests extends Middleware
                     'locale' => $user->locale,
                     'avatar' => $user->avatar,
                     'invitation_slug' => $user->invitation?->slug,
+                    'invitation_type' => $user->invitation?->type ?: 'wedding',
                 ] : null,
                 'impersonator' => session()->has('impersonator_id') ? [
                     'id' => session('impersonator_id'),
@@ -102,9 +105,9 @@ class HandleInertiaRequests extends Middleware
             ],
             'subscription' => $user ? (
                 (!$user->isAdmin() && !$user->isSuperAdmin()) ? [
-                    'plan' => $user->currentPlan()?->only(['id', 'name', 'slug', 'max_guests', 'max_galleries']),
-                    'status' => $user->activeSubscription?->status,
-                    'expires_at' => $user->activeSubscription?->expires_at?->toISOString(),
+                    'plan' => ($user->invitation ? ($user->invitation->activeSubscription ? $user->invitation->activeSubscription->plan : null) : $user->currentPlan())?->only(['id', 'name', 'slug', 'max_guests', 'max_galleries']),
+                    'status' => $user->invitation ? ($user->invitation->activeSubscription?->status) : ($user->activeSubscription?->status),
+                    'expires_at' => $user->invitation ? ($user->invitation->activeSubscription?->expires_at?->toISOString()) : ($user->activeSubscription?->expires_at?->toISOString()),
                 ] : [
                     'plan' => [
                         'name' => $user->isSuperAdmin() ? 'Super Admin' : 'Administrator',

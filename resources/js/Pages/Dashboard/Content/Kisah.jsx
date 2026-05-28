@@ -3,18 +3,51 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Image as ImageIcon, UploadCloud, X as XIcon, Save, Heart, Info, Trash2, Check } from 'lucide-react';
+import { Image as ImageIcon, UploadCloud, X as XIcon, Save, Heart, Info, Trash2, Check, GraduationCap, Cake, Baby, Smile } from 'lucide-react';
 
 const emptyStory = { title: '', story_date: '', description: '', image_url: '' };
 
 export default function Kisah({ stories, mediaAssets = [] }) {
-    const { flash } = usePage().props;
+    const { flash, auth } = usePage().props;
+    const invitationType = auth?.user?.invitation_type || 'wedding';
 
-    const initial = stories?.length > 0 ? stories : [
-        { ...emptyStory, title: 'Pertama Bertemu' },
-        { ...emptyStory, title: 'Mulai Menjalin Hubungan' },
-        { ...emptyStory, title: 'Lamaran' },
-    ];
+    const getDefaultStories = (type) => {
+        switch (type) {
+            case 'graduation':
+                return [
+                    { ...emptyStory, title: 'Masuk Kuliah / Sekolah' },
+                    { ...emptyStory, title: 'KKN / Magang / Organisasi' },
+                    { ...emptyStory, title: 'Sidang Akhir / Yudisium' },
+                ];
+            case 'birthday':
+                return [
+                    { ...emptyStory, title: 'Masa Kecil' },
+                    { ...emptyStory, title: 'Masa Sekolah' },
+                    { ...emptyStory, title: 'Pencapaian Berharga' },
+                ];
+            case 'aqiqah':
+            case 'circumcision':
+                return [
+                    { ...emptyStory, title: 'Kelahiran / Awal Kehidupan' },
+                    { ...emptyStory, title: 'Langkah Pertama / Tumbuh Kembang' },
+                    { ...emptyStory, title: 'Momen Penting Buah Hati' },
+                ];
+            case 'anniversary':
+                return [
+                    { ...emptyStory, title: 'Pertama Bertemu' },
+                    { ...emptyStory, title: 'Menikah' },
+                    { ...emptyStory, title: 'Perjalanan Bersama' },
+                ];
+            default:
+                return [
+                    { ...emptyStory, title: 'Pertama Bertemu' },
+                    { ...emptyStory, title: 'Mulai Menjalin Hubungan' },
+                    { ...emptyStory, title: 'Lamaran' },
+                ];
+        }
+    };
+
+    const initial = stories?.length > 0 ? stories : getDefaultStories(invitationType);
 
     const { data, setData, post, processing } = useForm({ stories: initial });
 
@@ -103,9 +136,136 @@ export default function Kisah({ stories, mediaAssets = [] }) {
         }
     };
 
+    // Dynamic config mapping based on event type
+    const config = {
+        wedding: {
+            title: 'Kisah Cinta',
+            bannerTitle: 'Kisah Cinta / Timeline Perjalanan',
+            bannerDesc: 'Ceritakan kembali momen-momen indah perjalanan cinta Anda berdua. Tambahkan foto pendukung dari album untuk setiap momen agar undangan terasa lebih romantis.',
+            titlePlaceholder: 'Contoh: Pertama Bertemu',
+            descPlaceholder: 'Ceritakan momen ini secara singkat dan romantis...',
+            fotoLabel: 'Foto Momen Kisah Cinta',
+            saveBtn: 'Simpan Kisah Cinta',
+            icon: Heart,
+            iconClass: 'text-pink-500 fill-pink-500',
+            bannerClass: 'bg-pink-50 border-pink-100',
+            bannerTitleClass: 'text-pink-800',
+            bannerDescClass: 'text-pink-600',
+            accentClass: 'focus:ring-pink-300 focus:border-pink-400',
+            badgeBg: 'bg-pink-500',
+            btnGradient: 'from-pink-500 to-rose-500',
+            pickerBorder: 'border-pink-200',
+            textClass: 'text-pink-500',
+            pickerText: 'bg-pink-50 hover:bg-pink-100/80 border-pink-100 text-pink-700'
+        },
+        graduation: {
+            title: 'Perjalanan Studi',
+            bannerTitle: 'Perjalanan Studi / Timeline Akademik',
+            bannerDesc: 'Ceritakan kembali momen-momen penting dan perjuangan studi Anda selama menempuh pendidikan. Tambahkan foto pendukung dari album untuk setiap momen agar kenangan terasa lebih berkesan.',
+            titlePlaceholder: 'Contoh: Masuk Kuliah',
+            descPlaceholder: 'Ceritakan kisah perjuangan atau kenangan indah pada momen ini secara singkat...',
+            fotoLabel: 'Foto Momen Perjalanan Studi',
+            saveBtn: 'Simpan Perjalanan Studi',
+            icon: GraduationCap,
+            iconClass: 'text-blue-500',
+            bannerClass: 'bg-blue-50 border-blue-100',
+            bannerTitleClass: 'text-blue-800',
+            bannerDescClass: 'text-blue-600',
+            accentClass: 'focus:ring-blue-300 focus:border-blue-400',
+            badgeBg: 'bg-blue-500',
+            btnGradient: 'from-blue-500 to-indigo-500',
+            pickerBorder: 'border-blue-200',
+            textClass: 'text-blue-500',
+            pickerText: 'bg-blue-50 hover:bg-blue-100/80 border-blue-100 text-blue-700'
+        },
+        birthday: {
+            title: 'Milestone & Kisah',
+            bannerTitle: 'Milestone & Kisah / Perjalanan Hidup',
+            bannerDesc: 'Ceritakan kembali momen-momen indah, tumbuh kembang, dan pencapaian berharga dalam kehidupan Anda. Tambahkan foto pendukung dari album untuk setiap momen penting tersebut.',
+            titlePlaceholder: 'Contoh: Masa Kecil',
+            descPlaceholder: 'Ceritakan kisah indah pada momen ini secara singkat...',
+            fotoLabel: 'Foto Momen Milestone',
+            saveBtn: 'Simpan Milestone & Kisah',
+            icon: Cake,
+            iconClass: 'text-amber-500',
+            bannerClass: 'bg-amber-50 border-amber-100',
+            bannerTitleClass: 'text-amber-800',
+            bannerDescClass: 'text-amber-600',
+            accentClass: 'focus:ring-amber-300 focus:border-amber-400',
+            badgeBg: 'bg-amber-500',
+            btnGradient: 'from-amber-500 to-orange-500',
+            pickerBorder: 'border-amber-200',
+            textClass: 'text-amber-500',
+            pickerText: 'bg-amber-50 hover:bg-amber-100/80 border-amber-100 text-amber-700'
+        },
+        aqiqah: {
+            title: 'Kisah Anak',
+            bannerTitle: 'Kisah Anak / Perkembangan Buah Hati',
+            bannerDesc: 'Ceritakan kembali perjalanan kehamilan, kelahiran, hingga momen aqiqah buah hati tercinta Anda. Tambahkan foto pendukung dari album untuk melengkapi kisah bahagianya.',
+            titlePlaceholder: 'Contoh: Kelahiran Buah Hati',
+            descPlaceholder: 'Ceritakan kisah indah pada momen ini secara singkat...',
+            fotoLabel: 'Foto Momen Kisah Anak',
+            saveBtn: 'Simpan Kisah Anak',
+            icon: Baby,
+            iconClass: 'text-teal-500',
+            bannerClass: 'bg-teal-50 border-teal-100',
+            bannerTitleClass: 'text-teal-800',
+            bannerDescClass: 'text-teal-600',
+            accentClass: 'focus:ring-teal-300 focus:border-teal-400',
+            badgeBg: 'bg-teal-500',
+            btnGradient: 'from-teal-500 to-emerald-500',
+            pickerBorder: 'border-teal-200',
+            textClass: 'text-teal-500',
+            pickerText: 'bg-teal-50 hover:bg-teal-100/80 border-teal-100 text-teal-700'
+        },
+        circumcision: {
+            title: 'Kisah Anak',
+            bannerTitle: 'Kisah Anak / Tumbuh Kembang',
+            bannerDesc: 'Ceritakan kembali tumbuh kembang anak Anda dari masa kecil hingga momen khitanan ini. Tambahkan foto pendukung dari album untuk melengkapi kisah bahagianya.',
+            titlePlaceholder: 'Contoh: Masa Kecil',
+            descPlaceholder: 'Ceritakan kisah indah pada momen ini secara singkat...',
+            fotoLabel: 'Foto Momen Kisah Anak',
+            saveBtn: 'Simpan Kisah Anak',
+            icon: Smile,
+            iconClass: 'text-emerald-500',
+            bannerClass: 'bg-emerald-50 border-emerald-100',
+            bannerTitleClass: 'text-emerald-800',
+            bannerDescClass: 'text-emerald-600',
+            accentClass: 'focus:ring-emerald-300 focus:border-emerald-400',
+            badgeBg: 'bg-emerald-500',
+            btnGradient: 'from-emerald-500 to-teal-500',
+            pickerBorder: 'border-emerald-200',
+            textClass: 'text-emerald-500',
+            pickerText: 'bg-emerald-50 hover:bg-emerald-100/80 border-emerald-100 text-emerald-700'
+        },
+        anniversary: {
+            title: 'Kisah Kebersamaan',
+            bannerTitle: 'Kisah Kebersamaan / Linimasa Pernikahan',
+            bannerDesc: 'Ceritakan kembali perjalanan kebersamaan Anda berdua dari awal bertemu hingga merayakan hari jadi pernikahan ini. Tambahkan foto pendukung dari album agar linimasa terasa lebih romantis.',
+            titlePlaceholder: 'Contoh: Pertama Bertemu',
+            descPlaceholder: 'Ceritakan momen ini secara singkat dan romantis...',
+            fotoLabel: 'Foto Momen Kisah Kebersamaan',
+            saveBtn: 'Simpan Kisah Kebersamaan',
+            icon: Heart,
+            iconClass: 'text-rose-500 fill-rose-500',
+            bannerClass: 'bg-rose-50 border-rose-100',
+            bannerTitleClass: 'text-rose-800',
+            bannerDescClass: 'text-rose-600',
+            accentClass: 'focus:ring-rose-300 focus:border-rose-400',
+            badgeBg: 'bg-rose-500',
+            btnGradient: 'from-rose-500 to-red-500',
+            pickerBorder: 'border-rose-200',
+            textClass: 'text-rose-500',
+            pickerText: 'bg-rose-50 hover:bg-rose-100/80 border-rose-100 text-rose-700'
+        }
+    };
+
+    const selectedConfig = config[invitationType] || config.wedding;
+    const BannerIcon = selectedConfig.icon;
+
     return (
-        <DashboardLayout title="Kisah Cinta">
-            <Head title="Kisah Cinta" />
+        <DashboardLayout title={selectedConfig.title}>
+            <Head title={selectedConfig.title} />
             <div className="max-w-3xl mx-auto space-y-6 px-2 sm:px-4">
                 {flash?.success && (
                     <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
@@ -116,14 +276,14 @@ export default function Kisah({ stories, mediaAssets = [] }) {
                     </div>
                 )}
 
-                <div className="bg-pink-50 border border-pink-100 rounded-3xl p-5 flex items-start gap-4 shadow-sm">
-                    <div className="bg-pink-100/60 p-2.5 rounded-2xl flex-shrink-0">
-                        <Heart size={20} className="text-pink-500 fill-pink-500" />
+                <div className={`${selectedConfig.bannerClass} border rounded-3xl p-5 flex items-start gap-4 shadow-sm`}>
+                    <div className={`${invitationType === 'wedding' || invitationType === 'anniversary' ? 'bg-pink-100/60' : 'bg-gray-100'} p-2.5 rounded-2xl flex-shrink-0`}>
+                        <BannerIcon size={20} className={selectedConfig.iconClass} />
                     </div>
                     <div>
-                        <div className="font-bold text-pink-800 text-sm">Kisah Cinta / Timeline Perjalanan</div>
-                        <div className="text-pink-600 text-xs mt-1">
-                            Ceritakan kembali momen-momen indah perjalanan cinta Anda berdua. Tambahkan foto pendukung dari album untuk setiap momen agar undangan terasa lebih romantis!
+                        <div className={`font-bold ${selectedConfig.bannerTitleClass} text-sm`}>{selectedConfig.bannerTitle}</div>
+                        <div className={`${selectedConfig.bannerDescClass} text-xs mt-1`}>
+                            {selectedConfig.bannerDesc}
                         </div>
                     </div>
                 </div>
@@ -132,7 +292,7 @@ export default function Kisah({ stories, mediaAssets = [] }) {
                     {data.stories.map((story, index) => (
                         <div key={index} className="bg-white rounded-3xl border border-gray-200 p-6 relative shadow-sm">
                             {/* Timeline dot */}
-                            <div className="absolute -left-3 top-8 w-6 h-6 bg-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md border border-white">
+                            <div className={`absolute -left-3 top-8 w-6 h-6 ${selectedConfig.badgeBg} rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md border border-white`}>
                                 {index + 1}
                             </div>
 
@@ -154,23 +314,23 @@ export default function Kisah({ stories, mediaAssets = [] }) {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Judul Momen *</label>
                                     <input type="text" value={story.title} onChange={(e) => updateStory(index, 'title', e.target.value)}
-                                        placeholder="Contoh: Pertama Bertemu"
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-pink-300 focus:border-pink-400" required />
+                                        placeholder={selectedConfig.titlePlaceholder}
+                                        className={`w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 ${selectedConfig.accentClass}`} required />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 mb-1.5">Tanggal</label>
                                     <input type="date" value={story.story_date?.split('T')[0] || ''}
                                         onChange={(e) => updateStory(index, 'story_date', e.target.value)}
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-pink-300 focus:border-pink-400" />
+                                        className={`w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 ${selectedConfig.accentClass}`} />
                                 </div>
                             </div>
 
                             <div className="mt-4">
                                 <label className="block text-xs font-bold text-gray-600 mb-1.5">Cerita</label>
                                 <textarea value={story.description || ''} onChange={(e) => updateStory(index, 'description', e.target.value)}
-                                    placeholder="Ceritakan momen ini secara singkat dan romantis..."
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-pink-300 focus:border-pink-400 resize-none shadow-inner bg-gray-50/20" rows={3} />
-                                </div>
+                                    placeholder={selectedConfig.descPlaceholder}
+                                    className={`w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 ${selectedConfig.accentClass} resize-none shadow-inner bg-gray-50/20`} rows={3} />
+                            </div>
 
                             {/* Premium Photo Selector for each Story Moment */}
                             <div className="mt-4 border-t border-gray-50 pt-4 flex flex-col md:flex-row items-start md:items-center gap-4">
@@ -186,13 +346,13 @@ export default function Kisah({ stories, mediaAssets = [] }) {
                                 </div>
                                 <div className="flex-1 space-y-1.5 w-full">
                                     <div className="text-xs font-bold text-gray-600 flex items-center gap-1.5">
-                                        <ImageIcon size={13} className="text-pink-500 flex-shrink-0" />
-                                        <span>Foto Momen Kisah Cinta</span>
+                                        <ImageIcon size={13} className={`${selectedConfig.textClass} flex-shrink-0`} />
+                                        <span>{selectedConfig.fotoLabel}</span>
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => openPhotoPicker(index)}
-                                        className="w-full md:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-pink-50 hover:bg-pink-100/80 border border-pink-100 rounded-lg text-[11px] font-bold text-pink-700 transition-all active:scale-[0.98]"
+                                        className={`w-full md:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 ${selectedConfig.pickerText} rounded-lg text-[11px] font-bold transition-all active:scale-[0.98] border`}
                                     >
                                         <ImageIcon size={12} />
                                         {story.image_url ? 'Ganti Foto Momen' : 'Pilih Foto dari Album'}
@@ -203,19 +363,19 @@ export default function Kisah({ stories, mediaAssets = [] }) {
                     ))}
 
                     <button type="button" onClick={addStory}
-                        className="w-full py-3.5 border-2 border-dashed border-pink-200 rounded-2xl text-pink-500 hover:border-pink-400 hover:text-pink-600 hover:bg-pink-50/20 transition-all text-xs font-bold">
+                        className={`w-full py-3.5 border-2 border-dashed ${selectedConfig.pickerBorder} rounded-2xl ${selectedConfig.textClass} hover:border-current transition-all text-xs font-bold`}>
                         + Tambah Momen Baru
                     </button>
 
                     <button type="submit" disabled={processing}
-                        className="w-full py-3.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl text-sm font-bold hover:shadow-lg hover:shadow-pink-500/10 transition-all active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-1.5"
+                        className={`w-full py-3.5 bg-gradient-to-r ${selectedConfig.btnGradient} text-white rounded-2xl text-sm font-bold hover:shadow-lg transition-all active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-1.5`}
                     >
                         {processing ? (
                             <span>Menyimpan...</span>
                         ) : (
                             <>
                                 <Save size={16} />
-                                <span>Simpan Kisah Cinta</span>
+                                <span>{selectedConfig.saveBtn}</span>
                             </>
                         )}
                     </button>
@@ -230,7 +390,7 @@ export default function Kisah({ stories, mediaAssets = [] }) {
                         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                             <div>
                                 <h3 className="font-bold text-gray-800 text-sm">Pilih Foto Momen</h3>
-                                <p className="text-[10px] text-gray-400">Hubungkan foto album ke momen "{data.stories[pickerStoryIndex].title || 'Kisah Cinta'}"</p>
+                                <p className="text-[10px] text-gray-400">Hubungkan foto album ke momen "{data.stories[pickerStoryIndex].title || selectedConfig.title}"</p>
                             </div>
                             <button 
                                 onClick={() => setPickerStoryIndex(null)}

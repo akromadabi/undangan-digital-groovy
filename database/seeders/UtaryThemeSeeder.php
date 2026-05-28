@@ -15,7 +15,7 @@ class UtaryThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'utary'],
             [
-                'name' => 'Utary',
+                'name' => 'Emerald Grace',
                 'thumbnail' => '/themes/utary/thumbnail.webp',
                 'preview_url' => '/themes/utary/preview.webp',
                 'category' => 'Premium',

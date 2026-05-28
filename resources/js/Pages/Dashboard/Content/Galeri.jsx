@@ -454,39 +454,6 @@ export default function Galeri({
                     </div>
                 </div>
 
-                {/* ═══ Gallery Mode Selector ═══ */}
-                <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h4 className="text-sm font-semibold text-gray-700">Model Tampilan Galeri Prewedding</h4>
-                            <p className="text-xs text-gray-400 mt-0.5">Pilih cara foto yang diaktifkan sebagai "Galeri" muncul di halaman undangan</p>
-                        </div>
-                        {savingMode && <span className="text-xs text-[#E5654B] animate-pulse">Menyimpan...</span>}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {modes.map((m) => (
-                            <button key={m.value} type="button" onClick={() => handleModeChange(m.value)}
-                                className={`relative p-4 rounded-2xl border-2 text-left transition-all ${mode === m.value ? 'border-[#E5654B] bg-orange-50/40 shadow-sm' : 'border-gray-100 bg-gray-50/50 hover:border-gray-200'}`}>
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${mode === m.value ? 'bg-[#E5654B] text-white shadow-md shadow-orange-500/20' : 'bg-gray-200 text-gray-500'}`}>
-                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d={m.icon} />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <div className={`text-xs font-bold ${mode === m.value ? 'text-[#b03a24]' : 'text-gray-700'}`}>{m.label}</div>
-                                        <div className="text-[10px] text-gray-400 mt-0.5">{m.desc}</div>
-                                    </div>
-                                </div>
-                                {mode === m.value && (
-                                    <div className="absolute top-2 right-2 w-4 h-4 bg-[#E5654B] rounded-full flex items-center justify-center">
-                                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                                    </div>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </div>
 
                 {/* Upload Area */}
                 <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">

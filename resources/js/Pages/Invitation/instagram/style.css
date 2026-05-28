@@ -1552,7 +1552,7 @@ body {
 }
 
 /* ═══════════════════════════════════════
-   HADIAH SECTION (Instagram Product Shop)
+   HADIAH SECTION (InstaVite Product Shop)
    ═══════════════════════════════════════ */
 .ig-gift-shop {
   background-color: var(--ig-bg);
@@ -1648,7 +1648,7 @@ body {
 }
 
 /* ═══════════════════════════════════════
-   RSVP & WISHES SECTION (Instagram Comments Drawer UI)
+   RSVP & WISHES SECTION (InstaVite Comments Drawer UI)
    ═══════════════════════════════════════ */
 .ig-rsvp-comments {
   background-color: var(--ig-bg);
@@ -1991,7 +1991,7 @@ body {
   transform: scale(1.1);
 }
 
-/* Active dot indicator (like Instagram) */
+/* Active dot indicator (like InstaVite) */
 .ig-nav-slot-dot {
   width: 5px;
   height: 5px;
@@ -2124,7 +2124,7 @@ body {
 }
 
 /* ═══════════════════════════════════════
-   INSTAGRAM LOGIN COVER STYLES
+   INSTAVITE LOGIN COVER STYLES
    ═══════════════════════════════════════ */
 .ig-login-lang-select {
   margin: 10px auto 20px;
@@ -2311,7 +2311,7 @@ body {
   background-color: var(--ig-bg);
 }
 
-/* Instagram Profile Story Modal */
+/* InstaVite Profile Story Modal */
 .ig-story-modal-overlay {
   position: fixed;
   top: 0;

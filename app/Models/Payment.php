@@ -9,6 +9,7 @@ class Payment extends Model
     protected $fillable = [
         'user_id',
         'plan_id',
+        'invitation_id',
         'amount',
         'payment_method',
         'payment_gateway',
@@ -36,6 +37,11 @@ class Payment extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function invitation()
+    {
+        return $this->belongsTo(Invitation::class);
     }
 
     public function plan()

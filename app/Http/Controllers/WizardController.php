@@ -213,14 +213,16 @@ class WizardController extends Controller
         $themes = Theme::active()
             ->where(function ($query) use ($invitation) {
                 if ($invitation && $invitation->type) {
-                    $query->whereJsonContains('type', $invitation->type)
-                          ->orWhereJsonContains('type', 'general')
-                          ->orWhere('type', $invitation->type)
-                          ->orWhere('type', 'general');
+                    $query->where('type', $invitation->type)
+                          ->orWhere('type', 'general')
+                          ->orWhere('type', 'like', '%"' . $invitation->type . '"%')
+                          ->orWhere('type', 'like', '%"general"%');
                 }
             })
             ->orderBy('sort_order')
             ->get();
+
+        $themes = Theme::applyResellerCustomizations($themes, $user->reseller_id);
 
         return Inertia::render('Wizard/Template', [
             'step' => 4,

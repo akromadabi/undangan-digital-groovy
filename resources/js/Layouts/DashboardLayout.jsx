@@ -7,6 +7,7 @@ const menuItems = [
         group: 'OVERVIEW',
         items: [
             { label: 'Dashboard', href: '/dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', feature: null },
+            { label: 'Undangan Saya', href: '/invitations', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', feature: null },
             { label: 'Kartu Ucapan', href: '/greeting-card', icon: 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75', feature: null },
             { label: 'Panduan & FAQ', href: '/tutorial', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', feature: null },
             { label: 'Upgrade', href: '/pricing', icon: 'M13 10V3L4 14h7v7l9-11h-7z', feature: null },
@@ -45,6 +46,7 @@ const bottomNavItems = [
 
 // Slide-up menu items (inside center Menu button sheet)
 const menuSheetItems = [
+    { label: 'Undangan Saya', href: '/invitations', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', color: 'bg-orange-50 text-[#E5654B]' },
     { label: 'Sambutan', href: '/content/teks-sambutan', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', color: 'bg-orange-50 text-[#E5654B]' },
     { label: 'Mempelai', href: '/content/mempelai', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v-1', color: 'bg-orange-50 text-[#E5654B]' },
     { label: 'Acara', href: '/content/acara', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', color: 'bg-orange-50 text-[#E5654B]' },
@@ -71,6 +73,36 @@ const SvgIcon = ({ d, className = '' }) => (
 
 export default function DashboardLayout({ children, title }) {
     const { auth, features, subscription, appName, brandLogo } = usePage().props;
+    const invitationType = auth?.user?.invitation_type || 'wedding';
+
+    const getDynamicLabel = (label) => {
+        if (invitationType === 'wedding') return label;
+
+        if (label === 'Mempelai') {
+            switch (invitationType) {
+                case 'graduation': return 'Profil Wisudawan';
+                case 'birthday': return 'Profil Utama';
+                case 'aqiqah': return 'Profil Anak';
+                case 'circumcision': return 'Profil Anak';
+                case 'anniversary': return 'Profil Pasangan';
+                default: return 'Profil Utama';
+            }
+        }
+
+        if (label === 'Kisah Cinta' || label === 'Kisah') {
+            switch (invitationType) {
+                case 'graduation': return 'Perjalanan Studi';
+                case 'birthday': return 'Milestone & Kisah';
+                case 'aqiqah': return 'Kisah Anak';
+                case 'circumcision': return 'Kisah Anak';
+                case 'anniversary': return 'Kisah Kebersamaan';
+                default: return 'Cerita & Kisah';
+            }
+        }
+
+        return label;
+    };
+
     const [openGroups, setOpenGroups] = useState({ 'OVERVIEW': true, 'KONTEN UNDANGAN': true, 'PENGATURAN': true });
     const [avatarOpen, setAvatarOpen] = useState(false);
     const [menuSheetOpen, setMenuSheetOpen] = useState(false);
@@ -179,10 +211,10 @@ export default function DashboardLayout({ children, title }) {
                                                         ? 'text-[#ccc] cursor-not-allowed hover:bg-amber-50/50'
                                                         : 'text-[#555] hover:bg-[#f5f3f0] hover:text-[#1a1a1a]'
                                                     }`}
-                                                onClick={locked ? (e) => handleLockedClick(e, item.label) : undefined}
+                                                onClick={locked ? (e) => handleLockedClick(e, getDynamicLabel(item.label)) : undefined}
                                             >
                                                 <SvgIcon d={item.icon} className={active ? 'text-white' : locked ? 'text-[#ddd]' : 'text-[#999]'} />
-                                                <span className="flex-1">{item.label}</span>
+                                                <span className="flex-1">{getDynamicLabel(item.label)}</span>
                                                 {locked && (
                                                     <svg className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
@@ -424,7 +456,7 @@ export default function DashboardLayout({ children, title }) {
                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.color}`}>
                                         <SvgIcon d={item.icon} className="w-5 h-5" />
                                     </div>
-                                    <span className="text-[10px] font-medium text-gray-600 text-center leading-tight">{item.label}</span>
+                                    <span className="text-[10px] font-medium text-gray-600 text-center leading-tight">{getDynamicLabel(item.label)}</span>
                                 </Link>
                             ))}
                         </div>

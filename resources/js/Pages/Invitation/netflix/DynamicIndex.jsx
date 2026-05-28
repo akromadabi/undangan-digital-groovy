@@ -25,6 +25,118 @@ function safeArr(val) {
     if (val && typeof val === 'object') return Object.values(val);
     return [];
 }
+
+function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
+    const t = type || 'wedding';
+    const isEn = String(locale).toLowerCase() === 'en';
+    const bgs = safeArr(brideGrooms);
+    const host = bgs[0] || {};
+    
+    let mainName = '';
+    let initials = '';
+    let isSingleHost = false;
+    
+    if (['wedding', 'anniversary'].includes(t)) {
+        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+        mainName = groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom';
+        initials = `${groom.nickname?.charAt(0) || 'B'}${bride.nickname?.charAt(0) || 'R'}`;
+        isSingleHost = false;
+    } else {
+        mainName = host.nickname || host.full_name || 'Host';
+        initials = mainName.charAt(0) || 'H';
+        isSingleHost = true;
+    }
+
+    let labels = {
+        albumLabel: isEn ? 'MEMORIES ALBUM' : 'ALBUM KENANGAN',
+        albumSubtitle: isEn ? 'Special Playlist' : 'Daftar Putar Spesial',
+        eventHeader: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
+        introBadge: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
+        introTitle: invitation?.opening_title || (isEn ? 'Special Celebration' : 'Perayaan Spesial'),
+        introText: invitation?.opening_text || '',
+        profileHeader: isEn ? 'Featured Profile' : 'Profil Utama',
+        storyHeader: isEn ? 'Our Journey' : 'Kisah Perjalanan',
+        storySubtitle: isEn ? 'Journey Playlist' : 'Daftar Putar Perjalanan',
+        streamDesc: isEn ? 'Join our event virtually via the streaming links below' : 'Saksikan momen bahagia kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.'
+    };
+
+    if (t === 'wedding') {
+        labels.albumLabel = isEn ? 'PLAYING FROM WEDDING ALBUM' : 'MEMUTAR DARI ALBUM PERNIKAHAN';
+        labels.albumSubtitle = isEn ? 'The Wedding Album' : 'Album Pernikahan';
+        labels.eventHeader = isEn ? 'Live Events / Tour' : 'Jadwal Acara / Tur';
+        labels.introBadge = isEn ? 'THE WEDDING OF' : 'PERNIKAHAN';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Wedding Album' : 'Album Pernikahan');
+        labels.introText = invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami meresmikan ikatan pernikahan kami.';
+        labels.profileHeader = isEn ? 'Featured Artists' : 'Artis Utama';
+        labels.storyHeader = isEn ? 'Love Story Playlist' : 'Daftar Putar Kisah Cinta';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our hearts' : 'Lirik disinkronkan dengan hati kami';
+        labels.streamDesc = isEn ? 'Please join our wedding virtually via the streaming platform links below' : 'Saksikan momen bahagia pernikahan kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'anniversary') {
+        labels.albumLabel = isEn ? 'PLAYING FROM ANNIVERSARY ALBUM' : 'MEMUTAR DARI ALBUM ANNIVERSARY';
+        labels.albumSubtitle = isEn ? 'The Anniversary Album' : 'Album Anniversary';
+        labels.eventHeader = isEn ? 'Anniversary Tour' : 'Jadwal Perayaan / Tur';
+        labels.introBadge = isEn ? 'ANNIVERSARY OF' : 'ANNIVERSARY';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Anniversary Album' : 'Album Anniversary');
+        labels.introText = invitation?.opening_text || 'Perjalanan kasih kami yang penuh berkat dan kebahagiaan.';
+        labels.profileHeader = isEn ? 'Featured Couple' : 'Pasangan Utama';
+        labels.storyHeader = isEn ? 'Love Journey Playlist' : 'Daftar Putar Perjalanan Kasih';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our years' : 'Lirik disinkronkan dengan tahun-tahun kami';
+        labels.streamDesc = isEn ? 'Please join our celebration virtually via the streaming platform links below' : 'Saksikan momen bahagia anniversary kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'graduation') {
+        labels.albumLabel = isEn ? 'PLAYING FROM GRADUATION ALBUM' : 'MEMUTAR DARI ALBUM WISUDA';
+        labels.albumSubtitle = isEn ? 'The Graduation Album' : 'Album Wisuda';
+        labels.eventHeader = isEn ? 'Graduation Tour' : 'Jadwal Acara / Wisuda';
+        labels.introBadge = isEn ? 'THE GRADUATION OF' : 'WISUDA';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Graduation Album' : 'Album Wisuda');
+        labels.introText = invitation?.opening_text || 'Perayaan kelulusan dan awal dari perjalanan studi baru.';
+        labels.profileHeader = isEn ? 'Featured Graduate' : 'Profil Wisudawan';
+        labels.storyHeader = isEn ? 'Study Journey Playlist' : 'Daftar Putar Perjalanan Studi';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our study days' : 'Lirik disinkronkan dengan perjuangan studi kami';
+        labels.streamDesc = isEn ? 'Please join our graduation virtually via the streaming platform links below' : 'Saksikan momen syukuran kelulusan kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'birthday') {
+        labels.albumLabel = isEn ? 'PLAYING FROM BIRTHDAY ALBUM' : 'MEMUTAR DARI ALBUM ULANG TAHUN';
+        labels.albumSubtitle = isEn ? 'The Birthday Album' : 'Album Ulang Tahun';
+        labels.eventHeader = isEn ? 'Birthday Party Tour' : 'Jadwal Perayaan / Tur';
+        labels.introBadge = isEn ? 'THE BIRTHDAY OF' : 'ULANG TAHUN';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Birthday Album' : 'Album Ulang Tahun');
+        labels.introText = invitation?.opening_text || 'Syukuran pertambahan usia dan langkah baru penuh berkah.';
+        labels.profileHeader = isEn ? 'Featured Celebrant' : 'Profil Ulang Tahun';
+        labels.storyHeader = isEn ? 'Life Milestones Playlist' : 'Daftar Putar Perjalanan Hidup';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our milestones' : 'Lirik disinkronkan dengan perjalanan usia kami';
+        labels.streamDesc = isEn ? 'Please join our birthday party virtually via the streaming platform links below' : 'Saksikan momen pertambahan usia kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'aqiqah') {
+        labels.albumLabel = isEn ? 'PLAYING FROM AQIQAH ALBUM' : 'MEMUTAR DARI ALBUM AQIQAH';
+        labels.albumSubtitle = isEn ? 'The Aqiqah Album' : 'Album Aqiqah';
+        labels.eventHeader = isEn ? 'Aqiqah Celebration Tour' : 'Jadwal Acara / Aqiqah';
+        labels.introBadge = isEn ? 'THE AQIQAH OF' : 'AQIQAH';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Aqiqah Album' : 'Album Aqiqah');
+        labels.introText = invitation?.opening_text || 'Syukuran kehadiran buah hati tercinta yang menjadi penyejuk hati kami.';
+        labels.profileHeader = isEn ? 'Featured Child' : 'Profil Anak';
+        labels.storyHeader = isEn ? 'Baby Growth Playlist' : 'Daftar Putar Tumbuh Kembang';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our baby steps' : 'Lirik disinkronkan dengan tumbuh kembang buah hati kami';
+        labels.streamDesc = isEn ? 'Please join our aqiqah virtually via the streaming platform links below' : 'Saksikan momen aqiqah putra/putri kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'circumcision') {
+        labels.albumLabel = isEn ? 'PLAYING FROM CIRCUMCISION ALBUM' : 'MEMUTAR DARI ALBUM KHITANAN';
+        labels.albumSubtitle = isEn ? 'The Circumcision Album' : 'Album Khitanan';
+        labels.eventHeader = isEn ? 'Circumcision Tour' : 'Jadwal Syukuran / Tur';
+        labels.introBadge = isEn ? 'THE CIRCUMCISION OF' : 'KHITANAN';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Circumcision Album' : 'Album Khitanan');
+        labels.introText = invitation?.opening_text || 'Syukuran khitanan putra kami sebagai bagian dari syariat dan kesehatan.';
+        labels.profileHeader = isEn ? 'Featured Child' : 'Profil Anak';
+        labels.storyHeader = isEn ? 'Growth Journey Playlist' : 'Daftar Putar Tumbuh Kembang';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our boy steps' : 'Lirik disinkronkan dengan kisah tumbuh kembang putra kami';
+        labels.streamDesc = isEn ? 'Please join our circumcision celebration virtually via the streaming platform links below' : 'Saksikan momen syukuran khitanan putra kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    }
+
+    return {
+        mainName,
+        initials,
+        isSingleHost,
+        labels
+    };
+}
+
 function pad2(n) { return String(n).padStart(2, '0'); }
 function formatDate(d) {
     if (!d) return '';
@@ -118,15 +230,16 @@ function Reveal({ children, className = '', delay = 0 }) {
    COVER SECTION  (Who's Watching?)
    ═══════════════════════════════════════ */
 function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, isSingleHost, labels } = themeConfig;
+
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => b.gender === 'pria') || bgs[0];
     const bride = bgs.find(b => b.gender === 'wanita') || bgs[1];
     const guestName = guest?.name
         || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null);
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'The Wedding');
+    const coupleName = mainName;
     const heroImg = getStorageUrl(invitation?.cover_image, null);
 
     return (
@@ -148,20 +261,32 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 
                 {/* Who's Watching Profiles */}
                 <div className="nf-profiles">
-                    <div className="nf-profile nf-profile--blue" onClick={onOpen} title={groom?.nickname || 'Pengantin Pria'}>
-                        <div className="nf-profile__face">
-                            <img src={ASSETS.eyes} alt="" className="nf-profile__eyes" />
-                            <img src={ASSETS.mouth} alt="" className="nf-profile__mouth nf-mouth--left" />
+                    {isSingleHost ? (
+                        <div className="nf-profile nf-profile--blue" onClick={onOpen} title={mainName}>
+                            <div className="nf-profile__face">
+                               <img src={ASSETS.eyes} alt="" className="nf-profile__eyes" />
+                               <img src={ASSETS.mouth} alt="" className="nf-profile__mouth nf-mouth--left" />
+                            </div>
+                            <p className="nf-profile__name">{mainName}</p>
                         </div>
-                        <p className="nf-profile__name">{groom?.nickname || 'Pria'}</p>
-                    </div>
-                    <div className="nf-profile nf-profile--pink" onClick={onOpen} title={bride?.nickname || 'Pengantin Wanita'}>
-                        <div className="nf-profile__face">
-                            <img src={ASSETS.eyes} alt="" className="nf-profile__eyes" />
-                            <img src={ASSETS.mouth} alt="" className="nf-profile__mouth nf-mouth--right" />
-                        </div>
-                        <p className="nf-profile__name">{bride?.nickname || 'Wanita'}</p>
-                    </div>
+                    ) : (
+                        <>
+                            <div className="nf-profile nf-profile--blue" onClick={onOpen} title={groom?.nickname || 'Pengantin Pria'}>
+                                <div className="nf-profile__face">
+                                    <img src={ASSETS.eyes} alt="" className="nf-profile__eyes" />
+                                    <img src={ASSETS.mouth} alt="" className="nf-profile__mouth nf-mouth--left" />
+                                </div>
+                                <p className="nf-profile__name">{groom?.nickname || 'Pria'}</p>
+                            </div>
+                            <div className="nf-profile nf-profile--pink" onClick={onOpen} title={bride?.nickname || 'Pengantin Wanita'}>
+                                <div className="nf-profile__face">
+                                    <img src={ASSETS.eyes} alt="" className="nf-profile__eyes" />
+                                    <img src={ASSETS.mouth} alt="" className="nf-profile__mouth nf-mouth--right" />
+                                </div>
+                                <p className="nf-profile__name">{bride?.nickname || 'Wanita'}</p>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Guest Info */}
@@ -184,13 +309,14 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
    OPENING SECTION
    ═══════════════════════════════════════ */
 function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories, galleries, enableRsvp, enableWishes, bankAccounts, id }) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, initials, labels } = themeConfig;
+
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => b.gender === 'pria') || bgs[0];
     const bride = bgs.find(b => b.gender === 'wanita') || bgs[1];
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'The Wedding');
+    const coupleName = mainName;
     const heroImg = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null);
 
     return (
@@ -216,9 +342,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                     <p className="nf-opening__ayat-src">&mdash; {invitation.opening_ayat_source}</p>
                 )}
                 <p className="nf-opening__text">
-                    {invitation?.opening_text || (t('invitation.save_the_date') === 'Save The Date'
-                        ? 'By the grace of God Almighty, we are pleased to share the happy news of our wedding with you.'
-                        : 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami menyampaikan kabar bahagia kepada Bapak/Ibu/Saudara/i mengenai hari pernikahan kami.')}
+                    {invitation?.opening_text || labels.introText}
                 </p>
 
                 {/* Nav buttons */}
@@ -309,6 +433,8 @@ function CountdownTimer({ targetDate }) {
    ═══════════════════════════════════════ */
 function BrideGroomSection({ invitation, brideGrooms, events, id }) {
     const { t, locale } = useTranslation();
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, isSingleHost, labels } = themeConfig;
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => b.gender === 'pria' || b.gender === 'male' || String(b.gender).toLowerCase() === 'pria' || String(b.gender).toLowerCase() === 'male') || bgs[0] || {};
     const bride = bgs.find(b => b.gender === 'wanita' || b.gender === 'female' || String(b.gender).toLowerCase() === 'wanita' || String(b.gender).toLowerCase() === 'female') || bgs[1] || bgs[0] || {};
@@ -392,18 +518,21 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
         );
     }
 
+    const firstWordHeader = labels.profileHeader.split(' ')[0];
+    const restWordHeader = labels.profileHeader.split(' ').slice(1).join(' ');
+
     return (
         <section id={id || "bride_groom"} className="nf-couple">
             <Reveal delay={100}>
                 <h3 className="nf-section-title">
-                    {t('invitation.save_the_date') === 'Save The Date' ? <><span className="nf-badge">Groom</span> &amp; Bride</> : <><span className="nf-badge">Kedua</span> Mempelai</>}
+                    <><span className="nf-badge">{firstWordHeader}</span> {restWordHeader}</>
                 </h3>
             </Reveal>
 
-            <div className="nf-couple__row">
-                <Card person={groom} side="left" />
-                <div className="nf-couple__amp">&amp;</div>
-                <Card person={bride} side="right" />
+            <div className="nf-couple__row" style={isSingleHost ? { justifyContent: 'center' } : undefined}>
+                <Card person={groom} side={isSingleHost ? 'center' : 'left'} />
+                {!isSingleHost && <div className="nf-couple__amp">&amp;</div>}
+                {!isSingleHost && <Card person={bride} side="right" />}
             </div>
 
             {/* Save The Date */}
@@ -437,7 +566,9 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
    EVENT SECTION
    ═══════════════════════════════════════ */
 function EventSection({ events, invitation, galleries }) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, [], invitation);
+    const { labels } = themeConfig;
     const safeEvents = safeArr(events);
     if (safeEvents.length === 0) return null;
 
@@ -453,11 +584,14 @@ function EventSection({ events, invitation, galleries }) {
         return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((evt.event_name || '') + ' - ' + names)}&dates=${ds}T${st}/${ds}T${st}&location=${encodeURIComponent([evt.venue_name, evt.venue_address].filter(Boolean).join(', '))}&sf=true&output=xml`;
     };
 
+    const firstWordHeader = labels.eventHeader.split(' ')[0];
+    const restWordHeader = labels.eventHeader.split(' ').slice(1).join(' ');
+
     return (
         <section id="event" className="nf-events">
             <Reveal>
                 <h3 className="nf-section-title">
-                    {t('invitation.save_the_date') === 'Save The Date' ? <><span className="nf-badge">Wedding</span> Day</> : <><span className="nf-badge">Hari</span> Pernikahan</>}
+                    <><span className="nf-badge">{firstWordHeader}</span> {restWordHeader}</>
                 </h3>
                 <p className="nf-section-subtitle">{t('invitation.save_the_date') === 'Save The Date' ? 'To be held on:' : 'Yang akan dilaksanakan pada:'}</p>
             </Reveal>
@@ -592,16 +726,21 @@ function TimelineCard({ story, index }) {
 }
 
 /* ── LOVE STORY SECTION ── */
-function LoveStorySection({ loveStories, id }) {
-    const { t } = useTranslation();
+function LoveStorySection({ loveStories, id, invitation }) {
+    const { t, locale } = useTranslation();
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, [], invitation);
+    const { labels } = themeConfig;
     const stories = safeArr(loveStories);
     if (stories.length === 0) return null;
+
+    const firstWordHeader = labels.storyHeader.split(' ')[0];
+    const restWordHeader = labels.storyHeader.split(' ').slice(1).join(' ');
 
     return (
         <section id={id || "love_story"} className="nf-lovestory">
             <Reveal>
                 <h3 className="nf-section-title">
-                    {t('invitation.save_the_date') === 'Save The Date' ? <><span className="nf-badge">Our Love</span> Story</> : <><span className="nf-badge">Kisah</span> Cinta Kami</>}
+                    <><span className="nf-badge">{firstWordHeader}</span> {restWordHeader}</>
                 </h3>
             </Reveal>
 
@@ -1040,7 +1179,7 @@ function MusicButton({ isPlaying, onToggle }) {
 /* ═══════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════ */
-function NetflixThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
+function WedflixThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
     const { t } = useTranslation(invitation?.language || 'id');
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -1252,9 +1391,14 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
     // Set document title
     useEffect(() => {
         const bgs = safeArr(brideGrooms);
-        const names = bgs.map(b => b.nickname || b.full_name).filter(Boolean).join(' & ');
-        document.title = (names ? `${names} - ` : '') + 'Undangan Pernikahan';
-    }, [brideGrooms]);
+        const themeConfig = getThemeLabels(invitation?.type || 'wedding', activeLanguage, bgs, invitation);
+        if (themeConfig.isSingleHost) {
+            document.title = `${themeConfig.mainName} - ${themeConfig.labels.introBadge}`;
+        } else {
+            const names = bgs.map(b => b.nickname || b.full_name).filter(Boolean).join(' & ');
+            document.title = (names ? `${names} - ` : '') + 'Undangan Pernikahan';
+        }
+    }, [brideGrooms, invitation, activeLanguage]);
 
     const handleOpen = useCallback(() => {
         setIsOpened(true);
@@ -1622,10 +1766,10 @@ function NetflixThemeContent({ invitation, sections, brideGrooms, events, galler
 /* ═══════════════════════════════════════
    EXPORT DEFAULT
    ═══════════════════════════════════════ */
-export default function NetflixTheme(props) {
+export default function WedflixTheme(props) {
     return (
         <ErrorBoundary>
-            <NetflixThemeContent {...props} />
+            <WedflixThemeContent {...props} />
         </ErrorBoundary>
     );
 }

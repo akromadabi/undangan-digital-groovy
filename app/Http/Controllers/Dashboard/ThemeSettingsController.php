@@ -71,14 +71,15 @@ class ThemeSettingsController extends Controller
         $themes = Theme::active()
             ->where(function ($query) use ($invitation) {
                 if ($invitation && $invitation->type) {
-                    $query->whereJsonContains('type', $invitation->type)
-                          ->orWhereJsonContains('type', 'general')
-                          ->orWhere('type', $invitation->type)
-                          ->orWhere('type', 'general');
+                    $query->where('type', $invitation->type)
+                          ->orWhere('type', 'general')
+                          ->orWhere('type', 'like', '%"' . $invitation->type . '"%')
+                          ->orWhere('type', 'like', '%"general"%');
                 }
             })
             ->orderBy('sort_order')
             ->get();
+        $themes = Theme::applyResellerCustomizations($themes, auth()->user()->reseller_id);
         $centralHost = parse_url(config('app.url'), PHP_URL_HOST) ?: 'undangan.com';
 
         return Inertia::render('Dashboard/ThemeSettings', [

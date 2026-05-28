@@ -62,20 +62,24 @@ class ContentController extends Controller
         return back()->with('success', 'Opening berhasil disimpan.');
     }
 
-    // Mempelai
     public function mempelai(Request $request)
     {
         $invitation = $this->getUserInvitation($request);
         return Inertia::render('Dashboard/Content/Mempelai', [
             'brideGrooms' => $invitation?->brideGrooms ?? [],
             'mediaAssets' => $invitation?->mediaAssets()->latest()->get() ?? [],
+            'eventType' => $invitation ? $invitation->type : 'wedding',
         ]);
     }
 
     public function saveMempelai(Request $request)
     {
+        $invitation = $this->getUserInvitation($request);
+        $type = $invitation->type ?? 'wedding';
+        $size = in_array($type, ['wedding', 'anniversary']) ? 2 : 1;
+
         $request->validate([
-            'bride_grooms' => 'required|array|size:2',
+            'bride_grooms' => "required|array|size:{$size}",
             'bride_grooms.*.full_name' => 'required|string|max:150',
             'bride_grooms.*.nickname' => 'nullable|string|max:50',
             'bride_grooms.*.father_name' => 'nullable|string|max:150',
@@ -90,7 +94,8 @@ class ContentController extends Controller
             'bride_grooms.*.child_order' => 'nullable|string|max:50',
         ]);
 
-        $invitation = $this->getUserInvitation($request);
+        // Delete extra records
+        $invitation->brideGrooms()->where('order_number', '>', $size)->delete();
 
         foreach ($request->bride_grooms as $index => $data) {
             BrideGroom::updateOrCreate(
@@ -99,7 +104,7 @@ class ContentController extends Controller
             );
         }
 
-        return back()->with('success', 'Data mempelai berhasil disimpan.');
+        return back()->with('success', 'Data subjek berhasil disimpan.');
     }
 
     // Acara

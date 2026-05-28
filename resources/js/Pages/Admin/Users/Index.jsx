@@ -57,13 +57,36 @@ export default function Index({ users, filters }) {
                                         )}
                                         <td className="px-3 sm:px-5 py-3 text-[#777] hidden sm:table-cell">{user.email}</td>
                                         <td className="px-3 sm:px-5 py-3 text-center">
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${user.active_subscription?.plan?.slug === 'platinum' ? 'bg-violet-50 text-violet-600' :
-                                                    user.active_subscription?.plan?.slug === 'gold' ? 'bg-amber-50 text-amber-600' :
-                                                        user.active_subscription?.plan?.slug === 'silver' ? 'bg-slate-100 text-slate-600' :
-                                                            'bg-[#f0ede8] text-[#999]'
-                                                }`}>
-                                                {user.active_subscription?.plan?.name || 'Free'}
-                                            </span>
+                                            {(() => {
+                                                const activeSubs = user.invitations?.map(inv => inv.active_subscription || { plan: { slug: 'free', name: 'Free' } }) || [];
+                                                if (activeSubs.length === 0) {
+                                                    return (
+                                                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f0ede8] text-[#999]">
+                                                            Free
+                                                        </span>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <div className="flex flex-wrap items-center justify-center gap-1 max-w-[150px] mx-auto">
+                                                        {activeSubs.map((sub, si) => {
+                                                            const plan = sub.plan;
+                                                            const slug = plan?.slug || 'free';
+                                                            const name = plan?.name || 'Free';
+                                                            
+                                                            const bgClass = slug === 'platinum' ? 'bg-violet-50 text-violet-600 border border-violet-100' :
+                                                                            slug === 'gold' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                                                                            slug === 'silver' ? 'bg-slate-50 text-slate-600 border border-slate-100' :
+                                                                            'bg-[#f0ede8] text-[#999]';
+                                                            return (
+                                                                <span key={si} className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${bgClass}`} title={name}>
+                                                                    {name}
+                                                                </span>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="px-3 sm:px-5 py-3 text-center text-xs text-[#999]">
                                             {new Date(user.created_at).toLocaleDateString('id-ID')}

@@ -29,22 +29,22 @@ class GreetingCard extends Model
 
     // Type labels
     public static array $types = [
-        'anniversary' => 'Aniversari 💑',
-        'birthday'    => 'Ulang Tahun 🎂',
-        'graduation'  => 'Wisuda 🎓',
-        'wedding'     => 'Pernikahan 💍',
+        'anniversary' => 'Aniversari',
+        'birthday'    => 'Ulang Tahun',
+        'graduation'  => 'Wisuda',
+        'wedding'     => 'Pernikahan',
     ];
 
     // Template labels
     public static array $templates = [
-        'stillwithyou' => 'Still With You 💗',
-        'giftforanita'  => 'Love Code Storybook 📖',
-        'oceanbreeze'   => 'Ocean Breeze 🌊',
-        'cosmicdrift'   => 'Cosmic Drift 🌌',
-        'retroarcade'   => 'Retro Arcade 👾',
-        'cyberpunk'     => 'Cyberpunk Decryptor 🤖',
-        'bioluminescent' => 'Bioluminescent Deep Dive 🌊',
-        'mysticforest'  => 'Mystic Forest & Lantern Wishes 🌲',
+        'stillwithyou' => 'Still With You',
+        'giftforanita'  => 'Love Code Storybook',
+        'oceanbreeze'   => 'Ocean Breeze',
+        'cosmicdrift'   => 'Cosmic Drift',
+        'retroarcade'   => 'Retro Arcade',
+        'cyberpunk'     => 'Cyberpunk Decryptor',
+        'bioluminescent' => 'Bioluminescent Deep Dive',
+        'mysticforest'  => 'Mystic Forest & Lantern Wishes',
     ];
 
     public function user()

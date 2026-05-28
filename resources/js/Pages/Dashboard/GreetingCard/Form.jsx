@@ -16,12 +16,12 @@ const Icon = ({ d, className = 'w-5 h-5', strokeWidth = 1.8 }) => (
 function StillWithYouPreview({ data }) {
     const { recipientName, senderName, type, messages, photoUrl } = data;
     const typeMap = {
-        anniversary: 'Happy Anniversary 💑',
-        birthday:    'Happy Birthday 🎂',
-        graduation:  'Selamat Wisuda 🎓',
-        wedding:     'Selamat Menikah 💍',
+        anniversary: 'Happy Anniversary',
+        birthday:    'Happy Birthday',
+        graduation:  'Selamat Wisuda',
+        wedding:     'Selamat Menikah',
     };
-    const greeting = typeMap[type] || 'Selamat 💫';
+    const greeting = typeMap[type] || 'Selamat';
 
     return (
         <div className="relative w-full h-full overflow-hidden rounded-xl" style={{
@@ -118,10 +118,10 @@ function GiftForAnitaPreview({ data }) {
     const [flipped, setFlipped] = useState(false);
 
     const typeMap = {
-        anniversary: '🎊 Aniversari',
-        birthday:    '🎂 Ulang Tahun',
-        graduation:  '🎓 Wisuda',
-        wedding:     '💍 Pernikahan',
+        anniversary: 'Aniversari',
+        birthday:    'Ulang Tahun',
+        graduation:  'Wisuda',
+        wedding:     'Pernikahan',
     };
 
     return (
@@ -225,12 +225,12 @@ function GiftForAnitaPreview({ data }) {
 function CyberpunkPreview({ data }) {
     const { recipientName, senderName, type } = data;
     const typeMap = {
-        anniversary: 'DECRYPTION COMPLETE: ANNIVERSARY 💑',
-        birthday:    'DECRYPTION COMPLETE: HAPPY BIRTHDAY 🎂',
-        graduation:  'SECURE LINK: GRADUATION SYSTEM 🎓',
-        wedding:     'SECURE LINK: WEDDING NODE 💍',
+        anniversary: 'DECRYPTION COMPLETE: ANNIVERSARY',
+        birthday:    'DECRYPTION COMPLETE: HAPPY BIRTHDAY',
+        graduation:  'SECURE LINK: GRADUATION SYSTEM',
+        wedding:     'SECURE LINK: WEDDING NODE',
     };
-    const connectionStatus = typeMap[type] || 'ENCRYPTED TRANSMISSION 🤖';
+    const connectionStatus = typeMap[type] || 'ENCRYPTED TRANSMISSION';
 
     return (
         <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center border border-cyan-500/20"
@@ -308,12 +308,12 @@ function CyberpunkPreview({ data }) {
 function BioluminescentPreview({ data }) {
     const { recipientName, senderName, type } = data;
     const typeMap = {
-        anniversary: 'DEEP DIVE: CELEBRATION 💑',
-        birthday:    'DEEP DIVE: BIRTHDAY WISHES 🎂',
-        graduation:  'ARCHIVE FOUND: GRADUATION 🎓',
-        wedding:     'ARCHIVE FOUND: WEDDING DAY 💍',
+        anniversary: 'DEEP DIVE: CELEBRATION',
+        birthday:    'DEEP DIVE: BIRTHDAY WISHES',
+        graduation:  'ARCHIVE FOUND: GRADUATION',
+        wedding:     'ARCHIVE FOUND: WEDDING DAY',
     };
-    const diveStatus = typeMap[type] || 'SUBMARINE VIEWPORT ACTIVE 🌊';
+    const diveStatus = typeMap[type] || 'SUBMARINE VIEWPORT ACTIVE';
 
     return (
         <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center border border-cyan-500/20"
@@ -396,12 +396,12 @@ function BioluminescentPreview({ data }) {
 function MysticForestPreview({ data }) {
     const { recipientName, senderName, type } = data;
     const typeMap = {
-        anniversary: 'MISTIK SCROLL: CELEBRATION 💑',
-        birthday:    'MISTIK SCROLL: BIRTHDAY WISHES 🎂',
-        graduation:  'MISTIK SCROLL: GRADUATION 🎓',
-        wedding:     'MISTIK SCROLL: WEDDING 💍',
+        anniversary: 'MISTIK SCROLL: CELEBRATION',
+        birthday:    'MISTIK SCROLL: BIRTHDAY WISHES',
+        graduation:  'MISTIK SCROLL: GRADUATION',
+        wedding:     'MISTIK SCROLL: WEDDING',
     };
-    const scrollStatus = typeMap[type] || 'MAGICAL SCROLL ACTIVE 🌲';
+    const scrollStatus = typeMap[type] || 'MAGICAL SCROLL ACTIVE';
 
     return (
         <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center border border-lime-500/20"
@@ -473,12 +473,12 @@ function MysticForestPreview({ data }) {
 function RetroArcadePreview({ data }) {
     const { recipientName, senderName, type } = data;
     const typeMap = {
-        anniversary: 'LEVEL UP: ANNIVERSARY! 💑',
-        birthday:    'LEVEL UP: HAPPY BIRTHDAY! 🎂',
-        graduation:  'MISSION ACCOMPLISHED: GRADUATION! 🎓',
-        wedding:     'PLAYER 1 & 2 JOINED THE GAME! 💍',
+        anniversary: 'LEVEL UP: ANNIVERSARY!',
+        birthday:    'LEVEL UP: HAPPY BIRTHDAY!',
+        graduation:  'MISSION ACCOMPLISHED: GRADUATION!',
+        wedding:     'PLAYER 1 & 2 JOINED THE GAME!',
     };
-    const gameStatus = typeMap[type] || 'READY PLAYER ONE 👾';
+    const gameStatus = typeMap[type] || 'READY PLAYER ONE';
 
     return (
         <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center border border-purple-500/20"
@@ -565,12 +565,12 @@ function RetroArcadePreview({ data }) {
 function CosmicDriftPreview({ data }) {
     const { recipientName, senderName, type } = data;
     const typeMap = {
-        anniversary: 'Selamat Aniversari 💑',
-        birthday:    'Selamat Ulang Tahun 🎂',
-        graduation:  'Selamat Wisuda 🎓',
-        wedding:     'Selamat Menikah 💍',
+        anniversary: 'Selamat Aniversari',
+        birthday:    'Selamat Ulang Tahun',
+        graduation:  'Selamat Wisuda',
+        wedding:     'Selamat Menikah',
     };
-    const greeting = typeMap[type] || 'Pesan Spesial ✨';
+    const greeting = typeMap[type] || 'Pesan Spesial';
 
     return (
         <div className="relative w-full overflow-hidden rounded-xl flex flex-col items-center justify-center"

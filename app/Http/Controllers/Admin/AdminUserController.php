@@ -18,7 +18,7 @@ class AdminUserController extends Controller
         $user = auth()->user();
 
         $query = User::where('role', 'user')
-            ->with(['activeSubscription.plan', 'reseller.resellerSettings']);
+            ->with(['invitations.activeSubscription.plan', 'reseller.resellerSettings']);
 
         // Reseller only sees their own users
         if ($user->isReseller()) {
@@ -45,24 +45,37 @@ class AdminUserController extends Controller
             }
         }
 
-        $user->load(['invitation.brideGrooms', 'invitation.events', 'invitation.guests', 'invitation.wishes', 'invitation.rsvps', 'invitation.galleries', 'activeSubscription.plan', 'payments.plan', 'reseller.resellerSettings']);
+        $user->load([
+            'invitations.brideGrooms',
+            'invitations.events',
+            'invitations.guests',
+            'invitations.wishes',
+            'invitations.rsvps',
+            'invitations.galleries',
+            'activeSubscription.plan',
+            'payments.plan',
+            'reseller.resellerSettings'
+        ]);
 
-        $stats = null;
-        if ($user->invitation) {
-            $stats = [
-                'total_guests' => $user->invitation->guests->count(),
-                'rsvp_hadir' => $user->invitation->rsvps->where('attendance', 'hadir')->count(),
-                'rsvp_tidak' => $user->invitation->rsvps->where('attendance', 'tidak_hadir')->count(),
-                'total_wishes' => $user->invitation->wishes->count(),
-                'total_photos' => $user->invitation->galleries->count(),
-                'guests_opened' => $user->invitation->guests->where('is_opened', true)->count(),
-                'wa_sent' => $user->invitation->guests->where('wa_sent', true)->count(),
+        $invitationsData = [];
+        foreach ($user->invitations as $invitation) {
+            $invitationsData[] = [
+                'invitation' => $invitation,
+                'stats' => [
+                    'total_guests' => $invitation->guests->count(),
+                    'rsvp_hadir' => $invitation->rsvps->where('attendance', 'hadir')->count(),
+                    'rsvp_tidak' => $invitation->rsvps->where('attendance', 'tidak_hadir')->count(),
+                    'total_wishes' => $invitation->wishes->count(),
+                    'total_photos' => $invitation->galleries->count(),
+                    'guests_opened' => $invitation->guests->where('is_opened', true)->count(),
+                    'wa_sent' => $invitation->guests->where('wa_sent', true)->count(),
+                ]
             ];
         }
 
         return Inertia::render('Admin/Users/Show', [
             'user' => $user,
-            'stats' => $stats,
+            'invitationsData' => $invitationsData,
             'siteUrl' => url('/'),
         ]);
     }
@@ -73,7 +86,12 @@ class AdminUserController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $user->load(['invitation.brideGrooms', 'invitation.events', 'activeSubscription.plan']);
+        $user->load([
+            'invitations.brideGrooms',
+            'invitations.events',
+            'invitations.activeSubscription.plan',
+            'activeSubscription.plan'
+        ]);
 
         return Inertia::render('Admin/Users/Edit', [
             'user' => $user,
@@ -92,24 +110,31 @@ class AdminUserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
-            // Invitation fields
-            'invitation.slug' => 'nullable|string|max:100',
-            'invitation.title' => 'nullable|string|max:255',
-            'invitation.is_active' => 'nullable|boolean',
-            'invitation.opening_title' => 'nullable|string|max:255',
-            'invitation.opening_text' => 'nullable|string',
-            'invitation.closing_title' => 'nullable|string|max:255',
-            'invitation.closing_text' => 'nullable|string',
-            'invitation.cover_title' => 'nullable|string|max:255',
-            'invitation.cover_subtitle' => 'nullable|string|max:255',
+            // Multiple invitations validation
+            'invitations' => 'nullable|array',
+            'invitations.*.id' => 'required|exists:invitations,id',
+            'invitations.*.slug' => 'nullable|string|max:100',
+            'invitations.*.title' => 'nullable|string|max:255',
+            'invitations.*.is_active' => 'nullable|boolean',
+            'invitations.*.opening_title' => 'nullable|string|max:255',
+            'invitations.*.opening_text' => 'nullable|string',
+            'invitations.*.closing_title' => 'nullable|string|max:255',
+            'invitations.*.closing_text' => 'nullable|string',
+            'invitations.*.cover_title' => 'nullable|string|max:255',
+            'invitations.*.cover_subtitle' => 'nullable|string|max:255',
         ]);
 
         // Update user
         $user->update($request->only(['name', 'email', 'phone', 'is_active']));
 
-        // Update invitation
-        if ($request->has('invitation') && $user->invitation) {
-            $user->invitation->update($request->input('invitation'));
+        // Update invitations
+        if ($request->has('invitations')) {
+            foreach ($request->input('invitations') as $invData) {
+                $inv = $user->invitations()->find($invData['id']);
+                if ($inv) {
+                    $inv->update($invData);
+                }
+            }
         }
 
         return redirect()->back()->with('success', 'User berhasil diupdate.');
@@ -148,9 +173,14 @@ class AdminUserController extends Controller
 
         $request->validate([
             'plan_id' => 'required|exists:subscription_plans,id',
+            'invitation_id' => 'nullable|exists:invitations,id',
         ]);
 
-        $sub = $user->activeSubscription;
+        $invitation = $request->invitation_id 
+            ? $user->invitations()->find($request->invitation_id) 
+            : $user->invitation;
+
+        $sub = $invitation ? $invitation->activeSubscription : null;
         if ($sub) {
             $sub->update([
                 'plan_id' => $request->plan_id,
@@ -160,6 +190,7 @@ class AdminUserController extends Controller
             Subscription::create([
                 'user_id' => $user->id,
                 'plan_id' => $request->plan_id,
+                'invitation_id' => $invitation?->id,
                 'status' => 'active',
                 'starts_at' => now(),
                 'expires_at' => now()->addYear(),
@@ -177,9 +208,14 @@ class AdminUserController extends Controller
 
         $request->validate([
             'expires_at' => 'required|date|after:today',
+            'invitation_id' => 'nullable|exists:invitations,id',
         ]);
 
-        $sub = $user->activeSubscription;
+        $invitation = $request->invitation_id 
+            ? $user->invitations()->find($request->invitation_id) 
+            : $user->invitation;
+        
+        $sub = $invitation ? $invitation->activeSubscription : null;
         if ($sub) {
             $sub->update(['expires_at' => $request->expires_at]);
         } else {
@@ -188,6 +224,7 @@ class AdminUserController extends Controller
             Subscription::create([
                 'user_id' => $user->id,
                 'plan_id' => $freePlan->id,
+                'invitation_id' => $invitation?->id,
                 'status' => 'active',
                 'starts_at' => now(),
                 'expires_at' => $request->expires_at,

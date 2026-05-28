@@ -44,6 +44,142 @@ function getStorageUrl(url, fallback = '') {
     return `/storage/${cleanUrl}`;
 }
 
+function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
+    const t = type || 'wedding';
+    const isEn = String(locale).toLowerCase() === 'en';
+    const bgs = safeArr(brideGrooms);
+    const host = bgs[0] || {};
+    
+    let mainName = '';
+    let initials = '';
+    let isSingleHost = false;
+    
+    if (['wedding', 'anniversary'].includes(t)) {
+        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+        mainName = groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom';
+        initials = `${groom.nickname?.charAt(0) || 'B'}${bride.nickname?.charAt(0) || 'R'}`;
+        isSingleHost = false;
+    } else {
+        mainName = host.nickname || host.full_name || 'Host';
+        initials = mainName.charAt(0) || 'H';
+        isSingleHost = true;
+    }
+
+    let labels = {
+        brandText: 'wedding',
+        brandSubtext: 'of',
+        coverTitle: invitation?.cover_title || mainName,
+        profileHeader: isEn ? 'PROFILES OF THE COUPLE' : 'PROFIL KEDUA MEMPELAI',
+        profileBadge: isEn ? 'The Couple' : 'Mempelai',
+        shortcutProfile: isEn ? 'The Couple' : 'Mempelai',
+        searchPlaceholder: isEn ? 'Search blessings...' : 'Cari doa restu...',
+        writeBlessingPlaceholder: isEn ? 'Write your blessings...' : 'Tulis doa & ucapan terbaik...',
+        bannerLabels: isEn ? [
+            "FREE SHIPPING PHYSICAL PRESENCE",
+            "VOUCHER BLESSINGS MIN. TRANSACTION RP0",
+            "SPECIAL LIVE STREAMING HAPPY MOMENT"
+        ] : [
+            "GRATIS ONGKIR KEHADIRAN KE PELAMINAN",
+            "VOUCHER DOA RESTU MINIMAL BELANJA RP0",
+            "SPESIAL LIVE STREAMING HARI BAHAGIA"
+        ]
+    };
+
+    if (t === 'wedding') {
+        labels.brandText = 'wedding';
+        labels.brandSubtext = 'of';
+        labels.profileHeader = isEn ? 'PROFILES OF THE COUPLE' : 'PROFIL KEDUA MEMPELAI';
+        labels.profileBadge = isEn ? 'Groom & Bride' : 'Mempelai';
+        labels.shortcutProfile = isEn ? 'Groom & Bride' : 'Mempelai';
+        labels.searchPlaceholder = isEn ? 'Search wedding blessings...' : 'Cari doa restu di hari bahagia...';
+        labels.writeBlessingPlaceholder = isEn ? 'Write your wedding blessings...' : 'Tulis doa & ucapan terbaik untuk kedua mempelai...';
+    } else if (t === 'anniversary') {
+        labels.brandText = 'anniversary';
+        labels.brandSubtext = 'of';
+        labels.profileHeader = isEn ? 'PROFILES OF THE COUPLE' : 'PROFIL KEDUA MEMPELAI';
+        labels.profileBadge = isEn ? 'Couple' : 'Pasangan';
+        labels.shortcutProfile = isEn ? 'Couple' : 'Pasangan';
+        labels.searchPlaceholder = isEn ? 'Search anniversary blessings...' : 'Cari doa restu anniversary...';
+        labels.writeBlessingPlaceholder = isEn ? 'Write your anniversary blessings...' : 'Tulis doa & ucapan terbaik untuk pasangan...';
+    } else if (t === 'graduation') {
+        labels.brandText = 'graduation';
+        labels.brandSubtext = 'of';
+        labels.profileHeader = isEn ? 'GRADUATE PROFILE' : 'PROFIL WISUDAWAN';
+        labels.profileBadge = isEn ? 'Graduate' : 'Wisudawan';
+        labels.shortcutProfile = isEn ? 'Graduate' : 'Wisudawan';
+        labels.searchPlaceholder = isEn ? 'Search graduation blessings...' : 'Cari doa restu kelulusan...';
+        labels.writeBlessingPlaceholder = isEn ? 'Write your graduation blessings...' : 'Tulis doa & ucapan terbaik untuk wisudawan...';
+        labels.bannerLabels = isEn ? [
+            "FREE SHIPPING CELEBRATION PRESENCE",
+            "VOUCHER BLESSINGS MIN. TRANSACTION RP0",
+            "SPECIAL LIVE STREAMING GRADUATION DAY"
+        ] : [
+            "GRATIS ONGKIR KEHADIRAN SYUKURAN",
+            "VOUCHER DOA RESTU KELULUSAN RP0",
+            "SPESIAL LIVE STREAMING HARI WISUDA"
+        ];
+    } else if (t === 'birthday') {
+        labels.brandText = 'birthday';
+        labels.brandSubtext = 'of';
+        labels.profileHeader = isEn ? 'CELEBRANT PROFILE' : 'PROFIL YANG BERULANG TAHUN';
+        labels.profileBadge = isEn ? 'Celebrant' : 'Ulang Tahun';
+        labels.shortcutProfile = isEn ? 'Celebrant' : 'Ulang Tahun';
+        labels.searchPlaceholder = isEn ? 'Search birthday blessings...' : 'Cari doa restu ulang tahun...';
+        labels.writeBlessingPlaceholder = isEn ? 'Write your birthday blessings...' : 'Tulis doa & ucapan terbaik untuk yang berulang tahun...';
+        labels.bannerLabels = isEn ? [
+            "FREE SHIPPING PARTY PRESENCE",
+            "VOUCHER BLESSINGS MIN. TRANSACTION RP0",
+            "SPECIAL LIVE STREAMING BIRTHDAY PARTY"
+        ] : [
+            "GRATIS ONGKIR KEHADIRAN PESTA",
+            "VOUCHER DOA RESTU PERTAMBAHAN USIA RP0",
+            "SPESIAL LIVE STREAMING TIUP LILIN"
+        ];
+    } else if (t === 'aqiqah') {
+        labels.brandText = 'aqiqah';
+        labels.brandSubtext = 'of';
+        labels.profileHeader = isEn ? 'BABY PROFILE' : 'PROFIL BUAH HATI';
+        labels.profileBadge = isEn ? 'Baby' : 'Buah Hati';
+        labels.shortcutProfile = isEn ? 'Baby' : 'Buah Hati';
+        labels.searchPlaceholder = isEn ? 'Search aqiqah blessings...' : 'Cari doa restu aqiqah...';
+        labels.writeBlessingPlaceholder = isEn ? 'Write your aqiqah blessings...' : 'Tulis doa & ucapan terbaik untuk buah hati...';
+        labels.bannerLabels = isEn ? [
+            "FREE SHIPPING AQIQAH PRESENCE",
+            "VOUCHER BLESSINGS MIN. TRANSACTION RP0",
+            "SPECIAL LIVE STREAMING AQIQAH CELEBRATION"
+        ] : [
+            "GRATIS ONGKIR KEHADIRAN AQIQAH",
+            "VOUCHER DOA RESTU BUAH HATI RP0",
+            "SPESIAL LIVE STREAMING SYUKURAN AQIQAH"
+        ];
+    } else if (t === 'circumcision') {
+        labels.brandText = 'khitanan';
+        labels.brandSubtext = 'of';
+        labels.profileHeader = isEn ? 'CHILD PROFILE' : 'PROFIL PUTRA KHITAN';
+        labels.profileBadge = isEn ? 'Child' : 'Putra Khitan';
+        labels.shortcutProfile = isEn ? 'Child' : 'Putra Khitan';
+        labels.searchPlaceholder = isEn ? 'Search circumcision blessings...' : 'Cari doa restu khitanan...';
+        labels.writeBlessingPlaceholder = isEn ? 'Write your circumcision blessings...' : 'Tulis doa & ucapan terbaik untuk putra khitan...';
+        labels.bannerLabels = isEn ? [
+            "FREE SHIPPING CIRCUMCISION PRESENCE",
+            "VOUCHER BLESSINGS MIN. TRANSACTION RP0",
+            "SPECIAL LIVE STREAMING CIRCUMCISION DAY"
+        ] : [
+            "GRATIS ONGKIR KEHADIRAN KHITANAN",
+            "VOUCHER DOA RESTU ANAK SHOLEH RP0",
+            "SPESIAL LIVE STREAMING HARI KHITAN"
+        ];
+    }
+
+    return {
+        mainName,
+        initials,
+        isSingleHost,
+        labels
+    };
+}
+
 /* ═══════════════════════════════════════
    ERROR BOUNDARY
    ═══════════════════════════════════════ */
@@ -65,7 +201,7 @@ class ErrorBoundary extends React.Component {
                         <line x1="12" y1="16" x2="12.01" y2="16" />
                     </svg>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '0 0 8px 0' }}>Terjadi Kesalahan Visual</h2>
-                    <p style={{ fontSize: '0.85rem', color: '#666', margin: '0 0 16px 0', maxWidth: '300px' }}>Mohon maaf, terjadi kegagalan rendering saat memuat tema Shopee.</p>
+                    <p style={{ fontSize: '0.85rem', color: '#666', margin: '0 0 16px 0', maxWidth: '300px' }}>Mohon maaf, terjadi kegagalan rendering saat memuat tema Shopinvity.</p>
                     <pre style={{ fontSize: '0.75rem', color: '#999', background: '#f5f5f5', padding: '12px', borderRadius: '6px', whiteSpace: 'pre-wrap', textAlign: 'left', maxWidth: '100%', overflowX: 'auto' }}>
                         {this.state.error?.toString()}
                     </pre>
@@ -109,7 +245,7 @@ const ICONS = {
         </svg>
     ),
     
-    // Bottom Navigation Icons (100% Shopee App Style)
+    // Bottom Navigation Icons (100% Shopinvity App Style)
     homeActive: (
         <svg viewBox="0 0 24 24" width="22" height="22" fill="#ff5722">
             <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
@@ -248,16 +384,13 @@ const ICONS = {
 function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGuestName }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
-    const groom = bgs.find(b => b.gender === 'pria' || b.gender === 'male' || String(b.gender).toLowerCase() === 'pria') || bgs[0];
-    const bride = bgs.find(b => b.gender === 'wanita' || b.gender === 'female' || String(b.gender).toLowerCase() === 'wanita') || bgs[1];
-
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', invitation?.language || 'id', brideGrooms, invitation);
+    
     const guestName = guest?.name
         || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null)
         || 'Tamu Undangan';
 
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Mempelai Pengantin');
+    const coupleName = invitation?.cover_title || themeConfig.labels.coverTitle;
 
     const heroImg = getStorageUrl(invitation?.cover_image, '');
 
@@ -269,9 +402,10 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGu
     const sorryText = isEn
         ? "We sincerely apologize if there are any errors in writing or the list of invitees."
         : "Mohon maaf apabila ada kesalahan penulisan nama atau gelar dalam undangan ini.";
+    
     const footerText = isEn 
-        ? "Checked by Wedding Blessing Customs &bull; 100% Sealed Forever" 
-        : "Telah Diperiksa Oleh Penjaga Pintu Restu &bull; Segel Cinta 100% Abadi";
+        ? `Checked by ${themeConfig.labels.profileBadge} Blessing Customs &bull; 100% Sealed Forever` 
+        : `Telah Diperiksa Oleh Penjaga Pintu Restu &bull; Segel 100% Abadi`;
 
     return (
         <div className={`sp-cover${isOpened ? ' is-opened' : ''}`}>
@@ -288,15 +422,14 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGu
             <div className="sp-cover-gradient" />
             
             <div className="sp-cover-body">
-                {/* 100% Text & Custom SVG Shopee Express logo style */}
+                {/* 100% Text & Custom SVG Shopinvity Express logo style */}
                 <div className="sp-cover-header-brand">
-                    <svg className="sp-shopee-logo-svg" viewBox="0 0 24 24" width="30" height="30" fill="none">
+                    <svg className="sp-shopinvity-logo-svg" viewBox="0 0 24 24" width="30" height="30" fill="none">
                         <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9-1a2 2 0 0 1 4 0v1h-4V6z" fill="#ee4d2d"/>
-                        <circle cx="12" cy="14" r="4.2" fill="#ffffff" />
-                        <text x="12" y="15.8" fill="#ee4d2d" fontSize="5.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">S</text>
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ffffff" transform="translate(6, 9.5) scale(0.5)" />
                     </svg>
-                    <span className="sp-brand-shopee">wedding</span>
-                    <span className="sp-brand-express">of</span>
+                    <span className="sp-brand-shopinvity">{themeConfig.labels.brandText}</span>
+                    <span className="sp-brand-express">{themeConfig.labels.brandSubtext}</span>
                 </div>
 
                 <div className="sp-cover-package">
@@ -333,6 +466,8 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGu
 function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, formatCountdown, showCountdown }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', invitation?.language || 'id', brideGrooms, invitation);
+    
     const groom = bgs.find(b => b.gender === 'pria' || b.gender === 'male' || String(b.gender).toLowerCase() === 'pria') || bgs[0] || {};
     const bride = bgs.find(b => b.gender === 'wanita' || b.gender === 'female' || String(b.gender).toLowerCase() === 'wanita') || bgs[1] || {};
 
@@ -361,19 +496,11 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0] || {};
 
     const isEn = invitation?.language === 'en';
-    const bannerLabels = isEn ? [
-        "FREE SHIPPING PHYSICAL PRESENCE",
-        "VOUCHER BLESSINGS MIN. TRANSACTION RP0",
-        "SPECIAL LIVE STREAMING HAPPY MOMENT"
-    ] : [
-        "GRATIS ONGKIR KEHADIRAN KE PELAMINAN",
-        "VOUCHER DOA RESTU MINIMAL BELANJA RP0",
-        "SPESIAL LIVE STREAMING HARI BAHAGIA"
-    ];
+    const bannerLabels = themeConfig.labels.bannerLabels;
 
     const shortcuts = [
-        { label: isEn ? "The Couple" : "Mempelai", icon: ICONS.mempelaiMenu, action: () => { const el = document.getElementById('sp-mempelai-sec'); el?.scrollIntoView({ behavior: 'smooth' }); } },
-        { label: isEn ? "Wedding Day" : "Acara", icon: ICONS.akadMenu, action: () => { setActiveTab('event'); } },
+        { label: themeConfig.labels.shortcutProfile, icon: ICONS.mempelaiMenu, action: () => { const el = document.getElementById('sp-mempelai-sec'); el?.scrollIntoView({ behavior: 'smooth' }); } },
+        { label: isEn ? "Event Schedule" : "Acara", icon: ICONS.akadMenu, action: () => { setActiveTab('event'); } },
         { label: isEn ? "Wishes & RSVP" : "Ucapan & Doa", icon: ICONS.kisahMenu, action: () => { setActiveTab('notification'); } },
         { label: "Google Map", icon: ICONS.mapMenu, action: () => { setActiveTab('event'); } }
     ];
@@ -385,14 +512,14 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
             {/* Banner Slider */}
             <div className="sp-banner-slider">
                 {showPhotos && (
-                    <img src={banners[activeBannerIdx]} alt="Prewedding Banner" className="sp-banner-image" />
+                    <img src={banners[activeBannerIdx]} alt="Event Banner" className="sp-banner-image" />
                 )}
                 {!showPhotos && (
                     <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Foto Dinonaktifkan</div>
                 )}
                 <div className="sp-banner-overlay">
                     <span className="sp-banner-badge">{bannerLabels[activeBannerIdx % bannerLabels.length]}</span>
-                    <p className="sp-banner-text">{groom.nickname || 'Groom'} & {bride.nickname || 'Bride'}</p>
+                    <p className="sp-banner-text">{themeConfig.mainName}</p>
                 </div>
                 <div className="sp-banner-indicators">
                     {banners.map((_, idx) => (
@@ -405,12 +532,12 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
             <div className="sp-wallet-bar">
                 <div className="sp-wallet-info">
                     <div className="sp-pay-logo">
-                        <span className="sp-pay-icon" style={{ color: '#ee4d2d' }}>{ICONS.shopeePay}</span>
-                        <span className="sp-pay-brand" style={{ color: '#ee4d2d' }}>WeddingPay</span>
+                        <span className="sp-pay-icon" style={{ color: '#ee4d2d' }}>{ICONS.shopinvityPay}</span>
+                        <span className="sp-pay-brand" style={{ color: '#ee4d2d' }}>GiftPay</span>
                     </div>
                     <div className="sp-pay-details">
                         <span className="sp-wallet-label" style={{ fontSize: '0.75rem', color: '#7f8c8d' }}>
-                            {isEn ? "Transfer Wedding Gifts & Digital Envelopes" : "Transfer Hadiah & Kado Digital"}
+                            {isEn ? "Transfer Gifts & Digital Envelopes" : "Transfer Hadiah & Kado Digital"}
                         </span>
                     </div>
                 </div>
@@ -431,64 +558,96 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                 ))}
             </div>
 
-            {/* Shopee Mall Mempelai Profile - PROFIL DULU sebelum acara */}
+            {/* Shopinvity Mall Mempelai Profile - PROFIL DULU sebelum acara */}
             <div className="sp-mall-section" id="sp-mempelai-sec">
                 <div className="sp-mall-header">
-                    <span className="sp-mall-badge" style={{ background: '#ee4d2d' }}>{isEn ? "The Couple" : "Mempelai"}</span>
-                    <span className="sp-mall-title">{isEn ? "PROFILES OF THE COUPLE" : "PROFIL KEDUA MEMPELAI"}</span>
+                    <span className="sp-mall-badge" style={{ background: '#ee4d2d' }}>{themeConfig.labels.profileBadge}</span>
+                    <span className="sp-mall-title">{themeConfig.labels.profileHeader}</span>
                 </div>
 
-                <div className="sp-mall-couple-grid">
-                    {groom.full_name && (
-                        <div className="sp-couple-card">
-                            <div className="sp-couple-photo-wrap">
-                                {showPhotos && groom.photo ? (
-                                    <img src={getStorageUrl(groom.photo)} alt={groom.full_name} className="sp-couple-photo" />
-                                ) : (
-                                    <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Pria Terganteng</div>
-                                )}
-                            </div>
-                            <div className="sp-couple-info">
-                                <div className="sp-couple-tag-row">
-                                    <span className="sp-couple-label">{isEn ? "GROOM" : "PRIA"}</span>
+                <div className={`sp-mall-couple-grid ${themeConfig.isSingleHost ? 'sp-single-host-grid' : ''}`}>
+                    {themeConfig.isSingleHost ? (
+                        bgs[0] && (
+                            <div className="sp-couple-card sp-single-host-card">
+                                <div className="sp-couple-photo-wrap">
+                                    {showPhotos && bgs[0].photo ? (
+                                        <img src={getStorageUrl(bgs[0].photo)} alt={bgs[0].full_name} className="sp-couple-photo" />
+                                    ) : (
+                                        <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Foto Profil</div>
+                                    )}
                                 </div>
-                                <h4 className="sp-couple-fullname">{groom.full_name}</h4>
-                                <p className="sp-couple-son-daughter">
-                                    {isEn ? `Son number ${groom.child_order || '1'} of Mr. ${groom.father_name || '...'} & Mrs. ${groom.mother_name || '...'}` : `Putra ${groom.child_order || 'Pertama'} dari Bapak ${groom.father_name || '...'} & Ibu ${groom.mother_name || '...'}`}
-                                </p>
-                                {groom.instagram && (
-                                    <a href={`https://instagram.com/${groom.instagram}`} target="_blank" rel="noreferrer" className="sp-couple-ig">
-                                        {isEn ? "Instagram >" : "Kunjungi IG >"}
-                                    </a>
-                                )}
+                                <div className="sp-couple-info">
+                                    <div className="sp-couple-tag-row">
+                                        <span className="sp-couple-label">{themeConfig.labels.profileBadge}</span>
+                                    </div>
+                                    <h4 className="sp-couple-fullname">{bgs[0].full_name}</h4>
+                                    <p className="sp-couple-son-daughter">
+                                        {isEn 
+                                            ? `${bgs[0].gender === 'pria' || bgs[0].gender === 'male' ? 'Son' : 'Daughter'} number ${bgs[0].child_order || '1'} of Mr. ${bgs[0].father_name || '...'} & Mrs. ${bgs[0].mother_name || '...'}`
+                                            : `${bgs[0].gender === 'pria' || bgs[0].gender === 'male' ? 'Putra' : 'Putri'} ${bgs[0].child_order || 'Pertama'} dari Bapak ${bgs[0].father_name || '...'} & Ibu ${bgs[0].mother_name || '...'}`}
+                                    </p>
+                                    {bgs[0].instagram && (
+                                        <a href={`https://instagram.com/${bgs[0].instagram}`} target="_blank" rel="noreferrer" className="sp-couple-ig">
+                                            {isEn ? "Instagram >" : "Kunjungi IG >"}
+                                        </a>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )
+                    ) : (
+                        <>
+                            {groom.full_name && (
+                                <div className="sp-couple-card">
+                                    <div className="sp-couple-photo-wrap">
+                                        {showPhotos && groom.photo ? (
+                                            <img src={getStorageUrl(groom.photo)} alt={groom.full_name} className="sp-couple-photo" />
+                                        ) : (
+                                            <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Pria Terganteng</div>
+                                        )}
+                                    </div>
+                                    <div className="sp-couple-info">
+                                        <div className="sp-couple-tag-row">
+                                            <span className="sp-couple-label">{isEn ? "GROOM" : "PRIA"}</span>
+                                        </div>
+                                        <h4 className="sp-couple-fullname">{groom.full_name}</h4>
+                                        <p className="sp-couple-son-daughter">
+                                            {isEn ? `Son number ${groom.child_order || '1'} of Mr. ${groom.father_name || '...'} & Mrs. ${groom.mother_name || '...'}` : `Putra ${groom.child_order || 'Pertama'} dari Bapak ${groom.father_name || '...'} & Ibu ${groom.mother_name || '...'}`}
+                                        </p>
+                                        {groom.instagram && (
+                                            <a href={`https://instagram.com/${groom.instagram}`} target="_blank" rel="noreferrer" className="sp-couple-ig">
+                                                {isEn ? "Instagram >" : "Kunjungi IG >"}
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
-                    {bride.full_name && (
-                        <div className="sp-couple-card">
-                            <div className="sp-couple-photo-wrap">
-                                {showPhotos && bride.photo ? (
-                                    <img src={getStorageUrl(bride.photo)} alt={bride.full_name} className="sp-couple-photo" />
-                                ) : (
-                                    <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Wanita Tercantik</div>
-                                )}
-                            </div>
-                            <div className="sp-couple-info">
-                                <div className="sp-couple-tag-row">
-                                    <span className="sp-couple-label">{isEn ? "BRIDE" : "WANITA"}</span>
+                            {bride.full_name && (
+                                <div className="sp-couple-card">
+                                    <div className="sp-couple-photo-wrap">
+                                        {showPhotos && bride.photo ? (
+                                            <img src={getStorageUrl(bride.photo)} alt={bride.full_name} className="sp-couple-photo" />
+                                        ) : (
+                                            <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Wanita Tercantik</div>
+                                        )}
+                                    </div>
+                                    <div className="sp-couple-info">
+                                        <div className="sp-couple-tag-row">
+                                            <span className="sp-couple-label">{isEn ? "BRIDE" : "WANITA"}</span>
+                                        </div>
+                                        <h4 className="sp-couple-fullname">{bride.full_name}</h4>
+                                        <p className="sp-couple-son-daughter">
+                                            {isEn ? `Daughter number ${bride.child_order || '1'} of Mr. ${bride.father_name || '...'} & Mrs. ${bride.mother_name || '...'}` : `Putri ${bride.child_order || 'Pertama'} dari Bapak ${bride.father_name || '...'} & Ibu ${bride.mother_name || '...'}`}
+                                        </p>
+                                        {bride.instagram && (
+                                            <a href={`https://instagram.com/${bride.instagram}`} target="_blank" rel="noreferrer" className="sp-couple-ig">
+                                                {isEn ? "Instagram >" : "Kunjungi IG >"}
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
-                                <h4 className="sp-couple-fullname">{bride.full_name}</h4>
-                                <p className="sp-couple-son-daughter">
-                                    {isEn ? `Daughter number ${bride.child_order || '1'} of Mr. ${bride.father_name || '...'} & Mrs. ${bride.mother_name || '...'}` : `Putri ${bride.child_order || 'Pertama'} dari Bapak ${bride.father_name || '...'} & Ibu ${bride.mother_name || '...'}`}
-                                </p>
-                                {bride.instagram && (
-                                    <a href={`https://instagram.com/${bride.instagram}`} target="_blank" rel="noreferrer" className="sp-couple-ig">
-                                        {isEn ? "Instagram >" : "Kunjungi IG >"}
-                                    </a>
-                                )}
-                            </div>
-                        </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
@@ -678,7 +837,7 @@ function VideoTab({ invitation, galleries, setActiveTab }) {
                                 <p className="sp-v-caption">
                                     {s.caption || s.description || "Kami mengundang Anda untuk merayakan kebahagiaan suci sakral pernikahan kami."}
                                 </p>
-                                <p className="sp-v-hashtags">#PreweddingDay #HalalCircle #ShopeeWedding</p>
+                                <p className="sp-v-hashtags">#PreweddingDay #HalalCircle #ShopinvityWedding</p>
                             </div>
                         </div>
                     );
@@ -825,7 +984,7 @@ function LiveTab({ invitation, events }) {
                     </div>
                     <div className="sp-address-body">
                         <p className="sp-address-name">Penerima Restu: {ev.event_name || 'Acara'}</p>
-                        <p className="sp-address-phone">Jasa Kirim: Shopee Express Wedding</p>
+                        <p className="sp-address-phone">Jasa Kirim: Shopinvity Express Wedding</p>
                         <p className="sp-address-detail">
                             <strong>{ev.venue_name}</strong> - {ev.venue_address}
                         </p>
@@ -904,17 +1063,17 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
 
     return (
         <div className="sp-notif-tab">
-            {/* Shopee-style Order/Checkout Header */}
+            {/* Shopinvity-style Order/Checkout Header */}
             <div className="sp-rsvp-checkout-header">
                 <div className="sp-checkout-store-row">
-                    <span className="sp-checkout-store-badge">💍</span>
-                    <span className="sp-checkout-store-name">{isEn ? "Wedding Ceremony" : "Pernikahan"}</span>
+                    <span className="sp-checkout-store-badge">🎉</span>
+                    <span className="sp-checkout-store-name">{invitation?.type === 'wedding' ? (isEn ? "Wedding Ceremony" : "Pernikahan") : (isEn ? "Event Celebration" : "Perayaan Acara")}</span>
                     <span className="sp-checkout-preferred">Preferred</span>
                 </div>
                 <div className="sp-checkout-item-row">
                     <div className="sp-checkout-item-img">💌</div>
                     <div className="sp-checkout-item-desc">
-                        <p className="sp-checkout-item-name">{isEn ? "Wedding Blessing Package (RSVP)" : "Paket Doa Restu & Konfirmasi Hadir"}</p>
+                        <p className="sp-checkout-item-name">{isEn ? "Blessing Package (RSVP)" : "Paket Doa Restu & Konfirmasi Hadir"}</p>
                         <p className="sp-checkout-item-variant">{isEn ? "Variation: Attend & Send Blessing" : "Variasi: Hadir & Kirim Doa"}</p>
                     </div>
                     <span className="sp-checkout-item-qty">x1</span>
@@ -928,7 +1087,7 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                     </div>
 
                     <form onSubmit={handleSubmit}>
-                        {/* Shopee-style name field */}
+                        {/* Shopinvity-style name field */}
                         <div className="sp-checkout-field-group">
                             <div className="sp-checkout-field-label">{isEn ? "Buyer Name" : "Nama Pembeli"}</div>
                             <input
@@ -980,7 +1139,7 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                                 <div className="sp-checkout-field-label">{isEn ? "Message / Blessing" : "Pesan / Ucapan Doa"}</div>
                                 <textarea
                                     className="sp-input-text"
-                                    placeholder={isEn ? "Write your wedding blessings..." : "Tulis doa & ucapan terbaik untuk kedua mempelai..."}
+                                    placeholder={invitation?.type === 'wedding' ? (isEn ? "Write your wedding blessings..." : "Tulis doa & ucapan terbaik untuk kedua mempelai...") : (isEn ? "Write your blessings..." : "Tulis doa & ucapan terbaik...")}
                                     rows="3"
                                     required={!enableRsvp}
                                     value={message}
@@ -1039,7 +1198,7 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                                 maskedName = rawName.charAt(0) + "*****" + rawName.charAt(rawName.length - 1);
                             }
                             return (
-                                <div key={idx} className="sp-review-card-shopee">
+                                <div key={idx} className="sp-review-card-shopinvity">
                                     <div className="sp-chat-item">
                                         <div className="sp-chat-avatar">
                                             {rawName.charAt(0).toUpperCase()}
@@ -1132,7 +1291,7 @@ function ProfileTab({ invitation, bankAccounts, guest }) {
 
     return (
         <div className="sp-profile-tab">
-            {/* Shopee Style Profile Header */}
+            {/* Shopinvity Style Profile Header */}
             <div className="sp-profile-card">
                 <div className="sp-profile-pattern" />
                 <div className="sp-profile-avatar-circle">
@@ -1194,7 +1353,7 @@ function ProfileTab({ invitation, bankAccounts, guest }) {
 /* ═══════════════════════════════════════
    MAIN THEME EXPORT COMPONENT (PURE VIEWPORT HEIGHT SCROLL ISOLATION)
    ═══════════════════════════════════════ */
-function ShopeeThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
+function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
     const [isOpened, setIsOpened] = useState(false);
     const [activeTab, setActiveTab] = useState('home');
     const [isPlaying, setIsPlaying] = useState(false);
@@ -1224,8 +1383,16 @@ function ShopeeThemeContent({ invitation, sections, brideGrooms, events, galleri
     const musicUrl = invitation?.music_url || null;
     const musicAutoplay = parseBool(invitation?.music_autoplay);
 
-    const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
+        const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
     const isEn = invitation?.language === 'en';
+
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', invitation?.language || 'id', brideGrooms, invitation);
+
+    useEffect(() => {
+        if (themeConfig.mainName) {
+            document.title = themeConfig.mainName + (invitation?.type ? ` - ${themeConfig.labels.profileBadge}` : '');
+        }
+    }, [themeConfig, invitation]);
 
     const showGuestName = parseBool(invitation?.show_guest_name, true);
     const showCountdown = parseBool(invitation?.show_countdown, true);
@@ -1329,7 +1496,7 @@ function ShopeeThemeContent({ invitation, sections, brideGrooms, events, galleri
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
                                     <span className="sp-search-icon">{ICONS.search}</span>
                                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {isEn ? "Search wedding blessings..." : "Cari doa restu di hari bahagia..."}
+                                        {themeConfig.labels.searchPlaceholder}
                                     </span>
                                 </div>
                                 {enableQr && activeGuest && (
@@ -1511,10 +1678,10 @@ function ShopeeThemeContent({ invitation, sections, brideGrooms, events, galleri
 /* ═══════════════════════════════════════
    EXPORT DEFAULT
    ═══════════════════════════════════════ */
-export default function ShopeeTheme(props) {
+export default function ShopinvityTheme(props) {
     return (
         <ErrorBoundary>
-            <ShopeeThemeContent {...props} />
+            <ShopinvityThemeContent {...props} />
         </ErrorBoundary>
     );
 }

@@ -43,6 +43,139 @@ function safeArr(val) {
     return [];
 }
 
+function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
+    const t = type || 'wedding';
+    const isEn = String(locale).toLowerCase() === 'en';
+    const bgs = safeArr(brideGrooms);
+    const host = bgs[0] || {};
+    
+    let coupleName = '';
+    let isSingleHost = false;
+    
+    if (['wedding', 'anniversary'].includes(t)) {
+        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+        coupleName = groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom';
+        isSingleHost = false;
+    } else {
+        coupleName = host.nickname || host.full_name || 'Host';
+        isSingleHost = true;
+    }
+
+    let labels = {
+        circleLogoText: isEn ? `• EVENT OF ${coupleName.toUpperCase()} •` : `• ACARA ${coupleName.toUpperCase()} •`,
+        heroBadge: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
+        heroDateLabel: isEn ? 'SAVE THE DATE' : 'SIMPAN TANGGAL',
+        
+        coupleTitle: isEn ? 'Host Profile' : 'Profil Utama',
+        coupleSubtitle: isEn ? 'Host' : 'Penyelenggara',
+        
+        storyTitle: isEn ? 'JOURNEY' : 'KISAH PERJALANAN',
+        storySubtitle: isEn ? 'Our Journey' : 'Kisah Perjalanan',
+        
+        eventTitle: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
+        eventSubtitle: isEn ? 'Event Schedule' : 'Jadwal Acara',
+        
+        streamTitle: isEn ? 'Virtual Celebration' : 'Siaran Langsung',
+        streamSubtitle: 'Live Streaming',
+        streamDesc: isEn 
+            ? 'We invite you to attend our special event virtually through the platforms below.'
+            : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi acara kami secara virtual melalui platform berikut.',
+            
+        closingQuote: invitation?.closing_text || (isEn 
+            ? 'It is an honor and a happiness for us if you are willing to attend and give your blessings to our event.' 
+            : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu.'),
+            
+        signatureTitle: isEn ? 'We Who Are Joyful,' : 'Kami Yang Berbahagia,',
+        signatureFamilies: isEn ? 'Big Family' : 'Keluarga Besar',
+    };
+
+    if (t === 'wedding') {
+        labels.circleLogoText = isEn ? `• THE WEDDING OF ${coupleName.toUpperCase()} •` : `• PERNIKAHAN ${coupleName.toUpperCase()} •`;
+        labels.heroBadge = isEn ? 'THE WEDDING OF' : 'PERNIKAHAN';
+        labels.coupleTitle = isEn ? 'THE BRIDE & GROOM' : 'MEMPELAI';
+        labels.coupleSubtitle = isEn ? 'The Couple' : 'Mempelai';
+        labels.storyTitle = isEn ? 'LOVE STORY' : 'KISAH CINTA';
+        labels.storySubtitle = isEn ? 'Our Love Journey' : 'Kisah Perjalanan';
+        labels.eventTitle = isEn ? 'SAVE THE DATE' : 'SAVE THE DATE';
+        labels.eventSubtitle = isEn ? 'Wedding Event' : 'Jadwal Acara';
+        labels.streamTitle = isEn ? 'Virtual Celebration' : 'Siaran Langsung';
+        labels.streamDesc = isEn 
+            ? 'We will broadcast the happy moments of our wedding procession virtually through the following platforms.'
+            : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi pernikahan kami secara virtual melalui platform berikut.';
+        labels.closingQuote = invitation?.closing_text || (isEn 
+            ? 'It is an honor and a happiness for us if you are willing to attend and give your blessings to the newlyweds.' 
+            : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.');
+    } else if (t === 'anniversary') {
+        labels.circleLogoText = isEn ? `• ANNIVERSARY OF ${coupleName.toUpperCase()} •` : `• ANNIVERSARY ${coupleName.toUpperCase()} •`;
+        labels.heroBadge = isEn ? 'ANNIVERSARY OF' : 'ANNIVERSARY';
+        labels.coupleTitle = isEn ? 'THE COUPLE' : 'PASANGAN';
+        labels.coupleSubtitle = isEn ? 'The Couple' : 'Pasangan';
+        labels.storyTitle = isEn ? 'LOVE STORY' : 'KISAH CINTA';
+        labels.storySubtitle = isEn ? 'Our Love Journey' : 'Kisah Perjalanan';
+        labels.eventTitle = isEn ? 'SAVE THE DATE' : 'SAVE THE DATE';
+        labels.eventSubtitle = isEn ? 'Anniversary Tour' : 'Jadwal Perayaan';
+        labels.streamTitle = isEn ? 'Virtual Celebration' : 'Siaran Langsung';
+        labels.streamDesc = isEn 
+            ? 'We will broadcast the happy moments of our anniversary procession virtually through the following platforms.'
+            : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi anniversary kami secara virtual melalui platform berikut.';
+    } else if (t === 'graduation') {
+        labels.circleLogoText = isEn ? `• GRADUATION OF ${coupleName.toUpperCase()} •` : `• WISUDA ${coupleName.toUpperCase()} •`;
+        labels.heroBadge = isEn ? 'GRADUATION OF' : 'WISUDA';
+        labels.coupleTitle = isEn ? 'GRADUATE PROFILE' : 'PROFIL WISUDAWAN';
+        labels.coupleSubtitle = isEn ? 'Graduate' : 'Wisudawan/wati';
+        labels.storyTitle = isEn ? 'STUDY JOURNEY' : 'PERJALANAN STUDI';
+        labels.storySubtitle = isEn ? 'My Academic Journey' : 'Perjalanan Studi';
+        labels.eventTitle = isEn ? 'GRADUATION TOUR' : 'JADWAL ACARA';
+        labels.eventSubtitle = isEn ? 'Graduation Event' : 'Jadwal Syukuran';
+        labels.streamDesc = isEn 
+            ? 'We will broadcast the happy moments of our graduation procession virtually through the following platforms.'
+            : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi kelulusan kami secara virtual melalui platform berikut.';
+    } else if (t === 'birthday') {
+        labels.circleLogoText = isEn ? `• BIRTHDAY OF ${coupleName.toUpperCase()} •` : `• ULANG TAHUN ${coupleName.toUpperCase()} •`;
+        labels.heroBadge = isEn ? 'THE BIRTHDAY OF' : 'ULANG TAHUN';
+        labels.coupleTitle = isEn ? 'CELEBRANT PROFILE' : 'PROFIL UTAMA';
+        labels.coupleSubtitle = isEn ? 'Celebrant' : 'Ulang Tahun';
+        labels.storyTitle = isEn ? 'LIFE TIMELINE' : 'PERJALANAN HIDUP';
+        labels.storySubtitle = isEn ? 'My Milestones' : 'Perjalanan Usia';
+        labels.eventTitle = isEn ? 'BIRTHDAY PARTY' : 'JADWAL PESTA';
+        labels.eventSubtitle = isEn ? 'Birthday Event' : 'Jadwal Perayaan';
+        labels.streamDesc = isEn 
+            ? 'We will broadcast the happy moments of our birthday party virtually through the following platforms.'
+            : 'Kami mengundang Anda untuk menyaksikan momen bahagia pesta ulang tahun kami secara virtual melalui platform berikut.';
+    } else if (t === 'aqiqah') {
+        labels.circleLogoText = isEn ? `• AQIQAH OF ${coupleName.toUpperCase()} •` : `• AQIQAH ${coupleName.toUpperCase()} •`;
+        labels.heroBadge = isEn ? 'AQIQAH OF' : 'AQIQAH';
+        labels.coupleTitle = isEn ? 'BABY PROFILE' : 'PROFIL ANAK';
+        labels.coupleSubtitle = isEn ? 'Child' : 'Buah Hati';
+        labels.storyTitle = isEn ? 'BABY TIMELINE' : 'TUMBUH KEMBANG';
+        labels.storySubtitle = isEn ? 'Growth Milestones' : 'Tumbuh Kembang';
+        labels.eventTitle = isEn ? 'AQIQAH CELEBRATION' : 'JADWAL SYUKURAN';
+        labels.eventSubtitle = isEn ? 'Aqiqah Event' : 'Jadwal Acara';
+        labels.streamDesc = isEn 
+            ? 'We will broadcast the happy moments of our baby aqiqah virtually through the following platforms.'
+            : 'Kami mengundang Anda untuk menyaksikan momen bahagia aqiqah anak kami secara virtual melalui platform berikut.';
+    } else if (t === 'circumcision') {
+        labels.circleLogoText = isEn ? `• CIRCUMCISION OF ${coupleName.toUpperCase()} •` : `• KHITANAN ${coupleName.toUpperCase()} •`;
+        labels.heroBadge = isEn ? 'CIRCUMCISION OF' : 'KHITANAN';
+        labels.coupleTitle = isEn ? 'CHILD PROFILE' : 'PROFIL ANAK';
+        labels.coupleSubtitle = isEn ? 'Child' : 'Buah Hati';
+        labels.storyTitle = isEn ? 'GROWTH TIMELINE' : 'TUMBUH KEMBANG';
+        labels.storySubtitle = isEn ? 'Growth Milestones' : 'Tumbuh Kembang';
+        labels.eventTitle = isEn ? 'CIRCUMCISION TOUR' : 'JADWAL SYUKURAN';
+        labels.eventSubtitle = isEn ? 'Circumcision Event' : 'Jadwal Acara';
+        labels.streamDesc = isEn 
+            ? 'We will broadcast the happy moments of our circumcision virtually through the following platforms.'
+            : 'Kami mengundang Anda untuk menyaksikan momen bahagia khitanan putra kami secara virtual melalui platform berikut.';
+    }
+
+    return {
+        coupleName,
+        isSingleHost,
+        labels
+    };
+}
+
 function formatDate(dateStr, lang = 'id') {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -201,19 +334,12 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
    ═══════════════════════════════════════ */
 
 // 1. Cover / Sampul Section
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
-    const { t } = useTranslation(invitation?.language || 'id');
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeConfig }) {
+    const isEn = invitation?.language === 'en';
     const couples = safeArr(brideGrooms);
-    const bride = couples.find(b => b.gender === 'wanita' || String(b.gender).toLowerCase() === 'female') || couples[0] || {};
-    const groom = couples.find(b => b.gender === 'pria' || String(b.gender).toLowerCase() === 'male') || couples[1] || couples[0] || {};
-
     const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
 
-    const coupleName = (bride.nickname && groom.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
-            ? invitation.cover_title
-            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
+    const coupleName = themeConfig?.coupleName || 'Bimo & Raras';
 
     const coverImages = useMemo(() => {
         if (!invitation?.cover_image) return [];
@@ -239,7 +365,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
                         <path id="circlePath" fill="none" stroke="none" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
                         <text>
                             <textPath href="#circlePath" startOffset="0%">
-                                • {t('invitation.wedding_of').toUpperCase()} • {t('invitation.wedding_of').toUpperCase()}
+                                {themeConfig?.labels?.circleLogoText || (isEn ? '• THE WEDDING OF •' : '• PERNIKAHAN •')}
                             </textPath>
                         </text>
                     </svg>
@@ -250,12 +376,12 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 
                 <h1 className="wy-cover-couple">{coupleName}</h1>
 
-                <div className="wy-cover-dear">{t('invitation.to')}</div>
+                <div className="wy-cover-dear">{isEn ? 'To:' : 'Kepada:'}</div>
                 <div className="wy-cover-guest">{activeGuest.name}</div>
-                <p className="wy-cover-apology">{t('invitation.dear_guest_desc')}</p>
+                <p className="wy-cover-apology">{isEn ? '*We apologize for any spelling errors in names/titles' : '*Mohon maaf apabila terdapat kesalahan penulisan nama/gelar'}</p>
 
                 <button type="button" onClick={onOpen} id="tombol-buka" className="wy-btn-primary">
-                    <i className="fas fa-envelope-open" /> {t('invitation.open')}
+                    <i className="fas fa-envelope-open" /> {isEn ? 'Open' : 'Buka'}
                 </button>
             </div>
         </div>
@@ -263,8 +389,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 }
 
 // 2. Opening Section
-function OpeningSection({ invitation, brideGrooms, events, language }) {
-    const { t } = useTranslation(language);
+function OpeningSection({ invitation, brideGrooms, events, language, themeConfig }) {
     const openingImages = useMemo(() => {
         const rawSource = invitation?.opening_image || invitation?.cover_image;
         if (!rawSource) return [];
@@ -272,14 +397,7 @@ function OpeningSection({ invitation, brideGrooms, events, language }) {
     }, [invitation?.opening_image, invitation?.cover_image]);
 
     // Couples names
-    const couples = safeArr(brideGrooms);
-    const bride = couples.find(b => b.gender === 'wanita' || String(b.gender).toLowerCase() === 'female') || couples[0] || {};
-    const groom = couples.find(b => b.gender === 'pria' || String(b.gender).toLowerCase() === 'male') || couples[1] || couples[0] || {};
-    const coupleName = (bride.nickname && groom.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
-            ? invitation.cover_title
-            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
+    const coupleName = themeConfig?.coupleName || 'Bimo & Raras';
 
     // Date and Countdown
     const targetDate = invitation?.countdown_target_date || '';
@@ -318,7 +436,7 @@ function OpeningSection({ invitation, brideGrooms, events, language }) {
             <div className="wy-opening-hero-block">
                 <Reveal delay={100}>
                     <span className="wy-opening-hero-subtitle">
-                        {invitation?.religion === 'islam' ? 'PERNIKAHAN' : 'THE WEDDING OF'}
+                        {themeConfig?.labels?.heroBadge || (invitation?.religion === 'islam' ? 'PERNIKAHAN' : 'THE WEDDING OF')}
                     </span>
                 </Reveal>
                 <Reveal delay={300}>
@@ -327,7 +445,7 @@ function OpeningSection({ invitation, brideGrooms, events, language }) {
                 {formattedDate && (
                     <Reveal delay={500}>
                         <span className="wy-opening-hero-date">
-                            {language === 'en' ? 'SAVE THE DATE' : 'SIMPAN TANGGAL'} | {formattedDate}
+                            {themeConfig?.labels?.heroDateLabel || (language === 'en' ? 'SAVE THE DATE' : 'SIMPAN TANGGAL')} | {formattedDate}
                         </span>
                     </Reveal>
                 )}
@@ -363,12 +481,12 @@ function OpeningSection({ invitation, brideGrooms, events, language }) {
             {/* 2. Text Content Block */}
             <div className="wy-opening-content">
                 <Reveal className="wy-double-border">
-                    <h2 className="wy-opening-basmalah">{invitation?.religion === 'islam' ? 'Bismillahirrahmanirrahim' : 'Welcome'}</h2>
+                    <h2 className="wy-opening-basmalah">{invitation?.religion === 'islam' ? 'Bismillahirrahmanirrahim' : (language === 'en' ? 'Welcome' : 'Selamat Datang')}</h2>
                     <div className="wy-opening-salut">
                         {invitation?.opening_text ? (
                             <p style={{ whiteSpace: 'pre-line' }}>{invitation.opening_text}</p>
                         ) : (
-                            <p>Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri pernikahan kami.</p>
+                            <p>{language === 'en' ? 'With love and blessings, we invite you to attend our celebration.' : 'Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri perayaan kami.'}</p>
                         )}
                     </div>
                 </Reveal>
@@ -400,7 +518,7 @@ function OpeningSection({ invitation, brideGrooms, events, language }) {
 }
 
 // 3. Couple / Mempelai Section
-function CoupleSection({ brideGrooms, language, id }) {
+function CoupleSection({ brideGrooms, language, id, themeConfig }) {
     const { t } = useTranslation(language);
     const couples = safeArr(brideGrooms);
     const isEn = language === 'en';
@@ -452,19 +570,28 @@ function CoupleSection({ brideGrooms, language, id }) {
         );
     };
 
+    const isSingleHost = themeConfig?.isSingleHost;
+    const coupleTitle = themeConfig?.labels?.coupleTitle || t('invitation.mempelai');
+    const coupleSubtitle = themeConfig?.labels?.coupleSubtitle || t('invitation.mempelai');
+
     return (
         <section id={id || "couple"} className="wy-section">
             <Reveal>
-                <h4 className="wy-section-subtitle">{t('invitation.mempelai')}</h4>
-                <h2 className="wy-section-title">{t('invitation.mempelai')}</h2>
+                <h4 className="wy-section-subtitle">{coupleSubtitle}</h4>
+                <h2 className="wy-section-title">{coupleTitle}</h2>
             </Reveal>
 
-            {/* Check gender rendering groom first then ampersand then bride */}
-            {renderMempelai(groom, 'groom')}
-            {groom.full_name && bride.full_name && (
-                <div className="wy-couple-ampersand">&amp;</div>
+            {isSingleHost ? (
+                renderMempelai(couples[0] || {}, 'host')
+            ) : (
+                <>
+                    {renderMempelai(groom, 'groom')}
+                    {groom.full_name && bride.full_name && (
+                        <div className="wy-couple-ampersand">&amp;</div>
+                    )}
+                    {renderMempelai(bride, 'bride')}
+                </>
             )}
-            {renderMempelai(bride, 'bride')}
 
             <div className="wy-divider-gunungan">
                 <img src={ASSETS.gunungan} className="wy-divider-gunungan-img" alt="Divider" />
@@ -500,16 +627,19 @@ function useCountdown(targetDate) {
 
 // 5. Countdown & Event Section
 // 5. Countdown & Event Section
-function EventSection({ events, invitation, language }) {
+function EventSection({ events, invitation, language, themeConfig }) {
     const { t } = useTranslation(language);
     const countdown = useCountdown(invitation?.countdown_target_date);
     const listEvents = safeArr(events);
 
+    const eventTitle = themeConfig?.labels?.eventTitle || t('invitation.save_the_date');
+    const eventSubtitle = themeConfig?.labels?.eventSubtitle || t('invitation.save_the_date');
+
     return (
         <section id="event" className="wy-section">
             <Reveal>
-                <h4 className="wy-section-subtitle">{t('invitation.save_the_date')}</h4>
-                <h2 className="wy-section-title">{t('invitation.save_the_date')}</h2>
+                <h4 className="wy-section-subtitle">{eventSubtitle}</h4>
+                <h2 className="wy-section-title">{eventTitle}</h2>
             </Reveal>
 
             {/* Countdown widget */}
@@ -569,7 +699,7 @@ function EventSection({ events, invitation, language }) {
 }
 
 // 5.1 Live Streaming Section
-function LiveStreamingSection({ events, invitation, language }) {
+function LiveStreamingSection({ events, invitation, language, themeConfig }) {
     const { t } = useTranslation(language);
     const eventList = safeArr(events);
     const primaryEvent = eventList.find(e => e.is_primary) || eventList[0];
@@ -589,12 +719,17 @@ function LiveStreamingSection({ events, invitation, language }) {
     if (streamsList.length === 0) return null;
     
     const isEn = language === 'en';
+    const streamTitle = themeConfig?.labels?.streamTitle || (isEn ? 'Virtual Celebration' : 'Siaran Langsung');
+    const streamSubtitle = themeConfig?.labels?.streamSubtitle || 'Live Streaming';
+    const streamDesc = themeConfig?.labels?.streamDesc || (isEn 
+        ? 'We will broadcast the happy moments of our wedding procession virtually through the following platforms.'
+        : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi pernikahan kami secara virtual melalui platform berikut.');
     
     return (
         <section id="livestream" className="wy-section wy-livestream-section">
             <Reveal>
-                <h4 className="wy-section-subtitle">Live Streaming</h4>
-                <h2 className="wy-section-title">{isEn ? 'Virtual Celebration' : 'Siaran Langsung'}</h2>
+                <h4 className="wy-section-subtitle">{streamSubtitle}</h4>
+                <h2 className="wy-section-title">{streamTitle}</h2>
             </Reveal>
 
             <Reveal className="wy-double-border" style={{ maxWidth: '450px', margin: '0 auto', textAlign: 'center' }}>
@@ -605,9 +740,7 @@ function LiveStreamingSection({ events, invitation, language }) {
                     {primaryEvent?.start_time} - {primaryEvent?.end_time === '23:59:00' ? 'Selesai' : primaryEvent?.end_time} {primaryEvent?.timezone || 'WIB'}
                 </p>
                 <p className="wy-livestream-text">
-                    {isEn 
-                        ? 'We will broadcast the happy moments of our wedding procession virtually through the following platforms.'
-                        : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi pernikahan kami secara virtual melalui platform berikut.'}
+                    {streamDesc}
                 </p>
                 <div className="wy-livestream-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', width: '100%' }}>
                     {streamsList.map((stream, idx) => (
@@ -667,18 +800,21 @@ function TimelineCard({ story, language }) {
 }
 
 // 6. Timeline Section (Love Story)
-function TimelineSection({ loveStories, invitation, language }) {
+function TimelineSection({ loveStories, invitation, language, themeConfig }) {
     const { t } = useTranslation(language);
     const stories = loveStories?.length > 0 ? loveStories : [
         { title: 'Pertama Bertemu', story_date: '2023-11-20', description: 'Pertama kali dipertemukan di Jogja.' },
         { title: 'Chapter Two: Tunangan', story_date: '2025-05-15', description: 'Memutuskan untuk bertunangan secara resmi.' }
     ];
 
+    const storyTitle = themeConfig?.labels?.storyTitle || (language === 'en' ? 'LOVE STORY' : 'KISAH CINTA');
+    const storySubtitle = themeConfig?.labels?.storySubtitle || (language === 'en' ? 'Our Love Journey' : 'Kisah Perjalanan');
+
     return (
         <section id="love_story" className="wy-section">
             <Reveal>
-                <h4 className="wy-section-subtitle">{language === 'en' ? 'Our Love Journey' : 'Kisah Perjalanan'}</h4>
-                <h2 className="wy-section-title">{language === 'en' ? 'LOVE STORY' : 'KISAH CINTA'}</h2>
+                <h4 className="wy-section-subtitle">{storySubtitle}</h4>
+                <h2 className="wy-section-title">{storyTitle}</h2>
             </Reveal>
 
             <div className="wy-timeline">
@@ -1024,16 +1160,16 @@ function GiftSection({ bankAccounts, language }) {
 }
 
 // 10. Footer Section & Watermark
-function FooterSection({ invitation, brideGrooms, language }) {
+function FooterSection({ invitation, brideGrooms, language, themeConfig }) {
     const { t } = useTranslation(language);
     const isEn = language === 'en';
     const couples = safeArr(brideGrooms);
     const bride = couples.find(bg => bg.gender === 'wanita' || String(bg.gender).toLowerCase() === 'female') || couples[0] || {};
     const groom = couples.find(bg => bg.gender === 'pria' || String(bg.gender).toLowerCase() === 'male') || couples[1] || couples[0] || {};
 
-    const displayNames = (bride.nickname && groom.nickname)
+    const displayNames = themeConfig?.coupleName || (bride.nickname && groom.nickname
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Mempelai');
+        : (invitation?.cover_title || 'Mempelai'));
 
     const groomFather = groom.father_name;
     const groomMother = groom.mother_name;
@@ -1043,42 +1179,66 @@ function FooterSection({ invitation, brideGrooms, language }) {
     const hasGroomParents = groomFather || groomMother;
     const hasBrideParents = brideFather || brideMother;
 
+    const host = couples[0] || {};
+    const hostFather = host.father_name;
+    const hostMother = host.mother_name;
+    const hasHostParents = hostFather || hostMother;
+
+    const closingQuote = themeConfig?.labels?.closingQuote || invitation?.closing_text || (isEn 
+        ? 'It is an honor and a happiness for us if you are willing to attend and give your blessings to our event.' 
+        : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu.');
+
+    const signatureTitle = themeConfig?.labels?.signatureTitle || (isEn ? 'We Who Are Joyful,' : 'Kami Yang Berbahagia,');
+
     return (
         <section id="closing" className="wy-section">
             <Reveal className="wy-closing-quote">
-                {invitation?.closing_text ? (
-                    <p style={{ whiteSpace: 'pre-line' }}>{invitation.closing_text}</p>
-                ) : (
-                    <p>Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.</p>
-                )}
+                <p style={{ whiteSpace: 'pre-line' }}>{closingQuote}</p>
             </Reveal>
 
             {/* Signature block */}
             <Reveal className="wy-signature" variant="zoom">
                 <div className="wy-signature-title">
-                    {isEn ? 'We Who Are Joyful,' : 'Kami Yang Berbahagia,'}
+                    {signatureTitle}
                 </div>
                 <div className="wy-signature-families">
-                    {hasGroomParents && (
-                        <div>
-                            {isEn
-                                ? `Family of Mr. ${groomFather || '...'} & Mrs. ${groomMother || '...'}`
-                                : `Kel. Bapak ${groomFather || '...'} & Ibu ${groomMother || '...'}`
-                            }
-                        </div>
-                    )}
-                    {hasBrideParents && (
-                        <div>
-                            {isEn
-                                ? `Family of Mr. ${brideFather || '...'} & Mrs. ${brideMother || '...'}`
-                                : `Kel. Bapak ${brideFather || '...'} & Ibu ${brideMother || '...'}`
-                            }
-                        </div>
-                    )}
-                    {!hasGroomParents && !hasBrideParents && (
-                        <div>
-                            {isEn ? 'Both Families of the Couple' : 'Keluarga Besar Kedua Mempelai'}
-                        </div>
+                    {themeConfig?.isSingleHost ? (
+                        hasHostParents ? (
+                            <div>
+                                {isEn
+                                    ? `Family of Mr. ${hostFather || '...'} & Mrs. ${hostMother || '...'}`
+                                    : `Kel. Bapak ${hostFather || '...'} & Ibu ${hostMother || '...'}`
+                                }
+                            </div>
+                        ) : (
+                            <div>
+                                {isEn ? 'Big Family' : 'Keluarga Besar'}
+                            </div>
+                        )
+                    ) : (
+                        <>
+                            {hasGroomParents && (
+                                <div>
+                                    {isEn
+                                        ? `Family of Mr. ${groomFather || '...'} & Mrs. ${groomMother || '...'}`
+                                        : `Kel. Bapak ${groomFather || '...'} & Ibu ${groomMother || '...'}`
+                                    }
+                                </div>
+                            )}
+                            {hasBrideParents && (
+                                <div>
+                                    {isEn
+                                        ? `Family of Mr. ${brideFather || '...'} & Mrs. ${brideMother || '...'}`
+                                        : `Kel. Bapak ${brideFather || '...'} & Ibu ${brideMother || '...'}`
+                                    }
+                                </div>
+                            )}
+                            {!hasGroomParents && !hasBrideParents && (
+                                <div>
+                                    {isEn ? 'Both Families of the Couple' : 'Keluarga Besar Kedua Mempelai'}
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
                 <div className="wy-signature-couple">
@@ -1111,6 +1271,10 @@ export default function WayangTheme({
     const language = invitation?.language || 'id';
     const { t } = useTranslation(language);
     const [isOpened, setIsOpened] = useState(false);
+
+    const themeConfig = useMemo(() => {
+        return getThemeLabels(invitation?.type, language, brideGrooms, invitation);
+    }, [invitation?.type, language, brideGrooms, invitation]);
     const [isPlaying, setIsPlaying] = useState(false);
     const [showQr, setShowQr] = useState(false);
     const [activeSection, setActiveSection] = useState('opening');
@@ -1380,18 +1544,18 @@ export default function WayangTheme({
     };
 
     const componentMap = {
-        'opening':    <OpeningSection invitation={invitation} brideGrooms={brideGrooms} events={events} language={language} />,
-        'hero':       <OpeningSection invitation={invitation} brideGrooms={brideGrooms} events={events} language={language} />,
-        'couple':     <CoupleSection id="couple" brideGrooms={brideGrooms} language={language} />,
-        'bride_groom':<CoupleSection id="bride_groom" brideGrooms={brideGrooms} language={language} />,
-        'love_story': <TimelineSection loveStories={loveStories} invitation={invitation} language={language} />,
-        'event':      <EventSection events={events} invitation={invitation} language={language} />,
-        'livestream': <LiveStreamingSection events={events} invitation={invitation} language={language} />,
+        'opening':    <OpeningSection invitation={invitation} brideGrooms={brideGrooms} events={events} language={language} themeConfig={themeConfig} />,
+        'hero':       <OpeningSection invitation={invitation} brideGrooms={brideGrooms} events={events} language={language} themeConfig={themeConfig} />,
+        'couple':     <CoupleSection id="couple" brideGrooms={brideGrooms} language={language} themeConfig={themeConfig} />,
+        'bride_groom':<CoupleSection id="bride_groom" brideGrooms={brideGrooms} language={language} themeConfig={themeConfig} />,
+        'love_story': <TimelineSection loveStories={loveStories} invitation={invitation} language={language} themeConfig={themeConfig} />,
+        'event':      <EventSection events={events} invitation={invitation} language={language} themeConfig={themeConfig} />,
+        'livestream': <LiveStreamingSection events={events} invitation={invitation} language={language} themeConfig={themeConfig} />,
         'gallery':    <GallerySection galleries={galleries} language={language} />,
         'rsvp':       <RsvpSection wishes={wishes} invitation={invitation} guest={guest} language={language} />,
         'bank':       <GiftSection bankAccounts={bankAccounts} language={language} />,
-        'closing':    <FooterSection invitation={invitation} brideGrooms={brideGrooms} language={language} />,
-        'footer':     <FooterSection invitation={invitation} brideGrooms={brideGrooms} language={language} />,
+        'closing':    <FooterSection invitation={invitation} brideGrooms={brideGrooms} language={language} themeConfig={themeConfig} />,
+        'footer':     <FooterSection invitation={invitation} brideGrooms={brideGrooms} language={language} themeConfig={themeConfig} />,
     };
 
     const renderSection = (section) => {
@@ -1503,6 +1667,7 @@ export default function WayangTheme({
                 guest={guest}
                 isOpened={isOpened}
                 onOpen={handleOpen}
+                themeConfig={themeConfig}
             />
 
             {/* MAIN CONTENT AREA */}

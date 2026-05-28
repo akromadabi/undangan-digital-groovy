@@ -176,7 +176,7 @@ const THEMES_CFG = {
 /* ─────────────────────────────────────────────────────────
    MAIN COMPONENT
 ───────────────────────────────────────────────────────── */
-export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
+export default function ResellerLanding({ reseller, plans = [], themes = [], features = [] }) {
     const T = THEMES_CFG[reseller?.template] || THEMES_CFG.default;
 
     const [scrolled, setScrolled] = useState(false);
@@ -187,6 +187,27 @@ export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
     const [likedThemes, setLikedThemes] = useState({});
     const [showContactModal, setShowContactModal] = useState(false);
     const marqueeRef = useRef(null);
+
+    const [showComparison, setShowComparison] = useState(false);
+
+    // Build feature access map: { planId: { featureId: is_enabled } }
+    const planFeatureMap = {};
+    plans.forEach(plan => {
+        planFeatureMap[plan.id] = {};
+        (plan.feature_access || []).forEach(fa => {
+            planFeatureMap[plan.id][fa.feature_id] = fa.is_enabled;
+        });
+    });
+
+    // Group features by category
+    const featuresByCategory = {};
+    (features || []).forEach(f => {
+        const cat = f.category || 'Lainnya';
+        if (!featuresByCategory[cat]) featuresByCategory[cat] = [];
+        featuresByCategory[cat].push(f);
+    });
+
+    const totalFeatures = (features || []).length;
 
     const hasContact = !!(
         reseller.footer_whatsapp ||
@@ -707,6 +728,92 @@ export default function ResellerLanding({ reseller, plans = [], themes = [] }) {
                                 );
                             })}
                         </div>
+
+                        {/* Feature Comparison Toggle */}
+                        {totalFeatures > 0 && (
+                            <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+                                <button type="button" onClick={() => setShowComparison(!showComparison)} className="rl-btn rl-btn--accent-outline" style={{ display: 'inline-flex', padding: '0.75rem 2rem', cursor: 'pointer', background: 'transparent' }}>
+                                    {showComparison ? 'Sembunyikan' : 'Lihat'} Perbandingan Fitur Detail
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Feature Comparison Table */}
+                        {showComparison && totalFeatures > 0 && (
+                            <div className="rl-comparison-table-wrap">
+                                <table className="rl-comparison-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Fitur</th>
+                                            {plans.map(plan => (
+                                                <th key={plan.id}>{plan.name}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {/* Quota rows */}
+                                        <tr className="rl-comparison-cat-row">
+                                            <td colSpan={plans.length + 1}>
+                                                <span className="rl-comparison-cat-label">Kuota & Batasan</span>
+                                            </td>
+                                        </tr>
+                                        <tr className="rl-comparison-row">
+                                            <td>Jumlah Tamu</td>
+                                            {plans.map(plan => (
+                                                <td key={plan.id} style={{ fontWeight: 700 }}>{plan.max_guests?.toLocaleString()}</td>
+                                            ))}
+                                        </tr>
+                                        <tr className="rl-comparison-row">
+                                            <td>Foto Galeri</td>
+                                            {plans.map(plan => (
+                                                <td key={plan.id} style={{ fontWeight: 700 }}>{plan.max_galleries}</td>
+                                            ))}
+                                        </tr>
+                                        <tr className="rl-comparison-row">
+                                            <td>Durasi Aktif</td>
+                                            {plans.map(plan => (
+                                                <td key={plan.id} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                                    {plan.duration_days > 0 ? `${plan.duration_days} hari` : 'Selamanya (∞)'}
+                                                </td>
+                                            ))}
+                                        </tr>
+
+                                        {/* Feature rows by category */}
+                                        {Object.entries(featuresByCategory).map(([category, catFeatures]) => (
+                                            <Fragment key={category}>
+                                                <tr className="rl-comparison-cat-row">
+                                                    <td colSpan={plans.length + 1}>
+                                                        <span className="rl-comparison-cat-label">{category}</span>
+                                                    </td>
+                                                </tr>
+                                                {catFeatures.map(feature => (
+                                                    <tr key={feature.id} className="rl-comparison-row">
+                                                        <td>
+                                                            <div style={{ fontWeight: 600 }}>{feature.name}</div>
+                                                            {feature.description && (
+                                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', lineHeight: '1.4' }}>{feature.description}</div>
+                                                            )}
+                                                        </td>
+                                                        {plans.map(plan => {
+                                                            const enabled = planFeatureMap[plan.id]?.[feature.id];
+                                                            return (
+                                                                <td key={plan.id}>
+                                                                    {enabled ? (
+                                                                        <div className="rl-comparison-icon rl-comparison-icon--enabled">✓</div>
+                                                                    ) : (
+                                                                        <div className="rl-comparison-icon rl-comparison-icon--disabled">−</div>
+                                                                    )}
+                                                                </td>
+                                                            );
+                                                        })}
+                                                    </tr>
+                                                ))}
+                                            </Fragment>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 </section>
             )}
@@ -1526,5 +1633,130 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     .rl-pricing { grid-template-columns: 1fr; }
     .rl-cta-btn { padding: 0.75rem 1.5rem; font-size: 0.9rem; }
     .rl-features { grid-template-columns: 1fr; }
+}
+
+/* ── COMPARISON TABLE ── */
+.rl-comparison-table-wrap {
+    overflow-x: auto;
+    position: relative;
+    margin-top: 2.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.rl-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+.rl-comparison-table th, 
+.rl-comparison-table td {
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--card-border);
+    vertical-align: middle;
+    font-size: 0.875rem;
+}
+.rl-comparison-table th {
+    background: rgba(255,255,255,0.02);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.rl-comparison-table th:first-child {
+    width: 280px;
+    min-width: 180px;
+}
+.rl-comparison-table th:not(:first-child),
+.rl-comparison-table td:not(:first-child) {
+    text-align: center;
+    min-width: 110px;
+}
+
+/* Category row style */
+.rl-comparison-cat-row td {
+    background: rgba(255, 255, 255, 0.05) !important;
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    padding: 0.625rem 1.25rem;
+}
+
+/* Sticky first column */
+.rl-comparison-table th:first-child,
+.rl-comparison-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: var(--section-alt);
+    border-right: 1px solid var(--card-border);
+    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.15);
+}
+/* Header first child sticky has higher z-index */
+.rl-comparison-table th:first-child {
+    z-index: 20;
+    background: var(--section-alt);
+}
+/* Category row first cell is also sticky to anchor label */
+.rl-comparison-cat-row td {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+}
+
+.rl-comparison-row:hover td {
+    background: rgba(255,255,255,0.02);
+}
+.rl-comparison-row:hover td:first-child {
+    background: var(--section-alt);
+}
+
+/* Icons */
+.rl-comparison-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin: 0 auto;
+}
+.rl-comparison-icon--enabled {
+    background: rgba(74,222,128,0.12);
+    color: #4ade80;
+}
+.rl-comparison-icon--disabled {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+}
+
+/* Compact mobile styles */
+@media (max-width: 640px) {
+    .rl-comparison-table th, 
+    .rl-comparison-table td {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.8rem;
+    }
+    .rl-comparison-table th:first-child {
+        width: 140px;
+        min-width: 130px;
+        max-width: 140px;
+    }
+    .rl-comparison-cat-row td {
+        font-size: 0.7rem;
+    }
+    .rl-comparison-cat-label {
+        left: 0.875rem;
+    }
+}
+.rl-comparison-cat-label {
+    position: sticky;
+    left: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    z-index: 10;
 }
 `;

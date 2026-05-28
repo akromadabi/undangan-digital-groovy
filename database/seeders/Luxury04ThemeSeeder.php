@@ -13,7 +13,7 @@ class Luxury04ThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'luxury-04'],
             [
-                'name' => 'Luxury 4',
+                'name' => 'Champagne Class',
                 'thumbnail' => '/themes/modern-black/thumbnail.jpg', // Placeholder thumbnail
                 'category' => 'premium',
                 'color_scheme' => [

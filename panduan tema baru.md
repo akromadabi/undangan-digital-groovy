@@ -38,6 +38,26 @@ nama-tema/
 └── asset/             ← Aset ornamen, bingkai, mask (format .webp / .svg)
 ```
 
+### 1.3 Registrasi Whitelist Router Backend (Controller)
+Agar Laravel backend dapat mengenali bahwa tema baru memiliki layout dinamis tingkat lanjut (`DynamicIndex.jsx`) dan mencegah sistem melakukan *fallback* otomatis ke tampilan dasar (`Invitation/Show.jsx`), Anda **WAJIB** mendaftarkan slug tema baru Anda ke dalam whitelist di controller backend.
+
+Buka file [InvitationController.php](file:///c:/laragon/www/Undangan%20Digital/app/Http/Controllers/InvitationController.php) dan tambahkan slug tema baru Anda ke dalam array pengecekan `in_array` di tiga tempat berikut:
+1. Di dalam method `show()` (untuk rute utama kunjungan tamu undangan live)
+2. Di dalam method `demo()` pada blok data demo reseller kustom (sekitar pertengahan file)
+3. Di dalam method `demo()` pada blok data demo katalog default (sekitar akhir file)
+
+Contoh kode:
+```php
+if ($invitation->theme && in_array($invitation->theme->slug, [
+    'utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 
+    'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 
+    'manchester-united', 'moroccan', 'youtube', 'youtube-new', 'slug-tema-anda-di-sini'
+])) {
+    $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
+}
+```
+*Catatan*: Jika langkah ini dilewatkan, tema baru Anda akan dirender menggunakan halaman default dasar (`Invitation/Show.jsx`), sehingga seluruh visual kreatif mockup app Anda tidak akan termuat.
+
 ---
 
 ## 2. Helper Baku & Parsing Data (Props)
@@ -332,6 +352,23 @@ Every theme must support QR Code presence check-in automatically if enabled.
    - Sediakan tombol tutup untuk mengubah state `setShowQr(false)`.
    - Pastikan overlay memiliki latar belakang gelap transparan (`rgba(0, 0, 0, 0.8)`) dengan efek blur (`backdrop-filter: blur(8px)`) agar tampak premium.
 
+### 4.10 Standar Visual Penanganan Gambar & Foto (Anti-Empty Space & Cover Lock)
+*Masalah*: Browser Chrome/Safari sering kali menimpa tinggi gambar (`height: 100%`) menjadi otomatis (`height: auto`) jika terdapat aturan reset CSS global seperti `img { height: auto; }`. Ketika pengguna mengunggah foto berorientasi landscape ke wadah berorientasi potret (atau sebaliknya), foto tersebut tidak akan memenuhi wadah, menyisakan area kosong berwarna hitam pekat di bagian bawah wadah (seperti yang sering terjadi pada profil mempelai dan grid galeri persegi).
+
+*Standardisasi Mutlak*:
+Setiap foto profil mempelai, foto galeri, slideshow cover, dan slideshow opening **WAJIB** dikunci properti dimensinya di dalam CSS menggunakan `!important` untuk menjamin foto selalu mengisi wadahnya secara penuh 100% tanpa kompromi:
+```css
+/* Menjamin foto yang menggunakan object-fit cover selalu memenuhi wadahnya dengan sempurna (Mencegah bug ruang kosong hitam) */
+.prefix-tema img.class-foto-profil,
+.prefix-tema img.class-foto-galeri,
+.prefix-tema .cover-photo-window img,
+.prefix-tema .opening-photo-window img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+```
+
 ---
 
 ## 5. Layout Mode & Mesin Transisi Halaman (Swipe & Scroll)
@@ -414,7 +451,48 @@ cmd /c mklink /J "public\storage" "storage\app\public"
 
 ---
 
-## 7. Rujukan Referensi Kode Terbaik
+## 7. Panduan Khusus Tema Single-Celebrant (Ulang Tahun, Khitanan, Aqiqah)
+
+Untuk pembuatan tema yang ditujukan untuk acara dengan tokoh tunggal (single-celebrant) seperti Ulang Tahun, Khitanan, atau Aqiqah, ikuti kaidah penyesuaian data dan istilah berikut:
+
+### 7.1 Cara Mengambil 1 Profil Tunggal dari `brideGrooms`
+Pada database, tabel `bride_grooms` tetap digunakan untuk menyimpan data profil tokoh utama. Bedanya, jika pernikahan menyimpan 2 data mempelai, maka acara single-celebrant hanya menyimpan 1 data tokoh utama pada baris pertama (indeks 0):
+```js
+const couples = safeArr(brideGrooms);
+const celebrant = couples[0] || {}; // Profil utama anak/tokoh yang merayakan
+```
+Gunakan variabel `celebrant` ini untuk menampilkan nama lengkap (`celebrant.full_name`), nama panggilan (`celebrant.nickname`), foto (`celebrant.photo`), dan sosial media.
+
+### 7.2 Penyesuaian Nama Orang Tua (Keluarga yang Mengundang)
+Karena tokoh utama hanya satu orang, maka data orang tua juga hanya berasal dari profil tunggal `celebrant`:
+```js
+const fatherName = celebrant.father_name || '';
+const motherName = celebrant.mother_name || '';
+const childOrder = celebrant.child_order || '';
+```
+Pada seksi penutup/footer, tampilkan nama keluarga yang mengundang secara dinamis:
+```jsx
+{fatherName && motherName && (
+    <p>
+        {isEn ? `Family of Mr. ${fatherName} & Mrs. ${motherName}` : `Kel. Bapak ${fatherName} & Ibu ${motherName}`}
+    </p>
+)}
+```
+
+### 7.3 Milestones / Love Story Tetap Aktif
+Fitur **Love Story (`love_stories`)** tetap aktif untuk tema Ulang Tahun atau tumbuh kembang anak, namun dialihkan fungsinya untuk menceritakan **milestones perjalanan usia** atau **momen tumbuh kembang** (contoh: usia 1 tahun, usia 3 tahun, saat mulai sekolah, dll.).
+- Sesuaikan judul heading seksi ini secara fleksibel, misalnya: `Perjalanan Usia`, `Tumbuh Kembang`, `Our Journey`, atau `Milestones`.
+
+### 7.4 Penyesuaian Istilah dan Terminologi Konten
+Sesuaikan seluruh sebutan statis bertema pernikahan di dalam JSX agar lebih umum dan ramah untuk acara tunggal:
+- **Heading Profil Mempelai**: Ubah tulisan `"Kedua Mempelai"` atau `"Groom & Bride"` menjadi `"Yang Merayakan"`, `"Tentang Anak Kami"`, `"Birthday Kid"`, atau nama panggilan tokoh utama (`celebrant.nickname`).
+- **Layout Profil**: Hindari membuat dua kolom bersebelahan untuk dua orang. Tampilkan satu kolom terpusat yang besar dan berdesain estetis untuk profil tunggal `celebrant`.
+- **Seksi Acara**: Ganti kata `"Akad & Resepsi"` menjadi `"Pesta Ulang Tahun"`, `"Acara Syukuran"`, `"Pesta Khitanan"`, atau biarkan dinamis membaca kolom `event.name` dari database.
+- **Countdown**: Arahkan hitung mundur ke waktu mulai acara pesta utama (`event.event_date`).
+
+---
+
+## 8. Rujukan Referensi Kode Terbaik
 
 | Nama Tema | Direktori File Utama | Keunggulan Utama Sebagai Standard Referensi |
 |---|---|---|

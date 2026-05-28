@@ -134,6 +134,7 @@ class XenditService
             Subscription::create([
                 'user_id' => $payment->user_id,
                 'plan_id' => $payment->plan_id,
+                'invitation_id' => $payment->invitation_id,
                 'payment_id' => $payment->id,
                 'starts_at' => now(),
                 'expires_at' => now()->addDays($payment->plan->duration_days),

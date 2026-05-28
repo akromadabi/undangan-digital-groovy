@@ -38,7 +38,7 @@ class DashboardController extends Controller
             ];
         });
 
-        $subscription = $user->activeSubscription;
+        $subscription = $invitation ? $invitation->activeSubscription : $user->activeSubscription;
         $dashboardSubscription = null;
         if ($subscription) {
             $dashboardSubscription = [
@@ -124,5 +124,87 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function list(Request $request)
+    {
+        $user = $request->user();
+        $invitations = $user->invitations()->with(['theme', 'activeSubscription.plan'])->get();
+
+        $greetingCards = \App\Models\GreetingCard::where('user_id', $user->id)
+            ->latest()
+            ->get()
+            ->map(fn ($card) => [
+                'id'             => $card->id,
+                'title'          => $card->title,
+                'template'       => $card->template,
+                'template_label' => $card->template_label,
+                'type'           => $card->type,
+                'type_label'     => $card->type_label,
+                'recipient_name' => $card->recipient_name,
+                'sender_name'    => $card->sender_name,
+                'photo_url'      => $card->photo_url,
+                'custom_url'     => $card->custom_url,
+                'share_url'      => $card->getShareUrl(),
+                'is_active'      => $card->is_active,
+                'created_at'     => $card->created_at->format('d M Y'),
+            ]);
+
+        return Inertia::render('Dashboard/InvitationsList', [
+            'invitations' => $invitations,
+            'greetingCards' => $greetingCards,
+            'activeInvitationId' => session('active_invitation_id'),
+            'initialTab' => $request->query('tab', 'invitations'),
+        ]);
+    }
+
+    public function select(Request $request, \App\Models\Invitation $invitation)
+    {
+        if ($invitation->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        session()->put('active_invitation_id', $invitation->id);
+
+        return redirect()->route('dashboard')->with('success', "Berhasil beralih ke undangan: {$invitation->title}");
+    }
+
+    public function create(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|string|in:wedding,birthday,graduation,aqiqah,circumcision,anniversary',
+            'title' => 'required|string|max:100',
+        ]);
+
+        $user = $request->user();
+        
+        $type = $request->input('type');
+        $title = $request->input('title');
+        
+        $openingText = "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan acara tersebut.";
+        if ($type === 'wedding') {
+            $openingText = "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan kami.";
+        } elseif ($type === 'birthday') {
+            $openingText = "Halo teman-teman, datang ya ke acara ulang tahunku!";
+        } elseif ($type === 'graduation') {
+            $openingText = "Dengan memohon doa restu, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri syukuran wisuda kami.";
+        }
+
+        $invitation = $user->invitations()->create([
+            'slug' => 'temp-slug-' . time() . '-' . rand(10, 99),
+            'title' => $title,
+            'type' => $type,
+            'opening_title' => 'Bismillahirrahmanirrahim',
+            'opening_text' => $openingText,
+            'closing_text' => "Wassalamu'alaikum Warahmatullahi Wabarakatuh",
+            'is_active' => true,
+        ]);
+
+        session()->put('active_invitation_id', $invitation->id);
+
+        // Reset onboarding step to step 2 for this new invitation
+        $user->update(['onboarding_step' => 2]);
+
+        return redirect()->route('wizard.link');
     }
 }

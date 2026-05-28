@@ -13,7 +13,7 @@ class Luxury01ThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'luxury-01'],
             [
-                'name' => 'Luxury 1',
+                'name' => 'Midnight Gold',
                 'thumbnail' => '/themes/modern-black/thumbnail.jpg', // Placeholder thumbnail
                 'category' => 'premium',
                 'color_scheme' => [

@@ -116,7 +116,7 @@
   text-align: center;
 }
 
-/* Shopee Express Text Logo Style (Cover Header) */
+/* Shopinvity Express Text Logo Style (Cover Header) */
 .sp-cover-header-brand {
   display: flex;
   align-items: center;
@@ -126,12 +126,12 @@
   cursor: default;
 }
 
-.sp-shopee-logo-svg {
+.sp-shopinvity-logo-svg {
   display: inline-block;
   vertical-align: middle;
 }
 
-.sp-brand-shopee {
+.sp-brand-shopinvity {
   font-size: 2.15rem;
   font-weight: 800;
   color: #ee4d2d;
@@ -1934,18 +1934,18 @@
   transform: scale(0.85);
 }
 
-.sp-review-card-shopee {
+.sp-review-card-shopinvity {
   background-color: #ffffff;
 }
 
-.sp-review-card-shopee .sp-chat-body {
+.sp-review-card-shopinvity .sp-chat-body {
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 !important;
   border-radius: 0 !important;
 }
 
-.sp-review-card-shopee .sp-chat-avatar {
+.sp-review-card-shopinvity .sp-chat-avatar {
   box-shadow: 0 2px 5px rgba(255, 87, 34, 0.15);
 }
 
@@ -2160,50 +2160,50 @@
 }
 
 /* Review card improved */
-.sp-review-card-shopee {
+.sp-review-card-shopinvity {
   border-bottom: 1px solid var(--sp-border);
   padding-bottom: 14px;
   margin-bottom: 14px;
 }
 
-.sp-review-card-shopee:last-child {
+.sp-review-card-shopinvity:last-child {
   border-bottom: none;
   margin-bottom: 0;
 }
 
-.sp-review-card-shopee .sp-chat-avatar {
+.sp-review-card-shopinvity .sp-chat-avatar {
   background: var(--sp-peach);
   color: var(--sp-primary);
   font-weight: 700;
   font-size: 1rem;
 }
 
-.sp-review-card-shopee .sp-chat-body {
+.sp-review-card-shopinvity .sp-chat-body {
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 !important;
   border-radius: 0 !important;
 }
 
-.sp-review-card-shopee .sp-chat-sender span:first-child {
+.sp-review-card-shopinvity .sp-chat-sender span:first-child {
   font-weight: 600;
   color: var(--sp-text);
   font-size: 0.78rem;
 }
 
-.sp-review-card-shopee .sp-review-stars-row {
+.sp-review-card-shopinvity .sp-review-stars-row {
   color: #ffb300;
   font-size: 0.7rem;
   margin: 3px 0;
 }
 
-.sp-review-card-shopee .sp-review-variation-text {
+.sp-review-card-shopinvity .sp-review-variation-text {
   font-size: 0.62rem;
   color: var(--sp-text-secondary);
   margin-bottom: 6px;
 }
 
-.sp-review-card-shopee .sp-chat-msg {
+.sp-review-card-shopinvity .sp-chat-msg {
   margin: 0;
   color: #333;
   font-size: 0.78rem;
@@ -2362,5 +2362,9 @@
   box-shadow: 0 4px 12px rgba(255, 87, 34, 0.35);
 }
 
-
-
+/* Single Host Grid adjustment for Shopinvity Mall profile */
+.sp-mall-couple-grid.sp-single-host-grid {
+  grid-template-columns: 1fr;
+  max-width: 280px;
+  margin: 0 auto;
+}

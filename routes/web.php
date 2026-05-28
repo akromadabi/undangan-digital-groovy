@@ -201,6 +201,9 @@ Route::middleware(['auth'])->prefix('wizard')->name('wizard.')->group(function (
 Route::middleware(['auth', 'onboarding'])->group(function () {
     // Main Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/invitations', [DashboardController::class, 'list'])->name('dashboard.invitations');
+    Route::post('/invitations/select/{invitation}', [DashboardController::class, 'select'])->name('dashboard.invitations.select');
+    Route::post('/invitations/create', [DashboardController::class, 'create'])->name('dashboard.invitations.create');
 
     // Tutorial & Panduan
     Route::get('/tutorial', [DashboardController::class, 'tutorial'])->name('tutorial');
@@ -315,6 +318,7 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/themes', [AdminDashboardController::class, 'themes'])->name('themes');
+    Route::post('/themes/{theme}/custom-preview', [AdminDashboardController::class, 'updateThemeCustomPreview'])->name('themes.custom-preview.update');
     Route::get('/faq', [AdminDashboardController::class, 'faq'])->name('faq');
     Route::resource('users', AdminUserController::class)->only(['index', 'show']);
     Route::get('/live-tamu', [AdminLiveTamuController::class, 'index'])->name('live-tamu');

@@ -11,6 +11,117 @@ function safeArr(val) {
     return [];
 }
 
+function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
+    const t = type || 'wedding';
+    const isEn = String(locale).toLowerCase() === 'en';
+    const bgs = safeArr(brideGrooms);
+    const host = bgs[0] || {};
+    
+    let mainName = '';
+    let initials = '';
+    let isSingleHost = false;
+    
+    if (['wedding', 'anniversary'].includes(t)) {
+        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+        mainName = groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom';
+        initials = `${groom.nickname?.charAt(0) || 'B'}${bride.nickname?.charAt(0) || 'R'}`;
+        isSingleHost = false;
+    } else {
+        mainName = host.nickname || host.full_name || 'Host';
+        initials = mainName.charAt(0) || 'H';
+        isSingleHost = true;
+    }
+
+    let labels = {
+        albumLabel: isEn ? 'MEMORIES ALBUM' : 'ALBUM KENANGAN',
+        albumSubtitle: isEn ? 'Special Playlist' : 'Daftar Putar Spesial',
+        eventHeader: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
+        introBadge: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
+        introTitle: invitation?.opening_title || (isEn ? 'Special Celebration' : 'Perayaan Spesial'),
+        introText: invitation?.opening_text || '',
+        profileHeader: isEn ? 'Featured Profile' : 'Profil Utama',
+        storyHeader: isEn ? 'Our Journey' : 'Kisah Perjalanan',
+        storySubtitle: isEn ? 'Journey Playlist' : 'Daftar Putar Perjalanan',
+        streamDesc: isEn ? 'Join our event virtually via the streaming links below' : 'Saksikan momen bahagia kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.'
+    };
+
+    if (t === 'wedding') {
+        labels.albumLabel = isEn ? 'PLAYING FROM WEDDING ALBUM' : 'MEMUTAR DARI ALBUM PERNIKAHAN';
+        labels.albumSubtitle = isEn ? 'The Wedding Album' : 'Album Pernikahan';
+        labels.eventHeader = isEn ? 'Live Events / Tour' : 'Jadwal Acara / Tur';
+        labels.introBadge = isEn ? 'THE WEDDING OF' : 'PERNIKAHAN';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Wedding Album' : 'Album Pernikahan');
+        labels.introText = invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami meresmikan ikatan pernikahan kami.';
+        labels.profileHeader = isEn ? 'Featured Artists' : 'Artis Utama';
+        labels.storyHeader = isEn ? 'Love Story Playlist' : 'Daftar Putar Kisah Cinta';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our hearts' : 'Lirik disinkronkan dengan hati kami';
+        labels.streamDesc = isEn ? 'Please join our wedding virtually via the streaming platform links below' : 'Saksikan momen bahagia pernikahan kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'anniversary') {
+        labels.albumLabel = isEn ? 'PLAYING FROM ANNIVERSARY ALBUM' : 'MEMUTAR DARI ALBUM ANNIVERSARY';
+        labels.albumSubtitle = isEn ? 'The Anniversary Album' : 'Album Anniversary';
+        labels.eventHeader = isEn ? 'Anniversary Tour' : 'Jadwal Perayaan / Tur';
+        labels.introBadge = isEn ? 'ANNIVERSARY OF' : 'ANNIVERSARY';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Anniversary Album' : 'Album Anniversary');
+        labels.introText = invitation?.opening_text || 'Perjalanan kasih kami yang penuh berkat dan kebahagiaan.';
+        labels.profileHeader = isEn ? 'Featured Couple' : 'Pasangan Utama';
+        labels.storyHeader = isEn ? 'Love Journey Playlist' : 'Daftar Putar Perjalanan Kasih';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our years' : 'Lirik disinkronkan dengan tahun-tahun kami';
+        labels.streamDesc = isEn ? 'Please join our celebration virtually via the streaming platform links below' : 'Saksikan momen bahagia anniversary kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'graduation') {
+        labels.albumLabel = isEn ? 'PLAYING FROM GRADUATION ALBUM' : 'MEMUTAR DARI ALBUM WISUDA';
+        labels.albumSubtitle = isEn ? 'The Graduation Album' : 'Album Wisuda';
+        labels.eventHeader = isEn ? 'Graduation Tour' : 'Jadwal Acara / Wisuda';
+        labels.introBadge = isEn ? 'THE GRADUATION OF' : 'WISUDA';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Graduation Album' : 'Album Wisuda');
+        labels.introText = invitation?.opening_text || 'Perayaan kelulusan dan awal dari perjalanan studi baru.';
+        labels.profileHeader = isEn ? 'Featured Graduate' : 'Profil Wisudawan';
+        labels.storyHeader = isEn ? 'Study Journey Playlist' : 'Daftar Putar Perjalanan Studi';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our study days' : 'Lirik disinkronkan dengan perjuangan studi kami';
+        labels.streamDesc = isEn ? 'Please join our graduation virtually via the streaming platform links below' : 'Saksikan momen syukuran kelulusan kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'birthday') {
+        labels.albumLabel = isEn ? 'PLAYING FROM BIRTHDAY ALBUM' : 'MEMUTAR DARI ALBUM ULANG TAHUN';
+        labels.albumSubtitle = isEn ? 'The Birthday Album' : 'Album Ulang Tahun';
+        labels.eventHeader = isEn ? 'Birthday Party Tour' : 'Jadwal Perayaan / Tur';
+        labels.introBadge = isEn ? 'THE BIRTHDAY OF' : 'ULANG TAHUN';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Birthday Album' : 'Album Ulang Tahun');
+        labels.introText = invitation?.opening_text || 'Syukuran pertambahan usia dan langkah baru penuh berkah.';
+        labels.profileHeader = isEn ? 'Featured Celebrant' : 'Profil Ulang Tahun';
+        labels.storyHeader = isEn ? 'Life Milestones Playlist' : 'Daftar Putar Perjalanan Hidup';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our milestones' : 'Lirik disinkronkan dengan perjalanan usia kami';
+        labels.streamDesc = isEn ? 'Please join our birthday party virtually via the streaming platform links below' : 'Saksikan momen pertambahan usia kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'aqiqah') {
+        labels.albumLabel = isEn ? 'PLAYING FROM AQIQAH ALBUM' : 'MEMUTAR DARI ALBUM AQIQAH';
+        labels.albumSubtitle = isEn ? 'The Aqiqah Album' : 'Album Aqiqah';
+        labels.eventHeader = isEn ? 'Aqiqah Celebration Tour' : 'Jadwal Acara / Aqiqah';
+        labels.introBadge = isEn ? 'THE AQIQAH OF' : 'AQIQAH';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Aqiqah Album' : 'Album Aqiqah');
+        labels.introText = invitation?.opening_text || 'Syukuran kehadiran buah hati tercinta yang menjadi penyejuk hati kami.';
+        labels.profileHeader = isEn ? 'Featured Child' : 'Profil Anak';
+        labels.storyHeader = isEn ? 'Baby Growth Playlist' : 'Daftar Putar Tumbuh Kembang';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our baby steps' : 'Lirik disinkronkan dengan tumbuh kembang buah hati kami';
+        labels.streamDesc = isEn ? 'Please join our aqiqah virtually via the streaming platform links below' : 'Saksikan momen aqiqah putra/putri kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'circumcision') {
+        labels.albumLabel = isEn ? 'PLAYING FROM CIRCUMCISION ALBUM' : 'MEMUTAR DARI ALBUM KHITANAN';
+        labels.albumSubtitle = isEn ? 'The Circumcision Album' : 'Album Khitanan';
+        labels.eventHeader = isEn ? 'Circumcision Tour' : 'Jadwal Syukuran / Tur';
+        labels.introBadge = isEn ? 'THE CIRCUMCISION OF' : 'KHITANAN';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Circumcision Album' : 'Album Khitanan');
+        labels.introText = invitation?.opening_text || 'Syukuran khitanan putra kami sebagai bagian dari syariat dan kesehatan.';
+        labels.profileHeader = isEn ? 'Featured Child' : 'Profil Anak';
+        labels.storyHeader = isEn ? 'Growth Journey Playlist' : 'Daftar Putar Tumbuh Kembang';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our boy steps' : 'Lirik disinkronkan dengan kisah tumbuh kembang putra kami';
+        labels.streamDesc = isEn ? 'Please join our circumcision celebration virtually via the streaming platform links below' : 'Saksikan momen syukuran khitanan putra kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    }
+
+    return {
+        mainName,
+        initials,
+        isSingleHost,
+        labels
+    };
+}
+
 function pad2(n) {
     return String(n).padStart(2, '0');
 }
@@ -131,29 +242,18 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
 }
 
 /* ═══════════════════════════════════════
-   COVER SECTION (Spotify Now Playing UI)
+   COVER SECTION (Spotivite Now Playing UI)
    ═══════════════════════════════════════ */
 function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, language, fallbackPhoto }) {
     const { t, locale } = useTranslation(language);
-    const bgs = safeArr(brideGrooms);
-    const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0];
-    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1];
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, initials, labels } = themeConfig;
 
     const guestName = guest?.name
         || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null)
         || 'Tamu Undangan';
 
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
-            ? invitation.cover_title
-            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
-
-    const initials = useMemo(() => {
-        const first = groom?.nickname?.charAt(0) || 'B';
-        const second = bride?.nickname?.charAt(0) || 'R';
-        return `${first}${second}`;
-    }, [groom, bride]);
+    const coupleName = mainName;
 
     const artworkUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto;
     const [coverSrc, setCoverSrc] = useState(artworkUrl);
@@ -186,7 +286,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                 <div className="spty-cover__device">
                     <div className="spty-cover__header">
                         <i className="fas fa-chevron-down" />
-                        <span>{locale === 'en' ? 'PLAYING FROM WEDDING ALBUM' : 'MEMUTAR DARI ALBUM PERNIKAHAN'}</span>
+                        <span>{labels.albumLabel}</span>
                         <i className="fas fa-ellipsis-v" />
                     </div>
 
@@ -208,7 +308,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                     <div className="spty-cover__title-area">
                         <div className="spty-cover__titles">
                             <h1 className="spty-cover__song-title">{coupleName}</h1>
-                            <p className="spty-cover__artist">{invitation?.cover_subtitle || (locale === 'en' ? 'The Wedding Album' : 'Album Pernikahan')}</p>
+                            <p className="spty-cover__artist">{invitation?.cover_subtitle || labels.albumSubtitle}</p>
                         </div>
                         <button className="spty-cover__like-btn" type="button">
                             <i className="fas fa-heart" />
@@ -266,15 +366,8 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
    ═══════════════════════════════════════ */
 function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, language, fallbackPhoto }) {
     const { t, locale } = useTranslation(language);
-    const bgs = safeArr(brideGrooms);
-    const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0];
-    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1];
-
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
-            ? invitation.cover_title
-            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, initials, labels } = themeConfig;
 
     const coverBg = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null) || fallbackPhoto;
     const [playlistSrc, setPlaylistSrc] = useState(coverBg);
@@ -316,12 +409,12 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
                     </div>
                 ) : (
                     <div className="spty-opening__playlist-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--spty-green)', fontSize: '2.5rem', fontWeight: '800' }}>
-                        {(groom?.nickname?.charAt(0) || 'B')}{(bride?.nickname?.charAt(0) || 'R')}
+                        {initials}
                     </div>
                 )}
                 <div className="spty-opening__playlist-info">
-                    <span className="spty-opening__badge">{locale === 'en' ? 'THE WEDDING OF' : 'PERNIKAHAN'}</span>
-                    <h2 className="spty-opening__playlist-title">{coupleName}</h2>
+                    <span className="spty-opening__badge">{labels.introBadge}</span>
+                    <h2 className="spty-opening__playlist-title">{mainName}</h2>
                     {formattedDate && (
                         <p className="spty-opening__playlist-meta">
                             {formattedDate}
@@ -362,8 +455,8 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
 
             <Reveal className="spty-opening__content" variant="up" delay={200}>
                 <h3 className="spty-section-title"><span>#</span>Introduction</h3>
-                <h4 className="spty-section-header">{invitation?.opening_title || (locale === 'en' ? 'The Wedding Album' : 'Album Pernikahan')}</h4>
-                <p className="spty-opening__body">{invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami meresmikan ikatan pernikahan kami.'}</p>
+                <h4 className="spty-section-header">{labels.introTitle}</h4>
+                <p className="spty-opening__body">{labels.introText}</p>
             </Reveal>
         </section>
     );
@@ -374,6 +467,8 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
    ═══════════════════════════════════════ */
 function BrideGroomSection({ brideGrooms, invitation, language }) {
     const { t, locale } = useTranslation(language);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, isSingleHost, labels } = themeConfig;
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
@@ -452,67 +547,96 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                         <i className="fas fa-check-circle" /> {locale === 'en' ? 'Verified Artists' : 'Artis Terverifikasi'}
                     </div>
                     <h2 className="spty-section-header" style={{ margin: 0, fontSize: '2.25rem' }}>
-                        {groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom'}
+                        {mainName}
                     </h2>
                     <p className="spty-couple__monthly-listeners">{locale === 'en' ? 'Monthly Listeners: Forever & Always' : 'Pendengar Bulanan: Selamanya & Selalu'}</p>
                 </div>
             </div>
 
             <h3 className="spty-couple__featured-header">
-                <i className="fas fa-users-cog" style={{ color: 'var(--spty-green)' }} /> {locale === 'en' ? 'Featured Artists' : 'Artis Utama'}
+                <i className="fas fa-users-cog" style={{ color: 'var(--spty-green)' }} /> {labels.profileHeader}
             </h3>
 
             <div className="spty-artists-list">
-                {/* Groom Card */}
-                {groom && (
-                    <Reveal className="spty-artist-card" variant="left">
-                        <div className="spty-artist-card__photo-wrap">
-                            {globalShowPhotos && groomSrc ? (
-                                <img src={groomSrc} alt={groom.full_name} className="spty-artist-card__photo" onError={() => setGroomSrc(null)} />
-                            ) : (
-                                <div className="spty-artist-card__monogram">{(groom.nickname?.charAt(0) || 'B')}</div>
-                            )}
-                        </div>
-                        <div className="spty-artist-card__info">
-                            <span className="spty-artist-card__role">{locale === 'en' ? 'Groom / Artist' : 'Mempelai Pria'}</span>
-                            <h4 className="spty-artist-card__name">{groom.full_name}</h4>
-                            <p className="spty-artist-card__parents">
-                                {translateChildOrder(groom.child_order, 'pria')}<br />
-                                <strong>Bapak {groom.father_name} & Ibu {groom.mother_name}</strong>
-                            </p>
-                            {groom.instagram && (
-                                <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
-                                    <i className="fab fa-instagram" /> Instagram
-                                </a>
-                            )}
-                        </div>
-                    </Reveal>
-                )}
+                {isSingleHost ? (
+                    groom && (
+                        <Reveal className="spty-artist-card" variant="zoom">
+                            <div className="spty-artist-card__photo-wrap">
+                                {globalShowPhotos && groomSrc ? (
+                                    <img src={groomSrc} alt={groom.full_name} className="spty-artist-card__photo" onError={() => setGroomSrc(null)} />
+                                ) : (
+                                    <div className="spty-artist-card__monogram">{(groom.nickname?.charAt(0) || initials)}</div>
+                                )}
+                            </div>
+                            <div className="spty-artist-card__info">
+                                <span className="spty-artist-card__role">{locale === 'en' ? 'Featured Artist' : 'Profil Utama'}</span>
+                                <h4 className="spty-artist-card__name">{groom.full_name}</h4>
+                                <p className="spty-artist-card__parents">
+                                    {translateChildOrder(groom.child_order, groom.gender)}<br />
+                                    <strong>Bapak {groom.father_name} & Ibu {groom.mother_name}</strong>
+                                </p>
+                                {groom.instagram && (
+                                    <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
+                                        <i className="fab fa-instagram" /> Instagram
+                                    </a>
+                                )}
+                            </div>
+                        </Reveal>
+                    )
+                ) : (
+                    <>
+                        {/* Groom Card */}
+                        {groom && (
+                            <Reveal className="spty-artist-card" variant="left">
+                                <div className="spty-artist-card__photo-wrap">
+                                    {globalShowPhotos && groomSrc ? (
+                                        <img src={groomSrc} alt={groom.full_name} className="spty-artist-card__photo" onError={() => setGroomSrc(null)} />
+                                    ) : (
+                                        <div className="spty-artist-card__monogram">{(groom.nickname?.charAt(0) || 'B')}</div>
+                                    )}
+                                </div>
+                                <div className="spty-artist-card__info">
+                                    <span className="spty-artist-card__role">{locale === 'en' ? 'Groom / Artist' : 'Mempelai Pria'}</span>
+                                    <h4 className="spty-artist-card__name">{groom.full_name}</h4>
+                                    <p className="spty-artist-card__parents">
+                                        {translateChildOrder(groom.child_order, 'pria')}<br />
+                                        <strong>Bapak {groom.father_name} & Ibu {groom.mother_name}</strong>
+                                    </p>
+                                    {groom.instagram && (
+                                        <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
+                                            <i className="fab fa-instagram" /> Instagram
+                                        </a>
+                                    )}
+                                </div>
+                            </Reveal>
+                        )}
 
-                {/* Bride Card */}
-                {bride && (
-                    <Reveal className="spty-artist-card" variant="right" delay={150}>
-                        <div className="spty-artist-card__photo-wrap">
-                            {globalShowPhotos && brideSrc ? (
-                                <img src={brideSrc} alt={bride.full_name} className="spty-artist-card__photo" onError={() => setBrideSrc(null)} />
-                            ) : (
-                                <div className="spty-artist-card__monogram">{(bride.nickname?.charAt(0) || 'R')}</div>
-                            )}
-                        </div>
-                        <div className="spty-artist-card__info">
-                            <span className="spty-artist-card__role">{locale === 'en' ? 'Bride / Artist' : 'Mempelai Wanita'}</span>
-                            <h4 className="spty-artist-card__name">{bride.full_name}</h4>
-                            <p className="spty-artist-card__parents">
-                                {translateChildOrder(bride.child_order, 'wanita')}<br />
-                                <strong>Bapak {bride.father_name} & Ibu {bride.mother_name}</strong>
-                            </p>
-                            {bride.instagram && (
-                                <a href={`https://instagram.com/${bride.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
-                                    <i className="fab fa-instagram" /> Instagram
-                                </a>
-                            )}
-                        </div>
-                    </Reveal>
+                        {/* Bride Card */}
+                        {bride && (
+                            <Reveal className="spty-artist-card" variant="right" delay={150}>
+                                <div className="spty-artist-card__photo-wrap">
+                                    {globalShowPhotos && brideSrc ? (
+                                        <img src={brideSrc} alt={bride.full_name} className="spty-artist-card__photo" onError={() => setBrideSrc(null)} />
+                                    ) : (
+                                        <div className="spty-artist-card__monogram">{(bride.nickname?.charAt(0) || 'R')}</div>
+                                    )}
+                                </div>
+                                <div className="spty-artist-card__info">
+                                    <span className="spty-artist-card__role">{locale === 'en' ? 'Bride / Artist' : 'Mempelai Wanita'}</span>
+                                    <h4 className="spty-artist-card__name">{bride.full_name}</h4>
+                                    <p className="spty-artist-card__parents">
+                                        {translateChildOrder(bride.child_order, 'wanita')}<br />
+                                        <strong>Bapak {bride.father_name} & Ibu {bride.mother_name}</strong>
+                                    </p>
+                                    {bride.instagram && (
+                                        <a href={`https://instagram.com/${bride.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
+                                            <i className="fab fa-instagram" /> Instagram
+                                        </a>
+                                    )}
+                                </div>
+                            </Reveal>
+                        )}
+                    </>
                 )}
             </div>
         </section>
@@ -597,6 +721,8 @@ function CountdownTimer({ targetDate, language }) {
    ═══════════════════════════════════════ */
 function EventSection({ events, invitation, language, sections }) {
     const { t, locale } = useTranslation(language);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, [], invitation);
+    const { labels } = themeConfig;
     const safeEvents = safeArr(events);
     const primaryEvent = safeEvents.find(e => e.is_primary) || safeEvents[0];
 
@@ -623,7 +749,7 @@ function EventSection({ events, invitation, language, sections }) {
     return (
         <section id="event" className="spty-section">
             <h3 className="spty-section-title"><span>#</span>Schedule</h3>
-            <h4 className="spty-section-header">{locale === 'en' ? 'Live Events / Tour' : 'Jadwal Acara / Tur'}</h4>
+            <h4 className="spty-section-header">{labels.eventHeader}</h4>
 
             {showCountdownInEvent && (
                 <CountdownTimer targetDate={primaryEvent.event_date} language={language} />
@@ -673,6 +799,8 @@ function EventSection({ events, invitation, language, sections }) {
    ═══════════════════════════════════════ */
 function LiveStreamingSection({ events, invitation, language }) {
     const { t, locale } = useTranslation(language);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, [], invitation);
+    const { labels } = themeConfig;
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
     
     const streamsList = useMemo(() => {
@@ -700,7 +828,7 @@ function LiveStreamingSection({ events, invitation, language }) {
             <div className="spty-stream">
                 <span className="spty-stream__icon"><i className="fas fa-satellite-dish" /></span>
                 <h5 className="spty-stream__title">{locale === 'en' ? 'Join Virtually' : 'Saksikan Siaran Langsung'}</h5>
-                <p className="spty-stream__desc">{locale === 'en' ? 'Please join our wedding virtually via the streaming platform links below' : 'Saksikan momen bahagia pernikahan kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.'}</p>
+                <p className="spty-stream__desc">{labels.streamDesc}</p>
                 
                 <div className="spty-stream__btns">
                     {streamsList.map((stream, idx) => (
@@ -715,10 +843,12 @@ function LiveStreamingSection({ events, invitation, language }) {
 }
 
 /* ═══════════════════════════════════════
-   LOVE STORY SECTION (Spotify Scrolling Lyrics UI)
+   LOVE STORY SECTION (Spotivite Scrolling Lyrics UI)
    ═══════════════════════════════════════ */
-function LoveStorySection({ loveStories, language }) {
+function LoveStorySection({ loveStories, language, invitation }) {
     const { t, locale } = useTranslation(language);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, [], invitation);
+    const { labels } = themeConfig;
     const stories = safeArr(loveStories).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     const [activeIdx, setActiveIdx] = useState(0);
     const containerRef = useRef(null);
@@ -760,11 +890,11 @@ function LoveStorySection({ loveStories, language }) {
     return (
         <section id="love_story" className="spty-section">
             <h3 className="spty-section-title"><span>#</span>OurLyrics</h3>
-            <h4 className="spty-section-header">{locale === 'en' ? 'Love Story Playlist' : 'Daftar Putar Kisah Cinta'}</h4>
+            <h4 className="spty-section-header">{labels.storyHeader}</h4>
 
             <div className="spty-lyrics">
                 <div className="spty-lyrics__watermark">
-                    <i className="fas fa-music" /> {locale === 'en' ? 'Lyrics synchronized with our hearts' : 'Lirik disinkronkan dengan hati kami'}
+                    <i className="fas fa-music" /> {labels.storySubtitle}
                 </div>
 
                 <div ref={containerRef} className="spty-lyrics__list">
@@ -1193,20 +1323,14 @@ function ClosingSection({ invitation, brideGrooms, language }) {
 }
 
 /* ═══════════════════════════════════════
-   SPOTIFY NOW PLAYING BOTTOM CONTROL BAR
+   SPOTIVITE NOW PLAYING BOTTOM CONTROL BAR
    ═══════════════════════════════════════ */
 function BottomPlayer({ invitation, brideGrooms, isPlaying, onTogglePlay, isSlideMode, onPrevSlide, onNextSlide, progress, language, fallbackPhoto, onSeek }) {
     const { t, locale } = useTranslation(language);
-    const bgs = safeArr(brideGrooms);
-    const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0];
-    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1];
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, initials, labels } = themeConfig;
 
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
-            ? invitation.cover_title
-            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
-
+    const coupleName = mainName;
     const artUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto;
     const [bottomArtSrc, setBottomArtSrc] = useState(artUrl);
 
@@ -1301,12 +1425,12 @@ function BottomPlayer({ invitation, brideGrooms, isPlaying, onTogglePlay, isSlid
                     {globalShowPhotos && bottomArtSrc ? (
                         <img src={bottomArtSrc} alt="" className="spty-player__art" onError={handleBottomArtError} />
                     ) : (
-                        <div className="spty-player__monogram-art">{(groom?.nickname?.charAt(0) || 'B')}</div>
+                        <div className="spty-player__monogram-art">{initials}</div>
                     )}
                 </div>
                 <div className="spty-player__info">
                     <h5 className="spty-player__title">{coupleName}</h5>
-                    <p className="spty-player__artist">{invitation?.cover_subtitle || (locale === 'en' ? 'Wedding Album' : 'Album Pernikahan')}</p>
+                    <p className="spty-player__artist">{invitation?.cover_subtitle || labels.albumSubtitle}</p>
                 </div>
             </div>
 
@@ -1343,7 +1467,7 @@ function BottomPlayer({ invitation, brideGrooms, isPlaying, onTogglePlay, isSlid
 /* ═══════════════════════════════════════
    MAIN THEME COMPONENT
    ═══════════════════════════════════════ */
-function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
+function SpotiviteThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
     const activeLanguage = invitation?.language || 'id';
     
     const randomGalleryPhoto = useMemo(() => {
@@ -1398,17 +1522,22 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
         }
     };
 
-    // Auto update page Title based on bride & groom nicknames
+    // Auto update page Title based on bride & groom nicknames or host name
     useEffect(() => {
         const bgs = safeArr(brideGrooms);
-        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase()));
-        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase()));
-        if (groom?.nickname && bride?.nickname) {
-            document.title = `${groom.nickname} & ${bride.nickname} - The Wedding`;
+        const themeConfig = getThemeLabels(invitation?.type || 'wedding', activeLanguage, bgs, invitation);
+        if (themeConfig.isSingleHost) {
+            document.title = `${themeConfig.mainName} - ${themeConfig.labels.introBadge}`;
         } else {
-            document.title = invitation?.title || 'Undangan Pernikahan';
+            const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase()));
+            const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase()));
+            if (groom?.nickname && bride?.nickname) {
+                document.title = `${groom.nickname} & ${bride.nickname} - The Wedding`;
+            } else {
+                document.title = invitation?.title || 'Undangan Pernikahan';
+            }
         }
-    }, [invitation, brideGrooms]);
+    }, [invitation, brideGrooms, activeLanguage]);
 
     // Handle initial lock body scroll
     useEffect(() => {
@@ -1878,8 +2007,8 @@ function SpotifyThemeContent({ invitation, sections, brideGrooms, events, galler
     );
 }
 
-export default function SpotifyTheme(props) {
+export default function SpotiviteTheme(props) {
     return (
-        <SpotifyThemeContent {...props} />
+        <SpotiviteThemeContent {...props} />
     );
 }

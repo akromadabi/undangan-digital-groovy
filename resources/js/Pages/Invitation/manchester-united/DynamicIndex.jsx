@@ -4,13 +4,152 @@ import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
-import muLogoImage from './asset/mu-logo.jpg';
+// Removed official logo import for legal safety
 
 /* ─── Helpers ─── */
 function safeArr(val) {
     if (Array.isArray(val)) return val;
     if (val && typeof val === 'object') return Object.values(val);
     return [];
+}
+
+function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
+    const t = type || 'wedding';
+    const isEn = String(locale).toLowerCase() === 'en';
+    const bgs = safeArr(brideGrooms);
+    const host = bgs[0] || {};
+    
+    let coupleName = '';
+    let isSingleHost = false;
+    
+    if (['wedding', 'anniversary'].includes(t)) {
+        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+        coupleName = groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom';
+        isSingleHost = false;
+    } else {
+        coupleName = host.nickname || host.full_name || 'Host';
+        isSingleHost = true;
+    }
+
+    let labels = {
+        ticketBadge: 'VIP EVENT TICKET',
+        matchChampionship: isEn ? 'SPECIAL EVENT CHAMPIONSHIP' : 'ACARA SPESIAL CHAMPIONSHIP',
+        
+        coupleTitleBadge: 'KEY PERSON',
+        coupleTitle: 'EVENT LINEUP',
+        
+        storyTitleBadge: 'EVENT TIMELINE',
+        storyTitle: isEn ? 'KEY MOMENTS' : 'PERJALANAN ACARA',
+        
+        eventTitleBadge: 'EVENT FIXTURES',
+        eventTitle: isEn ? 'THE SPECIAL EVENT SCHEDULE' : 'JADWAL ACARA SPESIAL',
+        
+        streamTitleBadge: 'BROADCASTING',
+        streamTitle: isEn ? 'LIVE STREAMING' : 'SIARAN LANGSUNG',
+        streamSubtitle: isEn ? 'Join our event virtually' : 'Saksikan momen bahagia kami secara virtual',
+        
+        closingQuote: invitation?.closing_text || (isEn 
+            ? 'It is an honor and a happiness for us if you are willing to attend and support our event.' 
+            : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan dukungan dan doa restu.'),
+            
+        signatureHeader: isEn ? 'FAMILY TRIBUTES' : 'KAMI YANG BERBAHAGIA',
+        signatureTitle: isEn ? 'We Who Are Joyful,' : 'Kami Yang Berbahagia,',
+        
+        vsDisplay: 'VS',
+        loveScoreBadge: 'EVENT STATUS',
+        scorerListText: isEn ? 'GREAT CELEBRATION' : 'PERAYAAN BESAR',
+        
+        playerRole: isEn ? 'SQUAD MEMBER / HOST' : 'ANGGOTA SKUAD / UTAMA',
+        playerNumber: '10',
+    };
+
+    if (t === 'wedding') {
+        labels.ticketBadge = 'VIP MATCH TICKET';
+        labels.matchChampionship = 'THE WEDDING CHAMPIONSHIP';
+        labels.coupleTitleBadge = 'KEY PLAYERS';
+        labels.coupleTitle = 'MATCHDAY LINEUP';
+        labels.storyTitleBadge = 'MATCH TIMELINE';
+        labels.storyTitle = 'KEY MOMENTS OF LOVE';
+        labels.eventTitleBadge = 'MATCH FIXTURES';
+        labels.eventTitle = 'THE WEDDING SCHEDULE';
+        labels.closingQuote = invitation?.closing_text || (isEn 
+            ? 'It is an honor and a happiness for us if you are willing to attend and give your blessings to the newlyweds.' 
+            : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.');
+        labels.vsDisplay = 'VS';
+        labels.loveScoreBadge = 'LOVE SCORE';
+        labels.scorerListText = 'ETERNAL LOYALTY';
+    } else if (t === 'anniversary') {
+        labels.ticketBadge = 'VIP ANNIVERSARY TICKET';
+        labels.matchChampionship = 'THE ANNIVERSARY CHAMPIONSHIP';
+        labels.coupleTitleBadge = 'KEY PLAYERS';
+        labels.coupleTitle = 'MATCHDAY LINEUP';
+        labels.storyTitleBadge = 'ANNIVERSARY TIMELINE';
+        labels.storyTitle = 'KEY MOMENTS OF TOGETHERNESS';
+        labels.eventTitleBadge = 'ANNIVERSARY FIXTURES';
+        labels.eventTitle = 'THE CELEBRATION SCHEDULE';
+        labels.vsDisplay = 'VS';
+        labels.loveScoreBadge = 'YEARS SCORE';
+        labels.scorerListText = 'ETERNAL LOVE';
+    } else if (t === 'graduation') {
+        labels.ticketBadge = 'VIP GRADUATION TICKET';
+        labels.matchChampionship = 'THE GRADUATION CHAMPIONSHIP';
+        labels.coupleTitleBadge = 'CHAMPION';
+        labels.coupleTitle = 'GRADUATE LINEUP';
+        labels.storyTitleBadge = 'ACADEMIC TIMELINE';
+        labels.storyTitle = 'KEY MOMENTS OF STUDY';
+        labels.eventTitleBadge = 'GRADUATION FIXTURES';
+        labels.eventTitle = 'THE SYUKURAN SCHEDULE';
+        labels.vsDisplay = '★';
+        labels.loveScoreBadge = 'GPA SCORE';
+        labels.scorerListText = 'ACADEMIC EXCELLENCE';
+        labels.playerRole = isEn ? 'CHAMPION / GRADUATE' : 'JUARA / WISUDAWAN';
+    } else if (t === 'birthday') {
+        labels.ticketBadge = 'VIP BIRTHDAY TICKET';
+        labels.matchChampionship = 'THE BIRTHDAY CHAMPIONSHIP';
+        labels.coupleTitleBadge = 'CELEBRANT';
+        labels.coupleTitle = 'BIRTHDAY LINEUP';
+        labels.storyTitleBadge = 'LIFE TIMELINE';
+        labels.storyTitle = 'KEY MOMENTS OF LIFE';
+        labels.eventTitleBadge = 'BIRTHDAY FIXTURES';
+        labels.eventTitle = 'THE CELEBRATION SCHEDULE';
+        labels.vsDisplay = '🎂';
+        labels.loveScoreBadge = 'AGE SCORE';
+        labels.scorerListText = 'ETERNAL JOY';
+        labels.playerRole = isEn ? 'CELEBRANT / HOST' : 'YANG BERULANG TAHUN';
+    } else if (t === 'aqiqah') {
+        labels.ticketBadge = 'VIP AQIQAH TICKET';
+        labels.matchChampionship = 'THE AQIQAH CHAMPIONSHIP';
+        labels.coupleTitleBadge = 'NEWBORN';
+        labels.coupleTitle = 'BABY LINEUP';
+        labels.storyTitleBadge = 'GROWTH TIMELINE';
+        labels.storyTitle = 'KEY MOMENTS OF BABY';
+        labels.eventTitleBadge = 'AQIQAH FIXTURES';
+        labels.eventTitle = 'THE AQIQAH SCHEDULE';
+        labels.vsDisplay = '👶';
+        labels.loveScoreBadge = 'GROWTH SCORE';
+        labels.scorerListText = 'GRACE & BLESSINGS';
+        labels.playerRole = isEn ? 'NEWBORN / BABY' : 'BUAH HATI / BAYI';
+    } else if (t === 'circumcision') {
+        labels.ticketBadge = 'VIP CIRCUMCISION TICKET';
+        labels.matchChampionship = 'THE CIRCUMCISION CHAMPIONSHIP';
+        labels.coupleTitleBadge = 'CHAMPION';
+        labels.coupleTitle = 'CHILD LINEUP';
+        labels.storyTitleBadge = 'GROWTH TIMELINE';
+        labels.storyTitle = 'KEY MOMENTS OF CHILD';
+        labels.eventTitleBadge = 'CIRCUMCISION FIXTURES';
+        labels.eventTitle = 'THE SYUKURAN SCHEDULE';
+        labels.vsDisplay = '👦';
+        labels.loveScoreBadge = 'BRAVERY SCORE';
+        labels.scorerListText = 'GRACE & BLESSINGS';
+        labels.playerRole = isEn ? 'CHAMPION / CHILD' : 'PUTRA / ANAK';
+    }
+
+    return {
+        coupleName,
+        isSingleHost,
+        labels
+    };
 }
 function pad2(n) { return String(n).padStart(2, '0'); }
 function formatDate(d) {
@@ -121,18 +260,49 @@ function PitchDecoration() {
 }
 
 /* ═══════════════════════════════════════
+   UNITED IN VITE CUSTOM CLUB CREST (100% LEGAL & EXQUISITE)
+   ═══════════════════════════════════════ */
+function UnitedInViteCrest({ size = 120 }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0px 4px 10px rgba(0,0,0,0.35))', margin: 'auto' }}>
+            {/* Shield Background in Crimson Red */}
+            <path d="M50 5C26 5 15 15 15 45C15 70 35 90 50 95C65 90 85 70 85 45C85 15 74 5 50 5Z" fill="#C70101" stroke="#F1C40F" strokeWidth="2.5" />
+            
+            {/* Football Arch / Ribbon lines */}
+            <path d="M20 40H80V46H20V40Z" fill="#F1C40F" opacity="0.12" />
+
+            {/* Gold Overlapping Wedding Rings */}
+            <circle cx="44" cy="24" r="6" stroke="#F1C40F" strokeWidth="1.8" />
+            <circle cx="56" cy="24" r="6" stroke="#F1C40F" strokeWidth="1.8" />
+
+            {/* Heart-Shaped Football Centerpiece */}
+            <path d="M50 72C40 62 30 52 30 40C30 30 38 22 48 22C52 22 55 25 57 27C59 25 62 22 66 22C76 22 84 30 84 40C84 52 74 62 64 72L57 79L50 72Z" fill="#F1C40F" />
+            
+            {/* Red Football panels inside gold heart */}
+            <path d="M47 35L53 35L55 41L50 45L45 41L47 35Z" fill="#C70101" />
+            <path d="M41 48L46 51L44 57L39 57L37 52L41 48Z" fill="#C70101" />
+            <path d="M59 48L63 52L61 57L56 57L54 51L59 48Z" fill="#C70101" />
+            <path d="M50 63L53 58L58 60L56 65L50 63Z" fill="#C70101" />
+
+            {/* Golden Ribbon Text */}
+            <text x="50%" y="88" fill="#F1C40F" fontFamily="Impact, sans-serif" fontWeight="900" fontSize="7.5" textAnchor="middle" letterSpacing="0.6">EST. 2026</text>
+        </svg>
+    );
+}
+
+/* ═══════════════════════════════════════
    COVER SECTION (VIP Match Ticket)
    ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeConfig }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
     
     const guestName = guest?.name || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null);
-    const coupleName = (groom?.nickname && bride?.nickname)
+    const coupleName = themeConfig?.coupleName || ((groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'Bimo & Raras');
+        : (invitation?.cover_title || 'Bimo & Raras'));
 
     return (
         <div className={`mu-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'mu-no-photo-mode' : ''}`}>
@@ -155,21 +325,21 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
                 <div className="mu-spotlight mu-spotlight--right" />
                 
                 {/* Logo Header */}
-                <div className="mu-logo-main-wrap">
-                    <img src={muLogoImage} alt="Invitation Wedding Of Logo" className="mu-logo-main" />
+                <div className="mu-logo-main-wrap" style={{ display: 'flex', justifyContent: 'center' }}>
+                    <UnitedInViteCrest size={100} />
                 </div>
 
                 {/* Ticket Header */}
                 <div className="mu-ticket-header">
-                    <span className="mu-ticket-badge">VIP MATCH TICKET</span>
+                    <span className="mu-ticket-badge">{themeConfig?.labels?.ticketBadge || "VIP MATCH TICKET"}</span>
                     <span className="mu-ticket-serial">NO: MU-{String(invitation?.id || 99).padStart(4, '0')}</span>
                 </div>
                 
                 {/* Main Ticket Card */}
                 <div className="mu-ticket-card">
                     <div className="mu-ticket-stub-left">
-                        <div className="mu-club-crest">
-                            <img src={muLogoImage} alt="MU Crest" className="mu-crest-img" />
+                        <div className="mu-club-crest" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                            <UnitedInViteCrest size={55} />
                         </div>
                         <div className="mu-ticket-divider" />
                     </div>
@@ -224,20 +394,23 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 /* ═══════════════════════════════════════
    OPENING SECTION (Jumbotron Scoreboard)
    ═══════════════════════════════════════ */
-function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories, galleries, enableRsvp, enableWishes, bankAccounts, events, id }) {
+function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories, galleries, enableRsvp, enableWishes, bankAccounts, events, id, themeConfig }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
     const groomNickname = groom.nickname || 'GROOM';
     const brideNickname = bride.nickname || 'BRIDE';
-    const coupleName = `${groomNickname} & ${brideNickname}`;
+    const coupleName = themeConfig?.coupleName || `${groomNickname} & ${brideNickname}`;
 
     const groomPhoto = getStorageUrl(groom.photo, null);
     const bridePhoto = getStorageUrl(bride.photo, null);
 
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
     const countdownTarget = primaryEvent?.event_date || '';
+
+    const host = bgs[0] || {};
+    const hostPhoto = getStorageUrl(host.photo, null);
 
     return (
         <section id={id || "opening"} className="mu-opening">
@@ -254,7 +427,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                             <span className="mu-live-dot-premium" />
                             <span>LIVE</span>
                         </div>
-                        <div className="mu-match-center-title">THE WEDDING CHAMPIONSHIP</div>
+                        <div className="mu-match-center-title">{themeConfig?.labels?.matchChampionship || "THE WEDDING CHAMPIONSHIP"}</div>
                         <div className="mu-match-time-premium">
                             <span className="mu-clock-icon">⏱️</span>
                             <span className="mu-clock-time">90:00+</span>
@@ -262,85 +435,123 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                     </div>
                     
                     {/* Head-to-Head Tactical Squad Cards */}
-                    <div className="mu-scoreboard-matchup-premium">
-                        {/* Groom Tactical Sports Card */}
-                        <div className="mu-matchup-card groom-card animate-float-slow">
-                            <div className="mu-card-crest-glow" />
-                            <div className="mu-card-inner">
-                                <div className="mu-card-header">
-                                    <span className="mu-card-rating">99</span>
-                                    <span className="mu-card-pos">GR</span>
-                                </div>
-                                <div className="mu-card-photo-wrap">
-                                    {globalShowPhotos && groomPhoto ? (
-                                        <img src={groomPhoto} alt={groomNickname} className="mu-card-photo" />
-                                    ) : (
-                                        <div className="mu-card-monogram">{groomNickname.charAt(0)}</div>
-                                    )}
-                                </div>
-                                <div className="mu-card-info">
-                                    <h4 className="mu-card-name">{groomNickname.toUpperCase()}</h4>
-                                    <span className="mu-card-role">FORWARD / GROOM</span>
-                                </div>
-                                <div className="mu-card-stats">
-                                    <div className="mu-stat-row">
-                                        <span>❤️ PAS</span><strong>99</strong>
+                    <div className="mu-scoreboard-matchup-premium" style={themeConfig?.isSingleHost ? { justifyContent: 'center' } : undefined}>
+                        {themeConfig?.isSingleHost ? (
+                            /* Single Host Sports Card */
+                            <div className="mu-matchup-card groom-card animate-float-slow" style={{ margin: '0 auto' }}>
+                                <div className="mu-card-crest-glow" />
+                                <div className="mu-card-inner">
+                                    <div className="mu-card-header">
+                                        <span className="mu-card-rating">99</span>
+                                        <span className="mu-card-pos">HP</span>
                                     </div>
-                                    <div className="mu-stat-row">
-                                        <span>🤝 LOY</span><strong>99</strong>
+                                    <div className="mu-card-photo-wrap">
+                                        {globalShowPhotos && hostPhoto ? (
+                                            <img src={hostPhoto} alt={coupleName} className="mu-card-photo" />
+                                        ) : (
+                                            <div className="mu-card-monogram">{coupleName.charAt(0)}</div>
+                                        )}
                                     </div>
-                                    <div className="mu-stat-row">
-                                        <span>🔥 COM</span><strong>99</strong>
+                                    <div className="mu-card-info">
+                                        <h4 className="mu-card-name">{coupleName.toUpperCase()}</h4>
+                                        <span className="mu-card-role">{themeConfig?.labels?.playerRole.toUpperCase()}</span>
+                                    </div>
+                                    <div className="mu-card-stats">
+                                        <div className="mu-stat-row">
+                                            <span>🔥 POW</span><strong>99</strong>
+                                        </div>
+                                        <div className="mu-stat-row">
+                                            <span>🤝 LOY</span><strong>99</strong>
+                                        </div>
+                                        <div className="mu-stat-row">
+                                            <span>✨ KND</span><strong>99</strong>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            /* Double Host Matchup */
+                            <>
+                                {/* Groom Tactical Sports Card */}
+                                <div className="mu-matchup-card groom-card animate-float-slow">
+                                    <div className="mu-card-crest-glow" />
+                                    <div className="mu-card-inner">
+                                        <div className="mu-card-header">
+                                            <span className="mu-card-rating">99</span>
+                                            <span className="mu-card-pos">GR</span>
+                                        </div>
+                                        <div className="mu-card-photo-wrap">
+                                            {globalShowPhotos && groomPhoto ? (
+                                                <img src={groomPhoto} alt={groomNickname} className="mu-card-photo" />
+                                            ) : (
+                                                <div className="mu-card-monogram">{groomNickname.charAt(0)}</div>
+                                            )}
+                                        </div>
+                                        <div className="mu-card-info">
+                                            <h4 className="mu-card-name">{groomNickname.toUpperCase()}</h4>
+                                            <span className="mu-card-role">FORWARD / GROOM</span>
+                                        </div>
+                                        <div className="mu-card-stats">
+                                            <div className="mu-stat-row">
+                                                <span>❤️ PAS</span><strong>99</strong>
+                                            </div>
+                                            <div className="mu-stat-row">
+                                                <span>🤝 LOY</span><strong>99</strong>
+                                            </div>
+                                            <div className="mu-stat-row">
+                                                <span>🔥 COM</span><strong>99</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        {/* VS Score Display */}
-                        <div className="mu-scoreboard-vs-premium">
-                            <div className="mu-score-row">
-                                <span className="mu-score-digit neon-red">9</span>
-                                <span className="mu-score-divider">-</span>
-                                <span className="mu-score-digit neon-gold">10</span>
-                            </div>
-                            <div className="mu-score-badge">LOVE SCORE</div>
-                            <div className="mu-scorer-list">
-                                <i className="fas fa-heartbeat animate-pulse" /> ETERNAL LOYALTY
-                            </div>
-                        </div>
+                                {/* VS Score Display */}
+                                <div className="mu-scoreboard-vs-premium">
+                                    <div className="mu-score-row">
+                                        <span className="mu-score-digit neon-red">9</span>
+                                        <span className="mu-score-divider">{themeConfig?.labels?.vsDisplay || "-"}</span>
+                                        <span className="mu-score-digit neon-gold">10</span>
+                                    </div>
+                                    <div className="mu-score-badge">{themeConfig?.labels?.loveScoreBadge || "LOVE SCORE"}</div>
+                                    <div className="mu-scorer-list">
+                                        <i className="fas fa-heartbeat animate-pulse" /> {themeConfig?.labels?.scorerListText || "ETERNAL LOYALTY"}
+                                    </div>
+                                </div>
 
-                        {/* Bride Tactical Sports Card */}
-                        <div className="mu-matchup-card bride-card animate-float-slow">
-                            <div className="mu-card-crest-glow" />
-                            <div className="mu-card-inner">
-                                <div className="mu-card-header">
-                                    <span className="mu-card-rating">99</span>
-                                    <span className="mu-card-pos">BR</span>
-                                </div>
-                                <div className="mu-card-photo-wrap">
-                                    {globalShowPhotos && bridePhoto ? (
-                                        <img src={bridePhoto} alt={brideNickname} className="mu-card-photo" />
-                                    ) : (
-                                        <div className="mu-card-monogram">{brideNickname.charAt(0)}</div>
-                                    )}
-                                </div>
-                                <div className="mu-card-info">
-                                    <h4 className="mu-card-name">{brideNickname.toUpperCase()}</h4>
-                                    <span className="mu-card-role">MIDFIELDER / BRIDE</span>
-                                </div>
-                                <div className="mu-card-stats">
-                                    <div className="mu-stat-row">
-                                        <span>❤️ CHM</span><strong>99</strong>
+                                {/* Bride Tactical Sports Card */}
+                                <div className="mu-matchup-card bride-card animate-float-slow">
+                                    <div className="mu-card-crest-glow" />
+                                    <div className="mu-card-inner">
+                                        <div className="mu-card-header">
+                                            <span className="mu-card-rating">99</span>
+                                            <span className="mu-card-pos">BR</span>
+                                        </div>
+                                        <div className="mu-card-photo-wrap">
+                                            {globalShowPhotos && bridePhoto ? (
+                                                <img src={bridePhoto} alt={brideNickname} className="mu-card-photo" />
+                                            ) : (
+                                                <div className="mu-card-monogram">{brideNickname.charAt(0)}</div>
+                                            )}
+                                        </div>
+                                        <div className="mu-card-info">
+                                            <h4 className="mu-card-name">{brideNickname.toUpperCase()}</h4>
+                                            <span className="mu-card-role">MIDFIELDER / BRIDE</span>
+                                        </div>
+                                        <div className="mu-card-stats">
+                                            <div className="mu-stat-row">
+                                                <span>❤️ CHM</span><strong>99</strong>
+                                            </div>
+                                            <div className="mu-stat-row">
+                                                <span>✨ KND</span><strong>99</strong>
+                                            </div>
+                                            <div className="mu-stat-row">
+                                                <span>😊 SML</span><strong>99</strong>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="mu-stat-row">
-                                        <span>✨ KND</span><strong>99</strong>
-                                    </div>
-                                    <div className="mu-stat-row">
-                                        <span>😊 SML</span><strong>99</strong>
-                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="mu-scoreboard-footer-premium">
@@ -361,7 +572,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                         <span className="mu-intro-badge">OFFICIAL MATCHDAY PROGRAMME</span>
                     </div>
                     <div className="mu-intro-box-body">
-                        <span className="mu-title-badge-premium">{t('invitation.wedding_of').toUpperCase()}</span>
+                        <span className="mu-title-badge-premium">{themeConfig?.labels?.ticketBadge ? (themeConfig.labels.ticketBadge.replace('VIP ', '').replace(' TICKET', '')) : t('invitation.wedding_of').toUpperCase()}</span>
                         <h2 className="mu-title-gold-premium">{coupleName.toUpperCase()}</h2>
                         
                         {/* Premium Intro Slideshow */}
@@ -388,7 +599,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                         )}
                         
                         <p className="mu-text-premium">
-                            {invitation?.opening_text || "Dengan memohon rahmat Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri dan mendoakan kelancaran pernikahan kami."}
+                            {invitation?.opening_text || "Dengan memohon rahmat Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri dan mendoakan kelancaran perayaan kami."}
                         </p>
                     </div>
                 </Reveal>
@@ -437,7 +648,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
 /* ═══════════════════════════════════════
    BRIDE & GROOM SECTION (Squad Lineup)
    ═══════════════════════════════════════ */
-function BrideGroomSection({ invitation, brideGrooms, id }) {
+function BrideGroomSection({ invitation, brideGrooms, id, themeConfig }) {
     const { t, locale } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -521,7 +732,7 @@ function BrideGroomSection({ invitation, brideGrooms, id }) {
                 
                 <div className="mu-player-meta">
                     <span className="mu-player-badge">
-                        <i className="fas fa-check-circle mu-verified-icon" /> {isWanita ? (locale === 'en' ? 'BRIDE / ARTIST' : 'MEMPELAI WANITA') : (locale === 'en' ? 'GROOM / ARTIST' : 'MEMPELAI PRIA')}
+                        <i className="fas fa-check-circle mu-verified-icon" /> {pos || (isWanita ? (locale === 'en' ? 'BRIDE' : 'MEMPELAI WANITA') : (locale === 'en' ? 'GROOM' : 'MEMPELAI PRIA'))}
                     </span>
                     <h3 className="mu-player-name">{person.full_name}</h3>
                     <p className="mu-player-child-order">
@@ -549,16 +760,22 @@ function BrideGroomSection({ invitation, brideGrooms, id }) {
             <div className="mu-container-inner">
                 <Reveal>
                     <h2 className="mu-section-title">
-                        <span className="mu-title-badge">KEY PLAYERS</span>
-                        MATCHDAY LINEUP
+                        <span className="mu-title-badge">{themeConfig?.labels?.coupleTitleBadge || "KEY PLAYERS"}</span>
+                        {themeConfig?.labels?.coupleTitle || "MATCHDAY LINEUP"}
                     </h2>
                 </Reveal>
 
-                <div className="mu-lineup-row">
-                    <PlayerCard person={groom} side="left" number="09" pos="FORWARD (GROOM)" />
-                    <div className="mu-lineup-vs">VS</div>
-                    <PlayerCard person={bride} side="right" number="10" pos="MIDFIELDER (BRIDE)" />
-                </div>
+                {themeConfig?.isSingleHost ? (
+                    <div className="mu-lineup-row" style={{ justifyContent: 'center' }}>
+                        <PlayerCard person={bgs[0] || {}} side="center" number="10" pos={themeConfig?.labels?.playerRole} />
+                    </div>
+                ) : (
+                    <div className="mu-lineup-row">
+                        <PlayerCard person={groom} side="left" number="09" pos="FORWARD (GROOM)" />
+                        <div className="mu-lineup-vs">VS</div>
+                        <PlayerCard person={bride} side="right" number="10" pos="MIDFIELDER (BRIDE)" />
+                    </div>
+                )}
             </div>
         </section>
     );
@@ -684,9 +901,12 @@ function TimelineEvent({ story, index }) {
     );
 }
 
-function LoveStorySection({ loveStories, id }) {
+function LoveStorySection({ loveStories, id, themeConfig }) {
     const stories = safeArr(loveStories);
     if (stories.length === 0) return null;
+
+    const storyTitleBadge = themeConfig?.labels?.storyTitleBadge || "MATCH TIMELINE";
+    const storyTitle = themeConfig?.labels?.storyTitle || "KEY MOMENTS OF LOVE";
 
     return (
         <section id={id || "love_story"} className="mu-love-story">
@@ -694,8 +914,8 @@ function LoveStorySection({ loveStories, id }) {
             <div className="mu-container-inner">
                 <Reveal>
                     <h2 className="mu-section-title">
-                        <span className="mu-title-badge">MATCH TIMELINE</span>
-                        KEY MOMENTS OF LOVE
+                        <span className="mu-title-badge">{storyTitleBadge}</span>
+                        {storyTitle}
                     </h2>
                 </Reveal>
                 
@@ -712,7 +932,7 @@ function LoveStorySection({ loveStories, id }) {
 /* ═══════════════════════════════════════
    EVENT SECTION (Match Fixtures)
    ═══════════════════════════════════════ */
-function EventSection({ events, invitation }) {
+function EventSection({ events, invitation, themeConfig }) {
     const { t } = useTranslation();
     const safeEvents = safeArr(events);
     if (safeEvents.length === 0) return null;
@@ -726,14 +946,17 @@ function EventSection({ events, invitation }) {
         return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((evt.event_name || '') + ' - ' + names)}&dates=${ds}T${st}/${ds}T${st}&location=${encodeURIComponent([evt.venue_name, evt.venue_address].filter(Boolean).join(', '))}&sf=true&output=xml`;
     };
 
+    const eventTitleBadge = themeConfig?.labels?.eventTitleBadge || "MATCH FIXTURES";
+    const eventTitle = themeConfig?.labels?.eventTitle || "THE WEDDING SCHEDULE";
+
     return (
         <section id="event" className="mu-events">
             <PitchDecoration />
             <div className="mu-container-inner">
                 <Reveal>
                     <h2 className="mu-section-title">
-                        <span className="mu-title-badge">MATCH FIXTURES</span>
-                        THE WEDDING SCHEDULE
+                        <span className="mu-title-badge">{eventTitleBadge}</span>
+                        {eventTitle}
                     </h2>
                 </Reveal>
 
@@ -741,13 +964,13 @@ function EventSection({ events, invitation }) {
                     {safeEvents.map((ev, idx) => {
                         const evDate = ev.event_date || ev.date;
                         const d = evDate ? new Date(evDate) : null;
-                        const isAkad = ev.event_name?.toLowerCase().includes('akad');
+                        const isAkad = ev.event_name?.toLowerCase().includes('akad') || ev.event_name?.toLowerCase().includes('utama');
 
                         return (
                             <Reveal key={idx} delay={idx * 100} className="mu-event-fixture">
                                 <div className="mu-fixture-header">
-                                    <span className="mu-fixture-leg">{isAkad ? 'LEG 1' : 'LEG 2'}</span>
-                                    <span className="mu-fixture-title">{ev.event_name || 'Wedding Match'}</span>
+                                    <span className="mu-fixture-leg">{isAkad ? 'LEG 1' : `LEG ${idx + 1}`}</span>
+                                    <span className="mu-fixture-title">{ev.event_name || 'Event Match'}</span>
                                 </div>
                                 <div className="mu-fixture-body">
                                     {d && (
@@ -792,7 +1015,7 @@ function EventSection({ events, invitation }) {
 /* ═══════════════════════════════════════
    LIVESTREAM SECTION
    ═══════════════════════════════════════ */
-function LivestreamSection({ events, invitation }) {
+function LivestreamSection({ events, invitation, themeConfig }) {
     const { t } = useTranslation();
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
     
@@ -811,16 +1034,20 @@ function LivestreamSection({ events, invitation }) {
     if (streamsList.length === 0) return null;
     const isEn = t('invitation.save_the_date') === 'Save The Date';
 
+    const streamTitleBadge = themeConfig?.labels?.streamTitleBadge || "BROADCASTING";
+    const streamTitle = themeConfig?.labels?.streamTitle || (isEn ? 'LIVE STREAMING' : 'SIARAN LANGSUNG');
+    const streamSubtitle = themeConfig?.labels?.streamSubtitle || (isEn ? 'Join our wedding virtually' : 'Saksikan momen bahagia kami secara virtual');
+
     return (
         <section className="mu-livestream" id="livestream">
             <PitchDecoration />
             <div className="mu-container-inner">
                 <Reveal>
                     <h2 className="mu-section-title">
-                        <span className="mu-title-badge">BROADCASTING</span>
-                        {isEn ? 'LIVE STREAMING' : 'SIARAN LANGSUNG'}
+                        <span className="mu-title-badge">{streamTitleBadge}</span>
+                        {streamTitle}
                     </h2>
-                    <p className="mu-subtitle">{isEn ? 'Join our wedding virtually' : 'Saksikan momen bahagia kami secara virtual'}</p>
+                    <p className="mu-subtitle">{streamSubtitle}</p>
                 </Reveal>
                 
                 <Reveal delay={150} className="mu-livestream-panel">
@@ -880,7 +1107,7 @@ function GallerySection({ galleries }) {
 /* ═══════════════════════════════════════
    BANK / TRANSFER WINDOW
    ═══════════════════════════════════════ */
-function BankSection({ bankAccounts, id }) {
+function BankSection({ bankAccounts, id, themeConfig }) {
     const { t } = useTranslation();
     const accounts = safeArr(bankAccounts);
     if (accounts.length === 0) return null;
@@ -939,13 +1166,15 @@ function BankSection({ bankAccounts, id }) {
         }
     };
 
+    const bankTitleBadge = themeConfig?.labels?.ticketBadge ? (themeConfig.labels.ticketBadge.replace('VIP ', '').replace(' TICKET', '') + ' SPONSOR') : "SPONSORSHIP & FUNDING";
+
     return (
         <section id={id || "bank"} className="mu-bank">
             <PitchDecoration />
             <div className="mu-container-inner">
                 <Reveal>
                     <h2 className="mu-section-title">
-                        <span className="mu-title-badge">SPONSORSHIP & FUNDING</span>
+                        <span className="mu-title-badge">{bankTitleBadge}</span>
                         TRANSFER WINDOW
                     </h2>
                     <p className="mu-subtitle">{t('invitation.gift_desc')}</p>
@@ -1152,7 +1381,7 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
 /* ═══════════════════════════════════════
    CLOSING SECTION (Trophy Presentation)
    ═══════════════════════════════════════ */
-function ClosingSection({ invitation, brideGrooms }) {
+function ClosingSection({ invitation, brideGrooms, themeConfig }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -1166,11 +1395,21 @@ function ClosingSection({ invitation, brideGrooms }) {
     const hasGroomParents = groomFather || groomMother;
     const hasBrideParents = brideFather || brideMother;
 
+    const host = bgs[0] || {};
+    const hostFather = host.father_name;
+    const hostMother = host.mother_name;
+    const hasHostParents = hostFather || hostMother;
+
     const brandName = invitation?.user?.reseller_settings?.brand_name 
         || invitation?.user?.reseller?.reseller_settings?.brand_name 
         || 'TrueLove Invitation';
 
     const isEn = t('invitation.save_the_date') === 'Save The Date';
+    const closingQuote = themeConfig?.labels?.closingQuote || invitation?.closing_text || (isEn 
+        ? 'It is an honor and a happiness for us if you are willing to attend and support our event.' 
+        : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan dukungan dan doa restu.');
+    
+    const signatureHeader = themeConfig?.labels?.signatureHeader || (isEn ? 'FAMILY TRIBUTES' : 'KAMI YANG BERBAHAGIA');
 
     return (
         <section id="closing" className="mu-closing">
@@ -1178,27 +1417,43 @@ function ClosingSection({ invitation, brideGrooms }) {
             <div className="mu-container-inner">
                 <Reveal className="mu-trophy-display">
                     <div className="mu-trophy-shield">🏆</div>
-                    <h2 className="mu-closing-header">{invitation?.closing_title || 'THANK YOU'}</h2>
+                    <h2 className="mu-closing-header">{invitation?.closing_title || (isEn ? 'THANK YOU' : 'TERIMA KASIH')}</h2>
                     <p className="mu-closing-text">
-                        {invitation?.closing_text || "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari bahagia kami."}
+                        {closingQuote}
                     </p>
                 </Reveal>
 
                 {/* Family signatures */}
                 <Reveal delay={150} className="mu-family-tributes">
-                    <h3 className="mu-tribute-header">FAMILY TRIBUTES</h3>
+                    <h3 className="mu-tribute-header">{signatureHeader}</h3>
                     <div className="mu-family-row">
-                        {hasGroomParents && (
-                            <div className="mu-family-col">
-                                <span className="mu-family-title">{isEn ? "Groom's Family" : "Keluarga Mempelai Pria"}</span>
-                                <p className="mu-family-names">{isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`}</p>
-                            </div>
-                        )}
-                        {hasBrideParents && (
-                            <div className="mu-family-col">
-                                <span className="mu-family-title">{isEn ? "Bride's Family" : "Keluarga Mempelai Wanita"}</span>
-                                <p className="mu-family-names">{isEn ? `Family of Mr. ${brideFather} & Mrs. ${brideMother}` : `Kel. Bapak ${brideFather} & Ibu ${brideMother}`}</p>
-                            </div>
+                        {themeConfig?.isSingleHost ? (
+                            hasHostParents ? (
+                                <div className="mu-family-col" style={{ width: '100%' }}>
+                                    <span className="mu-family-title">{isEn ? "Host's Family" : "Keluarga Penyelenggara"}</span>
+                                    <p className="mu-family-names">{isEn ? `Family of Mr. ${hostFather} & Mrs. ${hostMother}` : `Kel. Bapak ${hostFather} & Ibu ${hostMother}`}</p>
+                                </div>
+                            ) : (
+                                <div className="mu-family-col" style={{ width: '100%' }}>
+                                    <span className="mu-family-title">{isEn ? "Big Family" : "Keluarga Besar"}</span>
+                                    <p className="mu-family-names">{isEn ? "Both Families" : "Keluarga Besar"}</p>
+                                </div>
+                            )
+                        ) : (
+                            <>
+                                {hasGroomParents && (
+                                    <div className="mu-family-col">
+                                        <span className="mu-family-title">{isEn ? "Groom's Family" : "Keluarga Mempelai Pria"}</span>
+                                        <p className="mu-family-names">{isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`}</p>
+                                    </div>
+                                )}
+                                {hasBrideParents && (
+                                    <div className="mu-family-col">
+                                        <span className="mu-family-title">{isEn ? "Bride's Family" : "Keluarga Mempelai Wanita"}</span>
+                                        <p className="mu-family-names">{isEn ? `Family of Mr. ${brideFather} & Mrs. ${brideMother}` : `Kel. Bapak ${brideFather} & Ibu ${brideMother}`}</p>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </Reveal>
@@ -1236,12 +1491,16 @@ function MusicButton({ isPlaying, onToggle }) {
 /* ═══════════════════════════════════════
    CORE CONTENT CONTROLLER
    ═══════════════════════════════════════ */
-function ManchesterUnitedThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
-    const { t } = useTranslation();
+function UnitedInViteUnitedThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
+    const { t, locale } = useTranslation();
     
     // Global animation control overrides
     globalShowPhotos = !invitation?.hide_photos;
     globalShowAnimations = invitation?.show_animations !== false;
+
+    const themeConfig = React.useMemo(() => {
+        return getThemeLabels(invitation?.type, locale, brideGrooms, invitation);
+    }, [invitation?.type, locale, brideGrooms, invitation]);
 
     // Layout configuration
     const layoutMode = invitation?.layout_mode || 'scroll';
@@ -1280,9 +1539,19 @@ function ManchesterUnitedThemeContent({ invitation, sections, brideGrooms, event
             return (a.sort_order || 0) - (b.sort_order || 0);
         });
 
+    const getNavLabel = (key, defaultName) => {
+        switch (key) {
+            case 'opening': return t('nav.opening') || 'Opening';
+            case 'bride_groom': return themeConfig?.labels?.coupleTitleBadge || defaultName;
+            case 'love_story': return themeConfig?.labels?.storyTitleBadge || defaultName;
+            case 'event': return themeConfig?.labels?.eventTitleBadge || defaultName;
+            default: return defaultName;
+        }
+    };
+
     const navSections = resolvedSections.map(s => ({
         section_key: s.section_key,
-        section_name: s.section_key === 'opening' ? (t('nav.opening') || 'Opening') : s.section_name
+        section_name: getNavLabel(s.section_key, s.section_name)
     }));
 
     const navIcons = {
@@ -1536,13 +1805,14 @@ function ManchesterUnitedThemeContent({ invitation, sections, brideGrooms, event
                 enableWishes={enableWishes}
                 bankAccounts={bankAccounts}
                 events={events}
+                themeConfig={themeConfig}
             />
         ),
-        bride_groom: <BrideGroomSection invitation={invitation} brideGrooms={brideGrooms} events={events} />,
+        bride_groom: <BrideGroomSection invitation={invitation} brideGrooms={brideGrooms} events={events} themeConfig={themeConfig} />,
         countdown: <CountdownSection events={events} />,
-        love_story: <LoveStorySection loveStories={loveStories} />,
-        event: <EventSection events={events} invitation={invitation} />,
-        livestream: <LivestreamSection events={events} invitation={invitation} />,
+        love_story: <LoveStorySection loveStories={loveStories} themeConfig={themeConfig} />,
+        event: <EventSection events={events} invitation={invitation} themeConfig={themeConfig} />,
+        livestream: <LivestreamSection events={events} invitation={invitation} themeConfig={themeConfig} />,
         gallery: <GallerySection galleries={galleries} />,
         rsvp: (
             <UnifiedFormSection
@@ -1562,8 +1832,8 @@ function ManchesterUnitedThemeContent({ invitation, sections, brideGrooms, event
                 enableWishes={enableWishes}
             />
         ),
-        bank: <BankSection bankAccounts={bankAccounts} />,
-        closing: <ClosingSection invitation={invitation} brideGrooms={brideGrooms} />,
+        bank: <BankSection bankAccounts={bankAccounts} themeConfig={themeConfig} />,
+        closing: <ClosingSection invitation={invitation} brideGrooms={brideGrooms} themeConfig={themeConfig} />,
     };
 
     const musicUrl = invitation?.music_url || null;
@@ -1635,6 +1905,7 @@ function ManchesterUnitedThemeContent({ invitation, sections, brideGrooms, event
                 guest={guest}
                 isOpened={isOpened}
                 onOpen={handleOpen}
+                themeConfig={themeConfig}
             />
 
             {/* Floating Action Controls */}
@@ -1710,10 +1981,10 @@ function ManchesterUnitedThemeContent({ invitation, sections, brideGrooms, event
 /* ═══════════════════════════════════════
    EXPORT CORE WRAPPER
    ═══════════════════════════════════════ */
-export default function ManchesterUnitedTheme(props) {
+export default function UnitedInViteUnitedTheme(props) {
     return (
         <ErrorBoundary>
-            <ManchesterUnitedThemeContent {...props} />
+            <UnitedInViteUnitedThemeContent {...props} />
         </ErrorBoundary>
     );
 }

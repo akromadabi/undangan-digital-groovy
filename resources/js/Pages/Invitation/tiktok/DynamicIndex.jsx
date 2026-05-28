@@ -11,6 +11,117 @@ function safeArr(val) {
     return [];
 }
 
+function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
+    const t = type || 'wedding';
+    const isEn = String(locale).toLowerCase() === 'en';
+    const bgs = safeArr(brideGrooms);
+    const host = bgs[0] || {};
+    
+    let mainName = '';
+    let initials = '';
+    let isSingleHost = false;
+    
+    if (['wedding', 'anniversary'].includes(t)) {
+        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+        mainName = groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom';
+        initials = `${groom.nickname?.charAt(0) || 'B'}${bride.nickname?.charAt(0) || 'R'}`;
+        isSingleHost = false;
+    } else {
+        mainName = host.nickname || host.full_name || 'Host';
+        initials = mainName.charAt(0) || 'H';
+        isSingleHost = true;
+    }
+
+    let labels = {
+        albumLabel: isEn ? 'MEMORIES ALBUM' : 'ALBUM KENANGAN',
+        albumSubtitle: isEn ? 'Special Playlist' : 'Daftar Putar Spesial',
+        eventHeader: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
+        introBadge: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
+        introTitle: invitation?.opening_title || (isEn ? 'Special Celebration' : 'Perayaan Spesial'),
+        introText: invitation?.opening_text || '',
+        profileHeader: isEn ? 'Featured Profile' : 'Profil Utama',
+        storyHeader: isEn ? 'Our Journey' : 'Kisah Perjalanan',
+        storySubtitle: isEn ? 'Journey Playlist' : 'Daftar Putar Perjalanan',
+        streamDesc: isEn ? 'Join our event virtually via the streaming links below' : 'Saksikan momen bahagia kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.'
+    };
+
+    if (t === 'wedding') {
+        labels.albumLabel = isEn ? 'PLAYING FROM WEDDING ALBUM' : 'MEMUTAR DARI ALBUM PERNIKAHAN';
+        labels.albumSubtitle = isEn ? 'The Wedding Album' : 'Album Pernikahan';
+        labels.eventHeader = isEn ? 'Live Events / Tour' : 'Jadwal Acara / Tur';
+        labels.introBadge = isEn ? 'THE WEDDING OF' : 'PERNIKAHAN';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Wedding Album' : 'Album Pernikahan');
+        labels.introText = invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami meresmikan ikatan pernikahan kami.';
+        labels.profileHeader = isEn ? 'Featured Artists' : 'Artis Utama';
+        labels.storyHeader = isEn ? 'Love Story Playlist' : 'Daftar Putar Kisah Cinta';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our hearts' : 'Lirik disinkronkan dengan hati kami';
+        labels.streamDesc = isEn ? 'Please join our wedding virtually via the streaming platform links below' : 'Saksikan momen bahagia pernikahan kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'anniversary') {
+        labels.albumLabel = isEn ? 'PLAYING FROM ANNIVERSARY ALBUM' : 'MEMUTAR DARI ALBUM ANNIVERSARY';
+        labels.albumSubtitle = isEn ? 'The Anniversary Album' : 'Album Anniversary';
+        labels.eventHeader = isEn ? 'Anniversary Tour' : 'Jadwal Perayaan / Tur';
+        labels.introBadge = isEn ? 'ANNIVERSARY OF' : 'ANNIVERSARY';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Anniversary Album' : 'Album Anniversary');
+        labels.introText = invitation?.opening_text || 'Perjalanan kasih kami yang penuh berkat dan kebahagiaan.';
+        labels.profileHeader = isEn ? 'Featured Couple' : 'Pasangan Utama';
+        labels.storyHeader = isEn ? 'Love Journey Playlist' : 'Daftar Putar Perjalanan Kasih';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our years' : 'Lirik disinkronkan dengan tahun-tahun kami';
+        labels.streamDesc = isEn ? 'Please join our celebration virtually via the streaming platform links below' : 'Saksikan momen bahagia anniversary kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'graduation') {
+        labels.albumLabel = isEn ? 'PLAYING FROM GRADUATION ALBUM' : 'MEMUTAR DARI ALBUM WISUDA';
+        labels.albumSubtitle = isEn ? 'The Graduation Album' : 'Album Wisuda';
+        labels.eventHeader = isEn ? 'Graduation Tour' : 'Jadwal Acara / Wisuda';
+        labels.introBadge = isEn ? 'THE GRADUATION OF' : 'WISUDA';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Graduation Album' : 'Album Wisuda');
+        labels.introText = invitation?.opening_text || 'Perayaan kelulusan dan awal dari perjalanan studi baru.';
+        labels.profileHeader = isEn ? 'Featured Graduate' : 'Profil Wisudawan';
+        labels.storyHeader = isEn ? 'Study Journey Playlist' : 'Daftar Putar Perjalanan Studi';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our study days' : 'Lirik disinkronkan dengan perjuangan studi kami';
+        labels.streamDesc = isEn ? 'Please join our graduation virtually via the streaming platform links below' : 'Saksikan momen syukuran kelulusan kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'birthday') {
+        labels.albumLabel = isEn ? 'PLAYING FROM BIRTHDAY ALBUM' : 'MEMUTAR DARI ALBUM ULANG TAHUN';
+        labels.albumSubtitle = isEn ? 'The Birthday Album' : 'Album Ulang Tahun';
+        labels.eventHeader = isEn ? 'Birthday Party Tour' : 'Jadwal Perayaan / Tur';
+        labels.introBadge = isEn ? 'THE BIRTHDAY OF' : 'ULANG TAHUN';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Birthday Album' : 'Album Ulang Tahun');
+        labels.introText = invitation?.opening_text || 'Syukuran pertambahan usia dan langkah baru penuh berkah.';
+        labels.profileHeader = isEn ? 'Featured Celebrant' : 'Profil Ulang Tahun';
+        labels.storyHeader = isEn ? 'Life Milestones Playlist' : 'Daftar Putar Perjalanan Hidup';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our milestones' : 'Lirik disinkronkan dengan perjalanan usia kami';
+        labels.streamDesc = isEn ? 'Please join our birthday party virtually via the streaming platform links below' : 'Saksikan momen pertambahan usia kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'aqiqah') {
+        labels.albumLabel = isEn ? 'PLAYING FROM AQIQAH ALBUM' : 'MEMUTAR DARI ALBUM AQIQAH';
+        labels.albumSubtitle = isEn ? 'The Aqiqah Album' : 'Album Aqiqah';
+        labels.eventHeader = isEn ? 'Aqiqah Celebration Tour' : 'Jadwal Acara / Aqiqah';
+        labels.introBadge = isEn ? 'THE AQIQAH OF' : 'AQIQAH';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Aqiqah Album' : 'Album Aqiqah');
+        labels.introText = invitation?.opening_text || 'Syukuran kehadiran buah hati tercinta yang menjadi penyejuk hati kami.';
+        labels.profileHeader = isEn ? 'Featured Child' : 'Profil Anak';
+        labels.storyHeader = isEn ? 'Baby Growth Playlist' : 'Daftar Putar Tumbuh Kembang';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our baby steps' : 'Lirik disinkronkan dengan tumbuh kembang buah hati kami';
+        labels.streamDesc = isEn ? 'Please join our aqiqah virtually via the streaming platform links below' : 'Saksikan momen aqiqah putra/putri kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    } else if (t === 'circumcision') {
+        labels.albumLabel = isEn ? 'PLAYING FROM CIRCUMCISION ALBUM' : 'MEMUTAR DARI ALBUM KHITANAN';
+        labels.albumSubtitle = isEn ? 'The Circumcision Album' : 'Album Khitanan';
+        labels.eventHeader = isEn ? 'Circumcision Tour' : 'Jadwal Syukuran / Tur';
+        labels.introBadge = isEn ? 'THE CIRCUMCISION OF' : 'KHITANAN';
+        labels.introTitle = invitation?.opening_title || (isEn ? 'The Circumcision Album' : 'Album Khitanan');
+        labels.introText = invitation?.opening_text || 'Syukuran khitanan putra kami sebagai bagian dari syariat dan kesehatan.';
+        labels.profileHeader = isEn ? 'Featured Child' : 'Profil Anak';
+        labels.storyHeader = isEn ? 'Growth Journey Playlist' : 'Daftar Putar Tumbuh Kembang';
+        labels.storySubtitle = isEn ? 'Lyrics synchronized with our boy steps' : 'Lirik disinkronkan dengan kisah tumbuh kembang putra kami';
+        labels.streamDesc = isEn ? 'Please join our circumcision celebration virtually via the streaming platform links below' : 'Saksikan momen syukuran khitanan putra kami secara virtual dari mana saja melalui tombol live streaming di bawah ini.';
+    }
+
+    return {
+        mainName,
+        initials,
+        isSingleHost,
+        labels
+    };
+}
+
 function pad2(n) {
     return String(n).padStart(2, '0');
 }
@@ -176,10 +287,13 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
 }
 
 /* ═══════════════════════════════════════
-   COVER SECTION (TikTok Login screen design)
+   COVER SECTION (ViteTok Login screen design)
    ═══════════════════════════════════════ */
 function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, language, fallbackPhoto, onToast, onLanguageChange }) {
     const { t, locale } = useTranslation(language);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, isSingleHost, labels } = themeConfig;
+
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || {};
@@ -188,11 +302,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
         || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null)
         || 'Tamu Undangan';
 
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
-            ? invitation.cover_title
-            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
+    const coupleName = mainName;
 
     const coverImages = useMemo(() => {
         if (!invitation?.cover_image) return [];
@@ -214,9 +324,9 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
         }
     };
 
-    const groomTag = groom?.nickname ? groom.nickname.replace(/\s+/g, '') : 'Groom';
-    const brideTag = bride?.nickname ? bride.nickname.replace(/\s+/g, '') : 'Bride';
-    const defaultHashTags = `#${groomTag}${brideTag}Wedding #PernikahanViral`;
+    const groomTag = groom?.nickname ? groom.nickname.replace(/\s+/g, '') : 'groom';
+    const brideTag = bride?.nickname ? bride.nickname.replace(/\s+/g, '') : 'bride';
+    const defaultHashTags = isSingleHost ? `#${groomTag}Celebration` : `#${groomTag}${brideTag}Wedding #PernikahanViral`;
     
     let hashTags = invitation?.cover_subtitle || '';
     if (!hashTags || !hashTags.includes('#') || hashTags.toLowerCase().includes('bimo') || hashTags.toLowerCase().includes('raras')) {
@@ -237,6 +347,8 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
             }, 900);
         }, 1200);
     };
+
+    const userHandle = isSingleHost ? `@${groomTag.toLowerCase()}` : `@${groomTag.toLowerCase()}_dan_${brideTag.toLowerCase()}`;
 
     return (
         <div className={`ttk-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'ttk-no-photo-mode' : ''}`}>
@@ -282,7 +394,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
             <div className="ttk-scanlines" />
 
             <div className="ttk-cover__inner">
-                {/* Header mimicking TikTok feed tabs */}
+                {/* Header mimicking ViteTok feed tabs */}
                 <div className="ttk-cover__header" style={{ position: 'relative', zIndex: 12, justifyContent: 'center' }}>
                     <div className="ttk-cover__tabs">
                         <span className="ttk-cover__tab">{locale === 'en' ? 'Following' : 'Mengikuti'}</span>
@@ -299,10 +411,10 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                     </Reveal>
                 </div>
 
-                {/* Simulated TikTok Mobile Login screen options card (bukaundangan pakai login tiktok saja) */}
+                {/* Simulated ViteTok Mobile Login screen options card (bukaundangan pakai login tiktok saja) */}
                 <div className="ttk-cover__bottom-info" style={{ maxWidth: '100%' }}>
                     <div className="ttk-cover__handle" style={{ textAlign: 'center', marginBottom: 2 }}>
-                        @{groom?.nickname?.toLowerCase() || 'groom'}_dan_{bride?.nickname?.toLowerCase() || 'bride'}
+                        {userHandle}
                     </div>
                     <div className="ttk-cover__tags" style={{ textAlign: 'center', marginBottom: 15, fontSize: 12 }}>
                         {hashTags}
@@ -313,18 +425,18 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                             {locale === 'en' ? 'Log in to view invitation' : 'Masuk untuk Melihat Undangan'}
                         </div>
                         
-                        {/* Option 1: Continue as Tamu (The absolute TikTok Logo Login block style) */}
+                        {/* Option 1: Continue as Tamu (The absolute ViteTok Logo Login block style) */}
                         <button 
-                            onClick={() => handleLoginClick('TikTok')} 
+                            onClick={() => handleLoginClick('ViteTok')} 
                             className="ttk-cover__login-btn ttk-cover__login-btn--primary"
                             type="button"
                         >
-                            <i className="fab fa-tiktok" />
+                            <i className="fas fa-video" />
                             <strong>{locale === 'en' ? `Continue as Guest (${guestName})` : `Lanjutkan sebagai Tamu (${guestName})`}</strong>
                         </button>
                     </div>
 
-                    {/* Timeline progress line mockup */}
+                    {/* Simulated timeline progress line */}
                     <div className="ttk-cover__timeline-bar">
                         <div className="ttk-cover__timeline-progress" />
                     </div>
@@ -335,10 +447,13 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 }
 
 /* ═══════════════════════════════════════
-   OPENING SECTION (Stunning vertical card mockup replicating a real TikTok video post)
+   OPENING SECTION (Stunning vertical card mockup replicating a real ViteTok video post)
    ═══════════════════════════════════════ */
 function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onToast }) {
     const { t, locale } = useTranslation(language);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, isSingleHost, labels } = themeConfig;
+
     const isEn = t('invitation.save_the_date') === 'Save The Date';
     // Premium fallback Unsplash prewedding image so that it never looks like a plain black box
     const defaultOpeningPhoto = 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';
@@ -352,18 +467,14 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
     const isIdenticalQuote = invitation?.opening_ayat && invitation?.opening_ayat_translation &&
         invitation.opening_ayat.trim().toLowerCase() === invitation.opening_ayat_translation.trim().toLowerCase();
 
-    const couples = safeArr(brideGrooms);
-    const groom = couples.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || couples[0] || {};
-    const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
-            ? invitation.cover_title
-            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
+    const bgs = safeArr(brideGrooms);
+    const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+    const coupleName = mainName;
 
-    const groomTag = groom?.nickname ? groom.nickname.replace(/\s+/g, '') : 'Groom';
-    const brideTag = bride?.nickname ? bride.nickname.replace(/\s+/g, '') : 'Bride';
-    const defaultHashTags = `#${groomTag}${brideTag}Wedding #PernikahanViral`;
+    const groomTag = groom?.nickname ? groom.nickname.replace(/\s+/g, '') : 'groom';
+    const brideTag = bride?.nickname ? bride.nickname.replace(/\s+/g, '') : 'bride';
+    const defaultHashTags = isSingleHost ? `#${groomTag}Celebration` : `#${groomTag}${brideTag}Wedding #PernikahanViral`;
     
     let hashTags = invitation?.cover_subtitle || '';
     if (!hashTags || !hashTags.includes('#') || hashTags.toLowerCase().includes('bimo') || hashTags.toLowerCase().includes('raras')) {
@@ -372,7 +483,7 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
 
     return (
         <section className="ttk-section" id="opening" style={{ padding: '0 0 20px 0' }}>
-            {/* Authentic TikTok Feed Header with Simulated Mobile Status Bar */}
+            {/* Authentic ViteTok Feed Header with Simulated Mobile Status Bar */}
             <div className="ttk-feed-header">
                 {/* Status Bar */}
                 <div className="ttk-status-bar">
@@ -384,7 +495,7 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
                     </div>
                 </div>
 
-                {/* TikTok Header Navigation */}
+                {/* ViteTok Header Navigation */}
                 <div className="ttk-tiktok-nav">
                     {/* Left: TV icon and LIVE indicator */}
                     <div className="ttk-tiktok-nav__left" onClick={() => onToast && onToast(language === 'en' ? 'LIVE Broadcast Mode active 🎥' : 'Mode Siaran Langsung aktif 🎥')}>
@@ -413,7 +524,7 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
                 </div>
             </div>
 
-            {/* Photo opening card designed like a real TikTok video layout (pembuka pakai foto opening seperti tiktok biasa) */}
+            {/* Photo opening card designed like a real ViteTok video layout (pembuka pakai foto opening seperti tiktok biasa) */}
             <Reveal variant="zoom" delay={100}>
                 <div className="ttk-live__container" style={{ aspectRatio: '9/14', height: 'auto', minHeight: '480px', margin: '0 15px' }}>
                     {globalShowPhotos && openingImages.length > 0 ? (
@@ -439,17 +550,17 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
                         <span className="ttk-live__host-name">@announcement</span>
                     </div>
 
-                    {/* Captions overlayed inside the vertical image exactly like a real TikTok! */}
+                    {/* Captions overlayed inside the vertical image exactly like a real ViteTok! */}
                     <div style={{ position: 'absolute', bottom: '15px', left: '15px', right: '15px', zIndex: 3, textAlign: 'left' }}>
-                        {/* TikTok User handle verified block */}
+                        {/* ViteTok User handle verified block */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                            <span style={{ fontSize: '13px', fontWeight: 800, color: '#fff' }}>@wedding_announcement</span>
+                            <span style={{ fontSize: '13px', fontWeight: 800, color: '#fff' }}>@{groomTag.toLowerCase()}_announcement</span>
                             <i className="fas fa-check-circle" style={{ color: '#20d5ec', fontSize: '11px' }} />
                         </div>
 
-                        {/* The Wedding of caption */}
+                        {/* Caption Title */}
                         <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', marginBottom: 6 }}>
-                            {isEn ? `The Wedding of ${coupleName}` : `Pernikahan dari ${coupleName}`}
+                            {labels.introTitle}
                         </div>
 
                         {invitation?.opening_ayat && (
@@ -470,7 +581,7 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
                             </div>
                         )}
                         <p style={{ fontSize: '12px', lineHeight: '1.4', color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.8)', margin: '0 0 8px 0' }}>
-                            {invitation?.opening_text || "Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Anda untuk merayakan hari bahagia pernikahan kami."}
+                            {invitation?.opening_text || labels.introText}
                         </p>
                         <div style={{ fontSize: '11.5px', color: 'var(--ttk-cyan)', fontWeight: 700 }}>
                             {hashTags}
@@ -483,13 +594,16 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
 }
 
 /* ═══════════════════════════════════════
-   MEMPELAI SECTION (Bride & Groom cards styled like TikTok user profile page)
+   MEMPELAI SECTION (Bride & Groom cards styled like ViteTok user profile page)
    ═══════════════════════════════════════ */
 function BrideGroomSection({ brideGrooms, invitation, galleries, language, onToast }) {
-    const { t } = useTranslation(language);
-    const couples = safeArr(brideGrooms);
-    const groom = couples.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || couples[0] || {};
-    const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
+    const { t, locale } = useTranslation(language);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { mainName, isSingleHost, labels } = themeConfig;
+
+    const bgs = safeArr(brideGrooms);
+    const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
 
     const isEn = t('invitation.save_the_date') === 'Save The Date';
 
@@ -554,7 +668,7 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language, onToa
                 <h3 className="ttk-profile-card__name">{person.full_name}</h3>
                 <div className="ttk-profile-card__handle">@{person.nickname?.toLowerCase() || 'featured'}</div>
 
-                {/* TikTok style profile follow buttons mockup */}
+                {/* ViteTok style profile follow buttons mockup */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 15 }}>
                     {instagramUser && (
                         <button
@@ -575,7 +689,7 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language, onToa
                     </button>
                 </div>
 
-                {/* Simulated TikTok User Stats */}
+                {/* Simulated ViteTok User Stats */}
                 <div className="ttk-profile-card__stats">
                     <div className="ttk-profile-card__stat-item">
                         <span className="ttk-profile-card__stat-val">128</span>
@@ -616,17 +730,19 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language, onToa
             </div>
 
             <Reveal variant="up">
-                <h2 className="ttk-section-title">{isEn ? 'The Couple' : 'Mempelai'}</h2>
-                <p className="ttk-section-subtitle">{isEn ? 'Introducing the stars of this day' : 'Dua insan yang dipersatukan dalam cinta'}</p>
+                <h2 className="ttk-section-title">{labels.profileHeader}</h2>
+                <p className="ttk-section-subtitle">{isSingleHost ? (isEn ? 'Introducing the star of this day' : 'Syukuran dan doa restu untuk') : (isEn ? 'Introducing the stars of this day' : 'Dua insan yang dipersatukan dalam cinta')}</p>
             </Reveal>
 
-            <div className="ttk-couple__container">
-                <Reveal variant="left" delay={100}>
+            <div className="ttk-couple__container" style={isSingleHost ? { justifyContent: 'center' } : undefined}>
+                <Reveal variant="zoom" delay={100}>
                     {renderProfile(groom, 'groom')}
                 </Reveal>
-                <Reveal variant="right" delay={150}>
-                    {renderProfile(bride, 'bride')}
-                </Reveal>
+                {!isSingleHost && (
+                    <Reveal variant="right" delay={150}>
+                        {renderProfile(bride, 'bride')}
+                    </Reveal>
+                )}
             </div>
 
             {activeProfilePhotoIdx !== null && (
@@ -916,7 +1032,7 @@ function EventSection({ events, invitation, language, sections }) {
 }
 
 /* ═══════════════════════════════════════
-   LIVE STREAMING SECTION (Styled like a Blinking TikTok LIVE feed)
+   LIVE STREAMING SECTION (Styled like a Blinking ViteTok LIVE feed)
    ═══════════════════════════════════════ */
 function LiveStreamingSection({ events, invitation, language, onToast }) {
     const { t } = useTranslation(language);
@@ -960,7 +1076,7 @@ function LiveStreamingSection({ events, invitation, language, onToast }) {
             <Reveal variant="zoom">
                 <div className="ttk-card" style={{ padding: 12 }}>
                     
-                    {/* Simulated TikTok LIVE screen mockup */}
+                    {/* Simulated ViteTok LIVE screen mockup */}
                     <div className="ttk-live__container">
                         <div 
                             className="ttk-live__stream-bg" 
@@ -1026,7 +1142,7 @@ function LiveStreamingSection({ events, invitation, language, onToast }) {
 }
 
 /* ═══════════════════════════════════════
-   LOVE STORY SECTION (Timeline post mockup styled like TikTok chronological feeds)
+   LOVE STORY SECTION (Timeline post mockup styled like ViteTok chronological feeds)
    ═══════════════════════════════════════ */
 function LoveStorySection({ loveStories, language }) {
     const { t } = useTranslation(language);
@@ -1482,7 +1598,7 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                         </form>
                     )}
 
-                    {/* Wishes Feed styled exactly like TikTok comment list */}
+                    {/* Wishes Feed styled exactly like ViteTok comment list */}
                     <div className="ttk-comments__feed">
                         {localWishes.length === 0 ? (
                             <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--ttk-gray)', margin: '15px 0' }}>
@@ -1611,7 +1727,7 @@ function ClosingSection({ invitation, brideGrooms, language }) {
 /* ═══════════════════════════════════════
    TIKTOK BOTTOM NAVIGATION BAR
    ═══════════════════════════════════════ */
-function TikTokBottomBar({ activeSection, onNavigate, hasStream, hasGallery, hasStory, hasBank, enableRsvp, language }) {
+function ViteTokBottomBar({ activeSection, onNavigate, hasStream, hasGallery, hasStory, hasBank, enableRsvp, language }) {
     const { locale } = useTranslation(language);
     const isEn = locale === 'en';
 
@@ -1661,7 +1777,7 @@ function TikTokBottomBar({ activeSection, onNavigate, hasStream, hasGallery, has
 /* ═══════════════════════════════════════
    TIKTOK DYNAMIC INDEX COMPONENT (MAIN WRAPPER)
    ═══════════════════════════════════════ */
-export default function TikTokTheme(props) {
+export default function ViteTokTheme(props) {
     const { invitation, sections, brideGrooms, events, wishes, galleries, loveStories, bankAccounts, guest } = props;
     
     const bgs = safeArr(brideGrooms);
@@ -2230,7 +2346,7 @@ export default function TikTokTheme(props) {
                         )}
 
                         {/* Iconic Bottom Navigation Bar */}
-                        <TikTokBottomBar
+                        <ViteTokBottomBar
                             activeSection={activeSectionId}
                             onNavigate={handleNavigationClick}
                             hasStream={resolvedSections.some(s => s.section_key === 'livestream')}

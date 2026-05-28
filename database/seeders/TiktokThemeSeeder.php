@@ -13,7 +13,7 @@ class TiktokThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'tiktok'],
             [
-                'name' => 'TikTok Viral',
+                'name' => 'TikTok FYP',
                 'thumbnail' => '/themes/tiktok/thumbnail.png',
                 'preview_url' => '/themes/tiktok/preview.png',
                 'category' => 'Premium',

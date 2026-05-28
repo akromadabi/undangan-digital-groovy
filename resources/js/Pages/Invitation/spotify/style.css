@@ -1,5 +1,5 @@
 /* ==========================================
-   SPOTIFY NEON THEME - style.css
+   SPOTIVITE NEON THEME - style.css
    ========================================== */
 
 :root {
@@ -1030,7 +1030,7 @@ html, body {
 
 
 /* ------------------------------------------
-   KISAH CINTA SECTION (Spotify Lyrics UI)
+   KISAH CINTA SECTION (Spotivite Lyrics UI)
    ------------------------------------------ */
 .spty-lyrics {
     background: linear-gradient(180deg, #2b4a3f 0%, var(--spty-black) 100%);
@@ -1748,7 +1748,7 @@ html, body {
 }
 
 /* ------------------------------------------
-   QR CODE CHECK-IN MODAL (Spotify Style)
+   QR CODE CHECK-IN MODAL (Spotivite Style)
    ------------------------------------------ */
 .spty-qr-overlay {
     position: fixed;

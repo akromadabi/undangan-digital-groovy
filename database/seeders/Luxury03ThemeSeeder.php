@@ -13,14 +13,14 @@ class Luxury03ThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'luxury-03'],
             [
-                'name' => 'Luxury 3',
+                'name' => 'Emerald Royal',
                 'thumbnail' => '/themes/modern-black/thumbnail.jpg', // Placeholder thumbnail
                 'category' => 'premium',
                 'color_scheme' => [
-                    'primary' => '#b82d40',
-                    'secondary' => '#0d0203',
+                    'primary' => '#D4AF37',
+                    'secondary' => '#0B2512',
                     'accent' => '#ffffff',
-                    'bg' => '#0d0203',
+                    'bg' => '#0B2512',
                     'text' => '#ffffff',
                 ],
                 'font_config' => [

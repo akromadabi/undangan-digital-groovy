@@ -57,7 +57,15 @@ class PaymentController extends Controller
      */
     public function checkout(Request $request)
     {
-        $request->validate(['plan_id' => 'required|exists:subscription_plans,id']);
+        $request->validate([
+            'plan_id' => 'required|exists:subscription_plans,id',
+            'invitation_id' => 'nullable|exists:invitations,id',
+        ]);
+
+        $invitationId = $request->input('invitation_id') ?: session('active_invitation_id');
+        if (!$invitationId) {
+            return back()->with('error', 'Undangan tidak ditemukan untuk pemesanan ini.');
+        }
 
         $plan = SubscriptionPlan::findOrFail($request->plan_id);
         $user = auth()->user();
@@ -81,6 +89,7 @@ class PaymentController extends Controller
         if ($user->reseller_id) {
             $existingPendingManual = Payment::where('user_id', $user->id)
                 ->where('plan_id', $plan->id)
+                ->where('invitation_id', $invitationId)
                 ->whereIn('status', ['pending_manual', 'waiting_review'])
                 ->where('payment_gateway', 'manual')
                 ->where('created_at', '>', now()->subHours(24))
@@ -93,6 +102,7 @@ class PaymentController extends Controller
             $payment = Payment::create([
                 'user_id' => $user->id,
                 'plan_id' => $plan->id,
+                'invitation_id' => $invitationId,
                 'amount' => $price,
                 'payment_method' => 'transfer',
                 'payment_gateway' => 'manual',
@@ -105,6 +115,7 @@ class PaymentController extends Controller
         // Check for existing pending payment
         $existingPending = Payment::where('user_id', $user->id)
             ->where('plan_id', $plan->id)
+            ->where('invitation_id', $invitationId)
             ->where('status', 'pending')
             ->where('created_at', '>', now()->subHours(24))
             ->first();
@@ -117,6 +128,7 @@ class PaymentController extends Controller
         $payment = Payment::create([
             'user_id' => $user->id,
             'plan_id' => $plan->id,
+            'invitation_id' => $invitationId,
             'amount' => $price,
             'payment_gateway' => 'xendit',
             'status' => 'pending',

@@ -599,6 +599,88 @@ export const FAQ_DATABASE = [
             'Foto yang tidak dicentang akan tetap tersimpan di media library namun disembunyikan dari halaman undangan.'
         ],
         mockup: null
+    },
+    {
+        id: 'faq-tema-parodi',
+        category: 'desain-tema',
+        question: '29. Mengapa beberapa tema premium seperti Spotify, YouTube, dan Instagram berganti nama menjadi Spotivite, YouInvite, dan InstaVite?',
+        answer: 'Perubahan nama dan logo ini dirancang khusus untuk memastikan kepatuhan hukum hak cipta (copyright) serta memberikan sentuhan personal bertema pernikahan yang lebih romantis dan eksklusif.',
+        keywords: ['spotify', 'youtube', 'instagram', 'netflix', 'logo', 'nama', 'plesetan', 'ganti nama', 'hak cipta', 'aman', 'copyright', 'spotivite', 'youinvite', 'instavite', 'wedflix', 'vitegpt', 'unitedinvite', 'merek'],
+        steps: [
+            'Kami memodifikasi nama resmi menjadi plesetan kreatif bertema undangan/nikah (misalnya Spotivite, YouInvite, Wedflix, InstaVite, ViteTok, Shopinvity, ViteGPT, dan UnitedInVite).',
+            'Seluruh logo resmi platform tersebut digantikan secara kreatif dengan ilustrasi vektor bertema cinta (seperti play-button hati merah pada YouInvite, ikon chat bubble hati putih pada ViteGPT, dan logo UnitedInVite Crest orisinal).',
+            'Ini menjamin undangan digital Anda sepenuhnya aman, legal, dan bebas risiko pelanggaran hak cipta saat disebarkan kepada sanak saudara serta kerabat via WhatsApp atau media sosial.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-tambah-event',
+        category: 'fitur-tambahan',
+        question: '30. Bagaimana cara menambah event / acara baru di undangan saya?',
+        answer: 'Anda dapat menambahkan beberapa agenda acara (seperti Akad Nikah, Resepsi, Ngunduh Mantu, atau Syukuran) secara berurutan dalam satu undangan digital menggunakan fitur Multi-Event.',
+        keywords: ['tambah event', 'tambah acara', 'multi-event', 'akad', 'resepsi', 'ngunduh mantu', 'syukuran', 'agenda', 'jadwal'],
+        steps: [
+            'Buka dashboard undangan Anda dan pilih menu "Informasi Acara" di sidebar.',
+            'Jika kuota paket premium Anda mendukung, klik tombol "+ Tambah Acara Baru" di sudut kanan atas.',
+            'Isi formulir detail acara (nama acara, tanggal, waktu mulai/selesai, alamat gedung, dan link Google Maps).',
+            'Klik "Simpan Acara". Detail acara baru Anda akan langsung tampil rapi berurutan pada undangan digital Anda.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-multi-account',
+        category: 'mulai-cepat',
+        question: '31. Apakah satu akun bisa mengelola banyak undangan / event?',
+        answer: 'Ya, Anda dapat membuat dan mengelola banyak undangan digital untuk berbagai jenis event (Pernikahan, Ulang Tahun, Aqiqah, Wisuda) di dalam satu akun terpusat.',
+        keywords: ['kelola banyak', 'banyak undangan', 'kelola event', 'satu akun', 'multi akun', 'buat lagi', 'tambah undangan', 'batas akun'],
+        steps: [
+            'Masuk ke dashboard utama akun Anda.',
+            'Buka menu "Daftar Undangan" atau klik tombol "Buat Undangan Baru" di halaman depan dashboard.',
+            'Pilih tipe undangan (Pernikahan, Ulang Tahun, Wisuda, Aqiqah, dll.) yang ingin Anda buat.',
+            'Anda dapat berpindah panel kelola antar undangan secara praktis lewat menu selector undangan di bagian navigasi atas tanpa harus log out.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-single-celebrant',
+        category: 'desain-tema',
+        question: '32. Bagaimana cara membuat undangan non-pernikahan (seperti Ulang Tahun, Khitan, atau Wisuda) dan mengapa profilnya hanya 1 orang?',
+        answer: 'Sistem kami secara cerdas mendeteksi tipe undangan yang Anda buat. Untuk tipe undangan non-pernikahan (Single-Celebrant), tata letak otomatis berubah menampilkan 1 tokoh utama, mengubah penamaan kolom input, dan memodifikasi judul besar secara otomatis.',
+        keywords: ['single-celebrant', 'ulang tahun', 'khitan', 'wisuda', 'aqiqah', 'satu orang', 'profil tunggal', 'bukan nikah', 'ganti tipe'],
+        steps: [
+            'Di dashboard Anda, pastikan tipe undangan yang aktif adalah tipe non-pernikahan (misal: Ulang Tahun atau Wisuda).',
+            'Buka menu "Profil Tokoh" (sebelumnya "Mempelai"). Anda akan melihat kolom input otomatis berubah menjadi "Nama Wisudawan" atau "Nama Anak".',
+            'Unggah foto tokoh utama. Desain undangan Anda otomatis menyesuaikan layout dari 2 orang (pasangan) menjadi 1 orang terpusat yang elegan.',
+            'Teks judul statis seperti "The Wedding Of" otomatis diganti menjadi "Happy Birthday", "Walimatul Aqiqah", atau "Happy Graduation".'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-visual-color-cards',
+        category: 'desain-tema',
+        question: '33. Bagaimana cara mengganti warna tema dan layout undangan secara visual?',
+        answer: 'Anda dapat dengan mudah mengganti skema warna dan gaya layout undangan digital Anda menggunakan pilihan kartu palet visual (Visual Cards) yang interaktif.',
+        keywords: ['warna tema', 'visual cards', 'skema warna', 'palet', 'ganti warna', 'ubah tata letak', 'warna visual'],
+        steps: [
+            'Buka menu "Desain & Tema" di panel samping kiri dashboard klien.',
+            'Masuk ke tab "Pengaturan" atau "Kustomisasi Warna".',
+            'Klik salah satu Visual Card palet warna premium yang Anda sukai (seperti dusty rose, sage green, royal gold).',
+            'Klik "Simpan Pengaturan". Warna dan layout undangan Anda akan otomatis terupdate secara real-time.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-milestones-single',
+        category: 'desain-tema',
+        question: '34. Bagaimana cara menggunakan fitur cerita / Love Story untuk acara Ulang Tahun atau Khitanan?',
+        answer: 'Untuk tipe undangan single-celebrant, fitur cerita dialihkan fungsinya untuk menampilkan milestones (perjalanan usia atau tumbuh kembang anak) dengan nama seksi yang disesuaikan secara otomatis.',
+        keywords: ['love story', 'milestones', 'perjalanan', 'tumbuh kembang', 'cerita anak', 'usia', 'tahapan cerita'],
+        steps: [
+            'Buka menu "Love Story" (atau "Perjalanan Usia") di dashboard Anda.',
+            'Tambahkan tahapan milestones penting (misal: Usia 1 Tahun, Hari Pertama Sekolah, dll.) lengkap dengan tanggal dan foto dokumentasi.',
+            'Judul seksi di halaman undangan akan otomatis diterjemahkan tema menjadi "Perjalanan Usia" or "Milestones" agar selaras dengan jenis acara Anda.'
+        ],
+        mockup: null
     }
 ];
 

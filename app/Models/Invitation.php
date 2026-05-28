@@ -58,6 +58,7 @@ class Invitation extends Model
         'particle_speed',
         'menu_position',
         'custom_domain',
+        'type',
     ];
 
     protected function casts(): array
@@ -88,6 +89,46 @@ class Invitation extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class, 'invitation_id')
+            ->where('status', 'active')
+            ->latestOfMany();
+    }
+
+    public function hasFeatureAccess(string $featureSlug): bool
+    {
+        $owner = $this->user;
+        if (!$owner) {
+            return false;
+        }
+
+        if ($owner->isSuperAdmin() || $owner->isAdmin()) {
+            return true;
+        }
+
+        // Basic features are always accessible
+        $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
+        if (in_array($featureSlug, $basicFeatures)) {
+            return true;
+        }
+
+        $subscription = $this->activeSubscription;
+        if (!$subscription) {
+            return false;
+        }
+
+        $plan = $subscription->plan;
+        if (!$plan) {
+            return false;
+        }
+
+        return $plan->featureAccess()
+            ->whereHas('feature', fn($q) => $q->where('slug', $featureSlug))
+            ->where('is_enabled', true)
+            ->exists();
     }
 
     public function theme()

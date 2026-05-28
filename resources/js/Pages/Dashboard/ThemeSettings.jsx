@@ -1744,7 +1744,7 @@ function SectionCard({ section, colors, fonts, isJawa, inv, getDynamicLabel }) {
                     <p className="text-[10px] opacity-60 mt-2 leading-relaxed">{inv?.closing_text?.substring(0, 100) || 'Merupakan suatu kebahagiaan...'}</p>
                     <SwirlDiv />
                     <p className="text-base mt-2" style={{ fontFamily: fonts.script, color: colors.primary }}>
-                        {inv?.bride_grooms?.[0]?.nickname || 'Mempelai'} & {inv?.bride_grooms?.[1]?.nickname || 'Mempelai'}
+                        {getNicknameHeader()}
                     </p>
                 </div>
                 {isJawa && <OrnamentBottom />}
@@ -1758,7 +1758,7 @@ function SectionCard({ section, colors, fonts, isJawa, inv, getDynamicLabel }) {
             {isJawa && <OrnamentTop />}
             <div className="px-4 py-6">
                 <SwirlDiv />
-                <p className="text-[10px] uppercase tracking-widest" style={{ color: colors.primary }}>{section.section_name}</p>
+                <p className="text-[10px] uppercase tracking-widest" style={{ color: colors.primary }}>{getDynamicLabel(section.section_name)}</p>
                 <SwirlDiv />
                 <p className="text-[9px] opacity-40 mt-2">Preview section</p>
             </div>

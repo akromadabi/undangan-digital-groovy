@@ -14,12 +14,14 @@ class ResellerPricingController extends Controller
     {
         $reseller = auth()->user();
 
-        $plans = SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug', 'price', 'suggested_price']);
+        $plans = SubscriptionPlan::with('featureAccess.feature')
+            ->orderBy('sort_order')
+            ->get();
 
         $resellerPrices = ResellerPlanPrice::where('reseller_id', $reseller->id)
             ->pluck('reseller_price', 'plan_id');
 
-        // Merge plan data with reseller prices
+        // Merge plan data with reseller prices and feature details
         $planPricing = $plans->map(fn($plan) => [
             'id' => $plan->id,
             'name' => $plan->name,
@@ -29,10 +31,29 @@ class ResellerPricingController extends Controller
             'reseller_price' => isset($resellerPrices[$plan->id])
                 ? (float) $resellerPrices[$plan->id]
                 : (float) $plan->price,
+            'duration_days' => $plan->duration_days,
+            'max_guests' => $plan->max_guests,
+            'max_galleries' => $plan->max_galleries,
+            'feature_access' => $plan->featureAccess->map(function ($fa) {
+                return [
+                    'feature_id' => $fa->feature_id,
+                    'is_enabled' => (bool)$fa->is_enabled,
+                    'feature' => $fa->feature ? [
+                        'id' => $fa->feature->id,
+                        'name' => $fa->feature->name,
+                        'slug' => $fa->feature->slug,
+                        'category' => $fa->feature->category,
+                    ] : null,
+                ];
+            })->toArray(),
         ]);
+
+        // Fetch global features for comparison details
+        $features = \App\Models\Feature::orderBy('category')->orderBy('name')->get();
 
         return Inertia::render('Admin/Pricing', [
             'planPricing' => $planPricing,
+            'features' => $features,
         ]);
     }
 

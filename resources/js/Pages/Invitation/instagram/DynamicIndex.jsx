@@ -69,7 +69,122 @@ const parseBool = (val, defaultVal = true) => {
     return true;
 };
 
+function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
+    const t = type || 'wedding';
+    const isEn = String(locale).toLowerCase() === 'en';
+    const bgs = safeArr(brideGrooms);
+    const host = bgs[0] || {};
+    
+    let mainName = '';
+    let isSingleHost = false;
+    
+    if (['wedding', 'anniversary'].includes(t)) {
+        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+        mainName = groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom';
+        isSingleHost = false;
+    } else {
+        mainName = host.nickname || host.full_name || 'Host';
+        isSingleHost = true;
+    }
+
+    let labels = {
+        brandText: isEn ? 'wedding of' : 'pernikahan',
+        coverSubtitle: 'the.wedding.album',
+        storyBadge: '#TheWeddingOf',
+        storyUser: 'wedding.story',
+        profileHeader: isEn ? 'Bride & Groom Profiles' : 'Profil Kedua Mempelai',
+        profileUsername: '@profiles',
+        eventHeaderTag: '@wedding_live',
+        eventHeaderTitle: isEn ? 'Wedding Broadcast Live' : 'Siaran Langsung Acara',
+        streamDesc: isEn ? 'Please click the link button below to join our virtual wedding stream.' : 'Saksikan siaran virtual pernikahan kami dengan menekan tombol streaming di bawah ini.',
+        closingText: isEn ? 'It is a great honor and joy for us if you would join us on our wedding day.' : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari pernikahan kami.',
+        profileBadge: isEn ? 'Mempelai' : 'Mempelai'
+    };
+
+    if (t === 'wedding') {
+        labels.brandText = isEn ? 'wedding of' : 'pernikahan';
+        labels.coverSubtitle = 'the.wedding.album';
+        labels.storyBadge = '#TheWeddingOf';
+        labels.storyUser = 'wedding.story';
+        labels.profileHeader = isEn ? 'Bride & Groom Profiles' : 'Profil Kedua Mempelai';
+        labels.profileUsername = '@profiles';
+        labels.eventHeaderTag = '@wedding_live';
+        labels.eventHeaderTitle = isEn ? 'Wedding Broadcast Live' : 'Siaran Langsung Acara';
+        labels.streamDesc = isEn ? 'Please click the link button below to join our virtual wedding stream.' : 'Saksikan siaran virtual pernikahan kami dengan menekan tombol streaming di bawah ini.';
+        labels.closingText = isEn ? 'It is a great honor and joy for us if you would join us on our wedding day.' : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari pernikahan kami.';
+        labels.profileBadge = isEn ? 'Mempelai' : 'Mempelai';
+    } else if (t === 'anniversary') {
+        labels.brandText = isEn ? 'anniversary of' : 'anniversary';
+        labels.coverSubtitle = 'the.anniversary.album';
+        labels.storyBadge = '#AnniversaryOf';
+        labels.storyUser = 'anniversary.story';
+        labels.profileHeader = isEn ? 'Couple Profiles' : 'Profil Pasangan';
+        labels.profileUsername = '@profiles';
+        labels.eventHeaderTag = '@anniversary_live';
+        labels.eventHeaderTitle = isEn ? 'Anniversary Celebration' : 'Perayaan Anniversary';
+        labels.streamDesc = isEn ? 'Please click the link button below to join our virtual anniversary stream.' : 'Saksikan siaran virtual anniversary kami dengan menekan tombol streaming di bawah ini.';
+        labels.closingText = isEn ? 'It is a great honor and joy for us if you would join us on our celebration day.' : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari bahagia kami.';
+        labels.profileBadge = isEn ? 'Couple' : 'Pasangan';
+    } else if (t === 'graduation') {
+        labels.brandText = isEn ? 'graduation of' : 'wisuda';
+        labels.coverSubtitle = 'the.graduation.album';
+        labels.storyBadge = '#TheGraduationOf';
+        labels.storyUser = 'graduation.story';
+        labels.profileHeader = isEn ? 'Graduate Profile' : 'Profil Wisudawan';
+        labels.profileUsername = '@graduate';
+        labels.eventHeaderTag = '@graduation_live';
+        labels.eventHeaderTitle = isEn ? 'Graduation Celebration' : 'Syukuran Kelulusan';
+        labels.streamDesc = isEn ? 'Please click the link button below to join our virtual graduation stream.' : 'Saksikan siaran virtual kelulusan kami dengan menekan tombol streaming di bawah ini.';
+        labels.closingText = isEn ? 'It is a great honor and joy for us if you would join us on our graduation day.' : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari syukuran kelulusan kami.';
+        labels.profileBadge = isEn ? 'Graduate' : 'Wisudawan';
+    } else if (t === 'birthday') {
+        labels.brandText = isEn ? 'birthday of' : 'ulang tahun';
+        labels.coverSubtitle = 'the.birthday.album';
+        labels.storyBadge = '#TheBirthdayOf';
+        labels.storyUser = 'birthday.story';
+        labels.profileHeader = isEn ? 'Celebrant Profile' : 'Profil Ulang Tahun';
+        labels.profileUsername = '@celebrant';
+        labels.eventHeaderTag = '@birthday_live';
+        labels.eventHeaderTitle = isEn ? 'Birthday Celebration' : 'Perayaan Ulang Tahun';
+        labels.streamDesc = isEn ? 'Please click the link button below to join our virtual birthday party.' : 'Saksikan siaran virtual perayaan ulang tahun kami dengan menekan tombol streaming di bawah ini.';
+        labels.closingText = isEn ? 'It is a great honor and joy for us if you would join us on my birthday party.' : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di pesta ulang tahun kami.';
+        labels.profileBadge = isEn ? 'Celebrant' : 'Ulang Tahun';
+    } else if (t === 'aqiqah') {
+        labels.brandText = isEn ? 'aqiqah of' : 'aqiqah';
+        labels.coverSubtitle = 'the.aqiqah.album';
+        labels.storyBadge = '#TheAqiqahOf';
+        labels.storyUser = 'aqiqah.story';
+        labels.profileHeader = isEn ? 'Baby Profile' : 'Profil Buah Hati';
+        labels.profileUsername = '@baby';
+        labels.eventHeaderTag = '@aqiqah_live';
+        labels.eventHeaderTitle = isEn ? 'Aqiqah Celebration' : 'Syukuran Aqiqah';
+        labels.streamDesc = isEn ? 'Please click the link button below to join our virtual aqiqah stream.' : 'Saksikan siaran virtual aqiqah kami dengan menekan tombol streaming di bawah ini.';
+        labels.closingText = isEn ? 'It is a great honor and joy for us if you would join us on our baby\'s aqiqah.' : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di acara khitanan buah hati kami.';
+        labels.profileBadge = isEn ? 'Baby' : 'Buah Hati';
+    } else if (t === 'circumcision') {
+        labels.brandText = isEn ? 'circumcision of' : 'khitanan';
+        labels.coverSubtitle = 'the.circumcision.album';
+        labels.storyBadge = '#TheCircumcisionOf';
+        labels.storyUser = 'circumcision.story';
+        labels.profileHeader = isEn ? 'Child Profile' : 'Profil Putra Khitan';
+        labels.profileUsername = '@child';
+        labels.eventHeaderTag = '@circumcision_live';
+        labels.eventHeaderTitle = isEn ? 'Circumcision Celebration' : 'Syukuran Khitanan';
+        labels.streamDesc = isEn ? 'Please click the link button below to join our virtual circumcision stream.' : 'Saksikan siaran virtual khitanan putra kami dengan menekan tombol streaming di bawah ini.';
+        labels.closingText = isEn ? 'It is a great honor and joy for us if you would join us on our child\'s circumcision.' : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di acara khitanan putra kami.';
+        labels.profileBadge = isEn ? 'Child' : 'Putra Khitan';
+    }
+
+    return {
+        mainName,
+        isSingleHost,
+        labels
+    };
+}
+
 /* ═══════════════════════════════════════
+
    ERROR BOUNDARY
    ═══════════════════════════════════════ */
 class ErrorBoundary extends React.Component {
@@ -79,7 +194,7 @@ class ErrorBoundary extends React.Component {
         if (this.state.hasError) return (
             <div style={{ padding: 24, color: '#fff', background: '#000', minHeight: '100vh', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
                 <h2 style={{ color: '#E1306C', fontSize: '1.5rem', marginBottom: 12 }}>Oops, Something went wrong!</h2>
-                <p style={{ color: '#a7a7a7', fontSize: '0.85rem', marginBottom: 20 }}>Gagal me-render visualisasi tema Instagram.</p>
+                <p style={{ color: '#a7a7a7', fontSize: '0.85rem', marginBottom: 20 }}>Gagal me-render visualisasi tema InstaVite.</p>
                 <pre style={{ fontSize: '0.75rem', whiteSpace: 'pre-wrap', color: '#ff4d4d', background: '#121212', padding: 16, borderRadius: 8, border: '1px solid #262626', maxWidth: '100%', textAlign: 'left' }}>
                     {this.state.error?.toString()}
                 </pre>
@@ -131,10 +246,11 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
 }
 
 /* ═══════════════════════════════════════
-   COVER SECTION (Instagram Profile Cover UI)
+   COVER SECTION (InstaVite Profile Cover UI)
    ═══════════════════════════════════════ */
 function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, language, fallbackPhoto, onJump, onLanguageChange }) {
     const bgs = safeArr(brideGrooms);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', language || 'id', brideGrooms, invitation);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0];
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1];
 
@@ -146,9 +262,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
         guestName.replace(/\s+/g, '_').toLowerCase()
     );
 
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : 'the.wedding.album';
+    const coupleName = invitation?.cover_title || themeConfig.mainName;
 
     const artworkUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto || '/images/demo/korea-11-768x512.jpg';
 
@@ -170,7 +284,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
                     {/* IG Login Page UI - Official Gradient Camera Glyph Icon SVG & Couple names below! */}
                     <div className="ig-login-logo-container" style={{ margin: '50px auto 25px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-                        {/* High-fidelity official Instagram camera glyph logo SVG */}
+                        {/* High-fidelity official InstaVite camera glyph logo SVG */}
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <defs>
                                 <linearGradient id="ig-cover-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -181,12 +295,14 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                                     <stop offset="100%" stopColor="#bc1888"/>
                                 </linearGradient>
                             </defs>
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="url(#ig-cover-gradient)"/>
+                            <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#ig-cover-gradient)" strokeWidth="2.2" fill="none" />
+                            <circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig-cover-gradient)" />
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#ig-cover-gradient)" transform="translate(6, 6) scale(0.5)" />
                         </svg>
 
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
                             <span className="ig-login-logo" style={{ fontSize: '2.5rem', marginBottom: '0px', lineHeight: 1.1, fontFamily: "'Pacifico', cursive", letterSpacing: '-0.5px' }}>
-                                {isEn ? 'wedding of' : 'pernikahan'}
+                                {themeConfig.labels.brandText}
                             </span>
                             <div style={{
                                 fontSize: '18px',
@@ -257,7 +373,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 /* ═══════════════════════════════════════
    STORIES NAVIGATION TRAY
    ═══════════════════════════════════════ */
-function StoriesTray({ resolvedSections, activeSectionId, isSlideMode, activeSlideIdx, onJump, language }) {
+function StoriesTray({ resolvedSections, activeSectionId, isSlideMode, activeSlideIdx, onJump, language, themeConfig }) {
     const isEn = language === 'en';
     const containerRef = useRef(null);
 
@@ -288,7 +404,7 @@ function StoriesTray({ resolvedSections, activeSectionId, isSlideMode, activeSli
 
     const sectionLabels = {
         opening: isEn ? 'Intro' : 'Intro',
-        bride_groom: isEn ? 'Couple' : 'Mempelai',
+        bride_groom: themeConfig.labels.profileBadge,
         love_story: isEn ? 'Story' : 'Kisah',
         event: isEn ? 'Event' : 'Acara',
         livestream: 'Live',
@@ -326,19 +442,16 @@ function StoriesTray({ resolvedSections, activeSectionId, isSlideMode, activeSli
 }
 
 /* ═══════════════════════════════════════
-   OPENING SECTION (Instagram Story Screen UI)
+   OPENING SECTION (InstaVite Story Screen UI)
    ═══════════════════════════════════════ */
 function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, language, fallbackPhoto, onStoryEnd }) {
     const { t, locale } = useTranslation(language);
     const bgs = safeArr(brideGrooms);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', language || 'id', brideGrooms, invitation);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0];
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1];
 
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title && !invitation.cover_title.toLowerCase().includes('bimo') && !invitation.cover_title.toLowerCase().includes('raras')
-            ? invitation.cover_title
-            : `${groom?.nickname || 'Groom'} & ${bride?.nickname || 'Bride'}`);
+    const coupleName = invitation?.cover_title || themeConfig.mainName;
 
     const coverBg = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto || '/images/demo/korea-11-768x512.jpg';
     const openingBg = getStorageUrl(invitation?.opening_image, null) || coverBg;
@@ -383,11 +496,11 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
                     {globalShowPhotos && coverBg ? (
                         <img src={coverBg} alt="Avatar" />
                     ) : (
-                        <span>{(groom?.nickname?.charAt(0) || 'B')}{(bride?.nickname?.charAt(0) || 'R')}</span>
+                        <span>{(groom?.nickname?.charAt(0) || 'H')}</span>
                     )}
                 </div>
                 <div className="ig-story-user-details">
-                    <span className="ig-story-user-name">{(groom?.nickname && bride?.nickname) ? `${groom.nickname.toLowerCase()}.${bride.nickname.toLowerCase()}` : 'wedding.story'} <i className="fas fa-check-circle ig-verified-badge" /></span>
+                    <span className="ig-story-user-name">{(groom?.nickname && bride?.nickname && !themeConfig.isSingleHost) ? `${groom.nickname.toLowerCase()}.${bride.nickname.toLowerCase()}` : themeConfig.labels.storyUser} <i className="fas fa-check-circle ig-verified-badge" /></span>
                     <span className="ig-story-post-time">10h</span>
                 </div>
                 <div className="ig-story-options">
@@ -411,7 +524,7 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
 
             <div className="ig-opening-content">
                 <Reveal className="ig-opening-badge-reveal" variant="zoom">
-                    <div className="ig-badge-tag">#TheWeddingOf</div>
+                    <div className="ig-badge-tag">{themeConfig.labels.storyBadge}</div>
                     <h2 className="ig-opening-title">{coupleName}</h2>
                     {formattedDate && (
                         <p className="ig-opening-date-tag"><i className="far fa-calendar-check" /> {formattedDate}</p>
@@ -435,7 +548,7 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
 
                 <Reveal className="ig-opening-intro-box" variant="up" delay={300}>
                     <h3 className="ig-story-sticker-title">INVITATION</h3>
-                    <p className="ig-opening-body-text">{invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami meresmikan ikatan pernikahan kami.'}</p>
+                    <p className="ig-opening-body-text">{invitation?.opening_text || (themeConfig.isSingleHost ? 'Syukuran perayaan acara kami.' : 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami meresmikan ikatan pernikahan kami.')}</p>
                 </Reveal>
             </div>
         </section>
@@ -443,13 +556,14 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
 }
 
 /* ═══════════════════════════════════════
-   MEMPELAI SECTION (Instagram Profiles UI)
+   MEMPELAI SECTION (InstaVite Profiles UI)
    ═══════════════════════════════════════ */
 function BrideGroomSection({ brideGrooms, invitation, language, onOpenStory }) {
     const { t, locale } = useTranslation(language);
     const bgs = safeArr(brideGrooms);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', language || 'id', brideGrooms, invitation);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
-    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || bgs[0] || {};
+    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || bgs[0] || bgs[0] || {};
 
     const groomPhotoUrl = getStorageUrl(groom.photo, '/images/demo/korea-8.jpg');
     const bridePhotoUrl = getStorageUrl(bride.photo, '/images/demo/korea-3.jpg');
@@ -510,78 +624,116 @@ function BrideGroomSection({ brideGrooms, invitation, language, onOpenStory }) {
 
     return (
         <section id="bride_groom" className="ig-section ig-bridegroom-page">
-            <h3 className="ig-section-tag">@profiles</h3>
-            <h4 className="ig-section-title-custom">{locale === 'en' ? 'Bride & Groom Profiles' : 'Profil Kedua Mempelai'}</h4>
+            <h3 className="ig-section-tag">{themeConfig.labels.profileUsername}</h3>
+            <h4 className="ig-section-title-custom">{themeConfig.labels.profileHeader}</h4>
 
             <div className="ig-couple-profiles-container">
-                {/* Groom Card */}
-                {groom && (
-                    <Reveal className="ig-profile-card" variant="left">
-                        <div className="ig-card-header">
-                            <span className="ig-card-badge-live">LIVE</span>
-                            <span className="ig-card-title-name">@{groom.nickname ? groom.nickname.toLowerCase() : 'groom'}</span>
-                            <i className="fas fa-check-circle ig-verified-badge" />
-                        </div>
-                        <div className="ig-card-avatar-wrap" onClick={() => onOpenStory(groomSrc, groom.full_name, groom.nickname ? groom.nickname.toLowerCase() : 'groom')} style={{ cursor: 'pointer' }}>
-                            {globalShowPhotos && groomSrc ? (
-                                <img src={groomSrc} alt={groom.full_name} className="ig-card-photo" onError={() => setGroomSrc(null)} />
-                            ) : (
-                                <div className="ig-card-monogram">{groom.nickname?.charAt(0) || 'B'}</div>
+                {themeConfig.isSingleHost ? (
+                    bgs[0] && (
+                        <Reveal className="ig-profile-card ig-single-host-card" variant="zoom">
+                            <div className="ig-card-header">
+                                <span className="ig-card-badge-live">LIVE</span>
+                                <span className="ig-card-title-name">@{bgs[0].nickname ? bgs[0].nickname.toLowerCase() : 'profile'}</span>
+                                <i className="fas fa-check-circle ig-verified-badge" />
+                            </div>
+                            <div className="ig-card-avatar-wrap" onClick={() => onOpenStory(getStorageUrl(bgs[0].photo, '/images/demo/korea-8.jpg'), bgs[0].full_name, bgs[0].nickname ? bgs[0].nickname.toLowerCase() : 'profile')} style={{ cursor: 'pointer' }}>
+                                {globalShowPhotos && bgs[0].photo ? (
+                                    <img src={getStorageUrl(bgs[0].photo)} alt={bgs[0].full_name} className="ig-card-photo" />
+                                ) : (
+                                    <div className="ig-card-monogram">{bgs[0].nickname?.charAt(0) || 'H'}</div>
+                                )}
+                            </div>
+                            <div className="ig-card-meta-row">
+                                <span><strong>1</strong> post</span>
+                                <span><strong>99k</strong> followers</span>
+                            </div>
+                            <div className="ig-card-bio-info">
+                                <h4 className="ig-card-fullname">{bgs[0].full_name}</h4>
+                                <p className="ig-card-parents-line">
+                                    {translateChildOrder(bgs[0].child_order, bgs[0].gender)}<br />
+                                    <strong>Bapak {bgs[0].father_name} & Ibu {bgs[0].mother_name}</strong>
+                                </p>
+                                <p className="ig-card-short-bio">{bgs[0].bio || 'Blessed & grateful.'}</p>
+                            </div>
+                            {bgs[0].instavite && (
+                                <a href={`https://instavite.com/${bgs[0].instavite.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="ig-card-follow-btn">
+                                    <i className="fab fa-instavite" /> Follow
+                                </a>
                             )}
-                        </div>
-                        <div className="ig-card-meta-row">
-                            <span><strong>1</strong> post</span>
-                            <span><strong>99k</strong> followers</span>
-                        </div>
-                        <div className="ig-card-bio-info">
-                            <h4 className="ig-card-fullname">{groom.full_name}</h4>
-                            <p className="ig-card-parents-line">
-                                {translateChildOrder(groom.child_order, 'pria')}<br />
-                                <strong>Bapak {groom.father_name} & Ibu {groom.mother_name}</strong>
-                            </p>
-                            <p className="ig-card-short-bio">{groom.bio || 'Blessed & grateful.'}</p>
-                        </div>
-                        {groom.instagram && (
-                            <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="ig-card-follow-btn">
-                                <i className="fab fa-instagram" /> Follow
-                            </a>
+                        </Reveal>
+                    )
+                ) : (
+                    <>
+                        {/* Groom Card */}
+                        {groom && (
+                            <Reveal className="ig-profile-card" variant="left">
+                                <div className="ig-card-header">
+                                    <span className="ig-card-badge-live">LIVE</span>
+                                    <span className="ig-card-title-name">@{groom.nickname ? groom.nickname.toLowerCase() : 'groom'}</span>
+                                    <i className="fas fa-check-circle ig-verified-badge" />
+                                </div>
+                                <div className="ig-card-avatar-wrap" onClick={() => onOpenStory(groomSrc, groom.full_name, groom.nickname ? groom.nickname.toLowerCase() : 'groom')} style={{ cursor: 'pointer' }}>
+                                    {globalShowPhotos && groomSrc ? (
+                                        <img src={groomSrc} alt={groom.full_name} className="ig-card-photo" onError={() => setGroomSrc(null)} />
+                                    ) : (
+                                        <div className="ig-card-monogram">{groom.nickname?.charAt(0) || 'B'}</div>
+                                    )}
+                                </div>
+                                <div className="ig-card-meta-row">
+                                    <span><strong>1</strong> post</span>
+                                    <span><strong>99k</strong> followers</span>
+                                </div>
+                                <div className="ig-card-bio-info">
+                                    <h4 className="ig-card-fullname">{groom.full_name}</h4>
+                                    <p className="ig-card-parents-line">
+                                        {translateChildOrder(groom.child_order, 'pria')}<br />
+                                        <strong>Bapak {groom.father_name} & Ibu {groom.mother_name}</strong>
+                                    </p>
+                                    <p className="ig-card-short-bio">{groom.bio || 'Blessed & grateful.'}</p>
+                                </div>
+                                {groom.instavite && (
+                                    <a href={`https://instavite.com/${groom.instavite.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="ig-card-follow-btn">
+                                        <i className="fab fa-instavite" /> Follow
+                                    </a>
+                                )}
+                            </Reveal>
                         )}
-                    </Reveal>
-                )}
 
-                {/* Bride Card */}
-                {bride && (
-                    <Reveal className="ig-profile-card" variant="right" delay={150}>
-                        <div className="ig-card-header">
-                            <span className="ig-card-badge-live">LIVE</span>
-                            <span className="ig-card-title-name">@{bride.nickname ? bride.nickname.toLowerCase() : 'bride'}</span>
-                            <i className="fas fa-check-circle ig-verified-badge" />
-                        </div>
-                        <div className="ig-card-avatar-wrap" onClick={() => onOpenStory(brideSrc, bride.full_name, bride.nickname ? bride.nickname.toLowerCase() : 'bride')} style={{ cursor: 'pointer' }}>
-                            {globalShowPhotos && brideSrc ? (
-                                <img src={brideSrc} alt={bride.full_name} className="ig-card-photo" onError={() => setBrideSrc(null)} />
-                            ) : (
-                                <div className="ig-card-monogram">{bride.nickname?.charAt(0) || 'R'}</div>
-                            )}
-                        </div>
-                        <div className="ig-card-meta-row">
-                            <span><strong>1</strong> post</span>
-                            <span><strong>99k</strong> followers</span>
-                        </div>
-                        <div className="ig-card-bio-info">
-                            <h4 className="ig-card-fullname">{bride.full_name}</h4>
-                            <p className="ig-card-parents-line">
-                                {translateChildOrder(bride.child_order, 'wanita')}<br />
-                                <strong>Bapak {bride.father_name} & Ibu {bride.mother_name}</strong>
-                            </p>
-                            <p className="ig-card-short-bio">{bride.bio || 'Every day is a gift.'}</p>
-                        </div>
-                        {bride.instagram && (
-                            <a href={`https://instagram.com/${bride.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="ig-card-follow-btn">
-                                <i className="fab fa-instagram" /> Follow
-                            </a>
+                        {/* Bride Card */}
+                        {bride && (
+                            <Reveal className="ig-profile-card" variant="right" delay={150}>
+                                <div className="ig-card-header">
+                                    <span className="ig-card-badge-live">LIVE</span>
+                                    <span className="ig-card-title-name">@{bride.nickname ? bride.nickname.toLowerCase() : 'bride'}</span>
+                                    <i className="fas fa-check-circle ig-verified-badge" />
+                                </div>
+                                <div className="ig-card-avatar-wrap" onClick={() => onOpenStory(brideSrc, bride.full_name, bride.nickname ? bride.nickname.toLowerCase() : 'bride')} style={{ cursor: 'pointer' }}>
+                                    {globalShowPhotos && brideSrc ? (
+                                        <img src={brideSrc} alt={bride.full_name} className="ig-card-photo" onError={() => setBrideSrc(null)} />
+                                    ) : (
+                                        <div className="ig-card-monogram">{bride.nickname?.charAt(0) || 'R'}</div>
+                                    )}
+                                </div>
+                                <div className="ig-card-meta-row">
+                                    <span><strong>1</strong> post</span>
+                                    <span><strong>99k</strong> followers</span>
+                                </div>
+                                <div className="ig-card-bio-info">
+                                    <h4 className="ig-card-fullname">{bride.full_name}</h4>
+                                    <p className="ig-card-parents-line">
+                                        {translateChildOrder(bride.child_order, 'wanita')}<br />
+                                        <strong>Bapak {bride.father_name} & Ibu {bride.mother_name}</strong>
+                                    </p>
+                                    <p className="ig-card-short-bio">{bride.bio || 'Every day is a gift.'}</p>
+                                </div>
+                                {bride.instavite && (
+                                    <a href={`https://instavite.com/${bride.instavite.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="ig-card-follow-btn">
+                                        <i className="fab fa-instavite" /> Follow
+                                    </a>
+                                )}
+                            </Reveal>
                         )}
-                    </Reveal>
+                    </>
                 )}
             </div>
         </section>
@@ -589,7 +741,7 @@ function BrideGroomSection({ brideGrooms, invitation, language, onOpenStory }) {
 }
 
 /* ═══════════════════════════════════════
-   LOVE STORY SECTION (Instagram Reels Style)
+   LOVE STORY SECTION (InstaVite Reels Style)
    ═══════════════════════════════════════ */
 function LoveStorySection({ loveStories, language }) {
     const { t, locale } = useTranslation(language);
@@ -682,12 +834,13 @@ function formatStoryDate(dateStr) {
 }
 
 /* ═══════════════════════════════════════
-   ACARA SECTION (Instagram Live Video UI)
+   ACARA SECTION (InstaVite Live Video UI)
    ═══════════════════════════════════════ */
 function EventSection({ events, invitation, language, sections }) {
     const { t, locale } = useTranslation(language);
     const safeEvents = safeArr(events);
     const primaryEvent = safeEvents.find(e => e.is_primary) || safeEvents[0];
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', language || 'id', [], invitation);
 
     const getCalUrl = (evt) => {
         if (!evt?.event_date) return '#';
@@ -711,8 +864,8 @@ function EventSection({ events, invitation, language, sections }) {
 
     return (
         <section id="event" className="ig-section ig-events-live">
-            <h3 className="ig-section-tag">@wedding_live</h3>
-            <h4 className="ig-section-title-custom">{locale === 'en' ? 'Wedding Broadcast Live' : 'Siaran Langsung Acara'}</h4>
+            <h3 className="ig-section-tag">{themeConfig.labels.eventHeaderTag}</h3>
+            <h4 className="ig-section-title-custom">{themeConfig.labels.eventHeaderTitle}</h4>
 
             {/* Countdown Overlay Widget */}
             {showCountdownWidget && (
@@ -772,11 +925,12 @@ function EventSection({ events, invitation, language, sections }) {
 }
 
 /* ═══════════════════════════════════════
-   LIVE STREAMING SECTION (Instagram Live Video Broadcast Link)
+   LIVE STREAMING SECTION (InstaVite Live Video Broadcast Link)
    ═══════════════════════════════════════ */
 function LiveStreamingSection({ events, invitation, language }) {
     const { t, locale } = useTranslation(language);
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', language || 'id', [], invitation);
     
     const streamsList = useMemo(() => {
         const list = [];
@@ -801,7 +955,7 @@ function LiveStreamingSection({ events, invitation, language }) {
             <div className="ig-stream-broadcast-box">
                 <i className="fas fa-video ig-stream-broadcast-icon" />
                 <h5 className="ig-stream-broadcast-title">{locale === 'en' ? 'Watch Virtual Broadcast' : 'Tonton Siaran Virtual'}</h5>
-                <p className="ig-stream-broadcast-desc">{locale === 'en' ? 'Please click the link button below to join our virtual wedding stream.' : 'Saksikan siaran virtual pernikahan kami dengan menekan tombol streaming di bawah ini.'}</p>
+                <p className="ig-stream-broadcast-desc">{themeConfig.labels.streamDesc}</p>
                 <div className="ig-stream-broadcast-buttons">
                     {streamsList.map((stream, idx) => (
                         <button key={idx} type="button" onClick={() => window.open(stream.url, '_blank')} className="ig-btn-primary blinking-btn">
@@ -868,10 +1022,10 @@ function CountdownTimer({ targetDate, language }) {
 }
 
 /* ═══════════════════════════════════════
-   GALERI SECTION (Instagram Profile Post Grid)
+   GALERI SECTION (InstaVite Profile Post Grid)
    ═══════════════════════════════════════ */
 /* ═══════════════════════════════════════
-   PROFILE STORY MODAL (Instagram Story Player)
+   PROFILE STORY MODAL (InstaVite Story Player)
    ═══════════════════════════════════════ */
 function ProfileStoryModal({ story, onClose }) {
     const [progress, setProgress] = useState(0);
@@ -929,7 +1083,7 @@ function ProfileStoryModal({ story, onClose }) {
 }
 
 /* ═══════════════════════════════════════
-   GALERI SECTION (Instagram Profile Post Grid)
+   GALERI SECTION (InstaVite Profile Post Grid)
    ═══════════════════════════════════════ */
 function GallerySection({ galleries, language }) {
     const { t, locale } = useTranslation(language);
@@ -980,7 +1134,7 @@ function GallerySection({ galleries, language }) {
                 })}
             </div>
 
-            {/* Instagram Post Detail Modal Overlay */}
+            {/* InstaVite Post Detail Modal Overlay */}
             {selectedPhoto && (() => {
                 const id = selectedPhoto.indexKey;
                 const isLiked = likedPosts[id];
@@ -1025,7 +1179,7 @@ function GallerySection({ galleries, language }) {
 }
 
 /* ═══════════════════════════════════════
-   HADIAH SECTION (Instagram Product Shop List UI)
+   HADIAH SECTION (InstaVite Product Shop List UI)
    ═══════════════════════════════════════ */
 function BankSection({ bankAccounts, language }) {
     const { t, locale } = useTranslation(language);
@@ -1093,7 +1247,7 @@ function BankSection({ bankAccounts, language }) {
 }
 
 /* ═══════════════════════════════════════
-   RSVP & WISHES SECTION (Instagram Comments Drawer UI)
+   RSVP & WISHES SECTION (InstaVite Comments Drawer UI)
    ═══════════════════════════════════════ */
 function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishes, language }) {
     const { t, locale } = useTranslation(language);
@@ -1263,6 +1417,7 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
 function ClosingSection({ invitation, brideGrooms, language }) {
     const { t, locale } = useTranslation(language);
     const bgs = safeArr(brideGrooms);
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', language || 'id', [], invitation);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
 
@@ -1285,7 +1440,7 @@ function ClosingSection({ invitation, brideGrooms, language }) {
             <div className="ig-closing-card">
                 <i className="fas fa-heart ig-closing-heart" />
                 <h4 className="ig-closing-thanks-header">{invitation?.closing_title || (isEn ? 'THANK YOU' : 'TERIMA KASIH')}</h4>
-                <p className="ig-closing-thanks-text">{invitation?.closing_text || (isEn ? 'It is a great honor and joy for us if you would join us on our wedding day.' : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari pernikahan kami.')}</p>
+                <p className="ig-closing-thanks-text">{invitation?.closing_text || themeConfig.labels.closingText}</p>
                 
                 <div className="ig-closing-families">
                     {hasGroomParents && (
@@ -1371,7 +1526,7 @@ function BottomPlayer({ isSlideMode, onPrevSlide, onNextSlide, activeSectionId, 
 /* ═══════════════════════════════════════
    MAIN THEME EXPORT
    ═══════════════════════════════════════ */
-function InstagramThemeContent({ invitation, sections, brideGrooms, events, wishes, galleries, loveStories, bankAccounts, guest, isDemo }) {
+function InstaViteThemeContent({ invitation, sections, brideGrooms, events, wishes, galleries, loveStories, bankAccounts, guest, isDemo }) {
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [activeSlideIdx, setActiveSlideIdx] = useState(0);
@@ -1386,6 +1541,13 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
     const slideContainerRef = useRef(null);
 
     const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', activeLanguage, brideGrooms, invitation);
+
+    useEffect(() => {
+        if (themeConfig.mainName) {
+            document.title = themeConfig.mainName + (invitation?.type ? ` - ${themeConfig.labels.profileBadge}` : '');
+        }
+    }, [themeConfig, invitation]);
 
     const enableQr = parseBool(invitation?.enable_qr ?? true) && parseBool(invitation?.show_qr_code ?? true);
     const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
@@ -1652,6 +1814,7 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
                             activeSlideIdx={activeSlideIdx}
                             onJump={jumpToSection}
                             language={activeLanguage}
+                            themeConfig={themeConfig}
                         />
 
                         {/* Floating player and Auto scroll togglers */}
@@ -1748,6 +1911,6 @@ function InstagramThemeContent({ invitation, sections, brideGrooms, events, wish
     );
 }
 
-export default function InstagramTheme(props) {
-    return <InstagramThemeContent {...props} />;
+export default function InstaViteTheme(props) {
+    return <InstaViteThemeContent {...props} />;
 }

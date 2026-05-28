@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Instagram, Youtube, Facebook, Twitter, Plus, X as XIcon, Globe, Image as ImageIcon, UploadCloud, Save, Trash2, Heart, AlertTriangle, Info, User } from 'lucide-react';
+import { Instagram, Youtube, Facebook, Twitter, Plus, X as XIcon, Globe, Image as ImageIcon, UploadCloud, Save, Trash2, Heart, AlertTriangle, Info, User, GraduationCap, Calendar, Cake, ShieldCheck, Smile } from 'lucide-react';
 
 const SOCMED_OPTIONS = [
     { key: 'instagram', label: 'Instagram', icon: Instagram, placeholder: '@username atau link', color: 'text-pink-500' },
@@ -15,16 +15,21 @@ const SOCMED_OPTIONS = [
 
 const emptyBrideGroom = {
     full_name: '', nickname: '', father_name: '', mother_name: '',
-    gender: 'wanita', photo: '', bio: '', instagram: '', tiktok: '', twitter: '', facebook: '', youtube: '', child_order: '',
+    gender: 'pria', photo: '', bio: '', instagram: '', tiktok: '', twitter: '', facebook: '', youtube: '', child_order: '',
 };
 
-export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
+export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'wedding' }) {
     const { flash } = usePage().props;
+    const isSingleSubject = !['wedding', 'anniversary'].includes(eventType);
+    const size = isSingleSubject ? 1 : 2;
+
     const [activeTab, setActiveTab] = useState(0);
 
-    const initial = brideGrooms?.length === 2
+    const initial = brideGrooms?.length === size
         ? brideGrooms
-        : [{ ...emptyBrideGroom, gender: 'wanita' }, { ...emptyBrideGroom, gender: 'pria' }];
+        : (isSingleSubject 
+            ? [{ ...emptyBrideGroom, gender: 'pria' }]
+            : [{ ...emptyBrideGroom, gender: 'wanita' }, { ...emptyBrideGroom, gender: 'pria' }]);
 
     const { data, setData, post, processing, errors } = useForm({
         bride_grooms: initial,
@@ -33,10 +38,10 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
     const [visibleSocmed, setVisibleSocmed] = useState(() =>
         initial.map(bg => SOCMED_OPTIONS.filter(opt => bg[opt.key]).map(opt => opt.key))
     );
-    const [showSocmedPicker, setShowSocmedPicker] = useState([false, false]);
+    const [showSocmedPicker, setShowSocmedPicker] = useState(() => Array(size).fill(false));
 
     // Media library picker states
-    const [showPickerForIndex, setShowPickerForIndex] = useState(null); // null, 0, or 1
+    const [showPickerForIndex, setShowPickerForIndex] = useState(null);
     const [pickerTab, setPickerTab] = useState('album'); // 'album' or 'upload'
     const [selectedPhotoUrl, setSelectedPhotoUrl] = useState('');
     const [uploadingMedia, setUploadingMedia] = useState(false);
@@ -65,7 +70,11 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
             updated[personIndex] = [...updated[personIndex], key];
         }
         setVisibleSocmed(updated);
-        setShowSocmedPicker([false, false]);
+        setShowSocmedPicker(prev => {
+            const next = [...prev];
+            next[personIndex] = false;
+            return next;
+        });
     };
 
     const removeSocmed = (personIndex, key) => {
@@ -114,11 +123,9 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             
-            // Set the uploaded photo URL as selected
             const url = response.data.url;
             setSelectedPhotoUrl(url);
             
-            // Auto confirm and reload parent album list props
             update(showPickerForIndex, 'photo', url);
             setShowPickerForIndex(null);
             
@@ -132,16 +139,83 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
         }
     };
 
-    const tabs = [
-        { idx: 0, label: 'Mempelai 1', icon: Heart },
-        { idx: 1, label: 'Mempelai 2', icon: Heart },
-    ];
+    const getTabsConfig = () => {
+        if (eventType === 'wedding') {
+            return [
+                { idx: 0, label: 'Mempelai 1 (Wanita)', icon: Heart },
+                { idx: 1, label: 'Mempelai 2 (Pria)', icon: Heart },
+            ];
+        }
+        if (eventType === 'anniversary') {
+            return [
+                { idx: 0, label: 'Pasangan 1', icon: Heart },
+                { idx: 1, label: 'Pasangan 2', icon: Heart },
+            ];
+        }
+        if (eventType === 'graduation') {
+            return [{ idx: 0, label: 'Wisudawan / Wisudawati', icon: GraduationCap }];
+        }
+        if (eventType === 'birthday') {
+            return [{ idx: 0, label: 'Ulang Tahun', icon: Cake }];
+        }
+        if (eventType === 'aqiqah') {
+            return [{ idx: 0, label: 'Anak / Bayi', icon: Smile }];
+        }
+        if (eventType === 'circumcision') {
+            return [{ idx: 0, label: 'Anak Khitan', icon: ShieldCheck }];
+        }
+        return [{ idx: 0, label: 'Detail Acara / Subjek', icon: Calendar }];
+    };
 
+    const tabs = getTabsConfig();
     const idx = activeTab;
 
+    const getFieldLabels = () => {
+        if (eventType === 'wedding') {
+            return {
+                title: 'Data Mempelai Pernikahan',
+                photo: 'Foto Profil Mempelai',
+                full_name: 'Nama Lengkap Mempelai *',
+                nickname: 'Nama Panggilan',
+            };
+        }
+        if (eventType === 'anniversary') {
+            return {
+                title: 'Data Pasangan Syukuran',
+                photo: 'Foto Profil Pasangan',
+                full_name: 'Nama Lengkap *',
+                nickname: 'Nama Panggilan',
+            };
+        }
+        if (eventType === 'graduation') {
+            return {
+                title: 'Data Wisudawan / Wisudawati',
+                photo: 'Foto Profil Wisudawan',
+                full_name: 'Nama Lengkap Wisudawan *',
+                nickname: 'Nama Panggilan / Gelar',
+            };
+        }
+        if (eventType === 'birthday') {
+            return {
+                title: 'Data Yang Berulang Tahun',
+                photo: 'Foto Profil',
+                full_name: 'Nama Lengkap *',
+                nickname: 'Nama Panggilan',
+            };
+        }
+        return {
+            title: 'Data Pemilik Acara',
+            photo: 'Foto Profil',
+            full_name: 'Nama Lengkap *',
+            nickname: 'Nama Panggilan',
+        };
+    };
+
+    const labels = getFieldLabels();
+
     return (
-        <DashboardLayout title="Mempelai">
-            <Head title="Mempelai" />
+        <DashboardLayout title={isSingleSubject ? 'Data Pemilik Acara' : 'Mempelai'}>
+            <Head title={isSingleSubject ? 'Data Pemilik Acara' : 'Mempelai'} />
             <div className="max-w-2xl mx-auto space-y-3">
                 {flash?.success && (
                     <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 animate-fade-in">
@@ -154,7 +228,7 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
                     <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded-lg text-xs flex items-start gap-1.5 shadow-sm animate-fade-in">
                         <AlertTriangle size={14} className="text-red-500 flex-shrink-0 mt-0.5" />
                         <div>
-                            <div className="font-semibold text-red-800">Gagal menyimpan data mempelai. Silakan periksa kembali:</div>
+                            <div className="font-semibold text-red-800">Gagal menyimpan data. Silakan periksa kembali:</div>
                             <ul className="list-disc list-inside text-[11px] mt-1 text-red-600 space-y-0.5">
                                 {Object.entries(errors).map(([key, val]) => (
                                     <li key={key}>{val}</li>
@@ -164,23 +238,25 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
                     </div>
                 )}
 
-                {/* Tab Bar */}
-                <div className="bg-white rounded-xl border border-gray-200 p-1 flex gap-0.5 shadow-sm">
-                    {tabs.map((tab) => {
-                        const TabIcon = tab.icon;
-                        return (
-                            <button key={tab.idx} type="button"
-                                onClick={() => setActiveTab(tab.idx)}
-                                className={`flex-1 py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${activeTab === tab.idx
-                                    ? 'bg-[#E5654B] text-white shadow-sm'
-                                    : 'text-gray-500 hover:bg-gray-50'
-                                }`}>
-                                <TabIcon size={14} className="flex-shrink-0" />
-                                {tab.label}
-                            </button>
-                        );
-                    })}
-                </div>
+                {/* Tab Bar (only render if multiple tabs exist) */}
+                {!isSingleSubject && (
+                    <div className="bg-white rounded-xl border border-gray-200 p-1 flex gap-0.5 shadow-sm">
+                        {tabs.map((tab) => {
+                            const TabIcon = tab.icon;
+                            return (
+                                <button key={tab.idx} type="button"
+                                    onClick={() => setActiveTab(tab.idx)}
+                                    className={`flex-1 py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${activeTab === tab.idx
+                                        ? 'bg-[#E5654B] text-white shadow-sm'
+                                        : 'text-gray-500 hover:bg-gray-50'
+                                    }`}>
+                                    <TabIcon size={14} className="flex-shrink-0" />
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
 
                 {/* Form */}
                 <form onSubmit={handleSubmit}>
@@ -189,7 +265,7 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
                         <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-50 flex-shrink-0 relative shadow-inner">
                                 {data.bride_grooms[idx].photo ? (
-                                    <img src={data.bride_grooms[idx].photo} alt="Foto Mempelai" className="w-full h-full object-cover" />
+                                    <img src={data.bride_grooms[idx].photo} alt="Foto Profil" className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-300 bg-orange-50/20">
                                         <User size={28} />
@@ -199,7 +275,7 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
                             <div className="flex-1 min-w-0">
                                 <div className="text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5">
                                     <ImageIcon size={13} className="text-orange-500 flex-shrink-0" />
-                                    <span>Foto Profil Mempelai</span>
+                                    <span>{labels.photo}</span>
                                 </div>
                                 <button 
                                     type="button"
@@ -217,26 +293,28 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
 
                         {/* Name fields */}
                         <div className="grid grid-cols-2 gap-2">
-                            <Field label="Nama Lengkap *" value={data.bride_grooms[idx].full_name}
+                            <Field label={labels.full_name} value={data.bride_grooms[idx].full_name}
                                 onChange={(v) => update(idx, 'full_name', v)} required
                                 error={errors[`bride_grooms.${idx}.full_name`]} />
-                            <Field label="Nama Panggilan" value={data.bride_grooms[idx].nickname}
+                            <Field label={labels.nickname} value={data.bride_grooms[idx].nickname}
                                 onChange={(v) => update(idx, 'nickname', v)}
                                 error={errors[`bride_grooms.${idx}.nickname`]} />
                         </div>
 
                         {/* Gender toggle */}
-                        <div>
-                            <label className="block text-xs font-bold text-gray-600 mb-1">Jenis Kelamin</label>
-                            <div className="flex gap-1.5">
-                                {['pria', 'wanita'].map((g) => (
-                                    <button key={g} type="button" onClick={() => update(idx, 'gender', g)}
-                                        className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${data.bride_grooms[idx].gender === g
-                                            ? 'bg-[#E5654B] text-white shadow-sm shadow-orange-500/10' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}>{g === 'pria' ? 'Pria' : 'Wanita'}</button>
-                                ))}
+                        {!isSingleSubject && (
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">Jenis Kelamin</label>
+                                <div className="flex gap-1.5">
+                                    {['pria', 'wanita'].map((g) => (
+                                        <button key={g} type="button" onClick={() => update(idx, 'gender', g)}
+                                            className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${data.bride_grooms[idx].gender === g
+                                                ? 'bg-[#E5654B] text-white shadow-sm shadow-orange-500/10' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}>{g === 'pria' ? 'Pria' : 'Wanita'}</button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Parent info */}
                         <div className="grid grid-cols-3 gap-2">
@@ -294,9 +372,11 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
                                 <div className="relative mt-1.5">
                                     <button type="button"
                                         onClick={() => {
-                                            const updated = [...showSocmedPicker];
-                                            updated[idx] = !updated[idx];
-                                            setShowSocmedPicker(updated);
+                                            setShowSocmedPicker(prev => {
+                                                const next = [...prev];
+                                                next[idx] = !next[idx];
+                                                return next;
+                                            });
                                         }}
                                         className="flex items-center gap-1 text-[11px] text-[#c24b33] font-bold hover:text-[#b03a24] py-1 transition-colors">
                                         <Plus size={12} /> Tambah Sosmed
@@ -330,7 +410,7 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
                         ) : (
                             <>
                                 <Save size={16} />
-                                <span>Simpan Data Mempelai</span>
+                                <span>Simpan Data</span>
                             </>
                         )}
                     </button>
@@ -344,7 +424,7 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
                         {/* Modal Header */}
                         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                             <div>
-                                <h3 className="font-bold text-gray-800 text-sm">Pilih Foto Mempelai</h3>
+                                <h3 className="font-bold text-gray-800 text-sm">Pilih Foto</h3>
                                 <p className="text-[10px] text-gray-400">Pilih dari album yang ada atau unggah foto baru</p>
                             </div>
                             <button 
@@ -395,7 +475,6 @@ export default function Mempelai({ brideGrooms, mediaAssets = [] }) {
                                             const isSelected = selectedPhotoUrl === url;
                                             return (
                                                 <div 
-                                                    key={asset.id}
                                                     onClick={() => setSelectedPhotoUrl(url)}
                                                     className={`aspect-square rounded-2xl overflow-hidden cursor-pointer relative transition-all border-2 flex flex-col justify-end bg-gray-50 group hover:scale-[1.03] ${
                                                         isSelected 

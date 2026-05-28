@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   NETFLIX THEME  –  style.css
+   WEDFLIX THEME  –  style.css
    Prefix: .nf-
    ═══════════════════════════════════════ */
 
@@ -1447,7 +1447,7 @@
     margin: 0 auto;
 }
 
-/* Custom Netflix-red webkit scrollbar */
+/* Custom Wedflix-red webkit scrollbar */
 .nf-wishes__list::-webkit-scrollbar {
     width: 3px;
 }
@@ -1663,7 +1663,7 @@
 }
 
 /* ═══════════════════════════════════════
-   SLIDE TRANSITION STYLES (NETFLIX)
+   SLIDE TRANSITION STYLES (WEDFLIX)
    ═══════════════════════════════════════ */
 .nf-main--slide {
   height: 100vh !important;

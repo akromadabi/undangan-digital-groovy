@@ -8,17 +8,47 @@ const defaultEvent = {
     is_primary: false,
 };
 
-export default function Events({ step, events }) {
+const getDefaultsForType = (type) => {
+    if (type === 'birthday') {
+        return [
+            { ...defaultEvent, event_type: 'ultah', event_name: 'Perayaan Ulang Tahun', is_primary: true, streamings: [] }
+        ];
+    }
+    if (type === 'graduation') {
+        return [
+            { ...defaultEvent, event_type: 'syukuran', event_name: 'Syukuran Wisuda', is_primary: true, streamings: [] }
+        ];
+    }
+    if (type === 'aqiqah') {
+        return [
+            { ...defaultEvent, event_type: 'aqiqah', event_name: 'Acara Aqiqah', is_primary: true, streamings: [] }
+        ];
+    }
+    if (type === 'circumcision') {
+        return [
+            { ...defaultEvent, event_type: 'khitanan', event_name: 'Acara Khitanan', is_primary: true, streamings: [] }
+        ];
+    }
+    if (type === 'anniversary') {
+        return [
+            { ...defaultEvent, event_type: 'syukuran', event_name: 'Acara Anniversary / Syukuran', is_primary: true, streamings: [] }
+        ];
+    }
+    // Default wedding
+    return [
+        { ...defaultEvent, event_type: 'akad', event_name: 'Akad Nikah', is_primary: true, streamings: [] },
+        { ...defaultEvent, event_type: 'resepsi', event_name: 'Resepsi', streamings: [] },
+    ];
+};
+
+export default function Events({ step, events, eventType = 'wedding' }) {
     const initial = events?.length > 0 ? events.map((e, i) => ({
         ...e,
         is_primary: e.is_primary ?? (i === 0),
         streamings: e.streamings?.length > 0
             ? e.streamings
             : (e.streaming_platform ? [{ platform: e.streaming_platform, url: e.streaming_url || '' }] : []),
-    })) : [
-        { ...defaultEvent, event_type: 'akad', event_name: 'Akad Nikah', is_primary: true, streamings: [] },
-        { ...defaultEvent, event_type: 'resepsi', event_name: 'Resepsi', streamings: [] },
-    ];
+    })) : getDefaultsForType(eventType);
 
     const { data, setData, post, processing } = useForm({ events: initial });
 
@@ -34,13 +64,21 @@ export default function Events({ step, events }) {
     };
 
     const addEvent = () => {
-        setData('events', [...data.events, { ...defaultEvent, event_type: 'lainnya', event_name: '' }]);
+        let typeVal = 'lainnya';
+        let nameVal = '';
+        if (eventType === 'birthday') {
+            typeVal = 'ultah';
+            nameVal = 'Acara Tambahan';
+        } else if (eventType === 'graduation') {
+            typeVal = 'syukuran';
+            nameVal = 'Acara Tambahan';
+        }
+        setData('events', [...data.events, { ...defaultEvent, event_type: typeVal, event_name: nameVal, streamings: [] }]);
     };
 
     const removeEvent = (index) => {
         if (data.events.length <= 1) return;
         const updated = data.events.filter((_, i) => i !== index);
-        // If removed event was primary, make first remaining event primary
         if (data.events[index].is_primary && updated.length > 0) {
             updated[0] = { ...updated[0], is_primary: true };
         }
@@ -52,6 +90,17 @@ export default function Events({ step, events }) {
         post(route('wizard.events.save', undefined, false));
     };
 
+    const getEventLabel = (event) => {
+        if (event.event_type === 'akad') return 'Akad Nikah';
+        if (event.event_type === 'resepsi') return 'Resepsi';
+        if (event.event_type === 'pemberkatan') return 'Pemberkatan';
+        if (event.event_type === 'ultah') return 'Ulang Tahun';
+        if (event.event_type === 'syukuran') return 'Syukuran';
+        if (event.event_type === 'aqiqah') return 'Aqiqah';
+        if (event.event_type === 'khitanan') return 'Khitanan';
+        return 'Acara';
+    };
+
     return (
         <WizardLayout currentStep={step} title="Data Acara">
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -59,32 +108,62 @@ export default function Events({ step, events }) {
                     <div key={index} className={`bg-white rounded-2xl shadow-sm border p-6 transition-all ${event.is_primary ? 'border-orange-400 ring-2 ring-orange-100' : 'border-gray-200'}`}>
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-bold text-gray-800">
-                                {event.event_type === 'akad' ? 'Akad Nikah' :
-                                    event.event_type === 'resepsi' ? 'Resepsi' :
-                                        event.event_type === 'pemberkatan' ? 'Pemberkatan' : 'Acara'}
+                                {getEventLabel(event)}
                             </h3>
                             <div className="flex items-center gap-3">
                                 <button type="button" onClick={() => setPrimary(index)}
                                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${event.is_primary ? 'bg-orange-100 text-[#b03a24] ring-1 ring-orange-300' : 'bg-gray-100 text-gray-400 hover:bg-orange-50 hover:text-[#E5654B]'}`}>
-                                    ⭐ {event.is_primary ? 'Acara Utama' : 'Jadikan Utama'}
+                                    {event.is_primary ? 'Acara Utama' : 'Jadikan Utama'}
                                 </button>
                                 {data.events.length > 1 && (
-                                    <button type="button" onClick={() => removeEvent(index)} className="text-red-400 hover:text-red-600 text-sm">
+                                    <button type="button" onClick={() => removeEvent(index)} className="text-red-400 hover:text-red-600 text-sm font-semibold">
                                         Hapus
                                     </button>
                                 )}
                             </div>
                         </div>
-
+ 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 mb-1">Jenis Acara</label>
                                 <select value={event.event_type} onChange={(e) => updateEvent(index, 'event_type', e.target.value)}
                                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300">
-                                    <option value="akad">Akad Nikah</option>
-                                    <option value="pemberkatan">Pemberkatan</option>
-                                    <option value="resepsi">Resepsi</option>
-                                    <option value="lainnya">Lainnya</option>
+                                    {['wedding', 'anniversary'].includes(eventType) ? (
+                                        <>
+                                            <option value="akad">Akad Nikah</option>
+                                            <option value="pemberkatan">Pemberkatan</option>
+                                            <option value="resepsi">Resepsi</option>
+                                            <option value="lainnya">Lainnya</option>
+                                        </>
+                                    ) : eventType === 'birthday' ? (
+                                        <>
+                                            <option value="ultah">Ulang Tahun</option>
+                                            <option value="syukuran">Syukuran</option>
+                                            <option value="lainnya">Lainnya</option>
+                                        </>
+                                    ) : eventType === 'graduation' ? (
+                                        <>
+                                            <option value="syukuran">Syukuran Wisuda</option>
+                                            <option value="lainnya">Lainnya</option>
+                                        </>
+                                    ) : eventType === 'aqiqah' ? (
+                                        <>
+                                            <option value="aqiqah">Aqiqah</option>
+                                            <option value="syukuran">Syukuran</option>
+                                            <option value="lainnya">Lainnya</option>
+                                        </>
+                                    ) : eventType === 'circumcision' ? (
+                                        <>
+                                            <option value="khitanan">Khitanan</option>
+                                            <option value="syukuran">Syukuran</option>
+                                            <option value="lainnya">Lainnya</option>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <option value="syukuran">Syukuran</option>
+                                            <option value="lainnya">Lainnya</option>
+                                        </>
+                                    )}
                                 </select>
                             </div>
                             <div>
@@ -159,7 +238,7 @@ export default function Events({ step, events }) {
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-2">
                                                 <svg className="w-4 h-4 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                                <span className="font-semibold text-[#b03a24] text-sm">Live Streaming {event.streamings.length > 1 ? `#${si + 1}` : ''}</span>
+                                                <span className="font-semibold text-[#b03a24] text-sm font-outfit">Live Streaming {event.streamings.length > 1 ? `#${si + 1}` : ''}</span>
                                             </div>
                                             <button type="button" onClick={() => {
                                                 const updated = [...data.events];
@@ -167,7 +246,7 @@ export default function Events({ step, events }) {
                                                 streams.splice(si, 1);
                                                 updated[index] = { ...updated[index], streamings: streams };
                                                 setData('events', updated);
-                                            }} className="text-gray-400 hover:text-red-500 text-xs font-medium">Hapus</button>
+                                            }} className="text-gray-400 hover:text-red-500 text-xs font-semibold">Hapus</button>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             <div>
@@ -204,7 +283,7 @@ export default function Events({ step, events }) {
                                     const updated = [...data.events];
                                     updated[index] = { ...updated[index], streamings: [...(updated[index].streamings || []), { platform: 'youtube', url: '' }] };
                                     setData('events', updated);
-                                }} className="w-full py-2 border-2 border-dashed border-orange-300 rounded-xl text-orange-400 hover:border-orange-500 hover:text-[#E5654B] transition-colors text-xs font-medium flex items-center justify-center gap-1">
+                                }} className="w-full py-2 border-2 border-dashed border-orange-300 rounded-xl text-orange-400 hover:border-orange-500 hover:text-[#E5654B] transition-colors text-xs font-semibold flex items-center justify-center gap-1">
                                     + Tambah Streaming Lainnya
                                 </button>
                             </div>
@@ -214,7 +293,7 @@ export default function Events({ step, events }) {
                                 updated[index] = { ...updated[index], streamings: [{ platform: 'youtube', url: '' }] };
                                 setData('events', updated);
                             }}
-                                className="mt-4 w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-orange-400 hover:text-[#E5654B] transition-colors text-sm font-medium flex items-center justify-center gap-2">
+                                className="mt-4 w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-orange-400 hover:text-[#E5654B] transition-colors text-sm font-semibold flex items-center justify-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                 + Tambah Live Streaming
                             </button>
@@ -223,7 +302,7 @@ export default function Events({ step, events }) {
                 ))}
 
                 <button type="button" onClick={addEvent}
-                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-orange-400 hover:text-[#E5654B] transition-colors text-sm font-medium">
+                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-orange-400 hover:text-[#E5654B] transition-colors text-sm font-bold shadow-xs">
                     + Tambah Acara
                 </button>
 

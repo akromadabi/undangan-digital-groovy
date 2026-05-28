@@ -15,6 +15,7 @@ class Theme extends Model
         'preview_bg_style',
         'preview_url',
         'category',
+        'type',
         'color_scheme',
         'font_config',
         'default_data',
@@ -34,6 +35,7 @@ class Theme extends Model
     {
         return [
             'preview_images' => 'array',
+            'type' => 'array',
             'color_scheme' => 'array',
             'font_config' => 'array',
             'default_data' => 'array',
@@ -64,5 +66,39 @@ class Theme extends Model
     public function scopeFree($query)
     {
         return $query->where('is_premium', false);
+    }
+
+    public static function applyResellerCustomizations($themes, $resellerId)
+    {
+        if (!$resellerId) {
+            return $themes;
+        }
+
+        $customSettings = \App\Models\ResellerThemeSetting::where('reseller_id', $resellerId)
+            ->get()
+            ->keyBy('theme_id');
+
+        foreach ($themes as $theme) {
+            if (isset($customSettings[$theme->id])) {
+                $custom = $customSettings[$theme->id];
+                
+                if ($custom->preview_template && $custom->preview_template !== 'default') {
+                    $theme->preview_template = $custom->preview_template;
+                }
+                if ($custom->preview_bg_style && $custom->preview_bg_style !== 'default') {
+                    $theme->preview_bg_style = $custom->preview_bg_style;
+                }
+                if ($custom->preview_images) {
+                    $theme->preview_images = is_string($custom->preview_images) 
+                        ? json_decode($custom->preview_images, true) 
+                        : $custom->preview_images;
+                }
+                if ($custom->thumbnail) {
+                    $theme->thumbnail = $custom->thumbnail;
+                }
+            }
+        }
+
+        return $themes;
     }
 }

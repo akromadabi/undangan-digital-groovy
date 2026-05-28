@@ -25,8 +25,9 @@ class ResellerLandingPageController extends Controller
 
         $reseller = $setting->reseller;
 
-        // Get plans with reseller pricing
-        $plans = SubscriptionPlan::where('is_active', true)
+        // Get plans with reseller pricing and feature access
+        $plans = SubscriptionPlan::with('featureAccess.feature')
+            ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
 
@@ -35,6 +36,7 @@ class ResellerLandingPageController extends Controller
 
         $plansData = $plans->map(function ($plan) use ($resellerPrices) {
             return [
+                'id' => $plan->id,
                 'name' => $plan->name,
                 'slug' => $plan->slug,
                 'price' => isset($resellerPrices[$plan->id])
@@ -44,19 +46,35 @@ class ResellerLandingPageController extends Controller
                 'max_guests' => $plan->max_guests,
                 'max_galleries' => $plan->max_galleries,
                 'description' => $plan->description,
+                'feature_access' => $plan->featureAccess->map(function ($fa) {
+                    return [
+                        'feature_id' => $fa->feature_id,
+                        'is_enabled' => (bool)$fa->is_enabled,
+                        'feature' => $fa->feature ? [
+                            'id' => $fa->feature->id,
+                            'name' => $fa->feature->name,
+                            'slug' => $fa->feature->slug,
+                            'category' => $fa->feature->category,
+                        ] : null,
+                    ];
+                })->toArray(),
             ];
         });
+
+        // Get all global features for dynamic feature comparison
+        $features = \App\Models\Feature::orderBy('category')->orderBy('name')->get();
 
         // Get themes for gallery
         $themes = \App\Models\Theme::where('is_active', true)
             ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
             ->latest()
             ->take(8)
-            ->get()
-            ->map(function ($theme) {
-                $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
-                return $theme;
-            });
+            ->get();
+        $themes = \App\Models\Theme::applyResellerCustomizations($themes, $reseller->id);
+        $themes = $themes->map(function ($theme) {
+            $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
+            return $theme;
+        });
  
         $appUrl = config('app.url');
         $parsed = parse_url($appUrl);
@@ -89,6 +107,7 @@ class ResellerLandingPageController extends Controller
                 'social_links' => $setting->social_links ?: [],
             ],
             'plans' => $plansData,
+            'features' => $features,
             'themes' => $themes,
         ]);
     }
@@ -112,11 +131,12 @@ class ResellerLandingPageController extends Controller
         $themes = \App\Models\Theme::where('is_active', true)
             ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
             ->orderBy('sort_order')
-            ->get()
-            ->map(function ($theme) {
-                $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
-                return $theme;
-            });
+            ->get();
+        $themes = \App\Models\Theme::applyResellerCustomizations($themes, $reseller->id);
+        $themes = $themes->map(function ($theme) {
+            $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
+            return $theme;
+        });
  
         $appUrl = config('app.url');
         $parsed = parse_url($appUrl);

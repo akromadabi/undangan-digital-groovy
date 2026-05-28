@@ -1,33 +1,56 @@
 import { Head, useForm, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 import {
     Key, Package, CalendarClock, User, FileText, Users as UsersIcon,
     Save, ArrowLeft, CheckCircle, XCircle, RotateCw
 } from 'lucide-react';
 
+const eventIcons = {
+    wedding: '',
+    birthday: '',
+    graduation: '',
+    aqiqah: '',
+    circumcision: '',
+    anniversary: '',
+};
+
+const eventLabels = {
+    wedding: 'Pernikahan',
+    birthday: 'Ulang Tahun',
+    graduation: 'Wisuda',
+    aqiqah: 'Aqiqah',
+    circumcision: 'Sunatan',
+    anniversary: 'Anniversary',
+};
+
 export default function Edit({ user, plans }) {
     const { auth, adminRoutePrefix } = usePage().props;
-    const invitation = user?.invitation;
-    const subscription = user?.active_subscription;
 
     const { data, setData, put, processing, errors } = useForm({
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
         is_active: user.is_active ?? true,
-        invitation: {
-            slug: invitation?.slug || '',
-            title: invitation?.title || '',
-            is_active: invitation?.is_active ?? true,
-            opening_title: invitation?.opening_title || '',
-            opening_text: invitation?.opening_text || '',
-            closing_title: invitation?.closing_title || '',
-            closing_text: invitation?.closing_text || '',
-            cover_title: invitation?.cover_title || '',
-            cover_subtitle: invitation?.cover_subtitle || '',
-        },
+        invitations: user.invitations?.map(inv => ({
+            id: inv.id,
+            slug: inv.slug || '',
+            title: inv.title || '',
+            is_active: inv.is_active ?? true,
+            opening_title: inv.opening_title || '',
+            opening_text: inv.opening_text || '',
+            closing_title: inv.closing_title || '',
+            closing_text: inv.closing_text || '',
+            cover_title: inv.cover_title || '',
+            cover_subtitle: inv.cover_subtitle || '',
+            type: inv.type || 'wedding',
+        })) || [],
     });
+
+    const [selectedInvId, setSelectedInvId] = useState(user.invitations[0]?.id || null);
+    const activeInv = user.invitations?.find(i => i.id === selectedInvId) || user.invitations?.[0];
+    const invitation = activeInv;
+    const subscription = activeInv?.active_subscription;
 
     // Reset Password
     const [pw, setPw] = useState({ password: '', password_confirmation: '' });
@@ -48,13 +71,16 @@ export default function Edit({ user, plans }) {
     };
 
     // Change Plan
-    const [selectedPlan, setSelectedPlan] = useState(subscription?.plan_id || plans[0]?.id || '');
+    const [selectedPlan, setSelectedPlan] = useState('');
     const [planProcessing, setPlanProcessing] = useState(false);
     const [planMsg, setPlanMsg] = useState('');
 
     const handleChangePlan = () => {
         setPlanProcessing(true);
-        router.post(route('super-admin.users.changePlan', user.id), { plan_id: selectedPlan }, {
+        router.post(route('super-admin.users.changePlan', user.id), { 
+            plan_id: selectedPlan,
+            invitation_id: selectedInvId
+        }, {
             preserveScroll: true,
             onSuccess: () => setPlanMsg('Paket berhasil diubah!'),
             onError: (errs) => setPlanMsg('' + Object.values(errs).flat().join(', ')),
@@ -63,19 +89,32 @@ export default function Edit({ user, plans }) {
     };
 
     // Extend Subscription
-    const [expiresAt, setExpiresAt] = useState(subscription?.expires_at?.split('T')[0] || '');
+    const [expiresAt, setExpiresAt] = useState('');
     const [extProcessing, setExtProcessing] = useState(false);
     const [extMsg, setExtMsg] = useState('');
 
     const handleExtend = () => {
         setExtProcessing(true);
-        router.post(route('super-admin.users.extendSubscription', user.id), { expires_at: expiresAt }, {
+        router.post(route('super-admin.users.extendSubscription', user.id), { 
+            expires_at: expiresAt,
+            invitation_id: selectedInvId
+        }, {
             preserveScroll: true,
             onSuccess: () => setExtMsg('Masa aktif berhasil diperpanjang!'),
             onError: (errs) => setExtMsg('' + Object.values(errs).flat().join(', ')),
             onFinish: () => setExtProcessing(false),
         });
     };
+
+    // Effect to sync plan & expiration date when selected event changes
+    useEffect(() => {
+        const active = user.invitations?.find(i => i.id === selectedInvId) || user.invitations?.[0];
+        const sub = active?.active_subscription;
+        setSelectedPlan(sub?.plan_id || plans[0]?.id || '');
+        setExpiresAt(sub?.expires_at?.split('T')[0] || '');
+        setPlanMsg('');
+        setExtMsg('');
+    }, [selectedInvId, user.invitations]);
 
     const quickExtend = (months) => {
         const d = new Date();
@@ -99,6 +138,24 @@ export default function Edit({ user, plans }) {
                 <Link href={`${adminRoutePrefix}/users/${user.id}`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium flex items-center gap-1">
                     <ArrowLeft size={14} /> Kembali ke Detail
                 </Link>
+
+                {/* Event Selector Dropdown (only visible if there are multiple invitations) */}
+                {data.invitations.length > 1 && (
+                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-5 space-y-2.5 shadow-xs animate-in fade-in duration-200">
+                        <label className="text-xs font-semibold text-[#999] uppercase tracking-wider block">Pilih Event / Undangan untuk Dikelola (Paket & Masa Aktif)</label>
+                        <select
+                            value={selectedInvId || ''}
+                            onChange={(e) => setSelectedInvId(Number(e.target.value))}
+                            className="w-full bg-[#fcfbfa] border border-[#e8e5e0] rounded-xl px-4 py-3 text-[#333] text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-colors font-semibold shadow-xs"
+                        >
+                            {data.invitations.map((inv) => (
+                                <option key={inv.id} value={inv.id}>
+                                    {inv.title || 'Tanpa Judul'} (/u/{inv.slug})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 {/* ═══ Reset Password ═══ */}
                 <div className={cardClass}>
@@ -169,18 +226,18 @@ export default function Edit({ user, plans }) {
                         <span>Paket saat ini:</span>
                         <span className="font-bold text-[#E5654B]">{subscription?.plan?.name || 'Belum ada'}</span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {plans.map(p => (
-                            <button key={p.id} type="button" onClick={() => setSelectedPlan(p.id)}
-                                className={`p-4 rounded-xl border-2 text-center transition-all ${selectedPlan == p.id
-                                    ? 'border-[#E5654B] bg-[#E5654B]/5 shadow-sm'
-                                    : 'border-[#e8e5e0] hover:border-[#E5654B]/30'}`}>
-                                <div className="font-bold text-[#1a1a1a]">{p.name}</div>
-                                <div className="text-xs text-[#999] mt-1">
-                                    {p.price > 0 ? `Rp ${Number(p.price).toLocaleString('id-ID')}` : 'Gratis'}
-                                </div>
-                            </button>
-                        ))}
+                    <div className="max-w-md">
+                        <select
+                            value={selectedPlan}
+                            onChange={(e) => setSelectedPlan(e.target.value)}
+                            className={inputClass}
+                        >
+                            {plans.map(p => (
+                                <option key={p.id} value={p.id}>
+                                    {p.name} — {p.price > 0 ? `Rp ${Number(p.price).toLocaleString('id-ID')}` : 'Gratis'}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="flex items-center gap-3">
                         <button type="button" onClick={handleChangePlan} disabled={planProcessing}
@@ -200,13 +257,23 @@ export default function Edit({ user, plans }) {
                             {subscription?.expires_at ? new Date(subscription.expires_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tidak terbatas'}
                         </span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                        {[1, 3, 6, 12].map(m => (
-                            <button key={m} type="button" onClick={() => quickExtend(m)}
-                                className="px-4 py-2 rounded-xl text-sm font-medium bg-[#f5f3f0] text-[#555] hover:bg-[#E5654B] hover:text-white transition-all">
-                                +{m} Bulan
-                            </button>
-                        ))}
+                    <div className="max-w-xs">
+                        <label className={labelClass}>Tambah Durasi (Cepat)</label>
+                        <select 
+                            onChange={(e) => {
+                                if (e.target.value) {
+                                    quickExtend(Number(e.target.value));
+                                }
+                            }}
+                            className={inputClass}
+                            defaultValue=""
+                        >
+                            <option value="">-- Pilih Durasi Tambahan --</option>
+                            <option value="1">+1 Bulan</option>
+                            <option value="3">+3 Bulan</option>
+                            <option value="6">+6 Bulan</option>
+                            <option value="12">+12 Bulan</option>
+                        </select>
                     </div>
                     <div>
                         <label className={labelClass}>Tanggal Berakhir Baru</label>
@@ -253,116 +320,6 @@ export default function Edit({ user, plans }) {
                         </div>
                     </div>
 
-                    {/* Invitation Settings */}
-                    {invitation && (
-                        <div className={cardClass}>
-                            <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2"><FileText size={18} className="text-[#E5654B]" /> Detail Undangan</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className={labelClass}>Slug (URL)</label>
-                                    <div className="flex items-center">
-                                        <span className="bg-[#f8f7f4] border border-[#e8e5e0] border-r-0 rounded-l-xl px-3 py-2.5 text-[#999] text-sm">/u/</span>
-                                        <input type="text" value={data.invitation.slug}
-                                            onChange={e => setData('invitation', { ...data.invitation, slug: e.target.value })}
-                                            className={`${inputClass} rounded-l-none`} />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Judul Undangan</label>
-                                    <input type="text" value={data.invitation.title}
-                                        onChange={e => setData('invitation', { ...data.invitation, title: e.target.value })}
-                                        className={inputClass} />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Cover Title</label>
-                                    <input type="text" value={data.invitation.cover_title}
-                                        onChange={e => setData('invitation', { ...data.invitation, cover_title: e.target.value })}
-                                        className={inputClass} />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Cover Subtitle</label>
-                                    <input type="text" value={data.invitation.cover_subtitle}
-                                        onChange={e => setData('invitation', { ...data.invitation, cover_subtitle: e.target.value })}
-                                        className={inputClass} />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className={labelClass}>Opening Title</label>
-                                <input type="text" value={data.invitation.opening_title}
-                                    onChange={e => setData('invitation', { ...data.invitation, opening_title: e.target.value })}
-                                    className={inputClass} />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Opening Text</label>
-                                <textarea rows={3} value={data.invitation.opening_text}
-                                    onChange={e => setData('invitation', { ...data.invitation, opening_text: e.target.value })}
-                                    className={inputClass} />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Closing Title</label>
-                                <input type="text" value={data.invitation.closing_title}
-                                    onChange={e => setData('invitation', { ...data.invitation, closing_title: e.target.value })}
-                                    className={inputClass} />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Closing Text</label>
-                                <textarea rows={3} value={data.invitation.closing_text}
-                                    onChange={e => setData('invitation', { ...data.invitation, closing_text: e.target.value })}
-                                    className={inputClass} />
-                            </div>
-
-                            <div className="flex items-center gap-3 pt-2">
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked={data.invitation.is_active}
-                                        onChange={e => setData('invitation', { ...data.invitation, is_active: e.target.checked })}
-                                        className="sr-only peer" />
-                                    <div className="w-11 h-6 bg-[#e8e5e0] rounded-full peer peer-checked:bg-emerald-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm"></div>
-                                </label>
-                                <span className="text-sm text-[#555] font-medium">Undangan Aktif</span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Mempelai Preview (read-only) */}
-                    {invitation?.bride_grooms?.length > 0 && (
-                        <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6">
-                            <h3 className="font-bold text-[#1a1a1a] text-lg mb-4 flex items-center gap-2"><UsersIcon size={18} className="text-[#E5654B]" /> Mempelai <span className="text-xs text-[#999] font-normal">(read-only)</span></h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {invitation.bride_grooms.map(bg => (
-                                    <div key={bg.id} className="bg-[#f8f7f4] rounded-xl p-4 border border-[#e8e5e0]">
-                                        <div className="text-3xl mb-2">{bg.gender === 'wanita' ? '♀' : '♂'}</div>
-                                        <div className="text-[#333] font-semibold">{bg.full_name}</div>
-                                        <div className="text-[#999] text-sm">{bg.nickname}</div>
-                                        {bg.father_name && <div className="text-[#bbb] text-xs mt-2">Ayah: {bg.father_name}</div>}
-                                        {bg.mother_name && <div className="text-[#bbb] text-xs">Ibu: {bg.mother_name}</div>}
-                                        {bg.instagram && <div className="text-[#E5654B] text-xs mt-1 font-medium">{bg.instagram}</div>}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Events Preview (read-only) */}
-                    {invitation?.events?.length > 0 && (
-                        <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6">
-                            <h3 className="font-bold text-[#1a1a1a] text-lg mb-4 flex items-center gap-2"><CalendarClock size={18} className="text-[#E5654B]" /> Acara <span className="text-xs text-[#999] font-normal">(read-only)</span></h3>
-                            <div className="space-y-3">
-                                {invitation.events.map(ev => (
-                                    <div key={ev.id} className="bg-[#f8f7f4] rounded-xl p-4 border border-[#e8e5e0]">
-                                        <div className="flex items-center justify-between">
-                                            <div className="text-[#333] font-semibold">{ev.event_name}</div>
-                                            <span className="text-xs text-[#E5654B] bg-[#E5654B]/10 px-2 py-0.5 rounded-lg font-medium">{ev.event_type}</span>
-                                        </div>
-                                        <div className="text-[#999] text-sm mt-1">
-                                            {ev.event_date ? new Date(ev.event_date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-'} • {ev.start_time ? ev.start_time.substring(0, 5) : '--:--'} - {ev.end_time === 'Selesai' ? 'Selesai' : (ev.end_time ? ev.end_time.substring(0, 5) : 'Selesai')} {ev.timezone}
-                                        </div>
-                                        <div className="text-[#bbb] text-xs mt-1">{ev.venue_name} — {ev.venue_address}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
 
                     {/* Submit */}
                     <div className="flex items-center gap-3">

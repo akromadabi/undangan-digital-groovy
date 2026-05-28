@@ -54,6 +54,30 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Invitation::class)->latestOfMany();
     }
 
+    public function getInvitationAttribute()
+    {
+        try {
+            $invitationId = session('active_invitation_id');
+            if ($invitationId) {
+                $invitation = $this->invitations()->find($invitationId);
+                if ($invitation) {
+                    return $invitation;
+                }
+            }
+        } catch (\Exception $e) {
+            // Fallback for CLI/Queue where session is not available
+        }
+
+        $invitation = $this->invitations()->latest('id')->first();
+        if ($invitation) {
+            try {
+                session()->put('active_invitation_id', $invitation->id);
+            } catch (\Exception $e) {
+            }
+        }
+        return $invitation;
+    }
+
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);
@@ -64,6 +88,25 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Subscription::class)
             ->where('status', 'active')
             ->latestOfMany();
+    }
+
+    public function getActiveSubscriptionAttribute()
+    {
+        $invitation = $this->invitation;
+        if ($invitation) {
+            $sub = $invitation->relationLoaded('activeSubscription') 
+                ? $invitation->activeSubscription 
+                : $invitation->activeSubscription()->first();
+            if ($sub) {
+                return $sub;
+            }
+        }
+
+        if ($this->relationLoaded('activeSubscription')) {
+            return $this->getRelationValue('activeSubscription');
+        }
+
+        return $this->activeSubscription()->first();
     }
 
     public function payments()
@@ -125,7 +168,12 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        // Fitur dasar selalu aktif untuk paket apapun
+        $invitation = $this->invitation;
+        if ($invitation) {
+            return $invitation->hasFeatureAccess($featureSlug);
+        }
+
+        // Basic features are always active for any plan
         $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
         if (in_array($featureSlug, $basicFeatures)) {
             return true;
