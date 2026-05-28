@@ -248,45 +248,53 @@ html {
 }
 
 /* 3D Phone Mockup Transforms */
-.phone-rotate-default.phone-front {
+.phone-rotate-default {
     transform: none;
 }
-.phone-rotate-default.phone-front:hover,
-.group:hover .phone-rotate-default.phone-front {
-    transform: scale(1.04) translateY(-2px);
+.phone-rotate-default:hover,
+.group:hover .phone-rotate-default {
+    transform: scale(1.03);
 }
 
-.phone-rotate-left.phone-back {
+.phone-rotate-left {
+    transform: none;
+}
+.phone-rotate-left:hover,
+.group:hover .phone-rotate-left {
+    transform: scale(1.03);
+}
+
+.phone-rotate-right {
+    transform: none;
+}
+.phone-rotate-right:hover,
+.group:hover .phone-rotate-right {
+    transform: scale(1.03);
+}
+
+.phone-rotate-scaled {
+    transform: none;
+}
+.phone-rotate-scaled:hover,
+.group:hover .phone-rotate-scaled {
+    transform: scale(1.03);
+}
+
+/* Specific overrides for triple-phone layout */
+.triple-phone-layout .phone-rotate-left.phone-back {
     transform: rotateY(18deg) rotateZ(-2deg) scale(0.82);
 }
-.phone-rotate-left.phone-back:hover,
-.group:hover .phone-rotate-left.phone-back {
+.triple-phone-layout .phone-rotate-left.phone-back:hover,
+.group:hover .triple-phone-layout .phone-rotate-left.phone-back {
     transform: rotateY(9deg) rotateZ(-1deg) scale(0.85) translate(-2px, -2px);
 }
 
-.phone-rotate-right.phone-back {
+.triple-phone-layout .phone-rotate-right.phone-back {
     transform: rotateY(-18deg) rotateZ(2deg) scale(0.82);
 }
-.phone-rotate-right.phone-back:hover,
-.group:hover .phone-rotate-right.phone-back {
+.triple-phone-layout .phone-rotate-right.phone-back:hover,
+.group:hover .triple-phone-layout .phone-rotate-right.phone-back {
     transform: rotateY(-9deg) rotateZ(1deg) scale(0.85) translate(2px, -2px);
-}
-
-/* For double-phone where the front phone is rotated right (skewed right) */
-.phone-rotate-right.phone-front {
-    transform: rotateY(-10deg) rotateZ(1deg);
-}
-.phone-rotate-right.phone-front:hover,
-.group:hover .phone-rotate-right.phone-front {
-    transform: rotateY(-5deg) rotateZ(0.5deg) scale(1.03) translateY(-2px);
-}
-
-.phone-rotate-scaled.phone-back {
-    transform: scale(0.9);
-}
-.phone-rotate-scaled.phone-back:hover,
-.group:hover .phone-rotate-scaled.phone-back {
-    transform: scale(0.93);
 }
 
 
