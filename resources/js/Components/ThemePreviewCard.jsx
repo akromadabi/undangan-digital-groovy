@@ -196,11 +196,11 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                     {renderGroundShadow('translate-x-[35%] translate-y-[80%] rotate-[4deg]', 'w-[52%] max-w-[135px]', 'opacity-60')}
                     
                     {/* Back Left Phone */}
-                    <div className="absolute w-[62%] max-w-[170px] -translate-x-[35%] -translate-y-[12%] transform transition-transform duration-500 group-hover:-translate-x-[39%] z-10">
+                    <div className="absolute w-[62%] max-w-[170px] -translate-x-[35%] -translate-y-[4%] transform transition-transform duration-500 group-hover:-translate-x-[39%] z-10">
                         {renderPhone(images[1] || images[0], true, '', true, false)}
                     </div>
                     {/* Front Right Phone */}
-                    <div className="absolute w-[62%] max-w-[170px] translate-x-[19%] translate-y-[12%] transform transition-transform duration-500 group-hover:translate-x-[23%] z-20">
+                    <div className="absolute w-[62%] max-w-[170px] translate-x-[19%] translate-y-[4%] transform transition-transform duration-500 group-hover:translate-x-[23%] z-20">
                         {renderPhone(images[0], false, '', false, true)}
                     </div>
                 </div>
@@ -222,15 +222,15 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                     {renderGroundShadow('translate-y-[85%]', 'w-[44%] max-w-[125px]', 'opacity-65')}
                     
                     {/* Left Back Phone */}
-                    <div className="absolute w-[50%] max-w-[140px] -translate-x-[45%] -translate-y-[15%] transform transition-transform duration-500 group-hover:-translate-x-[53%] z-10">
+                    <div className="absolute w-[50%] max-w-[140px] -translate-x-[45%] -translate-y-[5%] transform transition-transform duration-500 group-hover:-translate-x-[53%] z-10">
                         {renderPhone(images[1] || images[0], true, '', true, false)}
                     </div>
                     {/* Right Back Phone */}
-                    <div className="absolute w-[50%] max-w-[140px] translate-x-[45%] -translate-y-[15%] transform transition-transform duration-500 group-hover:translate-x-[53%] z-10">
+                    <div className="absolute w-[50%] max-w-[140px] translate-x-[45%] -translate-y-[5%] transform transition-transform duration-500 group-hover:translate-x-[53%] z-10">
                         {renderPhone(images[2] || images[0], true, '', false, true)}
                     </div>
                     {/* Center Front Phone */}
-                    <div className="absolute w-[50%] max-w-[140px] translate-y-[8%] z-20 transform transition-transform duration-500 group-hover:scale-[1.03] group-hover:translate-y-[4%]">
+                    <div className="absolute w-[50%] max-w-[140px] translate-y-[3%] z-20 transform transition-transform duration-500 group-hover:scale-[1.03] group-hover:translate-y-[1.5%]">
                         {renderPhone(images[0], false, '', false, false)}
                     </div>
                 </div>
