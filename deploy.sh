@@ -30,7 +30,8 @@ echo "📦 3. Menginstall dependensi Node.js (NPM)..."
 npm install
 
 echo "🛠️ 4. Membangun aset frontend (Vite)..."
-NODE_OPTIONS="--max-old-space-size=1536" npm run build
+export NODE_OPTIONS="--max-old-space-size=2048"
+npm run build
 
 echo "🗄️ 5. Menjalankan migrasi database..."
 php artisan migrate --force

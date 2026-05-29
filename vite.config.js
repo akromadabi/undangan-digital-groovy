@@ -11,8 +11,13 @@ export default defineConfig({
         react(),
     ],
     build: {
+        minify: 'esbuild',
+        cssMinify: true,
+        sourcemap: false,
         rollupOptions: {
-            maxParallelFileOps: 2,
+            maxParallelFileOps: 1,
+            cache: false,
+            treeshake: false,
         },
     },
 });
