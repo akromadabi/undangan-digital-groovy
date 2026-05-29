@@ -206,7 +206,7 @@
         function showErrorVisualizer(message) {
             var container = document.getElementById('js-error-visualizer');
             if (container) {
-                container.style.display = 'block';
+                container.style.setProperty('display', 'flex', 'important');
                 var preEl = document.getElementById('js-error-pre');
                 if (preEl) {
                     preEl.innerText += message + '\n\n---------------------------------\n\n';
@@ -220,10 +220,13 @@
 </head>
 
 <body class="font-sans antialiased">
-    <!-- Global JavaScript Error Visualizer Container -->
-    <div id="js-error-visualizer" style="display: none; position: fixed; bottom: 20px; right: 20px; left: 20px; z-index: 999999; padding: 20px; background: #fef2f2; color: #991b1b; border: 2px solid #f87171; border-radius: 12px; font-family: monospace; font-size: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); max-height: 80vh; overflow-y: auto; white-space: pre-wrap;">
-        <h3 style="margin: 0 0 10px 0; color: #7f1d1d; font-size: 14px; font-weight: bold;">🔴 JavaScript Error Detected</h3>
-        <pre id="js-error-pre" style="margin: 0; overflow-x: auto; white-space: pre-wrap; word-break: break-all;"></pre>
+    <!-- Global JavaScript Error Visualizer Container (Refactored to be a compact, non-blocking toast, hidden by default) -->
+    <div id="js-error-visualizer" style="display: none !important; position: fixed; bottom: 20px; right: 20px; max-width: 420px; width: calc(100vw - 40px); z-index: 999999; padding: 16px; background: #fff5f5; color: #991b1b; border: 1.5px solid #feb2b2; border-radius: 16px; font-family: monospace; font-size: 11px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); max-height: 50vh; overflow: hidden; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-b: 1px solid #fed7d7; padding-bottom: 8px; margin-bottom: 6px;">
+            <h3 style="margin: 0; color: #9b2c2c; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px;">🔴 JavaScript Error Detected</h3>
+            <button onclick="document.getElementById('js-error-visualizer').style.setProperty('display', 'none', 'important')" style="background: #fed7d7; border: none; color: #9b2c2c; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;">Tutup</button>
+        </div>
+        <pre id="js-error-pre" style="margin: 0; overflow: auto; max-height: calc(50vh - 60px); white-space: pre-wrap; word-break: break-all; color: #4a5568; line-height: 1.4;"></pre>
     </div>
     @inertia
 </body>
