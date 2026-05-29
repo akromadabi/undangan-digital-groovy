@@ -188,6 +188,9 @@ class DatabaseSeeder extends Seeder
         // ═══════════════════════════════════════
         // 5. DEFAULT THEMES & RUN SEEDERS
         // ═══════════════════════════════════════
+        // Backup existing theme customizations to prevent them from being reset on deploy
+        $existingThemes = Theme::all()->keyBy('slug');
+
         $this->call([
             UtaryThemeSeeder::class,
             QuoteTemplateSeeder::class,
@@ -204,6 +207,28 @@ class DatabaseSeeder extends Seeder
             ManchesterUnitedThemeSeeder::class,
             MoroccanThemeSeeder::class,
         ]);
+
+        // Restore custom fields (like uploaded thumbnails) after seeders have run
+        foreach ($existingThemes as $slug => $oldTheme) {
+            Theme::where('slug', $slug)->update([
+                'thumbnail' => $oldTheme->thumbnail,
+                'preview_images' => $oldTheme->preview_images,
+                'preview_template' => $oldTheme->preview_template,
+                'preview_bg_style' => $oldTheme->preview_bg_style,
+                'category' => $oldTheme->category,
+                'type' => $oldTheme->type,
+                'color_scheme' => $oldTheme->color_scheme,
+                'font_config' => $oldTheme->font_config,
+                'is_premium' => $oldTheme->is_premium,
+                'allowed_plans' => $oldTheme->allowed_plans,
+                'is_active' => $oldTheme->is_active,
+                'supports_scroll' => $oldTheme->supports_scroll,
+                'supports_slide' => $oldTheme->supports_slide,
+                'supports_tab' => $oldTheme->supports_tab,
+                'base_likes' => $oldTheme->base_likes,
+                'sort_order' => $oldTheme->sort_order,
+            ]);
+        }
 
         $defaultTheme = Theme::where('slug', 'utary')->first();
 
