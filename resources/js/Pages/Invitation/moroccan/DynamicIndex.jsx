@@ -537,7 +537,8 @@ function OpeningSection({ invitation, brideGrooms, language, themeConfig }) {
                         <div className={`mc-quote-arabic${isArabicText(invitation.opening_ayat) ? ' is-arabic' : ''}`}>
                             {invitation.opening_ayat}
                         </div>
-                        {invitation.opening_ayat_translation && (
+                        {invitation.opening_ayat_translation && 
+                         invitation.opening_ayat_translation.trim() !== invitation.opening_ayat.trim() && (
                             <div className="mc-quote-translation">
                                 "{invitation.opening_ayat_translation}"
                             </div>

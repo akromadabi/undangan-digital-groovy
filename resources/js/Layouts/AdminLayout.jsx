@@ -114,6 +114,19 @@ export default function AdminLayout({ children, title }) {
         return () => document.removeEventListener('mousedown', handleClick);
     }, []);
 
+    // Auto-close mobile menu sheet on desktop view resizing
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) {
+                setMenuSheetOpen(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Run on mount
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const isActive = (href) => currentPath === href || (href !== '/admin' && currentPath.startsWith(href));
 
     const isBottomActive = (item) => {

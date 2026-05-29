@@ -165,7 +165,7 @@ class ErrorBoundary extends React.Component {
 /* ═══════════════════════════════════════
    COVER / LOCK SCREEN COMPONENT
    ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, language }) {
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, language, showPhotos }) {
     const { t, locale } = useTranslation(language);
     
     // Time & Date display for Lockscreen
@@ -198,8 +198,30 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
         return getStorageUrl(target, null);
     }, [groom, bride]);
 
+    const coverImages = useMemo(() => {
+        return (invitation?.cover_image || '')
+            .split(',')
+            .map(img => getStorageUrl(img.trim()))
+            .filter(Boolean);
+    }, [invitation?.cover_image]);
+
     return (
         <div className={`wa-cover${isOpened ? ' is-opened' : ''}`}>
+            {/* Background Slideshow */}
+            <div className="wa-cover-bg">
+                {showPhotos && coverImages.length > 0 ? (
+                    <PremiumSlideshow
+                        images={coverImages}
+                        positionX={invitation?.cover_position_x}
+                        positionY={invitation?.cover_position_y}
+                        zoom={invitation?.cover_zoom}
+                    />
+                ) : (
+                    <div className="wa-cover-bg-placeholder" />
+                )}
+                <div className="wa-cover-overlay" />
+            </div>
+
             <div className="wa-cover-top">
                 <div className="wa-cover-time">{timeStr}</div>
                 <div className="wa-cover-date">{dateStr}</div>
@@ -209,7 +231,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                 <div className="wa-lock-card">
                     <div className="wa-lock-header">
                         <div className="wa-lock-avatar-wrap">
-                            {globalShowPhotos && avatarSrc ? (
+                            {showPhotos && avatarSrc ? (
                                 <img src={avatarSrc} className="wa-lock-avatar" alt="Avatar" />
                             ) : (
                                 <div className="wa-lock-monogram">{monogram}</div>
@@ -253,8 +275,22 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 /* ═══════════════════════════════════════
    HEADER BAR COMPONENT
    ═══════════════════════════════════════ */
-function HeaderBar({ invitation, brideGrooms, onToggleQr, enableQr }) {
+function HeaderBar({ 
+    invitation, 
+    brideGrooms, 
+    onToggleQr, 
+    enableQr, 
+    hasStory, 
+    hasGallery, 
+    hasBank, 
+    hasStream, 
+    hasRsvp, 
+    hasEvent, 
+    language 
+}) {
     const { t } = useTranslation();
+    const [menuOpen, setMenuOpen] = useState(false);
+    
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
@@ -270,10 +306,18 @@ function HeaderBar({ invitation, brideGrooms, onToggleQr, enableQr }) {
         return getStorageUrl(target, null);
     }, [groom, bride]);
 
-    const handleLivestreamScroll = () => {
-        const streamEl = document.getElementById('livestream');
-        if (streamEl) {
-            streamEl.scrollIntoView({ behavior: 'smooth' });
+    const scrollToSection = (id) => {
+        setMenuOpen(false);
+        const el = document.getElementById(id);
+        if (el) {
+            const headerOffset = 65; // ~65px offset
+            const elementPosition = el.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.scrollY - headerOffset;
+            
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
         }
     };
 
@@ -297,12 +341,53 @@ function HeaderBar({ invitation, brideGrooms, onToggleQr, enableQr }) {
                 </div>
             </div>
 
-            <div className="wa-header-right">
-                <i className="fas fa-video" onClick={handleLivestreamScroll} title="Live Broadcast" />
+            <div className="wa-header-right" style={{ position: 'relative' }}>
+                {hasStream && (
+                    <i className="fas fa-video" onClick={() => scrollToSection('livestream')} title="Live Broadcast" />
+                )}
+                {hasEvent && (
+                    <i className="fas fa-phone" onClick={() => scrollToSection('event')} title={language === 'en' ? 'Event Schedule' : 'Jadwal Acara'} />
+                )}
                 {enableQr && (
                     <i className="fas fa-qrcode" onClick={onToggleQr} title="QR Presensi" />
                 )}
-                <i className="fas fa-ellipsis-v" />
+                <i className="fas fa-ellipsis-v" onClick={() => setMenuOpen(!menuOpen)} style={{ cursor: 'pointer', padding: '4px 8px' }} />
+                
+                {menuOpen && (
+                    <>
+                        <div className="wa-menu-backdrop" onClick={() => setMenuOpen(false)} />
+                        <div className="wa-menu-dropdown">
+                            <div className="wa-menu-item" onClick={() => scrollToSection('couple')}>
+                                {language === 'en' ? 'Info Couple' : 'Info Mempelai'}
+                            </div>
+                            {hasEvent && (
+                                <div className="wa-menu-item" onClick={() => scrollToSection('event')}>
+                                    {language === 'en' ? 'Event Schedule' : 'Jadwal Acara'}
+                                </div>
+                            )}
+                            {hasStory && (
+                                <div className="wa-menu-item" onClick={() => scrollToSection('love_story')}>
+                                    {language === 'en' ? 'Love Story' : 'Cerita Cinta'}
+                                </div>
+                            )}
+                            {hasGallery && (
+                                <div className="wa-menu-item" onClick={() => scrollToSection('gallery')}>
+                                    {language === 'en' ? 'Media Gallery' : 'Galeri Media'}
+                                </div>
+                            )}
+                            {hasRsvp && (
+                                <div className="wa-menu-item" onClick={() => scrollToSection('rsvp')}>
+                                    {language === 'en' ? 'RSVP Confirmation' : 'Konfirmasi RSVP'}
+                                </div>
+                            )}
+                            {hasBank && (
+                                <div className="wa-menu-item" onClick={() => scrollToSection('bank')}>
+                                    {language === 'en' ? 'Send Gift' : 'Kirim Kado'}
+                                </div>
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
@@ -689,6 +774,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                 isOpened={isOpened}
                 onOpen={handleOpen}
                 language={activeLanguage}
+                showPhotos={showPhotos}
             />
 
             {/* Main Application screen */}
@@ -700,6 +786,13 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                         brideGrooms={brideGrooms}
                         enableQr={enableQr}
                         onToggleQr={() => setShowQr(true)}
+                        hasStory={safeArr(loveStories).length > 0}
+                        hasGallery={galleryItems.length > 0}
+                        hasBank={safeArr(bankAccounts).length > 0}
+                        hasStream={hasStream}
+                        hasRsvp={enableRsvp || enableWishes}
+                        hasEvent={safeArr(events).length > 0}
+                        language={activeLanguage}
                     />
 
                     {/* Chat log messages */}
@@ -719,51 +812,12 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                             }
                         </div>
 
-                        {/* SECTION 1: Basmalah + Salam Pembuka */}
-                        <Reveal className="wa-message-row wa-in" delay={100}>
-                            <div className="wa-bubble">
-                                <span style={{ fontWeight: 'bold', color: '#008069', fontSize: '0.8rem', display: 'block', marginBottom: '2px' }}>
-                                    {bride.nickname || 'Bride'}
-                                </span>
-                                
-                                <div style={{ fontSize: '1rem', fontStyle: 'italic', fontWeight: '600', marginBottom: '6px', color: '#075E54' }}>
-                                    {invitation?.opening_title || (isEn ? 'In the Name of Allah' : 'Bismillahirrahmanirrahim')}
-                                </div>
-                                
-                                <p style={{ margin: 0 }}>
-                                    {invitation?.opening_text || (isEn 
-                                        ? 'Assalamu\'alaikum Wr. Wb. With the grace of Allah, we invite you to attend our special day.'
-                                        : 'Assalamu\'alaikum Wr. Wb. Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Anda untuk menghadiri pernikahan kami.'
-                                    )}
-                                </p>
-
-                                {invitation?.opening_ayat && (
-                                    <div style={{
-                                        marginTop: '10px',
-                                        padding: '8px 10px',
-                                        backgroundColor: '#f0f2f5',
-                                        borderRadius: '6px',
-                                        fontSize: '0.8rem',
-                                        borderLeft: '3px solid #008069',
-                                        color: '#3b4a54'
-                                    }}>
-                                        <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', fontSize: '0.9rem' }}>{invitation.opening_ayat}</p>
-                                        {invitation.opening_ayat_translation && <p style={{ margin: '0 0 2px 0', fontStyle: 'italic' }}>{invitation.opening_ayat_translation}</p>}
-                                        {invitation.opening_ayat_source && <p style={{ margin: 0, textAlign: 'right', fontSize: '0.72rem', fontWeight: '600' }}>— {invitation.opening_ayat_source}</p>}
-                                    </div>
-                                )}
-
-                                <div className="wa-meta">
-                                    <span>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
-                                </div>
-                            </div>
-                        </Reveal>
-
-                        {/* SECTION 2: Opening Image slideshow received */}
-                        {showPhotos && (openingImages.length > 0 || coverImages.length > 0) && (
-                            <Reveal className="wa-message-row wa-out" delay={300}>
-                                <div className="wa-bubble wa-media-bubble">
-                                    <div className="wa-media-box">
+                        {/* SECTION 1: Unified Premium Opening Card */}
+                        <Reveal className="wa-opening-card-row" delay={100}>
+                            <div className="wa-opening-card">
+                                {/* Top: Image/Slideshow of the Couple */}
+                                {showPhotos && (openingImages.length > 0 || coverImages.length > 0) && (
+                                    <div className="wa-opening-slideshow-container">
                                         <PremiumSlideshow
                                             images={openingImages.length > 0 ? openingImages : coverImages}
                                             positionX={invitation?.opening_position_x}
@@ -771,20 +825,69 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                                             zoom={invitation?.opening_zoom}
                                         />
                                     </div>
-                                    <div className="wa-media-caption">
-                                        📸 {isEn ? 'Share a picture of our moment' : 'Momen kebahagiaan kami'}
+                                )}
+
+                                {/* Card Content */}
+                                <div className="wa-opening-card-content">
+                                    {/* Monogram Overlay */}
+                                    <div className="wa-opening-card-monogram">
+                                        {groom.nickname?.charAt(0) || 'G'}&{bride.nickname?.charAt(0) || 'B'}
                                     </div>
-                                    <div className="wa-meta">
-                                        <span>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
-                                        <span className="wa-ticks">✓✓</span>
+
+                                    <div className="wa-opening-card-subtitle">
+                                        {isEn ? 'The Wedding Invitation' : 'Undangan Pernikahan'}
                                     </div>
+
+                                    <h2 className="wa-opening-card-couple">
+                                        {groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Happy Couple'}
+                                    </h2>
+
+                                    {primaryEvent?.event_date && (
+                                        <div className="wa-opening-card-date">
+                                            📅 {formatDate(primaryEvent.event_date, activeLanguage)}
+                                        </div>
+                                    )}
+
+                                    <div className="wa-opening-card-salam">
+                                        {invitation?.opening_title || (isEn ? 'In the Name of Allah, Most Gracious, Most Merciful' : 'Bismillahirrahmanirrahim')}
+                                    </div>
+
+                                    <p className="wa-opening-card-text">
+                                        {invitation?.opening_text || (isEn 
+                                            ? 'Assalamu\'alaikum Wr. Wb. With the grace of Allah, we invite you to attend our special day.'
+                                            : 'Assalamu\'alaikum Wr. Wb. Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Anda untuk menghadiri pernikahan kami.'
+                                        )}
+                                    </p>
+
+                                    {invitation?.opening_ayat && (
+                                        <div className="wa-opening-ayat-box">
+                                            <div className="wa-opening-ayat-title">
+                                                {invitation.opening_ayat}
+                                            </div>
+                                            {invitation.opening_ayat_translation && 
+                                             invitation.opening_ayat_translation.trim() !== invitation.opening_ayat.trim() && (
+                                                <div className="wa-opening-ayat-trans">
+                                                    {invitation.opening_ayat_translation}
+                                                </div>
+                                            )}
+                                            {invitation.opening_ayat_source && (
+                                                <div className="wa-opening-ayat-src">
+                                                    — {invitation.opening_ayat_source}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                            </Reveal>
-                        )}
+                                <div className="wa-meta" style={{ right: '12px', bottom: '8px' }}>
+                                    <span>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+                                    <span className="wa-ticks">✓✓</span>
+                                </div>
+                            </div>
+                        </Reveal>
 
                         {/* SECTION 3: Mempelai Pria Profile */}
                         {groom && (
-                            <Reveal className="wa-message-row wa-in" delay={150}>
+                            <Reveal className="wa-message-row wa-in" id="couple" delay={150}>
                                 <div className="wa-bubble">
                                     <div className="wa-profile-card">
                                         <div className="wa-profile-avatar">
@@ -878,7 +981,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                         {/* SECTION 5: Love Stories */}
                         {safeArr(loveStories).length > 0 && (
                             <>
-                                <div className="wa-system-message select-none">
+                                <div id="love_story" className="wa-system-message select-none">
                                     ❤️ {isEn ? 'OUR STORY TRACKS' : 'KISAH CINTA KAMI'}
                                 </div>
                                 {safeArr(loveStories).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map((story, idx) => (
@@ -962,7 +1065,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                         {/* SECTION 7: Event Schedule list */}
                         {safeArr(events).length > 0 && (
                             <>
-                                <div className="wa-system-message select-none">
+                                <div id="event" className="wa-system-message select-none">
                                     📅 {isEn ? 'WEDDING SCHEDULE' : 'JADWAL ACARA'}
                                 </div>
                                 {safeArr(events).map((ev, idx) => (
@@ -1053,7 +1156,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                         {/* SECTION 9: Gallery Album grid */}
                         {galleryItems.length > 0 && (
                             <>
-                                <div className="wa-system-message select-none">
+                                <div id="gallery" className="wa-system-message select-none">
                                     📷 {isEn ? 'SHARED GALLERY ALBUM' : 'ALBUM GALERI BERSAMA'}
                                 </div>
                                 <Reveal className="wa-message-row wa-out" delay={200}>
@@ -1148,7 +1251,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
 
                         {/* SECTION 10: RSVP Form input */}
                         {(enableRsvp || enableWishes) && (
-                            <Reveal className="wa-message-row wa-in" delay={200}>
+                            <Reveal className="wa-message-row wa-in" id="rsvp" delay={200}>
                                 <div className="wa-bubble" style={{ width: '100%' }}>
                                     <span style={{ fontWeight: 'bold', color: '#008069', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>
                                         📬 Reply & RSVP Status

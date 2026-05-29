@@ -130,6 +130,19 @@ export default function DashboardLayout({ children, title }) {
         return () => document.removeEventListener('mousedown', handleClick);
     }, []);
 
+    // Auto-close mobile menu sheet on desktop view resizing
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) {
+                setMenuSheetOpen(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Run on mount
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const isBottomActive = (item) => {
         if (item.isCenter) return menuSheetOpen;
         const currentQuery = typeof window !== 'undefined' ? window.location.search : '';

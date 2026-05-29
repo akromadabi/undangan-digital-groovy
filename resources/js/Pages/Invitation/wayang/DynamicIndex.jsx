@@ -497,7 +497,8 @@ function OpeningSection({ invitation, brideGrooms, events, language, themeConfig
                         <div className="wy-quote-arabic">
                             {invitation.opening_ayat}
                         </div>
-                        {invitation.opening_ayat_translation && (
+                        {invitation.opening_ayat_translation && 
+                         invitation.opening_ayat_translation.trim() !== invitation.opening_ayat.trim() && (
                             <div className="wy-quote-translation">
                                 "{invitation.opening_ayat_translation}"
                             </div>
