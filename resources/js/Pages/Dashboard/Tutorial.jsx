@@ -758,6 +758,23 @@ export const FAQ_DATABASE = [
             'Klik langsung pada tema untuk melihat preview dan menerapkannya ke undangan Anda.'
         ],
         mockup: null
+    },
+    {
+        id: 'faq-dress-code',
+        category: 'fitur-tambahan',
+        question: '40. Bagaimana cara menambahkan Dress Code (Panduan Busana) untuk tamu?',
+        answer: 'Anda dapat memberikan petunjuk berpakaian beserta rekomendasi palet warna pakaian secara spesifik untuk masing-masing acara yang Anda selenggarakan.',
+        keywords: ['dress code', 'dresscode', 'warna', 'pakaian', 'busana', 'baju', 'palet warna', 'rekomendasi baju', 'panduan busana', 'tamu'],
+        steps: [
+            'Buka menu "Acara" di panel samping kiri dasbor.',
+            'Gulir ke bagian bawah kartu acara yang ingin Anda berikan panduan busana.',
+            'Aktifkan toggle "Dress Code (Panduan Busana)". Kotak pengaturan khusus akan muncul di bawahnya.',
+            'Tulis instruksi pakaian pada kolom "Petunjuk / Rekomendasi Dress Code" (misal: Tamu disarankan mengenakan pakaian formal batik / nuansa pastel).',
+            'Pada bagian "Rekomendasi Palet Warna", Anda dapat membagi rekomendasi warna dalam beberapa kelompok (misal: Atasan, Bawahan, Pria, atau Wanita).',
+            'Klik ikon "+" untuk menambah warna baru, lalu klik lingkaran warna untuk membuka pemilih warna (color picker) interaktif.',
+            'Klik tombol "Simpan Acara" di bagian bawah untuk menyimpan perubahan.'
+        ],
+        mockup: null
     }
 ];
 
