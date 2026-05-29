@@ -6,11 +6,18 @@ import ParticleEffect from '@/Components/ParticleEffect';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
 
+import logoDana from '../luxury-02/asset/1200px-Logo_dana_blue.svg-1-1-1.png';
+import logoBca from '../luxury-02/asset/BCA_logo_Bank_Central_Asia-1-3-2048x650-1-1-1-1.png';
+import chipAtm from '../luxury-02/asset/chip-atm-1-2-1-1-1.png';
+import heartSvg from '../luxury-02/asset/2764.svg';
+
 /* ═══════════════════════════════════════
    ORMANENT ASSETS URLS
    ═══════════════════════════════════════ */
 const ORNAMENTS = {
     bouquet: '/themes/spesial-02/bouquet.png',
+    bgCover: '/themes/spesial-02/bg-cover.png',
+    cardOrnament: '/themes/spesial-02/leaf-branch.png',
     b1: '/themes/spesial-02/bunga-01.webp',
     b2: '/themes/spesial-02/bunga-02.webp',
     b3: '/themes/spesial-02/bunga-03.webp',
@@ -21,10 +28,10 @@ const ORNAMENTS = {
     frame: '/themes/spesial-02/frame-ornament.webp',
     
     // Fallback vector logos for banking cards
-    dana: '/themes/moroccan/asset/1200px-Logo_dana_blue.svg-1-2-1-1.png',
-    bca: '/themes/moroccan/asset/BCA_logo_Bank_Central_Asia-1-3-2048x650-1-1-1-1-1.png',
-    chip: '/themes/moroccan/asset/chip-atm-1-2-1-1-1-3.png',
-    heart: '/themes/moroccan/asset/2764.svg',
+    dana: logoDana,
+    bca: logoBca,
+    chip: chipAtm,
+    heart: heartSvg,
 };
 
 /* ═══════════════════════════════════════
@@ -290,7 +297,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
             {/* Background Slideshow */}
             {showPhotos && (
                 <PremiumSlideshow
-                    images={invitation?.cover_image ? invitation.cover_image.split(',') : [ORNAMENTS.bouquet]}
+                    images={invitation?.cover_image ? invitation.cover_image.split(',') : [ORNAMENTS.bgCover]}
                     positionX={invitation?.cover_position_x}
                     positionY={invitation?.cover_position_y}
                     zoom={invitation?.cover_zoom}
@@ -359,11 +366,11 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
 /* ═══════════════════════════════════════
    OPENING SECTION
    ═══════════════════════════════════════ */
-function OpeningSection({ invitation, showPhotos, brideGrooms }) {
+function OpeningSection({ invitation, showPhotos, brideGrooms, events }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
-    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || bgs[0] || {};
     const coupleNickname = (groom.nickname && bride.nickname) ? `${groom.nickname} & ${bride.nickname}` : '';
 
     const rawOpeningTitle = invitation?.opening_title || '';
@@ -371,6 +378,13 @@ function OpeningSection({ invitation, showPhotos, brideGrooms }) {
                         rawOpeningTitle.toUpperCase() === 'THE WEDDING OF' || 
                         rawOpeningTitle.toUpperCase() === 'PERNIKAHAN' || 
                         rawOpeningTitle.toUpperCase() === 'THE WEDDING';
+
+    const openingImages = useMemo(() => {
+        return (invitation?.opening_image || '')
+            .split(',')
+            .map(img => getStorageUrl(img.trim()))
+            .filter(Boolean);
+    }, [invitation?.opening_image]);
 
     return (
         <div className="max-w-lg mx-auto py-4">
@@ -380,12 +394,12 @@ function OpeningSection({ invitation, showPhotos, brideGrooms }) {
                 </p>
             </Reveal>
 
-            {/* Double Slideshow Image */}
-            {showPhotos && invitation?.opening_image ? (
+            {/* Opening Slideshow Image */}
+            {showPhotos && openingImages.length > 0 ? (
                 <Reveal variant="zoom" delay={200}>
                     <div className="mx-auto rounded-2xl overflow-hidden my-6 max-w-[300px] shadow-md border-4 border-white relative aspect-[4/3] sp02-pulse-gold">
                         <PremiumSlideshow
-                            images={invitation.opening_image.split(',')}
+                            images={openingImages}
                             positionX={invitation.opening_position_x}
                             positionY={invitation.opening_position_y}
                             zoom={invitation.opening_zoom}
@@ -505,7 +519,7 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
             <div className="space-y-12 mt-6">
                 <Reveal variant="left" className="w-full flex justify-center">
                     <div className="sp02-mempelai-card w-full flex flex-col items-center">
-                        <img src={ORNAMENTS.b3} className="sp02-mempelai-card-ornament-tl" alt="" />
+                        <img src={ORNAMENTS.cardOrnament} className="sp02-mempelai-card-ornament-tl" alt="" />
                         {showPhotos && groom.photo && (
                             <div className="sp02-avatar-frame mb-4 sp02-breathe">
                                 <div className="sp02-avatar-frame-inner">
@@ -561,7 +575,7 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                 {/* Bride card */}
                 <Reveal variant="right" className="w-full flex justify-center">
                     <div className="sp02-mempelai-card w-full flex flex-col items-center">
-                        <img src={ORNAMENTS.b4} className="sp02-mempelai-card-ornament-br" alt="" />
+                        <img src={ORNAMENTS.cardOrnament} className="sp02-mempelai-card-ornament-br" alt="" />
                         {showPhotos && bride.photo && (
                             <div className="sp02-avatar-frame mb-4 sp02-breathe" style={{ animationDelay: '1.5s' }}>
                                 <div className="sp02-avatar-frame-inner">
@@ -662,10 +676,10 @@ function CountdownBlock({ events }) {
         <div className="sp02-countdown-grid">
             {items.map((item, i) => (
                 <div key={i} className="sp02-countdown-item">
-                    <span className="text-xl sm:text-2xl font-bold text-[var(--sp02-primary)] sp02-font-heading-style leading-none mb-1">
+                    <span className="text-xl sm:text-2xl font-bold text-white sp02-font-heading-style leading-none mb-1">
                         {item.val}
                     </span>
-                    <span className="text-[8px] sm:text-[9px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider">
+                    <span className="text-[8px] sm:text-[9px] font-bold text-white/80 uppercase tracking-wider">
                         {item.label}
                     </span>
                 </div>
@@ -677,18 +691,40 @@ function CountdownBlock({ events }) {
 /* ═══════════════════════════════════════
    EVENTS & MAPS SECTION
    ═══════════════════════════════════════ */
-function EventSection({ events, showPhotos, locale }) {
+function EventSection({ events, showPhotos, locale, showCountdown, galleries }) {
     const { t } = useTranslation();
     const list = safeArr(events);
 
+    const [randomGalleryImages, setRandomGalleryImages] = useState({});
+
+    useEffect(() => {
+        const pics = safeArr(galleries);
+        if (pics.length === 0) return;
+
+        const resolved = {};
+        list.forEach((evt, idx) => {
+            const randIdx = idx % pics.length;
+            resolved[evt.id || idx] = getStorageUrl(pics[randIdx].image_path || pics[randIdx].image_url);
+        });
+        setRandomGalleryImages(resolved);
+    }, [galleries, list]);
+
     return (
         <div className="max-w-lg mx-auto">
+            {showCountdown && (
+                <Reveal variant="zoom" className="w-full">
+                    <CountdownBlock events={events} />
+                </Reveal>
+            )}
+
             <Reveal>
                 <FlowerSwirl title={t('nav.acara')} />
             </Reveal>
 
             {list.map((evt, idx) => {
-                const eventImg = getStorageUrl(evt.image, null) || ORNAMENTS.bouquet;
+                const eventImg = getStorageUrl(evt.image, null) 
+                    || randomGalleryImages[evt.id || idx] 
+                    || ORNAMENTS.bouquet;
                 const { dayNum, dayName, monthName, year } = parseEventDate(evt.event_date, locale);
                 const eventDisplayName = evt.event_type === 'akad' ? 'Akad Nikah' : (evt.event_name || 'Acara');
                 const isEven = idx % 2 === 0;
@@ -910,7 +946,7 @@ function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
                                     className="sp02-bank-card__copy-btn"
                                 >
                                     <i className={copiedIdx === i ? "fas fa-check" : "far fa-copy"} />
-                                    <span>{copiedIdx === i ? t('invitation.copied') || 'SALIN BERHASIL' : t('invitation.copy') || 'SALIN NOMOR'}</span>
+                                    <span>{copiedIdx === i ? t('invitation.gift_copied') || 'SALIN BERHASIL' : t('invitation.gift_copy') || 'SALIN NOMOR'}</span>
                                 </button>
                             </div>
                         </Reveal>
@@ -1219,7 +1255,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     // Error safety boundary fallback resolution list
     const resolvedSections = useMemo(() => {
         const list = safeArr(sections);
-        const coverFiltered = list.filter(s => s.section_key !== 'cover');
+        const coverFiltered = list.filter(s => s.section_key !== 'cover' && s.section_key !== 'countdown');
         
         // Anti duplicate wishes/rsvp form check in i18n settings
         const hasRsvp = coverFiltered.some(s => s.section_key === 'rsvp');
@@ -1228,6 +1264,19 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
             return true;
         });
     }, [sections]);
+
+    const showCountdown = parseBool(invitation?.show_countdown);
+    const showCountdownInEvent = useMemo(() => {
+        const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+        if (!primaryEvent?.event_date || !showCountdown) return false;
+        
+        const safeSections = safeArr(sections);
+        if (safeSections.length > 0) {
+            const cSection = safeSections.find(s => s.section_key === 'countdown');
+            return cSection ? !!cSection.is_visible : false;
+        }
+        return true;
+    }, [sections, events, showCountdown]);
 
     const activeSectionKey = useMemo(() => {
         if (layoutMode === 'scroll') return activeSection;
@@ -1440,16 +1489,19 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         className="sp02-section w-full max-w-xl"
                                     >
                                         {sec.section_key === 'opening' && (
-                                            <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} />
+                                            <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} events={events} />
                                         )}
                                         {sec.section_key === 'bride_groom' && (
                                             <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
                                         )}
                                         {sec.section_key === 'event' && (
-                                            <EventSection events={events} showPhotos={showPhotos} locale={locale} />
-                                        )}
-                                        {sec.section_key === 'countdown' && (
-                                            <CountdownBlock events={events} />
+                                            <EventSection 
+                                                events={events} 
+                                                showPhotos={showPhotos} 
+                                                locale={locale} 
+                                                showCountdown={showCountdownInEvent}
+                                                galleries={galleries}
+                                            />
                                         )}
                                         {sec.section_key === 'love_story' && (
                                             <LoveStorySection loveStories={loveStories} />
@@ -1502,16 +1554,19 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         >
                                             <div className="sp02-section w-full max-w-xl mx-auto min-h-screen py-16">
                                                 {sec.section_key === 'opening' && (
-                                                    <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} />
+                                                    <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} events={events} />
                                                 )}
                                                 {sec.section_key === 'bride_groom' && (
                                                     <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
                                                 )}
                                                 {sec.section_key === 'event' && (
-                                                    <EventSection events={events} showPhotos={showPhotos} locale={locale} />
-                                                )}
-                                                {sec.section_key === 'countdown' && (
-                                                    <CountdownBlock events={events} />
+                                                    <EventSection 
+                                                        events={events} 
+                                                        showPhotos={showPhotos} 
+                                                        locale={locale} 
+                                                        showCountdown={showCountdownInEvent}
+                                                        galleries={galleries}
+                                                    />
                                                 )}
                                                 {sec.section_key === 'love_story' && (
                                                     <LoveStorySection loveStories={loveStories} />
@@ -1545,7 +1600,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                         )}
 
                         {/* 3. SIDEBAR FLOATING CONTROLS */}
-                        <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2.5">
+                        <div className="fixed right-4 bottom-24 z-40 flex flex-col gap-2.5">
                             {/* QR CODE PRESENSI CHECK-IN TRIGGER */}
                             {enableQr && guest && (
                                 <button 
@@ -1607,10 +1662,9 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                     const isCurrent = activeSectionKey === key;
                                     let navIcon = 'fa-star';
                                     let labelText = sec.section_name || key;
-                                    if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.pembuka') || 'Pembuka'; }
+                                    if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.opening') || 'Pembuka'; }
                                     else if (key === 'bride_groom') { navIcon = 'fa-heart'; labelText = t('nav.mempelai') || 'Mempelai'; }
                                     else if (key === 'event') { navIcon = 'fa-calendar-alt'; labelText = t('nav.acara') || 'Acara'; }
-                                    else if (key === 'countdown') { navIcon = 'fa-clock'; labelText = t('nav.countdown') || 'Hitung Mundur'; }
                                     else if (key === 'love_story') { navIcon = 'fa-book-open'; labelText = t('nav.kisah') || 'Kisah'; }
                                     else if (key === 'gallery') { navIcon = 'fa-images'; labelText = t('nav.galeri') || 'Galeri'; }
                                     else if (key === 'livestream') { navIcon = 'fa-video'; labelText = t('nav.streaming') || 'Siaran'; }

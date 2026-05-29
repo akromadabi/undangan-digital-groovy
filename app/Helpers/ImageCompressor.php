@@ -21,6 +21,12 @@ class ImageCompressor
             return false;
         }
 
+        // Fail-safe: if GD extension is not loaded or functions do not exist, bypass compression
+        if (!extension_loaded('gd') || !function_exists('imagecreatefromstring')) {
+            Log::warning('GD extension is not loaded or imagecreatefromstring function is missing. Bypassing image compression.');
+            return false;
+        }
+
         // Get image info
         $imageInfo = @getimagesize($filePath);
         if (!$imageInfo) {

@@ -129,7 +129,11 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
             update(showPickerForIndex, 'photo', url);
             setShowPickerForIndex(null);
             
-            router.reload({ preserveScroll: true });
+            router.reload({ 
+                only: ['mediaAssets'],
+                preserveState: true,
+                preserveScroll: true 
+            });
         } catch (e) {
             console.error('Picker upload error:', e);
             alert('Gagal mengunggah foto. Silakan periksa ukuran file (max 10MB).');

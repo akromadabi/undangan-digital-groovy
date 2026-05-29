@@ -25,11 +25,11 @@
 /* Base Scope */
 .sp02-theme-wrapper {
     background-color: var(--sp02-bg);
-    background-image: url('/themes/spesial-02/gradasi.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    background-image: url('/themes/spesial-02/bg-body.png');
+    background-size: 320px auto;
+    background-position: top center;
+    background-repeat: repeat;
+    background-attachment: scroll;
     color: var(--sp02-text);
     font-family: var(--sp02-font-body);
     font-size: 14px;
@@ -51,6 +51,11 @@
     50% { transform: translateY(8px) rotate(-2deg); }
 }
 
+@keyframes sp02FloatReverseFlipped {
+    0%, 100% { transform: translateY(0) rotate(180deg) scaleX(-1); }
+    50% { transform: translateY(8px) rotate(178deg) scaleX(-1); }
+}
+
 @keyframes sp02Breathe {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.04); }
@@ -67,6 +72,10 @@
 
 .sp02-float-reverse {
     animation: sp02FloatReverse 7s ease-in-out infinite;
+}
+
+.sp02-float-reverse-flipped {
+    animation: sp02FloatReverseFlipped 6s ease-in-out infinite;
 }
 
 .sp02-breathe {
@@ -356,6 +365,7 @@
     z-index: 10;
     pointer-events: none;
     animation: sp02Float 5s ease-in-out infinite;
+    mix-blend-mode: multiply;
 }
 
 .sp02-mempelai-card-ornament-br {
@@ -365,7 +375,8 @@
     width: 80px;
     z-index: 10;
     pointer-events: none;
-    animation: sp02FloatReverse 6s ease-in-out infinite;
+    animation: sp02FloatReverseFlipped 6s ease-in-out infinite;
+    mix-blend-mode: multiply;
 }
 
 .sp02-avatar-frame-inner {
@@ -568,12 +579,12 @@
     font-weight: 700;
 }
 
-/* Timeline/Kisah Cinta */
+/* Timeline/Kisah Cinta - Scrapbook Premium Style */
 .sp02-timeline {
     position: relative;
     width: 100%;
-    max-width: 380px;
-    margin: 35px auto 0 auto;
+    max-width: 400px;
+    margin: 40px auto 0 auto;
     padding-left: 36px;
     text-align: left;
 }
@@ -584,71 +595,84 @@
     top: 8px;
     left: 12px;
     bottom: 8px;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--sp02-secondary) 0%, var(--sp02-primary) 50%, var(--sp02-secondary) 100%);
-    border-left: 2px dashed rgba(152, 106, 82, 0.35);
+    width: 1px;
+    background: var(--sp02-secondary);
 }
 
 .sp02-timeline-item {
     position: relative;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
 .sp02-timeline-item::before {
     content: '';
     position: absolute;
-    top: 14px;
-    left: -31px;
-    width: 14px;
-    height: 14px;
+    top: 18px;
+    left: -29px;
+    width: 10px;
+    height: 10px;
     transform: rotate(45deg);
     background-color: var(--sp02-primary);
-    border: 3px solid #ffffff;
-    border-radius: 4px;
-    box-shadow: 0 4px 10px rgba(152, 106, 82, 0.25);
+    border: 2px solid var(--sp02-bg);
+    box-shadow: 0 0 0 3px var(--sp02-secondary);
     z-index: 10;
 }
 
 .sp02-story-bubble {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: #ffffff;
     border: 1px solid rgba(152, 106, 82, 0.15);
-    border-radius: 24px;
-    padding: 20px 22px;
-    margin-left: 8px;
-    box-shadow: 0 8px 25px rgba(152, 106, 82, 0.03);
+    border-radius: 20px;
+    padding: 22px 24px;
+    margin-left: 10px;
+    box-shadow: 0 10px 30px rgba(152, 106, 82, 0.04);
     position: relative;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.sp02-story-bubble::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: -8px;
+    width: 15px;
+    height: 15px;
+    transform: rotate(45deg);
+    background-color: #ffffff;
+    border-left: 1px solid rgba(152, 106, 82, 0.15);
+    border-bottom: 1px solid rgba(152, 106, 82, 0.15);
+    z-index: 1;
 }
 
 .sp02-story-bubble:hover {
-    background: #ffffff;
-    transform: translateX(6px);
-    box-shadow: 0 12px 30px rgba(152, 106, 82, 0.08);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(152, 106, 82, 0.1);
+    border-color: var(--sp02-primary);
 }
 
 .sp02-timeline-date {
-    font-family: var(--sp02-font-heading);
-    font-size: 18px;
-    font-weight: 700;
+    font-family: var(--sp02-font-script);
+    font-size: 32px;
+    font-weight: 500;
     color: var(--sp02-primary);
-    margin-bottom: 4px;
+    line-height: 1;
+    margin-bottom: 6px;
 }
 
 .sp02-timeline-title {
-    font-size: 13px;
+    font-family: var(--sp02-font-heading);
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     margin-bottom: 6px;
-    color: var(--sp02-text);
+    color: var(--sp02-accent-dark);
 }
 
 .sp02-timeline-desc {
     font-size: 13px;
-    line-height: 1.5;
+    line-height: 1.6;
     opacity: 0.85;
+    color: var(--sp02-text);
 }
 
 /* Bank / Kado Rekening - Luxury 2 Style but Clay Terracotta Theme */
@@ -763,31 +787,37 @@
 
 /* Countdown Timer Grid */
 .sp02-countdown-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    max-width: 340px;
-    margin: 24px auto;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    max-width: 380px;
+    margin: 26px auto;
 }
 
 .sp02-countdown-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border: 1px dashed rgba(152, 106, 82, 0.3);
-    border-radius: 18px;
-    padding: 12px 6px;
-    box-shadow: 0 6px 20px rgba(152, 106, 82, 0.03);
-    transition: all 0.3s ease;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--sp02-secondary) 0%, var(--sp02-primary) 100%);
+    border: 2.5px solid #ffffff;
+    border-radius: 50%;
+    width: 68px;
+    height: 68px;
+    box-shadow: 0 8px 22px rgba(152, 106, 82, 0.22);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@media (min-width: 375px) {
+    .sp02-countdown-item {
+        width: 74px;
+        height: 74px;
+    }
 }
 
 .sp02-countdown-item:hover {
-    background: #ffffff;
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(152, 106, 82, 0.08);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(152, 106, 82, 0.35);
 }
 
 /* Wishes Comments Box */

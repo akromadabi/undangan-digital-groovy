@@ -126,7 +126,11 @@ export default function Kisah({ stories, mediaAssets = [] }) {
             updateStory(pickerStoryIndex, 'image_url', url);
             setPickerStoryIndex(null);
             
-            router.reload({ preserveScroll: true });
+            router.reload({ 
+                only: ['mediaAssets'],
+                preserveState: true,
+                preserveScroll: true 
+            });
         } catch (e) {
             console.error('Picker upload error:', e);
             alert('Gagal mengunggah foto. Silakan periksa ukuran file (max 10MB).');
