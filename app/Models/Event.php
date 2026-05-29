@@ -23,6 +23,9 @@ class Event extends Model
         'streaming_platform',
         'streaming_url',
         'streamings',
+        'show_dress_code',
+        'dress_code_text',
+        'dress_code_colors',
     ];
     protected function casts(): array
     {
@@ -30,6 +33,8 @@ class Event extends Model
             'event_date' => 'date',
             'is_primary' => 'boolean',
             'streamings' => 'array',
+            'show_dress_code' => 'boolean',
+            'dress_code_colors' => 'array',
         ];
     }
 

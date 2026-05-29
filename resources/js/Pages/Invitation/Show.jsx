@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+import DressCodeBlock from '@/Components/DressCodeBlock';
 
 
 // ═══ Scroll-triggered animation component (re-triggers on every viewport entry) ═══
@@ -742,6 +743,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                             className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-full text-xs font-semibold text-white"
                                                                             style={{ backgroundColor: colors.primary }}><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg> Buka Maps</a>
                                                                     )}
+                                                                    <DressCodeBlock event={evt} colors={colors} fonts={fonts} />
                                                                 </div>
                                                             </AnimateIn>
                                                         ))}

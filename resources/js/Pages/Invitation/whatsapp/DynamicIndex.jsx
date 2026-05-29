@@ -1369,7 +1369,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
 
                         {/* SECTION 11: Bank accounts card */}
                         {safeArr(bankAccounts).length > 0 && (
-                            <Reveal className="wa-message-row wa-in" delay={200}>
+                            <Reveal className="wa-message-row wa-in" id="bank" delay={200}>
                                 <div className="wa-bubble" style={{ width: '100%' }}>
                                     <span style={{ fontWeight: 'bold', color: '#008069', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>
                                         🎁 Gift & Support (Digital Envelope)

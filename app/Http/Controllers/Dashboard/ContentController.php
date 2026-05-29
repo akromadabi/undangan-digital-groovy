@@ -145,6 +145,9 @@ class ContentController extends Controller
             'events.*.streamings' => 'nullable|array',
             'events.*.streamings.*.platform' => 'required_with:events.*.streamings|string|max:50',
             'events.*.streamings.*.url' => 'required_with:events.*.streamings|string|max:500',
+            'events.*.show_dress_code' => 'sometimes|boolean',
+            'events.*.dress_code_text' => 'nullable|string|max:1000',
+            'events.*.dress_code_colors' => 'nullable|array',
         ]);
 
         $invitation = $this->getUserInvitation($request);

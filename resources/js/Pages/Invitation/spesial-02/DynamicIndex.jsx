@@ -5,6 +5,7 @@ import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+import DressCodeBlock from '@/Components/DressCodeBlock';
 
 import logoDana from '../luxury-02/asset/1200px-Logo_dana_blue.svg-1-1-1.png';
 import logoBca from '../luxury-02/asset/BCA_logo_Bank_Central_Asia-1-3-2048x650-1-1-1-1.png';
@@ -779,6 +780,7 @@ function EventSection({ events, showPhotos, locale, showCountdown, galleries, in
                                         <i className="fas fa-location-arrow text-[8px]" /> Google Maps
                                     </a>
                                 )}
+                                <DressCodeBlock event={evt} colors={{ primary: 'var(--sp02-primary)', text: 'var(--sp02-text)' }} fonts={{ heading: 'var(--sp02-font-heading)' }} />
                             </div>
                         </div>
                     </Reveal>
