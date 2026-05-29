@@ -34,6 +34,7 @@ if (typeof window !== 'undefined' && window.self !== window.top) {
     document.head.appendChild(style);
 }
 
+import React from 'react';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
