@@ -1916,3 +1916,17 @@
     color: var(--gpt-text-white);
 }
 
+
+
+/* ==========================================================================
+   STANDARDISASI PENANGANAN GAMBAR (Anti-Empty Space & Crop Compatibility)
+   Mencegah gambar terkompresi / menyisakan area kosong hitam di seluler.
+   Sangat aman dan 100% kompatibel dengan reposisi/kroping dashboard.
+   ========================================================================== */
+.gpt-main-wrapper img.gpt-couple-photo,
+.gpt-main-wrapper .gpt-gallery-img-box img,
+.gpt-main-wrapper img.gpt-opening-photo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}

@@ -2044,3 +2044,18 @@
 }
 
 
+
+
+/* ==========================================================================
+   STANDARDISASI PENANGANAN GAMBAR (Anti-Empty Space & Crop Compatibility)
+   Mencegah gambar terkompresi / menyisakan area kosong hitam di seluler.
+   Sangat aman dan 100% kompatibel dengan reposisi/kroping dashboard.
+   ========================================================================== */
+.utary-page img.utary-profile__photo,
+.utary-page .utary-main__left-img,
+.utary-page .utary-gallery__item img,
+.utary-page .utary-cover img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}

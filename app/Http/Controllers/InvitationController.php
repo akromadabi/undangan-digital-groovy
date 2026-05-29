@@ -28,6 +28,65 @@ class InvitationController extends Controller
             ])
             ->firstOrFail();
 
+        // Resolve reseller or central brand details
+        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+        $brandName = $resellerSetting ? $resellerSetting->brand_name : config('app.name', 'Undangan Digital');
+        $brandUrl = '#';
+        if ($resellerSetting) {
+            if ($resellerSetting->custom_domain) {
+                $brandUrl = 'https://' . $resellerSetting->custom_domain;
+            } else {
+                $centralDomain = parse_url(config('app.url'), PHP_URL_HOST);
+                $brandUrl = 'https://' . $resellerSetting->subdomain . '.' . $centralDomain;
+            }
+        } else {
+            $brandUrl = config('app.url');
+        }
+
+        // Determine if we should show the free invitation badge or if it has expired
+        $showFreeBadge = false;
+        $isExpired = false;
+        $trialExpiresAt = 0;
+        $owner = $invitation->user;
+
+        if ($owner && !$owner->isSuperAdmin() && !$owner->isAdmin()) {
+            $subscription = $invitation->activeSubscription;
+            if ($subscription) {
+                if ($subscription->plan && $subscription->plan->slug === 'free') {
+                    $startsAt = $subscription->starts_at;
+                    if ($startsAt) {
+                        if ($startsAt->lt(now()->subDays(5))) {
+                            $isExpired = true;
+                        } elseif ($startsAt->lt(now()->subDays(2))) {
+                            $showFreeBadge = true;
+                            $trialExpiresAt = $startsAt->copy()->addDays(5)->timestamp * 1000;
+                        }
+                    } else {
+                        $isExpired = true; // Legacy fallback
+                    }
+                }
+            } else {
+                // Fallback to invitation creation date if no active subscription exists
+                $createdAt = $invitation->created_at;
+                if ($createdAt) {
+                    if ($createdAt->lt(now()->subDays(5))) {
+                        $isExpired = true;
+                    } elseif ($createdAt->lt(now()->subDays(2))) {
+                        $showFreeBadge = true;
+                        $trialExpiresAt = $createdAt->copy()->addDays(5)->timestamp * 1000;
+                    }
+                }
+            }
+        }
+
+        if ($isExpired) {
+            return Inertia::render('Invitation/Expired', [
+                'brand_name' => $brandName,
+                'brand_url' => $brandUrl,
+                'title' => $invitation->title,
+            ]);
+        }
+
         // Increment views_count and unique_views_count
         $invitation->increment('views_count');
         $sessionKey = 'viewed_invitation_' . $invitation->id;
@@ -123,6 +182,10 @@ class InvitationController extends Controller
             'bankAccounts' => $invitation->bankAccounts,
             'guest' => $guest,
             'wishes' => $wishes,
+            'show_free_badge' => $showFreeBadge,
+            'trial_expires_at' => $trialExpiresAt,
+            'brand_name' => $brandName,
+            'brand_url' => $brandUrl,
         ]);
 
     }

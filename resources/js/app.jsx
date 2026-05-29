@@ -37,6 +37,7 @@ if (typeof window !== 'undefined' && window.self !== window.top) {
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
+import FreeInvitationBadge from './Components/FreeInvitationBadge';
 
 createInertiaApp({
     title: (title) => {
@@ -46,11 +47,37 @@ createInertiaApp({
         }
         return dynamicAppName;
     },
-    resolve: (name) =>
-        resolvePageComponent(
+    resolve: async (name) => {
+        const page = await resolvePageComponent(
             `./Pages/${name}.jsx`,
             import.meta.glob('./Pages/**/*.jsx'),
-        ),
+        );
+
+        if (name.startsWith('Invitation/') && name !== 'Invitation/Expired') {
+            const OriginalDefault = page.default;
+            const WrappedPage = (props) => {
+                return (
+                    <>
+                        <OriginalDefault {...props} />
+                        {props.show_free_badge && (
+                            <FreeInvitationBadge 
+                                brandName={props.brand_name} 
+                                brandUrl={props.brand_url} 
+                                trialExpiresAt={props.trial_expires_at}
+                            />
+                        )}
+                    </>
+                );
+            };
+            Object.assign(WrappedPage, OriginalDefault);
+            return {
+                ...page,
+                default: WrappedPage
+            };
+        }
+
+        return page;
+    },
     setup({ el, App, props }) {
         const root = createRoot(el);
 

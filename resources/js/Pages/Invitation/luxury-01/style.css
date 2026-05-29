@@ -1616,3 +1616,18 @@
   transition-delay: 0s !important;
   animation-delay: 0s !important;
 }
+
+
+/* ==========================================================================
+   STANDARDISASI PENANGANAN GAMBAR (Anti-Empty Space & Crop Compatibility)
+   Mencegah gambar terkompresi / menyisakan area kosong hitam di seluler.
+   Sangat aman dan 100% kompatibel dengan reposisi/kroping dashboard.
+   ========================================================================== */
+.lx1-page img.lx1-mempelai-photo,
+.lx1-page img.lx1-gallery-img,
+.lx1-page .lx1-hero-bg img,
+.lx1-page .lx1-cover-overlay img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}

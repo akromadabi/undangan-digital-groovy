@@ -116,10 +116,12 @@ export default function Pricing({ plans, currentPlan, features }) {
                                                 {formatCurrency(plan.original_price)}
                                             </div>
                                         )}
-                                        {plan.duration_days > 0 && (
-                                            <div className="text-xs text-gray-400 mt-1.5 font-medium">{plan.duration_days} hari</div>
-                                        )}
-                                    </div>
+                                         {plan.slug === 'free' ? (
+                                             <div className="text-xs text-amber-600 mt-1.5 font-bold">Masa Aktif 5 Hari</div>
+                                         ) : plan.duration_days > 0 ? (
+                                             <div className="text-xs text-gray-400 mt-1.5 font-medium">{plan.duration_days} hari</div>
+                                         ) : null}
+                                     </div>
 
                                     {/* Divider */}
                                     <div className="border-t border-gray-100 mb-4" />
@@ -160,6 +162,55 @@ export default function Pricing({ plans, currentPlan, features }) {
                                         )}
                                         {plan.description && (
                                             <p className="text-[11px] text-gray-400 leading-relaxed mt-1 pl-[30px]">{plan.description}</p>
+                                        )}
+
+                                        {/* Timeline trial guidelines for Free package */}
+                                        {plan.slug === 'free' && (
+                                            <div className="mt-3 pt-3 border-t border-dashed border-gray-150 space-y-2.5">
+                                                {auth?.user?.role === 'admin' || auth?.user?.role === 'super_admin' ? (
+                                                    <>
+                                                        <div className="flex items-start gap-2.5">
+                                                            <div className="w-4 h-4 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                                                                <span className="text-[9px] font-bold text-emerald-600">✓</span>
+                                                            </div>
+                                                            <span className="text-[11px] text-gray-600 leading-tight">Full Fitur Premium 2 Hari pertama</span>
+                                                        </div>
+                                                        <div className="flex items-start gap-2.5">
+                                                            <div className="w-4 h-4 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                                                                <span className="text-[9px] font-bold text-amber-600">!</span>
+                                                            </div>
+                                                            <span className="text-[11px] text-gray-600 leading-tight">Label Watermark "Free" pada Hari 3 - 5</span>
+                                                        </div>
+                                                        <div className="flex items-start gap-2.5">
+                                                            <div className="w-4 h-4 rounded-full bg-red-50 border border-red-200 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                                                                <span className="text-[9px] font-bold text-red-600">✕</span>
+                                                            </div>
+                                                            <span className="text-[11px] text-gray-600 leading-tight">Nonaktif Otomatis setelah Hari ke-5</span>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="flex items-start gap-2.5">
+                                                            <div className="w-4 h-4 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                                                                <span className="text-[9px] font-bold text-emerald-600">✓</span>
+                                                            </div>
+                                                            <span className="text-[11px] text-gray-600 leading-tight">Akses Full Fitur Premium</span>
+                                                        </div>
+                                                        <div className="flex items-start gap-2.5">
+                                                            <div className="w-4 h-4 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                                                                <span className="text-[9px] font-bold text-emerald-600">✓</span>
+                                                            </div>
+                                                            <span className="text-[11px] text-gray-600 leading-tight">Masa Aktif Uji Coba 5 Hari</span>
+                                                        </div>
+                                                        <div className="flex items-start gap-2.5">
+                                                            <div className="w-4 h-4 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                                                                <span className="text-[9px] font-bold text-amber-600">!</span>
+                                                            </div>
+                                                            <span className="text-[11px] text-gray-600 leading-tight">Nonaktif setelah 5 hari (Hubungi Admin)</span>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
 

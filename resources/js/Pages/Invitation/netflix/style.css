@@ -1752,3 +1752,20 @@
   animation-delay: 0s !important;
 }
 
+
+
+/* ==========================================================================
+   STANDARDISASI PENANGANAN GAMBAR (Anti-Empty Space & Crop Compatibility)
+   Mencegah gambar terkompresi / menyisakan area kosong hitam di seluler.
+   Sangat aman dan 100% kompatibel dengan reposisi/kroping dashboard.
+   ========================================================================== */
+.nf-container img.nf-couple__photo,
+.nf-container .nf-gallery__item img,
+.nf-container .nf-opening__bg img,
+.nf-container .nf-cover__bg img,
+.nf-container .nf-event-item__photo img,
+.nf-container .nf-story-item__photo img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}

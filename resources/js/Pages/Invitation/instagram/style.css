@@ -2413,3 +2413,18 @@ body {
   object-fit: contain;
 }
 
+
+
+/* ==========================================================================
+   STANDARDISASI PENANGANAN GAMBAR (Anti-Empty Space & Crop Compatibility)
+   Mencegah gambar terkompresi / menyisakan area kosong hitam di seluler.
+   Sangat aman dan 100% kompatibel dengan reposisi/kroping dashboard.
+   ========================================================================== */
+.ig-main-wrapper img.ig-card-photo,
+.ig-main-wrapper img.ig-gallery-img,
+.ig-main-wrapper .ig-opening-bg-container img,
+.ig-main-wrapper .ig-cover img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}

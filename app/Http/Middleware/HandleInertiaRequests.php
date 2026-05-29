@@ -133,6 +133,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),
                 'error' => fn() => $request->session()->get('error'),
+                'show_welcome_modal' => fn() => $request->session()->get('show_welcome_modal'),
             ],
         ];
     }

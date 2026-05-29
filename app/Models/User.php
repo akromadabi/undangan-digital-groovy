@@ -168,6 +168,14 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
+        // Intercept: Free plan has full features during the 5 days trial period
+        $subscription = $this->activeSubscription;
+        if ($subscription && $subscription->plan && $subscription->plan->slug === 'free') {
+            if ($subscription->starts_at && $subscription->starts_at->gt(now()->subDays(5))) {
+                return true;
+            }
+        }
+
         $invitation = $this->invitation;
         if ($invitation) {
             return $invitation->hasFeatureAccess($featureSlug);

@@ -280,6 +280,8 @@ class WizardController extends Controller
 
         $user->update(['onboarding_step' => 6]);
 
-        return redirect()->route('dashboard')->with('success', 'Selamat! Undangan digital Anda berhasil dibuat.');
+        return redirect()->route('dashboard')
+            ->with('success', 'Selamat! Undangan digital Anda berhasil dibuat.')
+            ->with('show_welcome_modal', true);
     }
 }

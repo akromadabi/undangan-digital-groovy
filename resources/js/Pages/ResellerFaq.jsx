@@ -228,9 +228,9 @@ const FAQ_DATABASE = [
         answer: 'Masa aktif undangan digital Anda tergantung pada jenis paket yang Anda pilih saat pendaftaran atau upgrade.',
         keywords: ['aktif', 'lama', 'durasi', 'expired', 'masa', 'berlaku', 'kapan', 'sisa', 'kadaluarsa', 'perpanjang'],
         steps: [
-            'Paket Free (Gratis): Aktif selama 7 hari sejak tanggal pembuatan undangan.',
+            'Paket Free (Gratis): Akses penuh seluruh fitur premium selama 2 hari pertama. Muncul label "Free" pada hari ke-3 s/d 5, dan undangan dinonaktifkan otomatis setelah 5 hari.',
             'Paket Premium / Pro: Aktif selama 1 tahun (365 hari) penuh.',
-            'Undangan digital yang kedaluwarsa akan dinonaktifkan secara otomatis, tetapi data Anda tidak akan dihapus. Anda dapat mengaktifkannya kembali kapan saja dengan melakukan perpanjangan paket.',
+            'Undangan digital yang kedaluwarsa atau dinonaktifkan akan dikunci secara otomatis, tetapi data Anda tetap tersimpan dengan aman. Anda dapat mengaktifkannya kembali kapan saja dengan melakukan upgrade paket.',
             'Anda dapat memeriksa sisa masa aktif undangan Anda di panel samping kiri (sidebar) bagian bawah.'
         ],
         mockup: 'aktif'

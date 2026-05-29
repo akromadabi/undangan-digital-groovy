@@ -125,6 +125,13 @@ class Invitation extends Model
             return false;
         }
 
+        // Special rule: Free plan has full features for the first 5 days before expiration
+        if ($plan->slug === 'free') {
+            if ($subscription->starts_at && $subscription->starts_at->gt(now()->subDays(5))) {
+                return true; // Full features active during trial
+            }
+        }
+
         return $plan->featureAccess()
             ->whereHas('feature', fn($q) => $q->where('slug', $featureSlug))
             ->where('is_enabled', true)

@@ -1970,3 +1970,19 @@
     60% { transform: scale(0.9); }
     100% { transform: scale(1); }
 }
+
+
+/* ==========================================================================
+   STANDARDISASI PENANGANAN GAMBAR (Anti-Empty Space & Crop Compatibility)
+   Mencegah gambar terkompresi / menyisakan area kosong hitam di seluler.
+   Sangat aman dan 100% kompatibel dengan reposisi/kroping dashboard.
+   ========================================================================== */
+.ttk-main img.ttk-profile-card__avatar,
+.ttk-main .ttk-profile-grid-photo img,
+.ttk-main .ttk-gallery__item img,
+.ttk-main .ttk-live__stream-bg img,
+.ttk-main .ttk-cover__music-disc img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}

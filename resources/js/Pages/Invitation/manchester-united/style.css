@@ -2381,3 +2381,18 @@
         height: 70px;
     }
 }
+
+
+/* ==========================================================================
+   STANDARDISASI PENANGANAN GAMBAR (Anti-Empty Space & Crop Compatibility)
+   Mencegah gambar terkompresi / menyisakan area kosong hitam di seluler.
+   Sangat aman dan 100% kompatibel dengan reposisi/kroping dashboard.
+   ========================================================================== */
+.mu-body img.mu-card-photo,
+.mu-body img.mu-player-photo,
+.mu-body .mu-gallery-item img,
+.mu-body .mu-cover__bg img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}

@@ -217,10 +217,14 @@ class AdminUserController extends Controller
         
         $sub = $invitation ? $invitation->activeSubscription : null;
         if ($sub) {
-            $sub->update(['expires_at' => $request->expires_at]);
+            $updateData = ['expires_at' => $request->expires_at];
+            if ($sub->plan && $sub->plan->slug === 'free') {
+                $updateData['starts_at'] = now();
+            }
+            $sub->update($updateData);
         } else {
             // Create a free subscription with the date
-            $freePlan = SubscriptionPlan::orderBy('sort_order')->first();
+            $freePlan = SubscriptionPlan::where('slug', 'free')->first() ?: SubscriptionPlan::orderBy('sort_order')->first();
             Subscription::create([
                 'user_id' => $user->id,
                 'plan_id' => $freePlan->id,

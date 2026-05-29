@@ -369,6 +369,13 @@ Setiap foto profil mempelai, foto galeri, slideshow cover, dan slideshow opening
 }
 ```
 
+> [!NOTE]
+> **Kompatibilitas Sistem Kroping & Reposisi Dashboard:**
+> Aturan CSS di atas **100% aman dan tidak akan bentrok** dengan fitur kroping/reposisi visual di dashboard. 
+> 
+> * **Cara Kerja Browser:** Karena CSS global tema hanya mengunci ukuran dimensi dan `object-fit`, properti inline dinamis dari database seperti `object-position` (untuk geser koordinat X/Y) dan `transform: scale` (untuk perbesaran/zoom) tidak menggunakan `!important`, sehingga tetap akan diterapkan secara sempurna oleh browser sebagai overlay style.
+> * **Kuncian Wadah (Parent Container):** Selalu pastikan elemen pembungkus (parent container) dari gambar mempelai, cover, dan opening yang mendukung zoom memiliki properti `overflow: hidden`. Ini penting agar bagian gambar yang ter-zoom tidak melebar keluar batas frame/lingkaran wadahnya.
+
 ---
 
 ## 5. Layout Mode & Mesin Transisi Halaman (Swipe & Scroll)

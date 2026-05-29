@@ -1113,6 +1113,7 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                     </div>
                 )}
             </Reveal>
+        </div>
     );
 }
 
@@ -1439,7 +1440,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         className="sp02-section w-full max-w-xl"
                                     >
                                         {sec.section_key === 'opening' && (
-                                            <OpeningSection invitation={invitation} showPhotos={showPhotos} />
+                                            <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} />
                                         )}
                                         {sec.section_key === 'bride_groom' && (
                                             <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
@@ -1469,10 +1470,6 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                                 wishes={wishes}
                                                 enableRsvp={enableRsvp}
                                                 enableWishes={enableWishes}
-                                                rsvpForm={rsvpForm}
-                                                handleRsvp={handleRsvp}
-                                                wishForm={wishForm}
-                                                handleWish={handleWish}
                                             />
                                         )}
                                         {sec.section_key === 'closing' && (
@@ -1505,7 +1502,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         >
                                             <div className="sp02-section w-full max-w-xl mx-auto min-h-screen py-16">
                                                 {sec.section_key === 'opening' && (
-                                                    <OpeningSection invitation={invitation} showPhotos={showPhotos} />
+                                                    <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} />
                                                 )}
                                                 {sec.section_key === 'bride_groom' && (
                                                     <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
@@ -1535,10 +1532,6 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                                         wishes={wishes}
                                                         enableRsvp={enableRsvp}
                                                         enableWishes={enableWishes}
-                                                        rsvpForm={rsvpForm}
-                                                        handleRsvp={handleRsvp}
-                                                        wishForm={wishForm}
-                                                        handleWish={handleWish}
                                                     />
                                                 )}
                                                 {sec.section_key === 'closing' && (
@@ -1607,35 +1600,38 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                         </div>
 
                         {/* 4. PREMIUM COMPACT NAVIGATION FLOATING BAR */}
-                        <div className="sp02-nav-bar">
-                            {resolvedSections.map((sec, i) => {
-                                const key = sec.section_key;
-                                const isCurrent = activeSectionKey === key;
-                                
-                                let navIcon = 'fa-star';
-                                if (key === 'opening') navIcon = 'fa-star';
-                                else if (key === 'bride_groom') navIcon = 'fa-heart';
-                                else if (key === 'event') navIcon = 'fa-calendar-alt';
-                                else if (key === 'countdown') navIcon = 'fa-clock';
-                                else if (key === 'love_story') navIcon = 'fa-book-open';
-                                else if (key === 'gallery') navIcon = 'fa-images';
-                                else if (key === 'livestream') navIcon = 'fa-video';
-                                else if (key === 'bank') navIcon = 'fa-gift';
-                                else if (key === 'rsvp') navIcon = 'fa-envelope-open-text';
-                                else if (key === 'closing') navIcon = 'fa-handshake';
+                        <div className="sp02-nav-menu">
+                            <div className="sp02-nav-menu__inner--row">
+                                {resolvedSections.map((sec) => {
+                                    const key = sec.section_key;
+                                    const isCurrent = activeSectionKey === key;
+                                    let navIcon = 'fa-star';
+                                    let labelText = sec.section_name || key;
+                                    if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.pembuka') || 'Pembuka'; }
+                                    else if (key === 'bride_groom') { navIcon = 'fa-heart'; labelText = t('nav.mempelai') || 'Mempelai'; }
+                                    else if (key === 'event') { navIcon = 'fa-calendar-alt'; labelText = t('nav.acara') || 'Acara'; }
+                                    else if (key === 'countdown') { navIcon = 'fa-clock'; labelText = t('nav.countdown') || 'Hitung Mundur'; }
+                                    else if (key === 'love_story') { navIcon = 'fa-book-open'; labelText = t('nav.kisah') || 'Kisah'; }
+                                    else if (key === 'gallery') { navIcon = 'fa-images'; labelText = t('nav.galeri') || 'Galeri'; }
+                                    else if (key === 'livestream') { navIcon = 'fa-video'; labelText = t('nav.streaming') || 'Siaran'; }
+                                    else if (key === 'bank') { navIcon = 'fa-gift'; labelText = t('nav.hadiah') || 'Hadiah'; }
+                                    else if (key === 'rsvp') { navIcon = 'fa-envelope-open-text'; labelText = t('nav.rsvp') || 'RSVP'; }
+                                    else if (key === 'closing') { navIcon = 'fa-handshake'; labelText = t('nav.penutup') || 'Penutup'; }
 
-                                return (
-                                    <button 
-                                        key={sec.id}
-                                        type="button"
-                                        onClick={() => jumpToSection(key)}
-                                        className={`sp02-nav-item ${isCurrent ? 'is-active' : ''}`}
-                                        title={sec.section_name}
-                                    >
-                                        <i className={`fas ${navIcon}`} />
-                                    </button>
-                                );
-                            })}
+                                    return (
+                                        <button 
+                                            key={sec.id}
+                                            type="button"
+                                            onClick={() => jumpToSection(key)}
+                                            className={`sp02-nav-menu__item ${isCurrent ? 'active' : ''}`}
+                                            title={sec.section_name}
+                                        >
+                                            <i className={`fas ${navIcon}`} />
+                                            <span className="sp02-nav-item-text">{labelText}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 )}

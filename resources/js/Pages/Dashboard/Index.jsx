@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Mail } from 'lucide-react';
+import { Mail, Sparkles, PhoneCall, LayoutDashboard } from 'lucide-react';
+import Modal from '@/Components/Modal';
 
 const featureRoutes = {
     cover: '/theme',
@@ -100,8 +101,9 @@ const MiniBar = ({ value, max, color }) => {
     );
 };
 
-export default function Index({ invitation, stats, features, dashboardSubscription, latestWishes }) {
-    const { appName } = usePage().props;
+export default function Index({ invitation, stats, features, dashboardSubscription, latestWishes, whatsappLink }) {
+    const { appName, flash } = usePage().props;
+    const [showWelcome, setShowWelcome] = React.useState(!!flash?.show_welcome_modal);
 
     const totalRsvp = (stats?.rsvp_hadir || 0) + (stats?.rsvp_tidak || 0);
     const openRate = stats?.total_guests > 0 ? Math.round((stats.total_opened / stats.total_guests) * 100) : 0;
@@ -363,6 +365,43 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                     </div>
                 </div>
             </div>
+
+            <Modal show={showWelcome} onClose={() => setShowWelcome(false)} maxWidth="md">
+                <div className="p-6 text-center">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#E5654B] to-orange-500 flex items-center justify-center text-white mx-auto mb-4 shadow-lg shadow-orange-100/50 animate-bounce">
+                        <Sparkles className="w-8 h-8" />
+                    </div>
+
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">
+                        Selamat! Akun Anda Telah Aktif 🎉
+                    </h3>
+                    
+                    <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                        Selamat, akun Anda telah aktif! Akun Anda saat ini menggunakan <strong>Paket Free</strong> yang menawarkan <strong>akses penuh fitur premium secara gratis selama 5 hari</strong>.
+                        <br /><br />
+                        Segera aktifkan atau tingkatkan paket Anda sebelum masa aktif habis agar undangan digital Anda tidak dinonaktifkan secara otomatis.
+                    </p>
+
+                    <div className="flex flex-col gap-2">
+                        <a 
+                            href={whatsappLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full py-3 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-xl font-semibold shadow-md shadow-orange-100 hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
+                        >
+                            <PhoneCall size={16} />
+                            Hubungi Kami (Aktivasi)
+                        </a>
+                        <button 
+                            onClick={() => setShowWelcome(false)}
+                            className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm"
+                        >
+                            <LayoutDashboard size={16} />
+                            Masuk Ke Dashboard
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </DashboardLayout>
     );
 }

@@ -56,12 +56,25 @@ class DashboardController extends Controller
             ];
         }
 
+        // Resolve WhatsApp Support Link
+        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+        if (!$resellerSetting && $user && $user->reseller) {
+            $resellerSetting = $user->reseller->resellerSettings;
+        }
+
+        $whatsappNumber = $resellerSetting && $resellerSetting->footer_whatsapp 
+            ? $resellerSetting->footer_whatsapp 
+            : (\App\Models\GlobalSetting::where('setting_key', 'whatsapp_support')->value('setting_value') ?: '6281234567890');
+        
+        $whatsappLink = "https://wa.me/" . preg_replace('/[^0-9]/', '', $whatsappNumber) . "?text=" . urlencode("Halo Admin, saya ingin menanyakan tentang aktivasi/upgrade undangan digital saya.");
+
         return Inertia::render('Dashboard/Index', [
             'invitation' => $invitation,
             'stats' => $stats,
             'features' => $features,
             'dashboardSubscription' => $dashboardSubscription,
             'latestWishes' => $invitation?->wishes()->latest()->take(5)->get() ?? [],
+            'whatsappLink' => $whatsappLink,
         ]);
     }
 
