@@ -365,7 +365,6 @@
     z-index: 10;
     pointer-events: none;
     animation: sp02Float 5s ease-in-out infinite;
-    mix-blend-mode: multiply;
 }
 
 .sp02-mempelai-card-ornament-br {
@@ -376,7 +375,6 @@
     z-index: 10;
     pointer-events: none;
     animation: sp02FloatReverseFlipped 6s ease-in-out infinite;
-    mix-blend-mode: multiply;
 }
 
 .sp02-avatar-frame-inner {
@@ -677,37 +675,38 @@
 
 /* Bank / Kado Rekening - Luxury 2 Style but Clay Terracotta Theme */
 .sp02-bank-card {
-    background: linear-gradient(135deg, #ae8f7a 0%, #5b4447 65%, #482e31 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-radius: 20px;
+    background: linear-gradient(135deg, var(--sp02-accent-dark) 0%, var(--sp02-primary) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 24px;
     padding: 24px;
     color: #ffffff;
     width: 100%;
-    max-width: 340px;
-    margin: 20px auto;
+    max-width: 320px;
+    margin: 0 auto;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 10px 25px rgba(91, 68, 71, 0.3);
+    box-shadow: 0 10px 30px rgba(91, 68, 71, 0.25);
     transition: all 0.3s ease;
 }
 
-.sp02-bank-card::before {
+.sp02-bank-card::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 100%) !important;
-    z-index: 1;
+    right: -50px;
+    bottom: -50px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(210, 182, 167, 0.15);
+    filter: blur(20px);
     pointer-events: none;
 }
 
 .sp02-bank-card:hover {
-    transform: translateY(-5px) rotate(0.5deg);
-    box-shadow: 0 15px 35px rgba(91, 68, 71, 0.45);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(91, 68, 71, 0.35);
 }
 
 .sp02-bank-card__header {
@@ -727,33 +726,35 @@
 }
 
 .sp02-bank-card__chip {
-    width: 32px;
+    width: 40px;
     height: auto;
     z-index: 2;
 }
 
 .sp02-bank-card__body {
     z-index: 2;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     text-align: left;
 }
 
 .sp02-bank-card__number {
-    font-family: var(--sp02-font-heading);
-    font-size: 1.45rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.25rem;
     letter-spacing: 2px;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 6px;
     color: white !important;
 }
 
 .sp02-bank-card__holder {
-    font-family: var(--sp02-font-heading);
-    font-size: 0.85rem;
-    opacity: 0.85;
+    font-family: var(--sp02-font-body);
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.8;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: white !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    margin-top: 4px;
 }
 
 .sp02-bank-card__footer {
@@ -763,26 +764,25 @@
 }
 
 .sp02-bank-card__copy-btn {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 8px 18px;
-    border-radius: 50px;
-    font-size: 0.8rem;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--sp02-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 6px 16px;
+    border-radius: 12px;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 1px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    transition: all 0.2s ease-in-out;
 }
 
 .sp02-bank-card__copy-btn:hover {
-    background-color: rgba(255, 255, 255, 0.35);
-    transform: translateY(-1px);
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.4);
+    background-color: var(--sp02-secondary);
+    color: var(--sp02-accent-dark);
+    border-color: var(--sp02-secondary);
 }
 
 /* Countdown Timer Grid */
@@ -843,17 +843,19 @@
 }
 
 .sp02-wish-item {
-    padding: 12px 14px;
-    background-color: var(--sp02-bg-soft);
-    border-radius: 14px;
-    margin-bottom: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(152, 106, 82, 0.12);
+    text-align: left;
     font-size: 13px;
 }
 
+.sp02-wish-item:last-child {
+    border-bottom: none;
+}
+
 .sp02-wish-sender {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--sp02-primary);
-    margin-bottom: 2px;
 }
 
 /* Controls (Floating controls) */
@@ -903,31 +905,27 @@
 /* Menu Dok Bawah (Bottom Navigation Bar) - Luxury 2 Style but Clay Terracotta Theme */
 .sp02-nav-menu {
     position: fixed;
-    bottom: 0;
-    z-index: 1000;
-    width: 100%;
-    max-width: 480px;
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255, 251, 248, 0.96);
-    border-top: 1.5px solid rgba(152, 106, 82, 0.22);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 -5px 25px rgba(152, 106, 82, 0.12);
+    width: calc(100% - 32px);
+    max-width: 480px;
+    background-color: rgba(72, 46, 49, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 8px 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 1000;
     transition: all 0.3s ease;
 }
 
 .sp02-nav-menu__inner--row {
     display: flex;
-    align-items: center;
-    padding: 0;
     overflow-x: auto;
-    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    flex-wrap: nowrap;
-    gap: 0;
-    justify-content: flex-start;
+    gap: 4px;
 }
 
 .sp02-nav-menu__inner--row::-webkit-scrollbar {
@@ -937,41 +935,42 @@
 .sp02-nav-menu__item {
     background: transparent;
     border: none;
-    color: var(--sp02-text-light);
-    padding: 10px 4px 8px 4px;
-    gap: 3px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 0;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    padding: 6px 8px;
+    border-radius: 12px;
     flex: 1 0 auto;
-    min-width: 72px;
+    min-width: 60px;
+    transition: all 0.25s ease;
+    cursor: pointer;
     white-space: nowrap;
-    opacity: 0.7;
 }
 
 .sp02-nav-menu__item i {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .sp02-nav-item-text {
-    font-size: 9px;
-    font-weight: 600;
-    text-transform: uppercase;
+    font-size: 8px;
+    font-weight: 500;
+    margin-top: 4px;
+    text-transform: none;
     letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .sp02-nav-menu__item:hover {
+    color: #ffffff;
     opacity: 1;
-    color: var(--sp02-primary);
 }
 
 .sp02-nav-menu__item.active {
-    color: var(--sp02-primary);
-    background-color: rgba(152, 106, 82, 0.08);
+    color: var(--sp02-secondary);
+    background-color: rgba(255, 255, 255, 0.08);
     opacity: 1;
 }
 

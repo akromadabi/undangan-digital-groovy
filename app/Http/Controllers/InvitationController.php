@@ -552,4 +552,47 @@ class InvitationController extends Controller
             'isDemo' => true,
         ]);
     }
+
+    public function showAr(Request $request, string $slug)
+    {
+        $invitation = Invitation::where('slug', $slug)
+            ->where('is_active', true)
+            ->with(['brideGrooms'])
+            ->firstOrFail();
+
+        $groom = $invitation->brideGrooms->where('gender', 'pria')->first();
+        $bride = $invitation->brideGrooms->where('gender', 'wanita')->first();
+
+        $groomNickname = $groom ? $groom->nickname : 'Groom';
+        $brideNickname = $bride ? $bride->nickname : 'Bride';
+
+        $weddingDate = $invitation->countdown_target_date 
+            ? $invitation->countdown_target_date->format('d M Y') 
+            : '';
+
+        $photoUrl = $invitation->cover_image;
+        if ($photoUrl && !str_starts_with($photoUrl, 'http') && !str_starts_with($photoUrl, '/')) {
+            $photoUrl = asset('storage/' . $photoUrl);
+        } elseif ($photoUrl && str_starts_with($photoUrl, '/')) {
+            $photoUrl = asset($photoUrl);
+        } else {
+            $photoUrl = asset('images/wedding_hero.png');
+        }
+
+        $musicUrl = $invitation->music_url ?: asset('audio/backsound.mp3');
+        if ($musicUrl && !str_starts_with($musicUrl, 'http') && !str_starts_with($musicUrl, '/')) {
+            $musicUrl = asset('storage/' . $musicUrl);
+        } elseif ($musicUrl && str_starts_with($musicUrl, '/')) {
+            $musicUrl = asset($musicUrl);
+        }
+
+        return view('ar', [
+            'invitation' => $invitation,
+            'groomNickname' => $groomNickname,
+            'brideNickname' => $brideNickname,
+            'weddingDate' => $weddingDate,
+            'photoUrl' => $photoUrl,
+            'musicUrl' => $musicUrl,
+        ]);
+    }
 }

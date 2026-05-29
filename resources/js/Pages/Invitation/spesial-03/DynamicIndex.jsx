@@ -18,7 +18,7 @@ const ORNAMENTS = {
     wanitaFallback: '/themes/spesial-03/WANITA-1-1.jpg',
     dana: '/themes/spesial-03/1200px-Logo_dana_blue.svg-1-2-1-1.png',
     bca: '/themes/spesial-03/BCA_logo_Bank_Central_Asia-1-3-2048x650-1-1-1-1-1.png',
-    chip: '/themes/spesial-03/chip-atm-1-2-1-1-1-3.png',
+    chip: '/themes/spesial-03/chip.png',
     heart: '/themes/spesial-03/heart.svg',
     bb1: '/themes/spesial-03/bb-1.webp',
 };
@@ -308,7 +308,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
 /* ═══════════════════════════════════════
    OPENING & QUOTE COMBINED (SCREENSHOT 2 & 3)
    ═══════════════════════════════════════ */
-function OpeningSection({ invitation, showPhotos, brideGrooms, locale }) {
+function OpeningSection({ invitation, showPhotos, brideGrooms, locale, onSaveDate }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -337,24 +337,40 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, locale }) {
             <div className="sp03-opening-page">
                 {/* Building sketch background watermark is handled in CSS background */}
 
-                {/* Flying Birds vectors upper-left */}
-                <div className="absolute top-10 left-10 z-10 select-none opacity-40">
-                    <svg viewBox="0 0 100 50" className="w-16 h-8 text-[var(--sp03-primary)]" fill="currentColor">
-                        <path d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
-                        <path d="M 30,40 Q 45,25 60,40 Q 75,25 90,40 Q 75,32 60,40 Q 45,32 30,40 Z" opacity="0.7"/>
-                    </svg>
+                {/* Animated Flying Birds */}
+                <div className="sp03-birds-container select-none">
+                    <div className="sp03-bird sp03-bird--1">
+                        <svg viewBox="0 0 100 50" className="w-12 h-6 text-[var(--sp03-primary)]" fill="currentColor">
+                            <path className="sp03-bird-wings-1" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
+                        </svg>
+                    </div>
+                    <div className="sp03-bird sp03-bird--2">
+                        <svg viewBox="0 0 100 50" className="w-8 h-4 text-[var(--sp03-primary)]" fill="currentColor">
+                            <path className="sp03-bird-wings-2" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
+                        </svg>
+                    </div>
+                    <div className="sp03-bird sp03-bird--3">
+                        <svg viewBox="0 0 100 50" className="w-10 h-5 text-[var(--sp03-primary)]" fill="currentColor">
+                            <path className="sp03-bird-wings-3" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
+                        </svg>
+                    </div>
+                    <div className="sp03-bird sp03-bird--4">
+                        <svg viewBox="0 0 100 50" className="w-9 h-4.5 text-[var(--sp03-primary)]" fill="currentColor">
+                            <path className="sp03-bird-wings-4" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
+                        </svg>
+                    </div>
                 </div>
 
                 {/* Arch-shaped prewedding photo */}
                 <Reveal variant="zoom" delay={100} className="relative z-10 w-full max-w-[280px] mb-8">
                     <div className="sp03-opening-frame w-full aspect-[3/4] relative">
                         {showPhotos && openingImages.length > 0 ? (
-                            <PremiumSlideshow
-                                images={openingImages}
-                                positionX={invitation?.opening_position_x}
-                                positionY={invitation?.opening_position_y}
-                                zoom={invitation?.opening_zoom}
-                            />
+                             <PremiumSlideshow
+                                 images={openingImages}
+                                 positionX={invitation?.opening_position_x}
+                                 positionY={invitation?.opening_position_y}
+                                 zoom={invitation?.opening_zoom}
+                             />
                         ) : (
                             <img src={ORNAMENTS.coverFallback} alt="Opening Fallback" className="w-full h-full object-cover" />
                         )}
@@ -372,7 +388,7 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, locale }) {
                         {displayDate}
                     </p>
 
-                    <button type="button" className="sp03-btn-save-date">
+                    <button type="button" onClick={onSaveDate} className="sp03-btn-save-date">
                         Save The Date
                     </button>
                 </Reveal>
@@ -930,9 +946,9 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                                 onChange={(e) => setAttendance(e.target.value)}
                                 className="sp03-input select-none"
                             >
-                                <option value="hadir">{t('invitation.attending') || 'Hadir'}</option>
-                                <option value="tidak_hadir">{t('invitation.not_attending') || 'Tidak Hadir'}</option>
-                                <option value="belum_pasti">{t('invitation.unsure') || 'Belum Pasti'}</option>
+                                <option value="hadir">{t('invitation.hadir') || 'Hadir'}</option>
+                                <option value="tidak_hadir">{t('invitation.tidak_hadir') || 'Tidak Hadir'}</option>
+                                <option value="belum_pasti">{t('invitation.belum_pasti') || 'Belum Pasti'}</option>
                             </select>
                         </div>
                     )}
@@ -1000,7 +1016,7 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                                                 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
                                                 : 'bg-rose-50 text-rose-600 border border-rose-200'
                                         }`}>
-                                            {w.attendance === 'hadir' ? (t('invitation.attending') || 'Hadir') : (t('invitation.not_attending') || 'Tidak Hadir')}
+                                            {w.attendance === 'hadir' ? (t('invitation.hadir') || 'Hadir') : (t('invitation.tidak_hadir') || 'Tidak Hadir')}
                                         </span>
                                     )}
                                 </div>
@@ -1088,13 +1104,14 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [autoScroll, setAutoScroll] = useState(invitation?.enable_auto_scroll !== false);
+    const [autoScroll, setAutoScroll] = useState(false);
     const [showQrCode, setShowQrCode] = useState(false);
     const [copiedIdx, setCopiedIdx] = useState(null);
 
     const [activeSection, setActiveSection] = useState('opening');
     const [slideIdx, setSlideIdx] = useState(0);
 
+    const activeNavRef = useRef(null);
     const audioRef = useRef(null);
     usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const layoutMode = invitation?.layout_mode || 'scroll'; // 'scroll', 'slide-h', 'slide-v'
@@ -1115,11 +1132,11 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     // Error safety boundary fallback resolution list
     const resolvedSections = useMemo(() => {
         const list = safeArr(sections);
-        const coverFiltered = list.filter(s => s.section_key !== 'cover');
+        const filtered = list.filter(s => !['cover', 'countdown'].includes(s.section_key));
         
         // Anti duplicate wishes/rsvp form check
-        const hasRsvp = coverFiltered.some(s => s.section_key === 'rsvp');
-        return coverFiltered.filter(s => {
+        const hasRsvp = filtered.some(s => s.section_key === 'rsvp');
+        return filtered.filter(s => {
             if (s.section_key === 'wishes' && hasRsvp) return false;
             return true;
         });
@@ -1129,6 +1146,16 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
         if (layoutMode === 'scroll') return activeSection;
         return resolvedSections[slideIdx]?.section_key || 'opening';
     }, [layoutMode, activeSection, slideIdx, resolvedSections]);
+
+    useEffect(() => {
+        if (activeNavRef.current) {
+            activeNavRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
+    }, [activeSectionKey]);
 
     // Handle Copy Number
     const handleCopy = (num, idx) => {
@@ -1331,7 +1358,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         className="sp03-section-container w-full max-w-xl"
                                     >
                                         {sec.section_key === 'opening' && (
-                                            <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} locale={locale} />
+                                            <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} locale={locale} onSaveDate={() => jumpToSection('event')} />
                                         )}
                                         {sec.section_key === 'bride_groom' && (
                                             <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
@@ -1390,7 +1417,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         >
                                             <div className="sp03-section-container w-full max-w-xl mx-auto min-h-screen">
                                                 {sec.section_key === 'opening' && (
-                                                    <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} locale={locale} />
+                                                    <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} locale={locale} onSaveDate={() => jumpToSection('event')} />
                                                 )}
                                                 {sec.section_key === 'bride_groom' && (
                                                     <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
@@ -1472,16 +1499,6 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                     )}
                                 </button>
                             )}
-
-                            {/* AUTO SCROLL TOGGLER */}
-                            <button 
-                                type="button" 
-                                onClick={() => setAutoScroll(!autoScroll)}
-                                className={`sp03-control-btn shadow-md ${autoScroll ? 'is-active' : ''}`}
-                                title="Auto Scroll"
-                            >
-                                <i className="fas fa-chevron-down" style={{ transform: autoScroll ? 'none' : 'rotate(-90deg)', transition: 'transform 0.3s' }} />
-                            </button>
                         </div>
 
                         {/* 4. PREMIUM COMPACT NAVIGATION FLOATING BAR */}
@@ -1506,6 +1523,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         <button 
                                             key={sec.id}
                                             type="button"
+                                            ref={isCurrent ? activeNavRef : null}
                                             onClick={() => jumpToSection(key)}
                                             className={`sp03-nav-menu__item ${isCurrent ? 'active' : ''}`}
                                             title={sec.section_name}

@@ -107,6 +107,7 @@ Route::get('/faq', function () {
 // Public Invitation (no auth needed)
 // ═══════════════════════════════════════
 Route::get('/u/{slug}', [InvitationController::class, 'show'])->name('invitation.show');
+Route::get('/u/{slug}/ar', [InvitationController::class, 'showAr'])->name('invitation.ar');
 Route::post('/u/{slug}/rsvp', [InvitationController::class, 'submitRsvp'])->name('invitation.rsvp');
 Route::post('/u/{slug}/wish', [InvitationController::class, 'submitWish'])->name('invitation.wish');
 Route::post('/u/{slug}/opened', [InvitationController::class, 'markOpened'])->name('invitation.opened');
@@ -266,6 +267,7 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
         Route::get('/hadiah', [SettingsController::class, 'hadiah'])->middleware('feature:gift')->name('hadiah');
         Route::get('/whatsapp', [SettingsController::class, 'whatsapp'])->middleware('feature:whatsapp')->name('whatsapp');
         Route::post('/whatsapp/send', [SettingsController::class, 'sendWhatsapp'])->middleware('feature:whatsapp')->name('whatsapp.send');
+        Route::get('/ar', [SettingsController::class, 'ar'])->name('ar');
     });
 
     // Theme Settings (Dynamic)

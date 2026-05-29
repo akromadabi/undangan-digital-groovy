@@ -913,33 +913,33 @@ function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
     if (list.length === 0) return null;
 
     return (
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto py-16 px-6">
             <Reveal>
                 <FlowerSwirl title={t('nav.hadiah')} />
             </Reveal>
 
-            <div className="space-y-6 mt-6">
+            <div className="space-y-6 mt-8">
                 {list.map((account, i) => {
                     const isBca = String(account.bank_name).toLowerCase().includes('bca');
                     const isDana = String(account.bank_name).toLowerCase().includes('dana');
                     
                     return (
-                        <Reveal key={account.id || i} variant="zoom" delay={i * 150} className="sp02-bank-card">
-                            <div className="sp02-bank-card__header">
-                                {isBca && <img src={ORNAMENTS.bca} alt="BCA" className="sp02-bank-card__logo" />}
-                                {isDana && <img src={ORNAMENTS.dana} alt="DANA" className="sp02-bank-card__logo" />}
+                        <Reveal key={account.id || i} variant="zoom" delay={i * 150} className="sp02-bank-card relative overflow-hidden">
+                            <div className="sp02-bank-card__header flex items-center justify-between z-10 relative">
+                                {isBca && <img src={ORNAMENTS.bca} alt="BCA" className="sp02-bank-card__logo h-6 object-contain" />}
+                                {isDana && <img src={ORNAMENTS.dana} alt="DANA" className="sp02-bank-card__logo h-5 object-contain" />}
                                 {!isBca && !isDana && (
-                                    <span style={{ fontWeight: 600, fontSize: '1.1rem', zIndex: 2 }}>
+                                    <span className="font-bold text-lg text-white select-none">
                                         {account.bank_name}
                                     </span>
                                 )}
-                                <img src={ORNAMENTS.chip} alt="Chip" className="sp02-bank-card__chip" />
+                                <img src={ORNAMENTS.chip} alt="Chip" className="sp02-bank-card__chip w-10 object-contain select-none" />
                             </div>
-                            <div className="sp02-bank-card__body">
-                                <div className="sp02-bank-card__number">{account.account_number}</div>
-                                <div className="sp02-bank-card__holder">{account.account_name}</div>
+                            <div className="sp02-bank-card__body my-4 z-10 relative text-left">
+                                <div className="sp02-bank-card__number text-xl font-bold tracking-widest text-white">{account.account_number}</div>
+                                <div className="sp02-bank-card__holder text-[11px] font-medium tracking-wider text-white/80 uppercase mt-1">{account.account_name}</div>
                             </div>
-                            <div className="sp02-bank-card__footer">
+                            <div className="sp02-bank-card__footer z-10 relative flex justify-end">
                                 <button 
                                     type="button" 
                                     onClick={() => handleCopy(account.account_number, i)} 
@@ -1030,7 +1030,7 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
     if (!enableRsvp && !enableWishes) return null;
 
     return (
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto py-16 px-6">
             <Reveal>
                 <FlowerSwirl title={sectionTitle} />
                 <p className="text-xs sm:text-sm opacity-80 mb-4 text-center">
@@ -1069,9 +1069,9 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                                 onChange={(e) => setAttendance(e.target.value)}
                                 className="sp02-input select-none"
                             >
-                                <option value="hadir">{t('invitation.attending') || 'Hadir'}</option>
-                                <option value="tidak_hadir">{t('invitation.not_attending') || 'Tidak Hadir'}</option>
-                                <option value="belum_pasti">{t('invitation.unsure') || 'Belum Pasti'}</option>
+                                <option value="hadir">{t('invitation.rsvp_hadir') || 'Hadir'}</option>
+                                <option value="tidak_hadir">{t('invitation.rsvp_tidak_hadir') || 'Tidak Hadir'}</option>
+                                <option value="belum_pasti">{t('invitation.rsvp_belum_pasti') || 'Belum Pasti'}</option>
                             </select>
                         </div>
                     )}
@@ -1101,7 +1101,7 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                                 {isEn ? 'Wishes & Prayers' : 'Pesan / Ucapan'}
                             </label>
                             <textarea
-                                placeholder={t('invitation.wish_placeholder') || 'Tulis pesan doa dan ucapan manis Anda di sini...'}
+                                placeholder={t('invitation.wishes_placeholder') || 'Tulis pesan doa dan ucapan manis Anda di sini...'}
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 className="sp02-input"
@@ -1131,19 +1131,19 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                     <div className="sp02-wishes-box mt-6 pt-4 border-t border-[var(--sp02-secondary)]/15">
                         {recentWishes.map((w, idx) => (
                             <div key={w.id || idx} className="sp02-wish-item">
-                                <div className="flex items-center justify-between mb-1">
-                                    <span className="sp02-wish-sender font-bold">{w.sender_name || w.name}</span>
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <span className="sp02-wish-sender font-bold text-[var(--sp02-primary)] text-xs">{w.sender_name || w.name}</span>
                                     {w.attendance && (
                                         <span className={`text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                                             w.attendance === 'hadir' 
                                                 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
                                                 : 'bg-rose-50 text-rose-600 border border-rose-200'
                                         }`}>
-                                            {w.attendance === 'hadir' ? (t('invitation.attending') || 'Hadir') : (t('invitation.not_attending') || 'Tidak Hadir')}
+                                            {w.attendance === 'hadir' ? (t('invitation.rsvp_hadir') || 'Hadir') : (t('invitation.rsvp_tidak_hadir') || 'Tidak Hadir')}
                                         </span>
                                     )}
                                 </div>
-                                <div className="opacity-90">{w.message}</div>
+                                <div className="text-[12px] leading-relaxed text-[var(--sp02-text)] opacity-90">{w.message}</div>
                             </div>
                         ))}
                     </div>
@@ -1656,13 +1656,13 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
 
                         {/* 4. PREMIUM COMPACT NAVIGATION FLOATING BAR */}
                         <div className="sp02-nav-menu">
-                            <div className="sp02-nav-menu__inner--row">
+                            <div className="sp02-nav-menu__inner--row flex justify-around">
                                 {resolvedSections.map((sec) => {
                                     const key = sec.section_key;
                                     const isCurrent = activeSectionKey === key;
                                     let navIcon = 'fa-star';
                                     let labelText = sec.section_name || key;
-                                    if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.opening') || 'Pembuka'; }
+                                    if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.pembuka') || 'Pembuka'; }
                                     else if (key === 'bride_groom') { navIcon = 'fa-heart'; labelText = t('nav.mempelai') || 'Mempelai'; }
                                     else if (key === 'event') { navIcon = 'fa-calendar-alt'; labelText = t('nav.acara') || 'Acara'; }
                                     else if (key === 'love_story') { navIcon = 'fa-book-open'; labelText = t('nav.kisah') || 'Kisah'; }

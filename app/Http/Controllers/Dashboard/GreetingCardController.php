@@ -36,6 +36,7 @@ class GreetingCardController extends Controller
             'photos.*'       => 'nullable|string|max:500',
             'messages'       => 'nullable|array',
             'messages.*'     => 'nullable|string|max:500',
+            'custom_url'     => 'nullable|string|max:100|alpha_dash|unique:greeting_cards,custom_url',
         ]);
 
         $card = GreetingCard::create([
@@ -44,7 +45,7 @@ class GreetingCardController extends Controller
             'title'      => $validated['title'] ?: 'Kartu Ucapan',
             'messages'   => array_values(array_filter($validated['messages'] ?? [])),
             'photos'     => array_values(array_filter($validated['photos'] ?? [])),
-            'custom_url' => GreetingCard::generateUniqueSlug(),
+            'custom_url' => ($validated['custom_url'] ?? null) ?: GreetingCard::generateUniqueSlug(),
         ]);
 
         return redirect()->route('greeting-card.index')
@@ -91,7 +92,14 @@ class GreetingCardController extends Controller
             'photos.*'       => 'nullable|string|max:500',
             'messages'       => 'nullable|array',
             'messages.*'     => 'nullable|string|max:500',
+            'custom_url'     => 'required|string|max:100|alpha_dash|unique:greeting_cards,custom_url,' . $id,
         ]);
+
+        // Delete old cached OG image to force regeneration with updated details/slug
+        $oldCachePath = storage_path('app/public/og-images/' . $card->custom_url . '.png');
+        if (file_exists($oldCachePath)) {
+            @unlink($oldCachePath);
+        }
 
         $card->update([
             ...$validated,

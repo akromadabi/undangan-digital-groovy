@@ -384,4 +384,28 @@ class SettingsController extends Controller
 
         return back()->with('success', 'Pengaturan undangan berhasil disimpan.');
     }
+
+    public function ar(Request $request)
+    {
+        $invitation = $this->getUserInvitation($request);
+        
+        if (!$invitation) {
+            return redirect()->route('dashboard')->with('error', 'Silakan buat undangan terlebih dahulu.');
+        }
+
+        $invitation->load('brideGrooms');
+        $groom = $invitation->brideGrooms->where('gender', 'pria')->first();
+        $bride = $invitation->brideGrooms->where('gender', 'wanita')->first();
+        $groomNickname = $groom ? $groom->nickname : 'Groom';
+        $brideNickname = $bride ? $bride->nickname : 'Bride';
+
+        $arUrl = route('invitation.ar', ['slug' => $invitation->slug]);
+
+        return Inertia::render('Dashboard/Settings/Ar', [
+            'invitation' => $invitation->only(['slug', 'cover_title', 'cover_image']),
+            'groomNickname' => $groomNickname,
+            'brideNickname' => $brideNickname,
+            'arUrl' => $arUrl,
+        ]);
+    }
 }

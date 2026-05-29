@@ -664,6 +664,7 @@ export default function GreetingCardForm({ card, types, templates }) {
         photo_url:      card?.photo_url ?? '',
         photos:         card?.photos ?? (card?.photo_url ? [card.photo_url] : []),
         messages:       card?.messages?.length ? card.messages : [''],
+        custom_url:     card?.custom_url ?? '',
     });
 
     // Messages helpers
@@ -1021,6 +1022,28 @@ export default function GreetingCardForm({ card, types, templates }) {
                                     placeholder="cth: Untuk Anita Tercinta"
                                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B]/50 transition-colors"
                                 />
+                            </div>
+
+                            {/* Custom URL */}
+                            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Link / URL Custom Kartu {isEdit ? '*' : '(Opsional)'}</label>
+                                <div className="flex rounded-xl shadow-sm overflow-hidden">
+                                    <span className="inline-flex items-center px-3 border border-r-0 border-gray-200 bg-gray-50 text-gray-500 text-xs font-mono select-none">
+                                        {typeof window !== 'undefined' ? window.location.origin : ''}/card/
+                                    </span>
+                                    <input
+                                        type="text"
+                                        value={data.custom_url}
+                                        onChange={e => setData('custom_url', e.target.value.replace(/[^a-zA-Z0-9-_]/g, ''))}
+                                        placeholder={isEdit ? "Masukkan URL kustom" : "cth: ulang-tahun-rachel (kosongkan untuk acak)"}
+                                        required={isEdit}
+                                        className={`flex-1 min-w-0 block w-full px-3.5 py-2.5 rounded-r-xl border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#E5654B]/30 ${errors.custom_url ? 'border-red-300 bg-red-50 focus:border-red-500' : 'border-gray-200 bg-white focus:border-[#E5654B]/50'}`}
+                                    />
+                                </div>
+                                {errors.custom_url && <p className="text-red-500 text-xs mt-1">{errors.custom_url}</p>}
+                                <p className="text-[10px] text-gray-400 mt-1.5 leading-normal">
+                                    Gunakan huruf, angka, tanda minus (-), dan garis bawah (_). {isEdit ? "Jika diubah, URL lama tidak akan bisa diakses lagi." : "Jika dikosongkan, URL acak unik akan dibuat otomatis."}
+                                </p>
                             </div>
 
                             {/* Submit */}

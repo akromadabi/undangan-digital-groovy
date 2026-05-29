@@ -53,6 +53,13 @@
         $invitation = Invitation::where('slug', $slug)->where('is_active', true)->first();
     }
 
+    // Resolve active greeting card
+    $greetingCard = null;
+    if (count($pathParts) >= 2 && $pathParts[0] === 'card') {
+        $cardSlug = $pathParts[1];
+        $greetingCard = \App\Models\GreetingCard::where('custom_url', $cardSlug)->where('is_active', true)->first();
+    }
+
     // If invitation is active, resolve reseller branding from invitation owner
     if ($invitation) {
         $owner = $invitation->user;
@@ -73,8 +80,12 @@
         }
     }
 
-    // 4. Resolve metadata for invitation or reseller pages
-    if ($invitation) {
+    // 4. Resolve metadata for invitation, greeting card, or reseller pages
+    if ($greetingCard) {
+        $metaTitle = "Kartu Ucapan {$greetingCard->type_label} - {$greetingCard->title}";
+        $metaDescription = "Kartu Ucapan {$greetingCard->type_label} spesial dari {$greetingCard->sender_name} untuk {$greetingCard->recipient_name}. Klik untuk melihat kartu ucapan selengkapnya.";
+        $metaImage = route('greeting-card.og-image', $greetingCard->custom_url);
+    } elseif ($invitation) {
         $groom = $invitation->brideGrooms()->where('gender', 'pria')->first();
         $bride = $invitation->brideGrooms()->where('gender', 'wanita')->first();
         

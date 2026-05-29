@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Great+Vibes&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 
 /* ═══════════════════════════════════════
    THEME DESIGN CONFIG & VARIABLES
@@ -275,7 +276,6 @@
   background-color: #2E3F54 !important;
   position: relative;
   width: 100%;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -327,18 +327,19 @@
 .sp03-btn-ig-circle {
   width: 38px !important;
   height: 38px !important;
-  background-color: #D5AF6F !important;
+  background-color: var(--sp03-primary) !important;
   color: #FFFFFF !important;
   border-radius: 50% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 4px 10px rgba(213, 175, 111, 0.3) !important;
+  box-shadow: 0 4px 10px rgba(46, 63, 84, 0.2) !important;
 }
 
 .sp03-btn-ig-circle:hover {
-  background-color: #2B3951 !important;
+  background-color: var(--sp03-accent) !important;
+  box-shadow: 0 4px 12px rgba(215, 172, 100, 0.3) !important;
 }
 
 /* ═══════════════════════════════════════
@@ -816,19 +817,20 @@
   justify-content: center;
   color: rgba(255, 255, 255, 0.5);
   font-size: 14px;
-  padding: 6px;
+  padding: 6px 8px;
   border-radius: 12px;
-  flex: 1;
-  min-width: 45px;
+  flex: 1 0 auto;
+  min-width: 60px;
   transition: all 0.25s ease;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .sp03-nav-item-text {
   font-size: 8px;
   font-weight: 500;
   margin-top: 4px;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
@@ -912,4 +914,134 @@
   transition: none !important;
   transition-delay: 0s !important;
   animation-delay: 0s !important;
+}
+
+/* ═══════════════════════════════════════
+   ANIMATED FLYING BIRDS IN OPENING
+   ═══════════════════════════════════════ */
+.sp03-birds-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.sp03-bird {
+  position: absolute;
+  opacity: 0;
+}
+
+.sp03-bird--1 {
+  animation: sp03-fly-up-right 16s linear infinite;
+  animation-delay: 0s;
+}
+
+.sp03-bird--2 {
+  animation: sp03-fly-up-left 20s linear infinite;
+  animation-delay: 4s;
+}
+
+.sp03-bird--3 {
+  animation: sp03-fly-up-center 14s linear infinite;
+  animation-delay: 8s;
+}
+
+.sp03-bird--4 {
+  animation: sp03-fly-up-right 18s linear infinite;
+  animation-delay: 11s;
+}
+
+.sp03-bird-wings-1 {
+  transform-origin: 45px 25px;
+  animation: sp03-flap 0.4s ease-in-out infinite alternate;
+}
+
+.sp03-bird-wings-2 {
+  transform-origin: 45px 25px;
+  animation: sp03-flap 0.5s ease-in-out infinite alternate;
+}
+
+.sp03-bird-wings-3 {
+  transform-origin: 45px 25px;
+  animation: sp03-flap 0.35s ease-in-out infinite alternate;
+}
+
+.sp03-bird-wings-4 {
+  transform-origin: 45px 25px;
+  animation: sp03-flap 0.45s ease-in-out infinite alternate;
+}
+
+@keyframes sp03-fly-up-right {
+  0% {
+    left: -10%;
+    top: 75%;
+    transform: scale(0.4) rotate(22deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    left: 110%;
+    top: 15%;
+    transform: scale(0.7) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sp03-fly-up-left {
+  0% {
+    left: 110%;
+    top: 80%;
+    transform: scale(0.3) rotate(-22deg) scaleX(-1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    left: -10%;
+    top: 20%;
+    transform: scale(0.65) rotate(-12deg) scaleX(-1);
+    opacity: 0;
+  }
+}
+
+@keyframes sp03-fly-up-center {
+  0% {
+    left: 20%;
+    top: 90%;
+    transform: scale(0.3) rotate(-5deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.5;
+  }
+  85% {
+    opacity: 0.5;
+  }
+  100% {
+    left: 75%;
+    top: -10%;
+    transform: scale(0.6) rotate(5deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sp03-flap {
+  0% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(-0.35) translateY(15%);
+  }
 }
