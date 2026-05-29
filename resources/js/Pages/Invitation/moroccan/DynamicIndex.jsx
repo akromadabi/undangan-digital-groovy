@@ -4,6 +4,8 @@ import { useForm, Head, router } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+
 
 // Import theme assets via Vite
 import moroccanKubah from './asset/moroccan_kubah.png';
@@ -1516,7 +1518,15 @@ function NavigationMenu({
                     onClick={onToggleMusic}
                     title="Musik Latar"
                 >
-                    <i className={isPlaying ? "fas fa-music animate-spin-slow" : "fas fa-volume-mute"} />
+                    {isPlaying ? (
+                        <div className="global-music-waves">
+                            <span />
+                            <span />
+                            <span />
+                        </div>
+                    ) : (
+                        <i className="fas fa-volume-mute" />
+                    )}
                 </button>
             </div>
         </>
@@ -1545,6 +1555,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, audioPlaying, setAudioPlaying);
     const containerRef = useRef(null);
 
     const enableRsvp = parseBool(invitation?.enable_rsvp, true);

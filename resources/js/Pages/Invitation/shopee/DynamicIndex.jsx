@@ -2,6 +2,8 @@ import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm } from '@inertiajs/react';
 import './style.css';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+
 
 /* ─── Standardized Helpers ─── */
 function safeArr(val) {
@@ -1358,6 +1360,7 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
     const [activeTab, setActiveTab] = useState('home');
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -1552,8 +1555,16 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
                             )}
                             {musicUrl && (
                                 <div className="sp-float-audio">
-                                    <button className="sp-float-audio-btn" onClick={toggleMusic}>
-                                        {isPlaying ? "🎵" : "🔇"}
+                                    <button className="sp-float-audio-btn" onClick={toggleMusic} title="Toggle Musik" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {isPlaying ? (
+                                            <div className="global-music-waves">
+                                                <span />
+                                                <span />
+                                                <span />
+                                            </div>
+                                        ) : (
+                                            <i className="fas fa-volume-mute" style={{ fontSize: 13 }} />
+                                        )}
                                     </button>
                                 </div>
                             )}

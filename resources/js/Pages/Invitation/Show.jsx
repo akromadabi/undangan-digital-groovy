@@ -2,6 +2,8 @@ import { Head, useForm } from '@inertiajs/react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+
 
 // ═══ Scroll-triggered animation component (re-triggers on every viewport entry) ═══
 const AnimateIn = ({ children, type = 'fadeUp', delay = 0, className = '', duration = 700 }) => {
@@ -124,6 +126,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
         }
     };
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, musicPlaying, setMusicPlaying);
     const layoutMode = invitation.layout_mode || 'scroll';
     const enableQr = invitation.enable_qr !== false && invitation.show_qr_code !== false;
 
@@ -1158,10 +1161,15 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                         <button onClick={toggleMusic}
                                             className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-300"
                                             style={{ backgroundColor: colors.primary, color: '#fff', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
-                                            {musicPlaying
-                                                ? <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z" /></svg>
-                                                : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
-                                            }
+                                            {musicPlaying ? (
+                                                <div className="global-music-waves">
+                                                    <span />
+                                                    <span />
+                                                    <span />
+                                                </div>
+                                            ) : (
+                                                <i className="fas fa-volume-mute" />
+                                            )}
                                         </button>
                                         <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none text-white"
                                             style={{ backgroundColor: colors.primary, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>

@@ -1,0 +1,1569 @@
+import { useTranslation } from '@/i18n';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useForm, Head } from '@inertiajs/react';
+import './style.css';
+import ParticleEffect from '@/Components/ParticleEffect';
+import PremiumSlideshow from '@/Components/PremiumSlideshow';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+
+/* ═══════════════════════════════════════
+   ORMANENT ASSETS URLS
+   ═══════════════════════════════════════ */
+const ORNAMENTS = {
+    bouquet: '/themes/spesial-02/bouquet.png',
+    b1: '/themes/spesial-02/bunga-01.webp',
+    b2: '/themes/spesial-02/bunga-02.webp',
+    b3: '/themes/spesial-02/bunga-03.webp',
+    b4: '/themes/spesial-02/bunga-04.webp',
+    b5: '/themes/spesial-02/bunga-05.webp',
+    b6: '/themes/spesial-02/bunga-06.webp',
+    gradasi: '/themes/spesial-02/gradasi.png',
+    frame: '/themes/spesial-02/frame-ornament.webp',
+    
+    // Fallback vector logos for banking cards
+    dana: '/themes/moroccan/asset/1200px-Logo_dana_blue.svg-1-2-1-1.png',
+    bca: '/themes/moroccan/asset/BCA_logo_Bank_Central_Asia-1-3-2048x650-1-1-1-1-1.png',
+    chip: '/themes/moroccan/asset/chip-atm-1-2-1-1-1-3.png',
+    heart: '/themes/moroccan/asset/2764.svg',
+};
+
+/* ═══════════════════════════════════════
+   STANDARD HELPERS
+   ═══════════════════════════════════════ */
+function safeArr(val) {
+    if (Array.isArray(val)) return val;
+    if (val && typeof val === 'object') return Object.values(val);
+    return [];
+}
+
+function pad2(n) {
+    return String(n).padStart(2, '0');
+}
+
+function formatDate(d, locale) {
+    if (!d) return '';
+    return new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', { 
+        weekday: 'long', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    });
+}
+
+function formatTime(t) {
+    if (!t || t === 'Selesai') return t || '';
+    return String(t).substring(0, 5);
+}
+
+function parseEventDate(dateString, locale) {
+    if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
+    
+    const dayNum = String(d.getDate()).padStart(2, '0');
+    const dayName = d.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', { weekday: 'long' });
+    const monthName = d.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', { month: 'long' });
+    const year = d.getFullYear();
+    
+    return { dayNum, dayName, monthName, year };
+}
+
+function getStorageUrl(url, fallback) {
+    if (!url) return fallback;
+    if (typeof url === 'string' && url.includes(',')) {
+        url = url.split(',')[0];
+    }
+    let cleanUrl = url.replace(/\\/g, '/');
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) return cleanUrl;
+    if (cleanUrl.startsWith('themes/') || cleanUrl.startsWith('/themes/')) {
+        return cleanUrl.startsWith('/') ? cleanUrl : '/' + cleanUrl;
+    }
+    if (cleanUrl.startsWith('/storage/')) return cleanUrl;
+    if (cleanUrl.startsWith('storage/')) return '/' + cleanUrl;
+    if (cleanUrl.startsWith('/')) return cleanUrl;
+    return `/storage/${cleanUrl}`;
+}
+
+const parseBool = (val, defaultVal = true) => {
+    if (val === undefined || val === null) return defaultVal;
+    if (val === false || val === 0 || val === '0' || val === 'false') return false;
+    return true;
+};
+
+// Clipboard copy fallback for iOS / WebViews
+const fallbackCopy = (text) => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    Object.assign(ta.style, { position: 'fixed', opacity: 0, top: 0, left: 0 });
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+};
+
+/* ═══════════════════════════════════════
+   ERROR BOUNDARY
+   ═══════════════════════════════════════ */
+class ErrorBoundary extends React.Component {
+    constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+    static getDerivedStateFromError(e) { return { hasError: true, error: e }; }
+    render() {
+        if (this.state.hasError) return (
+            <div style={{ padding: '40px 20px', color: '#5b4447', background: '#fffbf8', minHeight: '100vh', fontFamily: 'sans-serif', textAlign: 'center' }}>
+                <h2 style={{ color: '#986a52', fontFamily: 'serif' }}>Terjadi kesalahan pada rendering tema.</h2>
+                <p style={{ opacity: 0.8, fontSize: '13px', marginTop: 10 }}>Penyebab umum: Data mempelai atau tanggal acara belum diset lengkap.</p>
+                <pre style={{ fontSize: '11px', background: '#fcf7f4', padding: 15, borderRadius: 10, overflowX: 'auto', maxHeight: 200, color: '#777', textAlign: 'left', maxWidth: 500, margin: '20px auto' }}>
+                    {this.state.error?.toString()}
+                </pre>
+                <button onClick={() => window.location.reload()} style={{ background: '#986a52', color: '#fff', border: 0, padding: '10px 20px', borderRadius: 20, cursor: 'pointer', fontWeight: 600 }}>Muat Ulang Halaman</button>
+            </div>
+        );
+        return this.props.children;
+    }
+}
+
+// Global configurations updated by React
+let globalShowPhotos = true;
+let globalShowAnimations = true;
+
+/* ═══════════════════════════════════════
+   SCROLL REVEAL (LOCAL)
+   ═══════════════════════════════════════ */
+function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
+    const ref = useRef(null);
+    const [visible, setVisible] = useState(!globalShowAnimations);
+
+    useEffect(() => {
+        if (!globalShowAnimations) return;
+        const el = ref.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(([e]) => {
+            setVisible(e.isIntersecting);
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+
+    if (!globalShowAnimations) {
+        return <div className={className}>{children}</div>;
+    }
+
+    let baseClass = 'ani-fadeUp';
+    if (variant === 'zoom') baseClass = 'ani-scaleIn';
+    else if (variant === 'left') baseClass = 'ani-fadeLeft';
+    else if (variant === 'right') baseClass = 'ani-fadeRight';
+    else if (variant === 'down') baseClass = 'ani-fadeDown';
+
+    return (
+        <div
+            ref={ref}
+            className={`${className} ${visible ? baseClass : 'ani-hidden'}`}
+            style={delay ? { animationDelay: `${delay}ms` } : undefined}
+        >
+            {children}
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   ORMANENT PARTS
+   ═══════════════════════════════════════ */
+function FlowerSwirl({ title }) {
+    return (
+        <div className="mb-6 mt-2 flex flex-col items-center">
+            {title && (
+                <h2 className="text-2xl sm:text-3xl text-[var(--sp02-primary)] sp02-font-script-style leading-none mb-1">
+                    {title}
+                </h2>
+            )}
+            <div className="sp02-divider">
+                <div className="sp02-divider-line" />
+                <div className="sp02-divider-dot" />
+                <div className="sp02-divider-line" />
+            </div>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   PREMIUM LAYERED FLOWER ORNAMENTS
+   ═══════════════════════════════════════ */
+function FlowerOrnaments({ isFixed = false }) {
+    return (
+        <div className={`sp02-ornaments-container ${isFixed ? 'is-fixed' : ''}`}>
+            {/* Top Left Corner: b6 image (pulse2 anim) */}
+            <div className="sp02-corner-tl sp02-anim-pluse2">
+                <img src={ORNAMENTS.b6} alt="" />
+            </div>
+
+            {/* Top Right Corner: b5, b3, b4, b2, b1 elements */}
+            <div className="sp02-corner-tr">
+                <div className="sp02-corner-group">
+                    <div className="sp02-corner-item sp02-item-b5 sp02-anim-wayanGR">
+                        <img src={ORNAMENTS.b5} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b3 sp02-anim-wayanGL">
+                        <img src={ORNAMENTS.b3} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b4 sp02-anim-flc">
+                        <img src={ORNAMENTS.b4} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b2 sp02-anim-pluse">
+                        <img src={ORNAMENTS.b2} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b1">
+                        <img src={ORNAMENTS.b1} alt="" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Right Corner: Flipped Y, identical structure */}
+            <div className="sp02-corner-br">
+                <div className="sp02-corner-group">
+                    <div className="sp02-corner-item sp02-item-b5 sp02-anim-wayanGR">
+                        <img src={ORNAMENTS.b5} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b3 sp02-anim-wayanGL">
+                        <img src={ORNAMENTS.b3} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b4 sp02-anim-flc">
+                        <img src={ORNAMENTS.b4} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b2 sp02-anim-pluse">
+                        <img src={ORNAMENTS.b2} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b1">
+                        <img src={ORNAMENTS.b1} alt="" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Left Corner: Flipped X & Y, identical structure */}
+            <div className="sp02-corner-bl">
+                <div className="sp02-corner-group">
+                    <div className="sp02-corner-item sp02-item-b5 sp02-anim-wayanGR">
+                        <img src={ORNAMENTS.b5} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b3 sp02-anim-wayanGL">
+                        <img src={ORNAMENTS.b3} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b4 sp02-anim-flc">
+                        <img src={ORNAMENTS.b4} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b2 sp02-anim-pluse">
+                        <img src={ORNAMENTS.b2} alt="" />
+                    </div>
+                    <div className="sp02-corner-item sp02-item-b1">
+                        <img src={ORNAMENTS.b1} alt="" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   COVER SECTION
+   ═══════════════════════════════════════ */
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPhotos }) {
+    const { t } = useTranslation();
+    const bgs = safeArr(brideGrooms);
+    const groom = bgs.find(b => b.gender === 'pria') || bgs[0] || {};
+    const bride = bgs.find(b => b.gender === 'wanita') || bgs[1] || {};
+
+    const guestName = guest?.name
+        || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null)
+        || 'Tamu Undangan';
+
+    const coupleName = (groom?.nickname && bride?.nickname)
+        ? `${groom.nickname} & ${bride.nickname}`
+        : (invitation?.cover_title || 'Groom & Bride');
+
+    const initials = useMemo(() => {
+        const first = groom?.nickname?.charAt(0) || 'G';
+        const second = bride?.nickname?.charAt(0) || 'B';
+        return `${first}${second}`;
+    }, [groom, bride]);
+
+    return (
+        <div className={`sp02-cover ${isOpened ? 'is-opened' : ''} ${!showPhotos ? 'lx2-no-photo-mode' : ''}`}>
+            {/* Background Slideshow */}
+            {showPhotos && (
+                <PremiumSlideshow
+                    images={invitation?.cover_image ? invitation.cover_image.split(',') : [ORNAMENTS.bouquet]}
+                    positionX={invitation?.cover_position_x}
+                    positionY={invitation?.cover_position_y}
+                    zoom={invitation?.cover_zoom}
+                    className="absolute inset-0 w-full h-full object-cover z-0"
+                />
+            )}
+            
+            {!invitation?.cover_image && (
+                <img src={ORNAMENTS.gradasi} alt="" className="sp02-bg-pattern-gradasi opacity-40" />
+            )}
+
+            {/* Watercolor Cover Overlays */}
+            <div className="sp02-cover__overlay" />
+
+            {/* Rich Pampas Layered Corners */}
+            <FlowerOrnaments isFixed={false} />
+
+            <div className="sp02-cover__content">
+                <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] font-semibold text-[var(--sp02-primary)] mb-3">
+                    {t('invitation.wedding_of').toUpperCase()}
+                </p>
+
+                {/* Circular Couples Photo with Pampas Frame Overlay */}
+                {showPhotos && invitation?.cover_image && (
+                    <div className="relative w-36 h-36 mx-auto mb-6 sp02-breathe">
+                        <div className="w-full h-full rounded-full overflow-hidden relative border border-white shadow-md">
+                            <PremiumSlideshow
+                                images={invitation.cover_image.split(',')}
+                                positionX={invitation.cover_position_x}
+                                positionY={invitation.cover_position_y}
+                                zoom={invitation.cover_zoom}
+                            />
+                        </div>
+                        <img src={ORNAMENTS.frame} alt="" className="sp02-avatar-frame__ornament w-16" style={{ bottom: -2, right: -10 }} />
+                    </div>
+                )}
+
+                {/* Initials fallback monogram */}
+                {(!showPhotos || !invitation?.cover_image) && (
+                    <div className="w-20 h-20 rounded-full border border-[var(--sp02-primary)]/20 flex items-center justify-center text-xl font-bold tracking-widest text-[var(--sp02-primary)] bg-[var(--sp02-bg-soft)]/90 shadow-sm mx-auto mb-6 sp02-breathe font-serif">
+                        {initials}
+                    </div>
+                )}
+
+                <h1 className="text-3xl sm:text-4xl text-[var(--sp02-primary)] sp02-font-script-style mb-4 leading-snug">
+                    {coupleName}
+                </h1>
+                
+                {guest && (
+                    <div className="my-5 bg-[var(--sp02-bg-soft)]/65 border border-[var(--sp02-secondary)]/20 rounded-2xl p-4 shadow-sm backdrop-blur-xs">
+                        <p className="text-[9px] uppercase tracking-[0.2em] opacity-50 mb-0.5">{t('invitation.to')}</p>
+                        <p className="text-md font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wide">{guestName}</p>
+                        <p className="text-[9px] opacity-40 mt-1 italic leading-tight">{t('invitation.dear_guest_desc')}</p>
+                    </div>
+                )}
+
+                <button type="button" onClick={onOpen} id="tombol-buka" className="sp02-btn-primary mt-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    {t('invitation.open')}
+                </button>
+            </div>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   OPENING SECTION
+   ═══════════════════════════════════════ */
+function OpeningSection({ invitation, showPhotos }) {
+    const { t } = useTranslation();
+
+    const rawOpeningTitle = invitation?.opening_title || '';
+    const isWeddingOf = !rawOpeningTitle || 
+                        rawOpeningTitle.toUpperCase() === 'THE WEDDING OF' || 
+                        rawOpeningTitle.toUpperCase() === 'PERNIKAHAN' || 
+                        rawOpeningTitle.toUpperCase() === 'THE WEDDING';
+
+    return (
+        <div className="max-w-lg mx-auto py-4">
+            <Reveal delay={100}>
+                <p className="text-base font-semibold tracking-widest text-[var(--sp02-primary)] sp02-font-heading-style mb-4">
+                    بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ
+                </p>
+            </Reveal>
+
+            {/* Double Slideshow Image */}
+            {showPhotos && invitation?.opening_image && (
+                <Reveal variant="zoom" delay={200}>
+                    <div className="mx-auto rounded-2xl overflow-hidden my-6 max-w-[300px] shadow-md border-4 border-white relative aspect-[4/3] sp02-pulse-gold">
+                        <PremiumSlideshow
+                            images={invitation.opening_image.split(',')}
+                            positionX={invitation.opening_position_x}
+                            positionY={invitation.opening_position_y}
+                            zoom={invitation.opening_zoom}
+                        />
+                    </div>
+                </Reveal>
+            )}
+
+            {invitation?.opening_ayat && (
+                <Reveal delay={300}>
+                    <div className="px-4 py-2 border-l-2 border-[var(--sp02-primary)]/15 italic my-4 text-center">
+                        <p className="text-[13px] sm:text-[14px] leading-relaxed opacity-85 text-[var(--sp02-text)]">
+                            &ldquo;{invitation.opening_ayat}&rdquo;
+                        </p>
+                        {invitation?.opening_ayat_source && (
+                            <p className="text-[11px] font-semibold tracking-wider text-[var(--sp02-primary)] mt-1">
+                                &mdash; {invitation.opening_ayat_source}
+                            </p>
+                        )}
+                    </div>
+                </Reveal>
+            )}
+
+            <Reveal delay={400}>
+                <FlowerSwirl title={isWeddingOf ? t('invitation.wedding_of') : invitation.opening_title} />
+            </Reveal>
+
+            <Reveal delay={500}>
+                <p className="text-[13px] sm:text-[14px] leading-relaxed whitespace-pre-line opacity-90 mt-2 px-2">
+                    {invitation?.opening_text || "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan kami."}
+                </p>
+            </Reveal>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   BRIDE & GROOM SECTION
+   ═══════════════════════════════════════ */
+function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
+    const { t } = useTranslation();
+    const bgs = safeArr(brideGrooms);
+    const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+
+    const translateChildOrder = (childOrder, gender) => {
+        if (!childOrder) return '';
+        const isEn = locale === 'en';
+        const raw = String(childOrder).trim().toLowerCase();
+        let matchedKey = null;
+        
+        if (raw.includes('tunggal') || raw.includes('satu-satunya') || raw.includes('only')) matchedKey = 'tunggal';
+        else if (raw.includes('bungsu') || raw.includes('terakhir') || raw.includes('youngest')) matchedKey = 'bungsu';
+        else if (raw.includes('10') || raw.includes('kesepuluh') || raw.includes('tenth')) matchedKey = '10';
+        else if (raw.includes('9') || raw.includes('kesembilan') || raw.includes('ninth')) matchedKey = '9';
+        else if (raw.includes('8') || raw.includes('kedelapan') || raw.includes('eighth')) matchedKey = '8';
+        else if (raw.includes('7') || raw.includes('ketujuh') || raw.includes('seventh')) matchedKey = '7';
+        else if (raw.includes('6') || raw.includes('keenam') || raw.includes('sixth')) matchedKey = '6';
+        else if (raw.includes('5') || raw.includes('kelima') || raw.includes('fifth')) matchedKey = '5';
+        else if (raw.includes('4') || raw.includes('keempat') || raw.includes('fourth')) matchedKey = '4';
+        else if (raw.includes('3') || raw.includes('ketiga') || raw.includes('third')) matchedKey = '3';
+        else if (raw.includes('2') || raw.includes('kedua') || raw.includes('second')) matchedKey = '2';
+        else if (raw.includes('1') || raw.includes('pertama') || raw.includes('kesatu') || raw.includes('first')) matchedKey = '1';
+        
+        const ordinalMap = {
+            '1': { id: 'Pertama', en: 'First' },
+            '2': { id: 'Kedua', en: 'Second' },
+            '3': { id: 'Ketiga', en: 'Third' },
+            '4': { id: 'Keempat', en: 'Fourth' },
+            '5': { id: 'Kelima', en: 'Fifth' },
+            '6': { id: 'Keenam', en: 'Sixth' },
+            '7': { id: 'Ketujuh', en: 'Seventh' },
+            '8': { id: 'Kedelapan', en: 'Eighth' },
+            '9': { id: 'Kesembilan', en: 'Ninth' },
+            '10': { id: 'Kesepuluh', en: 'Tenth' },
+            'bungsu': { id: 'Bungsu', en: 'Youngest' },
+            'tunggal': { id: 'Tunggal', en: 'Only' }
+        };
+        
+        const match = ordinalMap[matchedKey] || { id: childOrder, en: childOrder };
+        const isWanita = ['wanita', 'female'].includes(String(gender).toLowerCase());
+        
+        if (isEn) {
+            const noun = isWanita ? 'Daughter' : 'Son';
+            if (String(match.en).toLowerCase() === 'only') return `ONLY ${noun.toUpperCase()} OF`;
+            return `${String(match.en).toUpperCase()} ${noun.toUpperCase()} OF`;
+        } else {
+            const noun = isWanita ? 'Putri' : 'Putra';
+            if (String(match.id).toLowerCase() === 'tunggal') return `${noun.toUpperCase()} TUNGGAL DARI`;
+            return `${noun.toUpperCase()} ${String(match.id).toUpperCase()} DARI`;
+        }
+    };
+
+    return (
+        <div className="max-w-lg mx-auto">
+            <Reveal>
+                <FlowerSwirl title={t('invitation.mempelai')} />
+            </Reveal>
+
+            {/* Groom card */}
+            <div className="space-y-12 mt-6">
+                <Reveal variant="left" className="w-full flex justify-center">
+                    <div className="sp02-mempelai-card w-full flex flex-col items-center">
+                        <img src={ORNAMENTS.b3} className="sp02-mempelai-card-ornament-tl" alt="" />
+                        {showPhotos && groom.photo && (
+                            <div className="sp02-avatar-frame mb-4 sp02-breathe">
+                                <div className="sp02-avatar-frame-inner">
+                                    <img 
+                                        src={getStorageUrl(groom.photo)} 
+                                        alt={groom.full_name || 'Groom'} 
+                                        className="sp02-strict-cover"
+                                        style={{
+                                            objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                            transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                        }}
+                                    />
+                                </div>
+                                <img src={ORNAMENTS.frame} alt="" className="sp02-avatar-frame__ornament w-16" />
+                            </div>
+                        )}
+                        
+                        {!showPhotos && (
+                            <div className="w-16 h-16 rounded-full border border-[var(--sp02-primary)]/20 flex items-center justify-center font-bold text-lg text-[var(--sp02-primary)] bg-[var(--sp02-bg-soft)] shadow-sm mb-4 font-serif">
+                                {groom.nickname?.charAt(0) || 'G'}
+                            </div>
+                        )}
+
+                        <h3 className="text-xl font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wider">
+                            {groom.full_name || 'Nama Lengkap Pria'}
+                        </h3>
+                        <p className="text-[9px] font-bold text-[var(--sp02-text-light)] mt-1.5 uppercase tracking-widest text-center">
+                            {translateChildOrder(groom.child_order, 'pria')}
+                        </p>
+                        <p className="text-xs text-[var(--sp02-text)] mt-1 text-center">
+                            {groom.father_name && groom.mother_name
+                                ? (locale === 'en' ? `Mr. ${groom.father_name} & Mrs. ${groom.mother_name}` : `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`)
+                                : (groom.father_name || groom.mother_name || '')}
+                        </p>
+                        {groom.instagram && (
+                            <a
+                                href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="sp02-btn-secondary mt-3 inline-flex items-center gap-1.5"
+                            >
+                                <i className="fab fa-instagram text-xs" /> @{groom.instagram.replace('@', '')}
+                            </a>
+                        )}
+                    </div>
+                </Reveal>
+
+                {/* Spliter Ampersand */}
+                <Reveal variant="zoom">
+                    <div className="text-4xl text-[var(--sp02-secondary)] sp02-font-script-style my-2">&amp;</div>
+                </Reveal>
+
+                {/* Bride card */}
+                <Reveal variant="right" className="w-full flex justify-center">
+                    <div className="sp02-mempelai-card w-full flex flex-col items-center">
+                        <img src={ORNAMENTS.b4} className="sp02-mempelai-card-ornament-br" alt="" />
+                        {showPhotos && bride.photo && (
+                            <div className="sp02-avatar-frame mb-4 sp02-breathe" style={{ animationDelay: '1.5s' }}>
+                                <div className="sp02-avatar-frame-inner">
+                                    <img 
+                                        src={getStorageUrl(bride.photo)} 
+                                        alt={bride.full_name || 'Bride'} 
+                                        className="sp02-strict-cover"
+                                        style={{
+                                            objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                            transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                        }}
+                                    />
+                                </div>
+                                <img src={ORNAMENTS.frame} alt="" className="sp02-avatar-frame__ornament w-16" style={{ transform: 'scaleX(-1)', right: 'auto', left: '-12px' }} />
+                            </div>
+                        )}
+
+                        {!showPhotos && (
+                            <div className="w-16 h-16 rounded-full border border-[var(--sp02-primary)]/20 flex items-center justify-center font-bold text-lg text-[var(--sp02-primary)] bg-[var(--sp02-bg-soft)] shadow-sm mb-4 font-serif">
+                                {bride.nickname?.charAt(0) || 'B'}
+                            </div>
+                        )}
+
+                        <h3 className="text-xl font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wider">
+                            {bride.full_name || 'Nama Lengkap Wanita'}
+                        </h3>
+                        <p className="text-[9px] font-bold text-[var(--sp02-text-light)] mt-1.5 uppercase tracking-widest text-center">
+                            {translateChildOrder(bride.child_order, 'wanita')}
+                        </p>
+                        <p className="text-xs text-[var(--sp02-text)] mt-1 text-center">
+                            {bride.father_name && bride.mother_name
+                                ? (locale === 'en' ? `Mr. ${bride.father_name} & Mrs. ${bride.mother_name}` : `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`)
+                                : (bride.father_name || bride.mother_name || '')}
+                        </p>
+                        {bride.instagram && (
+                            <a
+                                href={`https://instagram.com/${bride.instagram.replace('@', '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="sp02-btn-secondary mt-3 inline-flex items-center gap-1.5"
+                            >
+                                <i className="fab fa-instagram text-xs" /> @{bride.instagram.replace('@', '')}
+                            </a>
+                        )}
+                    </div>
+                </Reveal>
+            </div>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   SAVE THE DATE / COUNTDOWN PART
+   ═══════════════════════════════════════ */
+function CountdownBlock({ events }) {
+    const { t } = useTranslation();
+    const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+    const targetDate = primaryEvent?.event_date || '';
+    const targetTime = primaryEvent?.start_time || '08:00';
+
+    const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
+
+    useEffect(() => {
+        if (!targetDate) return;
+        const dateStr = String(targetDate).substring(0, 10);
+        const timeStr = String(targetTime).substring(0, 5);
+        const target = new Date(`${dateStr}T${timeStr}:00`);
+
+        if (isNaN(target.getTime())) return;
+
+        const tick = () => {
+            const diff = target - new Date();
+            if (diff <= 0) {
+                setTimeLeft({ d: 0, h: 0, m: 0, s: 0 });
+                return;
+            }
+            setTimeLeft({
+                d: Math.floor(diff / 86400000),
+                h: Math.floor((diff % 86400000) / 3600000),
+                m: Math.floor((diff % 3600000) / 60000),
+                s: Math.floor((diff % 60000) / 1000),
+            });
+        };
+
+        tick();
+        const timer = setInterval(tick, 1000);
+        return () => clearInterval(timer);
+    }, [targetDate, targetTime]);
+
+    const items = [
+        { label: t('invitation.days'), val: pad2(timeLeft.d) },
+        { label: t('invitation.hours'), val: pad2(timeLeft.h) },
+        { label: t('invitation.minutes'), val: pad2(timeLeft.m) },
+        { label: t('invitation.seconds'), val: pad2(timeLeft.s) }
+    ];
+
+    return (
+        <div className="sp02-countdown-grid">
+            {items.map((item, i) => (
+                <div key={i} className="sp02-countdown-item">
+                    <span className="text-xl sm:text-2xl font-bold text-[var(--sp02-primary)] sp02-font-heading-style leading-none mb-1">
+                        {item.val}
+                    </span>
+                    <span className="text-[8px] sm:text-[9px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider">
+                        {item.label}
+                    </span>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   EVENTS & MAPS SECTION
+   ═══════════════════════════════════════ */
+function EventSection({ events, showPhotos, locale }) {
+    const { t } = useTranslation();
+    const list = safeArr(events);
+
+    return (
+        <div className="max-w-lg mx-auto">
+            <Reveal>
+                <FlowerSwirl title={t('nav.acara')} />
+            </Reveal>
+
+            {list.map((evt, idx) => {
+                const eventImg = getStorageUrl(evt.image, null) || ORNAMENTS.bouquet;
+                const { dayNum, dayName, monthName, year } = parseEventDate(evt.event_date, locale);
+                const eventDisplayName = evt.event_type === 'akad' ? 'Akad Nikah' : (evt.event_name || 'Acara');
+                const isEven = idx % 2 === 0;
+
+                return (
+                    <Reveal key={evt.id || idx} variant={isEven ? 'left' : 'right'} className="sp02-event-card">
+                        <img src={ORNAMENTS.b1} className="sp02-event-card-ornament-tr" alt="" />
+                        {showPhotos && eventImg && (
+                            <div className="sp02-event-banner">
+                                <img src={eventImg} alt={evt.event_name} className="sp02-strict-cover" />
+                            </div>
+                        )}
+                        <div className="sp02-event-body">
+                            {/* Left column: Vertical event title */}
+                            <div className="sp02-event-vertical-title-container">
+                                <div className="sp02-event-vertical-title">{eventDisplayName}</div>
+                            </div>
+                            
+                            {/* Right column: Info */}
+                            <div className="sp02-event-details">
+                                <div className="sp02-event-date-row">
+                                    <span className="sp02-event-date-num">{dayNum}</span>
+                                    <div className="sp02-event-date-col">
+                                        <span className="sp02-event-date-day">{dayName}</span>
+                                        <span className="text-[var(--sp02-text-light)]">{monthName} {year}</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="h-px bg-gray-100 my-3" />
+                                
+                                <p className="text-[12px] opacity-80 mb-2">
+                                    <i className="far fa-clock text-[var(--sp02-primary)] mr-1.5" />
+                                    {formatTime(evt.start_time)} {evt.end_time ? `- ${formatTime(evt.end_time)}` : ' - Selesai'} {evt.timezone || 'WIB'}
+                                </p>
+                                
+                                <div className="text-[12px] opacity-80 leading-normal mb-4">
+                                    <i className="fas fa-map-marker-alt text-[var(--sp02-primary)] mr-2" />
+                                    <strong>{evt.venue_name}</strong>
+                                    <p className="pl-4 mt-0.5 opacity-75">{evt.venue_address}</p>
+                                </div>
+
+                                {evt.gmaps_link && (
+                                    <a
+                                        href={evt.gmaps_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="sp02-btn-secondary inline-flex items-center gap-1.5 w-full justify-center text-[10px]"
+                                    >
+                                        <i className="fas fa-location-arrow text-[8px]" /> Google Maps
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    </Reveal>
+                );
+            })}
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   LOVE STORY / TIMELINE SECTION
+   ═══════════════════════════════════════ */
+function LoveStorySection({ loveStories }) {
+    const { t } = useTranslation();
+    const list = safeArr(loveStories);
+
+    return (
+        <div className="max-w-lg mx-auto">
+            <Reveal>
+                <FlowerSwirl title={t('nav.kisah')} />
+            </Reveal>
+
+            <Reveal variant="zoom" className="sp02-timeline">
+                {list.map((story, i) => (
+                    <div key={story.id || i} className="sp02-timeline-item">
+                        <div className="sp02-story-bubble">
+                            <div className="sp02-timeline-date">
+                                {story.story_date ? new Date(story.story_date).getFullYear() : story.year || ''}
+                            </div>
+                            <h4 className="sp02-timeline-title">
+                                {story.title}
+                            </h4>
+                            <p className="sp02-timeline-desc">
+                                {story.description}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+            </Reveal>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   GALLERY GRID SECTION
+   ═══════════════════════════════════════ */
+function GallerySection({ galleries, showPhotos }) {
+    const { t } = useTranslation();
+    const list = safeArr(galleries);
+
+    if (!showPhotos || list.length === 0) return null;
+
+    return (
+        <div className="max-w-lg mx-auto">
+            <Reveal>
+                <FlowerSwirl title={t('nav.galeri')} />
+            </Reveal>
+
+            <div className="grid grid-cols-2 gap-3 mt-6 px-1">
+                {list.map((item, i) => {
+                    const imgUrl = getStorageUrl(item.image_path || item.image_url);
+                    const isLarge = i === 0 || i === 3;
+                    return (
+                        <Reveal 
+                            key={item.id || i} 
+                            variant="zoom" 
+                            delay={i * 100}
+                            className={`rounded-2xl overflow-hidden shadow-xs border-2 border-white aspect-[3/4] relative ${isLarge ? 'col-span-2 aspect-[4/3]' : ''}`}
+                        >
+                            <img src={imgUrl} alt={item.caption || 'Galeri'} className="sp02-strict-cover" />
+                        </Reveal>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   LIVESTREAM SECTION
+   ═══════════════════════════════════════ */
+function LiveStreamingSection({ events, locale }) {
+    const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+    
+    const streamsList = [];
+    if (primaryEvent?.streaming_url) {
+        streamsList.push({ platform: primaryEvent.streaming_platform || 'Live', url: primaryEvent.streaming_url });
+    }
+    if (Array.isArray(primaryEvent?.streamings)) {
+        primaryEvent.streamings.forEach(s => {
+            if (s.url && !streamsList.some(item => item.url === s.url)) {
+                streamsList.push({ platform: s.platform || 'Live', url: s.url });
+            }
+        });
+    }
+
+    if (streamsList.length === 0) return null;
+
+    const isEn = locale === 'en';
+
+    return (
+        <div className="max-w-lg mx-auto text-center">
+            <Reveal>
+                <FlowerSwirl title={isEn ? 'Live Streaming' : 'Siaran Langsung'} />
+            </Reveal>
+            
+            <Reveal variant="zoom" className="sp02-card mt-6">
+                <p className="text-xs sm:text-sm opacity-80 mb-6">
+                    {isEn ? 'Join our wedding virtually from your device:' : 'Saksikan momen sakral kami secara virtual melalui tautan berikut:'}
+                </p>
+                <div className="space-y-3">
+                    {streamsList.map((stream, idx) => (
+                        <button 
+                            key={idx} 
+                            type="button" 
+                            onClick={() => window.open(stream.url, '_blank')} 
+                            className="sp02-btn-primary w-full text-xs font-semibold py-3"
+                        >
+                            <i className="fas fa-video text-xs" /> WATCH ON {stream.platform.toUpperCase()}
+                        </button>
+                    ))}
+                </div>
+            </Reveal>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   BANKING GIFT SECTION
+   ═══════════════════════════════════════ */
+function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
+    const { t } = useTranslation();
+    const list = safeArr(bankAccounts);
+
+    if (list.length === 0) return null;
+
+    return (
+        <div className="max-w-lg mx-auto">
+            <Reveal>
+                <FlowerSwirl title={t('nav.hadiah')} />
+            </Reveal>
+
+            <div className="space-y-6 mt-6">
+                {list.map((account, i) => {
+                    const isBca = String(account.bank_name).toLowerCase() === 'bca';
+                    const isDana = String(account.bank_name).toLowerCase() === 'dana';
+                    
+                    return (
+                        <Reveal key={account.id || i} variant="zoom" delay={i * 150} className="sp02-bank-card text-left">
+                            <div className="flex items-center justify-between">
+                                <img src={ORNAMENTS.chip} alt="chip" className="sp02-bank-chip" />
+                                {isBca && <img src={ORNAMENTS.bca} alt="BCA" className="h-4 w-auto" />}
+                                {isDana && <img src={ORNAMENTS.dana} alt="DANA" className="h-5 w-auto" />}
+                                {!isBca && !isDana && (
+                                    <span className="text-sm font-bold tracking-widest text-[var(--sp02-primary)]/80 uppercase">
+                                        {account.bank_name}
+                                    </span>
+                                )}
+                            </div>
+
+                            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mt-4">
+                                {t('invitation.save_the_date') === 'Save The Date' ? 'Account Number' : 'Nomor Rekening'}
+                            </p>
+                            
+                            <h4 className="sp02-bank-no">{account.account_number}</h4>
+                            <p className="sp02-bank-holder">{account.account_name}</p>
+
+                            <button 
+                                type="button" 
+                                onClick={() => handleCopy(account.account_number, i)} 
+                                className="sp02-btn-secondary mt-5 py-1.5 w-full text-[10px] font-bold inline-flex items-center justify-center gap-1.5"
+                            >
+                                {copiedIdx === i ? (
+                                    <><i className="fas fa-check" /> {t('invitation.copied') || 'SALIN BERHASIL'}</>
+                                ) : (
+                                    <><i className="far fa-copy" /> {t('invitation.copy') || 'SALIN NOMOR'}</>
+                                )}
+                            </button>
+                        </Reveal>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   RSVP & WISHES DUAL FORM SECTION
+   ═══════════════════════════════════════ */
+function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes, rsvpForm, handleRsvp, wishForm, handleWish }) {
+    const { t } = useTranslation();
+    const list = safeArr(wishes).slice(0, 5); // Limit 5 comments
+
+    return (
+        <div className="max-w-lg mx-auto">
+            <Reveal>
+                <FlowerSwirl title={t('nav.rsvp')} />
+            </Reveal>
+
+            {/* RSVP Form Card */}
+            {enableRsvp && (
+                <Reveal variant="zoom" className="sp02-card mt-6">
+                    <h3 className="text-base font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wide mb-4">
+                        {t('invitation.save_the_date') === 'Save The Date' ? 'RSVP Confirmation' : 'Konfirmasi Kehadiran'}
+                    </h3>
+                    
+                    <form onSubmit={handleRsvp} className="space-y-4 text-left">
+                        <div>
+                            <label className="text-[10px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider block mb-1.5">
+                                {t('invitation.save_the_date') === 'Save The Date' ? 'Attendance Status' : 'Status Kehadiran'}
+                            </label>
+                            <select
+                                value={rsvpForm.data.attendance}
+                                onChange={(e) => rsvpForm.setData('attendance', e.target.value)}
+                                className="sp02-input select-none"
+                            >
+                                <option value="hadir">{t('invitation.attending') || 'Hadir'}</option>
+                                <option value="tidak_hadir">{t('invitation.not_attending') || 'Tidak Hadir'}</option>
+                                <option value="belum_pasti">{t('invitation.unsure') || 'Belum Pasti'}</option>
+                            </select>
+                        </div>
+
+                        {rsvpForm.data.attendance === 'hadir' && (
+                            <div>
+                                <label className="text-[10px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider block mb-1.5">
+                                    {t('invitation.save_the_date') === 'Save The Date' ? 'Number of Guests' : 'Jumlah Orang'}
+                                </label>
+                                <select
+                                    value={rsvpForm.data.number_of_guests}
+                                    onChange={(e) => rsvpForm.setData('number_of_guests', parseInt(e.target.value))}
+                                    className="sp02-input"
+                                >
+                                    {[1, 2, 3, 4, 5].map(v => (
+                                        <option key={v} value={v}>{v} {v === 1 ? 'Person' : 'People'}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        <button 
+                            type="submit" 
+                            disabled={rsvpForm.processing} 
+                            className="sp02-btn-primary w-full text-xs font-semibold py-3 mt-2"
+                        >
+                            {rsvpForm.processing ? 'SABAR...' : (t('invitation.save_the_date') === 'Save The Date' ? 'SUBMIT CONFIRMATION' : 'KIRIM KONFIRMASI')}
+                        </button>
+                    </form>
+                </Reveal>
+            )}
+
+            {/* Wishes guestbook card */}
+            {enableWishes && (
+                <Reveal variant="zoom" className="sp02-card mt-6">
+                    <h3 className="text-base font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wide mb-4">
+                        {t('invitation.wishes_title')}
+                    </h3>
+
+                    <form onSubmit={handleWish} className="space-y-4 text-left">
+                        <div>
+                            <input
+                                type="text"
+                                placeholder={t('invitation.name_placeholder') || 'Nama Anda'}
+                                value={wishForm.data.sender_name}
+                                onChange={(e) => wishForm.setData('sender_name', e.target.value)}
+                                className="sp02-input"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <textarea
+                                placeholder={t('invitation.wish_placeholder') || 'Tulis pesan doa dan ucapan manis Anda di sini...'}
+                                value={wishForm.data.message}
+                                onChange={(e) => wishForm.setData('message', e.target.value)}
+                                className="sp02-input"
+                                rows={3}
+                                required
+                            />
+                        </div>
+                        <button 
+                            type="submit" 
+                            disabled={wishForm.processing} 
+                            className="sp02-btn-primary w-full text-xs font-semibold py-3"
+                        >
+                            {wishForm.processing ? 'KIRIM...' : (t('invitation.save_the_date') === 'Save The Date' ? 'SEND WISH' : 'KIRIM UCAPAN')}
+                        </button>
+                    </form>
+
+                    {/* Scrollable list of comments */}
+                    {list.length > 0 && (
+                        <div className="sp02-wishes-box">
+                            {list.map((w, idx) => (
+                                <div key={w.id || idx} className="sp02-wish-item">
+                                    <div className="sp02-wish-sender">{w.sender_name}</div>
+                                    <div className="opacity-90">{w.message}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </Reveal>
+            )}
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   CLOSING SECTION
+   ═══════════════════════════════════════ */
+function ClosingSection({ invitation, brideGrooms, locale }) {
+    const { t } = useTranslation();
+    const bgs = safeArr(brideGrooms);
+    const groom = bgs.find(b => b.gender === 'pria') || bgs[0] || {};
+    const bride = bgs.find(b => b.gender === 'wanita') || bgs[1] || {};
+
+    const hasGroomParents = groom.father_name || groom.mother_name;
+    const hasBrideParents = bride.father_name || bride.mother_name;
+
+    const isEn = locale === 'en';
+
+    // Watermark dynamic brand reseller name
+    const brandName = invitation?.user?.resellerSettings?.brand_name 
+        || invitation?.user?.reseller?.resellerSettings?.brand_name 
+        || 'TrueLove Invitation';
+
+    return (
+        <div className="max-w-lg mx-auto text-center py-4 flex flex-col items-center">
+            <Reveal delay={100}>
+                <FlowerSwirl title={invitation?.closing_title || t('invitation.closing_title') || 'Terima Kasih'} />
+            </Reveal>
+
+            <Reveal delay={300}>
+                <p className="text-[13px] leading-relaxed whitespace-pre-line opacity-90 px-4 mt-2 mb-6">
+                    {invitation?.closing_text || 'Merupakan suatu kehormatan dan kebahagiaan bagi kami, apabila Bapak/Ibu, Saudara/i berkenan hadir di hari bahagia kami.'}
+                </p>
+            </Reveal>
+
+            <Reveal delay={400} className="space-y-4 text-xs opacity-75 font-semibold uppercase tracking-wider text-[var(--sp02-text-light)]">
+                <p className="text-[11px] font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-widest">
+                    {isEn ? 'WE ARE COMMITTED UNDER LOVE' : 'KAMI YANG BERBAHAGIA'}
+                </p>
+                <div className="space-y-2">
+                    {hasGroomParents && (
+                        <div>
+                            {isEn 
+                                ? `Family of Mr. ${groom.father_name} & Mrs. ${groom.mother_name}` 
+                                : `Keluarga Bapak ${groom.father_name} & Ibu ${groom.mother_name}`}
+                        </div>
+                    )}
+                    {hasBrideParents && (
+                        <div>
+                            {isEn 
+                                ? `Family of Mr. ${bride.father_name} & Mrs. ${bride.mother_name}` 
+                                : `Keluarga Bapak ${bride.father_name} & Ibu ${bride.mother_name}`}
+                        </div>
+                    )}
+                </div>
+            </Reveal>
+
+            <Reveal delay={500}>
+                <FlowerSwirl />
+            </Reveal>
+
+            <p className="sp02-watermark relative z-10 select-none pb-6">
+                Made with <img src={ORNAMENTS.heart} alt="love" className="w-3 h-3 inline-block" /> by {brandName}
+            </p>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   MAIN COMPONENT PORT export
+   ═══════════════════════════════════════ */
+export default function DynamicIndex({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
+    const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
+    const { t, locale } = useTranslation(activeLanguage);
+    const isEn = locale === 'en';
+
+    const [isOpened, setIsOpened] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [autoScroll, setAutoScroll] = useState(invitation?.enable_auto_scroll !== false);
+    const [showQrCode, setShowQrCode] = useState(false);
+    const [copiedIdx, setCopiedIdx] = useState(null);
+
+    const [activeSection, setActiveSection] = useState('opening');
+    const [slideIdx, setSlideIdx] = useState(0);
+
+    const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
+    const layoutMode = invitation?.layout_mode || 'scroll'; // 'scroll', 'slide-h', 'slide-v'
+    const isHorizontal = layoutMode === 'slide-h';
+
+    // Global settings injection
+    const showPhotos = invitation?.show_photos !== false;
+    const showAnimations = invitation?.show_animations !== false;
+    const enableRsvp = invitation?.enable_rsvp !== false;
+    const enableWishes = invitation?.enable_wishes !== false;
+    const enableQr = invitation?.enable_qr !== false && invitation?.show_qr_code !== false;
+
+    useEffect(() => {
+        globalShowPhotos = showPhotos;
+        globalShowAnimations = showAnimations;
+    }, [showPhotos, showAnimations]);
+
+    // Error safety boundary fallback resolution list
+    const resolvedSections = useMemo(() => {
+        const list = safeArr(sections);
+        const coverFiltered = list.filter(s => s.section_key !== 'cover');
+        
+        // Anti duplicate wishes/rsvp form check in i18n settings
+        const hasRsvp = coverFiltered.some(s => s.section_key === 'rsvp');
+        return coverFiltered.filter(s => {
+            if (s.section_key === 'wishes' && hasRsvp) return false; // RSVP includes Wishes
+            return true;
+        });
+    }, [sections]);
+
+    const activeSectionKey = useMemo(() => {
+        if (layoutMode === 'scroll') return activeSection;
+        return resolvedSections[slideIdx]?.section_key || 'opening';
+    }, [layoutMode, activeSection, slideIdx, resolvedSections]);
+
+    // Handle Copy Number
+    const handleCopy = (num, idx) => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(num)
+                .then(() => {
+                    setCopiedIdx(idx);
+                    setTimeout(() => setCopiedIdx(null), 2500);
+                })
+                .catch(() => {
+                    fallbackCopy(num);
+                    setCopiedIdx(idx);
+                    setTimeout(() => setCopiedIdx(null), 2500);
+                });
+        } else {
+            fallbackCopy(num);
+            setCopiedIdx(idx);
+            setTimeout(() => setCopiedIdx(null), 2500);
+        }
+    };
+
+    // Fullscreen listeners
+    useEffect(() => {
+        const handleFs = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFs);
+        return () => document.removeEventListener('fullscreenchange', handleFs);
+    }, []);
+
+    const toggleFs = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
+    const handleOpen = () => {
+        setIsOpened(true);
+        if (invitation?.music_url && audioRef.current) {
+            audioRef.current.play()
+                .then(() => setIsPlaying(true))
+                .catch(err => console.log('Audio autoplay blocked:', err));
+        }
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
+    };
+
+    const togglePlay = () => {
+        if (!audioRef.current) return;
+        if (isPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play().catch(() => {});
+        }
+        setIsPlaying(!isPlaying);
+    };
+
+    // Swipe page triggers in slide modes
+    const touchStart = useRef(null);
+    
+    const handleTouchStart = (e) => {
+        if (layoutMode === 'scroll') return;
+        touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+
+    const handleTouchEnd = (e) => {
+        if (layoutMode === 'scroll' || !touchStart.current) return;
+        
+        const dx = e.changedTouches[0].clientX - touchStart.current.x;
+        const dy = e.changedTouches[0].clientY - touchStart.current.y;
+        
+        const isHorizontalLayout = layoutMode === 'slide-h';
+        const axisDelta = isHorizontalLayout ? dx : dy;
+        
+        if (Math.abs(isHorizontalLayout ? dx : dy) > 50 && Math.abs(isHorizontalLayout ? dx : dy) > Math.abs(isHorizontalLayout ? dy : dx)) {
+            if (axisDelta < 0) {
+                // Next
+                setSlideIdx(prev => Math.min(prev + 1, resolvedSections.length - 1));
+            } else {
+                // Prev
+                setSlideIdx(prev => Math.max(prev - 0, 0));
+            }
+        }
+        touchStart.current = null;
+    };
+
+    // Scrollspy and dynamic menu highlight in scroll mode
+    useEffect(() => {
+        if (layoutMode !== 'scroll' || !isOpened) return;
+
+        const handleScroll = () => {
+            const elements = document.querySelectorAll('[data-section]');
+            let current = 'opening';
+            elements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top <= 250) {
+                    current = el.dataset.section;
+                }
+            });
+            setActiveSection(current);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [layoutMode, isOpened]);
+
+    // Stale closure synchronizer for slide index
+    useEffect(() => {
+        if (layoutMode === 'scroll') return;
+        const target = resolvedSections[slideIdx]?.section_key;
+        if (target) setActiveSection(target);
+    }, [slideIdx, resolvedSections, layoutMode]);
+
+    // Pixel auto scroll in scroll mode, and index swiper in slide modes
+    useEffect(() => {
+        if (!isOpened || !autoScroll) return;
+
+        const isSlide = layoutMode === 'slide-h' || layoutMode === 'slide-v';
+        let timer = null;
+
+        if (isSlide) {
+            timer = setInterval(() => {
+                setSlideIdx(prev => {
+                    const count = resolvedSections.length;
+                    if (prev >= count - 1) return 0;
+                    return prev + 1;
+                });
+            }, 5500);
+        } else {
+            timer = setInterval(() => {
+                window.scrollBy(0, 1);
+                const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 5;
+                if (isAtBottom) {
+                    setAutoScroll(false);
+                }
+            }, 25);
+        }
+
+        return () => {
+            if (timer) clearInterval(timer);
+        };
+    }, [isOpened, autoScroll, layoutMode, resolvedSections.length]);
+
+    // Form Hooks
+    const rsvpForm = useForm({ attendance: 'hadir', number_of_guests: 1 });
+    const handleRsvp = (e) => {
+        e.preventDefault();
+        rsvpForm.post(`/u/${invitation.slug}/rsvp`, {
+            preserveScroll: true
+        });
+    };
+
+    const wishForm = useForm({ sender_name: guest?.name || '', message: '' });
+    const handleWish = (e) => {
+        e.preventDefault();
+        wishForm.post(`/u/${invitation.slug}/wish`, {
+            preserveScroll: true,
+            onSuccess: () => wishForm.reset('message')
+        });
+    };
+
+    // Navigation jumps
+    const jumpToSection = (key) => {
+        if (layoutMode === 'scroll') {
+            const el = document.getElementById(`section-${key}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            const idx = resolvedSections.findIndex(s => s.section_key === key);
+            if (idx >= 0) setSlideIdx(idx);
+        }
+    };
+
+    // Particles background rendering
+    const particleType = invitation?.particle_type || 'gold-dust';
+
+    return (
+        <ErrorBoundary>
+            <div className={`sp02-theme-wrapper ${!showAnimations ? 'theme-no-animations' : ''}`}>
+                <Head title={invitation?.title || 'Undangan Pernikahan'} />
+                
+                {/* Background music audio player */}
+                {invitation?.music_url && (
+                    <audio ref={audioRef} src={invitation.music_url} loop />
+                )}
+
+                {/* Particle effect background */}
+                {isOpened && particleType !== 'none' && (
+                    <div className="fixed inset-0 z-0 pointer-events-none">
+                        <ParticleEffect type={particleType} />
+                    </div>
+                )}
+
+                {/* Fixed Background layered ornaments revealed after Buka Undangan */}
+                {isOpened && <FlowerOrnaments isFixed={true} />}
+
+                {/* 1. COVER OVERLAY SCREEN */}
+                <CoverSection 
+                    invitation={invitation} 
+                    brideGrooms={brideGrooms} 
+                    guest={guest} 
+                    isOpened={isOpened} 
+                    onOpen={handleOpen}
+                    showPhotos={showPhotos}
+                />
+
+                {/* 2. MAIN APPLICATION CONTENT */}
+                {isOpened && (
+                    <div className="relative z-10 w-full min-h-screen">
+                        
+                        {/* Scroll Spy / Dynamic Layout mode handler */}
+                        {layoutMode === 'scroll' ? (
+                            <div className="w-full flex flex-col items-center">
+                                {resolvedSections.map((sec) => (
+                                    <div 
+                                        key={sec.id} 
+                                        id={`section-${sec.section_key}`} 
+                                        data-section={sec.section_key}
+                                        className="sp02-section w-full max-w-xl"
+                                    >
+                                        {sec.section_key === 'opening' && (
+                                            <OpeningSection invitation={invitation} showPhotos={showPhotos} />
+                                        )}
+                                        {sec.section_key === 'bride_groom' && (
+                                            <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
+                                        )}
+                                        {sec.section_key === 'event' && (
+                                            <EventSection events={events} showPhotos={showPhotos} locale={locale} />
+                                        )}
+                                        {sec.section_key === 'countdown' && (
+                                            <CountdownBlock events={events} />
+                                        )}
+                                        {sec.section_key === 'love_story' && (
+                                            <LoveStorySection loveStories={loveStories} />
+                                        )}
+                                        {sec.section_key === 'gallery' && (
+                                            <GallerySection galleries={galleries} showPhotos={showPhotos} />
+                                        )}
+                                        {sec.section_key === 'livestream' && (
+                                            <LiveStreamingSection events={events} locale={locale} />
+                                        )}
+                                        {sec.section_key === 'bank' && (
+                                            <BankSection bankAccounts={bankAccounts} copiedIdx={copiedIdx} handleCopy={handleCopy} />
+                                        )}
+                                        {sec.section_key === 'rsvp' && (
+                                            <WishesRsvpSection 
+                                                invitation={invitation}
+                                                guest={guest}
+                                                wishes={wishes}
+                                                enableRsvp={enableRsvp}
+                                                enableWishes={enableWishes}
+                                                rsvpForm={rsvpForm}
+                                                handleRsvp={handleRsvp}
+                                                wishForm={wishForm}
+                                                handleWish={handleWish}
+                                            />
+                                        )}
+                                        {sec.section_key === 'closing' && (
+                                            <ClosingSection invitation={invitation} brideGrooms={brideGrooms} locale={locale} />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            /* SLIDE MODES (HORIZONTAL / VERTICAL) */
+                            <div 
+                                className="sp02-slide-mode-container"
+                                onTouchStart={handleTouchStart}
+                                onTouchEnd={handleTouchEnd}
+                            >
+                                {resolvedSections.map((sec, idx) => {
+                                    const isActive = idx === slideIdx;
+                                    const isNext = idx === slideIdx + 1;
+                                    const isPrev = idx === slideIdx - 1;
+                                    
+                                    let statusClass = '';
+                                    if (isActive) statusClass = 'is-active';
+                                    else if (isNext) statusClass = 'is-next';
+                                    else if (isPrev) statusClass = 'is-prev';
+
+                                    return (
+                                        <div 
+                                            key={sec.id}
+                                            className={`sp02-slide-wrapper ${statusClass}`}
+                                        >
+                                            <div className="sp02-section w-full max-w-xl mx-auto min-h-screen py-16">
+                                                {sec.section_key === 'opening' && (
+                                                    <OpeningSection invitation={invitation} showPhotos={showPhotos} />
+                                                )}
+                                                {sec.section_key === 'bride_groom' && (
+                                                    <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
+                                                )}
+                                                {sec.section_key === 'event' && (
+                                                    <EventSection events={events} showPhotos={showPhotos} locale={locale} />
+                                                )}
+                                                {sec.section_key === 'countdown' && (
+                                                    <CountdownBlock events={events} />
+                                                )}
+                                                {sec.section_key === 'love_story' && (
+                                                    <LoveStorySection loveStories={loveStories} />
+                                                )}
+                                                {sec.section_key === 'gallery' && (
+                                                    <GallerySection galleries={galleries} showPhotos={showPhotos} />
+                                                )}
+                                                {sec.section_key === 'livestream' && (
+                                                    <LiveStreamingSection events={events} locale={locale} />
+                                                )}
+                                                {sec.section_key === 'bank' && (
+                                                    <BankSection bankAccounts={bankAccounts} copiedIdx={copiedIdx} handleCopy={handleCopy} />
+                                                )}
+                                                {sec.section_key === 'rsvp' && (
+                                                    <WishesRsvpSection 
+                                                        invitation={invitation}
+                                                        guest={guest}
+                                                        wishes={wishes}
+                                                        enableRsvp={enableRsvp}
+                                                        enableWishes={enableWishes}
+                                                        rsvpForm={rsvpForm}
+                                                        handleRsvp={handleRsvp}
+                                                        wishForm={wishForm}
+                                                        handleWish={handleWish}
+                                                    />
+                                                )}
+                                                {sec.section_key === 'closing' && (
+                                                    <ClosingSection invitation={invitation} brideGrooms={brideGrooms} locale={locale} />
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* 3. SIDEBAR FLOATING CONTROLS */}
+                        <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2.5">
+                            {/* QR CODE PRESENSI CHECK-IN TRIGGER */}
+                            {enableQr && guest && (
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowQrCode(true)}
+                                    className="sp02-control-btn"
+                                    title="QR Code Presensi"
+                                >
+                                    <i className="fas fa-qrcode" />
+                                </button>
+                            )}
+
+                            {/* FULLSCREEN MODE TOGGLER */}
+                            <button 
+                                type="button" 
+                                onClick={toggleFs} 
+                                className="sp02-control-btn"
+                                title="Fullscreen"
+                            >
+                                <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'}`} />
+                            </button>
+
+                            {/* AUDIO BACKSOUND CONTROLLER */}
+                            {invitation?.music_url && (
+                                <button 
+                                    type="button" 
+                                    onClick={togglePlay}
+                                    className={`sp02-control-btn ${isPlaying ? 'is-active' : ''}`}
+                                    title={isPlaying ? "Mute" : "Play music"}
+                                >
+                                    {isPlaying ? (
+                                        <div className="global-music-waves">
+                                            <span />
+                                            <span />
+                                            <span />
+                                        </div>
+                                    ) : (
+                                        <i className="fas fa-volume-mute" />
+                                    )}
+                                </button>
+                            )}
+
+                            {/* AUTO SCROLL TOGGLER */}
+                            <button 
+                                type="button" 
+                                onClick={() => setAutoScroll(!autoScroll)}
+                                className={`sp02-control-btn ${autoScroll ? 'is-active' : ''}`}
+                                title="Auto Scroll"
+                            >
+                                <i className="fas fa-chevron-down" style={{ transform: autoScroll ? 'none' : 'rotate(-90deg)', transition: 'transform 0.3s' }} />
+                            </button>
+                        </div>
+
+                        {/* 4. PREMIUM COMPACT NAVIGATION FLOATING BAR */}
+                        <div className="sp02-nav-bar">
+                            {resolvedSections.map((sec, i) => {
+                                const key = sec.section_key;
+                                const isCurrent = activeSectionKey === key;
+                                
+                                let navIcon = 'fa-star';
+                                if (key === 'opening') navIcon = 'fa-star';
+                                else if (key === 'bride_groom') navIcon = 'fa-heart';
+                                else if (key === 'event') navIcon = 'fa-calendar-alt';
+                                else if (key === 'countdown') navIcon = 'fa-clock';
+                                else if (key === 'love_story') navIcon = 'fa-book-open';
+                                else if (key === 'gallery') navIcon = 'fa-images';
+                                else if (key === 'livestream') navIcon = 'fa-video';
+                                else if (key === 'bank') navIcon = 'fa-gift';
+                                else if (key === 'rsvp') navIcon = 'fa-envelope-open-text';
+                                else if (key === 'closing') navIcon = 'fa-handshake';
+
+                                return (
+                                    <button 
+                                        key={sec.id}
+                                        type="button"
+                                        onClick={() => jumpToSection(key)}
+                                        className={`sp02-nav-item ${isCurrent ? 'is-active' : ''}`}
+                                        title={sec.section_name}
+                                    >
+                                        <i className={`fas ${navIcon}`} />
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </ErrorBoundary>
+    );
+}

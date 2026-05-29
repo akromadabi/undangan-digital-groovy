@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+
 
 /* ─── Helpers ─── */
 function safeArr(val) {
@@ -1653,6 +1655,7 @@ function ViteGptThemeContent({ invitation, sections, brideGrooms, events, wishes
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const slideContainerRef = useRef(null);
     const viewportRef = useRef(null);
 
@@ -2210,7 +2213,15 @@ function ViteGptThemeContent({ invitation, sections, brideGrooms, events, wishes
                                 </button>
                                 {invitation?.music_url && (
                                     <button type="button" className={`gpt-btn-float gpt-music-btn-float ${isPlaying ? 'playing' : ''}`} onClick={toggleMusic} title="Toggle Music">
-                                        <i className={isPlaying ? "fas fa-music gpt-music-spin" : "fas fa-volume-mute"} />
+                                        {isPlaying ? (
+                                            <div className="global-music-waves">
+                                                <span />
+                                                <span />
+                                                <span />
+                                            </div>
+                                        ) : (
+                                            <i className="fas fa-volume-mute" />
+                                        )}
                                     </button>
                                 )}
                                 {enableQr && activeGuest && (

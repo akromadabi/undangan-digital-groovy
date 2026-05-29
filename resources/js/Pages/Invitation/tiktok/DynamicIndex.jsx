@@ -2,6 +2,7 @@ import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useForm } from '@inertiajs/react';
 import './style.css';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 
 /* ─── Standard Blueprint Helpers ─── */
@@ -1804,6 +1805,7 @@ export default function ViteTokTheme(props) {
     const [isFollowed, setIsFollowed] = useState(false); // Manages persistent sidebar red follow badge overlay state (menu samping seperti tiktok)
 
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const slideContainerRef = useRef(null);
 
     const activeLanguage = invitation?.default_locale || invitation?.language || 'id';
@@ -2297,7 +2299,15 @@ export default function ViteTokTheme(props) {
                                     style={isPlaying ? {} : { animationPlayState: 'paused' }}
                                 >
                                     <div className="ttk-cover__music-disc-inner">
-                                        <i className="fas fa-music" />
+                                        {isPlaying ? (
+                                            <div className="global-music-waves">
+                                                <span />
+                                                <span />
+                                                <span />
+                                            </div>
+                                        ) : (
+                                            <i className="fas fa-music" />
+                                        )}
                                     </div>
                                 </div>
                             </div>

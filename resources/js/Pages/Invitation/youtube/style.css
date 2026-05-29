@@ -51,7 +51,7 @@
 
 /* Global transitions & scroll behaviour */
 .yt-invitation-body {
-    padding-top: 82px; /* Space for Notch HeaderBar */
+    padding-top: 60px; /* Space for Notch HeaderBar */
     padding-bottom: 80px; /* Clear fixed bottom menu */
     overflow-y: auto;
 }
@@ -107,8 +107,7 @@
 
 /* ─── Header Bar Component (yt-header) ─── */
 .yt-header {
-    height: 82px;
-    padding-top: 26px;
+    height: 60px;
     background-color: var(--yt-bg);
     border-bottom: 1px solid var(--yt-border);
     display: flex;
@@ -264,7 +263,7 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    padding-top: 82px;
+    padding-top: 60px;
 }
 
 .yt-cover.is-opened {

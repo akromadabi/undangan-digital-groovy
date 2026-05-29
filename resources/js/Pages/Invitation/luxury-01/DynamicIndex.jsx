@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+
 
 // Import theme assets via Vite
 import logoDana from './asset/dana-logo.png';
@@ -225,6 +227,7 @@ export default function DynamicIndex({
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     
@@ -1530,7 +1533,15 @@ export default function DynamicIndex({
                             onClick={onToggleMusic}
                             title="Play/Pause Musik"
                         >
-                            <i className={isPlaying ? "fas fa-music" : "fas fa-volume-xmark"} />
+                            {isPlaying ? (
+                                <div className="global-music-waves">
+                                    <span />
+                                    <span />
+                                    <span />
+                                </div>
+                            ) : (
+                                <i className="fas fa-volume-mute" />
+                            )}
                         </button>
                     </div>
 

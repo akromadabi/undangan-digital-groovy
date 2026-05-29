@@ -13,7 +13,7 @@ class NetflixThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'netflix'],
             [
-                'name' => 'Netflix Premium',
+                'name' => 'Wedflix Premium',
                 'thumbnail' => '/themes/modern-black/thumbnail.jpg', // Placeholder since there is no thumbnail.webp in the asset dir
                 'category' => 'modern',
                 'color_scheme' => [

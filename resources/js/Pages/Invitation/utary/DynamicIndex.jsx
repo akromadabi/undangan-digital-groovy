@@ -4,6 +4,7 @@ import { Head, useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
 
 // Asset imports
 import ornamentLeft from './asset/ornament-left.webp';
@@ -1462,9 +1463,11 @@ function Navigation({
                     )}
                     <button type="button" className="utary-floating__btn" onClick={onToggleMusic} title="Music">
                         {isPlaying ? (
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/>
-                            </svg>
+                            <div className="global-music-waves">
+                                <span />
+                                <span />
+                                <span />
+                            </div>
                         ) : (
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -1537,6 +1540,7 @@ export default function Utary({ invitation, sections, brideGrooms, events, galle
     const [activeSlideIdx, setActiveSlideIdx] = useState(0);
     const [activeSection, setActiveSection] = useState('opening');
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
     const [isFullscreen, setIsFullscreen] = useState(false);
 

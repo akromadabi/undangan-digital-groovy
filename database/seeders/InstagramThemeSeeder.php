@@ -13,7 +13,7 @@ class InstagramThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'instagram'],
             [
-                'name' => 'Instagram Dark',
+                'name' => 'InstaVite Dark',
                 'thumbnail' => '/themes/instagram/thumbnail.png',
                 'preview_url' => '/themes/instagram/preview.png',
                 'category' => 'Premium',

@@ -12,7 +12,7 @@ return new class extends Migration
         // 1. Create or Update Theme
         $themeId = DB::table('themes')->insertGetId([
             'slug' => 'youtube',
-            'name' => 'YouTube Red',
+            'name' => 'YouInvite Red',
             'thumbnail' => '/themes/modern-black/thumbnail.jpg', // Default placeholder
             'category' => 'modern',
             'color_scheme' => json_encode([

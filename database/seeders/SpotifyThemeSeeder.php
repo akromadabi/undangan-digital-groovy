@@ -13,7 +13,7 @@ class SpotifyThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'spotify'],
             [
-                'name' => 'Spotify Neon',
+                'name' => 'Spotivite Neon',
                 'thumbnail' => '/themes/spotify/thumbnail.png',
                 'preview_url' => '/themes/spotify/preview.png',
                 'category' => 'Premium',

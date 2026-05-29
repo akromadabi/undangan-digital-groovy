@@ -13,7 +13,7 @@ class ChatgptThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'chatgpt'],
             [
-                'name' => 'ChatGPT AI',
+                'name' => 'ViteGPT AI',
                 'thumbnail' => '/themes/chatgpt/thumbnail.png',
                 'preview_url' => '/themes/chatgpt/preview.png',
                 'category' => 'Premium',

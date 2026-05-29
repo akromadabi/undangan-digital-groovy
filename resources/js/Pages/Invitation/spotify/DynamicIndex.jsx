@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
 
 /* ─── Helpers ─── */
 function safeArr(val) {
@@ -1449,7 +1450,15 @@ function BottomPlayer({ invitation, brideGrooms, isPlaying, onTogglePlay, isSlid
                     onClick={onTogglePlay}
                     title={isPlaying ? 'Mute Music' : 'Play Music'}
                 >
-                    <i className={isPlaying ? "fas fa-pause" : "fas fa-play"} />
+                    {isPlaying ? (
+                        <div className="global-music-waves">
+                            <span />
+                            <span />
+                            <span />
+                        </div>
+                    ) : (
+                        <i className="fas fa-play" />
+                    )}
                 </button>
                 {isSlideMode && (
                     <button className="spty-player__btn spty-player__btn--next" type="button" onClick={onNextSlide} title="Next Section">
@@ -1491,6 +1500,7 @@ function SpotiviteThemeContent({ invitation, sections, brideGrooms, events, gall
     const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
 
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const slideContainerRef = useRef(null);
 
     const layoutMode = invitation?.layout_mode || 'scroll';

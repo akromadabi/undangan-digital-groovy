@@ -492,7 +492,44 @@ Sesuaikan seluruh sebutan statis bertema pernikahan di dalam JSX agar lebih umum
 
 ---
 
-## 8. Rujukan Referensi Kode Terbaik
+## 8. Standar Musik Latar & Kontrol Animasi Gelombang (Music Equalizer)
+
+Setiap tema wajib mematuhi standar terpadu untuk pemutaran musik latar dan visualisasi status pemutaran:
+
+### 8.1 Kontrol Halaman Tidak Aktif (Page Visibility API)
+Untuk memastikan kenyamanan pengguna, setiap tema **WAJIB** menggunakan custom hook `usePageVisibilityAudio` untuk menghentikan musik saat tab browser ditinggalkan/diminimalkan dan memutarnya kembali saat pengguna kembali ke halaman undangan:
+```js
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+
+// Di dalam komponen utama DynamicIndex:
+const audioRef = useRef(null);
+const [isPlaying, setIsPlaying] = useState(false);
+
+// Integrasikan hook di bawah inisialisasi state audio
+usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
+```
+
+### 8.2 Animasi Gelombang Equalizer Default (.global-music-waves)
+Tombol kontrol musik mengambang (floating music button) tidak boleh hanya menampilkan ikon musik statis atau berputar saat musik sedang dimainkan. Wajib menampilkan animasi equalizer gelombang 3-bar dinamis menggunakan markup global berikut:
+```jsx
+// Di dalam render tombol musik:
+<button type="button" className="..." onClick={toggleMusic}>
+    {isPlaying ? (
+        <div className="global-music-waves">
+            <span />
+            <span />
+            <span />
+        </div>
+    ) : (
+        <i className="fas fa-volume-mute" />
+    )}
+</button>
+```
+*Catatan Desain*: Animasi gelombang ini menggunakan `background-color: currentColor`, sehingga secara otomatis akan mewarisi warna teks/ikon tombol yang bersangkutan pada tema masing-masing.
+
+---
+
+## 9. Rujukan Referensi Kode Terbaik
 
 | Nama Tema | Direktori File Utama | Keunggulan Utama Sebagai Standard Referensi |
 |---|---|---|
@@ -501,3 +538,4 @@ Sesuaikan seluruh sebutan statis bertema pernikahan di dalam JSX agar lebih umum
 
 *Dokumen ini adalah standarisasi mutlak. Jika tema baru Anda memiliki perilaku yang berbeda dari aturan di atas, Anda telah melanggar blueprint dan wajib merevisinya kembali.*
 *Terakhir diperbarui: Mei 2026*
+

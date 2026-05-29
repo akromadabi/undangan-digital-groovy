@@ -322,4 +322,29 @@ html {
     }
 }
 
+/* ═══════════════════════════════════════
+   GLOBAL MUSIC WAVES COMPONENT (MANCHESTER UNITED STYLE)
+   ═══════════════════════════════════════ */
+.global-music-waves {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 13px;
+    vertical-align: middle;
+}
+.global-music-waves span {
+    width: 2.5px;
+    background-color: currentColor; /* inherits the icon/text color dynamically! */
+    animation: global-wave-bar 1s infinite alternate;
+}
+.global-music-waves span:nth-child(1) { height: 100%; animation-delay: 0.1s; }
+.global-music-waves span:nth-child(2) { height: 60%; animation-delay: 0.4s; }
+.global-music-waves span:nth-child(3) { height: 80%; animation-delay: 0.2s; }
+
+@keyframes global-wave-bar {
+    0% { height: 2px; }
+    100% { height: 100%; }
+}
+
+
 

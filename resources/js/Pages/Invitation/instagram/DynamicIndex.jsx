@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+
 
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 
@@ -1538,6 +1540,7 @@ function InstaViteThemeContent({ invitation, sections, brideGrooms, events, wish
     const [activeProfileStory, setActiveProfileStory] = useState(null);
 
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const slideContainerRef = useRef(null);
 
     const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
@@ -1827,7 +1830,15 @@ function InstaViteThemeContent({ invitation, sections, brideGrooms, events, wish
                             </button>
                             {invitation?.music_url && (
                                 <button onClick={toggleMusic} className={`ig-btn-float ig-music-btn-float ${isPlaying ? 'playing' : ''}`} title={isPlaying ? "Pause Music" : "Play Music"}>
-                                    <i className={isPlaying ? "fas fa-music ig-music-disc-spin" : "fas fa-volume-mute"} />
+                                    {isPlaying ? (
+                                        <div className="global-music-waves">
+                                            <span />
+                                            <span />
+                                            <span />
+                                        </div>
+                                    ) : (
+                                        <i className="fas fa-volume-mute" />
+                                    )}
                                 </button>
                             )}
                             {enableQr && activeGuest && activeGuest.slug && (

@@ -2,6 +2,7 @@ import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useForm } from '@inertiajs/react';
 import './style.css';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
 
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 
@@ -201,21 +202,15 @@ function HeaderBar({ isSingleHost, mainName, isOpened, onOpen }) {
                     <span className="yt-header__logo-country">ID</span>
                 </div>
             </div>
-            
-            <div className="yt-header__center">
-                <div className="yt-header__search-box">
-                    <input type="text" placeholder="Search" disabled />
-                    <button type="button" className="yt-header__search-btn">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M20.87 20.17l-5.14-5.14a7.92 7.92 0 10-.7.7l5.14 5.14a.5.5 0 00.7 0l.01-.01a.5.5 0 000-.7zM4 10a6 6 0 116 6 6 6 0 01-6-6z"/></svg>
-                    </button>
-                </div>
-            </div>
 
             <div className="yt-header__right">
-                <button type="button" className="yt-header__action-btn">
+                <button type="button" className="yt-header__action-btn" title="Create">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2zm9-1c0 5.5-4.5 10-10 10S3 17.5 3 12 7.5 2 13 2s10 4.5 10 10zm-1 0c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9 9-4.03 9-9z"/></svg>
                 </button>
-                <button type="button" className="yt-header__action-btn">
+                <button type="button" className="yt-header__action-btn" title="Search">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20.87 20.17l-5.14-5.14a7.92 7.92 0 10-.7.7l5.14 5.14a.5.5 0 00.7 0l.01-.01a.5.5 0 000-.7zM4 10a6 6 0 116 6 6 6 0 01-6-6z"/></svg>
+                </button>
+                <button type="button" className="yt-header__action-btn" title="Notifications">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M10 20h4c0 1.1-.9 2-2 2s-2-.9-2-2zm10-2.5V19H4v-1.5L6 16v-5c0-3.07 1.64-5.64 4.5-6.32V4c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v.68C16.36 5.36 18 7.92 18 11v5l2 1.5zm-1.88-1.54L17 14.84V11c0-2.31-1.34-4.22-3.66-4.78C12.87 6.11 12.44 6 12 6c-.44 0-.87.11-1.34.22C8.34 6.78 7 8.69 7 11v3.84l-1.12 1.12C5.35 16.48 5.11 17 5 17h14c-.11 0-.35-.52-.88-1.04z"/></svg>
                 </button>
                 {!isOpened ? (
@@ -695,7 +690,19 @@ function LoveStorySection({ loveStories, id, invitation }) {
 function GallerySection({ galleries }) {
     const { t } = useTranslation();
     const safeGalleries = safeArr(galleries);
+    const [activeIdx, setActiveIdx] = useState(null);
+
     if (safeGalleries.length === 0 || !globalShowPhotos) return null;
+
+    const handlePrev = (e) => {
+        e.stopPropagation();
+        setActiveIdx((prev) => (prev === 0 ? safeGalleries.length - 1 : prev - 1));
+    };
+
+    const handleNext = (e) => {
+        e.stopPropagation();
+        setActiveIdx((prev) => (prev === safeGalleries.length - 1 ? 0 : prev + 1));
+    };
 
     return (
         <section id="gallery" className="yt-gallery-section">
@@ -709,11 +716,11 @@ function GallerySection({ galleries }) {
                     const src = getStorageUrl(g.image_url, dummyPortrait);
                     return (
                         <Reveal key={idx} delay={(idx % 4) * 60} className="yt-gallery-item-card">
-                            <div className="yt-gallery-img-box">
+                            <div className="yt-gallery-img-box" onClick={() => setActiveIdx(idx)} style={{ cursor: 'pointer' }}>
                                 <img src={src} alt={`Foto Galeri ${idx + 1}`} loading="lazy" />
                                 <span className="yt-gallery-duration">4:12</span>
                             </div>
-                            <div className="yt-gallery-item-info">
+                            <div className="yt-gallery-item-info" onClick={() => setActiveIdx(idx)} style={{ cursor: 'pointer' }}>
                                 <div className="yt-channel-avatar mini">G</div>
                                 <div className="yt-gallery-item-meta">
                                     <h5 className="yt-gallery-item-title">Momen Indah Galeri Kami Video #{idx + 1}</h5>
@@ -724,12 +731,157 @@ function GallerySection({ galleries }) {
                     );
                 })}
             </div>
+
+            {/* Lightbox / Theater Mode Modal */}
+            {activeIdx !== null && (
+                <div 
+                    className="yt-gallery-lightbox animate-in fade-in duration-200"
+                    onClick={() => setActiveIdx(null)}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                        zIndex: 15000,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '16px'
+                    }}
+                >
+                    {/* Close button */}
+                    <button 
+                        type="button"
+                        onClick={() => setActiveIdx(null)}
+                        style={{
+                            position: 'absolute',
+                            top: '20px',
+                            right: '20px',
+                            background: 'rgba(255, 255, 255, 0.15)',
+                            border: 'none',
+                            color: '#FFF',
+                            fontSize: '28px',
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 15100
+                        }}
+                    >
+                        &times;
+                    </button>
+
+                    {/* Prev button */}
+                    <button 
+                        type="button"
+                        onClick={handlePrev}
+                        style={{
+                            position: 'absolute',
+                            left: '20px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: 'none',
+                            color: '#FFF',
+                            fontSize: '32px',
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 15100,
+                            userSelect: 'none'
+                        }}
+                    >
+                        &#8249;
+                    </button>
+
+                    {/* Next button */}
+                    <button 
+                        type="button"
+                        onClick={handleNext}
+                        style={{
+                            position: 'absolute',
+                            right: '20px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: 'none',
+                            color: '#FFF',
+                            fontSize: '32px',
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 15100,
+                            userSelect: 'none'
+                        }}
+                    >
+                        &#8250;
+                    </button>
+
+                    {/* Active Image container */}
+                    <div 
+                        style={{
+                            position: 'relative',
+                            maxWidth: '100%',
+                            maxHeight: '80vh',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img 
+                            src={getStorageUrl(safeGalleries[activeIdx].image_url, dummyPortrait)} 
+                            alt={`Foto ${activeIdx + 1}`} 
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '75vh',
+                                objectFit: 'contain',
+                                borderRadius: '8px',
+                                border: '2px solid rgba(255, 255, 255, 0.1)',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
+                            }}
+                        />
+                    </div>
+
+                    {/* Caption under Image */}
+                    <div 
+                        style={{
+                            marginTop: '16px',
+                            color: '#AAA',
+                            fontSize: '14px',
+                            textAlign: 'center',
+                            maxWidth: '90%',
+                            fontFamily: 'Roboto, sans-serif'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ color: '#FFF', fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>
+                            Momen Indah Galeri Kami Video #{activeIdx + 1}
+                        </div>
+                        <div>Recommended for you • YouInvite HD</div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
 
 /* ─── Live Streaming Section (YouInvite Broadcast Style) ─── */
-function LiveStreamingSection({ events, invitation, id }) {
+function LiveStreamingSection({ events, invitation, id, galleries }) {
     const { t } = useTranslation();
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
     
@@ -748,6 +900,12 @@ function LiveStreamingSection({ events, invitation, id }) {
     if (streamsList.length === 0) return null;
 
     const isEn = t('invitation.save_the_date') === 'Save The Date';
+    
+    // Pick the first photo from galleries, or use a high-quality wedding photo from Unsplash
+    const list = safeArr(galleries);
+    const coverPhoto = list.length > 0 
+        ? getStorageUrl(list[0].image_url) 
+        : 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800';
 
     return (
         <section id={id || "livestream"} className="yt-livestream-section">
@@ -761,13 +919,13 @@ function LiveStreamingSection({ events, invitation, id }) {
             </h3>
             
             <div className="yt-livestream-box">
-                <div className="yt-livestream-preview">
+                <div className="yt-livestream-preview" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${coverPhoto})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                     <div className="yt-livestream-badge">
                         <span className="yt-dot-red animate-ping" />
                         <span>UPCOMING LIVE</span>
                     </div>
                     <div className="yt-livestream-icon">
-                        <svg viewBox="0 0 24 24" width="48" height="48" fill="#FF0000">
+                        <svg viewBox="0 0 24 24" width="48" height="48" fill="#FF0000" style={{ filter: 'drop-shadow(0px 4px 10px rgba(0,0,0,0.6))' }}>
                             <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
                         </svg>
                     </div>
@@ -1017,36 +1175,88 @@ function BankSection({ bankAccounts, id }) {
                 {accounts.map((bank, idx) => {
                     // YouInvite Super Chat colors (yellow, green, blue, orange, red)
                     const colors = [
-                        { bg: '#00e5ff', text: '#000000', headerBg: '#00b0ff' }, // Blue
-                        { bg: '#ffd600', text: '#000000', headerBg: '#ffea00' }, // Yellow
-                        { bg: '#1de9b6', text: '#000000', headerBg: '#00bfa5' }, // Green
-                        { bg: '#e65100', text: '#ffffff', headerBg: '#e65100' }, // Orange
+                        { bg: '#00e5ff', text: '#000000', headerBg: '#00b0ff', avatarBg: '#00838f', msg: 'Selamat menempuh hidup baru ya Rian & Amelia! Dari sahabat terbaikmu. 🤵👰✨' }, // Blue
+                        { bg: '#ffd600', text: '#000000', headerBg: '#ffb300', avatarBg: '#f57f17', msg: 'Semoga lancar acaranya dan menjadi keluarga sakinah mawaddah warahmah! 💸❤️' }, // Yellow
+                        { bg: '#1de9b6', text: '#000000', headerBg: '#00bfa5', avatarBg: '#00695c', msg: 'Happy Wedding! Semoga cinta kalian abadi selamanya sampai kakek nenek. 🎉🥳' }, // Green
+                        { bg: '#f44336', text: '#ffffff', headerBg: '#d32f2f', avatarBg: '#b71c1c', msg: 'Barakallahu lakum wa baraka alaikum wa jamaa bainakuma fii khair! 🌸💍' }, // Red
                     ];
                     const theme = colors[idx % colors.length];
 
                     return (
-                        <Reveal key={idx} delay={idx * 100} className="yt-superchat-card" style={{ borderColor: theme.headerBg }}>
-                            {/* Super Chat Header (Bank Account Owner) */}
-                            <div className="yt-superchat-header" style={{ backgroundColor: theme.headerBg, color: theme.text }}>
-                                <span className="yt-superchat-bank-name">{bank.bank_name || 'Bank'}</span>
-                                <span className="yt-superchat-amount">KADO DIGITAL</span>
+                        <Reveal key={idx} delay={idx * 100} className="yt-superchat-card" style={{ borderColor: theme.headerBg, marginBottom: '12px' }}>
+                            {/* Super Chat Header (Bank Account Info Styled as Creator/Donor details) */}
+                            <div className="yt-superchat-header" style={{ backgroundColor: theme.headerBg, color: theme.text, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {/* User Initial / Avatar */}
+                                <div style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '50%',
+                                    backgroundColor: theme.avatarBg,
+                                    color: '#fff',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '15px',
+                                    fontWeight: 'bold',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                                    flexShrink: 0
+                                }}>
+                                    {bank.bank_name?.charAt(0) || 'B'}
+                                </div>
+                                
+                                {/* Info details */}
+                                <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 'bold', color: theme.text }}>
+                                        <span className="truncate">{bank.bank_name || 'Bank'}</span>
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill={theme.text === '#000000' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.8)'} style={{ flexShrink: 0 }}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                    </div>
+                                    <div style={{ fontSize: '10px', opacity: 0.75, fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>SUPER CHAT • KADO DIGITAL</div>
+                                </div>
+                                
+                                {/* Amount Style (Number) */}
+                                <div style={{ fontSize: '14px', fontWeight: 'bold', fontFamily: 'monospace', color: theme.text, flexShrink: 0 }}>
+                                    {bank.account_number}
+                                </div>
                             </div>
                             
-                            {/* Super Chat Body (Account Details) */}
-                            <div className="yt-superchat-body" style={{ backgroundColor: theme.bg, color: theme.text }}>
-                                <div className="yt-superchat-info-row">
-                                    <span className="yt-superchat-owner-name">{bank.account_name}</span>
-                                    <strong className="yt-superchat-number block text-sm tracking-widest mt-1 select-all">{bank.account_number}</strong>
-                                </div>
+                            {/* Super Chat Body */}
+                            <div className="yt-superchat-body" style={{ backgroundColor: theme.bg, color: theme.text, padding: '12px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    {/* Atas Nama Owner */}
+                                    <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.75, fontWeight: 'bold' }}>
+                                        Atas Nama: <span style={{ color: theme.text === '#000000' ? '#000' : '#fff' }}>{bank.account_name}</span>
+                                    </div>
+                                    
+                                    {/* Message */}
+                                    <div style={{ fontSize: '13px', lineHeight: '1.4', fontStyle: 'normal', margin: '2px 0 8px 0', opacity: 0.9 }}>
+                                        "{theme.msg}"
+                                    </div>
 
-                                <button
-                                    type="button"
-                                    onClick={() => copyToClipboard(bank.account_number, idx)}
-                                    className="yt-superchat-copy-btn"
-                                    style={{ backgroundColor: theme.text === '#000000' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)' }}
-                                >
-                                    {copiedIdx === idx ? 'Copied!' : 'Copy Account Number'}
-                                </button>
+                                    {/* Copy Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => copyToClipboard(bank.account_number, idx)}
+                                        style={{
+                                            border: 'none',
+                                            borderRadius: '18px',
+                                            padding: '6px 14px',
+                                            fontSize: '11px',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            alignSelf: 'flex-start',
+                                            backgroundColor: theme.text === '#000000' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.18)',
+                                            color: theme.text,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            transition: 'background-color 0.2s',
+                                            outline: 'none'
+                                        }}
+                                    >
+                                        <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                        <span>{copiedIdx === idx ? 'Disalin!' : 'Salin Nomor Rekening'}</span>
+                                    </button>
+                                </div>
                             </div>
                         </Reveal>
                     );
@@ -1074,15 +1284,18 @@ function ClosingSection({ invitation, brideGrooms }) {
     const groomPhoto = getStorageUrl(bgs.find(b => b.gender === 'pria')?.photo || host.photo, dummyPortrait);
     const coverImg = getStorageUrl(invitation?.cover_image?.split(',')[0], dummyCover);
 
+    const groom = bgs.find(b => b.gender === 'pria' || b.gender === 'male' || String(b.gender).toLowerCase() === 'pria' || String(b.gender).toLowerCase() === 'male') || bgs[0] || {};
+    const bride = bgs.find(b => b.gender === 'wanita' || b.gender === 'female' || String(b.gender).toLowerCase() === 'wanita' || String(b.gender).toLowerCase() === 'female') || bgs[1] || bgs[0] || {};
+
     return (
-        <section className="yt-closing-section">
+        <section className="yt-closing-section" style={{ borderBottom: 'none' }}>
             <h3 className="yt-section-title-bar mb-4">
                 <span className="yt-red-pill-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></span>
                 <span>Terima Kasih - End Screen</span>
             </h3>
 
             {/* End Screen Grid Simulator */}
-            <div className="yt-endscreen-container" style={{ position: 'relative', width: 'calc(100% - 32px)', margin: '0 auto', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden', boxSizing: 'border-box' }}>
+            <div className="yt-endscreen-container" style={{ position: 'relative', width: 'calc(100% - 32px)', margin: '0 auto 24px auto', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden', boxSizing: 'border-box' }}>
                 {/* Blurred Video Freeze frame as background */}
                 <div className="yt-endscreen-bg-img" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: `url(${coverImg})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(6px) brightness(0.35)', zIndex: 1 }} />
                 
@@ -1127,7 +1340,72 @@ function ClosingSection({ invitation, brideGrooms }) {
                 </div>
             </div>
 
-            <p className="yt-closing-signature mt-6">
+            {/* Kami Yang Berbahagia & Turut Mengundang Section */}
+            <div style={{ padding: '20px 16px', backgroundColor: 'var(--yt-card-bg)', borderRadius: '12px', border: '1px solid var(--yt-border)', textAlign: 'center', boxSizing: 'border-box', width: 'calc(100% - 32px)', margin: '0 auto 24px auto' }}>
+                {/* Kami Yang Berbahagia */}
+                <h4 style={{ color: 'var(--yt-red)', fontSize: '13px', fontWeight: 'bold', margin: '0 0 16px 0', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Kami Yang Berbahagia
+                </h4>
+                
+                {!isSingleHost ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '8px' }}>
+                        <div>
+                            <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#FFF' }}>Keluarga Besar Bapak & Ibu</div>
+                            <div style={{ fontSize: '13px', color: 'var(--yt-grey)', marginTop: '3px', fontWeight: '500' }}>
+                                {[groom.father_name, groom.mother_name].filter(Boolean).join(' & ') || groom.parents_name || 'Orang Tua Mempelai Pria'}
+                            </div>
+                        </div>
+                        
+                        <div style={{ fontSize: '14px', color: 'var(--yt-grey)', fontStyle: 'italic', margin: '2px 0' }}>&</div>
+                        
+                        <div>
+                            <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#FFF' }}>Keluarga Besar Bapak & Ibu</div>
+                            <div style={{ fontSize: '13px', color: 'var(--yt-grey)', marginTop: '3px', fontWeight: '500' }}>
+                                {[bride.father_name, bride.mother_name].filter(Boolean).join(' & ') || bride.parents_name || 'Orang Tua Mempelai Wanita'}
+                            </div>
+                        </div>
+                        
+                        <div style={{ marginTop: '12px', fontSize: '16px', fontWeight: 'bold', color: '#FFF', borderTop: '1px dashed var(--yt-border)', paddingTop: '12px' }}>
+                            {groom.nickname || groom.full_name} & {bride.nickname || bride.full_name}
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ marginBottom: '8px' }}>
+                        <div style={{ fontSize: '15px', fontWeight: 'bold', color: '#FFF' }}>
+                            {host.full_name}
+                        </div>
+                        {host.parents_name && (
+                            <div style={{ fontSize: '13px', color: 'var(--yt-grey)', marginTop: '4px' }}>
+                                Keluarga Besar {host.parents_name}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Turut Mengundang (Only show if invitation?.turut_mengundang_text is defined) */}
+                {invitation?.turut_mengundang_text && (
+                    <div style={{ borderTop: '1px solid var(--yt-border)', paddingTop: '16px', marginTop: '20px' }}>
+                        <h4 style={{ color: 'var(--yt-red)', fontSize: '13px', fontWeight: 'bold', margin: '0 0 12px 0', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                            Turut Mengundang
+                        </h4>
+                        <div style={{ 
+                            fontSize: '13px', 
+                            color: 'var(--yt-grey)', 
+                            lineHeight: '1.6', 
+                            whiteSpace: 'pre-line',
+                            textAlign: 'center',
+                            maxHeight: '180px',
+                            overflowY: 'auto',
+                            padding: '0 4px',
+                            fontFamily: 'Roboto, sans-serif'
+                        }}>
+                            {invitation.turut_mengundang_text}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <p className="yt-closing-signature" style={{ margin: '0 auto 16px auto', fontSize: '13px', color: 'var(--yt-grey)', fontStyle: 'italic' }}>
                 Terima kasih atas kehadiran & doa restu Anda.
             </p>
         </section>
@@ -1224,6 +1502,7 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
     };
 
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
 
     // Save global photos/animations override state on initial render
     useEffect(() => {
@@ -1258,35 +1537,40 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
     const scrollToSection = (id) => {
         const el = document.getElementById(id);
         if (el) {
-            const offset = el.offsetTop - 82; // offset for dynamic island header
+            const offset = el.offsetTop - 60; // offset for dynamic island header
             window.scrollTo({ top: offset, behavior: 'smooth' });
             setActiveSection(id);
         }
     };
 
-    // Auto scroll logic
-    const toggleAutoScroll = () => {
+    // Auto scroll logic managed via useEffect to avoid instant clearInterval on state re-render
+    useEffect(() => {
         if (isAutoScrolling) {
-            if (autoScrollInterval.current) clearInterval(autoScrollInterval.current);
-            setIsAutoScrolling(false);
-        } else {
-            setIsAutoScrolling(true);
             const scrollSpeed = 1;
             autoScrollInterval.current = setInterval(() => {
                 window.scrollBy({ top: scrollSpeed, behavior: 'auto' });
                 if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 2) {
-                    if (autoScrollInterval.current) clearInterval(autoScrollInterval.current);
                     setIsAutoScrolling(false);
                 }
             }, 30);
+        } else {
+            if (autoScrollInterval.current) {
+                clearInterval(autoScrollInterval.current);
+                autoScrollInterval.current = null;
+            }
         }
-    };
 
-    useEffect(() => {
         return () => {
-            if (autoScrollInterval.current) clearInterval(autoScrollInterval.current);
+            if (autoScrollInterval.current) {
+                clearInterval(autoScrollInterval.current);
+                autoScrollInterval.current = null;
+            }
         };
     }, [isAutoScrolling]);
+
+    const toggleAutoScroll = () => {
+        setIsAutoScrolling((prev) => !prev);
+    };
 
     // Handle background audio
     const handleAudioToggle = () => {
@@ -1448,7 +1732,11 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
                             {invitation?.music_url && (
                                 <button type="button" onClick={handleAudioToggle} className={`yt-dock-btn ${isPlaying ? 'playing' : ''}`} title="Mute/Unmute Audio">
                                     {isPlaying ? (
-                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                                        <div className="global-music-waves">
+                                            <span />
+                                            <span />
+                                            <span />
+                                        </div>
                                     ) : (
                                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
                                     )}
@@ -1538,6 +1826,7 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
                                                 key="livestream"
                                                 events={events}
                                                 invitation={invitation}
+                                                galleries={galleries}
                                             />
                                         );
                                     case 'rsvp':

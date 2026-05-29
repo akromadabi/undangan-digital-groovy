@@ -4,6 +4,7 @@ import { useForm, Head } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
 
 // Import theme assets via Vite
 import ornamenAtas from './asset/ornamen-atas.png';
@@ -1279,6 +1280,7 @@ export default function WayangTheme({
     const [showQr, setShowQr] = useState(false);
     const [activeSection, setActiveSection] = useState('opening');
     const audioRef = useRef(null);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     useEffect(() => {
@@ -1780,7 +1782,15 @@ export default function WayangTheme({
                                 style={isPlaying ? { animation: 'wy-rotating 12s linear infinite' } : undefined}
                                 title={isPlaying ? 'Hentikan Musik' : 'Putar Musik'}
                             >
-                                <i className={`fas ${isPlaying ? 'fa-music' : 'fa-volume-mute'}`} />
+                                {isPlaying ? (
+                                    <div className="global-music-waves">
+                                        <span />
+                                        <span />
+                                        <span />
+                                    </div>
+                                ) : (
+                                    <i className="fas fa-volume-mute" />
+                                )}
                             </button>
                         )}
                     </div>

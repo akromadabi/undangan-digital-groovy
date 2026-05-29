@@ -4,6 +4,8 @@ import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
+import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+
 // Removed official logo import for legal safety
 
 /* ─── Helpers ─── */
@@ -1516,6 +1518,7 @@ function UnitedInViteUnitedThemeContent({ invitation, sections, brideGrooms, eve
     // Audio ref setup
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
 
     // Dynamic state management
     const [isOpened, setIsOpened] = useState(false);

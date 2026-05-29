@@ -13,7 +13,7 @@ class ManchesterUnitedThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'manchester-united'],
             [
-                'name' => 'Manchester United',
+                'name' => 'UnitedInVite',
                 'thumbnail' => '/themes/manchester-united/thumbnail.png',
                 'preview_url' => '/themes/manchester-united/preview.png',
                 'category' => 'Premium',

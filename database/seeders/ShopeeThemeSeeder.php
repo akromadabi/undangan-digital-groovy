@@ -13,7 +13,7 @@ class ShopeeThemeSeeder extends Seeder
         $theme = Theme::updateOrCreate(
             ['slug' => 'shopee'],
             [
-                'name' => 'Shopee Checkout',
+                'name' => 'Shopinvity Checkout',
                 'thumbnail' => '/themes/shopee/thumbnail.webp',
                 'preview_url' => '/themes/shopee/preview.webp',
                 'category' => 'Premium',
