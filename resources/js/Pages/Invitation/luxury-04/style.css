@@ -2303,7 +2303,7 @@ div[style*="position: fixed"][style*="pointer-events: none"] svg ellipse {
    Mencegah gambar terkompresi / menyisakan area kosong hitam di seluler.
    Sangat aman dan 100% kompatibel dengan reposisi/kroping dashboard.
    ========================================================================== */
-.lx4-container img.lx4-couple__photo,
+.lx4-container img.lx4-mempelai-photo,
 .lx4-container .lx4-gallery-grid__item img,
 .lx4-container .lx4-cover__bg,
 .lx4-container .lx4-event-banner img,

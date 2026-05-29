@@ -1183,6 +1183,7 @@ function MusicButton({ isPlaying, onToggle }) {
    ═══════════════════════════════════════ */
 function WedflixThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
     const { t } = useTranslation(invitation?.language || 'id');
+    const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [showQr, setShowQr] = useState(false);

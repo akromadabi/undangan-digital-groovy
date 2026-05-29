@@ -1,0 +1,675 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Great+Vibes&display=swap');
+
+/* ═══════════════════════════════════════
+   THEME DESIGN CONFIG & VARIABLES
+   ═══════════════════════════════════════ */
+:root {
+  --sp03-primary: #2e3f54;
+  --sp03-primary-dark: #1a2837;
+  --sp03-secondary: #4a5a74;
+  --sp03-accent: #d7ac64;
+  --sp03-accent-light: #d5af6f;
+  --sp03-bg: #ffffff;
+  --sp03-bg-soft: #fffbf8;
+  --sp03-text: #40506b;
+  --sp03-text-light: #70809a;
+  
+  --sp03-font-heading: 'Cinzel', serif;
+  --sp03-font-body: 'Montserrat', sans-serif;
+  --sp03-font-script: 'Great Vibes', cursive;
+}
+
+/* ═══════════════════════════════════════
+   FONTS STYLING UTILITIES
+   ═══════════════════════════════════════ */
+.sp03-font-heading-style {
+  font-family: var(--sp03-font-heading) !important;
+}
+
+.sp03-font-script-style {
+  font-family: var(--sp03-font-script) !important;
+}
+
+/* ═══════════════════════════════════════
+   GLOBAL RESET & STRUCTURES
+   ═══════════════════════════════════════ */
+.sp03-theme-wrapper {
+  font-family: var(--sp03-font-body);
+  background-color: var(--sp03-bg-soft);
+  color: var(--sp03-text);
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sp03-section {
+  padding: 60px 20px 80px 20px;
+  position: relative;
+  width: 100%;
+  background-color: var(--sp03-bg);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+  margin-bottom: 20px;
+  border-radius: 30px;
+}
+
+.sp03-section:nth-child(even) {
+  background-color: var(--sp03-bg-soft);
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════
+   CUSTOM ANIMATIONS & TRANSLATIONS
+   ═══════════════════════════════════════ */
+.sp03-ani-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.sp03-ani-fadeUp {
+  animation: sp03-fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sp03-ani-scaleIn {
+  animation: sp03-scaleIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sp03-ani-fadeLeft {
+  animation: sp03-fadeLeft 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sp03-ani-fadeRight {
+  animation: sp03-fadeRight 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sp03-fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sp03-scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sp03-fadeLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes sp03-fadeRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Micro-animations breathing and pulsing */
+.sp03-breathe {
+  animation: sp03-breathe 4s ease-in-out infinite alternate;
+}
+
+@keyframes sp03-breathe {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.03);
+  }
+}
+
+.sp03-pulse-gold {
+  box-shadow: 0 0 0 0 rgba(215, 172, 100, 0.3);
+  animation: sp03-pulse-gold 2s infinite;
+}
+
+@keyframes sp03-pulse-gold {
+  70% {
+    box-shadow: 0 0 0 10px rgba(215, 172, 100, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(215, 172, 100, 0);
+  }
+}
+
+/* ═══════════════════════════════════════
+   IMAGE STANDARD STRICTION (Anti Black Gap)
+   ═══════════════════════════════════════ */
+.sp03-strict-cover {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* ═══════════════════════════════════════
+   COVER SCREEN STYLING
+   ═══════════════════════════════════════ */
+.sp03-cover {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transition: transform 1.5s cubic-bezier(0.86, 0, 0.07, 1), opacity 1.5s ease-in-out;
+  background-color: var(--sp03-primary-dark);
+}
+
+.sp03-cover.sp03-is-opened {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sp03-cover__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(46, 63, 84, 0.2) 0%, rgba(26, 40, 55, 0.92) 100%);
+  z-index: 1;
+}
+
+.sp03-cover__content {
+  text-align: center;
+  padding: 24px;
+  color: white;
+  width: 100%;
+  max-width: 460px;
+}
+
+/* ═══════════════════════════════════════
+   DIVIDERS & SWIRLS
+   ═══════════════════════════════════════ */
+.sp03-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 140px;
+}
+
+.sp03-divider-line {
+  height: 1px;
+  flex-grow: 1;
+  background-color: rgba(215, 172, 100, 0.3);
+}
+
+.sp03-divider-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--sp03-accent);
+}
+
+/* ═══════════════════════════════════════
+   COUPLING PROFILE CARDS
+   ═══════════════════════════════════════ */
+.sp03-mempelai-card {
+  background-color: var(--sp03-bg);
+  border: 1px solid rgba(215, 172, 100, 0.15);
+  box-shadow: 0 10px 30px rgba(74, 90, 116, 0.04);
+  border-radius: 24px;
+  padding: 30px 20px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.sp03-avatar-frame {
+  width: 140px;
+  height: 180px;
+  position: relative;
+}
+
+.sp03-avatar-frame-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 80px 80px 0 0;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  border: 4px solid white;
+  position: relative;
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════
+   EVENT STYLING CARDS
+   ═══════════════════════════════════════ */
+.sp03-event-card {
+  background-color: var(--sp03-bg);
+  border: 1px solid rgba(215, 172, 100, 0.12);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.015);
+  margin-top: 24px;
+}
+
+.sp03-event-banner {
+  height: 150px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.sp03-event-body {
+  padding: 24px;
+  text-align: left;
+}
+
+.sp03-event-date-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.sp03-event-date-num {
+  font-family: var(--sp03-font-heading);
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--sp03-primary);
+  line-height: 1;
+}
+
+.sp03-event-date-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.sp03-event-date-day {
+  font-weight: bold;
+  font-size: 13px;
+  color: var(--sp03-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ═══════════════════════════════════════
+   TIMELINE MILESTONES
+   ═══════════════════════════════════════ */
+.sp03-timeline {
+  position: relative;
+  padding-left: 24px;
+  border-left: 1px dashed rgba(215, 172, 100, 0.4);
+  text-align: left;
+  margin-left: 10px;
+  margin-top: 30px;
+}
+
+.sp03-timeline-item {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.sp03-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -29.5px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--sp03-accent);
+  border: 2px solid var(--sp03-bg-soft);
+  box-shadow: 0 0 0 3px rgba(215, 172, 100, 0.2);
+}
+
+.sp03-story-bubble {
+  background-color: var(--sp03-bg);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(215, 172, 100, 0.08);
+}
+
+.sp03-timeline-date {
+  font-family: var(--sp03-font-heading);
+  color: var(--sp03-accent);
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.sp03-timeline-title {
+  color: var(--sp03-primary);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* ═══════════════════════════════════════
+   PREMIUM BANKING GIFT CARDS
+   ═══════════════════════════════════════ */
+.sp03-bank-card {
+  background: linear-gradient(135deg, var(--sp03-primary-dark) 0%, var(--sp03-primary) 100%);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(26, 40, 55, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.sp03-bank-card::after {
+  content: '';
+  position: absolute;
+  right: -50px;
+  bottom: -50px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(215, 172, 100, 0.08);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.sp03-bank-card__number {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.sp03-bank-card__copy-btn {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 6px 16px;
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: var(--sp03-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.sp03-bank-card__copy-btn:hover {
+  background-color: var(--sp03-accent);
+  color: var(--sp03-primary-dark);
+  border-color: var(--sp03-accent);
+}
+
+/* ═══════════════════════════════════════
+   BUTTONS AND INPUT FIELD CONTROLS
+   ═══════════════════════════════════════ */
+.sp03-btn-primary {
+  background-color: var(--sp03-accent);
+  color: var(--sp03-primary-dark);
+  font-family: var(--sp03-font-heading);
+  font-weight: bold;
+  font-size: 12px;
+  padding: 12px 28px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(215, 172, 100, 0.25);
+  display: inline-flex;
+  align-items: center;
+}
+
+.sp03-btn-primary:hover {
+  background-color: var(--sp03-accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(215, 172, 100, 0.35);
+}
+
+.sp03-btn-primary:active {
+  transform: translateY(0);
+}
+
+.sp03-btn-secondary {
+  background-color: transparent;
+  color: var(--sp03-primary);
+  border: 1px solid rgba(74, 90, 116, 0.2);
+  font-family: var(--sp03-font-body);
+  font-weight: 600;
+  font-size: 11px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sp03-btn-secondary:hover {
+  background-color: var(--sp03-primary);
+  color: white;
+  border-color: var(--sp03-primary);
+}
+
+.sp03-card {
+  background-color: var(--sp03-bg);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(215, 172, 100, 0.08);
+}
+
+.sp03-input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: var(--sp03-bg-soft);
+  border: 1px solid rgba(74, 90, 116, 0.12);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--sp03-text);
+  outline: none;
+  font-family: var(--sp03-font-body);
+  transition: border-color 0.2s ease;
+}
+
+.sp03-input:focus {
+  border-color: var(--sp03-accent);
+  background-color: white;
+}
+
+.sp03-wishes-box {
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.sp03-wish-item {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(74, 90, 116, 0.06);
+  text-align: left;
+}
+
+.sp03-wish-item:last-child {
+  border-bottom: none;
+}
+
+.sp03-wish-sender {
+  font-size: 12px;
+}
+
+/* ═══════════════════════════════════════
+   FLOATING ACTION BUTTONS SIDE BAR
+   ═══════════════════════════════════════ */
+.sp03-control-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(46, 63, 84, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sp03-primary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.sp03-control-btn:hover {
+  background-color: var(--sp03-primary);
+  color: white;
+  transform: scale(1.08);
+}
+
+.sp03-control-btn.is-active {
+  background-color: var(--sp03-accent);
+  color: var(--sp03-primary-dark);
+  border-color: var(--sp03-accent);
+}
+
+/* ═══════════════════════════════════════
+   PREMIUM COMPACT NAVIGATION BOTTOM BAR
+   ═══════════════════════════════════════ */
+.sp03-nav-menu {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 480px;
+  background-color: rgba(26, 40, 55, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 8px 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 49;
+}
+
+.sp03-nav-menu__inner--row {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  gap: 4px;
+}
+
+.sp03-nav-menu__inner--row::-webkit-scrollbar {
+  display: none;
+}
+
+.sp03-nav-menu__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  padding: 6px;
+  border-radius: 12px;
+  flex: 1;
+  min-width: 45px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.sp03-nav-item-text {
+  font-size: 8px;
+  font-weight: 500;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.sp03-nav-menu__item.active {
+  color: var(--sp03-accent);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ═══════════════════════════════════════
+   MODALS AND PRESENSI CHECK-IN WINDOWS
+   ═══════════════════════════════════════ */
+.sp03-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.sp03-modal-card {
+  background-color: white;
+  border-radius: 24px;
+  box-shadow: 0 10px 45px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(215, 172, 100, 0.1);
+  animation: sp03-scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ═══════════════════════════════════════
+   LAYOUT SLIDE MODES (HORIZONTAL / VERTICAL)
+   ═══════════════════════════════════════ */
+.sp03-slide-mode-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.sp03-slide-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.8s cubic-bezier(0.86, 0, 0.07, 1);
+  transform: scale(0.95);
+  background-color: var(--sp03-bg-soft);
+}
+
+.sp03-slide-wrapper.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateY(0) translateX(0);
+  z-index: 10;
+}
+
+.sp03-slide-wrapper.is-next {
+  z-index: 5;
+}
+
+/* Horizontal slide offsets */
+.sp03-theme-wrapper:not(.theme-no-animations) .sp03-slide-mode-container .sp03-slide-wrapper.is-next {
+  transform: scale(0.95) translateX(100%);
+}
+
+.sp03-theme-wrapper:not(.theme-no-animations) .sp03-slide-mode-container .sp03-slide-wrapper.is-prev {
+  transform: scale(0.95) translateX(-100%);
+}
+
+/* ═══════════════════════════════════════
+   GLOBAL OVERRIDES (TANPA ANIMASI)
+   ═══════════════════════════════════════ */
+.theme-no-animations *,
+.theme-no-animations *::before,
+.theme-no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+  transition-delay: 0s !important;
+  animation-delay: 0s !important;
+}

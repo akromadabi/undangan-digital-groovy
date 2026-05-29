@@ -1,0 +1,15 @@
+.elementor-21686 .elementor-element.elementor-element-223c2741{--display:flex;--gap:0px 0px;--row-gap:0px;--column-gap:0px;--overflow:hidden;--border-radius:0px 0px 0px 0px;--margin-top:0px;--margin-bottom:0px;--margin-left:0px;--margin-right:0px;--padding-top:0px;--padding-bottom:0px;--padding-left:0px;--padding-right:0px;}.elementor-widget-lottie{--caption-color:var( --e-global-color-text );}.elementor-widget-lottie .e-lottie__caption{font-family:var( --e-global-typography-text-font-family ), Sans-serif;font-weight:var( --e-global-typography-text-font-weight );}.elementor-21686 .elementor-element.elementor-element-a32c259{width:100%;max-width:100%;--lottie-container-width:200px;}.elementor-21686 .elementor-element.elementor-element-a32c259 > .elementor-widget-container{margin:-5% 0% -50% 0%;padding:0% 0% 0% 0%;border-style:none;border-radius:0px 0px 0px 0px;}.elementor-21686 .elementor-element.elementor-element-a32c259:hover .elementor-widget-container{border-style:none;}.elementor-21686 .elementor-element.elementor-element-a32c259:hover > .elementor-widget-container{border-radius:0px 0px 0px 0px;}#elementor-popup-modal-21686 .dialog-widget-content{animation-duration:1.2s;background-color:#AF505000;border-style:none;margin:0px 300px 0px 0px;}#elementor-popup-modal-21686 .dialog-message{width:180px;height:auto;padding:0px 0px 0px 0px;}#elementor-popup-modal-21686{justify-content:center;align-items:flex-end;}@media(max-width:767px){.elementor-21686 .elementor-element.elementor-element-223c2741{--width:500px;--margin-top:0px;--margin-bottom:0px;--margin-left:0px;--margin-right:0px;--padding-top:0px;--padding-bottom:0px;--padding-left:0px;--padding-right:0px;}.elementor-21686 .elementor-element.elementor-element-a32c259 > .elementor-widget-container{margin:-5% 0% -50% -10%;}.elementor-21686 .elementor-element.elementor-element-a32c259{--lottie-container-width:200px;}#elementor-popup-modal-21686 .dialog-message{width:176px;}#elementor-popup-modal-21686{justify-content:flex-start;align-items:flex-end;}}/* Start custom CSS for lottie, class: .elementor-element-a32c259 */.elementor-21686 .elementor-element.elementor-element-a32c259{
+    overflow: none;
+}/* End custom CSS */
+/* Start custom CSS */.elementor-popup-modal:focus,
+.elementor-popup-modal *:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#elementor-popup-modal-21686 {
+  bottom: 80px !important; /* naik 60px dari bawah */
+  top: auto !important;
+  transform: none !important;
+  margin: 0 auto !important;
+}/* End custom CSS */
