@@ -14,6 +14,8 @@
     <!-- AR.js & A-Frame library resources -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <!-- AR.js extra: Pattern marker component for wider detection radius -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
 
     <!-- ===================== Custom A-Frame Components ===================== -->
     <script>
@@ -413,9 +415,17 @@
     <!-- ══════════════════════════════════════════════════════════════════ -->
     <!-- 5. WEBАР A-SCENE                                                   -->
     <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!--
+        A-SCENE SETTINGS:
+        - patternRatio: 0.5  → detects marker dari jarak lebih jauh (default 0.8 terlalu ketat)
+        - maxDetectionRate: 60 → polling lebih sering = lebih responsif
+        - smoothCount: 10    → rata-rata 10 frame posisi → kurangi goyang / putus
+        - smoothTolerance: 0.01 → toleransi pergerakan kecil agar tidak reset
+        - smoothThreshold: 5 → threshold sebelum reset tracking
+    -->
     <a-scene
         embedded
-        arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;"
+        arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best; patternRatio: 0.5; maxDetectionRate: 60; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 5;"
         renderer="antialias: true; colorManagement: true; logarithmicDepthBuffer: true; physicallyCorrectLights: true;"
         vr-mode-ui="enabled: false">
 

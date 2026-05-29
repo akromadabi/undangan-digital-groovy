@@ -26,86 +26,132 @@ export default function Ar({ invitation, groomNickname, brideNickname, arUrl }) 
         setDownloading(true);
         setDownloadError('');
 
+        // ── CANVAS: Portrait 600×900 Combined Card ──
         const canvas = document.createElement('canvas');
-        canvas.width = 1200;
-        canvas.height = 800;
+        canvas.width  = 600;
+        canvas.height = 920;
         const ctx = canvas.getContext('2d');
 
-        // Draw elegant gradient background
-        const grad = ctx.createLinearGradient(0, 0, 1200, 800);
+        // Background warm cream
+        const grad = ctx.createLinearGradient(0, 0, 600, 920);
         grad.addColorStop(0, '#FFFBF9');
-        grad.addColorStop(1, '#FFF2EC');
+        grad.addColorStop(1, '#FFF0E8');
         ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 1200, 800);
+        ctx.fillRect(0, 0, 600, 920);
 
-        // Draw outer card border / frame
+        // Outer border (coral)
         ctx.strokeStyle = '#E5654B';
-        ctx.lineWidth = 8;
-        ctx.strokeRect(40, 40, 1120, 720);
+        ctx.lineWidth = 6;
+        roundRect(ctx, 20, 20, 560, 880, 18);
+        ctx.stroke();
 
-        // Draw inner thin gold frame
+        // Inner gold border
         ctx.strokeStyle = '#D4AF37';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(55, 55, 1090, 690);
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, 30, 30, 540, 860, 14);
+        ctx.stroke();
 
-        // Draw Title text
+        // Title chip
         ctx.fillStyle = '#E5654B';
-        ctx.font = 'bold 36px "Playfair Display", Georgia, serif';
+        ctx.font = 'bold 13px Arial, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('KARTU AUGMENTED REALITY (AR)', 600, 110);
+        ctx.letterSpacing = '2px';
+        ctx.fillText('KARTU AUGMENTED REALITY (AR)', 300, 68);
 
-        // Draw Subtitle / Names
-        ctx.fillStyle = '#333333';
-        ctx.font = 'italic 50px "Great Vibes", cursive, Georgia, serif';
-        ctx.fillText(`${groomNickname} & ${brideNickname}`, 600, 185);
+        // Names
+        ctx.fillStyle = '#1a1a1a';
+        ctx.font = 'italic bold 38px Georgia, serif';
+        ctx.fillText(`${groomNickname} & ${brideNickname}`, 300, 118);
 
-        ctx.fillStyle = '#777777';
-        ctx.font = '500 20px Figtree, Arial, sans-serif';
-        ctx.fillText('PINDAI QR & LIHAT MAGIS PERNIKAHAN KAMI', 600, 235);
+        // Thin divider
+        ctx.strokeStyle = '#D4AF37';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(120, 134); ctx.lineTo(480, 134); ctx.stroke();
 
-        // Load and draw Hiro Marker & QR Code
-        const loadImg = (src, isCrossorigin) => {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                if (isCrossorigin) {
-                    img.crossOrigin = 'Anonymous';
-                }
-                img.onload = () => resolve(img);
-                img.onerror = (e) => reject(new Error(`Gagal memuat gambar: ${src}`));
-                img.src = src;
-            });
-        };
+        // Helper: round rect path
+        function roundRect(c, x, y, w, h, r) {
+            c.beginPath();
+            c.moveTo(x + r, y);
+            c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r);
+            c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r);
+            c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y);
+            c.closePath();
+        }
+
+        const loadImg = (src, crossorigin) => new Promise((resolve, reject) => {
+            const img = new Image();
+            if (crossorigin) img.crossOrigin = 'Anonymous';
+            img.onload  = () => resolve(img);
+            img.onerror = () => reject(new Error(`Gagal memuat: ${src}`));
+            img.src = src;
+        });
 
         Promise.all([
             loadImg(hiroMarkerUrl, false),
             loadImg(qrCodeUrl, true)
         ]).then(([hiroImg, qrImg]) => {
-            // Draw backgrounds for elements
-            ctx.fillStyle = '#FFFFFF';
-            // Left side (Hiro)
-            ctx.fillRect(200, 280, 320, 320);
-            ctx.strokeStyle = '#EAEAEA';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(200, 280, 320, 320);
-            ctx.drawImage(hiroImg, 220, 300, 280, 280);
 
-            // Right side (QR Code)
-            ctx.fillRect(680, 280, 320, 320);
-            ctx.strokeRect(680, 280, 320, 320);
-            ctx.drawImage(qrImg, 700, 300, 280, 280);
+            // ── Section 1: Hiro Marker ──
+            ctx.fillStyle = '#F9F9F9';
+            roundRect(ctx, 80, 154, 440, 330, 14);
+            ctx.fill();
+            ctx.strokeStyle = '#EEEEEE'; ctx.lineWidth = 1;
+            roundRect(ctx, 80, 154, 440, 330, 14);
+            ctx.stroke();
 
-            // Draw Labels
+            // Step badge
             ctx.fillStyle = '#E5654B';
-            ctx.font = 'bold 24px Figtree, Arial, sans-serif';
-            ctx.fillText('1. SCAN QR CODE INI', 840, 640);
-            ctx.fillText('2. ARAHKAN KAMERA KE MARKER INI', 360, 640);
+            ctx.beginPath(); ctx.arc(110, 182, 16, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('2', 110, 187);
 
-            // Draw Footer / Brand
-            ctx.fillStyle = '#999999';
-            ctx.font = 'italic 16px Figtree, Arial, sans-serif';
-            ctx.fillText('Dibuat secara otomatis oleh Undangan Digital Premium', 600, 715);
+            ctx.fillStyle = '#555';
+            ctx.font = 'bold 11px Arial'; ctx.textAlign = 'left';
+            ctx.fillText('ARAHKAN KAMERA KE MARKER INI', 132, 187);
 
-            // Trigger download
+            // Draw Hiro image centred in section
+            const hiroSize = 240;
+            ctx.drawImage(hiroImg, (600 - hiroSize) / 2, 204, hiroSize, hiroSize);
+
+            // ── Divider with arrow ──
+            ctx.fillStyle = '#E5654B';
+            ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('▼', 300, 507);
+            ctx.fillStyle = '#aaa';
+            ctx.font = '10px Arial';
+            ctx.fillText('Scan QR lalu arahkan kamera ke marker di atas', 300, 524);
+
+            // ── Section 2: QR Code ──
+            ctx.fillStyle = '#F9F9F9';
+            roundRect(ctx, 80, 536, 440, 310, 14);
+            ctx.fill();
+            ctx.strokeStyle = '#EEEEEE'; ctx.lineWidth = 1;
+            roundRect(ctx, 80, 536, 440, 310, 14);
+            ctx.stroke();
+
+            // Step badge
+            ctx.fillStyle = '#E5654B';
+            ctx.beginPath(); ctx.arc(110, 564, 16, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('1', 110, 569);
+
+            ctx.fillStyle = '#555';
+            ctx.font = 'bold 11px Arial'; ctx.textAlign = 'left';
+            ctx.fillText('SCAN QR CODE INI TERLEBIH DAHULU', 132, 569);
+
+            const qrSize = 220;
+            ctx.drawImage(qrImg, (600 - qrSize) / 2, 585, qrSize, qrSize);
+
+            // ── Footer ──
+            ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(120, 862); ctx.lineTo(480, 862); ctx.stroke();
+            ctx.fillStyle = '#aaa';
+            ctx.font = 'italic 10px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('Undangan Digital Premium — Scan & Lihat Keajaiban 3D', 300, 880);
+
             const dataUrl = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.download = `Kartu_AR_${invitation.slug}.png`;
@@ -113,11 +159,11 @@ export default function Ar({ invitation, groomNickname, brideNickname, arUrl }) 
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
             setDownloading(false);
+
         }).catch(err => {
             console.error(err);
-            setDownloadError('Gagal men-download kartu AR karena kendala koneksi gambar. Silakan klik kanan pratinjau kartu untuk menyimpan.');
+            setDownloadError('Gagal men-download kartu. Klik kanan pada pratinjau untuk menyimpan.');
             setDownloading(false);
         });
     };
@@ -292,37 +338,52 @@ export default function Ar({ invitation, groomNickname, brideNickname, arUrl }) 
                         </div>
                     )}
 
-                    {/* Aesthetic Glassmorphic Card Mockup */}
-                    <div className="bg-gradient-to-tr from-amber-50/40 via-orange-50/20 to-red-50/30 border border-orange-100/50 rounded-2xl p-6 md:p-8 max-w-2xl mx-auto shadow-sm relative overflow-hidden">
-                        <div className="absolute -top-12 -right-12 w-24 h-24 bg-orange-400/10 rounded-full blur-xl"></div>
-                        <div className="absolute -bottom-12 -left-12 w-24 h-24 bg-red-400/10 rounded-full blur-xl"></div>
-                        
-                        <div className="text-center space-y-2 mb-6">
-                            <span className="text-[10px] font-bold tracking-widest text-[#E5654B] uppercase bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100">KARTU AUGMENTED REALITY (AR)</span>
-                            <h2 className="text-2xl font-bold text-gray-800 font-serif italic mt-2">{groomNickname} & {brideNickname}</h2>
-                            <p className="text-xs text-gray-400 tracking-wide">Pindai QR & Arahkan Kamera ke Marker untuk Melihat Magis</p>
-                        </div>
+                    {/* ── Combined AR Card Preview (Portrait) ── */}
+                    <div className="max-w-xs mx-auto">
+                        <div className="bg-gradient-to-b from-[#FFFBF9] to-[#FFF0E8] border-2 border-[#E5654B] rounded-2xl p-5 shadow-md relative overflow-hidden">
+                            {/* Inner gold ring */}
+                            <div className="absolute inset-[6px] rounded-xl border border-[#D4AF37] pointer-events-none"></div>
 
-                        <div className="flex flex-col sm:flex-row justify-center items-center gap-8 md:gap-12 py-4">
-                            {/* Left Side: Hiro Marker */}
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="w-44 h-44 bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-center">
-                                    <img src={hiroMarkerUrl} alt="Hiro Marker" className="w-36 h-36 object-contain" />
-                                </div>
-                                <span className="text-[10px] font-bold text-gray-500 tracking-wider">MARKER HIRO</span>
+                            {/* Header */}
+                            <div className="text-center mb-4">
+                                <span className="text-[9px] font-bold tracking-widest text-[#E5654B] uppercase">KARTU AUGMENTED REALITY (AR)</span>
+                                <h2 className="text-xl font-bold text-gray-800 font-serif italic mt-0.5">{groomNickname} & {brideNickname}</h2>
+                                <div className="h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mt-2"></div>
                             </div>
 
-                            {/* Right Side: QR Code */}
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="w-44 h-44 bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-center">
-                                    <img src={qrCodeUrl} alt="QR Code Link" className="w-36 h-36 object-contain" />
+                            {/* ── STEP 2: Hiro Marker (top, arahkan kamera) ── */}
+                            <div className="bg-white rounded-xl border border-gray-100 p-3 mb-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="w-5 h-5 rounded-full bg-[#E5654B] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+                                    <span className="text-[10px] font-bold text-gray-600 tracking-wide uppercase">Arahkan Kamera ke Marker Ini</span>
                                 </div>
-                                <span className="text-[10px] font-bold text-[#E5654B] tracking-wider">SCAN UNTUK KAMERA</span>
+                                <div className="flex justify-center">
+                                    <img src={hiroMarkerUrl} alt="Hiro Marker" className="w-40 h-40 object-contain" />
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="text-center mt-6 pt-4 border-t border-dashed border-orange-200/50 text-[10px] text-gray-400">
-                            *Gunakan HP Android atau iOS dengan koneksi internet aktif.
+                            {/* Arrow divider */}
+                            <div className="flex items-center gap-2 my-2 px-2">
+                                <div className="flex-1 h-px bg-orange-200"></div>
+                                <span className="text-[10px] text-gray-400">Scan QR dulu, lalu arahkan ke marker</span>
+                                <div className="flex-1 h-px bg-orange-200"></div>
+                            </div>
+
+                            {/* ── STEP 1: QR Code (bottom, scan dulu) ── */}
+                            <div className="bg-white rounded-xl border border-gray-100 p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="w-5 h-5 rounded-full bg-[#E5654B] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+                                    <span className="text-[10px] font-bold text-[#E5654B] tracking-wide uppercase">Scan QR Code Ini Terlebih Dahulu</span>
+                                </div>
+                                <div className="flex justify-center">
+                                    <img src={qrCodeUrl} alt="QR Code" className="w-36 h-36 object-contain" />
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="text-center mt-4 pt-3 border-t border-dashed border-orange-200/60">
+                                <p className="text-[9px] text-gray-400">*Gunakan HP Android / iOS dengan internet aktif</p>
+                            </div>
                         </div>
                     </div>
                 </div>
