@@ -10,4 +10,9 @@ export default defineConfig({
         }),
         react(),
     ],
+    build: {
+        rollupOptions: {
+            maxParallelFileOps: 2,
+        },
+    },
 });
