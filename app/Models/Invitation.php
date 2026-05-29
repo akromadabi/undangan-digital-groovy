@@ -59,6 +59,7 @@ class Invitation extends Model
         'menu_position',
         'custom_domain',
         'type',
+        'ar_style',
     ];
 
     protected function casts(): array

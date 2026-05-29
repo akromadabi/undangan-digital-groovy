@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useRef } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
@@ -6,10 +6,21 @@ export default function Ar({ invitation, groomNickname, brideNickname, arUrl }) 
     const { flash } = usePage().props;
     const [downloading, setDownloading] = useState(false);
     const [downloadError, setDownloadError] = useState('');
-    const canvasRef = useRef(null);
+    const [selectedStyle, setSelectedStyle] = useState(invitation.ar_style || 'classic');
+    const [saving, setSaving] = useState(false);
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(arUrl)}`;
     const hiroMarkerUrl = '/images/ar/hiro.png';
+
+    const handleStyleChange = (style) => {
+        setSelectedStyle(style);
+        setSaving(true);
+        router.post(route('settings.ar.style'), { ar_style: style }, {
+            preserveScroll: true,
+            onSuccess: () => setSaving(false),
+            onError: () => setSaving(false),
+        });
+    };
 
     const handleDownloadCard = () => {
         setDownloading(true);
@@ -155,6 +166,104 @@ export default function Ar({ invitation, groomNickname, brideNickname, arUrl }) 
                             <h4 className="font-semibold text-gray-800 text-sm">Arahkan ke Marker</h4>
                             <p className="text-xs text-gray-500 mt-1">Arahkan kamera HP ke pola Marker Hiro pada kartu, maka visual 3D foto Anda & musik akan muncul melayang!</p>
                         </div>
+                    </div>
+                </div>
+
+                {/* Theme Selector */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                    <div className="border-b border-gray-100 pb-4 mb-6">
+                        <h3 className="font-bold text-gray-800">Pilih Tema Visual WebAR</h3>
+                        <p className="text-xs text-gray-400">Pilih nuansa visual 3D yang akan muncul saat marker discan</p>
+                    </div>
+
+                    {flash?.success && (
+                        <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-xs mb-4 flex items-center gap-2">
+                            <span className="text-sm">✓</span>
+                            <span>{flash.success}</span>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Classic Floral Card */}
+                        <button
+                            onClick={() => handleStyleChange('classic')}
+                            disabled={saving}
+                            className={`text-left rounded-2xl border p-5 flex flex-col justify-between transition-all duration-200 relative overflow-hidden min-h-[160px] ${
+                                selectedStyle === 'classic'
+                                    ? 'border-[#E5654B] bg-orange-50/20 ring-2 ring-[#E5654B]/20'
+                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                            }`}
+                        >
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-[#E5654B]/5 rounded-bl-full flex items-center justify-center">
+                                <span className="text-lg">🌸</span>
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-bold text-[#E5654B] tracking-wider uppercase">TEMA CLASSIC</span>
+                                <h4 className="font-bold text-gray-800 text-sm mt-1">Classic Floral Arch</h4>
+                                <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
+                                    Gerbang bunga mawar romantis dengan sepasang burung merpati mengepakkan sayap dan kelopak bunga mawar merah muda berjatuhan.
+                                </p>
+                            </div>
+                            {selectedStyle === 'classic' && (
+                                <span className="absolute bottom-4 right-4 text-xs font-bold text-[#E5654B] flex items-center gap-1">
+                                    Aktif <span className="text-sm">✓</span>
+                                </span>
+                            )}
+                        </button>
+
+                        {/* Cosmic Stars Card */}
+                        <button
+                            onClick={() => handleStyleChange('cosmic')}
+                            disabled={saving}
+                            className={`text-left rounded-2xl border p-5 flex flex-col justify-between transition-all duration-200 relative overflow-hidden min-h-[160px] ${
+                                selectedStyle === 'cosmic'
+                                    ? 'border-indigo-600 bg-indigo-50/10 ring-2 ring-indigo-600/20'
+                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                            }`}
+                        >
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-600/5 rounded-bl-full flex items-center justify-center">
+                                <span className="text-lg">✨</span>
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-bold text-indigo-600 tracking-wider uppercase">TEMA MODERN</span>
+                                <h4 className="font-bold text-gray-800 text-sm mt-1">Cosmic Galaxy</h4>
+                                <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
+                                    Cincin bintang berkilau melayang dengan bulan berputar, gugusan partikel angkasa perak, dan percikan kembang api kosmik.
+                                </p>
+                            </div>
+                            {selectedStyle === 'cosmic' && (
+                                <span className="absolute bottom-4 right-4 text-xs font-bold text-indigo-600 flex items-center gap-1">
+                                    Aktif <span className="text-sm">✓</span>
+                                </span>
+                            )}
+                        </button>
+
+                        {/* Traditional Javanese Card */}
+                        <button
+                            onClick={() => handleStyleChange('java')}
+                            disabled={saving}
+                            className={`text-left rounded-2xl border p-5 flex flex-col justify-between transition-all duration-200 relative overflow-hidden min-h-[160px] ${
+                                selectedStyle === 'java'
+                                    ? 'border-amber-600 bg-amber-50/10 ring-2 ring-amber-600/20'
+                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                            }`}
+                        >
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-amber-600/5 rounded-bl-full flex items-center justify-center">
+                                <span className="text-lg">👑</span>
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-bold text-amber-600 tracking-wider uppercase">TEMA ETNIK</span>
+                                <h4 className="font-bold text-gray-800 text-sm mt-1">Traditional Javanese</h4>
+                                <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
+                                    Gunungan wayang kulit megah bernuansa emas-cokelat tradisional dengan kepakan burung serta hujan cahaya keemasan.
+                                </p>
+                            </div>
+                            {selectedStyle === 'java' && (
+                                <span className="absolute bottom-4 right-4 text-xs font-bold text-amber-600 flex items-center gap-1">
+                                    Aktif <span className="text-sm">✓</span>
+                                </span>
+                            )}
+                        </button>
                     </div>
                 </div>
 

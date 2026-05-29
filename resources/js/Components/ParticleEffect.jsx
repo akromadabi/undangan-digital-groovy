@@ -11,6 +11,7 @@ const PARTICLE_MAP = {
     butterfly:{ name: 'Kupu-kupu' },
     flower:   { name: 'Bunga' },
     sparkle:  { name: 'Sparkle' },
+    birds:    { name: 'Burung' },
 };
 
 const SPEED_MAP = { slow: 22, normal: 15, fast: 9 };
@@ -37,6 +38,110 @@ export default function ParticleEffect({ type = 'snow', count = 30, speed = 'nor
     if (!PARTICLE_MAP[type]) return null;
 
     const baseDur = SPEED_MAP[speed] || 15;
+
+    const birdsList = useMemo(() => {
+        if (type !== 'birds') return [];
+        return Array.from({ length: count }, (_, i) => {
+            const scale = (0.2 + Math.random() * 0.65).toFixed(2);
+            const opacity = (0.2 + parseFloat(scale) * 0.6).toFixed(2);
+            const delay = (Math.random() * 35).toFixed(1);
+            const dur = (baseDur + Math.random() * 8 - 4).toFixed(1);
+            const pathType = Math.floor(Math.random() * 3);
+            const topStart = Math.round(55 + Math.random() * 35);
+            const topEnd = Math.round(5 + Math.random() * 25);
+            const leftStart = Math.round(5 + Math.random() * 40);
+            const leftEnd = Math.round(55 + Math.random() * 40);
+            const flapDur = (0.15 + (1 - parseFloat(scale)) * 0.35).toFixed(2);
+            return {
+                id: i,
+                scale,
+                opacity,
+                delay,
+                dur,
+                pathType,
+                topStart,
+                topEnd,
+                leftStart,
+                leftEnd,
+                flapDur
+            };
+        });
+    }, [type, count, baseDur]);
+
+    if (type === 'birds') {
+        return (
+            <div className="sp-birds-container select-none" aria-hidden="true">
+                <style dangerouslySetInnerHTML={{ __html: `
+                    @keyframes spFlyUpRight {
+                      0% { left: -10%; top: calc(var(--ts) * 1%); transform: scale(calc(var(--sc) * 0.6)) rotate(22deg); opacity: 0; }
+                      10% { opacity: var(--op); }
+                      90% { opacity: var(--op); }
+                      100% { left: 110%; top: calc(var(--te) * 1%); transform: scale(var(--sc)) rotate(12deg); opacity: 0; }
+                    }
+                    @keyframes spFlyUpLeft {
+                      0% { left: 110%; top: calc(var(--ts) * 1%); transform: scale(calc(var(--sc) * 0.6)) rotate(-22deg) scaleX(-1); opacity: 0; }
+                      10% { opacity: var(--op); }
+                      90% { opacity: var(--op); }
+                      100% { left: -10%; top: calc(var(--te) * 1%); transform: scale(var(--sc)) rotate(-12deg) scaleX(-1); opacity: 0; }
+                    }
+                    @keyframes spFlyUpCenter {
+                      0% { left: calc(var(--ls) * 1%); top: 105%; transform: scale(calc(var(--sc) * 0.5)) rotate(-5deg); opacity: 0; }
+                      15% { opacity: var(--op); }
+                      85% { opacity: var(--op); }
+                      100% { left: calc(var(--le) * 1%); top: -15%; transform: scale(var(--sc)) rotate(5deg); opacity: 0; }
+                    }
+                    @keyframes spFlap {
+                      0% { transform: scaleY(1); }
+                      100% { transform: scaleY(-0.35) translateY(15%); }
+                    }
+                    .sp-birds-container {
+                      position: fixed;
+                      inset: 0;
+                      width: 100%;
+                      height: 100%;
+                      pointer-events: none;
+                      z-index: 15;
+                      overflow: hidden;
+                    }
+                    .sp-bird {
+                      position: absolute;
+                      opacity: 0;
+                      will-change: transform, left, top;
+                    }
+                    .sp-bird-wings {
+                      transform-origin: 45px 25px;
+                      animation: spFlap var(--fd) ease-in-out infinite alternate;
+                    }
+                ` }} />
+                {birdsList.map(b => {
+                    let animName = 'spFlyUpRight';
+                    if (b.pathType === 1) animName = 'spFlyUpLeft';
+                    else if (b.pathType === 2) animName = 'spFlyUpCenter';
+                    
+                    return (
+                        <div 
+                            key={b.id} 
+                            className="sp-bird"
+                            style={{
+                                animation: `${animName} ${b.dur}s linear ${b.delay}s infinite`,
+                                '--sc': b.scale,
+                                '--op': b.opacity,
+                                '--ts': String(b.topStart),
+                                '--te': String(b.topEnd),
+                                '--ls': String(b.leftStart),
+                                '--le': String(b.leftEnd),
+                                '--fd': `${b.flapDur}s`
+                            }}
+                        >
+                            <svg viewBox="0 0 100 50" className="w-12 h-6 text-[#2E3F54] dark:text-white" fill="currentColor">
+                                <path className="sp-bird-wings" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
+                            </svg>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    }
 
     const particles = useMemo(() => {
         return Array.from({ length: count }, (_, i) => {
@@ -84,8 +189,8 @@ export default function ParticleEffect({ type = 'snow', count = 30, speed = 'nor
                         left: `${p.left}%`,
                         '--d': `${p.dur}s`,
                         '--dl': `${p.delay}s`,
-                        '--dr': p.drift,
-                        '--sw': p.sway,
+                        '--dr': String(p.drift),
+                        '--sw': String(p.sway),
                     }}
                     dangerouslySetInnerHTML={{ __html: p.html }}
                 />

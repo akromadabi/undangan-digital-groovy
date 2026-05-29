@@ -15,6 +15,165 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
+    <!-- Custom A-Frame Components for Grand Wedding Effects -->
+    <script>
+        // 1. Confetti/Petals falling down around the marker
+        AFRAME.registerComponent('confetti-rain', {
+            schema: {
+                count: {type: 'int', default: 60},
+                style: {type: 'string', default: 'classic'}
+            },
+            init: function() {
+                this.petals = [];
+                let colors = ['#FFC0CB', '#FF69B4', '#FFD700', '#FFF8F6', '#FF0000']; // classic colors
+                
+                if (this.data.style === 'cosmic') {
+                    colors = ['#00FFFF', '#8A2BE2', '#4B0082', '#E6E6FA', '#C0C0C0', '#4169E1']; // cosmic colors
+                } else if (this.data.style === 'java') {
+                    colors = ['#D4AF37', '#FFD700', '#B8860B', '#FFFDD0', '#E59866']; // golden javanese colors
+                }
+
+                for (let i = 0; i < this.data.count; i++) {
+                    const petal = document.createElement('a-plane');
+                    
+                    // Position randomly
+                    const x = (Math.random() - 0.5) * 4;
+                    const y = Math.random() * 5 + 1;
+                    const z = (Math.random() - 0.5) * 4;
+                    
+                    petal.setAttribute('position', {x: x, y: y, z: z});
+                    petal.setAttribute('rotation', {
+                        x: Math.random() * 360,
+                        y: Math.random() * 360,
+                        z: Math.random() * 360
+                    });
+                    
+                    const size = 0.04 + Math.random() * 0.06;
+                    petal.setAttribute('width', size);
+                    petal.setAttribute('height', size * 1.5);
+                    petal.setAttribute('color', colors[Math.floor(Math.random() * colors.length)]);
+                    
+                    if (this.data.style === 'cosmic') {
+                        petal.setAttribute('material', 'side: double; depthWrite: false; roughness: 0.2; metalness: 0.8; emissive: ' + colors[Math.floor(Math.random() * colors.length)] + '; emissiveIntensity: 0.5');
+                    } else {
+                        petal.setAttribute('material', 'side: double; depthWrite: false; roughness: 0.8');
+                    }
+                    
+                    this.el.appendChild(petal);
+                    this.petals.push({
+                        el: petal,
+                        speedY: (this.data.style === 'java' ? 0.008 : 0.012) + Math.random() * 0.016,
+                        speedX: (Math.random() - 0.5) * 0.004,
+                        rotSpeed: 1 + Math.random() * 2
+                    });
+                }
+            },
+            tick: function() {
+                this.petals.forEach(p => {
+                    const pos = p.el.getAttribute('position');
+                    const rot = p.el.getAttribute('rotation');
+                    
+                    pos.y -= p.speedY;
+                    pos.x += p.speedX + Math.sin(pos.y * 2) * 0.002;
+                    
+                    rot.x += p.rotSpeed;
+                    rot.y += p.rotSpeed * 0.5;
+                    
+                    if (pos.y < 0) {
+                        pos.y = 5;
+                        pos.x = (Math.random() - 0.5) * 4;
+                    }
+                    
+                    p.el.setAttribute('position', pos);
+                    p.el.setAttribute('rotation', rot);
+                });
+            }
+        });
+
+        // 2. Continuous Fireworks Spark explosions above the arch
+        AFRAME.registerComponent('fireworks-sparks', {
+            schema: {
+                style: {type: 'string', default: 'classic'}
+            },
+            init: function() {
+                this.timer = 0;
+                this.sparks = [];
+            },
+            tick: function(time, deltaTime) {
+                this.timer += deltaTime;
+                if (this.timer > 2500) { // explode every 2.5 seconds
+                    this.timer = 0;
+                    this.launch();
+                }
+                
+                // Update sparks
+                for (let i = this.sparks.length - 1; i >= 0; i--) {
+                    const spark = this.sparks[i];
+                    const pos = spark.el.getAttribute('position');
+                    const scale = spark.el.getAttribute('scale');
+                    
+                    pos.x += spark.vel.x;
+                    pos.y += spark.vel.y;
+                    pos.z += spark.vel.z;
+                    
+                    spark.vel.y -= 0.0006; // gravity
+                    
+                    scale.x -= 0.015;
+                    scale.y -= 0.015;
+                    scale.z -= 0.015;
+                    
+                    spark.el.setAttribute('position', pos);
+                    spark.el.setAttribute('scale', scale);
+                    
+                    if (scale.x <= 0) {
+                        this.el.removeChild(spark.el);
+                        this.sparks.splice(i, 1);
+                    }
+                }
+            },
+            launch: function() {
+                // Burst origin above the wedding arch (x: -0.5 to 0.5, y: 2.3 to 2.6)
+                const origin = {
+                    x: (Math.random() - 0.5) * 1.5,
+                    y: 2.3 + Math.random() * 0.4,
+                    z: (Math.random() - 0.5) * 0.8
+                };
+                
+                let colors = ['#FFD700', '#FF4500', '#FF1493', '#00FFFF', '#39FF14', '#FF8C00'];
+                if (this.data.style === 'cosmic') {
+                    colors = ['#00FFFF', '#E6E6FA', '#8A2BE2', '#39FF14', '#C0C0C0'];
+                } else if (this.data.style === 'java') {
+                    colors = ['#D4AF37', '#FFD700', '#FF4500', '#E59866'];
+                }
+
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const count = 18;
+                
+                for (let i = 0; i < count; i++) {
+                    const spark = document.createElement('a-sphere');
+                    spark.setAttribute('position', origin);
+                    spark.setAttribute('radius', 0.04);
+                    spark.setAttribute('color', color);
+                    spark.setAttribute('material', 'emissive: ' + color + '; emissiveIntensity: 2; metalness: 0.8');
+                    spark.setAttribute('scale', '1 1 1');
+                    
+                    const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+                    const pitch = (Math.random() - 0.5) * Math.PI;
+                    const speed = 0.025 + Math.random() * 0.025;
+                    
+                    const vel = {
+                        x: Math.cos(angle) * Math.cos(pitch) * speed,
+                        y: Math.sin(pitch) * speed + 0.01,
+                        z: Math.sin(angle) * Math.cos(pitch) * speed
+                    };
+                    
+                    this.el.appendChild(spark);
+                    this.sparks.push({ el: spark, vel: vel });
+                }
+            }
+        });
+    </script>
+
     <style>
         body {
             margin: 0;
@@ -250,6 +409,9 @@
     </style>
 </head>
 <body>
+    @php
+        $arStyle = $invitation->ar_style ?? 'classic';
+    @endphp
 
     <!-- 1. Start Screen Glassmorphic Overlay -->
     <div id="ar-overlay">
@@ -307,47 +469,271 @@
         <!-- Detect Hiro Marker -->
         <a-marker preset="hiro" id="ar-marker">
             
-            <!-- Rotating Postcard Group -->
-            <a-entity id="postcard-group" position="0 1 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 12000; easing: linear">
+            <!-- Particle & Firework Spark Generators inside Marker -->
+            <a-entity confetti-rain="count: 60; style: {{ $arStyle }}"></a-entity>
+            <a-entity fireworks-sparks="style: {{ $arStyle }}"></a-entity>
+
+            @if($arStyle === 'classic')
+            <!-- ================= STYLE: CLASSIC ================= -->
+            <!-- 1. Gerbang Pernikahan Megah (3D Arch) -->
+            <a-entity id="wedding-arch" position="0 0 0">
+                <!-- Pillars Left and Right -->
+                <a-cylinder position="-0.9 1 0" radius="0.06" height="2" color="#FFFFFF" material="roughness: 0.7"></a-cylinder>
+                <a-cylinder position="0.9 1 0" radius="0.06" height="2" color="#FFFFFF" material="roughness: 0.7"></a-cylinder>
+                
+                <!-- Pillar Bases -->
+                <a-box position="-0.9 0.05 0" width="0.2" height="0.1" depth="0.2" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box position="0.9 0.05 0" width="0.2" height="0.1" depth="0.2" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-box>
+                
+                <!-- Curved Gold Arch Top -->
+                <a-torus position="0 2 0" radius="0.9" radius-tubular="0.03" arc="180" color="#D4AF37" rotation="0 0 0" material="metalness: 0.8; roughness: 0.2"></a-torus>
+
+                <!-- Arch Flowers (Spheres representing beautiful roses) -->
+                <a-sphere position="-0.9 2 0" radius="0.1" color="#FF69B4" animation="property: scale; from: 1 1 1; to: 1.1 1.1 1.1; loop: true; dir: alternate; dur: 800"></a-sphere>
+                <a-sphere position="-0.7 2.4 0.02" radius="0.08" color="#FFB6C1"></a-sphere>
+                <a-sphere position="-0.4 2.7 0.03" radius="0.09" color="#FFFFFF"></a-sphere>
+                
+                <!-- Glowing Center Wedding Heart above Arch -->
+                <a-entity position="0 2.9 0" animation="property: scale; from: 0.8 0.8 0.8; to: 1.0 1.0 1.0; loop: true; dir: alternate; dur: 1200; easing: easeInOutQuad">
+                    <a-sphere position="-0.07 0 0" radius="0.09" color="#E5654B" material="emissive: #E5654B; emissiveIntensity: 1.2"></a-sphere>
+                    <a-sphere position="0.07 0 0" radius="0.09" color="#E5654B" material="emissive: #E5654B; emissiveIntensity: 1.2"></a-sphere>
+                    <a-cone position="0 -0.07 0" radius-bottom="0.09" height="0.18" rotation="180 0 0" color="#E5654B" material="emissive: #E5654B; emissiveIntensity: 1.2"></a-cone>
+                </a-entity>
+                
+                <a-sphere position="0.4 2.7 0.03" radius="0.09" color="#FFFFFF"></a-sphere>
+                <a-sphere position="0.7 2.4 0.02" radius="0.08" color="#FFB6C1"></a-sphere>
+                <a-sphere position="0.9 2 0" radius="0.1" color="#FF69B4" animation="property: scale; from: 1 1 1; to: 1.1 1.1 1.1; loop: true; dir: alternate; dur: 820"></a-sphere>
+
+                <!-- Leaves Wrapped on Pillars -->
+                <a-sphere position="-0.9 1.5 0.04" radius="0.07" color="#82E0AA"></a-sphere>
+                <a-sphere position="-0.85 1.1 0.04" radius="0.06" color="#52BE80"></a-sphere>
+                <a-sphere position="-0.9 0.7 0.04" radius="0.07" color="#82E0AA"></a-sphere>
+                <a-sphere position="0.9 1.5 0.04" radius="0.07" color="#82E0AA"></a-sphere>
+                <a-sphere position="0.85 1.1 0.04" radius="0.06" color="#52BE80"></a-sphere>
+                <a-sphere position="0.9 0.7 0.04" radius="0.07" color="#82E0AA"></a-sphere>
+            </a-entity>
+
+            <!-- 2. Flapping White Doves (Burung Merpati) flying in circle above the Arch -->
+            <a-entity position="0 2.2 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
+                <!-- Dove 1 -->
+                <a-entity position="1.3 0.4 0" rotation="0 90 0">
+                    <a-cone radius-bottom="0.035" radius-top="0.005" height="0.18" rotation="90 0 0" color="#FFFFFF"></a-cone>
+                    <!-- Left flapping wing -->
+                    <a-plane position="-0.09 0 0" width="0.18" height="0.07" color="#FFFFFF" material="side: double"
+                              animation="property: rotation; from: 0 0 0; to: 0 0 60; dir: alternate; loop: true; dur: 220; easing: easeInOutQuad"></a-plane>
+                    <!-- Right flapping wing -->
+                    <a-plane position="0.09 0 0" width="0.18" height="0.07" color="#FFFFFF" material="side: double"
+                              animation="property: rotation; from: 0 0 0; to: 0 0 -60; dir: alternate; loop: true; dur: 220; easing: easeInOutQuad"></a-plane>
+                </a-entity>
+                
+                <!-- Dove 2 -->
+                <a-entity position="-1.3 0.6 0.4" rotation="0 -90 0">
+                    <a-cone radius-bottom="0.035" radius-top="0.005" height="0.18" rotation="90 0 0" color="#FFFFFF"></a-cone>
+                    <a-plane position="-0.09 0 0" width="0.18" height="0.07" color="#FFFFFF" material="side: double"
+                              animation="property: rotation; from: 0 0 0; to: 0 0 60; dir: alternate; loop: true; dur: 200; easing: easeInOutQuad"></a-plane>
+                    <a-plane position="0.09 0 0" width="0.18" height="0.07" color="#FFFFFF" material="side: double"
+                              animation="property: rotation; from: 0 0 0; to: 0 0 -60; dir: alternate; loop: true; dur: 200; easing: easeInOutQuad"></a-plane>
+                </a-entity>
+            </a-entity>
+
+            <!-- 3. Floating Orbiting Gems/Hearts decoration -->
+            <a-entity position="0 1 0" animation="property: rotation; to: 0 -360 0; loop: true; dur: 9000; easing: linear">
+                <!-- Orbiting Heart Left -->
+                <a-entity position="1.3 0 0" rotation="0 0 0">
+                    <a-sphere position="-0.04 0 0" radius="0.06" color="#FF1493" material="emissive: #FF1493; emissiveIntensity: 0.5"></a-sphere>
+                    <a-sphere position="0.04 0 0" radius="0.06" color="#FF1493" material="emissive: #FF1493; emissiveIntensity: 0.5"></a-sphere>
+                    <a-cone position="0 -0.05 0" radius-bottom="0.06" height="0.12" rotation="180 0 0" color="#FF1493" material="emissive: #FF1493; emissiveIntensity: 0.5"></a-cone>
+                </a-entity>
+                
+                <!-- Orbiting Star / Box Right -->
+                <a-entity geometry="primitive: box; width: 0.08; height: 0.08; depth: 0.08" 
+                          material="color: #FFD700; metalness: 0.9; roughness: 0.1" 
+                          position="-1.3 0.2 -0.2"
+                          animation="property: rotation; to: 360 360 0; loop: true; dur: 3000; easing: linear"></a-entity>
+            </a-entity>
+            @endif
+
+            @if($arStyle === 'cosmic')
+            <!-- ================= STYLE: COSMIC ================= -->
+            <!-- 1. Orbiting Galaxy Rings (Futuristic Space Nebula) -->
+            <a-entity position="0 1 0">
+                <!-- Cyan Ring (Horizontal) -->
+                <a-torus radius="1.3" radius-tubular="0.015" color="#00FFFF" rotation="90 0 0" material="emissive: #00FFFF; emissiveIntensity: 1.2; metalness: 0.8"
+                          animation="property: rotation; to: 90 360 0; loop: true; dur: 8000; easing: linear"></a-torus>
+                <!-- Purple Ring (Tilted) -->
+                <a-torus radius="1.1" radius-tubular="0.015" color="#8A2BE2" rotation="45 45 0" material="emissive: #8A2BE2; emissiveIntensity: 1.2; metalness: 0.8"
+                          animation="property: rotation; to: 45 405 0; loop: true; dur: 10000; easing: linear"></a-torus>
+                <!-- Magenta Ring (Tilted Opposite) -->
+                <a-torus radius="1.2" radius-tubular="0.01" color="#FF00FF" rotation="-45 45 0" material="emissive: #FF00FF; emissiveIntensity: 1.2; metalness: 0.8"
+                          animation="property: rotation; to: -45 405 0; loop: true; dur: 12000; easing: linear"></a-torus>
+            </a-entity>
+
+            <!-- 2. Rotating Glowing Moon Floating above the card -->
+            <a-entity position="0 2.5 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear">
+                <a-sphere radius="0.16" color="#E6E6FA" material="emissive: #4B0082; emissiveIntensity: 0.4; roughness: 0.8; metalness: 0.2"></a-sphere>
+                <!-- Tiny Moon Satellite orbiting the moon -->
+                <a-sphere position="0.32 0 0" radius="0.03" color="#C0C0C0" material="emissive: #C0C0C0; emissiveIntensity: 0.3"
+                          animation="property: rotation; to: 360 360 0; loop: true; dur: 4000; easing: linear"></a-sphere>
+            </a-entity>
+
+            <!-- 3. Orbiting Neon Crystal Stars -->
+            <a-entity position="0 1 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear">
+                <!-- Cyan Octahedron -->
+                <a-entity position="1.4 0.5 0" rotation="0 0 0" animation="property: rotation; to: 360 360 360; loop: true; dur: 4000; easing: linear">
+                    <a-octahedron radius="0.09" color="#00FFFF" material="emissive: #00FFFF; emissiveIntensity: 1; roughness: 0.1; metalness: 0.9"></a-octahedron>
+                </a-entity>
+                <!-- Purple Octahedron -->
+                <a-entity position="-1.4 -0.3 0.2" rotation="0 0 0" animation="property: rotation; to: 360 0 360; loop: true; dur: 5000; easing: linear">
+                    <a-octahedron radius="0.08" color="#8A2BE2" material="emissive: #8A2BE2; emissiveIntensity: 1; roughness: 0.1; metalness: 0.9"></a-octahedron>
+                </a-entity>
+                <!-- Golden Star -->
+                <a-entity position="0 0.8 -1.4" rotation="0 0 0" animation="property: rotation; to: 0 360 360; loop: true; dur: 6000; easing: linear">
+                    <a-dodecahedron radius="0.07" color="#FFD700" material="emissive: #FFD700; emissiveIntensity: 1; roughness: 0.1; metalness: 0.9"></a-dodecahedron>
+                </a-entity>
+            </a-entity>
+            @endif
+
+            @if($arStyle === 'java')
+            <!-- ================= STYLE: JAVA ================= -->
+            <!-- 1. Gapura Candi Bentar (Gerbang Jawa) Left & Right -->
+            <a-entity id="javanese-gate" position="0 0 0">
+                <!-- Left Pillar of Split Gate -->
+                <a-entity position="-0.95 0 0">
+                    <a-box position="0 0.1 0" width="0.32" height="0.2" depth="0.32" color="#8A3324" material="roughness: 0.9"></a-box>
+                    <a-box position="0 0.7 0" width="0.22" height="1.0" depth="0.22" color="#8A3324" material="roughness: 0.9"></a-box>
+                    <!-- Gold Accents Left -->
+                    <a-box position="0 0.4 0" width="0.24" height="0.05" depth="0.24" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-box>
+                    <a-box position="0 0.9 0" width="0.24" height="0.05" depth="0.24" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-box>
+                    <!-- Step Top and Pinnacle -->
+                    <a-box position="0 1.25 0" width="0.26" height="0.1" depth="0.26" color="#8A3324" material="roughness: 0.9"></a-box>
+                    <a-box position="0 1.35 0" width="0.18" height="0.1" depth="0.18" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-box>
+                    <a-cone position="0 1.5 0" radius-bottom="0.09" height="0.2" segments-radial="4" rotation="0 45 0" color="#8A3324" material="roughness: 0.9"></a-cone>
+                </a-entity>
+
+                <!-- Right Pillar of Split Gate -->
+                <a-entity position="0.95 0 0">
+                    <a-box position="0 0.1 0" width="0.32" height="0.2" depth="0.32" color="#8A3324" material="roughness: 0.9"></a-box>
+                    <a-box position="0 0.7 0" width="0.22" height="1.0" depth="0.22" color="#8A3324" material="roughness: 0.9"></a-box>
+                    <!-- Gold Accents Right -->
+                    <a-box position="0 0.4 0" width="0.24" height="0.05" depth="0.24" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-box>
+                    <a-box position="0 0.9 0" width="0.24" height="0.05" depth="0.24" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-box>
+                    <!-- Step Top and Pinnacle -->
+                    <a-box position="0 1.25 0" width="0.26" height="0.1" depth="0.26" color="#8A3324" material="roughness: 0.9"></a-box>
+                    <a-box position="0 1.35 0" width="0.18" height="0.1" depth="0.18" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-box>
+                    <a-cone position="0 1.5 0" radius-bottom="0.09" height="0.2" segments-radial="4" rotation="0 45 0" color="#8A3324" material="roughness: 0.9"></a-cone>
+                </a-entity>
+
+                <!-- Hanging Traditional Javanese Lanterns (Lampion) -->
+                <!-- Left Lantern -->
+                <a-entity position="-1.1 0.8 0.1">
+                    <a-cylinder position="0 0 0" radius="0.05" height="0.15" color="#B22222" material="roughness: 0.7"></a-cylinder>
+                    <a-cylinder position="0 0.08 0" radius="0.06" height="0.02" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
+                    <a-cylinder position="0 -0.08 0" radius="0.06" height="0.02" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
+                    <a-cone position="0 -0.13 0" radius-bottom="0.01" height="0.08" rotation="180 0 0" color="#D4AF37" material="metalness: 0.5"></a-cone>
+                </a-entity>
+
+                <!-- Right Lantern -->
+                <a-entity position="1.1 0.8 0.1">
+                    <a-cylinder position="0 0 0" radius="0.05" height="0.15" color="#B22222" material="roughness: 0.7"></a-cylinder>
+                    <a-cylinder position="0 0.08 0" radius="0.06" height="0.02" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
+                    <a-cylinder position="0 -0.08 0" radius="0.06" height="0.02" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
+                    <a-cone position="0 -0.13 0" radius-bottom="0.01" height="0.08" rotation="180 0 0" color="#D4AF37" material="metalness: 0.5"></a-cone>
+                </a-entity>
+
+                <!-- Jasmine Hanging Flower Garlands bridging the Gate -->
+                <a-sphere position="-0.7 1.2 0" radius="0.05" color="#FFFDD0"></a-sphere>
+                <a-sphere position="-0.4 1.05 -0.03" radius="0.05" color="#FFFDD0"></a-sphere>
+                <a-sphere position="0 0.95 -0.05" radius="0.06" color="#FFFDD0" material="emissive: #FFFDD0; emissiveIntensity: 0.3"></a-sphere>
+                <a-sphere position="0.4 1.05 -0.03" radius="0.05" color="#FFFDD0"></a-sphere>
+                <a-sphere position="0.7 1.2 0" radius="0.05" color="#FFFDD0"></a-sphere>
+            </a-entity>
+
+            <!-- 2. Flapping Golden Birds (Javanese Elegance) flying in circle above the Gate -->
+            <a-entity position="0 2.2 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 12000; easing: linear">
+                <!-- Golden Bird 1 -->
+                <a-entity position="1.3 0.4 0" rotation="0 90 0">
+                    <a-cone radius-bottom="0.035" radius-top="0.005" height="0.18" rotation="90 0 0" color="#D4AF37" material="metalness: 0.7; roughness: 0.3"></a-cone>
+                    <!-- Left flapping wing -->
+                    <a-plane position="-0.09 0 0" width="0.18" height="0.07" color="#D4AF37" material="side: double; metalness: 0.7; roughness: 0.3"
+                              animation="property: rotation; from: 0 0 0; to: 0 0 55; dir: alternate; loop: true; dur: 240; easing: easeInOutQuad"></a-plane>
+                    <!-- Right flapping wing -->
+                    <a-plane position="0.09 0 0" width="0.18" height="0.07" color="#D4AF37" material="side: double; metalness: 0.7; roughness: 0.3"
+                              animation="property: rotation; from: 0 0 0; to: 0 0 -55; dir: alternate; loop: true; dur: 240; easing: easeInOutQuad"></a-plane>
+                </a-entity>
+                
+                <!-- Golden Bird 2 -->
+                <a-entity position="-1.3 0.6 0.4" rotation="0 -90 0">
+                    <a-cone radius-bottom="0.035" radius-top="0.005" height="0.18" rotation="90 0 0" color="#D4AF37" material="metalness: 0.7; roughness: 0.3"></a-cone>
+                    <a-plane position="-0.09 0 0" width="0.18" height="0.07" color="#D4AF37" material="side: double; metalness: 0.7; roughness: 0.3"
+                              animation="property: rotation; from: 0 0 0; to: 0 0 55; dir: alternate; loop: true; dur: 210; easing: easeInOutQuad"></a-plane>
+                    <a-plane position="0.09 0 0" width="0.18" height="0.07" color="#D4AF37" material="side: double; metalness: 0.7; roughness: 0.3"
+                              animation="property: rotation; from: 0 0 0; to: 0 0 -55; dir: alternate; loop: true; dur: 210; easing: easeInOutQuad"></a-plane>
+                </a-entity>
+            </a-entity>
+
+            <!-- 3. Floating Orbiting Jasmine Buds and Golden Ornaments -->
+            <a-entity position="0 1 0" animation="property: rotation; to: 0 -360 0; loop: true; dur: 10000; easing: linear">
+                <!-- Orbiting Jasmine Left -->
+                <a-entity position="1.35 0 0">
+                    <a-sphere radius="0.06" color="#FFFDD0"></a-sphere>
+                    <a-cone position="0 -0.07 0" radius-bottom="0.04" height="0.08" rotation="180 0 0" color="#82E0AA"></a-cone>
+                </a-entity>
+                <!-- Orbiting Gold Diamond Right -->
+                <a-entity position="-1.35 0.3 -0.1" rotation="0 0 0" animation="property: rotation; to: 360 360 0; loop: true; dur: 4000; easing: linear">
+                    <a-octahedron radius="0.07" color="#D4AF37" material="metalness: 0.8; roughness: 0.2"></a-octahedron>
+                </a-entity>
+            </a-entity>
+            @endif
+
+            <!-- 3. Rotating Postcard Group (Wedding Greeting Card) - Rendered with style-specific colors -->
+            <a-entity id="postcard-group" position="0 1 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 14000; easing: linear">
                 
                 <!-- Main Card Base / Frame -->
-                <a-box position="0 0 0" width="1.6" height="2" depth="0.06" color="#FFF8F6" shadow="cast: true; receive: true"></a-box>
+                <a-box position="0 0 0" width="1.4" height="1.85" depth="0.06" color="{{ $arStyle === 'cosmic' ? '#0d1117' : ($arStyle === 'java' ? '#5c0601' : '#FFF8F6') }}" shadow="cast: true; receive: true"></a-box>
                 
-                <!-- Front Side: Frame Border Decoration -->
-                <a-plane position="0 0 0.031" width="1.45" height="1.85" color="#D4AF37"></a-plane>
-                <a-plane position="0 0 0.032" width="1.41" height="1.81" color="#FFF8F6"></a-plane>
+                <!-- Front Side: Border Decoration -->
+                <a-plane position="0 0 0.031" width="1.28" height="1.73" color="{{ $arStyle === 'cosmic' ? '#00FFFF' : ($arStyle === 'java' ? '#D4AF37' : '#D4AF37') }}"></a-plane>
+                <a-plane position="0 0 0.032" width="1.24" height="1.69" color="{{ $arStyle === 'cosmic' ? '#161b22' : ($arStyle === 'java' ? '#5c0601' : '#FFF8F6') }}"></a-plane>
 
                 <!-- Front Side: Wedding Couple Photo -->
-                <a-image src="#wedding-photo" position="0 0.25 0.035" width="1.25" height="1.15"></a-image>
+                <a-image src="#wedding-photo" position="0 0.25 0.035" width="1.1" height="1.05" material="roughness: 1"></a-image>
                 
-                <!-- Front Side: Groom & Bride Names -->
+                <!-- Front Side: Grand Names Text -->
+                <!-- Multi-layer drop-shadow effect for text clarity -->
                 <a-text value="{{ $groomNickname }} & {{ $brideNickname }}" 
-                        color="#E5654B" 
+                        color="{{ $arStyle === 'cosmic' ? '#004f4f' : ($arStyle === 'java' ? '#3d0400' : '#801a08') }}" 
                         align="center" 
-                        position="0 -0.5 0.035" 
-                        width="3.5" 
+                        position="0.01 -0.44 0.035" 
+                        width="3.2" 
+                        font="roboto"
+                        wrap-count="18"></a-text>
+                <a-text value="{{ $groomNickname }} & {{ $brideNickname }}" 
+                        color="{{ $arStyle === 'cosmic' ? '#00FFFF' : ($arStyle === 'java' ? '#D4AF37' : '#E5654B') }}" 
+                        align="center" 
+                        position="0 -0.45 0.036" 
+                        width="3.2" 
                         font="roboto"
                         wrap-count="18"></a-text>
                 
                 <!-- Front Side: Date -->
                 <a-text value="{{ $weddingDate }}" 
-                        color="#888888" 
+                        color="{{ $arStyle === 'cosmic' ? '#8b949e' : ($arStyle === 'java' ? '#FADBD8' : '#888888') }}" 
                         align="center" 
-                        position="0 -0.7 0.035" 
-                        width="2.2" 
+                        position="0 -0.65 0.035" 
+                        width="2" 
                         font="roboto"
-                        wrap-count="20"></a-text>
+                        wrap-count="22"></a-text>
 
                 <!-- Back Side: Quote Frame -->
-                <a-plane position="0 0 -0.031" width="1.45" height="1.85" color="#D4AF37" rotation="0 180 0"></a-plane>
-                <a-plane position="0 0 -0.032" width="1.41" height="1.81" color="#E5654B" rotation="0 180 0"></a-plane>
+                <a-plane position="0 0 -0.031" width="1.28" height="1.73" color="{{ $arStyle === 'cosmic' ? '#00FFFF' : ($arStyle === 'java' ? '#D4AF37' : '#D4AF37') }}" rotation="0 180 0"></a-plane>
+                <a-plane position="0 0 -0.032" width="1.24" height="1.69" color="{{ $arStyle === 'cosmic' ? '#161b22' : ($arStyle === 'java' ? '#801a08' : '#E5654B') }}" rotation="0 180 0"></a-plane>
                 
                 <a-text value="THE WEDDING OF" 
                         color="#FFF8F6" 
                         align="center" 
-                        position="0 0.5 -0.035" 
+                        position="0 0.45 -0.035" 
                         rotation="0 180 0" 
-                        width="2.5" 
+                        width="2.2" 
                         font="roboto"
                         wrap-count="20"></a-text>
                         
@@ -356,44 +742,32 @@
                         align="center" 
                         position="0 -0.1 -0.035" 
                         rotation="0 180 0" 
-                        width="3.0" 
+                        width="2.8" 
                         font="roboto"
                         wrap-count="22"></a-text>
                         
                 <a-text value="#WeddingDay" 
                         color="#FFF8F6" 
                         align="center" 
-                        position="0 -0.6 -0.035" 
+                        position="0 -0.55 -0.035" 
                         rotation="0 180 0" 
-                        width="2" 
+                        width="1.8" 
                         font="roboto"
                         wrap-count="20"></a-text>
 
             </a-entity>
 
-            <!-- Orbiting 3D floating hearts and stars decoration around card -->
-            <a-entity position="0 1 0" animation="property: rotation; to: 0 -360 0; loop: true; dur: 9000; easing: linear">
-                <!-- 3D Pink Heart 1 -->
-                <a-entity geometry="primitive: box; width: 0.15; height: 0.15; depth: 0.15" 
-                          material="color: #FF85A2; roughness: 0.2; metalness: 0.1" 
-                          position="1.4 0.6 0"
-                          animation="property: rotation; to: 360 360 0; loop: true; dur: 3000; easing: linear"></a-entity>
-                
-                <!-- 3D Gold Box 2 -->
-                <a-entity geometry="primitive: sphere; radius: 0.1" 
-                          material="color: #D4AF37; roughness: 0.1; metalness: 0.8" 
-                          position="-1.3 -0.4 0.3"
-                          animation="property: rotation; to: 0 360 360; loop: true; dur: 4500; easing: linear"></a-entity>
-                
-                <!-- 3D Red Box 3 -->
-                <a-entity geometry="primitive: box; width: 0.1; height: 0.1; depth: 0.1" 
-                          material="color: #E5654B; roughness: 0.3" 
-                          position="0.5 -1.2 -1"
-                          animation="property: rotation; to: 360 0 360; loop: true; dur: 3500; easing: linear"></a-entity>
-            </a-entity>
-
-            <!-- Lights specific to marker object to make 3D model look premium -->
-            <a-entity light="type: point; intensity: 1.5; distance: 10; decay: 2" position="0 2 1"></a-entity>
+            <!-- Custom Point Light and Ambient Lights configured dynamically per theme -->
+            @if($arStyle === 'cosmic')
+                <a-entity light="type: ambient; color: #8A2BE2; intensity: 0.6"></a-entity>
+                <a-entity light="type: point; color: #00FFFF; intensity: 2.2; distance: 10" position="0 2.5 1.5"></a-entity>
+            @elseif($arStyle === 'java')
+                <a-entity light="type: ambient; color: #FFA07A; intensity: 0.7"></a-entity>
+                <a-entity light="type: point; color: #FFD700; intensity: 2.0; distance: 10" position="0 2.5 1.5"></a-entity>
+            @else
+                <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
+                <a-entity light="type: point; color: #FFEAD4; intensity: 1.6; distance: 10" position="0 2.5 1.5"></a-entity>
+            @endif
 
         </a-marker>
 

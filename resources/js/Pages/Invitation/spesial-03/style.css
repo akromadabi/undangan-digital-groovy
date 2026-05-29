@@ -804,10 +804,14 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   gap: 4px;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 .sp03-nav-menu__inner--row::-webkit-scrollbar {
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .sp03-nav-menu__item {

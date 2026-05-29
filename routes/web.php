@@ -268,6 +268,7 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
         Route::get('/whatsapp', [SettingsController::class, 'whatsapp'])->middleware('feature:whatsapp')->name('whatsapp');
         Route::post('/whatsapp/send', [SettingsController::class, 'sendWhatsapp'])->middleware('feature:whatsapp')->name('whatsapp.send');
         Route::get('/ar', [SettingsController::class, 'ar'])->name('ar');
+        Route::post('/ar/style', [SettingsController::class, 'saveArStyle'])->name('ar.style');
     });
 
     // Theme Settings (Dynamic)

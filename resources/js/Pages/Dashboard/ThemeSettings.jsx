@@ -23,6 +23,7 @@ const PIcons = {
     butterfly: (c) => <svg className={c} viewBox="0 0 24 24"><path d="M12 12c-3-5-8-6-9-4s1 6 3.5 8c1.2 1 4 1.5 5.5 0" fill="#a29bfe"/><path d="M12 12c3-5 8-6 9-4s-1 6-3.5 8c-1.2 1-4 1.5-5.5 0" fill="#7c6fef"/><line x1="12" y1="7" x2="12" y2="20" stroke="#6050c0" strokeWidth="1"/></svg>,
     flower: (c) => <svg className={c} viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="3.5" ry="5.5" fill="#fd79a8"/><ellipse cx="18" cy="12" rx="5.5" ry="3.5" fill="#f890b8"/><ellipse cx="12" cy="18.5" rx="3.5" ry="5.5" fill="#fd79a8"/><ellipse cx="6" cy="12" rx="5.5" ry="3.5" fill="#f890b8"/><circle cx="12" cy="12" r="3" fill="#ffc83c"/></svg>,
     sparkle: (c) => <svg className={c} viewBox="0 0 24 24"><path d="M12 2L14 9L21 12L14 15L12 22L10 15L3 12L10 9Z" fill="#ffd700"/></svg>,
+    birds: (c) => <svg className={c} viewBox="0 0 100 50" fill="currentColor"><path d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" /></svg>,
 };
 
 const PARTICLE_OPTIONS = [
@@ -36,6 +37,7 @@ const PARTICLE_OPTIONS = [
     { key: 'butterfly', label: 'Kupu-kupu' },
     { key: 'flower', label: 'Bunga' },
     { key: 'sparkle', label: 'Sparkle' },
+    { key: 'birds', label: 'Burung' },
 ];
 
 const ToggleSwitch = ({ checked, onChange, label, desc, icon, disabled = false }) => (

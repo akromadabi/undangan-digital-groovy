@@ -241,15 +241,16 @@ function FlowerSwirl({ title }) {
 /* ═══════════════════════════════════════
    COVER SECTION (SCREENSHOT 1)
    ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPhotos }) {
-    const { t } = useTranslation();
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPhotos, showGuestName }) {
+    const { t, locale } = useTranslation();
+    const isEn = locale === 'en';
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || {};
 
     const guestName = guest?.name
         || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null)
-        || 'Nama Tamu';
+        || (isEn ? 'Dear Guest' : 'Tamu Undangan');
 
     const coupleName = (groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
@@ -272,10 +273,12 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
                     positionY={invitation?.cover_position_y}
                     zoom={invitation?.cover_zoom}
                 />
-            ) : (
+            ) : showPhotos ? (
                 <div className="absolute inset-0 z-0">
                     <img src={ORNAMENTS.coverFallback} alt="Cover Background Fallback" className="w-full h-full object-cover" />
                 </div>
+            ) : (
+                <div className="absolute inset-0 z-0 bg-[var(--sp03-primary-dark)] opacity-95" />
             )}
             
             {/* Dark bottom gradient overlay */}
@@ -290,15 +293,19 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
                     {coupleName}
                 </h1>
                 
-                <p className="text-lg text-white/80 italic sp03-font-script-style mb-2 select-none">
-                    Dear,
-                </p>
-                <p className="text-[18px] font-semibold text-white mb-8 tracking-wide">
-                    {guestName}
-                </p>
+                {showGuestName && guest && (
+                    <>
+                        <p className="text-lg text-white/80 italic sp03-font-script-style mb-2 select-none">
+                            {isEn ? 'Dear,' : 'Kepada Yth.,'}
+                        </p>
+                        <p className="text-[18px] font-semibold text-white mb-8 tracking-wide">
+                            {guestName}
+                        </p>
+                    </>
+                )}
 
                 <button type="button" onClick={onOpen} className="sp03-btn-buka">
-                    Buka Undangan
+                    {t('invitation.open')}
                 </button>
             </div>
         </div>
@@ -308,12 +315,13 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
 /* ═══════════════════════════════════════
    OPENING & QUOTE COMBINED (SCREENSHOT 2 & 3)
    ═══════════════════════════════════════ */
-function OpeningSection({ invitation, showPhotos, brideGrooms, locale, onSaveDate }) {
+function OpeningSection({ invitation, showPhotos, brideGrooms, events, locale }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
     const coupleNickname = (groom.nickname && bride.nickname) ? `${groom.nickname} & ${bride.nickname}` : 'Habib & Adiba';
+    const isEn = locale === 'en';
 
     const openingImages = useMemo(() => {
         return (invitation?.opening_image || '')
@@ -326,8 +334,25 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, locale, onSaveDat
         if (invitation?.countdown_target_date) {
             return formatDate(invitation.countdown_target_date, locale);
         }
-        return 'Minggu, 16 Agustus 2026';
-    }, [invitation?.countdown_target_date, locale]);
+        return isEn ? 'Sunday, August 16, 2026' : 'Minggu, 16 Agustus 2026';
+    }, [invitation?.countdown_target_date, locale, isEn]);
+
+    const googleCalendarUrl = useMemo(() => {
+        const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+        if (primaryEvent?.event_date) {
+            const ds = String(primaryEvent.event_date).substring(0, 10).replace(/-/g, '');
+            const st = (primaryEvent.start_time || '08:00').substring(0, 5).replace(':', '') + '00';
+            const bgs = safeArr(brideGrooms);
+            const names = bgs.map(b => b.nickname || b.full_name).filter(Boolean).join(' & ');
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((primaryEvent.event_name || 'Wedding') + ' - ' + names)}&dates=${ds}T${st}/${ds}T${st}&location=${encodeURIComponent([primaryEvent.venue_name, primaryEvent.venue_address].filter(Boolean).join(', '))}&sf=true&output=xml`;
+        }
+        
+        const ds = invitation?.countdown_target_date ? String(invitation.countdown_target_date).substring(0, 10).replace(/-/g, '') : '20261220';
+        const st = '080000';
+        const bgs = safeArr(brideGrooms);
+        const names = bgs.map(b => b.nickname || b.full_name).filter(Boolean).join(' & ') || 'Habib & Adiba';
+        return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('The Wedding of ' + names)}&dates=${ds}T${st}/${ds}T${st}&sf=true&output=xml`;
+    }, [events, invitation, brideGrooms]);
 
     return (
         <div className="w-full">
@@ -337,45 +362,29 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, locale, onSaveDat
             <div className="sp03-opening-page">
                 {/* Building sketch background watermark is handled in CSS background */}
 
-                {/* Animated Flying Birds */}
-                <div className="sp03-birds-container select-none">
-                    <div className="sp03-bird sp03-bird--1">
-                        <svg viewBox="0 0 100 50" className="w-12 h-6 text-[var(--sp03-primary)]" fill="currentColor">
-                            <path className="sp03-bird-wings-1" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
-                        </svg>
-                    </div>
-                    <div className="sp03-bird sp03-bird--2">
-                        <svg viewBox="0 0 100 50" className="w-8 h-4 text-[var(--sp03-primary)]" fill="currentColor">
-                            <path className="sp03-bird-wings-2" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
-                        </svg>
-                    </div>
-                    <div className="sp03-bird sp03-bird--3">
-                        <svg viewBox="0 0 100 50" className="w-10 h-5 text-[var(--sp03-primary)]" fill="currentColor">
-                            <path className="sp03-bird-wings-3" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
-                        </svg>
-                    </div>
-                    <div className="sp03-bird sp03-bird--4">
-                        <svg viewBox="0 0 100 50" className="w-9 h-4.5 text-[var(--sp03-primary)]" fill="currentColor">
-                            <path className="sp03-bird-wings-4" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
-                        </svg>
-                    </div>
-                </div>
-
                 {/* Arch-shaped prewedding photo */}
-                <Reveal variant="zoom" delay={100} className="relative z-10 w-full max-w-[280px] mb-8">
-                    <div className="sp03-opening-frame w-full aspect-[3/4] relative">
-                        {showPhotos && openingImages.length > 0 ? (
-                             <PremiumSlideshow
-                                 images={openingImages}
-                                 positionX={invitation?.opening_position_x}
-                                 positionY={invitation?.opening_position_y}
-                                 zoom={invitation?.opening_zoom}
-                             />
-                        ) : (
-                            <img src={ORNAMENTS.coverFallback} alt="Opening Fallback" className="w-full h-full object-cover" />
-                        )}
-                    </div>
-                </Reveal>
+                {showPhotos ? (
+                    <Reveal variant="zoom" delay={100} className="relative z-10 w-full max-w-[280px] mb-8">
+                        <div className="sp03-opening-frame w-full aspect-[3/4] relative">
+                            {openingImages.length > 0 ? (
+                                 <PremiumSlideshow
+                                     images={openingImages}
+                                     positionX={invitation?.opening_position_x}
+                                     positionY={invitation?.opening_position_y}
+                                     zoom={invitation?.opening_zoom}
+                                 />
+                            ) : (
+                                <img src={ORNAMENTS.coverFallback} alt="Opening Fallback" className="w-full h-full object-cover" />
+                            )}
+                        </div>
+                    </Reveal>
+                ) : (
+                    <Reveal delay={150} className="relative z-10 my-6">
+                        <div className="w-24 h-24 rounded-full border border-[var(--sp03-accent)]/30 flex items-center justify-center text-2xl font-bold tracking-widest text-[var(--sp03-accent)] bg-white/80 shadow-md mx-auto sp03-breathe font-serif select-none">
+                            {groom.nickname?.charAt(0) || 'H'}{bride.nickname?.charAt(0) || 'A'}
+                        </div>
+                    </Reveal>
+                )}
 
                 <Reveal delay={200} className="relative z-10 text-center">
                     <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] font-bold text-[var(--sp03-text-light)] mb-2">
@@ -388,8 +397,8 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, locale, onSaveDat
                         {displayDate}
                     </p>
 
-                    <button type="button" onClick={onSaveDate} className="sp03-btn-save-date">
-                        Save The Date
+                    <button type="button" onClick={() => window.open(googleCalendarUrl, '_blank')} className="sp03-btn-save-date">
+                        {t('invitation.save_the_date') || 'Save The Date'}
                     </button>
                 </Reveal>
             </div>
@@ -402,22 +411,25 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, locale, onSaveDat
                 <div className="sp03-quote-bg" />
 
                 <Reveal variant="zoom" className="relative z-10 flex flex-col items-center max-w-md">
-                    {/* White rose outline image */}
-                    <img src={ORNAMENTS.bb1} alt="Rose Outline" className="w-32 h-auto object-contain opacity-70 mb-4 select-none" />
+                    {/* White rose outline image (shrunk from w-32 to w-20) */}
+                    <img src={ORNAMENTS.bb1} alt="Rose Outline" className="w-20 h-auto object-contain opacity-70 mb-4 select-none" />
 
                     {/* Monogram white text */}
                     <h3 className="text-5xl sm:text-6xl text-white sp03-font-heading-style font-medium tracking-widest mb-6 select-none">
                         {groom.nickname?.charAt(0) || 'H'} &amp; {bride.nickname?.charAt(0) || 'A'}
                     </h3>
 
-                    {/* Quote text */}
-                    <p className="text-[13px] sm:text-[14px] leading-relaxed opacity-95 italic px-2 mb-4 font-serif">
-                        “Dan diantara tanda-tanda kekuasaanNya ialah Dia menciptakan untukmu pasangan-pasangan dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya, dan dijadikanNya diantaramu rasa kasih dan sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda bagi kaum yang berpikir.”
+                    {/* Quote text (improved visibility with text-white/95) */}
+                    <p className="text-[13px] sm:text-[14px] leading-relaxed text-white/95 italic px-2 mb-4 font-serif text-center">
+                        {invitation?.opening_ayat || (isEn 
+                            ? "“And among His Signs is this, that He created for you mates from among yourselves, that ye may dwell in tranquillity with them, and He has put love and mercy between your (hearts): handy in that are Signs for those who reflect.”"
+                            : "“Dan diantara tanda-tanda kekuasaanNya ialah Dia menciptakan untukmu pasangan-pasangan dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya, dan dijadikanNya diantaramu rasa kasih dan sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda bagi kaum yang berpikir.”"
+                        )}
                     </p>
 
                     {/* Source */}
                     <p className="text-[13px] font-bold text-[#D7AC64] mt-3">
-                        (Qs. Ar. Rum (30) : 21)
+                        {invitation?.opening_ayat_source || (isEn ? "(Surah Ar-Rum: 21)" : "(Qs. Ar-Rum: 21)")}
                     </p>
                 </Reveal>
             </div>
@@ -433,6 +445,7 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+    const isEn = locale === 'en';
 
     const translateChildOrder = (childOrder, gender) => {
         if (!childOrder) return '';
@@ -474,10 +487,12 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
             <div className="relative z-10 max-w-lg mx-auto">
                 <Reveal>
                     <h2 className="text-3xl sm:text-4xl text-[#D7AC64] sp03-font-heading-style tracking-wider mb-2 select-none">
-                        Our Spesial Day
+                        {isEn ? 'Our Special Day' : 'Hari Bahagia Kami'}
                     </h2>
                     <p className="text-xs sm:text-[13px] text-[var(--sp03-text)] leading-relaxed max-w-md mx-auto mb-10 select-none">
-                        Tanpa mengurangi rasa hormat, kami mengundang Bapak/Ibu/Saudara/i serta kerabat sekalian untuk menghadiri acara pernikahan kami:
+                        {isEn 
+                            ? 'Without reducing any respect, we cordially invite you to attend our wedding ceremony:' 
+                            : 'Tanpa mengurangi rasa hormat, kami mengundang Bapak/Ibu/Saudara/i serta kerabat sekalian untuk menghadiri acara pernikahan kami:'}
                     </p>
                 </Reveal>
 
@@ -485,7 +500,7 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                     {/* Groom Profile */}
                     <Reveal variant="left" className="w-full flex justify-center">
                         <div className="flex flex-col items-center">
-                            {showPhotos && (
+                            {showPhotos ? (
                                 <div className="sp03-profile-photo-card mb-5">
                                     <img 
                                         src={getStorageUrl(groom.photo, ORNAMENTS.priaFallback)} 
@@ -493,12 +508,20 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                                         className="class-foto-profil" 
                                     />
                                 </div>
+                            ) : (
+                                <div className="w-16 h-16 rounded-full border border-[var(--sp03-accent)]/30 flex items-center justify-center font-bold text-lg text-[var(--sp03-accent)] bg-white/80 shadow-md mb-5 font-serif select-none">
+                                    {groom.nickname?.charAt(0) || 'H'}
+                                </div>
                             )}
                             <h3 className="text-2xl font-bold text-[var(--sp03-primary)] sp03-font-heading-style tracking-wide">
                                 {groom.full_name || 'Habib Yulianto'}
                             </h3>
                             <p className="text-xs sm:text-[13px] text-[var(--sp03-text)] italic font-semibold mt-1">
-                                {translateChildOrder(groom.child_order, 'pria')} <span className="not-italic font-bold">{groom.father_name && groom.mother_name ? `Bapak ${groom.father_name} & Ibu ${groom.mother_name}` : 'Bapak Anas & Ibu Kholifah'}</span>
+                                {translateChildOrder(groom.child_order, 'pria')} <span className="not-italic font-bold">
+                                    {groom.father_name && groom.mother_name 
+                                        ? (isEn ? `Mr. ${groom.father_name} & Mrs. ${groom.mother_name}` : `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`) 
+                                        : (isEn ? 'Mr. Anas & Mrs. Kholifah' : 'Bapak Anas & Ibu Kholifah')}
+                                </span>
                             </p>
                             {groom.instagram && (
                                 <a 
@@ -521,7 +544,7 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                     {/* Bride Profile */}
                     <Reveal variant="right" className="w-full flex justify-center">
                         <div className="flex flex-col items-center">
-                            {showPhotos && (
+                            {showPhotos ? (
                                 <div className="sp03-profile-photo-card mb-5">
                                     <img 
                                         src={getStorageUrl(bride.photo, ORNAMENTS.wanitaFallback)} 
@@ -529,12 +552,20 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                                         className="class-foto-profil" 
                                     />
                                 </div>
+                            ) : (
+                                <div className="w-16 h-16 rounded-full border border-[var(--sp03-accent)]/30 flex items-center justify-center font-bold text-lg text-[var(--sp03-accent)] bg-white/80 shadow-md mb-5 font-serif select-none">
+                                    {bride.nickname?.charAt(0) || 'A'}
+                                </div>
                             )}
                             <h3 className="text-2xl font-bold text-[var(--sp03-primary)] sp03-font-heading-style tracking-wide">
                                 {bride.full_name || 'Adiba Putri Syakila'}
                             </h3>
                             <p className="text-xs sm:text-[13px] text-[var(--sp03-text)] italic font-semibold mt-1">
-                                {translateChildOrder(bride.child_order, 'wanita')} <span className="not-italic font-bold">{bride.father_name && bride.mother_name ? `Bapak ${bride.father_name} & Ibu ${bride.mother_name}` : 'Bapak M. Dawam & Ibu Dewi Sudarwati'}</span>
+                                {translateChildOrder(bride.child_order, 'wanita')} <span className="not-italic font-bold">
+                                    {bride.father_name && bride.mother_name 
+                                        ? (isEn ? `Mr. ${bride.father_name} & Mrs. ${bride.mother_name}` : `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`) 
+                                        : (isEn ? 'Mr. M. Dawam & Mrs. Dewi Sudarwati' : 'Bapak M. Dawam & Ibu Dewi Sudarwati')}
+                                </span>
                             </p>
                             {bride.instagram && (
                                 <a 
@@ -557,9 +588,10 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
 /* ═══════════════════════════════════════
    EVENTS & MAPS SECTION (SCREENSHOT 5)
    ═══════════════════════════════════════ */
-function EventSection({ events, locale, invitation, sections }) {
+function EventSection({ events, locale, invitation, sections, showPhotos }) {
     const { t } = useTranslation();
     const list = safeArr(events);
+    const isEn = locale === 'en';
 
     const showCountdown = parseBool(invitation?.show_countdown);
     const showCountdownInEvent = useMemo(() => {
@@ -574,6 +606,9 @@ function EventSection({ events, locale, invitation, sections }) {
         return true;
     }, [sections, events, showCountdown]);
 
+    const primaryEvent = useMemo(() => safeArr(events).find(e => e.is_primary) || safeArr(events)[0], [events]);
+    const targetDate = useMemo(() => invitation?.countdown_target_date || primaryEvent?.event_date || '', [invitation?.countdown_target_date, primaryEvent]);
+
     return (
         <div className="sp03-event-section w-full bg-[#2E3F54] py-16 px-6 text-center">
             <div className="relative z-10 max-w-lg mx-auto">
@@ -581,9 +616,9 @@ function EventSection({ events, locale, invitation, sections }) {
                     <FlowerSwirl title={t('nav.acara')} />
                 </Reveal>
 
-                {showCountdownInEvent && invitation?.countdown_target_date && (
+                {showCountdownInEvent && targetDate && (
                     <Reveal variant="zoom">
-                        <CountdownTimer targetDate={invitation.countdown_target_date} />
+                        <CountdownTimer targetDate={targetDate} />
                     </Reveal>
                 )}
 
@@ -595,9 +630,11 @@ function EventSection({ events, locale, invitation, sections }) {
                     return (
                         <Reveal key={evt.id || idx} variant={isEven ? 'left' : 'right'} className="sp03-custom-event-card relative overflow-hidden bg-white text-left p-8 rounded-[30px] shadow-lg mb-8 max-w-sm mx-auto">
                             {/* Misty mountain background inside the card */}
-                            <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
-                                <img src={ORNAMENTS.bgMempelai} alt="" className="w-full h-full object-cover" />
-                            </div>
+                            {showPhotos && (
+                                <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
+                                    <img src={ORNAMENTS.bgMempelai} alt="" className="w-full h-full object-cover" />
+                                </div>
+                            )}
 
                             <div className="relative z-10 flex flex-col items-center text-center">
                                 {/* Event Title */}
@@ -607,7 +644,7 @@ function EventSection({ events, locale, invitation, sections }) {
 
                                 {/* Day */}
                                 <p className="text-[10px] font-bold tracking-[0.2em] text-[#40506b]/70 uppercase mb-1 select-none">
-                                    {dayName || 'MINGGU'}
+                                    {dayName || (isEn ? 'SUNDAY' : 'MINGGU')}
                                 </p>
 
                                 {/* Date Big Gold Number */}
@@ -617,12 +654,12 @@ function EventSection({ events, locale, invitation, sections }) {
 
                                 {/* Month Year */}
                                 <p className="text-xs font-bold text-[#40506b]/80 uppercase tracking-widest mb-4 select-none">
-                                    {monthName || 'AGUSTUS'} {year || '2026'}
+                                    {monthName || (isEn ? 'AUGUST' : 'AGUSTUS')} {year || '2026'}
                                 </p>
 
                                 {/* Time */}
                                 <p className="text-[12px] font-semibold text-[#40506b] mb-5 select-none">
-                                    Pukul : {formatTime(evt.start_time)} {evt.end_time ? `- ${formatTime(evt.end_time)}` : ' - Selesai'} {evt.timezone || 'WIB'}
+                                    {isEn ? 'Time' : 'Pukul'} : {formatTime(evt.start_time)} {evt.end_time ? `- ${formatTime(evt.end_time)}` : (isEn ? ' - End' : ' - Selesai')} {evt.timezone || 'WIB'}
                                 </p>
 
                                 {/* Location PIN icon separator */}
@@ -636,7 +673,7 @@ function EventSection({ events, locale, invitation, sections }) {
 
                                 {/* Venue Details */}
                                 <div className="text-xs leading-relaxed text-[#40506b] font-semibold mt-4 mb-6">
-                                    <p className="font-bold text-sm mb-1">{evt.venue_name || 'Kediaman Mempelai Wanita'}</p>
+                                    <p className="font-bold text-sm mb-1">{evt.venue_name || (isEn ? "Bride's Residence" : "Kediaman Mempelai Wanita")}</p>
                                     <p className="opacity-80 font-medium">{evt.venue_address || 'Ds Pagu, Wates, Kediri, Jawa Timur'}</p>
                                 </div>
 
@@ -648,7 +685,7 @@ function EventSection({ events, locale, invitation, sections }) {
                                         rel="noopener noreferrer"
                                         className="sp03-btn-lihat-lokasi"
                                     >
-                                        <i className="fas fa-map-marker-alt text-[9px]" /> Lihat Lokasi
+                                        <i className="fas fa-map-marker-alt text-[9px]" /> {isEn ? 'View Location' : 'Lihat Lokasi'}
                                     </a>
                                 )}
                             </div>
@@ -993,7 +1030,7 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                         disabled={isSubmitting} 
                         className="sp03-btn-primary w-full text-xs font-semibold py-3 mt-2 animate-pulse"
                     >
-                        {isSubmitting ? 'KIRIM...' : (isEn ? 'SEND MESSAGE' : 'KIRIM KONFIRMASI & UCAPAN')}
+                        {isSubmitting ? (isEn ? 'SENDING...' : 'KIRIM...') : (isEn ? 'SEND MESSAGE' : 'KIRIM KONFIRMASI & UCAPAN')}
                     </button>
 
                     {success && (
@@ -1086,8 +1123,8 @@ function ClosingSection({ invitation, brideGrooms, locale }) {
                 <FlowerSwirl />
             </Reveal>
 
-            <p className="sp03-watermark relative z-10 select-none pb-6 text-[var(--sp03-text-light)] text-[10px]">
-                Made with <img src={ORNAMENTS.heart} alt="love" className="w-3.5 h-3.5 inline-block mx-0.5 opacity-90" /> by {brandName}
+            <p className="watermark sp03-watermark relative z-10 select-none pb-6 text-[var(--sp03-text-light)] text-[10px]">
+                Made with ❤️ by {brandName}
             </p>
         </div>
     );
@@ -1104,7 +1141,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [autoScroll, setAutoScroll] = useState(false);
+    const [autoScroll, setAutoScroll] = useState(invitation?.enable_auto_scroll !== false);
     const [showQrCode, setShowQrCode] = useState(false);
     const [copiedIdx, setCopiedIdx] = useState(null);
 
@@ -1120,6 +1157,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     // Global settings injection
     const showPhotos = invitation?.show_photos !== false;
     const showAnimations = invitation?.show_animations !== false;
+    const showGuestName = invitation?.show_guest_name !== false;
     const enableRsvp = invitation?.enable_rsvp !== false;
     const enableWishes = invitation?.enable_wishes !== false;
     const enableQr = invitation?.enable_qr !== false && invitation?.show_qr_code !== false;
@@ -1196,7 +1234,8 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
 
     const handleOpen = () => {
         setIsOpened(true);
-        if (invitation?.music_url && audioRef.current) {
+        const autoplay = invitation?.music_autoplay !== false;
+        if (autoplay && invitation?.music_url && audioRef.current) {
             audioRef.current.play()
                 .then(() => setIsPlaying(true))
                 .catch(err => console.log('Audio autoplay blocked:', err));
@@ -1341,6 +1380,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                     isOpened={isOpened} 
                     onOpen={handleOpen}
                     showPhotos={showPhotos}
+                    showGuestName={showGuestName}
                 />
 
                 {/* 2. MAIN APPLICATION CONTENT */}
@@ -1358,7 +1398,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         className="sp03-section-container w-full max-w-xl"
                                     >
                                         {sec.section_key === 'opening' && (
-                                            <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} locale={locale} onSaveDate={() => jumpToSection('event')} />
+                                            <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} events={events} locale={locale} />
                                         )}
                                         {sec.section_key === 'bride_groom' && (
                                             <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
@@ -1417,7 +1457,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         >
                                             <div className="sp03-section-container w-full max-w-xl mx-auto min-h-screen">
                                                 {sec.section_key === 'opening' && (
-                                                    <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} locale={locale} onSaveDate={() => jumpToSection('event')} />
+                                                    <OpeningSection invitation={invitation} showPhotos={showPhotos} brideGrooms={brideGrooms} events={events} locale={locale} />
                                                 )}
                                                 {sec.section_key === 'bride_groom' && (
                                                     <BrideGroomSection brideGrooms={brideGrooms} locale={locale} showPhotos={showPhotos} />
@@ -1499,42 +1539,56 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                     )}
                                 </button>
                             )}
+
+                            {/* AUTO SCROLL TOGGLER */}
+                            {invitation?.enable_auto_scroll !== false && (
+                                <button 
+                                    type="button" 
+                                    onClick={() => setAutoScroll(!autoScroll)}
+                                    className={`sp03-control-btn shadow-md ${autoScroll ? 'is-active' : ''}`}
+                                    title="Auto Scroll"
+                                >
+                                    <i className="fas fa-chevron-down" style={{ transform: autoScroll ? 'none' : 'rotate(-90deg)', transition: 'transform 0.3s' }} />
+                                </button>
+                            )}
                         </div>
 
                         {/* 4. PREMIUM COMPACT NAVIGATION FLOATING BAR */}
-                        <div className="sp03-nav-menu">
-                            <div className="sp03-nav-menu__inner--row flex justify-around">
-                                {resolvedSections.map((sec) => {
-                                    const key = sec.section_key;
-                                    const isCurrent = activeSectionKey === key;
-                                    let navIcon = 'fa-star';
-                                    let labelText = sec.section_name || key;
-                                    if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.pembuka') || 'Pembuka'; }
-                                    else if (key === 'bride_groom') { navIcon = 'fa-heart'; labelText = t('nav.mempelai') || 'Mempelai'; }
-                                    else if (key === 'event') { navIcon = 'fa-calendar-alt'; labelText = t('nav.acara') || 'Acara'; }
-                                    else if (key === 'love_story') { navIcon = 'fa-book-open'; labelText = t('nav.kisah') || 'Kisah'; }
-                                    else if (key === 'gallery') { navIcon = 'fa-images'; labelText = t('nav.galeri') || 'Galeri'; }
-                                    else if (key === 'livestream') { navIcon = 'fa-video'; labelText = t('nav.streaming') || 'Siaran'; }
-                                    else if (key === 'bank') { navIcon = 'fa-gift'; labelText = t('nav.hadiah') || 'Hadiah'; }
-                                    else if (key === 'rsvp') { navIcon = 'fa-envelope-open-text'; labelText = t('nav.rsvp') || 'RSVP'; }
-                                    else if (key === 'closing') { navIcon = 'fa-handshake'; labelText = t('nav.penutup') || 'Penutup'; }
+                        {invitation?.menu_position !== 'none' && (
+                            <div className="sp03-nav-menu">
+                                <div className="sp03-nav-menu__inner--row flex justify-around">
+                                    {resolvedSections.map((sec) => {
+                                        const key = sec.section_key;
+                                        const isCurrent = activeSectionKey === key;
+                                        let navIcon = 'fa-star';
+                                        let labelText = sec.section_name || key;
+                                        if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.pembuka') || 'Pembuka'; }
+                                        else if (key === 'bride_groom') { navIcon = 'fa-heart'; labelText = t('nav.mempelai') || 'Mempelai'; }
+                                        else if (key === 'event') { navIcon = 'fa-calendar-alt'; labelText = t('nav.acara') || 'Acara'; }
+                                        else if (key === 'love_story') { navIcon = 'fa-book-open'; labelText = t('nav.kisah') || 'Kisah'; }
+                                        else if (key === 'gallery') { navIcon = 'fa-images'; labelText = t('nav.galeri') || 'Galeri'; }
+                                        else if (key === 'livestream') { navIcon = 'fa-video'; labelText = t('nav.streaming') || 'Siaran'; }
+                                        else if (key === 'bank') { navIcon = 'fa-gift'; labelText = t('nav.hadiah') || 'Hadiah'; }
+                                        else if (key === 'rsvp') { navIcon = 'fa-envelope-open-text'; labelText = t('nav.rsvp') || 'RSVP'; }
+                                        else if (key === 'closing') { navIcon = 'fa-handshake'; labelText = t('nav.penutup') || 'Penutup'; }
 
-                                    return (
-                                        <button 
-                                            key={sec.id}
-                                            type="button"
-                                            ref={isCurrent ? activeNavRef : null}
-                                            onClick={() => jumpToSection(key)}
-                                            className={`sp03-nav-menu__item ${isCurrent ? 'active' : ''}`}
-                                            title={sec.section_name}
-                                        >
-                                            <i className={`fas ${navIcon}`} />
-                                            <span className="sp03-nav-item-text">{labelText}</span>
-                                        </button>
-                                    );
-                                })}
+                                        return (
+                                            <button 
+                                                key={sec.id}
+                                                type="button"
+                                                ref={isCurrent ? activeNavRef : null}
+                                                onClick={() => jumpToSection(key)}
+                                                className={`sp03-nav-menu__item ${isCurrent ? 'active' : ''}`}
+                                                title={sec.section_name}
+                                            >
+                                                <i className={`fas ${navIcon}`} />
+                                                <span className="sp03-nav-item-text">{labelText}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* 5. PRESENSI CHECK-IN MODAL OVERLAY */}
                         {enableQr && showQrCode && guest && (

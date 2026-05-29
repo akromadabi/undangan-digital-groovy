@@ -272,7 +272,7 @@ function FlowerOrnaments({ isFixed = false }) {
 /* ═══════════════════════════════════════
    COVER SECTION
    ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPhotos }) {
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPhotos, showGuestName }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => b.gender === 'pria') || bgs[0] || {};
@@ -293,7 +293,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
     }, [groom, bride]);
 
     return (
-        <div className={`sp02-cover ${isOpened ? 'is-opened' : ''} ${!showPhotos ? 'lx2-no-photo-mode' : ''}`}>
+        <div className={`sp02-cover ${isOpened ? 'is-opened' : ''} ${!showPhotos ? 'sp02-no-photo-mode' : ''}`}>
             {/* Background Slideshow */}
             {showPhotos && (
                 <PremiumSlideshow
@@ -346,7 +346,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
                     {coupleName}
                 </h1>
                 
-                {guest && (
+                {showGuestName && guest && (
                     <div className="my-5 bg-[var(--sp02-bg-soft)]/65 border border-[var(--sp02-secondary)]/20 rounded-2xl p-4 shadow-sm backdrop-blur-xs">
                         <p className="text-[9px] uppercase tracking-[0.2em] opacity-50 mb-0.5">{t('invitation.to')}</p>
                         <p className="text-md font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wide">{guestName}</p>
@@ -630,11 +630,13 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
 /* ═══════════════════════════════════════
    SAVE THE DATE / COUNTDOWN PART
    ═══════════════════════════════════════ */
-function CountdownBlock({ events }) {
+function CountdownBlock({ events, invitation }) {
     const { t } = useTranslation();
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
-    const targetDate = primaryEvent?.event_date || '';
-    const targetTime = primaryEvent?.start_time || '08:00';
+    const targetDate = invitation?.countdown_target_date || primaryEvent?.event_date || '';
+    const targetTime = targetDate === invitation?.countdown_target_date 
+        ? (String(invitation?.countdown_target_date).substring(11, 16) || '08:00')
+        : (primaryEvent?.start_time || '08:00');
 
     const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
@@ -691,9 +693,10 @@ function CountdownBlock({ events }) {
 /* ═══════════════════════════════════════
    EVENTS & MAPS SECTION
    ═══════════════════════════════════════ */
-function EventSection({ events, showPhotos, locale, showCountdown, galleries }) {
+function EventSection({ events, showPhotos, locale, showCountdown, galleries, invitation }) {
     const { t } = useTranslation();
     const list = safeArr(events);
+    const isEn = locale === 'en';
 
     const [randomGalleryImages, setRandomGalleryImages] = useState({});
 
@@ -713,7 +716,7 @@ function EventSection({ events, showPhotos, locale, showCountdown, galleries }) 
         <div className="max-w-lg mx-auto">
             {showCountdown && (
                 <Reveal variant="zoom" className="w-full">
-                    <CountdownBlock events={events} />
+                    <CountdownBlock events={events} invitation={invitation} />
                 </Reveal>
             )}
 
@@ -757,7 +760,7 @@ function EventSection({ events, showPhotos, locale, showCountdown, galleries }) 
                                 
                                 <p className="text-[12px] opacity-80 mb-2">
                                     <i className="far fa-clock text-[var(--sp02-primary)] mr-1.5" />
-                                    {formatTime(evt.start_time)} {evt.end_time ? `- ${formatTime(evt.end_time)}` : ' - Selesai'} {evt.timezone || 'WIB'}
+                                    {formatTime(evt.start_time)} {evt.end_time ? `- ${formatTime(evt.end_time)}` : (isEn ? ' - End' : ' - Selesai')} {evt.timezone || 'WIB'}
                                 </p>
                                 
                                 <div className="text-[12px] opacity-80 leading-normal mb-4">
@@ -1116,7 +1119,7 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                         disabled={isSubmitting} 
                         className="sp02-btn-primary w-full text-xs font-semibold py-3 mt-2"
                     >
-                        {isSubmitting ? 'KIRIM...' : (isEn ? 'SEND MESSAGE' : 'KIRIM KONFIRMASI & UCAPAN')}
+                        {isSubmitting ? (isEn ? 'SENDING...' : 'KIRIM...') : (isEn ? 'SEND MESSAGE' : 'KIRIM KONFIRMASI & UCAPAN')}
                     </button>
 
                     {success && (
@@ -1168,8 +1171,8 @@ function ClosingSection({ invitation, brideGrooms, locale }) {
     const isEn = locale === 'en';
 
     // Watermark dynamic brand reseller name
-    const brandName = invitation?.user?.resellerSettings?.brand_name 
-        || invitation?.user?.reseller?.resellerSettings?.brand_name 
+    const brandName = invitation?.user?.reseller_settings?.brand_name 
+        || invitation?.user?.reseller?.reseller_settings?.brand_name 
         || 'TrueLove Invitation';
 
     return (
@@ -1243,6 +1246,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     // Global settings injection
     const showPhotos = invitation?.show_photos !== false;
     const showAnimations = invitation?.show_animations !== false;
+    const showGuestName = invitation?.show_guest_name !== false;
     const enableRsvp = invitation?.enable_rsvp !== false;
     const enableWishes = invitation?.enable_wishes !== false;
     const enableQr = invitation?.enable_qr !== false && invitation?.show_qr_code !== false;
@@ -1322,7 +1326,8 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
 
     const handleOpen = () => {
         setIsOpened(true);
-        if (invitation?.music_url && audioRef.current) {
+        const autoplay = invitation?.music_autoplay !== false;
+        if (autoplay && invitation?.music_url && audioRef.current) {
             audioRef.current.play()
                 .then(() => setIsPlaying(true))
                 .catch(err => console.log('Audio autoplay blocked:', err));
@@ -1472,6 +1477,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                     isOpened={isOpened} 
                     onOpen={handleOpen}
                     showPhotos={showPhotos}
+                    showGuestName={showGuestName}
                 />
 
                 {/* 2. MAIN APPLICATION CONTENT */}
@@ -1644,49 +1650,84 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                             )}
 
                             {/* AUTO SCROLL TOGGLER */}
-                            <button 
-                                type="button" 
-                                onClick={() => setAutoScroll(!autoScroll)}
-                                className={`sp02-control-btn ${autoScroll ? 'is-active' : ''}`}
-                                title="Auto Scroll"
-                            >
-                                <i className="fas fa-chevron-down" style={{ transform: autoScroll ? 'none' : 'rotate(-90deg)', transition: 'transform 0.3s' }} />
-                            </button>
+                            {invitation?.enable_auto_scroll !== false && (
+                                <button 
+                                    type="button" 
+                                    onClick={() => setAutoScroll(!autoScroll)}
+                                    className={`sp02-control-btn ${autoScroll ? 'is-active' : ''}`}
+                                    title="Auto Scroll"
+                                >
+                                    <i className="fas fa-chevron-down" style={{ transform: autoScroll ? 'none' : 'rotate(-90deg)', transition: 'transform 0.3s' }} />
+                                </button>
+                            )}
                         </div>
 
                         {/* 4. PREMIUM COMPACT NAVIGATION FLOATING BAR */}
-                        <div className="sp02-nav-menu">
-                            <div className="sp02-nav-menu__inner--row flex justify-around">
-                                {resolvedSections.map((sec) => {
-                                    const key = sec.section_key;
-                                    const isCurrent = activeSectionKey === key;
-                                    let navIcon = 'fa-star';
-                                    let labelText = sec.section_name || key;
-                                    if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.pembuka') || 'Pembuka'; }
-                                    else if (key === 'bride_groom') { navIcon = 'fa-heart'; labelText = t('nav.mempelai') || 'Mempelai'; }
-                                    else if (key === 'event') { navIcon = 'fa-calendar-alt'; labelText = t('nav.acara') || 'Acara'; }
-                                    else if (key === 'love_story') { navIcon = 'fa-book-open'; labelText = t('nav.kisah') || 'Kisah'; }
-                                    else if (key === 'gallery') { navIcon = 'fa-images'; labelText = t('nav.galeri') || 'Galeri'; }
-                                    else if (key === 'livestream') { navIcon = 'fa-video'; labelText = t('nav.streaming') || 'Siaran'; }
-                                    else if (key === 'bank') { navIcon = 'fa-gift'; labelText = t('nav.hadiah') || 'Hadiah'; }
-                                    else if (key === 'rsvp') { navIcon = 'fa-envelope-open-text'; labelText = t('nav.rsvp') || 'RSVP'; }
-                                    else if (key === 'closing') { navIcon = 'fa-handshake'; labelText = t('nav.penutup') || 'Penutup'; }
+                        {invitation?.menu_position !== 'none' && (
+                            <div className="sp02-nav-menu">
+                                <div className="sp02-nav-menu__inner--row flex justify-around">
+                                    {resolvedSections.map((sec) => {
+                                        const key = sec.section_key;
+                                        const isCurrent = activeSectionKey === key;
+                                        let navIcon = 'fa-star';
+                                        let labelText = sec.section_name || key;
+                                        if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.pembuka') || 'Pembuka'; }
+                                        else if (key === 'bride_groom') { navIcon = 'fa-heart'; labelText = t('nav.mempelai') || 'Mempelai'; }
+                                        else if (key === 'event') { navIcon = 'fa-calendar-alt'; labelText = t('nav.acara') || 'Acara'; }
+                                        else if (key === 'love_story') { navIcon = 'fa-book-open'; labelText = t('nav.kisah') || 'Kisah'; }
+                                        else if (key === 'gallery') { navIcon = 'fa-images'; labelText = t('nav.galeri') || 'Galeri'; }
+                                        else if (key === 'livestream') { navIcon = 'fa-video'; labelText = t('nav.streaming') || 'Siaran'; }
+                                        else if (key === 'bank') { navIcon = 'fa-gift'; labelText = t('nav.hadiah') || 'Hadiah'; }
+                                        else if (key === 'rsvp') { navIcon = 'fa-envelope-open-text'; labelText = t('nav.rsvp') || 'RSVP'; }
+                                        else if (key === 'closing') { navIcon = 'fa-handshake'; labelText = t('nav.penutup') || 'Penutup'; }
 
-                                    return (
-                                        <button 
-                                            key={sec.id}
-                                            type="button"
-                                            onClick={() => jumpToSection(key)}
-                                            className={`sp02-nav-menu__item ${isCurrent ? 'active' : ''}`}
-                                            title={sec.section_name}
-                                        >
-                                            <i className={`fas ${navIcon}`} />
-                                            <span className="sp02-nav-item-text">{labelText}</span>
-                                        </button>
-                                    );
-                                })}
+                                        return (
+                                            <button 
+                                                key={sec.id}
+                                                type="button"
+                                                onClick={() => jumpToSection(key)}
+                                                className={`sp02-nav-menu__item ${isCurrent ? 'active' : ''}`}
+                                                title={sec.section_name}
+                                            >
+                                                <i className={`fas ${navIcon}`} />
+                                                <span className="sp02-nav-item-text">{labelText}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {/* 5. PRESENSI CHECK-IN MODAL OVERLAY */}
+                        {enableQr && showQrCode && guest && (
+                            <div className="sp02-modal-overlay z-50 flex items-center justify-center p-4">
+                                <div className="sp02-modal-card text-center max-w-[290px] w-full p-6 relative">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowQrCode(false)} 
+                                        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+                                    >
+                                        <i className="fas fa-times text-md" />
+                                    </button>
+                                    <h4 className="text-[15px] font-bold text-[var(--sp02-primary)] sp02-font-heading-style mb-4 tracking-wide">
+                                        {isEn ? 'PRESENCE CHECK-IN QR' : 'QR CODE PRESENSI'}
+                                    </h4>
+                                    <div className="mx-auto border border-gray-100 p-2 rounded-2xl bg-white w-[180px] h-[180px] flex items-center justify-center shadow-xs">
+                                        <img 
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&color=986a52&data=${encodeURIComponent(window.location.origin + '/u/' + invitation.slug + '/checkin?to=' + guest.slug)}`} 
+                                            alt="QR Code Presensi" 
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </div>
+                                    <p className="text-[12px] text-[var(--sp02-text)] mt-4 font-semibold tracking-wide">
+                                        {guest.name}
+                                    </p>
+                                    <p className="text-[9px] opacity-60 mt-1">
+                                        {isEn ? 'Show this QR code to the reception desk for instant check-in.' : 'Tunjukkan QR Code ini pada penerima tamu untuk check-in kehadiran.'}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

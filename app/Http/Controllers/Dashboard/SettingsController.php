@@ -402,10 +402,29 @@ class SettingsController extends Controller
         $arUrl = route('invitation.ar', ['slug' => $invitation->slug]);
 
         return Inertia::render('Dashboard/Settings/Ar', [
-            'invitation' => $invitation->only(['slug', 'cover_title', 'cover_image']),
+            'invitation' => $invitation->only(['slug', 'cover_title', 'cover_image', 'ar_style']),
             'groomNickname' => $groomNickname,
             'brideNickname' => $brideNickname,
             'arUrl' => $arUrl,
         ]);
+    }
+
+    public function saveArStyle(Request $request)
+    {
+        $request->validate([
+            'ar_style' => 'required|in:classic,cosmic,java',
+        ]);
+
+        $invitation = $this->getUserInvitation($request);
+        
+        if (!$invitation) {
+            return back()->withErrors(['ar_style' => 'Undangan tidak ditemukan.']);
+        }
+
+        $invitation->update([
+            'ar_style' => $request->ar_style
+        ]);
+
+        return back()->with('success', 'Gaya AR berhasil diperbarui.');
     }
 }
