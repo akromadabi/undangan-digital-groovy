@@ -586,13 +586,23 @@ class InvitationController extends Controller
             $musicUrl = asset($musicUrl);
         }
 
+        // ── NFT Marker status ──────────────────────────────────────
+        $nftDir   = "ar-nft/{$slug}";
+        $hasNft   = \Illuminate\Support\Facades\Storage::disk('public')->exists("{$nftDir}/qr.fset")
+                 && \Illuminate\Support\Facades\Storage::disk('public')->exists("{$nftDir}/qr.fset3")
+                 && \Illuminate\Support\Facades\Storage::disk('public')->exists("{$nftDir}/qr.iset");
+
+        $nftBasePath = $hasNft ? asset("storage/{$nftDir}/qr") : null;
+
         return view('ar', [
-            'invitation' => $invitation,
-            'groomNickname' => $groomNickname,
-            'brideNickname' => $brideNickname,
-            'weddingDate' => $weddingDate,
-            'photoUrl' => $photoUrl,
-            'musicUrl' => $musicUrl,
+            'invitation'     => $invitation,
+            'groomNickname'  => $groomNickname,
+            'brideNickname'  => $brideNickname,
+            'weddingDate'    => $weddingDate,
+            'photoUrl'       => $photoUrl,
+            'musicUrl'       => $musicUrl,
+            'hasNft'         => $hasNft,
+            'nftBasePath'    => $nftBasePath,
         ]);
     }
 }

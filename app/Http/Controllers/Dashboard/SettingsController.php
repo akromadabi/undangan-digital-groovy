@@ -401,11 +401,18 @@ class SettingsController extends Controller
 
         $arUrl = route('invitation.ar', ['slug' => $invitation->slug]);
 
+        // Check NFT readiness
+        $slug    = $invitation->slug;
+        $nftReady = \Illuminate\Support\Facades\Storage::disk('public')->exists("ar-nft/{$slug}/qr.fset")
+                 && \Illuminate\Support\Facades\Storage::disk('public')->exists("ar-nft/{$slug}/qr.fset3")
+                 && \Illuminate\Support\Facades\Storage::disk('public')->exists("ar-nft/{$slug}/qr.iset");
+
         return Inertia::render('Dashboard/Settings/Ar', [
-            'invitation' => $invitation->only(['slug', 'cover_title', 'cover_image', 'ar_style']),
+            'invitation'    => $invitation->only(['slug', 'cover_title', 'cover_image', 'ar_style']),
             'groomNickname' => $groomNickname,
             'brideNickname' => $brideNickname,
-            'arUrl' => $arUrl,
+            'arUrl'         => $arUrl,
+            'nftReady'      => $nftReady,
         ]);
     }
 

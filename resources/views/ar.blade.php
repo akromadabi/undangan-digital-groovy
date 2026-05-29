@@ -417,7 +417,7 @@
     <!-- ══════════════════════════════════════════════════════════════════ -->
     <!--
         A-SCENE SETTINGS:
-        - patternRatio: 0.5  → detects marker dari jarak lebih jauh (default 0.8 terlalu ketat)
+        - patternRatio: 0.5  → detects marker dari jarak lebih jauh
         - maxDetectionRate: 60 → polling lebih sering = lebih responsif
         - smoothCount: 10    → rata-rata 10 frame posisi → kurangi goyang / putus
         - smoothTolerance: 0.01 → toleransi pergerakan kecil agar tidak reset
@@ -425,7 +425,11 @@
     -->
     <a-scene
         embedded
+        @if($hasNft)
+        arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 5;"
+        @else
         arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best; patternRatio: 0.5; maxDetectionRate: 60; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 5;"
+        @endif
         renderer="antialias: true; colorManagement: true; logarithmicDepthBuffer: true; physicallyCorrectLights: true;"
         vr-mode-ui="enabled: false">
 
@@ -434,8 +438,21 @@
             <img id="wedding-photo" src="{{ $photoUrl }}" crossorigin="anonymous">
         </a-assets>
 
-        <!-- ══════════ HIRO MARKER ══════════ -->
+        {{-- ══════════ MARKER MODE ══════════ --}}
+        @if($hasNft)
+        {{-- NFT MODE: QR code sendiri sebagai marker --}}
+        <a-nft
+            id="ar-marker"
+            type="nft"
+            url="{{ $nftBasePath }}"
+            smooth="true"
+            smoothCount="10"
+            smoothTolerance="0.01"
+            smoothThreshold="5">
+        @else
+        {{-- FALLBACK: Hiro pattern marker --}}
         <a-marker preset="hiro" id="ar-marker">
+        @endif
 
             <!-- ── Global Particle Systems ── -->
             <a-entity petal-rain="count: 70; style: {{ $arStyle }}"></a-entity>
@@ -848,12 +865,13 @@
         bgMusic.loop    = true;
         bgMusic.volume  = 0.75;
 
+        const isNftMode  = {{ $hasNft ? 'true' : 'false' }};
+
         const startBtn   = document.getElementById('start-btn');
         const overlay    = document.getElementById('ar-overlay');
         const scanStatus = document.getElementById('scan-status');
         const targetFrame= document.getElementById('target-frame');
         const uiOverlay  = document.getElementById('ar-ui-overlay');
-        const marker     = document.getElementById('ar-marker');
         const scanText   = document.getElementById('scan-text');
 
         let hasInteracted = false;
@@ -871,25 +889,38 @@
             hasInteracted = true;
         });
 
-        marker.addEventListener('markerFound', () => {
-            if (!hasInteracted) return;
-            scanStatus.style.background = 'rgba(229, 101, 75, 0.85)';
-            scanText.innerText = '✦ Marker Ditemukan! ✦';
-            targetFrame.style.display = 'none';
-            setTimeout(() => {
-                if (scanText.innerText.includes('Ditemukan')) {
-                    scanStatus.style.display = 'none';
-                }
-            }, 2200);
-        });
+        // Wait for A-Frame scene to initialize before binding marker events
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            const marker = document.getElementById('ar-marker');
+            if (!marker) return;
 
-        marker.addEventListener('markerLost', () => {
-            if (!hasInteracted) return;
-            scanStatus.style.display   = 'flex';
-            scanStatus.style.background= 'rgba(0,0,0,0.6)';
-            scanText.innerText = 'Arahkan Kamera ke Marker Hiro...';
-            targetFrame.style.display  = 'block';
+            const foundEvent = isNftMode ? 'targetFound' : 'markerFound';
+            const lostEvent  = isNftMode ? 'targetLost'  : 'markerLost';
+            const lostText   = isNftMode
+                ? 'Arahkan Kamera ke QR Code Undangan...'
+                : 'Arahkan Kamera ke Marker Hiro...';
+
+            marker.addEventListener(foundEvent, () => {
+                if (!hasInteracted) return;
+                scanStatus.style.background = 'rgba(229, 101, 75, 0.85)';
+                scanText.innerText = '✦ ' + (isNftMode ? 'QR Terdeteksi!' : 'Marker Ditemukan!') + ' ✦';
+                targetFrame.style.display = 'none';
+                setTimeout(() => {
+                    if (scanStatus.style.background.includes('229')) {
+                        scanStatus.style.display = 'none';
+                    }
+                }, 2200);
+            });
+
+            marker.addEventListener(lostEvent, () => {
+                if (!hasInteracted) return;
+                scanStatus.style.display   = 'flex';
+                scanStatus.style.background= 'rgba(0,0,0,0.6)';
+                scanText.innerText = lostText;
+                targetFrame.style.display  = 'block';
+            });
         });
     </script>
 </body>
 </html>
+

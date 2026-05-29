@@ -235,6 +235,7 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
         Route::get('/galeri', [ContentController::class, 'galeri'])->name('galeri');
         Route::post('/galeri', [ContentController::class, 'saveGaleri'])->name('galeri.save');
         Route::post('/galeri/mode', [ContentController::class, 'saveGalleryMode'])->name('galeri.mode');
+        Route::post('/galeri/video', [ContentController::class, 'saveVideoSettings'])->name('galeri.video');
         Route::delete('/galeri/{id}', [ContentController::class, 'deleteGaleri'])->name('galeri.delete');
 
         Route::get('/kisah', [ContentController::class, 'kisah'])->middleware('feature:love_story')->name('kisah');
@@ -269,6 +270,10 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
         Route::post('/whatsapp/send', [SettingsController::class, 'sendWhatsapp'])->middleware('feature:whatsapp')->name('whatsapp.send');
         Route::get('/ar', [SettingsController::class, 'ar'])->name('ar');
         Route::post('/ar/style', [SettingsController::class, 'saveArStyle'])->name('ar.style');
+        // NFT Marker routes
+        Route::get('/ar/nft/status', [\App\Http\Controllers\Dashboard\ArNftController::class, 'status'])->name('ar.nft.status');
+        Route::post('/ar/nft/store', [\App\Http\Controllers\Dashboard\ArNftController::class, 'store'])->name('ar.nft.store');
+        Route::delete('/ar/nft', [\App\Http\Controllers\Dashboard\ArNftController::class, 'destroy'])->name('ar.nft.destroy');
     });
 
     // Theme Settings (Dynamic)

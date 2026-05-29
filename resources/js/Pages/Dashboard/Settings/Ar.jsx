@@ -1,13 +1,18 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
-export default function Ar({ invitation, groomNickname, brideNickname, arUrl }) {
+export default function Ar({ invitation, groomNickname, brideNickname, arUrl, nftReady }) {
     const { flash } = usePage().props;
     const [downloading, setDownloading] = useState(false);
     const [downloadError, setDownloadError] = useState('');
     const [selectedStyle, setSelectedStyle] = useState(invitation.ar_style || 'classic');
     const [saving, setSaving] = useState(false);
+
+    // ── NFT State ──
+    const [nftStatus, setNftStatus]   = useState(nftReady ? 'ready' : 'idle'); // idle | loading | uploading | ready | error
+    const [nftMessage, setNftMessage] = useState('');
+    const [nftProgress, setNftProgress] = useState(0);
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(arUrl)}`;
     const hiroMarkerUrl = '/images/ar/hiro.png';
@@ -21,6 +26,156 @@ export default function Ar({ invitation, groomNickname, brideNickname, arUrl }) 
             onError: () => setSaving(false),
         });
     };
+
+    // ── NFT: generate + upload ──
+    const handleGenerateNft = async () => {
+        setNftStatus('loading');
+        setNftMessage('Memuat NFT engine...');
+        setNftProgress(5);
+
+        try {
+            // 1. Load QR code image via canvas (bypass CORS with proxy)
+            setNftMessage('Mengambil gambar QR code...');
+            setNftProgress(10);
+            const qrImg = await loadImageToCanvas(qrCodeUrl, 400, 400);
+
+            // 2. Load NFT Marker Creator WASM from CDN
+            setNftMessage('Memuat NFT engine (WebAssembly)...');
+            setNftProgress(20);
+
+            const script = await loadScript('https://raw.githack.com/nicktindall/cyclon.p2p-rtc-server/master/static/artoolkitNFT.min.js');
+
+            // 3. Use NFT Marker Creator web tool API
+            setNftMessage('Memproses QR sebagai NFT marker...');
+            setNftProgress(40);
+
+            // Use the online NFT Marker Creator API approach
+            const descriptors = await generateNftDescriptors(qrImg);
+
+            setNftMessage('Mengunggah descriptor ke server...');
+            setNftProgress(85);
+
+            // 4. Upload to server
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const response = await fetch(route('settings.ar.nft.store'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken || '',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    fset:  descriptors.fset,
+                    fset3: descriptors.fset3,
+                    iset:  descriptors.iset,
+                }),
+            });
+
+            const result = await response.json();
+            if (!result.success) throw new Error(result.error || 'Upload gagal');
+
+            setNftProgress(100);
+            setNftStatus('ready');
+            setNftMessage('NFT marker berhasil dibuat! Refresh halaman AR untuk menggunakannya.');
+
+        } catch (err) {
+            console.error('NFT generation error:', err);
+            setNftStatus('error');
+            setNftMessage('Gagal: ' + err.message);
+        }
+    };
+
+    const handleResetNft = async () => {
+        if (!confirm('Reset ke Hiro marker? NFT marker QR akan dihapus.')) return;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        await fetch(route('settings.ar.nft.destroy'), {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': csrfToken || '', 'Accept': 'application/json' },
+        });
+        setNftStatus('idle');
+        setNftMessage('');
+        setNftProgress(0);
+    };
+
+    // ── Helpers ──
+    function loadImageToCanvas(src, w, h) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = () => {
+                const c = document.createElement('canvas');
+                c.width = w; c.height = h;
+                c.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(c);
+            };
+            img.onerror = () => reject(new Error('Gagal load QR image'));
+            // Use QR server with explicit size
+            img.src = src + '&t=' + Date.now();
+        });
+    }
+
+    function loadScript(url) {
+        return new Promise((resolve, reject) => {
+            if (document.querySelector(`script[src="${url}"]`)) { resolve(); return; }
+            const s = document.createElement('script');
+            s.src = url; s.async = true;
+            s.onload = resolve;
+            s.onerror = () => reject(new Error('Gagal memuat script: ' + url));
+            document.head.appendChild(s);
+        });
+    }
+
+    async function generateNftDescriptors(canvas) {
+        // Use the NFT Marker Creator approach:
+        // Load jsartoolkitnft from CDN and generate descriptors
+        setNftMessage('Menginisialisasi NFT tracker...');
+        setNftProgress(45);
+
+        // Try to use ARToolkitNFT if available (loaded from aframe-ar-nft.js)
+        // Otherwise use the simplified descriptor generation
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Load the NFT marker creator script
+                await loadScript('https://raw.githack.com/Carnaux/NFT-Marker-Creator/master/app/static/artoolkitNFT_ES6_wasm.js');
+                setNftProgress(60);
+
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                if (typeof ARToolkitNFT === 'undefined') {
+                    throw new Error('ARToolkitNFT tidak tersedia. Coba gunakan upload manual.');
+                }
+
+                const artoolkit = await ARToolkitNFT.init();
+                setNftProgress(70);
+
+                const nft = new artoolkit();
+                await nft.setup(canvas.width, canvas.height, 72);
+
+                setNftProgress(75);
+                const result = await nft.processImage(imageData.data, canvas.width, canvas.height);
+
+                if (!result) throw new Error('Gagal generate descriptor');
+
+                // Convert ArrayBuffer to base64
+                const toBase64 = (buf) => {
+                    const bytes = new Uint8Array(buf);
+                    let binary = '';
+                    bytes.forEach(b => binary += String.fromCharCode(b));
+                    return btoa(binary);
+                };
+
+                resolve({
+                    fset:  toBase64(result.fset),
+                    fset3: toBase64(result.fset3),
+                    iset:  toBase64(result.iset),
+                });
+
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
 
     const handleDownloadCard = () => {
         setDownloading(true);
@@ -385,6 +540,133 @@ export default function Ar({ invitation, groomNickname, brideNickname, arUrl }) 
                                 <p className="text-[9px] text-gray-400">*Gunakan HP Android / iOS dengan internet aktif</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* ── NFT QR Marker Generator Section ── */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-100 pb-4 mb-5 gap-3">
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm">🔬</span>
+                                <h3 className="font-bold text-gray-800">QR Code sebagai AR Marker (NFT)</h3>
+                                <span className="text-[9px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Beta</span>
+                            </div>
+                            <p className="text-xs text-gray-400 mt-1">
+                                Jadikan QR code undangan sebagai marker AR — tamu hanya butuh 1 gambar untuk scan <em>dan</em> melihat efek 3D.
+                            </p>
+                        </div>
+                        {nftStatus === 'ready' && (
+                            <button
+                                onClick={handleResetNft}
+                                className="text-xs text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors flex-shrink-0"
+                            >
+                                Reset ke Hiro
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Status badges */}
+                    {nftStatus === 'ready' && (
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 mb-4">
+                            <span className="text-xl">✅</span>
+                            <div>
+                                <p className="text-sm font-semibold text-green-800">NFT Marker Aktif</p>
+                                <p className="text-xs text-green-600">AR sekarang menggunakan QR code sebagai marker. Tamu cukup scan 1 gambar QR saja!</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {nftStatus === 'error' && (
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+                            <p className="text-xs font-semibold text-red-700">⚠️ {nftMessage}</p>
+                            <p className="text-xs text-red-500 mt-1">
+                                Jika generate otomatis gagal, gunakan <strong>Upload Manual</strong> di bawah.
+                            </p>
+                        </div>
+                    )}
+
+                    {(nftStatus === 'loading' || nftStatus === 'uploading') && (
+                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                                <p className="text-xs font-semibold text-blue-700">{nftMessage}</p>
+                            </div>
+                            <div className="w-full bg-blue-100 rounded-full h-2">
+                                <div
+                                    className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                                    style={{ width: nftProgress + '%' }}
+                                ></div>
+                            </div>
+                            <p className="text-[10px] text-blue-400 mt-1">{nftProgress}%</p>
+                        </div>
+                    )}
+
+                    {nftStatus !== 'ready' && (
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            {/* Auto generate */}
+                            <button
+                                onClick={handleGenerateNft}
+                                disabled={nftStatus === 'loading' || nftStatus === 'uploading'}
+                                className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.347a3.5 3.5 0 01-4.95 0l-.347-.347z" />
+                                </svg>
+                                {nftStatus === 'loading' ? 'Memproses...' : '⚡ Generate Otomatis dari QR'}
+                            </button>
+
+                            {/* Manual upload fallback */}
+                            <label className="flex-1 flex items-center justify-center gap-2 px-5 py-3 border border-gray-300 text-gray-700 rounded-xl text-xs font-semibold hover:bg-gray-50 transition-all cursor-pointer">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                Upload Manual (.fset, .fset3, .iset)
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept=".fset,.fset3,.iset"
+                                    multiple
+                                    onChange={async (e) => {
+                                        const files = Array.from(e.target.files);
+                                        if (files.length < 3) { alert('Upload 3 file: qr.fset, qr.fset3, qr.iset'); return; }
+                                        const toBase64 = (file) => new Promise((res, rej) => {
+                                            const r = new FileReader();
+                                            r.onload = () => res(btoa(String.fromCharCode(...new Uint8Array(r.result))));
+                                            r.onerror = rej;
+                                            r.readAsArrayBuffer(file);
+                                        });
+                                        const find = (ext) => files.find(f => f.name.endsWith(ext));
+                                        setNftStatus('loading');
+                                        setNftMessage('Mengunggah file...');
+                                        try {
+                                            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                                            const resp = await fetch(route('settings.ar.nft.store'), {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                                                body: JSON.stringify({
+                                                    fset:  await toBase64(find('.fset')),
+                                                    fset3: await toBase64(find('.fset3')),
+                                                    iset:  await toBase64(find('.iset')),
+                                                }),
+                                            });
+                                            const res = await resp.json();
+                                            if (res.success) { setNftStatus('ready'); setNftMessage('Upload berhasil!'); }
+                                            else throw new Error(res.error);
+                                        } catch (err) { setNftStatus('error'); setNftMessage(err.message); }
+                                    }}
+                                />
+                            </label>
+                        </div>
+                    )}
+
+                    <div className="mt-4 bg-gray-50 rounded-xl p-3">
+                        <p className="text-[10px] text-gray-500 font-semibold mb-1">📌 Cara Kerja NFT Marker:</p>
+                        <ol className="text-[10px] text-gray-400 space-y-1 list-decimal pl-4">
+                            <li>Klik <strong>Generate Otomatis</strong> — sistem buat descriptor dari QR code Anda</li>
+                            <li>Tamu scan QR code → browser AR terbuka</li>
+                            <li>Tamu arahkan kamera ke QR code yang sama → efek 3D muncul langsung!</li>
+                        </ol>
                     </div>
                 </div>
 
