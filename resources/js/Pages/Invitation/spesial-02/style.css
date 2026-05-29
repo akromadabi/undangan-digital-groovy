@@ -651,73 +651,114 @@
     opacity: 0.85;
 }
 
-/* Bank / Kado Rekening */
+/* Bank / Kado Rekening - Luxury 2 Style but Clay Terracotta Theme */
 .sp02-bank-card {
-    background: linear-gradient(135deg, #c3a18d 0%, #986a52 100%);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 28px;
-    padding: 28px;
+    background: linear-gradient(135deg, #ae8f7a 0%, #5b4447 65%, #482e31 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 20px;
+    padding: 24px;
+    color: #ffffff;
     width: 100%;
     max-width: 340px;
     margin: 20px auto;
     position: relative;
-    box-shadow: 0 15px 35px rgba(152, 106, 82, 0.18);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(91, 68, 71, 0.3);
     transition: all 0.3s ease;
 }
 
 .sp02-bank-card::before {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 150%;
-    height: 150%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 100%) !important;
+    z-index: 1;
     pointer-events: none;
 }
 
 .sp02-bank-card:hover {
-    transform: translateY(-6px) rotate(0.8deg);
-    box-shadow: 0 20px 45px rgba(152, 106, 82, 0.28);
+    transform: translateY(-5px) rotate(0.5deg);
+    box-shadow: 0 15px 35px rgba(91, 68, 71, 0.45);
 }
 
-.sp02-bank-chip {
-    width: 40px;
+.sp02-bank-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2;
+    margin-bottom: 25px;
+}
+
+.sp02-bank-card__logo {
+    max-height: 22px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    z-index: 2;
+}
+
+.sp02-bank-card__chip {
+    width: 32px;
     height: auto;
-    margin-bottom: 12px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    z-index: 2;
 }
 
-.sp02-bank-no {
+.sp02-bank-card__body {
+    z-index: 2;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.sp02-bank-card__number {
     font-family: var(--sp02-font-heading);
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 1.45rem;
     letter-spacing: 2px;
-    color: #ffffff !important;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.15);
-    margin: 10px 0;
-}
-
-.sp02-bank-holder {
-    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+    color: white !important;
+}
+
+.sp02-bank-card__holder {
+    font-family: var(--sp02-font-heading);
+    font-size: 0.85rem;
+    opacity: 0.85;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.8) !important;
+    letter-spacing: 1px;
+    color: white !important;
 }
 
-.sp02-bank-card .sp02-btn-secondary {
-    border-color: rgba(255, 255, 255, 0.4);
+.sp02-bank-card__footer {
+    display: flex;
+    justify-content: flex-end;
+    z-index: 2;
+}
+
+.sp02-bank-card__copy-btn {
+    background-color: rgba(255, 255, 255, 0.2);
     color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
-.sp02-bank-card .sp02-btn-secondary:hover {
-    background: #ffffff;
-    color: var(--sp02-primary);
-    border-color: #ffffff;
+.sp02-bank-card__copy-btn:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Countdown Timer Grid */
@@ -829,49 +870,79 @@
     pointer-events: none;
 }
 
-/* Floating navigation bottom bar */
-.sp02-nav-bar {
+/* Menu Dok Bawah (Bottom Navigation Bar) - Luxury 2 Style but Clay Terracotta Theme */
+.sp02-nav-menu {
     position: fixed;
-    bottom: 16px;
+    bottom: 0;
+    z-index: 1000;
+    width: 100%;
+    max-width: 480px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 45;
-    background-color: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 251, 248, 0.96);
+    border-top: 1.5px solid rgba(152, 106, 82, 0.22);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1.5px solid rgba(152, 106, 82, 0.22);
-    border-radius: 9999px;
-    padding: 5px 8px;
-    display: flex;
-    gap: 6px;
-    box-shadow: 0 10px 35px rgba(152, 106, 82, 0.15);
-    max-width: 95vw;
+    box-shadow: 0 -5px 25px rgba(152, 106, 82, 0.12);
+    transition: all 0.3s ease;
 }
 
-.sp02-nav-item {
-    width: 36px;
-    height: 36px;
-    border-radius: 9999px;
+.sp02-nav-menu__inner--row {
     display: flex;
     align-items: center;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    gap: 0;
+    justify-content: flex-start;
+}
+
+.sp02-nav-menu__inner--row::-webkit-scrollbar {
+    display: none;
+}
+
+.sp02-nav-menu__item {
+    background: transparent;
+    border: none;
+    color: var(--sp02-text-light);
+    padding: 10px 4px 8px 4px;
+    gap: 3px;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
-    color: var(--sp02-primary);
-    opacity: 0.75;
+    align-items: center;
+    cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 14px;
+    border-radius: 0;
+    flex: 1 0 auto;
+    min-width: 72px;
+    white-space: nowrap;
+    opacity: 0.7;
 }
 
-.sp02-nav-item:hover {
+.sp02-nav-menu__item i {
+    font-size: 16px;
+}
+
+.sp02-nav-item-text {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sp02-nav-menu__item:hover {
     opacity: 1;
-    background-color: rgba(152, 106, 82, 0.1);
     color: var(--sp02-primary);
 }
 
-.sp02-nav-item.is-active {
+.sp02-nav-menu__item.active {
+    color: var(--sp02-primary);
+    background-color: rgba(152, 106, 82, 0.08);
     opacity: 1;
-    background-color: var(--sp02-primary);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(152, 106, 82, 0.3);
 }
 
 /* Watermarkcredit styles */

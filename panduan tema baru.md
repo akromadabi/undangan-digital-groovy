@@ -536,6 +536,31 @@ Tombol kontrol musik mengambang (floating music button) tidak boleh hanya menamp
 | **Luxury 02** | `resources/js/Pages/Invitation/luxury-02/` | Standard transisi swipe horizontal/vertikal termulus, multi-slideshow cover, auto-scroll, desain UI rekening default, dan error boundary tangguh. |
 | **Utary** | `resources/js/Pages/Invitation/utary/` | Standard penanganan countdown menyatu, copy rekening aman Safari, QR check-in, dan penanganan watermark dinamis. |
 
+---
+
+## 10. Protokol Replikasi Cerdas dari Referensi HTML / Mockup (AI-Assisted Porting)
+
+Saat membuat tema baru berdasarkan porting/replikasi dari **Referensi berkas HTML mentah** atau **Mockup halaman web statis**, kecerdasan dalam memahami detail referensi menjadi pembeda utama antara hasil yang penuh bug dengan tema premium siap pakai. 
+
+AI Coding Assistant wajib memahami bahwa **mereplikasi referensi berbeda dengan membuat tema kreatif baru secara bebas**. Replikasi menuntut ketepatan struktural, sedangkan kreasi bebas mengandalkan improvisasi estetika.
+
+### 10.1 Analisis & Penyelarasan Ornamen, Animasi, dan Latar Belakang (Background)
+* **Penyelaman Latar Belakang:** Analisis dengan teliti apakah latar belakang referensi menggunakan gambar ornamen (`background-image`), gradasi CSS linear/radial, atau warna solid. Jangan pernah melewatkan aset latar belakang ini karena ia merupakan penentu 80% atmosfer tema asli.
+* **Preservasi Ornamen & Hierarki z-index:** Ornamen daun, bunga, atau border hiasan seringkali hilang atau tertutup konten utama karena kesalahan pengaturan layer. Wajib definisikan ornamen secara terpisah dengan struktur kontainer absolut dan `z-index` yang dikunci dengan hati-hati (misal: latar belakang `z-0`, konten `z-10`, ornamen hiasan `z-20`).
+* **Koreografi Animasi Asli:** Perhatikan efek animasi bawaan dari referensi HTML (seperti detak napas, transisi memudar, atau ayunan). AI wajib memetakan durasi (`duration`), delay (`delay`), serta jenis timing function (seperti `ease-in-out` atau `cubic-bezier`) secara tepat ke dalam JSX/CSS tema baru.
+
+### 10.2 Kontras Tinggi Ikon & Standardisasi Aksesibilitas (Belajar dari Luxury 02)
+* **Masalah Warna Ikon yang Hilang:** Pada porting referensi, AI sering kali secara brutal menyalin warna default ikon sehingga ia memiliki warna yang sama (atau hampir sama) dengan latar belakang barunya, menjadikannya tidak terbaca atau hilang secara visual.
+* **Pembungkus Tombol Mengambang Pintar (Floating Button Wrappers):** Untuk menghindari masalah di atas, ikuti standar kokoh dari tema **Luxury 02**:
+  - Tombol melayang (*floating action buttons*) dan ikon navigasi wajib dibungkus dalam kontainer sirkular/persegi yang memiliki latar belakang kontras semi-transparan (contoh: `rgba(255, 255, 255, 0.15)` dengan efek `backdrop-filter: blur(8px)` untuk tema gelap, atau `rgba(0, 0, 0, 0.05)` untuk tema terang).
+  - Terapkan bayangan lembut (`box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)`) untuk memisahkan secara visual posisi ikon dengan elemen latar belakang.
+  - Tambahkan transisi warna yang tegas ketika tombol mendapatkan fokus atau disentuh (`:active`, `:hover`).
+
+### 10.3 Deteksi & Mitigasi Bug Struktural
+* **Anti-Overlapping Konten:** Pastikan tidak ada elemen navigasi bawah (bottom navigation bar) yang menutupi konten seksi penutup atau tombol aksi penting di bagian bawah layar ponsel. Berikan padding bawah ekstra pada seksi penutup (contoh: `padding-bottom: 90px !important`).
+* **Verifikasi Grid & Flexbox:** AI harus secara cerdas membedakan elemen kolom yang butuh adaptasi responsif seluler. Struktur tabel lebar atau flex sebaris dari referensi desktop **wajib** diubah menjadi grid satu kolom atau flex-col saat mendeteksi ukuran layar ponsel agar konten tidak terpotong ke samping.
+
 *Dokumen ini adalah standarisasi mutlak. Jika tema baru Anda memiliki perilaku yang berbeda dari aturan di atas, Anda telah melanggar blueprint dan wajib merevisinya kembali.*
 *Terakhir diperbarui: Mei 2026*
+
 

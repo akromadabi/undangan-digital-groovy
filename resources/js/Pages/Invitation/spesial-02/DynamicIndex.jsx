@@ -359,8 +359,12 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
 /* ═══════════════════════════════════════
    OPENING SECTION
    ═══════════════════════════════════════ */
-function OpeningSection({ invitation, showPhotos }) {
+function OpeningSection({ invitation, showPhotos, brideGrooms }) {
     const { t } = useTranslation();
+    const bgs = safeArr(brideGrooms);
+    const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+    const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+    const coupleNickname = (groom.nickname && bride.nickname) ? `${groom.nickname} & ${bride.nickname}` : '';
 
     const rawOpeningTitle = invitation?.opening_title || '';
     const isWeddingOf = !rawOpeningTitle || 
@@ -371,13 +375,13 @@ function OpeningSection({ invitation, showPhotos }) {
     return (
         <div className="max-w-lg mx-auto py-4">
             <Reveal delay={100}>
-                <p className="text-base font-semibold tracking-widest text-[var(--sp02-primary)] sp02-font-heading-style mb-4">
+                <p className="text-base font-semibold tracking-widest text-[var(--sp02-primary)] sp02-font-heading-style mb-4 text-center">
                     بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ
                 </p>
             </Reveal>
 
             {/* Double Slideshow Image */}
-            {showPhotos && invitation?.opening_image && (
+            {showPhotos && invitation?.opening_image ? (
                 <Reveal variant="zoom" delay={200}>
                     <div className="mx-auto rounded-2xl overflow-hidden my-6 max-w-[300px] shadow-md border-4 border-white relative aspect-[4/3] sp02-pulse-gold">
                         <PremiumSlideshow
@@ -387,6 +391,22 @@ function OpeningSection({ invitation, showPhotos }) {
                             zoom={invitation.opening_zoom}
                         />
                     </div>
+                </Reveal>
+            ) : (
+                coupleNickname && (
+                    <Reveal delay={200}>
+                        <div className="w-20 h-20 rounded-full border border-[var(--sp02-primary)]/20 flex items-center justify-center text-xl font-bold tracking-widest text-[var(--sp02-primary)] bg-[var(--sp02-bg-soft)]/90 shadow-sm mx-auto my-6 sp02-breathe font-serif">
+                            {groom.nickname?.charAt(0) || 'G'}{bride.nickname?.charAt(0) || 'B'}
+                        </div>
+                    </Reveal>
+                )
+            )}
+
+            {coupleNickname && (
+                <Reveal delay={250}>
+                    <h2 className="text-3xl sm:text-4xl text-[var(--sp02-primary)] sp02-font-script-style my-4 leading-none text-center">
+                        {coupleNickname}
+                    </h2>
                 </Reveal>
             )}
 
@@ -864,40 +884,35 @@ function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
 
             <div className="space-y-6 mt-6">
                 {list.map((account, i) => {
-                    const isBca = String(account.bank_name).toLowerCase() === 'bca';
-                    const isDana = String(account.bank_name).toLowerCase() === 'dana';
+                    const isBca = String(account.bank_name).toLowerCase().includes('bca');
+                    const isDana = String(account.bank_name).toLowerCase().includes('dana');
                     
                     return (
-                        <Reveal key={account.id || i} variant="zoom" delay={i * 150} className="sp02-bank-card text-left">
-                            <div className="flex items-center justify-between">
-                                <img src={ORNAMENTS.chip} alt="chip" className="sp02-bank-chip" />
-                                {isBca && <img src={ORNAMENTS.bca} alt="BCA" className="h-4 w-auto" />}
-                                {isDana && <img src={ORNAMENTS.dana} alt="DANA" className="h-5 w-auto" />}
+                        <Reveal key={account.id || i} variant="zoom" delay={i * 150} className="sp02-bank-card">
+                            <div className="sp02-bank-card__header">
+                                {isBca && <img src={ORNAMENTS.bca} alt="BCA" className="sp02-bank-card__logo" />}
+                                {isDana && <img src={ORNAMENTS.dana} alt="DANA" className="sp02-bank-card__logo" />}
                                 {!isBca && !isDana && (
-                                    <span className="text-sm font-bold tracking-widest text-[var(--sp02-primary)]/80 uppercase">
+                                    <span style={{ fontWeight: 600, fontSize: '1.1rem', zIndex: 2 }}>
                                         {account.bank_name}
                                     </span>
                                 )}
+                                <img src={ORNAMENTS.chip} alt="Chip" className="sp02-bank-card__chip" />
                             </div>
-
-                            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mt-4">
-                                {t('invitation.save_the_date') === 'Save The Date' ? 'Account Number' : 'Nomor Rekening'}
-                            </p>
-                            
-                            <h4 className="sp02-bank-no">{account.account_number}</h4>
-                            <p className="sp02-bank-holder">{account.account_name}</p>
-
-                            <button 
-                                type="button" 
-                                onClick={() => handleCopy(account.account_number, i)} 
-                                className="sp02-btn-secondary mt-5 py-1.5 w-full text-[10px] font-bold inline-flex items-center justify-center gap-1.5"
-                            >
-                                {copiedIdx === i ? (
-                                    <><i className="fas fa-check" /> {t('invitation.copied') || 'SALIN BERHASIL'}</>
-                                ) : (
-                                    <><i className="far fa-copy" /> {t('invitation.copy') || 'SALIN NOMOR'}</>
-                                )}
-                            </button>
+                            <div className="sp02-bank-card__body">
+                                <div className="sp02-bank-card__number">{account.account_number}</div>
+                                <div className="sp02-bank-card__holder">{account.account_name}</div>
+                            </div>
+                            <div className="sp02-bank-card__footer">
+                                <button 
+                                    type="button" 
+                                    onClick={() => handleCopy(account.account_number, i)} 
+                                    className="sp02-bank-card__copy-btn"
+                                >
+                                    <i className={copiedIdx === i ? "fas fa-check" : "far fa-copy"} />
+                                    <span>{copiedIdx === i ? t('invitation.copied') || 'SALIN BERHASIL' : t('invitation.copy') || 'SALIN NOMOR'}</span>
+                                </button>
+                            </div>
                         </Reveal>
                     );
                 })}
@@ -907,33 +922,115 @@ function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
 }
 
 /* ═══════════════════════════════════════
-   RSVP & WISHES DUAL FORM SECTION
+   RSVP & WISHES UNIFIED FORM SECTION
    ═══════════════════════════════════════ */
-function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes, rsvpForm, handleRsvp, wishForm, handleWish }) {
+function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes }) {
     const { t } = useTranslation();
-    const list = safeArr(wishes).slice(0, 5); // Limit 5 comments
+    const activeGuest = guest || { name: '', id: null };
+    const guestName = activeGuest.name || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : '') || '';
+    const isEn = t('invitation.save_the_date') === 'Save The Date';
+
+    const [sharedName, setSharedName] = useState(guestName || '');
+    const [attendance, setAttendance] = useState('hadir');
+    const [numGuests, setNumGuests] = useState(1);
+    const [message, setMessage] = useState('');
+    const [success, setSuccess] = useState(false);
+
+    const rsvpForm = useForm({
+        sender_name: guestName || '',
+        attendance: 'hadir',
+        number_of_guests: 1,
+        guest_id: activeGuest.id || null,
+    });
+
+    const wishForm = useForm({
+        sender_name: guestName || '',
+        message: '',
+        guest_id: activeGuest.id || null,
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        rsvpForm.setData('sender_name', sharedName);
+        rsvpForm.setData('attendance', attendance);
+        rsvpForm.setData('number_of_guests', numGuests);
+        wishForm.setData('sender_name', sharedName);
+        wishForm.setData('message', message);
+
+        const doWish = () => {
+            if (enableWishes && message.trim()) {
+                wishForm.post(`/u/${invitation.slug}/wish`, {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        setMessage('');
+                        setSuccess(true);
+                    },
+                });
+            } else {
+                setSuccess(true);
+            }
+        };
+
+        if (enableRsvp) {
+            rsvpForm.post(`/u/${invitation.slug}/rsvp`, {
+                preserveScroll: true,
+                onSuccess: doWish,
+            });
+        } else {
+            doWish();
+        }
+    };
+
+    const isSubmitting = rsvpForm.processing || wishForm.processing;
+    const wishList = safeArr(wishes);
+    const recentWishes = wishList.slice(0, 5);
+
+    const sectionTitle = enableRsvp && enableWishes
+        ? `${t('nav.rsvp')} & ${t('invitation.wishes_title')}`
+        : enableRsvp
+            ? t('invitation.rsvp_title') || 'RSVP'
+            : t('invitation.wishes_title') || 'Ucapan';
+
+    if (!enableRsvp && !enableWishes) return null;
 
     return (
         <div className="max-w-lg mx-auto">
             <Reveal>
-                <FlowerSwirl title={t('nav.rsvp')} />
+                <FlowerSwirl title={sectionTitle} />
+                <p className="text-xs sm:text-sm opacity-80 mb-4 text-center">
+                    {isEn
+                        ? 'Please fill out the form below to send your confirmation and wishes.'
+                        : 'Mohon isi formulir berikut untuk mengirimkan konfirmasi dan ucapan doa Anda.'}
+                </p>
             </Reveal>
 
-            {/* RSVP Form Card */}
-            {enableRsvp && (
-                <Reveal variant="zoom" className="sp02-card mt-6">
-                    <h3 className="text-base font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wide mb-4">
-                        {t('invitation.save_the_date') === 'Save The Date' ? 'RSVP Confirmation' : 'Konfirmasi Kehadiran'}
-                    </h3>
-                    
-                    <form onSubmit={handleRsvp} className="space-y-4 text-left">
+            <Reveal variant="zoom" className="sp02-card mt-6">
+                <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                    {/* Nama Lengkap */}
+                    <div>
+                        <label className="text-[10px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider block mb-1.5">
+                            {isEn ? 'Your Name' : 'Nama Lengkap'}
+                        </label>
+                        <input
+                            type="text"
+                            placeholder={isEn ? 'Your Name' : 'Nama Lengkap'}
+                            readOnly={!!activeGuest.name && activeGuest.name !== 'Tamu Undangan'}
+                            value={sharedName}
+                            onChange={(e) => setSharedName(e.target.value)}
+                            className="sp02-input"
+                            required
+                        />
+                    </div>
+
+                    {/* Konfirmasi Kehadiran */}
+                    {enableRsvp && (
                         <div>
                             <label className="text-[10px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider block mb-1.5">
-                                {t('invitation.save_the_date') === 'Save The Date' ? 'Attendance Status' : 'Status Kehadiran'}
+                                {isEn ? 'Attendance Status' : 'Status Kehadiran'}
                             </label>
                             <select
-                                value={rsvpForm.data.attendance}
-                                onChange={(e) => rsvpForm.setData('attendance', e.target.value)}
+                                value={attendance}
+                                onChange={(e) => setAttendance(e.target.value)}
                                 className="sp02-input select-none"
                             >
                                 <option value="hadir">{t('invitation.attending') || 'Hadir'}</option>
@@ -941,86 +1038,81 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                                 <option value="belum_pasti">{t('invitation.unsure') || 'Belum Pasti'}</option>
                             </select>
                         </div>
+                    )}
 
-                        {rsvpForm.data.attendance === 'hadir' && (
-                            <div>
-                                <label className="text-[10px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider block mb-1.5">
-                                    {t('invitation.save_the_date') === 'Save The Date' ? 'Number of Guests' : 'Jumlah Orang'}
-                                </label>
-                                <select
-                                    value={rsvpForm.data.number_of_guests}
-                                    onChange={(e) => rsvpForm.setData('number_of_guests', parseInt(e.target.value))}
-                                    className="sp02-input"
-                                >
-                                    {[1, 2, 3, 4, 5].map(v => (
-                                        <option key={v} value={v}>{v} {v === 1 ? 'Person' : 'People'}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
-
-                        <button 
-                            type="submit" 
-                            disabled={rsvpForm.processing} 
-                            className="sp02-btn-primary w-full text-xs font-semibold py-3 mt-2"
-                        >
-                            {rsvpForm.processing ? 'SABAR...' : (t('invitation.save_the_date') === 'Save The Date' ? 'SUBMIT CONFIRMATION' : 'KIRIM KONFIRMASI')}
-                        </button>
-                    </form>
-                </Reveal>
-            )}
-
-            {/* Wishes guestbook card */}
-            {enableWishes && (
-                <Reveal variant="zoom" className="sp02-card mt-6">
-                    <h3 className="text-base font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wide mb-4">
-                        {t('invitation.wishes_title')}
-                    </h3>
-
-                    <form onSubmit={handleWish} className="space-y-4 text-left">
+                    {/* Jumlah Orang */}
+                    {enableRsvp && attendance === 'hadir' && (
                         <div>
-                            <input
-                                type="text"
-                                placeholder={t('invitation.name_placeholder') || 'Nama Anda'}
-                                value={wishForm.data.sender_name}
-                                onChange={(e) => wishForm.setData('sender_name', e.target.value)}
+                            <label className="text-[10px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider block mb-1.5">
+                                {isEn ? 'Number of Guests' : 'Jumlah Orang'}
+                            </label>
+                            <select
+                                value={numGuests}
+                                onChange={(e) => setNumGuests(parseInt(e.target.value) || 1)}
                                 className="sp02-input"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <textarea
-                                placeholder={t('invitation.wish_placeholder') || 'Tulis pesan doa dan ucapan manis Anda di sini...'}
-                                value={wishForm.data.message}
-                                onChange={(e) => wishForm.setData('message', e.target.value)}
-                                className="sp02-input"
-                                rows={3}
-                                required
-                            />
-                        </div>
-                        <button 
-                            type="submit" 
-                            disabled={wishForm.processing} 
-                            className="sp02-btn-primary w-full text-xs font-semibold py-3"
-                        >
-                            {wishForm.processing ? 'KIRIM...' : (t('invitation.save_the_date') === 'Save The Date' ? 'SEND WISH' : 'KIRIM UCAPAN')}
-                        </button>
-                    </form>
-
-                    {/* Scrollable list of comments */}
-                    {list.length > 0 && (
-                        <div className="sp02-wishes-box">
-                            {list.map((w, idx) => (
-                                <div key={w.id || idx} className="sp02-wish-item">
-                                    <div className="sp02-wish-sender">{w.sender_name}</div>
-                                    <div className="opacity-90">{w.message}</div>
-                                </div>
-                            ))}
+                            >
+                                {[1, 2, 3, 4, 5].map(v => (
+                                    <option key={v} value={v}>{v} {isEn ? (v === 1 ? 'Person' : 'People') : 'Orang'}</option>
+                                ))}
+                            </select>
                         </div>
                     )}
-                </Reveal>
-            )}
-        </div>
+
+                    {/* Ucapan & Doa */}
+                    {enableWishes && (
+                        <div>
+                            <label className="text-[10px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider block mb-1.5">
+                                {isEn ? 'Wishes & Prayers' : 'Pesan / Ucapan'}
+                            </label>
+                            <textarea
+                                placeholder={t('invitation.wish_placeholder') || 'Tulis pesan doa dan ucapan manis Anda di sini...'}
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                className="sp02-input"
+                                rows={3}
+                                required={!enableRsvp}
+                            />
+                        </div>
+                    )}
+
+                    <button 
+                        type="submit" 
+                        disabled={isSubmitting} 
+                        className="sp02-btn-primary w-full text-xs font-semibold py-3 mt-2"
+                    >
+                        {isSubmitting ? 'KIRIM...' : (isEn ? 'SEND MESSAGE' : 'KIRIM KONFIRMASI & UCAPAN')}
+                    </button>
+
+                    {success && (
+                        <p className="text-xs text-[var(--sp02-primary)] font-bold text-center mt-3">
+                            ✓ {isEn ? 'Successfully sent!' : 'Berhasil terkirim!'}
+                        </p>
+                    )}
+                </form>
+
+                {/* Wishes list scrollable */}
+                {enableWishes && recentWishes.length > 0 && (
+                    <div className="sp02-wishes-box mt-6 pt-4 border-t border-[var(--sp02-secondary)]/15">
+                        {recentWishes.map((w, idx) => (
+                            <div key={w.id || idx} className="sp02-wish-item">
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="sp02-wish-sender font-bold">{w.sender_name || w.name}</span>
+                                    {w.attendance && (
+                                        <span className={`text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                                            w.attendance === 'hadir' 
+                                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
+                                                : 'bg-rose-50 text-rose-600 border border-rose-200'
+                                        }`}>
+                                            {w.attendance === 'hadir' ? (t('invitation.attending') || 'Hadir') : (t('invitation.not_attending') || 'Tidak Hadir')}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="opacity-90">{w.message}</div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </Reveal>
     );
 }
 
@@ -1286,23 +1378,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
         };
     }, [isOpened, autoScroll, layoutMode, resolvedSections.length]);
 
-    // Form Hooks
-    const rsvpForm = useForm({ attendance: 'hadir', number_of_guests: 1 });
-    const handleRsvp = (e) => {
-        e.preventDefault();
-        rsvpForm.post(`/u/${invitation.slug}/rsvp`, {
-            preserveScroll: true
-        });
-    };
 
-    const wishForm = useForm({ sender_name: guest?.name || '', message: '' });
-    const handleWish = (e) => {
-        e.preventDefault();
-        wishForm.post(`/u/${invitation.slug}/wish`, {
-            preserveScroll: true,
-            onSuccess: () => wishForm.reset('message')
-        });
-    };
 
     // Navigation jumps
     const jumpToSection = (key) => {
