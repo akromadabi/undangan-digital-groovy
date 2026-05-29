@@ -28,26 +28,38 @@ if (typeof window !== 'undefined') {
 
     // 2. Periodic Scanner for transparent overlay blocks
     const scanForOverlays = () => {
-        console.log("[DIAGNOSTICS] Scanning DOM for screen-covering elements...");
+        console.log("[DIAGNOSTICS] Scanning DOM for fixed/absolute interactive elements...");
         const allElements = document.querySelectorAll('*');
         let foundAny = false;
+        let interactiveFixed = [];
         
         allElements.forEach((el) => {
-            if (['HTML', 'BODY', 'IFRAME', 'SVG', 'PATH'].includes(el.tagName)) return;
+            if (['HTML', 'BODY', 'IFRAME', 'SVG', 'PATH', 'SCRIPT', 'STYLE'].includes(el.tagName)) return;
             
             const style = window.getComputedStyle(el);
             if (style.position === 'fixed' || style.position === 'absolute') {
                 const rect = el.getBoundingClientRect();
-                const coversWidth = rect.width >= window.innerWidth * 0.85;
-                const coversHeight = rect.height >= window.innerHeight * 0.85;
+                const isVisible = style.display !== 'none' && style.visibility !== 'hidden';
+                const hasPointerEvents = style.pointerEvents !== 'none';
                 
-                if (coversWidth && coversHeight) {
-                    const isVisible = style.display !== 'none' && style.visibility !== 'hidden';
-                    const hasPointerEvents = style.pointerEvents !== 'none';
+                if (isVisible && hasPointerEvents) {
+                    interactiveFixed.push({
+                        element: el,
+                        tagName: el.tagName,
+                        className: el.className,
+                        id: el.id,
+                        rect: { width: rect.width, height: rect.height, top: rect.top, left: rect.left },
+                        zIndex: style.zIndex,
+                        opacity: style.opacity
+                    });
                     
-                    if (isVisible && hasPointerEvents) {
+                    // Look for overlays covering at least 55% of the viewport width & height
+                    const coversWidth = rect.width >= window.innerWidth * 0.55;
+                    const coversHeight = rect.height >= window.innerHeight * 0.55;
+                    
+                    if (coversWidth && coversHeight) {
                         foundAny = true;
-                        console.warn("%c[BLOCKING OVERLAY DETECTED]%c Element is fixed/absolute, covers the screen, and accepts pointer events:", 
+                        console.warn("%c[BLOCKING OVERLAY DETECTED]%c Element is fixed/absolute, covers >55% of screen, and accepts pointer events:", 
                             "color: white; background: red; font-weight: bold; padding: 2px 5px; border-radius: 3px;", 
                             "color: #b30000; font-weight: bold;", 
                             el
@@ -79,8 +91,10 @@ if (typeof window !== 'undefined') {
             }
         });
         
+        console.log("Active interactive fixed/absolute elements on page:", interactiveFixed);
+        
         if (!foundAny) {
-            console.log("[DIAGNOSTICS] No blocking overlay detected covering >85% of screen.");
+            console.log("[DIAGNOSTICS] No blocking overlay detected covering >55% of screen.");
         }
     };
     

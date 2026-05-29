@@ -142,7 +142,7 @@ const featuresList = [
     { 
         icon: (
             <svg className="w-6 h-6 text-[#E5654B] group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3V3.75a3 3 0 013-3h13.5a3 3 0 013 3v7.5a3 3 0 01-3 3mM5.25 14.25a3 3 0 00-3 3v3.75a3 3 0 003 3h13.5a3 3 0 003-3v-3.75a3 3 0 00-3-3M16.5 7.5h.008v.008H16.5V7.5zm0 9h.008v.008H16.5v-.008z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3V3.75a3 3 0 013-3h13.5a3 3 0 013 3v7.5a3 3 0 01-3 3 M5.25 14.25a3 3 0 00-3 3v3.75a3 3 0 003 3h13.5a3 3 0 003-3v-3.75a3 3 0 00-3-3M16.5 7.5h.008v.008H16.5V7.5zm0 9h.008v.008H16.5v-.008z" />
             </svg>
         ),
         title: 'Free Server & SSL', 
