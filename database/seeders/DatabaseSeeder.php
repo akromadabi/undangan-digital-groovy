@@ -19,36 +19,38 @@ class DatabaseSeeder extends Seeder
         // ═══════════════════════════════════════
         // 1. ADMIN USERS (Super Admin & Reseller)
         // ═══════════════════════════════════════
-        $superAdmin = User::updateOrCreate(
-            ['email' => 'akromadabi@gmail.com'],
-            [
+        $superAdmin = User::where('email', 'akromadabi@gmail.com')->first();
+        if (!$superAdmin) {
+            $superAdmin = User::create([
+                'email' => 'akromadabi@gmail.com',
                 'name' => 'Super Admin',
                 'password' => Hash::make('akromadabi'),
                 'role' => 'super_admin',
                 'is_active' => true,
                 'onboarding_step' => 6,
                 'email_verified_at' => now(),
-            ]
-        );
+            ]);
+        }
 
-        $reseller = User::updateOrCreate(
-            ['email' => 'reseller@groovy.com'],
-            [
+        $reseller = User::where('email', 'reseller@groovy.com')->first();
+        if (!$reseller) {
+            $reseller = User::create([
+                'email' => 'reseller@groovy.com',
                 'name' => 'Reseller Groovy',
                 'password' => Hash::make('password'),
                 'role' => 'admin', // Role 'admin' di sistem ini berfungsi sebagai Reseller
                 'is_active' => true,
                 'onboarding_step' => 6,
                 'email_verified_at' => now(),
-            ]
-        );
+            ]);
+        }
 
         // ═══════════════════════════════════════
         // 2. SUBSCRIPTION PLANS
         // ═══════════════════════════════════════
-        $free = SubscriptionPlan::updateOrCreate(
-            ['slug' => 'free'],
+        $plansToSeed = [
             [
+                'slug' => 'free',
                 'name' => 'Free',
                 'description' => 'Paket gratis dengan fitur terbatas',
                 'price' => 0,
@@ -56,12 +58,9 @@ class DatabaseSeeder extends Seeder
                 'max_guests' => 50,
                 'max_galleries' => 3,
                 'sort_order' => 1,
-            ]
-        );
-
-        $silver = SubscriptionPlan::updateOrCreate(
-            ['slug' => 'silver'],
+            ],
             [
+                'slug' => 'silver',
                 'name' => 'Silver',
                 'description' => 'Paket dasar untuk undangan digital',
                 'price' => 49000,
@@ -69,12 +68,9 @@ class DatabaseSeeder extends Seeder
                 'max_guests' => 200,
                 'max_galleries' => 10,
                 'sort_order' => 2,
-            ]
-        );
-
-        $gold = SubscriptionPlan::updateOrCreate(
-            ['slug' => 'gold'],
+            ],
             [
+                'slug' => 'gold',
                 'name' => 'Gold',
                 'description' => 'Paket lengkap dengan semua fitur',
                 'price' => 99000,
@@ -82,12 +78,9 @@ class DatabaseSeeder extends Seeder
                 'max_guests' => 500,
                 'max_galleries' => 25,
                 'sort_order' => 3,
-            ]
-        );
-
-        $platinum = SubscriptionPlan::updateOrCreate(
-            ['slug' => 'platinum'],
+            ],
             [
+                'slug' => 'platinum',
                 'name' => 'Platinum',
                 'description' => 'Paket premium tanpa batas',
                 'price' => 199000,
@@ -96,7 +89,18 @@ class DatabaseSeeder extends Seeder
                 'max_galleries' => 50,
                 'sort_order' => 4,
             ]
-        );
+        ];
+
+        foreach ($plansToSeed as $planData) {
+            if (!SubscriptionPlan::where('slug', $planData['slug'])->exists()) {
+                SubscriptionPlan::create($planData);
+            }
+        }
+
+        $free = SubscriptionPlan::where('slug', 'free')->first();
+        $silver = SubscriptionPlan::where('slug', 'silver')->first();
+        $gold = SubscriptionPlan::where('slug', 'gold')->first();
+        $platinum = SubscriptionPlan::where('slug', 'platinum')->first();
 
         // ═══════════════════════════════════════
         // 3. FEATURES (Lockable)
@@ -131,58 +135,64 @@ class DatabaseSeeder extends Seeder
         }
 
         // ═══════════════════════════════════════
-        // 4. PLAN-FEATURE ACCESS
+        // 4. PLAN-FEATURE ACCESS (Only seed if no accesses are set in database)
         // ═══════════════════════════════════════
+        if (PlanFeatureAccess::count() === 0) {
+            // Free plan: basic features only
+            $freeEnabled = ['opening', 'bride_groom', 'event', 'gallery', 'closing', 'guestbook', 'cover', 'guest', 'rsvp', 'template'];
+            $freeLocked = ['love_story', 'bank', 'save_the_date', 'turut_mengundang', 'bride_groom_detail', 'music', 'gift', 'whatsapp'];
 
-        // Free plan: basic features only
-        $freeEnabled = ['opening', 'bride_groom', 'event', 'gallery', 'closing', 'guestbook', 'cover', 'guest', 'rsvp', 'template'];
-        $freeLocked = ['love_story', 'bank', 'save_the_date', 'turut_mengundang', 'bride_groom_detail', 'music', 'gift', 'whatsapp'];
+            foreach ($featureModels as $slug => $feature) {
+                PlanFeatureAccess::create([
+                    'plan_id' => $free->id,
+                    'feature_id' => $feature->id,
+                    'is_enabled' => in_array($slug, $freeEnabled)
+                ]);
+            }
 
-        foreach ($featureModels as $slug => $feature) {
-            PlanFeatureAccess::updateOrCreate(
-                ['plan_id' => $free->id, 'feature_id' => $feature->id],
-                ['is_enabled' => in_array($slug, $freeEnabled)]
-            );
-        }
+            // Silver plan: most features unlocked
+            $silverLocked = ['gift', 'bride_groom_detail'];
+            foreach ($featureModels as $slug => $feature) {
+                PlanFeatureAccess::create([
+                    'plan_id' => $silver->id,
+                    'feature_id' => $feature->id,
+                    'is_enabled' => !in_array($slug, $silverLocked)
+                ]);
+            }
 
-        // Silver plan: most features unlocked
-        $silverLocked = ['gift', 'bride_groom_detail'];
-        foreach ($featureModels as $slug => $feature) {
-            PlanFeatureAccess::updateOrCreate(
-                ['plan_id' => $silver->id, 'feature_id' => $feature->id],
-                ['is_enabled' => !in_array($slug, $silverLocked)]
-            );
-        }
-
-        // Gold & Platinum: all features enabled
-        foreach ([$gold, $platinum] as $plan) {
-            foreach ($featureModels as $feature) {
-                PlanFeatureAccess::updateOrCreate(
-                    ['plan_id' => $plan->id, 'feature_id' => $feature->id],
-                    ['is_enabled' => true]
-                );
+            // Gold & Platinum: all features enabled
+            foreach ([$gold, $platinum] as $plan) {
+                foreach ($featureModels as $feature) {
+                    PlanFeatureAccess::create([
+                        'plan_id' => $plan->id,
+                        'feature_id' => $feature->id,
+                        'is_enabled' => true
+                    ]);
+                }
             }
         }
 
-        // ── Give Super Admin & Reseller Gold Subscription ──
+        // ── Give Super Admin & Reseller Gold Subscription (Only seed once) ──
         foreach ([$superAdmin, $reseller] as $adminUser) {
-            $payment = \App\Models\Payment::updateOrCreate(
-                ['user_id' => $adminUser->id, 'plan_id' => $gold->id, 'amount' => $gold->price],
-                [
+            if ($adminUser && !$adminUser->subscriptions()->exists()) {
+                $payment = \App\Models\Payment::create([
+                    'user_id' => $adminUser->id,
+                    'plan_id' => $gold->id,
+                    'amount' => $gold->price,
                     'payment_gateway' => 'manual',
                     'status' => 'paid',
                     'paid_at' => now(),
-                ]
-            );
+                ]);
 
-            \App\Models\Subscription::updateOrCreate(
-                ['user_id' => $adminUser->id, 'plan_id' => $gold->id, 'payment_id' => $payment->id],
-                [
+                \App\Models\Subscription::create([
+                    'user_id' => $adminUser->id,
+                    'plan_id' => $gold->id,
+                    'payment_id' => $payment->id,
                     'starts_at' => now(),
                     'expires_at' => now()->addYears(10), // Long duration for admin
                     'status' => 'active',
-                ]
-            );
+                ]);
+            }
         }
 
         // ═══════════════════════════════════════
