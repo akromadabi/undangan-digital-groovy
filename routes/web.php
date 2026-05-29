@@ -283,6 +283,7 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
     Route::post('/theme/change', [ThemeSettingsController::class, 'changeTheme'])->name('theme.change');
     Route::post('/theme/{theme}/like', [ThemeSettingsController::class, 'toggleLike'])->name('theme.like');
     Route::post('/theme/sections', [ThemeSettingsController::class, 'updateSections'])->name('theme.sections');
+    Route::post('/theme/video-list', [ThemeSettingsController::class, 'saveVideoList'])->name('theme.video_list.save');
 
     // Media Library APIs
     Route::get('/theme/media', [\App\Http\Controllers\Dashboard\MediaAssetController::class, 'index'])->name('theme.media.index');

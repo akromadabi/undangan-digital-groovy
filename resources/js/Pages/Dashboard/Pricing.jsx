@@ -3,7 +3,7 @@ import { useState, Fragment } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
 export default function Pricing({ plans, currentPlan, features }) {
-    const { flash } = usePage().props;
+    const { flash, auth } = usePage().props;
     const [showComparison, setShowComparison] = useState(false);
 
     const formatCurrency = (a) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(a);

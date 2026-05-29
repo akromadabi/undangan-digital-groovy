@@ -1,0 +1,811 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Caramel&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Roboto+Slab:wght@300;400;600;700&display=swap');
+
+/* ==========================================================================
+   DESIGN SYSTEM / THEME VARIABLES (SPESIAL-06)
+   ========================================================================== */
+:root {
+  --sp06-primary: #282828;
+  --sp06-primary-rgb: 40, 40, 40;
+  --sp06-secondary: #838181;
+  --sp06-accent: #52483c;
+  --sp06-accent-rgb: 82, 72, 60;
+  --sp06-bg-light: #f5f5f5;
+  --sp06-text-dark: #4b4a4a;
+  --sp06-text-muted: #838181;
+  
+  --sp06-font-heading: 'Caramel', cursive;
+  --sp06-font-body: 'Montserrat', sans-serif;
+  --sp06-font-sideways: 'Poppins', sans-serif;
+  --sp06-font-num: 'Roboto Slab', serif;
+}
+
+/* ==========================================================================
+   RESET & MOBILE-ONLY CONTAINER
+   ========================================================================== */
+.sp06-theme {
+  font-family: var(--sp06-font-body);
+  color: var(--sp06-text-dark);
+  background-color: #0d0d0d;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* Mobile viewport constraint (max 450px as per Elementor JSON) */
+.sp06-theme-container {
+  width: 100%;
+  max-width: 450px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: white;
+  position: relative;
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.45);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY UTILITIES
+   ========================================================================== */
+.sp06-font-heading-style {
+  font-family: var(--sp06-font-heading);
+}
+
+.sp06-font-body-style {
+  font-family: var(--sp06-font-body);
+}
+
+.sp06-font-sideways-style {
+  font-family: var(--sp06-font-sideways);
+}
+
+.sp06-font-num-style {
+  font-family: var(--sp06-font-num);
+}
+
+/* ==========================================================================
+   ANIMATIONS & TRANSITIONS
+   ========================================================================== */
+.sp06-ani-hidden {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp06-ani-fadeUp {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.sp06-ani-scaleIn {
+  animation: sp06ScaleIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sp06-ani-fadeLeft {
+  animation: sp06FadeLeft 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sp06-ani-fadeRight {
+  animation: sp06FadeRight 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sp06ScaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes sp06FadeLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes sp06FadeRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.sp06-breathe {
+  animation: sp06Breathe 3s ease-in-out infinite alternate;
+}
+
+@keyframes sp06Breathe {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.04); }
+}
+
+/* ==========================================================================
+   COVER / ENVELOPE (HIGH-CONTRAST WITH BLUR BACKDROP)
+   ========================================================================== */
+.sp06-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  transition: transform 1.2s cubic-bezier(0.76, 0, 0.24, 1), opacity 1s ease;
+  overflow: hidden;
+}
+
+.sp06-cover.sp06-is-opened {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sp06-cover__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.sp06-cover__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Heavy backdrop styling from Elementor! */
+  filter: grayscale(50%) brightness(55%) contrast(166%) saturate(45%);
+}
+
+.sp06-cover__blur {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  backdrop-filter: blur(4.5px);
+  -webkit-backdrop-filter: blur(4.5px);
+  background-color: rgba(72, 72, 71, 0.74); /* dark overlay tint */
+}
+
+.sp06-cover__content {
+  position: relative;
+  z-index: 10;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 80px 24px;
+  text-align: center;
+  color: white;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.sp06-cover-names {
+  font-family: var(--sp06-font-heading);
+  font-size: 75px;
+  line-height: 1;
+  color: white;
+  margin-top: 10px;
+}
+
+.sp06-cover-guest-box {
+  background: rgba(80, 82, 80, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px 24px;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.sp06-btn-buka {
+  background: rgba(255, 255, 255, 0.95);
+  color: #282828;
+  padding: 12px 36px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.sp06-btn-buka:hover {
+  transform: translateY(-2px);
+  background-color: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+/* ==========================================================================
+   OPENING SECTION (DARK GRADIENT WELLCOME CARD WITH COUNTDOWN)
+   ========================================================================== */
+.sp06-opening-section {
+  padding: 80px 24px;
+  background-color: white;
+}
+
+.sp05-wellcome2-card {
+  width: 100%;
+  border-radius: 16px;
+  border: 2px solid rgba(var(--sp06-primary-rgb), 0.1);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  padding: 60px 20px;
+  color: white;
+  text-align: center;
+}
+
+.sp05-wellcome2-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.sp05-wellcome2-bg img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  filter: grayscale(80%) brightness(40%);
+}
+
+.sp05-wellcome2-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to bottom, rgba(239, 231, 231, 0.2) 0%, rgba(39, 39, 39, 0.95) 75%);
+}
+
+.sp06-btn-save-date {
+  background: var(--sp06-accent);
+  color: white !important;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sp06-btn-save-date:hover {
+  background-color: #3f372e;
+}
+
+/* ==========================================================================
+   BRIDE & GROOM PROFILE SECTION (KOREAN GREYSCALE EDITORIAL)
+   ========================================================================== */
+.sp06-mempelai-section {
+  padding: 80px 24px;
+  background-color: var(--sp06-bg-light);
+}
+
+/* Stunning sideways rotated editorial frame */
+.sp06-profile-card {
+  display: flex;
+  background: linear-gradient(135deg, #d1caca 0%, #fcfafb 100%);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(var(--sp06-primary-rgb), 0.15);
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.sp06-profile-sideways-banner {
+  width: 75px;
+  background-color: #adabab;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.sp06-profile-sideways-title {
+  font-family: var(--sp06-font-sideways);
+  font-size: 28px;
+  font-weight: 300;
+  color: #49494a;
+  writing-mode: vertical-lr;
+  text-orientation: sideways-right;
+  transform: rotate(180deg);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.sp06-profile-image-wrapper {
+  flex-grow: 1;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+}
+
+.sp06-profile-image-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  /* Premium greyscale mask */
+  filter: grayscale(100%) brightness(1.08) contrast(95%);
+  transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp06-profile-card:hover .sp06-profile-image-wrapper img {
+  filter: grayscale(0%) brightness(1) contrast(100%);
+  transform: scale(1.03);
+}
+
+/* ==========================================================================
+   EVENTS SECTION (DARK SLIDESHOW GLASS-CARD LAYOUT)
+   ========================================================================== */
+.sp06-event-section {
+  padding: 80px 20px;
+  position: relative;
+  overflow: hidden;
+  color: white;
+  min-height: 480px;
+}
+
+.sp06-event-bg-slideshow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.sp06-event-bg-slideshow img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  filter: grayscale(90%) brightness(35%) contrast(110%);
+}
+
+.sp06-event-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to bottom, rgba(48, 47, 47, 0.5) 0%, rgba(14, 13, 13, 0.95) 75%);
+}
+
+/* Glassmorphism Event Card */
+.sp06-event-glass-card {
+  background: rgba(125, 124, 124, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 35px 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.sp06-btn-map {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--sp06-accent);
+  color: white !important;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sp06-btn-map:hover {
+  background: #3f372e;
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   COUNTDOWN TIMER
+   ========================================================================== */
+.sp06-countdown-wrapper {
+  margin: 25px 0;
+}
+
+.sp06-countdown {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.sp06-countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(2, 1, 1, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  min-width: 60px;
+  padding: 10px 5px;
+  backdrop-filter: blur(4px);
+}
+
+.sp06-countdown-num {
+  font-size: 20px;
+  font-weight: 400;
+  color: white;
+  line-height: 1.1;
+  font-family: var(--sp06-font-num);
+}
+
+.sp06-countdown-label {
+  font-size: 8px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 3px;
+  font-family: var(--sp06-font-num);
+}
+
+.sp06-countdown-colon {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  animation: sp06Blink 1s infinite;
+}
+
+@keyframes sp06Blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ==========================================================================
+   TIMELINE MILESTONES (STORY)
+   ========================================================================== */
+.sp06-timeline {
+  position: relative;
+  padding: 20px 0;
+}
+
+.sp06-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background: var(--sp06-primary);
+  opacity: 0.25;
+}
+
+.sp06-timeline-item {
+  position: relative;
+  padding-left: 50px;
+  margin-bottom: 35px;
+}
+
+.sp06-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  border: 4px solid var(--sp06-secondary);
+  z-index: 2;
+}
+
+.sp06-story-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.sp06-story-year {
+  display: inline-block;
+  background: #adabab;
+  color: white;
+  padding: 3px 12px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-family: var(--sp06-font-num);
+}
+
+/* ==========================================================================
+   GALLERY SECTION
+   ========================================================================== */
+.sp06-strict-cover {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.6s ease;
+}
+
+.sp06-strict-cover:hover {
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   RSVP & WISHES SECTION (UNIFIED FORM)
+   ========================================================================== */
+.sp06-rsvp-wishes-section {
+  padding: 80px 24px;
+}
+
+.sp06-input-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.sp06-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sp06-primary);
+  margin-bottom: 6px;
+}
+
+.sp06-input, .sp06-select, .sp06-textarea {
+  width: 100%;
+  background: #fcfcfc;
+  border: 1.5px solid rgba(var(--sp06-primary-rgb), 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--sp06-text-dark);
+  font-family: var(--sp06-font-body);
+  transition: all 0.3s ease;
+}
+
+.sp06-input:focus, .sp06-select:focus, .sp06-textarea:focus {
+  outline: none;
+  border-color: var(--sp06-primary);
+  background: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.sp06-btn-submit {
+  width: 100%;
+  background: var(--sp06-primary);
+  color: white;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.sp06-btn-submit:hover {
+  background-color: #1a1a1a;
+}
+
+.sp06-wishes-container {
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.sp06-wishes-container::-webkit-scrollbar {
+  width: 4px;
+}
+.sp06-wishes-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+.sp06-wishes-container::-webkit-scrollbar-thumb {
+  background: var(--sp06-primary);
+  border-radius: 10px;
+}
+
+.sp06-wish-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+}
+
+/* ==========================================================================
+   BANK DETAILS (LUXURY 2 STYLE)
+   ========================================================================== */
+.sp06-bank-section {
+  padding: 80px 24px;
+}
+
+.sp06-bank-card {
+  background: linear-gradient(135deg, white 0%, var(--sp06-bg-light) 100%);
+  border-radius: 20px;
+  padding: 24px;
+  border: 1.5px solid rgba(var(--sp06-primary-rgb), 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.sp06-bank-card::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(var(--sp06-primary-rgb), 0.05);
+}
+
+.sp06-btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  color: var(--sp06-primary);
+  border: 1.5px solid var(--sp06-primary);
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sp06-btn-copy:hover {
+  background: var(--sp06-primary);
+  color: white;
+}
+
+/* ==========================================================================
+   FLOATING ACTION BUTTONS (AUDIO, SCROLL, FULLSCREEN, QR)
+   ========================================================================== */
+.sp06-floating-controls {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 999;
+}
+
+@media(min-width: 450px) {
+  .sp06-floating-controls {
+    right: calc(50% - 225px + 24px); /* locked to mobile width margin */
+  }
+}
+
+.sp06-control-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(var(--sp06-primary-rgb), 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+}
+
+.sp06-control-btn:hover {
+  transform: scale(1.08);
+  background: var(--sp06-primary);
+}
+
+.sp06-control-btn:active {
+  transform: scale(0.95);
+}
+
+/* Three-bar Music Equalizer Animation */
+.global-music-waves {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  width: 16px;
+  height: 16px;
+}
+
+.global-music-waves span {
+  display: inline-block;
+  width: 3px;
+  background-color: currentColor;
+  border-radius: 1.5px;
+  animation: sp06Equalizer 1.2s ease-in-out infinite alternate;
+}
+
+.global-music-waves span:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+.global-music-waves span:nth-child(2) { height: 100%; animation-delay: 0.3s; }
+.global-music-waves span:nth-child(3) { height: 60%; animation-delay: 0s; }
+
+@keyframes sp06Equalizer {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1.1); }
+}
+
+/* ==========================================================================
+   QR PRESENCE CHECKIN MODAL
+   ========================================================================== */
+.sp06-qr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.sp06-qr-card {
+  background: white;
+  width: 100%;
+  max-width: 340px;
+  border-radius: 20px;
+  padding: 30px 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  position: relative;
+  border: 2px solid var(--sp06-primary);
+}
+
+.sp06-qr-image-wrapper {
+  background: #fafafa;
+  border: 2px dashed rgba(var(--sp06-primary-rgb), 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   SECTIONS WATERMARK & DIVIDERS
+   ========================================================================== */
+.sp06-watermark {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--sp06-primary);
+  opacity: 0.8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 90px !important; /* anti-overlap safety bottom padding */
+}
+
+.sp06-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 140px;
+  margin: 12px auto;
+}
+
+.sp06-divider-line {
+  height: 1.5px;
+  background: var(--sp06-primary);
+  flex-grow: 1;
+  opacity: 0.3;
+}
+
+.sp06-divider-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sp06-secondary);
+}

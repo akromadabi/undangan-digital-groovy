@@ -60,6 +60,11 @@ class Invitation extends Model
         'custom_domain',
         'type',
         'ar_style',
+        'video_url',
+        'video_playback',
+        'cover_video_url',
+        'opening_video_url',
+        'video_list',
     ];
 
     protected function casts(): array
@@ -82,6 +87,7 @@ class Invitation extends Model
             'show_qr_code' => 'boolean',
             'enable_rsvp' => 'boolean',
             'enable_wishes' => 'boolean',
+            'video_list' => 'array',
         ];
     }
 

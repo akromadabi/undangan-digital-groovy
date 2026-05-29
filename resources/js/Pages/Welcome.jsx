@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
 // Brand Partnership Logos (10 Distinct Premium Brands for Infinite Scrolling Ticker)
@@ -177,12 +177,38 @@ const featuresList = [
     }
 ];
 
+// Shared sort helper — used in all theme catalog pages
+export function sortThemes(themes, sortKey, likesMap = {}) {
+    const arr = [...themes];
+    if (sortKey === 'terbaru') {
+        return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
+    }
+    if (sortKey === 'populer') {
+        return arr.sort((a, b) => ((b.usage_count || 0) + (b.base_usage || 0)) - ((a.usage_count || 0) + (a.base_usage || 0)));
+    }
+    if (sortKey === 'disukai') {
+        return arr.sort((a, b) => {
+            const bLikes = (likesMap[b.id] ?? ((b.base_likes || 0) + (b.real_likes || 0)));
+            const aLikes = (likesMap[a.id] ?? ((a.base_likes || 0) + (a.real_likes || 0)));
+            return bLikes - aLikes;
+        });
+    }
+    return arr;
+}
+
+const SORT_OPTIONS = [
+    { key: 'terbaru', label: 'Terbaru' },
+    { key: 'populer', label: 'Terpopuler' },
+    { key: 'disukai', label: 'Terfavorit' },
+];
+
 export default function Welcome({ auth, canLogin, canRegister, appName, themes = [], recentInvitations = [], resellerCount = 15, invitationCount = 40, adminWhatsapp = '6283132211830', adminEmail = 'admin@groovy.com', minModalCost = 15000 }) {
     const { flash } = usePage().props;
     const [scrolled, setScrolled] = useState(false);
     const [showFlash, setShowFlash] = useState(true);
     const [activeFaq, setActiveFaq] = useState(null);
     const [mounted, setMounted] = useState(false);
+    const [themeSortKey, setThemeSortKey] = useState('terbaru');
 
     // Reseller profit calculator states
     const [clientsCount, setClientsCount] = useState(30); // clients per month
@@ -593,32 +619,39 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                 </div>
             </section>
 
-            {/* ═══ THEME PREVIEW CAROUSEL ═══ */}
+            {/* ═══ THEME PREVIEW CATALOG ═══ */}
             <section id="tema" className="bg-white py-24">
                 <div className="max-w-6xl mx-auto px-6">
-                    <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
-                        <div>
-                            <span className="text-xs font-bold text-[#E5654B] tracking-widest uppercase bg-[#E5654B]/10 px-3 py-1 rounded-full">Koleksi Desain</span>
-                            <h2 className="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight mt-5">Template Premium Siap Jual</h2>
-                            <p className="text-gray-500 mt-2 max-w-lg text-sm font-medium">Puluhan desain modern, responsif, dan elegan otomatis aktif di dashboard agensi Anda.</p>
-                        </div>
-                        {themes.length > 0 && (
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => { const el = document.getElementById('theme-scroll'); el.scrollBy({ left: -300, behavior: 'smooth' }); }}
-                                    className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:scale-105 active:scale-95 transition-all">
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-                                </button>
-                                <button onClick={() => { const el = document.getElementById('theme-scroll'); el.scrollBy({ left: 300, behavior: 'smooth' }); }}
-                                    className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:scale-105 active:scale-95 transition-all">
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-                                </button>
-                            </div>
-                        )}
+                    {/* Header */}
+                    <div className="text-center mb-10">
+                        <span className="text-xs font-bold text-[#E5654B] tracking-widest uppercase bg-[#E5654B]/10 px-3 py-1 rounded-full">Koleksi Desain</span>
+                        <h2 className="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight mt-5">Template Premium Siap Jual</h2>
+                        <p className="text-gray-500 mt-2 max-w-lg mx-auto text-sm font-medium">Puluhan desain modern, responsif, dan elegan otomatis aktif di dashboard agensi Anda.</p>
                     </div>
 
-                    <div id="theme-scroll" className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                        {themes.map((theme) => (
-                            <div key={theme.id} className="w-[240px] sm:w-[280px] flex-shrink-0 snap-start">
+                    {/* Sort Bar */}
+                    {themes.length > 0 && (
+                        <div className="flex items-center justify-center gap-2 mb-8">
+                            {SORT_OPTIONS.map(opt => (
+                                <button
+                                    key={opt.key}
+                                    onClick={() => setThemeSortKey(opt.key)}
+                                    className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-200 border ${
+                                        themeSortKey === opt.key
+                                            ? 'bg-[#E5654B] text-white border-[#E5654B] shadow-md shadow-[#E5654B]/25 scale-105'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-[#E5654B]/40 hover:text-[#E5654B]'
+                                    }`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Theme Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                        {sortThemes(themes, themeSortKey).map((theme) => (
+                            <div key={theme.id} className="flex-shrink-0">
                                 <ThemePreviewCard 
                                     theme={theme}
                                 />

@@ -621,6 +621,83 @@ const FAQ_DATABASE = [
             'Foto yang tidak dicentang akan tetap tersimpan di media library namun disembunyikan dari halaman undangan.'
         ],
         mockup: null
+    },
+    {
+        id: 'faq-video-cover',
+        category: 'desain-tema',
+        question: '29. Bagaimana cara memasang video YouTube sebagai latar belakang Cover atau Pembuka?',
+        answer: 'Selain foto, Anda dapat menggunakan video dari YouTube sebagai latar belakang section Cover (Sampul) maupun Opening (Pembuka) undangan. Video akan diputar otomatis secara diam (muted) tanpa kontrol YouTube yang mengganggu — memberikan kesan sinematik dan mewah.',
+        keywords: ['video', 'youtube', 'cover', 'sampul', 'pembuka', 'opening', 'latar video', 'background video', 'sinematik', 'link youtube', 'url video'],
+        steps: [
+            'Buka menu "Desain & Tema" di panel samping, lalu klik tab "Tampilan".',
+            'Di panel kiri terdapat bagian "Cover" dan "Opening/Pembuka". Klik tombol "Kelola Media Cover" atau "Kelola Media Pembuka".',
+            'Pada jendela media yang terbuka, pilih tab "Video Album".',
+            'Di kolom input "Tambah Video YouTube", paste link YouTube yang ingin Anda gunakan (contoh: https://www.youtube.com/watch?v=xxxxx atau https://youtu.be/xxxxx). Klik tombol "+".',
+            'Video akan muncul di daftar album. Klik video tersebut untuk memilihnya sebagai latar belakang Cover atau Opening.',
+            'Preview undangan di sebelah kanan akan otomatis memperbarui tampilan dengan video yang dipilih.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-video-album',
+        category: 'desain-tema',
+        question: '30. Bagaimana cara mengelola (menambah/menghapus) video YouTube di album undangan?',
+        answer: 'Anda dapat menyimpan beberapa link video YouTube sekaligus ke dalam album video undangan, lalu memilih salah satunya untuk digunakan sebagai latar Cover atau Pembuka kapan saja.',
+        keywords: ['album video', 'hapus video', 'tambah video', 'youtube album', 'video list', 'koleksi video', 'kelola video'],
+        steps: [
+            'Buka "Kelola Media Cover" atau "Kelola Media Pembuka" di tab Tampilan menu Desain & Tema.',
+            'Pilih tab "Video Album" pada jendela media.',
+            'Untuk menambah: masukkan link YouTube di kolom input dan tekan tombol "+". Video otomatis tersimpan di album.',
+            'Untuk menghapus: arahkan kursor ke kartu video lalu klik ikon "🗑 Hapus" (Tempat Sampah) yang muncul di pojok kanan atas kartu.',
+            'Catatan: Menghapus video dari album tidak secara otomatis menonaktifkan video yang sedang terpasang — ganti terlebih dahulu dengan foto atau video lain sebelum menghapus.',
+            'Untuk kembali menggunakan foto, buka tab "Album Foto" dan klik foto yang diinginkan.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-layout-mode',
+        category: 'desain-tema',
+        question: '31. Apa perbedaan mode tampilan "Scroll" dan "Per Halaman" pada undangan?',
+        answer: 'Anda dapat memilih bagaimana tamu menavigasi undangan digital — apakah dengan menggulir layar ke bawah (scroll biasa) atau dengan berpindah per section secara penuh layar (seperti presentasi).',
+        keywords: ['layout', 'scroll', 'per halaman', 'slide', 'navigasi', 'mode tampilan', 'mode undangan', 'swipe', 'page', 'fullpage'],
+        steps: [
+            'Buka menu "Desain & Tema" di panel samping, lalu pilih tab "Tampilan".',
+            'Gulir ke bagian "Mode Navigasi Undangan".',
+            'Pilih "Scroll Biasa" jika ingin undangan tampil seperti website pada umumnya (tamu menggulir ke bawah).',
+            'Pilih "Per Halaman (Full-Screen)" jika ingin setiap section tampil penuh layar dan berpindah dengan swipe/klik panah navigasi — cocok untuk tampilan yang lebih dramatis dan modern.',
+            'Klik tombol pilihan yang diinginkan; perubahan langsung terlihat di preview undangan di sebelah kanan.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-demo-kelas',
+        category: 'mulai-cepat',
+        question: '32. Bagaimana cara melihat perbedaan tampilan undangan antar paket (Gratis, Silver, Gold, Platinum)?',
+        answer: 'Saat Anda atau calon pembeli membuka link demo/preview undangan, tersedia tombol pemilih kelas paket di bagian atas undangan. Dengan mengkliknya, Anda dapat melihat secara langsung fitur apa saja yang aktif atau disembunyikan pada setiap kelas paket — tanpa perlu mendaftar atau membeli terlebih dahulu.',
+        keywords: ['demo', 'preview', 'kelas', 'paket', 'perbedaan', 'gratis', 'gold', 'platinum', 'silver', 'lihat fitur', 'coba paket', 'bandingkan'],
+        steps: [
+            'Buka link demo undangan (biasanya berformat /demo/[nama-tema]).',
+            'Di bagian paling atas undangan, Anda akan melihat bar horizontal berisi tombol kelas paket: "Gratis", "Silver", "Gold", "Platinum" (sesuai paket yang diaktifkan admin).',
+            'Klik salah satu kelas untuk beralih tampilan. Section yang tidak tersedia di kelas tersebut akan otomatis disembunyikan dari undangan.',
+            'Klik tombol "Detail Fitur" untuk melihat perbandingan lengkap fitur antar kelas (masa aktif, jumlah tamu, galeri, dll.).',
+            'Fitur ini sangat berguna untuk membantu calon pembeli memahami perbedaan nilai tiap paket sebelum memutuskan upgrade.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-sortir-tema',
+        category: 'desain-tema',
+        question: '33. Bagaimana cara mengurutkan atau menyortir katalog tema undangan?',
+        answer: 'Di halaman katalog tema (baik di landing page maupun di dashboard), tersedia tombol sortir yang memudahkan Anda menemukan tema yang paling sesuai dengan kebutuhan.',
+        keywords: ['sortir', 'urutkan', 'katalog', 'tema', 'terbaru', 'terpopuler', 'terfavorit', 'filter tema', 'cari tema'],
+        steps: [
+            'Buka halaman katalog tema (menu "Desain & Tema" di dashboard, atau halaman Katalog Tema di website).',
+            'Di bagian atas daftar tema, terdapat 3 tombol sortir: "Terbaru" (tema terbaru ditambahkan), "Terpopuler" (paling banyak digunakan), dan "Terfavorit" (paling banyak disukai).',
+            'Klik salah satu tombol untuk mengurutkan tampilan tema sesuai kriteria tersebut.',
+            'Di dashboard, Anda juga dapat memfilter tema berdasarkan Kategori (misal: PERNIKAHAN, ISLAMI, ADAT, dll.) sebelum mengurutkan.',
+            'Klik langsung pada tema untuk melihat preview dan menerapkannya ke undangan Anda.'
+        ],
+        mockup: null
     }
 ];
 
@@ -888,7 +965,48 @@ export default function ResellerFaq({ reseller }) {
 
     // Filter FAQs based on active tab and search query
     const filteredFAQs = useMemo(() => {
-        return FAQ_DATABASE.filter(faq => {
+        const FAQ_ORDER_POPULARITY = [
+            'faq-wa',
+            'faq-ganti-tema',
+            'faq-autoplay',
+            'faq-musik',
+            'faq-video-cover',
+            'faq-tambah-tamu',
+            'faq-hadiah',
+            'faq-rsvp',
+            'faq-demo-kelas',
+            'faq-sortir-tema',
+            'faq-domain',
+            'faq-tambah-event',
+            'faq-tambah-acara',
+            'faq-upgrade-paket',
+            'faq-aktif',
+            'faq-ganti-tema-limit',
+            'faq-teks-sambutan',
+            'faq-teks-penutup',
+            'faq-sosmed',
+            'faq-ubah-bahasa',
+            'faq-partikel',
+            'faq-qr-code',
+            'faq-tambah-foto',
+            'faq-beda-album-galeri',
+            'faq-cara-crop',
+            'faq-foto-tidak-pas',
+            'faq-reposition-preset',
+            'faq-slideshow-cover',
+            'faq-bulk-toggle',
+            'faq-video-album',
+            'faq-layout-mode',
+            'faq-no-photos',
+            'faq-tema-parodi',
+            'faq-single-celebrant',
+            'faq-visual-color-cards',
+            'faq-milestones-single',
+            'faq-multi-account',
+            'faq-cek-ucapan'
+        ];
+
+        const list = FAQ_DATABASE.filter(faq => {
             // Filter by Category
             if (activeCategory !== 'semua' && faq.category !== activeCategory) {
                 return false;
@@ -902,6 +1020,14 @@ export default function ResellerFaq({ reseller }) {
                 return matchesQuestion || matchesAnswer || matchesKeywords || matchesSteps;
             }
             return true;
+        });
+
+        return [...list].sort((a, b) => {
+            const indexA = FAQ_ORDER_POPULARITY.indexOf(a.id);
+            const indexB = FAQ_ORDER_POPULARITY.indexOf(b.id);
+            const valA = indexA === -1 ? 999 : indexA;
+            const valB = indexB === -1 ? 999 : indexB;
+            return valA - valB;
         });
     }, [activeCategory, searchQuery]);
 
@@ -1125,7 +1251,7 @@ export default function ResellerFaq({ reseller }) {
                                         className="rl-faq-trigger"
                                     >
                                         <span className="rl-faq-question">
-                                            {idx + 1}. {faq.question.replace(/^\d+\.\s*/, '')}
+                                            {faq.question.replace(/^\d+\.\s*/, '')}
                                         </span>
                                         <span className="rl-faq-icon-wrap">
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

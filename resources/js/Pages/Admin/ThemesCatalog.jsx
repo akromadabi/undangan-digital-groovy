@@ -1,5 +1,5 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
@@ -122,6 +122,20 @@ const renderBgPreview = (value, activeTheme) => {
     return <div className="w-full h-full bg-gray-100 rounded-md border border-dashed border-gray-300 flex items-center justify-center text-[9px] text-gray-400 font-semibold">Default</div>;
 };
 
+const SORT_OPTIONS = [
+    { key: 'terbaru', label: 'Terbaru' },
+    { key: 'populer', label: 'Terpopuler' },
+    { key: 'disukai', label: 'Terfavorit' },
+];
+
+function sortThemes(themes, sortKey) {
+    const arr = [...themes];
+    if (sortKey === 'terbaru') return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
+    if (sortKey === 'populer') return arr.sort((a, b) => ((b.usage_count || 0) + (b.base_usage || 0)) - ((a.usage_count || 0) + (a.base_usage || 0)));
+    if (sortKey === 'disukai') return arr.sort((a, b) => ((b.base_likes || 0) + (b.real_likes || 0)) - ((a.base_likes || 0) + (a.real_likes || 0)));
+    return arr;
+}
+
 export default function ThemesCatalog({ themes }) {
     const { adminRoutePrefix } = usePage().props;
     const resolvedPrefix = adminRoutePrefix || '/admin';
@@ -130,6 +144,7 @@ export default function ThemesCatalog({ themes }) {
     const [isBgDropdownOpen, setIsBgDropdownOpen] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [uploadingIndex, setUploadingIndex] = useState(null);
+    const [sortKey, setSortKey] = useState('terbaru');
 
     const fileInputRef = useRef(null);
     const bgDropdownRef = useRef(null);
@@ -323,12 +338,33 @@ export default function ThemesCatalog({ themes }) {
             <Head title="Katalog Tema" />
             <div className="space-y-6">
                 <div className="bg-white rounded-2xl border border-[#e8e5e0] p-4 sm:p-6 shadow-sm">
-                    <h3 className="text-sm font-semibold text-gray-700">Daftar Tema Global</h3>
-                    <p className="text-xs text-gray-400 mt-1">Berikut adalah pilihan desain undangan digital premium dari admin pusat yang dapat dinikmati oleh user client Anda. Klik "Kustomisasi Preview" pada kartu untuk mengubah template, latar belakang, dan gambar pratinjau tema di katalog brand Anda.</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                            <h3 className="text-sm font-semibold text-gray-700">Daftar Tema Global</h3>
+                            <p className="text-xs text-gray-400 mt-1">Berikut adalah pilihan desain undangan digital premium dari admin pusat yang dapat dinikmati oleh user client Anda. Klik "Kustomisasi Preview" pada kartu untuk mengubah template, latar belakang, dan gambar pratinjau tema di katalog brand Anda.</p>
+                        </div>
+                        {/* Sort Bar */}
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                            {SORT_OPTIONS.map(opt => (
+                                <button
+                                    key={opt.key}
+                                    type="button"
+                                    onClick={() => setSortKey(opt.key)}
+                                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 border whitespace-nowrap ${
+                                        sortKey === opt.key
+                                            ? 'bg-[#E5654B] text-white border-[#E5654B] shadow-sm scale-105'
+                                            : 'bg-white text-gray-500 border-gray-200 hover:border-[#E5654B]/40 hover:text-[#E5654B]'
+                                    }`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {themes?.map(theme => (
+                    {sortThemes(themes, sortKey)?.map(theme => (
                         <div key={theme.id} className="relative group/catalog flex flex-col h-full bg-white rounded-2xl border border-[#e8e5e0] overflow-hidden hover:shadow-lg transition-all duration-300">
                             {/* ThemePreviewCard wrapped */}
                             <div className="flex-1">

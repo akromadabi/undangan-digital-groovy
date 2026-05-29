@@ -1197,13 +1197,59 @@ function LoveStorySection({ loveStories, language }) {
 /* ═══════════════════════════════════════
    GALLERY SECTION (Excluded in hide_photos mode)
    ═══════════════════════════════════════ */
-function GallerySection({ galleries, language, onToast }) {
+function GallerySection({ galleries, language, onToast, invitation }) {
     const { t } = useTranslation(language);
-    const photos = safeArr(galleries).sort((a, b) => a.sort_order - b.sort_order);
+    const safePhotos = safeArr(galleries).sort((a, b) => a.sort_order - b.sort_order);
 
-    if (photos.length === 0 || !globalShowPhotos) return null;
+    const getYoutubeId = (url) => {
+        if (!url) return '';
+        let id = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            id = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            id = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            id = url.split('embed/')[1]?.split('?')[0];
+        }
+        return id;
+    };
 
+    // Combine photos and videos
+    const galleryItems = [];
     const isEn = t('invitation.save_the_date') === 'Save The Date';
+
+    if (globalShowPhotos) {
+        safePhotos.forEach((ph, idx) => {
+            galleryItems.push({
+                type: 'photo',
+                id: ph.id || idx,
+                src: getStorageUrl(ph.image_url, ''),
+                caption: ph.caption || (isEn ? 'Captured moments of our prewedding. ❤️' : 'Momen manis terindah prewedding kami. ❤️'),
+                label: '🖼️ PHOTO'
+            });
+        });
+    }
+
+    const showVideoInGallery = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideoInGallery) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                galleryItems.push({
+                    type: 'video',
+                    id: 'video-' + idx,
+                    ytId: ytId,
+                    src: 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg',
+                    caption: isEn ? ('Watch our prewedding story! 🎥✨') : ('Tonton kisah romantis prewedding kami! 🎥✨'),
+                    label: '🎥 VIDEO'
+                });
+            }
+        });
+    }
+
+    if (galleryItems.length === 0) return null;
 
     const [activePhotoIdx, setActivePhotoIdx] = useState(null);
     const [likedPhotos, setLikedPhotos] = useState({});
@@ -1217,16 +1263,6 @@ function GallerySection({ galleries, language, onToast }) {
         setBookmarkedPhotos(prev => ({ ...prev, [idx]: !prev[idx] }));
     };
 
-    const romanticCaptions = [
-        "Menghitung hari bahagia bersama selamanya. 💍✨",
-        "Momen manis terindah yang terabadikan dalam cinta. ❤️",
-        "Dua hati, satu cinta, melangkah bersama selamanya. 🌹",
-        "Dalam tatapmu, kutemukan dunia masa depanku. 💫💖",
-        "Setiap senyuman adalah bab baru kisah bahagia kita. ✨🏡",
-        "Bersamamu, perjalanan ini terasa sangat sempurna. 🗺️💞",
-        "Cinta bukanlah tentang saling menatap, tapi melangkah ke arah yang sama. 🥂"
-    ];
-
     useEffect(() => {
         if (activePhotoIdx !== null && scrollContainerRef.current) {
             const child = scrollContainerRef.current.children[activePhotoIdx];
@@ -1239,8 +1275,46 @@ function GallerySection({ galleries, language, onToast }) {
                     }
                 }, 100);
             }
+            
+            // Auto pause BGM if initially opened video
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                if (galleryItems[activePhotoIdx]?.type === 'video') {
+                    audioEl.pause();
+                } else {
+                    audioEl.play().catch(() => {});
+                }
+            }
         }
     }, [activePhotoIdx]);
+
+    const handleScroll = (e) => {
+        const container = e.target;
+        const slideHeight = container.clientHeight;
+        const scrollTop = container.scrollTop;
+        if (slideHeight <= 0) return;
+        
+        const currentIdx = Math.round(scrollTop / slideHeight);
+        
+        if (currentIdx >= 0 && currentIdx < galleryItems.length) {
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                if (galleryItems[currentIdx]?.type === 'video') {
+                    audioEl.pause();
+                } else {
+                    audioEl.play().catch(() => {});
+                }
+            }
+        }
+    };
+
+    const handleCloseModal = () => {
+        setActivePhotoIdx(null);
+        const audioEl = document.querySelector('audio');
+        if (audioEl) {
+            audioEl.play().catch(() => {});
+        }
+    };
 
     return (
         <section className="ttk-section" id="gallery">
@@ -1258,13 +1332,48 @@ function GallerySection({ galleries, language, onToast }) {
 
             <Reveal variant="zoom">
                 <div className="ttk-gallery__grid">
-                    {photos.map((ph, idx) => {
-                        const imgUrl = getStorageUrl(ph.image_url, '');
-                        if (!imgUrl) return null;
-
+                    {galleryItems.map((ph, idx) => {
+                        const isVideo = ph.type === 'video';
                         return (
-                            <div key={ph.id || idx} className="ttk-gallery__item" onClick={() => setActivePhotoIdx(idx)} style={{ cursor: 'pointer' }}>
-                                <img src={imgUrl} alt={ph.caption || 'Pre-wedding'} />
+                            <div key={ph.id} className="ttk-gallery__item" onClick={() => setActivePhotoIdx(idx)} style={{ cursor: 'pointer', position: 'relative' }}>
+                                <img src={ph.src} alt={ph.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                
+                                {isVideo ? (
+                                    <div style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: 'rgba(0,0,0,0.2)'
+                                    }}>
+                                        <div style={{
+                                            width: '36px',
+                                            height: '36px',
+                                            borderRadius: '50%',
+                                            backgroundColor: 'var(--ttk-red)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: '0 0 10px rgba(254,44,85,0.6)'
+                                        }}>
+                                            <svg style={{ width: '14px', height: '14px', fill: '#fff', marginLeft: '2px' }} viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '6px',
+                                        right: '6px',
+                                        color: '#ffffff',
+                                        fontSize: '11px',
+                                        textShadow: '0 1px 3px rgba(0,0,0,0.6)'
+                                    }}>
+                                        <i className="far fa-image" />
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
@@ -1273,30 +1382,58 @@ function GallerySection({ galleries, language, onToast }) {
 
             {activePhotoIdx !== null && (
                 <div className="ttk-gallery-fullscreen-overlay">
-                    <div className="ttk-gallery-fullscreen-close" onClick={() => setActivePhotoIdx(null)}>
+                    <div className="ttk-gallery-fullscreen-close" onClick={handleCloseModal}>
                         <i className="fas fa-arrow-left" />
                     </div>
                     
-                    <div className="ttk-gallery-fullscreen-scroll-container" ref={scrollContainerRef}>
-                        {photos.map((ph, idx) => {
-                            const imgUrl = getStorageUrl(ph.image_url, '');
-                            if (!imgUrl) return null;
-                            const captionText = ph.caption || romanticCaptions[idx % romanticCaptions.length];
+                    <div className="ttk-gallery-fullscreen-scroll-container" ref={scrollContainerRef} onScroll={handleScroll}>
+                        {galleryItems.map((ph, idx) => {
+                            const isVideo = ph.type === 'video';
                             
                             return (
-                                <div key={ph.id || idx} className="ttk-gallery-fullscreen-slide">
-                                    <img src={imgUrl} className="ttk-gallery-fullscreen-img" alt={ph.caption || 'Pre-wedding'} />
+                                <div key={ph.id} className="ttk-gallery-fullscreen-slide">
+                                    {isVideo ? (
+                                        <div style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            maxWidth: '500px',
+                                            maxHeight: '65vh',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxSizing: 'border-box',
+                                            padding: '8px'
+                                        }}>
+                                            <iframe 
+                                                src={'https://www.youtube.com/embed/' + ph.ytId + '?autoplay=1&rel=0&showinfo=0&controls=1&mute=0'}
+                                                frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    aspectRatio: '16/9',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    borderRadius: '8px',
+                                                    backgroundColor: '#000',
+                                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
+                                                }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <img src={ph.src} className="ttk-gallery-fullscreen-img" alt={ph.caption} />
+                                    )}
                                     
                                     {/* Sidebar actions */}
                                     <div className="ttk-gallery-sidebar">
                                         <div className="ttk-gallery-sidebar__action" onClick={() => toggleLike(idx)}>
-                                            <div className={`ttk-gallery-sidebar__circle ${likedPhotos[idx] ? 'liked' : ''}`}>
+                                            <div className={'ttk-gallery-sidebar__circle ' + (likedPhotos[idx] ? 'liked' : '')}>
                                                 <i className="fas fa-heart" />
                                             </div>
                                             <span>{likedPhotos[idx] ? '1,501' : '1,500'}</span>
                                         </div>
                                         <div className="ttk-gallery-sidebar__action" onClick={() => toggleBookmark(idx)}>
-                                            <div className={`ttk-gallery-sidebar__circle ${bookmarkedPhotos[idx] ? 'bookmarked' : ''}`}>
+                                            <div className={'ttk-gallery-sidebar__circle ' + (bookmarkedPhotos[idx] ? 'bookmarked' : '')}>
                                                 <i className="fas fa-bookmark" />
                                             </div>
                                             <span>{bookmarkedPhotos[idx] ? '681' : '680'}</span>
@@ -1317,12 +1454,12 @@ function GallerySection({ galleries, language, onToast }) {
                                     {/* Caption Box */}
                                     <div className="ttk-gallery-caption-box">
                                         <div className="ttk-gallery-user-row">
-                                            <div className="ttk-gallery-user-avatar">📸</div>
-                                            <span className="ttk-gallery-username">prewedding_diaries</span>
+                                            <div className="ttk-gallery-user-avatar">{isVideo ? '🎬' : '📸'}</div>
+                                            <span className="ttk-gallery-username">{isVideo ? 'prewedding_reels' : 'prewedding_diaries'}</span>
                                             <i className="fas fa-check-circle ttk-gallery-verified-badge" />
                                         </div>
-                                        <p className="ttk-gallery-desc">{captionText}</p>
-                                        <div className="ttk-gallery-tags">#prewedding #wedding #love #viral</div>
+                                        <p className="ttk-gallery-desc">{ph.caption}</p>
+                                        <div className="ttk-gallery-tags">{isVideo ? '#viralreels #lovevibe #trending' : '#prewedding #wedding #love #viral'}</div>
                                         <div className="ttk-gallery-music-row">
                                             <i className="fas fa-music" />
                                             <div className="ttk-gallery-music-scroll">
@@ -1344,7 +1481,6 @@ function GallerySection({ galleries, language, onToast }) {
         </section>
     );
 }
-
 /* ═══════════════════════════════════════
    BANK SECTION (Equipped with dynamic Safari copy clipboard text-area fallback)
    ═══════════════════════════════════════ */
@@ -1908,7 +2044,10 @@ export default function ViteTokTheme(props) {
 
             dbSorted.forEach(s => {
                 if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return;
-                if (s.section_key === 'gallery' && (!(galleries?.length > 0) || !globalShowPhotos)) return;
+                if (s.section_key === 'gallery') {
+                    const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+                    if (!((galleries?.length > 0 || hasVideos) && globalShowPhotos)) return;
+                }
                 if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return;
                 if (s.section_key === 'rsvp' && !enableRsvp) return;
                 
@@ -1938,7 +2077,8 @@ export default function ViteTokTheme(props) {
             }
 
             if (loveStories?.length > 0) fallbacks.push({ section_key: 'love_story' });
-            if (galleries?.length > 0 && globalShowPhotos) fallbacks.push({ section_key: 'gallery' });
+            const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+            if ((galleries?.length > 0 || hasVideos) && globalShowPhotos) fallbacks.push({ section_key: 'gallery' });
             if (enableRsvp) {
                 fallbacks.push({ section_key: 'rsvp' });
             } else if (enableWishes) {

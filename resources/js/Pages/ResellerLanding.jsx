@@ -186,6 +186,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
     const [likes, setLikes] = useState({});
     const [likedThemes, setLikedThemes] = useState({});
     const [showContactModal, setShowContactModal] = useState(false);
+    const [sortThemeKey, setSortThemeKey] = useState('terbaru');
     const marqueeRef = useRef(null);
 
     const [showComparison, setShowComparison] = useState(false);
@@ -635,19 +636,55 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                         <h2 className="rl-section__title">Pilih Tema yang Sempurna untuk Anda</h2>
                         <p className="rl-section__desc">Koleksi tema elegan dan modern yang siap digunakan. Klik untuk melihat preview langsung.</p>
                     </div>
+                    {/* Sort Bar */}
+                    {themes.length > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                            {[{key:'terbaru',label:'Terbaru'},{key:'populer',label:'Terpopuler'},{key:'disukai',label:'Terfavorit'}].map(opt => (
+                                <button
+                                    key={opt.key}
+                                    type="button"
+                                    onClick={() => setSortThemeKey(opt.key)}
+                                    style={{
+                                        padding: '0.35rem 1rem',
+                                        borderRadius: '999px',
+                                        fontSize: '0.72rem',
+                                        fontWeight: 700,
+                                        border: sortThemeKey === opt.key ? '1.5px solid var(--accent)' : '1.5px solid var(--card-border)',
+                                        background: sortThemeKey === opt.key ? 'var(--accent)' : 'var(--card-bg)',
+                                        color: sortThemeKey === opt.key ? '#fff' : 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        transform: sortThemeKey === opt.key ? 'scale(1.05)' : 'scale(1)',
+                                    }}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {themes.length > 0 ? (
                     <div className="rl-themes-scroll-wrap">
                         <div className="rl-themes-scroll" id="themes-scroll">
-                            {themes.map(theme => (
-                                <div key={theme.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
-                                    <ThemePreviewCard 
-                                        theme={theme}
-                                        reseller={reseller}
-                                    />
-                                </div>
-                            ))}
+                            {(() => {
+                                const sorted = [...themes];
+                                if (sortThemeKey === 'terbaru') sorted.sort((a, b) => (b.id || 0) - (a.id || 0));
+                                else if (sortThemeKey === 'populer') sorted.sort((a, b) => ((b.usage_count || 0) + (b.base_usage || 0)) - ((a.usage_count || 0) + (a.base_usage || 0)));
+                                else if (sortThemeKey === 'disukai') sorted.sort((a, b) => {
+                                    const bL = likes[b.id] ?? ((b.base_likes || 0) + (b.real_likes || 0));
+                                    const aL = likes[a.id] ?? ((a.base_likes || 0) + (a.real_likes || 0));
+                                    return bL - aL;
+                                });
+                                return sorted.map(theme => (
+                                    <div key={theme.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
+                                        <ThemePreviewCard 
+                                            theme={theme}
+                                            reseller={reseller}
+                                        />
+                                    </div>
+                                ));
+                            })()}
                         </div>
                         <div className="rl-themes-scroll-controls">
                             <button onClick={() => document.getElementById('themes-scroll')?.scrollBy({ left: -280, behavior: 'smooth' })} className="rl-scroll-btn">←</button>

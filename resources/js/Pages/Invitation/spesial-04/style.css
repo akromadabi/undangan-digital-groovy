@@ -1,0 +1,773 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Niconne&display=swap');
+
+/* ==========================================================================
+   DESIGN SYSTEM / THEME VARIABLES (SPESIAL-04)
+   ========================================================================== */
+:root {
+  --sp04-primary: #c26e5f;
+  --sp04-primary-rgb: 194, 110, 95;
+  --sp04-secondary: #f9d9cc;
+  --sp04-bg-light: #fbf2ee;
+  --sp04-text-dark: #40302d;
+  --sp04-text-muted: #6f5d5a;
+  --sp04-accent: #c26e5f;
+  
+  --sp04-font-heading: 'Niconne', cursive;
+  --sp04-font-body: 'Montserrat', sans-serif;
+}
+
+/* ==========================================================================
+   RESET & MOBILE-ONLY CONTAINER
+   ========================================================================== */
+.sp04-theme {
+  font-family: var(--sp04-font-body);
+  color: var(--sp04-text-dark);
+  background-color: #121212;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* Mobile viewport constraint (max 450px as per Elementor JSON) */
+.sp04-theme-container {
+  width: 100%;
+  max-width: 450px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--sp04-bg-light);
+  position: relative;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY UTILITIES
+   ========================================================================== */
+.sp04-font-heading-style {
+  font-family: var(--sp04-font-heading);
+}
+
+.sp04-font-body-style {
+  font-family: var(--sp04-font-body);
+}
+
+/* ==========================================================================
+   ANIMATIONS & TRANSITIONS
+   ========================================================================== */
+.sp04-ani-hidden {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp04-ani-fadeUp {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.sp04-ani-scaleIn {
+  animation: sp04ScaleIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sp04-ani-fadeLeft {
+  animation: sp04FadeLeft 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sp04-ani-fadeRight {
+  animation: sp04FadeRight 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sp04ScaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes sp04FadeLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes sp04FadeRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.sp04-breathe {
+  animation: sp04Breathe 3s ease-in-out infinite alternate;
+}
+
+@keyframes sp04Breathe {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+
+/* ==========================================================================
+   COVER / ENVELOPE (FULLSCREEN OVERLAY)
+   ========================================================================== */
+.sp04-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  background-color: var(--sp04-secondary);
+  transition: transform 1.2s cubic-bezier(0.76, 0, 0.24, 1), opacity 1s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sp04-cover.sp04-is-opened {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sp04-cover__overlay {
+  background: linear-gradient(to bottom, rgba(var(--sp04-primary-rgb), 0.1) 0%, rgba(var(--sp04-primary-rgb), 0.3) 50%, rgba(var(--sp04-primary-rgb), 0.8) 100%);
+}
+
+.sp04-cover__content {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.sp04-cover-photo-window {
+  width: 100%;
+  height: 45vh;
+  overflow: hidden;
+  border-radius: 0 0 500px 500px;
+  box-shadow: 0 10px 30px rgba(var(--sp04-primary-rgb), 0.2);
+  border-bottom: 4px solid var(--sp04-primary);
+}
+
+.sp04-cover-photo-window img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Initials Leaf Monogram Container */
+.sp04-leaf-monogram {
+  width: 130px;
+  height: 130px;
+  border: 4px double var(--sp04-primary);
+  border-radius: 45px 0 45px 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(var(--sp04-primary-rgb), 0.15);
+  animation: sp04Breathe 4s ease-in-out infinite alternate;
+}
+
+.sp04-leaf-monogram span {
+  line-height: 1;
+}
+
+/* Glassmorphism Guest Card */
+.sp04-guest-card {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(var(--sp04-primary-rgb), 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  width: 90%;
+  max-width: 320px;
+}
+
+/* Open Invitation Button */
+.sp04-btn-buka {
+  background: var(--sp04-primary);
+  color: white;
+  padding: 14px 36px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(var(--sp04-primary-rgb), 0.3);
+  transition: all 0.3s ease;
+}
+
+.sp04-btn-buka:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--sp04-primary-rgb), 0.45);
+  background-color: #b05c4d;
+}
+
+.sp04-btn-buka:active {
+  transform: translateY(1px);
+}
+
+/* ==========================================================================
+   OPENING SECTION
+   ========================================================================== */
+.sp04-opening-section {
+  padding: 80px 24px;
+  background-color: var(--sp04-bg-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.sp04-opening-photo-frame {
+  width: 250px;
+  height: 330px;
+  overflow: hidden;
+  border-radius: 200px 200px 0 0;
+  border: 4px solid var(--sp04-primary);
+  box-shadow: 0 10px 35px rgba(var(--sp04-primary-rgb), 0.15);
+}
+
+.sp04-opening-photo-frame img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.sp04-btn-save-date {
+  background: transparent;
+  color: var(--sp04-primary);
+  padding: 10px 28px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 2px solid var(--sp04-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sp04-btn-save-date:hover {
+  background: var(--sp04-primary);
+  color: white;
+  box-shadow: 0 6px 15px rgba(var(--sp04-primary-rgb), 0.2);
+}
+
+/* ==========================================================================
+   QURANIC QUOTE SECTION
+   ========================================================================== */
+.sp04-quote-section {
+  padding: 80px 30px;
+  background-color: var(--sp04-primary);
+  color: white;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.15);
+}
+
+.sp04-quote-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.3;
+}
+
+/* ==========================================================================
+   BRIDE & GROOM PROFILE SECTION
+   ========================================================================== */
+.sp04-mempelai-section {
+  padding: 80px 24px;
+  background-color: var(--sp04-bg-light);
+}
+
+.sp04-couple-arch-frame {
+  width: 200px;
+  height: 270px;
+  overflow: hidden;
+  border-radius: 0 0 200px 200px;
+  border: 4px solid var(--sp04-primary);
+  box-shadow: 0 10px 30px rgba(var(--sp04-primary-rgb), 0.12);
+}
+
+.sp04-couple-arch-frame img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.sp04-btn-ig-circle {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--sp04-primary);
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(var(--sp04-primary-rgb), 0.3);
+  transition: all 0.3s ease;
+}
+
+.sp04-btn-ig-circle:hover {
+  transform: scale(1.1);
+  background-color: #b05c4d;
+}
+
+/* ==========================================================================
+   COUNTDOWN TIMER
+   ========================================================================== */
+.sp04-countdown-wrapper {
+  margin: 25px 0;
+}
+
+.sp04-countdown {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.sp04-countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--sp04-primary);
+  border-radius: 18px;
+  min-width: 68px;
+  padding: 10px 5px;
+  box-shadow: 0 6px 15px rgba(var(--sp04-primary-rgb), 0.08);
+}
+
+.sp04-countdown-num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--sp04-primary);
+  line-height: 1.1;
+}
+
+.sp04-countdown-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sp04-text-muted);
+  margin-top: 4px;
+}
+
+.sp04-countdown-colon {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--sp04-primary);
+  animation: sp04Blink 1s infinite;
+}
+
+@keyframes sp04Blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ==========================================================================
+   EVENTS SECTION
+   ========================================================================== */
+.sp04-event-section {
+  padding: 80px 24px;
+  background-color: var(--sp04-bg-light);
+}
+
+.sp04-event-card {
+  background: white;
+  border-radius: 30px;
+  padding: 35px 24px;
+  box-shadow: 0 10px 40px rgba(var(--sp04-primary-rgb), 0.08);
+  border: 1px solid rgba(var(--sp04-primary-rgb), 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.sp04-event-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: var(--sp04-primary);
+}
+
+.sp04-btn-map {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--sp04-primary);
+  color: white !important;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 15px rgba(var(--sp04-primary-rgb), 0.25);
+  transition: all 0.3s ease;
+}
+
+.sp04-btn-map:hover {
+  background: #b05c4d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(var(--sp04-primary-rgb), 0.35);
+}
+
+/* ==========================================================================
+   TIMELINE MILESTONES (STORY)
+   ========================================================================== */
+.sp04-timeline {
+  position: relative;
+  padding: 20px 0;
+}
+
+.sp04-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background: rgba(var(--sp04-primary-rgb), 0.3);
+}
+
+.sp04-timeline-item {
+  position: relative;
+  padding-left: 50px;
+  margin-bottom: 35px;
+}
+
+.sp04-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  border: 4px solid var(--sp04-primary);
+  box-shadow: 0 0 0 4px rgba(var(--sp04-primary-rgb), 0.15);
+  z-index: 2;
+}
+
+.sp04-story-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(var(--sp04-primary-rgb), 0.05);
+  border: 1px solid rgba(var(--sp04-primary-rgb), 0.05);
+}
+
+.sp04-story-year {
+  display: inline-block;
+  background: rgba(var(--sp04-primary-rgb), 0.1);
+  color: var(--sp04-primary);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* ==========================================================================
+   GALLERY SECTION
+   ========================================================================== */
+.sp04-strict-cover {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.6s ease;
+}
+
+.sp04-strict-cover:hover {
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   RSVP & WISHES SECTION (UNIFIED FORM)
+   ========================================================================== */
+.sp04-input-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.sp04-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sp04-text-muted);
+  margin-bottom: 6px;
+}
+
+.sp04-input, .sp04-select, .sp04-textarea {
+  width: 100%;
+  background: #fbfbfb;
+  border: 2px solid rgba(var(--sp04-primary-rgb), 0.15);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--sp04-text-dark);
+  font-family: var(--sp04-font-body);
+  transition: all 0.3s ease;
+}
+
+.sp04-input:focus, .sp04-select:focus, .sp04-textarea:focus {
+  outline: none;
+  border-color: var(--sp04-primary);
+  background: white;
+  box-shadow: 0 4px 15px rgba(var(--sp04-primary-rgb), 0.08);
+}
+
+.sp04-btn-submit {
+  width: 100%;
+  background: var(--sp04-primary);
+  color: white;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(var(--sp04-primary-rgb), 0.2);
+  transition: all 0.3s ease;
+}
+
+.sp04-btn-submit:hover {
+  background: #b05c4d;
+}
+
+.sp04-wishes-container {
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Custom scrollbar for wishes */
+.sp04-wishes-container::-webkit-scrollbar {
+  width: 4px;
+}
+.sp04-wishes-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+.sp04-wishes-container::-webkit-scrollbar-thumb {
+  background: rgba(var(--sp04-primary-rgb), 0.2);
+  border-radius: 10px;
+}
+
+.sp04-wish-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(var(--sp04-primary-rgb), 0.06);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+/* ==========================================================================
+   BANK DETAILS (LUXURY 2 STYLE)
+   ========================================================================== */
+.sp04-bank-card {
+  background: linear-gradient(135deg, #fbf2ee 0%, #f9d9cc 100%);
+  border-radius: 24px;
+  padding: 24px;
+  border: 2px solid rgba(var(--sp04-primary-rgb), 0.15);
+  box-shadow: 0 10px 25px rgba(var(--sp04-primary-rgb), 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.sp04-bank-card::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(var(--sp04-primary-rgb), 0.05);
+}
+
+.sp04-btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  color: var(--sp04-primary);
+  border: 2px solid var(--sp04-primary);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sp04-btn-copy:hover {
+  background: var(--sp04-primary);
+  color: white;
+}
+
+/* ==========================================================================
+   FLOATING ACTION BUTTONS (AUDIO, SCROLL, FULLSCREEN, QR)
+   ========================================================================== */
+.sp04-floating-controls {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 999;
+}
+
+@media(min-width: 450px) {
+  .sp04-floating-controls {
+    right: calc(50% - 225px + 24px); /* locked to mobile width margin */
+  }
+}
+
+.sp04-control-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(64, 48, 45, 0.85); /* kontras tinggi */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+}
+
+.sp04-control-btn:hover {
+  transform: scale(1.08);
+  background: rgba(64, 48, 45, 0.95);
+}
+
+.sp04-control-btn:active {
+  transform: scale(0.95);
+}
+
+/* Three-bar Music Equalizer Animation */
+.global-music-waves {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  width: 16px;
+  height: 16px;
+}
+
+.global-music-waves span {
+  display: inline-block;
+  width: 3px;
+  background-color: currentColor;
+  border-radius: 1.5px;
+  animation: sp04Equalizer 1.2s ease-in-out infinite alternate;
+}
+
+.global-music-waves span:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+.global-music-waves span:nth-child(2) { height: 100%; animation-delay: 0.3s; }
+.global-music-waves span:nth-child(3) { height: 60%; animation-delay: 0s; }
+
+@keyframes sp04Equalizer {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1.1); }
+}
+
+/* ==========================================================================
+   QR PRESENCE CHECKIN MODAL
+   ========================================================================== */
+.sp04-qr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.sp04-qr-card {
+  background: white;
+  width: 100%;
+  max-width: 340px;
+  border-radius: 28px;
+  padding: 30px 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  position: relative;
+  border: 1px solid rgba(var(--sp04-primary-rgb), 0.1);
+}
+
+.sp04-qr-image-wrapper {
+  background: #fdfaf9;
+  border: 2px dashed rgba(var(--sp04-primary-rgb), 0.3);
+  border-radius: 20px;
+  padding: 16px;
+  display: inline-block;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.02);
+}
+
+/* ==========================================================================
+   SECTIONS WATERMARK & DIVIDERS
+   ========================================================================== */
+.sp04-watermark {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--sp04-text-muted);
+  opacity: 0.8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 90px !important; /* anti-overlap safety bottom padding */
+}
+
+.sp04-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 140px;
+  margin: 12px auto;
+  opacity: 0.6;
+}
+
+.sp04-divider-line {
+  height: 1.5px;
+  background: var(--sp04-primary);
+  flex-grow: 1;
+}
+
+.sp04-divider-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sp04-primary);
+  box-shadow: 0 0 8px rgba(var(--sp04-primary-rgb), 0.4);
+}

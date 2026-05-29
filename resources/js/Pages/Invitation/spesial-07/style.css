@@ -1,0 +1,879 @@
+/* ═══════════════════════════════════════
+   THEME SPESIAL 07 - SAGE GREEN & GOLD MODERNISM
+   ═══════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Caramel&family=Kaushan+Script&family=Croissant+One&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+    --sp07-primary: #3E4E48;      /* Dark Charcoal/Sage Green */
+    --sp07-secondary: #5B844A;    /* Medium Sage Green */
+    --sp07-bg-light: #F4F6F5;     /* Soft Light Green-Gray */
+    --sp07-accent: #E4DB1F;       /* Golden accent */
+    --sp07-text-dark: #333d39;    /* Dark Charcoal Text */
+    --sp07-text-muted: #6e7a75;   /* Muted Slate Text */
+    --sp07-gold-glow: rgba(228, 219, 31, 0.45);
+}
+
+/* Base Wrapper for Mobile Viewport */
+.sp07-wrapper {
+    max-width: 480px;
+    margin: 0 auto;
+    background-color: var(--sp07-primary);
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: relative;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+    overflow-x: hidden;
+}
+
+/* Custom Typography Classes */
+.sp07-font-script {
+    font-family: 'Caramel', cursive;
+}
+
+.sp07-font-couple {
+    font-family: 'Caramel', cursive;
+}
+
+.sp07-font-vertical {
+    font-family: 'Kaushan Script', cursive;
+}
+
+.sp07-font-event {
+    font-family: 'Croissant One', cursive;
+}
+
+/* Floating Actions Controls Container */
+.sp07-floating-controls {
+    position: fixed;
+    bottom: 90px;
+    right: calc(50% - 225px); /* Perfectly aligns floating action buttons in viewport max-width: 450px */
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (max-width: 480px) {
+    .sp07-floating-controls {
+        right: 16px;
+    }
+}
+
+/* Circular Floating Button */
+.sp07-btn-floating {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(62, 78, 72, 0.85);
+    border: 1.5px solid var(--sp07-accent);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sp07-btn-floating:active,
+.sp07-btn-floating:hover {
+    transform: scale(1.1);
+    background: var(--sp07-secondary);
+    border-color: #ffffff;
+    box-shadow: 0 0 10px var(--sp07-gold-glow);
+}
+
+/* ═══════════════════════════════════════
+   1. COVER SECTION (Elementor ID Atas & wellcome)
+   ═══════════════════════════════════════ */
+.sp07-cover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 100;
+    background-color: var(--sp07-primary);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    will-change: transform;
+}
+
+.sp07-cover.sp07-is-opened {
+    transform: translateY(-100%);
+    pointer-events: none;
+}
+
+.sp07-cover__bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.sp07-cover__bg img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: scale(1.05);
+    filter: brightness(0.65) contrast(1.05);
+}
+
+/* Organic Frame Mask overlay on prewedding photo */
+.sp07-cover__mask {
+    position: absolute;
+    top: 15%;
+    left: 5%;
+    width: 90%;
+    height: 60%;
+    z-index: 2;
+    overflow: hidden;
+    mask-image: radial-gradient(circle, black 65%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle, black 65%, transparent 100%);
+}
+
+.sp07-cover__mask img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.sp07-cover__blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    background: linear-gradient(to bottom, rgba(62, 78, 72, 0.45) 0%, rgba(62, 78, 72, 0.9) 85%);
+}
+
+.sp07-cover__content {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    padding: 60px 24px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+}
+
+.sp07-cover-names {
+    font-size: 3.5rem;
+    font-weight: 500;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    line-height: 1.1;
+    margin: 10px 0;
+    font-family: 'Caramel', cursive;
+}
+
+.sp07-cover-guest-box {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 20px 30px;
+    width: 100%;
+    max-width: 320px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.sp07-btn-buka {
+    background: var(--sp07-accent);
+    color: var(--sp07-primary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 14px 36px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px var(--sp07-gold-glow), 0 0 0 0px rgba(228, 219, 31, 0.4);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    animation: sp07-pulse 2s infinite;
+}
+
+.sp07-btn-buka:hover,
+.sp07-btn-buka:active {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(228, 219, 31, 0.7);
+}
+
+/* ═══════════════════════════════════════
+   2. OPENING SECTION
+   ═══════════════════════════════════════ */
+.sp07-section {
+    padding: 60px 24px;
+    position: relative;
+}
+
+.sp07-opening-section {
+    background-color: var(--sp07-primary);
+    color: #ffffff;
+    overflow: hidden;
+}
+
+.sp07-wellcome2-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 40px 24px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.sp07-wellcome2-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0.25;
+}
+
+.sp07-wellcome2-bg img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.sp07-wellcome2-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    background: linear-gradient(135deg, rgba(62, 78, 72, 0.8) 0%, rgba(91, 132, 74, 0.75) 100%);
+}
+
+.sp07-countdown-wrapper {
+    width: 100%;
+    margin-top: 25px;
+}
+
+.sp07-countdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.sp07-countdown-item {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    min-width: 55px;
+    padding: 8px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sp07-countdown-num {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--sp07-accent);
+    line-height: 1.1;
+    font-family: 'Roboto', sans-serif;
+}
+
+.sp07-countdown-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    margin-top: 3px;
+}
+
+.sp07-countdown-colon {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.sp07-btn-save-date {
+    background: transparent;
+    color: #ffffff;
+    border: 1.5px solid var(--sp07-accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: 20px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+}
+
+.sp07-btn-save-date:hover,
+.sp07-btn-save-date:active {
+    background: var(--sp07-accent);
+    color: var(--sp07-primary);
+    box-shadow: 0 4px 12px var(--sp07-gold-glow);
+}
+
+/* ═══════════════════════════════════════
+   3. BRIDE & GROOM PROFILE SECTION (Sideways Rotated Cards)
+   ═══════════════════════════════════════ */
+.sp07-mempelai-section {
+    background-color: var(--sp07-bg-light);
+    color: var(--sp07-text-dark);
+}
+
+/* Editorial Profile Flex Layout */
+.sp07-profile-card {
+    display: flex;
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.07);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    max-width: 380px;
+    margin: 0 auto;
+}
+
+/* Rotated Sideways Name Ribbon */
+.sp07-profile-sideways-banner {
+    width: 65px;
+    background-color: var(--sp07-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.sp07-profile-sideways-title {
+    writing-mode: vertical-lr;
+    text-orientation: sideways-right;
+    transform: rotate(180deg);
+    font-family: 'Kaushan Script', cursive;
+    font-size: 1.3rem;
+    font-weight: 500;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    color: var(--sp07-accent);
+}
+
+/* Profile Prewedding Image Wrapper */
+.sp07-profile-image-wrapper {
+    flex: 1;
+    position: relative;
+    aspect-ratio: 4/5;
+    overflow: hidden;
+}
+
+.sp07-profile-image-wrapper img.class-foto-profil {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transition: transform 0.8s ease;
+}
+
+.sp07-profile-card:hover img.class-foto-profil {
+    transform: scale(1.08);
+}
+
+/* Organic Mask overlay on photo inside wrapper */
+.sp07-profile-image-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+}
+
+/* IG Circle Button */
+.sp07-btn-ig-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--sp07-secondary);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 10px rgba(91, 132, 74, 0.3);
+    transition: all 0.3s ease;
+}
+
+.sp07-btn-ig-circle:hover {
+    background-color: var(--sp07-primary);
+    transform: translateY(-2px);
+}
+
+/* ═══════════════════════════════════════
+   4. EVENTS SECTION (Rotated Akad/Resepsi headers)
+   ═══════════════════════════════════════ */
+.sp07-event-section {
+    background-color: var(--sp07-primary);
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.sp07-event-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 10% 20%, rgba(91, 132, 74, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(228, 219, 31, 0.05) 0%, transparent 40%);
+    pointer-events: none;
+}
+
+/* Offset Split Cards for Events */
+.sp07-event-editorial-card {
+    display: flex;
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    max-width: 390px;
+    margin: 0 auto;
+    color: var(--sp07-text-dark);
+}
+
+/* Vertical text ribbon for events */
+.sp07-event-sideways-banner {
+    width: 60px;
+    background-color: var(--sp07-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.sp07-event-sideways-title {
+    writing-mode: vertical-lr;
+    text-orientation: upright;
+    font-family: 'Croissant One', cursive;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Event Content Details */
+.sp07-event-content-details {
+    flex: 1;
+    padding: 35px 24px;
+    background-color: #E5E6E5; /* Off-white backing */
+}
+
+.sp07-btn-map {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #188A44;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 12px rgba(24, 138, 68, 0.3);
+    transition: all 0.3s ease;
+}
+
+.sp07-btn-map:hover {
+    transform: translateY(-2px);
+    background-color: #126e35;
+    box-shadow: 0 6px 16px rgba(24, 138, 68, 0.4);
+}
+
+/* ═══════════════════════════════════════
+   5. TIMELINE / LOVE STORY SECTION
+   ═══════════════════════════════════════ */
+.sp07-timeline-section {
+    background-color: #ffffff;
+    color: var(--sp07-text-dark);
+}
+
+.sp07-timeline {
+    position: relative;
+    padding: 10px 0;
+}
+
+.sp07-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    height: 100%;
+    width: 2px;
+    background-color: rgba(91, 132, 74, 0.2);
+}
+
+.sp07-timeline-item {
+    position: relative;
+    padding-left: 50px;
+    margin-bottom: 30px;
+}
+
+.sp07-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 6px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: var(--sp07-secondary);
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 3px rgba(91, 132, 74, 0.2);
+    z-index: 2;
+}
+
+.sp07-story-card {
+    background: var(--sp07-bg-light);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.sp07-story-year {
+    display: inline-block;
+    background-color: var(--sp07-secondary);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+/* ═══════════════════════════════════════
+   6. GALLERY SECTION
+   ═══════════════════════════════════════ */
+.sp07-gallery-section {
+    background-color: var(--sp07-bg-light);
+    color: var(--sp07-text-dark);
+}
+
+.sp07-strict-cover {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transition: transform 0.6s ease;
+}
+
+.sp07-gallery-section img:hover {
+    transform: scale(1.06);
+}
+
+/* ═══════════════════════════════════════
+   7. unified RSVP & WISHES SECTION
+   ═══════════════════════════════════════ */
+.sp07-rsvp-section {
+    background-color: #ffffff;
+    color: var(--sp07-text-dark);
+}
+
+.sp07-rsvp-card {
+    background: var(--sp07-bg-light);
+    border-radius: 24px;
+    border: 1px solid rgba(91, 132, 74, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.sp07-input {
+    width: 100%;
+    background-color: #ffffff;
+    border: 1.5px solid rgba(91, 132, 74, 0.2);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    color: var(--sp07-text-dark);
+    transition: border-color 0.3s ease;
+}
+
+.sp07-input:focus {
+    outline: none;
+    border-color: var(--sp07-secondary);
+    box-shadow: 0 0 0 3px rgba(91, 132, 74, 0.1);
+}
+
+.sp07-btn-submit {
+    width: 100%;
+    background-color: var(--sp07-primary);
+    color: #ffffff;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(62, 78, 72, 0.25);
+}
+
+.sp07-btn-submit:hover {
+    background-color: var(--sp07-secondary);
+    box-shadow: 0 6px 20px rgba(91, 132, 74, 0.35);
+}
+
+/* Scrollable wishes box */
+.sp07-wishes-box {
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.sp07-wishes-box::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sp07-wishes-box::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sp07-wishes-box::-webkit-scrollbar-thumb {
+    background: rgba(91, 132, 74, 0.2);
+    border-radius: 4px;
+}
+
+.sp07-wish-item {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid rgba(91, 132, 74, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+/* ═══════════════════════════════════════
+   8. DIGITAL KADO / BANK SECTION
+   ═══════════════════════════════════════ */
+.sp07-bank-section {
+    background-color: var(--sp07-bg-light);
+    color: var(--sp07-text-dark);
+}
+
+.sp07-bank-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1.5px dashed rgba(91, 132, 74, 0.2);
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.sp07-btn-copy {
+    background-color: var(--sp07-primary);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sp07-btn-copy:hover {
+    background-color: var(--sp07-secondary);
+}
+
+/* ═══════════════════════════════════════
+   9. CLOSING & WATERMARK SECTION
+   ═══════════════════════════════════════ */
+.sp07-closing-section {
+    background-color: var(--sp07-primary);
+    color: #ffffff;
+    text-align: center;
+    padding: 80px 24px 100px;
+}
+
+.sp07-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.sp07-divider-line {
+    height: 1px;
+    width: 30px;
+    background-color: var(--sp07-accent);
+    opacity: 0.5;
+}
+
+.sp07-divider-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--sp07-accent);
+}
+
+.sp07-watermark {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 40px;
+    text-transform: uppercase;
+}
+
+/* QR code modal overlay */
+.sp07-qr-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.sp07-qr-modal {
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 30px;
+    width: 100%;
+    max-width: 340px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    color: var(--sp07-text-dark);
+}
+
+.sp07-qr-image-wrapper {
+    margin: 20px auto;
+    width: 200px;
+    height: 200px;
+    background: var(--sp07-bg-light);
+    border-radius: 16px;
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sp07-qr-close-btn {
+    background: var(--sp07-secondary);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    width: 100%;
+    padding: 12px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+}
+
+.sp07-qr-close-btn:hover {
+    background: var(--sp07-primary);
+}
+
+/* Animations */
+@keyframes sp07-pulse {
+    0% {
+        box-shadow: 0 4px 15px var(--sp07-gold-glow), 0 0 0 0px rgba(228, 219, 31, 0.4);
+    }
+    70% {
+        box-shadow: 0 4px 15px var(--sp07-gold-glow), 0 0 0 10px rgba(228, 219, 31, 0);
+    }
+    100% {
+        box-shadow: 0 4px 15px var(--sp07-gold-glow), 0 0 0 0px rgba(228, 219, 31, 0);
+    }
+}
+
+.sp07-breathe {
+    animation: sp07-breathe-ani 3s ease-in-out infinite;
+}
+
+@keyframes sp07-breathe-ani {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
+/* Entrance Scroll reveals */
+.sp07-ani-hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: none;
+}
+
+.sp07-ani-fadeUp {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp07-ani-scaleIn {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp07-ani-fadeLeft {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp07-ani-fadeRight {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp07-wrapper.theme-no-animations *,
+.sp07-wrapper.theme-no-animations *::before,
+.sp07-wrapper.theme-no-animations *::after {
+    animation: none !important;
+    transition: none !important;
+    transition-delay: 0s !important;
+    animation-delay: 0s !important;
+}

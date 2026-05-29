@@ -942,16 +942,123 @@ function formatStoryDate(dateStr) {
 /* ═══════════════════════════════════════
    GALERI SECTION (Popular Releases UI)
    ═══════════════════════════════════════ */
-function GallerySection({ galleries, language }) {
+function GallerySection({ galleries, language, invitation }) {
     const { t, locale } = useTranslation(language);
     const safeGalleries = safeArr(galleries);
     const [brokenImages, setBrokenImages] = useState({});
+    const [activeIdx, setActiveIdx] = useState(null);
 
-    if (safeGalleries.length === 0 || !globalShowPhotos) return null;
+    const getYoutubeId = (url) => {
+        if (!url) return '';
+        let id = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            id = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            id = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            id = url.split('embed/')[1]?.split('?')[0];
+        }
+        return id;
+    };
+
+    // Combine photos and videos
+    const galleryItems = [];
+
+    if (globalShowPhotos) {
+        safeGalleries.forEach((g, idx) => {
+            galleryItems.push({
+                type: 'photo',
+                src: getStorageUrl(g.image_url),
+                title: g.caption || ('Single Release #' + (idx + 1)),
+                subtitle: locale === 'en' ? 'Album Track' : 'Lagu Album',
+                id: g.id || idx
+            });
+        });
+    }
+
+    const showVideoInGallery = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideoInGallery) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                galleryItems.push({
+                    type: 'video',
+                    ytId: ytId,
+                    src: 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg',
+                    title: locale === 'en' ? ('Prewedding Video Track #' + (idx + 1)) : ('Video Musik #' + (idx + 1)),
+                    subtitle: locale === 'en' ? 'Music Video • Featured Release' : 'Video Musik • Rilis Utama',
+                    id: 'video-' + idx
+                });
+            }
+        });
+    }
+
+    if (galleryItems.length === 0) return null;
 
     const handleImgError = (idx) => {
         setBrokenImages(prev => ({ ...prev, [idx]: true }));
     };
+
+    const handlePrev = (e) => {
+        e.stopPropagation();
+        setActiveIdx((prev) => {
+            const nextIdx = prev === 0 ? galleryItems.length - 1 : prev - 1;
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                if (galleryItems[nextIdx]?.type === 'video') {
+                    audioEl.pause();
+                } else {
+                    audioEl.play().catch(() => {});
+                }
+            }
+            return nextIdx;
+        });
+    };
+
+    const handleNext = (e) => {
+        e.stopPropagation();
+        setActiveIdx((prev) => {
+            const nextIdx = prev === galleryItems.length - 1 ? 0 : prev + 1;
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                if (galleryItems[nextIdx]?.type === 'video') {
+                    audioEl.pause();
+                } else {
+                    audioEl.play().catch(() => {});
+                }
+            }
+            return nextIdx;
+        });
+    };
+
+    const handleOpenModal = (idx) => {
+        setActiveIdx(idx);
+        if (galleryItems[idx]?.type === 'video') {
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                audioEl.pause();
+            }
+        }
+    };
+
+    const handleCloseModal = () => {
+        setActiveIdx(null);
+        const audioEl = document.querySelector('audio');
+        if (audioEl) {
+            audioEl.play().catch(() => {});
+        }
+    };
+
+    useEffect(() => {
+        if (activeIdx !== null && galleryItems[activeIdx]?.type === 'video') {
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                audioEl.pause();
+            }
+        }
+    }, [activeIdx]);
 
     return (
         <section id="gallery" className="spty-section">
@@ -959,24 +1066,239 @@ function GallerySection({ galleries, language }) {
             <h4 className="spty-section-header">{locale === 'en' ? 'Popular Releases' : 'Rilis Populer'}</h4>
 
             <div className="spty-gallery__grid">
-                {safeGalleries.map((g, idx) => {
-                    const src = getStorageUrl(g.image_url);
-                    if (brokenImages[idx]) return null; // skip broken image items gracefully
+                {galleryItems.map((item, idx) => {
+                    const isVideo = item.type === 'video';
+                    if (brokenImages[idx] && !isVideo) return null;
                     return (
-                        <Reveal key={g.id || idx} className="spty-gallery__item" variant="zoom" delay={(idx % 4) * 100}>
-                            <div className="spty-gallery__img-wrap">
-                                <img src={src} alt={g.caption || `Galeri ${idx + 1}`} className="spty-gallery__img" onError={() => handleImgError(idx)} loading="lazy" />
+                        <Reveal key={item.id} className="spty-gallery__item" variant="zoom" delay={(idx % 4) * 100}>
+                            <div className="spty-gallery__img-wrap" onClick={() => handleOpenModal(idx)} style={{ cursor: 'pointer', position: 'relative' }}>
+                                <img src={item.src} alt={item.title} className="spty-gallery__img" onError={() => handleImgError(idx)} loading="lazy" />
+                                
+                                {isVideo ? (
+                                    <div style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        backgroundColor: 'rgba(0,0,0,0.3)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'background-color 0.2s'
+                                    }} className="spty-video-overlay-hover">
+                                        <div style={{
+                                            width: '42px',
+                                            height: '42px',
+                                            borderRadius: '50%',
+                                            backgroundColor: '#1db954',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: '0 4px 12px rgba(29, 185, 84, 0.4)'
+                                        }}>
+                                            <svg style={{ width: '16px', height: '16px', fill: '#000000', marginLeft: '2px' }} viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        backgroundColor: 'rgba(0,0,0,0)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'background-color 0.2s'
+                                    }} className="spty-photo-overlay-hover">
+                                        <div style={{
+                                            width: '36px',
+                                            height: '36px',
+                                            borderRadius: '50%',
+                                            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            opacity: 0,
+                                            transition: 'opacity 0.2s'
+                                        }} className="spty-zoom-icon">
+                                            <i className="fas fa-search-plus" style={{ color: '#fff', fontSize: '12px' }} />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                            <h5 className="spty-gallery__caption">{g.caption || `Single Release #${idx + 1}`}</h5>
-                            <p className="spty-gallery__type">{locale === 'en' ? 'Album Track' : 'Lagu Album'} • 2026</p>
+                            <h5 className="spty-gallery__caption" style={{ color: isVideo ? '#1db954' : 'inherit' }}>{item.title}</h5>
+                            <p className="spty-gallery__type">{item.subtitle} • 2026</p>
                         </Reveal>
                     );
                 })}
             </div>
+
+            {/* Lightbox / Theater Mode Modal */}
+            {activeIdx !== null && (
+                <div 
+                    className="spty-gallery-lightbox animate-in fade-in duration-200"
+                    onClick={handleCloseModal}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(12, 12, 12, 0.97)',
+                        zIndex: 15000,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '16px',
+                        backdropFilter: 'blur(6px)'
+                    }}
+                >
+                    {/* Close button */}
+                    <button 
+                        type="button"
+                        onClick={handleCloseModal}
+                        style={{
+                            position: 'absolute',
+                            top: '20px',
+                            right: '20px',
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: 'none',
+                            color: '#FFF',
+                            fontSize: '28px',
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 15100
+                        }}
+                    >
+                        &times;
+                    </button>
+
+                    {/* Prev button */}
+                    <button 
+                        type="button"
+                        onClick={handlePrev}
+                        style={{
+                            position: 'absolute',
+                            left: '20px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            color: '#FFF',
+                            fontSize: '32px',
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 15100,
+                            userSelect: 'none'
+                        }}
+                    >
+                        &#8249;
+                    </button>
+
+                    {/* Next button */}
+                    <button 
+                        type="button"
+                        onClick={handleNext}
+                        style={{
+                            position: 'absolute',
+                            right: '20px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            color: '#FFF',
+                            fontSize: '32px',
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 15100,
+                            userSelect: 'none'
+                        }}
+                    >
+                        &#8250;
+                    </button>
+
+                    {/* Active Content container */}
+                    <div 
+                        style={{
+                            position: 'relative',
+                            width: '100%',
+                            maxWidth: '900px',
+                            maxHeight: '75vh',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            aspectRatio: galleryItems[activeIdx].type === 'video' ? '16/9' : 'auto'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {galleryItems[activeIdx].type === 'video' ? (
+                            <iframe 
+                                src={'https://www.youtube.com/embed/' + galleryItems[activeIdx].ytId + '?autoplay=1&rel=0&showinfo=0&controls=1&mute=0'}
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    borderRadius: '8px',
+                                    border: '2px solid #1db954',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
+                                }}
+                            />
+                        ) : (
+                            <img 
+                                src={galleryItems[activeIdx].src} 
+                                alt={galleryItems[activeIdx].title} 
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '72vh',
+                                    objectFit: 'contain',
+                                    borderRadius: '8px',
+                                    border: '2px solid rgba(255, 255, 255, 0.1)',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
+                                }}
+                            />
+                        )}
+                    </div>
+
+                    {/* Caption under Image */}
+                    <div 
+                        style={{
+                            marginTop: '18px',
+                            color: '#888',
+                            fontSize: '14px',
+                            textAlign: 'center',
+                            maxWidth: '90%',
+                            fontFamily: 'Plus Jakarta Sans, sans-serif'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ color: '#1db954', fontWeight: 'bold', fontSize: '17px', marginBottom: '4px', letterSpacing: '0.5px' }}>
+                            {galleryItems[activeIdx].title}
+                        </div>
+                        <div>{galleryItems[activeIdx].type === 'video' ? 'Spotivite Premium Video Player' : 'Spotivite High-Fidelity Discography'}</div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
-
 /* ═══════════════════════════════════════
    HADIAH SECTION (Merchandise / Tip Jar UI)
    ═══════════════════════════════════════ */
@@ -1605,7 +1927,10 @@ function SpotiviteThemeContent({ invitation, sections, brideGrooms, events, gall
 
             dbSorted.forEach(s => {
                 if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return;
-                if (s.section_key === 'gallery' && !(galleries?.length > 0)) return;
+                if (s.section_key === 'gallery') {
+                    const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+                    if (!(galleries?.length > 0 || hasVideos)) return;
+                }
                 if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return;
                 if (s.section_key === 'rsvp' && !enableRsvp) return;
                 
@@ -1635,7 +1960,8 @@ function SpotiviteThemeContent({ invitation, sections, brideGrooms, events, gall
             }
 
             if (loveStories?.length > 0) fallbacks.push({ section_key: 'love_story' });
-            if (galleries?.length > 0) fallbacks.push({ section_key: 'gallery' });
+            const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+            if (galleries?.length > 0 || hasVideos) fallbacks.push({ section_key: 'gallery' });
             if (enableRsvp) {
                 fallbacks.push({ section_key: 'rsvp' });
             } else if (enableWishes) {

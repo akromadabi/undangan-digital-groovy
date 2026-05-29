@@ -240,6 +240,19 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
         ? (host.full_name || 'Celebration') 
         : bgs.map(b => b.nickname || b.full_name).filter(Boolean).join(' & ');
 
+    // Resolve YouTube cover embed ID
+    let coverEmbedId = '';
+    const coverVideoUrl = invitation?.cover_video_url;
+    if (coverVideoUrl) {
+        if (coverVideoUrl.includes('youtube.com/watch?v=')) {
+            coverEmbedId = coverVideoUrl.split('v=')[1]?.split('&')[0];
+        } else if (coverVideoUrl.includes('youtu.be/')) {
+            coverEmbedId = coverVideoUrl.split('youtu.be/')[1]?.split('?')[0];
+        } else if (coverVideoUrl.includes('youtube.com/embed/')) {
+            coverEmbedId = coverVideoUrl.split('embed/')[1]?.split('?')[0];
+        }
+    }
+
     return (
         <div className={`yt-cover ${isOpened ? 'is-opened' : ''}`}>
             <HeaderBar isSingleHost={isSingleHost} mainName={titleText} isOpened={isOpened} onOpen={onOpen} />
@@ -247,7 +260,16 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
             <div className="yt-cover__main">
                 {/* Simulated Video Player Box */}
                 <div className="yt-video-player" onClick={onOpen}>
-                    {globalShowPhotos && invitation?.cover_image ? (
+                    {globalShowPhotos && coverEmbedId ? (
+                        <iframe
+                            src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                            title="Cover Video"
+                            frameBorder="0"
+                            className="yt-video-player__media pointer-events-none scale-105"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        />
+                    ) : globalShowPhotos && invitation?.cover_image ? (
                         <PremiumSlideshow
                             images={invitation.cover_image.split(',')}
                             positionX={invitation?.cover_position_x}
@@ -337,11 +359,58 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
         }
     };
 
+    // Resolve YouTube embed ID
+    let embedId = '';
+    const videoUrl = invitation?.video_url;
+    if (videoUrl) {
+        if (videoUrl.includes('youtube.com/watch?v=')) {
+            embedId = videoUrl.split('v=')[1]?.split('&')[0];
+        } else if (videoUrl.includes('youtu.be/')) {
+            embedId = videoUrl.split('youtu.be/')[1]?.split('?')[0];
+        } else if (videoUrl.includes('youtube.com/embed/')) {
+            embedId = videoUrl.split('embed/')[1]?.split('?')[0];
+        }
+    }
+
+    // Resolve YouTube opening embed ID
+    let openingEmbedId = '';
+    const openingVideoUrl = invitation?.opening_video_url;
+    if (openingVideoUrl) {
+        if (openingVideoUrl.includes('youtube.com/watch?v=')) {
+            openingEmbedId = openingVideoUrl.split('v=')[1]?.split('&')[0];
+        } else if (openingVideoUrl.includes('youtu.be/')) {
+            openingEmbedId = openingVideoUrl.split('youtu.be/')[1]?.split('?')[0];
+        } else if (openingVideoUrl.includes('youtube.com/embed/')) {
+            openingEmbedId = openingVideoUrl.split('embed/')[1]?.split('?')[0];
+        }
+    }
+
+    const activeEmbedId = openingEmbedId || (invitation.video_playback === 'background' || invitation.video_playback === 'both' ? embedId : '');
+
     return (
         <section id={id || "opening"} className="yt-opening">
             {/* Live Video Player Box */}
-            <div className="yt-main-player">
-                {globalShowPhotos && (invitation?.opening_image || invitation?.cover_image) ? (
+            <div className="yt-main-player" style={{ position: 'relative', overflow: 'hidden' }}>
+                {globalShowPhotos && activeEmbedId ? (
+                    <iframe
+                        src={`https://www.youtube.com/embed/${activeEmbedId}?autoplay=1&mute=1&loop=1&playlist=${activeEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                        title="Background Live Stream"
+                        frameBorder="0"
+                        className="yt-main-player__media pointer-events-none scale-105"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                ) : globalShowPhotos && embedId && (invitation.video_playback === 'gallery' || !invitation.video_playback) ? (
+                    <iframe
+                        src={`https://www.youtube.com/embed/${embedId}?autoplay=0&mute=0&controls=1&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                        title="Wedding Video"
+                        frameBorder="0"
+                        className="yt-main-player__media"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                    />
+                ) : globalShowPhotos && (invitation?.opening_image || invitation?.cover_image) ? (
                     <PremiumSlideshow
                         images={invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : [])}
                         positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
@@ -352,10 +421,14 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                 ) : (
                     <div className="yt-main-player__media yt-main-player__media--fallback" />
                 )}
-                <div className="yt-player-badge">
-                    <span className="yt-dot-red animate-ping" />
-                    <span>LIVE</span>
-                </div>
+                
+                {/* LIVE badge overlay - only shown for live stream bg / slideshow */}
+                {(!embedId || (invitation.video_playback !== 'gallery' && invitation.video_playback !== undefined)) && (
+                    <div className="yt-player-badge">
+                        <span className="yt-dot-red animate-ping" />
+                        <span>LIVE</span>
+                    </div>
+                )}
             </div>
 
             {/* Video Meta & Actions */}
@@ -687,22 +760,107 @@ function LoveStorySection({ loveStories, id, invitation }) {
 }
 
 /* ─── Gallery Section (Recommended Videos Style) ─── */
-function GallerySection({ galleries }) {
+function GallerySection({ galleries, invitation }) {
     const { t } = useTranslation();
-    const safeGalleries = safeArr(galleries);
     const [activeIdx, setActiveIdx] = useState(null);
+    const safeGalleries = safeArr(galleries);
 
-    if (safeGalleries.length === 0 || !globalShowPhotos) return null;
+    const getYoutubeId = (url) => {
+        if (!url) return '';
+        let id = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            id = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            id = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            id = url.split('embed/')[1]?.split('?')[0];
+        }
+        return id;
+    };
+
+    // Combine photos and videos
+    const galleryItems = [];
+
+    if (globalShowPhotos) {
+        safeGalleries.forEach((g, idx) => {
+            galleryItems.push({
+                type: 'photo',
+                url: getStorageUrl(g.image_url, dummyPortrait),
+                title: t('invitation.save_the_date') === 'Save The Date' ? ('Photo Highlight #' + (idx + 1)) : ('Foto Momen #' + (idx + 1)),
+                label: '🖼️ PHOTO'
+            });
+        });
+    }
+
+    const showVideoInGallery = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideoInGallery) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                galleryItems.push({
+                    type: 'video',
+                    ytId: ytId,
+                    url: url,
+                    thumbnail: 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg',
+                    title: t('invitation.save_the_date') === 'Save The Date' ? ('Prewedding Teaser Video #' + (idx + 1)) : ('Video Prewedding #' + (idx + 1)),
+                    label: '🎥 VIDEO'
+                });
+            }
+        });
+    }
+
+    if (galleryItems.length === 0) return null;
 
     const handlePrev = (e) => {
         e.stopPropagation();
-        setActiveIdx((prev) => (prev === 0 ? safeGalleries.length - 1 : prev - 1));
+        setActiveIdx((prev) => {
+            const nextIdx = prev === 0 ? galleryItems.length - 1 : prev - 1;
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                if (galleryItems[nextIdx]?.type === 'video') {
+                    audioEl.pause();
+                } else {
+                    audioEl.play().catch(() => {});
+                }
+            }
+            return nextIdx;
+        });
     };
 
     const handleNext = (e) => {
         e.stopPropagation();
-        setActiveIdx((prev) => (prev === safeGalleries.length - 1 ? 0 : prev + 1));
+        setActiveIdx((prev) => {
+            const nextIdx = prev === galleryItems.length - 1 ? 0 : prev + 1;
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                if (galleryItems[nextIdx]?.type === 'video') {
+                    audioEl.pause();
+                } else {
+                    audioEl.play().catch(() => {});
+                }
+            }
+            return nextIdx;
+        });
     };
+
+    const handleCloseModal = () => {
+        setActiveIdx(null);
+        const audioEl = document.querySelector('audio');
+        if (audioEl) {
+            audioEl.play().catch(() => {});
+        }
+    };
+
+    useEffect(() => {
+        if (activeIdx !== null && galleryItems[activeIdx]?.type === 'video') {
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                audioEl.pause();
+            }
+        }
+    }, [activeIdx]);
 
     return (
         <section id="gallery" className="yt-gallery-section">
@@ -712,19 +870,47 @@ function GallerySection({ galleries }) {
             </h3>
 
             <div className="yt-gallery-grid">
-                {safeGalleries.map((g, idx) => {
-                    const src = getStorageUrl(g.image_url, dummyPortrait);
+                {galleryItems.map((item, idx) => {
+                    const isVideo = item.type === 'video';
+                    const src = isVideo ? item.thumbnail : item.url;
                     return (
                         <Reveal key={idx} delay={(idx % 4) * 60} className="yt-gallery-item-card">
-                            <div className="yt-gallery-img-box" onClick={() => setActiveIdx(idx)} style={{ cursor: 'pointer' }}>
-                                <img src={src} alt={`Foto Galeri ${idx + 1}`} loading="lazy" />
-                                <span className="yt-gallery-duration">4:12</span>
+                            <div className="yt-gallery-img-box" onClick={() => setActiveIdx(idx)} style={{ cursor: 'pointer', position: 'relative' }}>
+                                <img src={src} alt={item.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <span className="yt-gallery-duration" style={{ backgroundColor: isVideo ? '#f00' : 'rgba(0,0,0,0.8)' }}>{item.label}</span>
+                                {isVideo && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: 'rgba(0,0,0,0.2)'
+                                    }}>
+                                        <div style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            borderRadius: '50%',
+                                            backgroundColor: '#f00',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: '0 0 10px rgba(255,0,0,0.5)'
+                                        }}>
+                                            <svg style={{ width: '16px', height: '16px', fill: '#fff', marginLeft: '2px' }} viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="yt-gallery-item-info" onClick={() => setActiveIdx(idx)} style={{ cursor: 'pointer' }}>
-                                <div className="yt-channel-avatar mini">G</div>
+                                <div className="yt-channel-avatar mini" style={{ backgroundColor: isVideo ? '#ff0000' : '#4a4a4a' }}>
+                                    {isVideo ? '▶' : '🖼️'}
+                                </div>
                                 <div className="yt-gallery-item-meta">
-                                    <h5 className="yt-gallery-item-title">Momen Indah Galeri Kami Video #{idx + 1}</h5>
-                                    <span className="yt-gallery-views-label">Recommended for you</span>
+                                    <h5 className="yt-gallery-item-title">{item.title}</h5>
+                                    <span className="yt-gallery-views-label">{isVideo ? 'YouTube Video • Premium Streaming' : 'Recommended for you'}</span>
                                 </div>
                             </div>
                         </Reveal>
@@ -736,26 +922,27 @@ function GallerySection({ galleries }) {
             {activeIdx !== null && (
                 <div 
                     className="yt-gallery-lightbox animate-in fade-in duration-200"
-                    onClick={() => setActiveIdx(null)}
+                    onClick={handleCloseModal}
                     style={{
                         position: 'fixed',
                         top: 0,
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.96)',
                         zIndex: 15000,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        padding: '16px'
+                        padding: '16px',
+                        backdropFilter: 'blur(4px)'
                     }}
                 >
                     {/* Close button */}
                     <button 
                         type="button"
-                        onClick={() => setActiveIdx(null)}
+                        onClick={handleCloseModal}
                         style={{
                             position: 'absolute',
                             top: '20px',
@@ -831,30 +1018,48 @@ function GallerySection({ galleries }) {
                         &#8250;
                     </button>
 
-                    {/* Active Image container */}
+                    {/* Active Content container */}
                     <div 
                         style={{
                             position: 'relative',
-                            maxWidth: '100%',
-                            maxHeight: '80vh',
+                            width: '100%',
+                            maxWidth: '900px',
+                            maxHeight: '75vh',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            aspectRatio: galleryItems[activeIdx].type === 'video' ? '16/9' : 'auto'
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <img 
-                            src={getStorageUrl(safeGalleries[activeIdx].image_url, dummyPortrait)} 
-                            alt={`Foto ${activeIdx + 1}`} 
-                            style={{
-                                maxWidth: '100%',
-                                maxHeight: '75vh',
-                                objectFit: 'contain',
-                                borderRadius: '8px',
-                                border: '2px solid rgba(255, 255, 255, 0.1)',
-                                boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-                            }}
-                        />
+                        {galleryItems[activeIdx].type === 'video' ? (
+                            <iframe 
+                                src={'https://www.youtube.com/embed/' + galleryItems[activeIdx].ytId + '?autoplay=1&rel=0&showinfo=0&controls=1&mute=0'}
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    borderRadius: '8px',
+                                    border: '2px solid rgba(255, 0, 0, 0.3)',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
+                                }}
+                            />
+                        ) : (
+                            <img 
+                                src={galleryItems[activeIdx].url} 
+                                alt={galleryItems[activeIdx].title} 
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '75vh',
+                                    objectFit: 'contain',
+                                    borderRadius: '8px',
+                                    border: '2px solid rgba(255, 255, 255, 0.1)',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
+                                }}
+                            />
+                        )}
                     </div>
 
                     {/* Caption under Image */}
@@ -870,16 +1075,15 @@ function GallerySection({ galleries }) {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div style={{ color: '#FFF', fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>
-                            Momen Indah Galeri Kami Video #{activeIdx + 1}
+                            {galleryItems[activeIdx].title}
                         </div>
-                        <div>Recommended for you • YouInvite HD</div>
+                        <div>{galleryItems[activeIdx].type === 'video' ? 'YouTube Premium Stream • YouInvite Red' : 'Recommended for you • YouInvite HD'}</div>
                     </div>
                 </div>
             )}
         </section>
     );
 }
-
 /* ─── Live Streaming Section (YouInvite Broadcast Style) ─── */
 function LiveStreamingSection({ events, invitation, id, galleries }) {
     const { t } = useTranslation();
@@ -1642,7 +1846,8 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
             list.push({ key: 'love_story', isVisible: secStory ? !!secStory.is_visible : true });
         }
         
-        if (galleries && galleries.length > 0 && globalShowPhotos) {
+        const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+        if ((galleries && galleries.length > 0 && globalShowPhotos) || hasVideos) {
             list.push({ key: 'gallery', isVisible: secGallery ? !!secGallery.is_visible : true });
         }
 
@@ -1815,10 +2020,7 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
                                         );
                                     case 'gallery':
                                         return (
-                                            <GallerySection
-                                                key="gallery"
-                                                galleries={galleries}
-                                            />
+                                            <GallerySection key="gallery" galleries={galleries} invitation={invitation} />
                                         );
                                     case 'livestream':
                                         return (

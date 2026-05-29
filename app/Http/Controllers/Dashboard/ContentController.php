@@ -54,10 +54,20 @@ class ContentController extends Controller
             'opening_ayat_source' => 'nullable|string|max:200',
             'religion' => 'nullable|in:islam,kristen,hindu,buddha,umum',
             'opening_image' => 'nullable|string|max:500',
+            'opening_video_url' => 'nullable|string|max:500',
         ]);
 
         $invitation = $this->getUserInvitation($request);
-        $invitation->update($request->only(['opening_title', 'opening_text', 'opening_ayat', 'opening_ayat_translation', 'opening_ayat_source', 'religion', 'opening_image']));
+        $invitation->update($request->only([
+            'opening_title',
+            'opening_text',
+            'opening_ayat',
+            'opening_ayat_translation',
+            'opening_ayat_source',
+            'religion',
+            'opening_image',
+            'opening_video_url'
+        ]));
 
         return back()->with('success', 'Opening berhasil disimpan.');
     }
@@ -171,9 +181,11 @@ class ContentController extends Controller
             'mediaAssets' => $invitation?->mediaAssets()->latest()->get() ?? [],
             'invitation' => $invitation ? $invitation->only([
                 'id', 'cover_image', 'cover_position_x', 'cover_position_y', 'cover_zoom',
-                'opening_image', 'opening_position_x', 'opening_position_y', 'opening_zoom'
+                'opening_image', 'opening_position_x', 'opening_position_y', 'opening_zoom',
+                'video_url', 'video_playback', 'cover_video_url', 'opening_video_url', 'video_list'
             ]) : null,
             'brideGrooms' => $invitation?->brideGrooms ?? [],
+            'can_use_video_album' => $invitation ? $invitation->hasFeatureAccess('video_album') : false,
         ]);
     }
 
@@ -187,6 +199,26 @@ class ContentController extends Controller
         $invitation->update(['gallery_mode' => $request->gallery_mode]);
 
         return back()->with('success', 'Mode galeri berhasil disimpan.');
+    }
+
+    public function saveVideoSettings(Request $request)
+    {
+        if (!$request->user()->hasFeatureAccess('video_album')) {
+            return back()->withErrors(['video_url' => 'Fitur Album Video dikunci oleh Paket Anda.']);
+        }
+
+        $request->validate([
+            'video_url' => 'nullable|string|max:500',
+            'video_playback' => 'nullable|in:background,gallery,both',
+        ]);
+
+        $invitation = $this->getUserInvitation($request);
+        $invitation->update([
+            'video_url' => $request->video_url,
+            'video_playback' => $request->video_playback ?: 'gallery',
+        ]);
+
+        return back()->with('success', 'Pengaturan video YouTube berhasil disimpan.');
     }
 
     public function saveGaleri(Request $request)

@@ -154,35 +154,9 @@ const ManualPaymentMockup = () => {
    ───────────────────────────────────────────────────────── */
 const RESELLER_FAQ_DATABASE = [
     {
-        id: 'reseller-what-is',
-        category: 'transaksi-klien',
-        question: '1. Apa itu reseller di website ini?',
-        answer: 'Program Reseller (Agency) adalah kemitraan eksklusif yang memungkinkan Anda menjalankan bisnis pembuatan undangan digital secara mandiri menggunakan teknologi kami, namun 100% menggunakan identitas brand Anda sendiri (White-Label).',
-        keywords: ['apa', 'itu', 'reseller', 'konsep', 'skema', 'sistem', 'cara kerja', 'agency', 'mitra'],
-        steps: [
-            'Anda memegang kendali penuh melalui dashboard admin ini untuk mengonfigurasi logo, nama brand, domain, dan harga jual.',
-            'Klien mendaftar, mengelola undangan, dan melakukan transaksi di bawah naungan nama brand Anda tanpa tahu keterkaitan dengan sistem pusat.',
-            'Anda bertindak sebagai penyedia jasa independen dan menerima keuntungan penuh dari markup harga paket penjualan.'
-        ],
-        mockup: 'branding'
-    },
-    {
-        id: 'reseller-need-hosting',
-        category: 'domain-branding',
-        question: '2. Apakah saya membutuhkan hosting tambahan?',
-        answer: 'Tidak. Anda sama sekali tidak memerlukan hosting tambahan untuk menjalankan bisnis ini. Seluruh database, website reseller Anda, serta ribuan website undangan milik klien Anda akan di-host secara gratis dan aman di infrastruktur server cloud kami.',
-        keywords: ['hosting', 'server', 'sewa', 'biaya', 'domain', 'cpanel', 'vps', 'cloud', 'penyimpanan'],
-        steps: [
-            'Anda hanya perlu menyiapkan sebuah nama domain (misal: undanganmu.com) jika ingin menggunakan brand kustom profesional.',
-            'Cukup arahkan DNS domain tersebut ke IP server kami yang sudah disediakan.',
-            'Tim pengembang kami akan mengurus semua pemeliharaan server, keamanan enkripsi SSL (HTTPS) gratis untuk klien Anda, pembaruan fitur otomatis, dan backup data rutin.'
-        ],
-        mockup: 'dns'
-    },
-    {
         id: 'reseller-profit-how',
         category: 'pricing-revenue',
-        question: '3. Bagaimana cara saya mendapatkan keuntungan dari program reseller ini?',
+        question: 'Bagaimana cara saya mendapatkan keuntungan dari program reseller ini?',
         answer: 'Keuntungan Anda didapatkan dari selisih penuh (margin profit) antara Harga Jual yang Anda tetapkan ke klien dikurangi dengan Harga Modal (biaya pusat) per transaksi paket undangan.',
         keywords: ['keuntungan', 'profit', 'laba', 'dapat uang', 'markup', 'pendapatan', 'margin', 'sistem bagi hasil'],
         steps: [
@@ -194,9 +168,24 @@ const RESELLER_FAQ_DATABASE = [
         mockup: 'pricing'
     },
     {
+        id: 'reseller-pricing',
+        category: 'pricing-revenue',
+        question: 'Bagaimana cara mengatur harga paket dan mendapatkan keuntungan?',
+        answer: 'Anda bebas memarkup (menaikkan) harga jual paket di atas harga modal sistem pusat. Selisih harga tersebut sepenuhnya menjadi laba kotor Anda.',
+        keywords: ['harga', 'markup', 'paket', 'profit', 'keuntungan', 'pricing', 'jual', 'modal'],
+        steps: [
+            'Masuk ke menu "Harga Paket" pada dashboard reseller.',
+            'Di sana tertera Harga Modal (nominal yang harus Anda bayarkan ke pusat per transaksi klien) and kolom input Harga Jual.',
+            'Masukkan nominal harga jual yang diinginkan untuk klien Anda pada masing-masing paket.',
+            'Klik tombol "Simpan".',
+            'Klien yang mendaftar atau melakukan upgrade di website agency Anda akan melakukan pembayaran sesuai dengan harga jual yang Anda tentukan.'
+        ],
+        mockup: 'pricing'
+    },
+    {
         id: 'reseller-domain',
         category: 'domain-branding',
-        question: '4. Bagaimana cara menghubungkan Custom Domain untuk agency saya?',
+        question: 'Bagaimana cara menghubungkan Custom Domain untuk agency saya?',
         answer: 'Reseller dengan paket aktif dapat mengarahkan domain pribadi (misal: www.undanganmu.com) agar bertindak sebagai brand mandiri.',
         keywords: ['domain', 'custom', 'dns', 'a record', 'cname', 'resolusi', 'ip', 'pointing', 'white-label'],
         steps: [
@@ -210,24 +199,9 @@ const RESELLER_FAQ_DATABASE = [
         mockup: 'dns'
     },
     {
-        id: 'reseller-pricing',
-        category: 'pricing-revenue',
-        question: '5. Bagaimana cara mengatur harga paket dan mendapatkan keuntungan?',
-        answer: 'Anda bebas memarkup (menaikkan) harga jual paket di atas harga modal sistem pusat. Selisih harga tersebut sepenuhnya menjadi laba kotor Anda.',
-        keywords: ['harga', 'markup', 'paket', 'profit', 'keuntungan', 'pricing', 'jual', 'modal'],
-        steps: [
-            'Masuk ke menu "Harga Paket" pada dashboard reseller.',
-            'Di sana tertera Harga Modal (nominal yang harus Anda bayarkan ke pusat per transaksi klien) and kolom input Harga Jual.',
-            'Masukkan nominal harga jual yang diinginkan untuk klien Anda pada masing-masing paket.',
-            'Klik tombol "Simpan".',
-            'Klien yang mendaftar atau melakukan upgrade di website agency Anda akan melakukan pembayaran sesuai dengan harga jual yang Anda tentukan.'
-        ],
-        mockup: 'pricing'
-    },
-    {
         id: 'reseller-branding',
         category: 'domain-branding',
-        question: '6. Bagaimana cara mengubah Logo, Favicon, dan Nama Brand agency saya?',
+        question: 'Bagaimana cara mengubah Logo, Favicon, dan Nama Brand agency saya?',
         answer: 'Gunakan fitur Branding untuk membuat platform Anda terlihat 100% independen dan profesional dengan logo Anda sendiri.',
         keywords: ['branding', 'logo', 'favicon', 'nama brand', 'aplikasi', 'white-label', 'tampilan', 'dashboard klien'],
         steps: [
@@ -240,24 +214,9 @@ const RESELLER_FAQ_DATABASE = [
         mockup: 'branding'
     },
     {
-        id: 'reseller-pencairan',
-        category: 'pricing-revenue',
-        question: '7. Bagaimana cara mencairkan keuntungan (saldo pendapatan) ke rekening bank?',
-        answer: 'Semua pendapatan dari transaksi klien (selisih profit) otomatis terakumulasi dalam bentuk saldo di akun reseller Anda. Anda dapat menarik saldo tersebut kapan saja.',
-        keywords: ['pencairan', 'saldo', 'rekening', 'tarik', 'withdrawal', 'payout', 'transfer', 'pendapatan'],
-        steps: [
-            'Buka menu "Pencairan" di dashboard reseller.',
-            'Pilih tab "Pengaturan Bank / Rekening" terlebih dahulu untuk mendaftarkan nama bank, nomor rekening, dan nama pemilik rekening penampung.',
-            'Setelah rekening terdaftar, buka tab "Ajukan Pencairan".',
-            'Masukkan nominal penarikan saldo (minimal penarikan Rp 50.000).',
-            'Klik "Ajukan Pencairan". Pengajuan akan diverifikasi dan ditransfer oleh Super Admin dalam waktu maksimal 1x24 jam.'
-        ],
-        mockup: 'pencairan'
-    },
-    {
         id: 'reseller-approval',
         category: 'transaksi-klien',
-        question: '8. Bagaimana cara memverifikasi pembayaran transfer manual dari klien?',
+        question: 'Bagaimana cara memverifikasi pembayaran transfer manual dari klien?',
         answer: 'Klien Anda dapat melakukan upgrade dengan metode transfer manual langsung ke rekening bank pribadi Anda. Anda bertanggung jawab melakukan aktivasi manual.',
         keywords: ['approval', 'manual', 'verifikasi', 'transfer', 'bukti', 'approve', 'user', 'aktifkan paket'],
         steps: [
@@ -270,9 +229,85 @@ const RESELLER_FAQ_DATABASE = [
         mockup: 'manual-payment'
     },
     {
+        id: 'reseller-pencairan',
+        category: 'pricing-revenue',
+        question: 'Bagaimana cara mencairkan keuntungan (saldo pendapatan) ke rekening bank?',
+        answer: 'Semua pendapatan dari transaksi klien (selisih profit) otomatis terakumulasi dalam bentuk saldo di akun reseller Anda. Anda dapat menarik saldo tersebut kapan saja.',
+        keywords: ['pencairan', 'saldo', 'rekening', 'tarik', 'withdrawal', 'payout', 'transfer', 'pendapatan'],
+        steps: [
+            'Buka menu "Pencairan" di dashboard reseller.',
+            'Pilih tab "Pengaturan Bank / Rekening" terlebih dahulu untuk mendaftarkan nama bank, nomor rekening, dan nama pemilik rekening penampung.',
+            'Setelah rekening terdaftar, buka tab "Ajukan Pencairan".',
+            'Masukkan nominal penarikan saldo (minimal penarikan Rp 50.000).',
+            'Klik "Ajukan Pencairan". Pengajuan akan diverifikasi dan ditransfer oleh Super Admin dalam waktu maksimal 1x24 jam.'
+        ],
+        mockup: 'pencairan'
+    },
+    {
+        id: 'reseller-allowed-plans',
+        category: 'transaksi-klien',
+        question: 'Bagaimana cara membatasi tema agar hanya bisa diakses oleh paket tertentu (misal hanya Platinum)?',
+        answer: 'Anda dapat mengunci sebuah tema agar hanya bisa digunakan oleh klien dengan paket tertentu — misalnya tema eksklusif hanya untuk Platinum. Klien dengan paket lebih rendah akan melihat tema tersebut terkunci dan diminta upgrade.',
+        keywords: ['paket eksklusif', 'kunci tema', 'platinum only', 'allowed plans', 'tema premium', 'batasi paket', 'akses tema'],
+        steps: [
+            'Buka "Katalog Tema" di dashboard Admin reseller, lalu klik "Edit" pada tema yang ingin dikunci.',
+            'Cari kolom atau bagian "Paket yang Diizinkan (Allowed Plans)".',
+            'Centang atau pilih paket mana saja yang berhak menggunakan tema ini (misal: hanya Gold dan Platinum).',
+            'Jika dikosongkan, tema bersifat universal dan bisa digunakan oleh semua klien tanpa batasan paket.',
+            'Klik "Simpan Perubahan". Di halaman demo dan katalog, tema akan otomatis tampil dengan ikon kunci (🔒) untuk paket yang tidak diizinkan.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'reseller-video-youtube',
+        category: 'transaksi-klien',
+        question: 'Apakah klien bisa menggunakan video YouTube sebagai latar undangan mereka?',
+        answer: 'Ya! Klien dapat menggunakan link video YouTube sebagai latar belakang (background) pada section Cover (Sampul) atau Opening (Pembuka) undangan mereka. Video diputar otomatis tanpa suara (muted autoplay) memberikan efek sinematik yang memukau.',
+        keywords: ['video youtube', 'klien video', 'latar video', 'background video', 'cover video', 'opening video', 'sinematik'],
+        steps: [
+            'Klien membuka dashboard → menu "Desain & Tema" → tab "Tampilan".',
+            'Klik "Kelola Media Cover" atau "Kelola Media Pembuka".',
+            'Pilih tab "Video Album" di jendela media yang muncul.',
+            'Paste link YouTube (format youtube.com/watch?v=xxx atau youtu.be/xxx) di kolom input lalu klik "+".',
+            'Klik thumbnail video untuk memilihnya sebagai latar. Preview undangan langsung menampilkan video tersebut.',
+            'Fitur ini tersedia untuk semua tema — video akan diputar otomatis (muted, loop) memberikan efek latar yang sinematik dan profesional.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'reseller-demo-plan-switcher',
+        category: 'domain-branding',
+        question: 'Bagaimana cara demo undangan menampilkan perbedaan fitur antar paket kepada calon klien?',
+        answer: 'Di halaman demo undangan, terdapat bar pemilih kelas paket di bagian atas. Calon klien dapat mengklik setiap kelas untuk melihat langsung fitur apa yang aktif atau disembuyenikan — tanpa mendaftar. Ini alat pemasaran yang sangat efektif untuk mendorong upgrade.',
+        keywords: ['demo', 'kelas', 'paket', 'pemilih', 'switcher', 'preview paket', 'perbedaan fitur', 'pemasaran', 'konversi'],
+        steps: [
+            'Setiap halaman demo undangan (format URL: /demo/[slug-tema]) sudah dilengkapi bar pemilih kelas di atas undangan secara otomatis.',
+            'Kelas yang ditampilkan mengikuti paket yang diaktifkan di sistem — jika Anda hanya mengaktifkan Gold and Platinum, hanya dua kelas tersebut yang tampil.',
+            'Ketika calon klien mengklik kelas berbeda, section yang tidak tersedia (RSVP, Galeri, dll.) otomatis tersembunyi.',
+            'Tombol "Detail Fitur" menampilkan perbandingan lengkap semua fitur antar kelas dalam pop-up yang informatif.',
+            'Bagikan link demo ke calon klien untuk membantu mereka memahami nilai tiap paket dan mendorong keputusan pembelian.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'reseller-sortir-tema',
+        category: 'domain-branding',
+        question: 'Apa arti tombol sortir "Terbaru", "Terpopuler", dan "Terfavorit" di katalog tema?',
+        answer: 'Di halaman katalog tema (landing page reseller maupun dashboard), terdapat tiga tombol sortir untuk membantu klien menemukan tema yang sesuai dengan cara yang berbeda.',
+        keywords: ['sortir', 'urutkan', 'terbaru', 'terpopuler', 'terfavorit', 'katalog tema', 'urutan tema'],
+        steps: [
+            '"Terbaru" — mengurutkan tema berdasarkan yang paling baru ditambahkan ke sistem (ID terbesar). Cocok untuk menampilkan tema-tema edisi terkini.',
+            '"Terpopuler" — mengurutkan berdasarkan jumlah penggunaan aktual oleh klien (usage_count). Tema yang paling banyak dipilih muncul di urutan pertama.',
+            '"Terfavorit" — mengurutkan berdasarkan jumlah like/suka yang diberikan oleh pengguna. Tema yang paling disukai muncul pertama.',
+            'Klien dapat mengganti urutan kapan saja dengan mengklik tombol sortir di halaman katalog atau di dashboard "Desain & Tema".',
+            'Filter kategori dan sortir dapat dikombinasikan — misalnya melihat tema kategori ISLAMI yang paling Terpopuler.'
+        ],
+        mockup: null
+    },
+    {
         id: 'reseller-guarantee',
         category: 'transaksi-klien',
-        question: '9. Apakah ada jejak brand pusat (Groovy) yang dapat dilihat oleh klien saya?',
+        question: 'Apakah ada jejak brand pusat (Groovy) yang dapat dilihat oleh klien saya?',
         answer: 'Tidak. Kami menjamin 100% white-label system. Nama brand pusat sepenuhnya dieliminasi dari ekosistem klien Anda.',
         keywords: ['jejak', 'pusat', 'nama', 'groovy', 'white-label', 'keamanan', 'kerahasiaan', 'invoice', 'email'],
         steps: [
@@ -284,9 +319,35 @@ const RESELLER_FAQ_DATABASE = [
         mockup: null
     },
     {
+        id: 'reseller-what-is',
+        category: 'transaksi-klien',
+        question: 'Apa itu reseller di website ini?',
+        answer: 'Program Reseller (Agency) adalah kemitraan eksklusif yang memungkinkan Anda menjalankan bisnis pembuatan undangan digital secara mandiri menggunakan teknologi kami, namun 100% menggunakan identitas brand Anda sendiri (White-Label).',
+        keywords: ['apa', 'itu', 'reseller', 'konsep', 'skema', 'sistem', 'cara kerja', 'agency', 'mitra'],
+        steps: [
+            'Anda memegang kendali penuh melalui dashboard admin ini untuk mengonfigurasi logo, nama brand, domain, dan harga jual.',
+            'Klien mendaftar, mengelola undangan, dan melakukan transaksi di bawah naungan nama brand Anda tanpa tahu keterkaitan dengan sistem pusat.',
+            'Anda bertindak sebagai penyedia jasa independen dan menerima keuntungan penuh dari markup harga paket penjualan.'
+        ],
+        mockup: 'branding'
+    },
+    {
+        id: 'reseller-need-hosting',
+        category: 'domain-branding',
+        question: 'Apakah saya membutuhkan hosting tambahan?',
+        answer: 'Tidak. Anda sama sekali tidak memerlukan hosting tambahan untuk menjalankan bisnis ini. Seluruh database, website reseller Anda, serta ribuan website undangan milik klien Anda akan di-host secara gratis dan aman di infrastruktur server cloud kami.',
+        keywords: ['hosting', 'server', 'sewa', 'biaya', 'domain', 'cpanel', 'vps', 'cloud', 'penyimpanan'],
+        steps: [
+            'Anda hanya perlu menyiapkan sebuah nama domain (misal: undanganmu.com) jika ingin menggunakan brand kustom profesional.',
+            'Cukup arahkan DNS domain tersebut ke IP server kami yang sudah disediakan.',
+            'Tim pengembang kami akan mengurus semua pemeliharaan server, keamanan enkripsi SSL (HTTPS) gratis untuk klien Anda, pembaruan fitur otomatis, dan backup data rutin.'
+        ],
+        mockup: 'dns'
+    },
+    {
         id: 'reseller-brand-safety',
         category: 'domain-branding',
-        question: '10. Apakah tema parodi (seperti Spotivite, YouInvite, Wedflix, dll) aman dijual secara komersial oleh reseller?',
+        question: 'Apakah tema parodi (seperti Spotivite, YouInvite, Wedflix, dll) aman dijual secara komersial oleh reseller?',
         answer: 'Sangat aman. Kami telah merancang ulang seluruh tema populer tersebut menjadi versi parodi kreatif dengan menggunakan nama-nama plesetan estetik dan mengganti seluruh logo/ikon resmi dengan ilustrasi kustom yang orisinal.',
         keywords: ['aman', 'hak cipta', 'tuntut', 'lisensi', 'merek', 'brand', 'youtube', 'spotify', 'netflix', 'logo', 'copyright', 'trademark', 'komersial', 'legal', 'hukum', 'parodi', 'spotivite', 'youinvite', 'wedflix', 'vitegpt', 'unitedinvite'],
         steps: [
@@ -299,7 +360,7 @@ const RESELLER_FAQ_DATABASE = [
     {
         id: 'reseller-preview-catalog',
         category: 'domain-branding',
-        question: '11. Bagaimana cara merubah preview katalog tema di halaman reseller?',
+        question: 'Bagaimana cara merubah preview katalog tema di halaman reseller?',
         answer: 'Anda dapat merubah preview katalog tema dengan menyesuaikan gaya mockup (Flat 2-Phone vs 3D Triple-Phone ultra-realistis) serta mengganti background menjadi Creative Studio Dual-Tone Split yang modern di menu edit tema.',
         keywords: ['katalog', 'preview', 'mockup', 'triple-phone', 'background', 'dual-tone', 'clay-sand', 'velvet-rose', 'sage-cream', 'merubah preview'],
         steps: [
@@ -314,7 +375,7 @@ const RESELLER_FAQ_DATABASE = [
     {
         id: 'reseller-theme-compatibility',
         category: 'transaksi-klien',
-        question: '12. Bagaimana cara membatasi tema agar hanya muncul untuk tipe undangan tertentu?',
+        question: 'Bagaimana cara membatasi tema agar hanya muncul untuk tipe undangan tertentu?',
         answer: 'Anda dapat membatasi kompatibilitas tema melalui pengaturan "Tipe Acara (Event Type)" di form edit tema untuk memastikan tema tersebut tampil sesuai dengan jenis undangan yang dibuat klien.',
         keywords: ['tipe acara', 'event type', 'membatasi tema', 'kompatibilitas', 'kategori tema', 'pilihan tema'],
         steps: [
@@ -604,7 +665,7 @@ export default function Faq() {
                                         className="w-full flex items-start justify-between text-left p-4 focus:outline-none transition-colors hover:bg-gray-50/30"
                                     >
                                         <span className={`text-sm font-bold pr-4 transition-colors ${isOpen ? 'text-[#E5654B]' : 'text-gray-800'} pt-0.5`}>
-                                            {idx + 1}. {faq.question.replace(/^\d+\.\s*/, '')}
+                                            {faq.question}
                                         </span>
                                         <span className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
                                             isOpen ? 'bg-orange-50 text-[#E5654B] rotate-180' : 'bg-[#f5f3f0] text-gray-400'

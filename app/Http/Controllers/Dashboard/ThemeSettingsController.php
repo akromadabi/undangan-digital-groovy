@@ -111,6 +111,9 @@ class ThemeSettingsController extends Controller
                 'particle_count' => $invitation->particle_count ?? 30,
                 'particle_speed' => $invitation->particle_speed ?? 'normal',
                 'menu_position' => $invitation->menu_position ?? 'none',
+                'cover_video_url' => $invitation->cover_video_url,
+                'opening_video_url' => $invitation->opening_video_url,
+                'video_list' => $invitation->video_list || is_string($invitation->video_list) ? (is_array($invitation->video_list) ? $invitation->video_list : json_decode($invitation->video_list, true)) : [],
             ] : null,
             'currentTheme' => $invitation?->theme,
             'themes' => $themes,
@@ -515,5 +518,33 @@ class ThemeSettingsController extends Controller
             'invitation' => $invitation->load(['theme', 'brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts']),
             'sections' => $invitation->visibleSections()->get(),
         ];
+    }
+
+    public function saveVideoList(Request $request)
+    {
+        $request->validate([
+            'video_list' => 'nullable|array',
+            'video_list.*' => 'required|string|max:500',
+        ]);
+
+        $user = $request->user();
+        $invitation = $user->invitation;
+
+        if (!$invitation) {
+            return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
+        }
+
+        if (!$user->hasFeatureAccess('video_album')) {
+            return response()->json(['error' => 'Fitur Album Video dikunci oleh Paket Anda.'], 403);
+        }
+
+        $invitation->update([
+            'video_list' => $request->video_list,
+        ]);
+
+        return response()->json([
+            'success' => true, 
+            'video_list' => is_array($invitation->video_list) ? $invitation->video_list : json_decode($invitation->video_list, true)
+        ]);
     }
 }

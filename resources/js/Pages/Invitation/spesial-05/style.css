@@ -1,0 +1,838 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=MonteCarlo&family=Amita:wght@400;700&family=Croissant+One&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+/* ==========================================================================
+   DESIGN SYSTEM / THEME VARIABLES (SPESIAL-05)
+   ========================================================================== */
+:root {
+  --sp05-primary: #484729;
+  --sp05-primary-rgb: 72, 71, 41;
+  --sp05-secondary: #cbc46d;
+  --sp05-secondary-rgb: 203, 196, 109;
+  --sp05-card-bg: #b7ae72;
+  --sp05-bg-light: #fbfbf7;
+  --sp05-text-dark: #484729;
+  --sp05-accent: #dfad6b;
+  --sp05-accent-rgb: 223, 173, 107;
+  
+  --sp05-font-heading: 'MonteCarlo', cursive;
+  --sp05-font-body: 'Montserrat', sans-serif;
+  --sp05-font-script: 'Amita', cursive;
+  --sp05-font-accent: 'Crimson Pro', serif;
+  --sp05-font-vertical: 'Croissant One', cursive;
+}
+
+/* ==========================================================================
+   RESET & MOBILE-ONLY CONTAINER
+   ========================================================================== */
+.sp05-theme {
+  font-family: var(--sp05-font-body);
+  color: var(--sp05-text-dark);
+  background-color: #1a1a14;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* Mobile viewport constraint (max 450px as per Elementor JSON) */
+.sp05-theme-container {
+  width: 100%;
+  max-width: 450px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--sp05-secondary);
+  position: relative;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY UTILITIES
+   ========================================================================== */
+.sp05-font-heading-style {
+  font-family: var(--sp05-font-heading);
+}
+
+.sp05-font-body-style {
+  font-family: var(--sp05-font-body);
+}
+
+.sp05-font-script-style {
+  font-family: var(--sp05-font-script);
+}
+
+.sp05-font-accent-style {
+  font-family: var(--sp05-font-accent);
+}
+
+/* ==========================================================================
+   ANIMATIONS
+   ========================================================================== */
+.sp05-ani-hidden {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp05-ani-fadeUp {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.sp05-ani-scaleIn {
+  animation: sp05ScaleIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sp05-ani-fadeLeft {
+  animation: sp05FadeLeft 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sp05-ani-fadeRight {
+  animation: sp05FadeRight 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sp05ScaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes sp05FadeLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes sp05FadeRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.sp05-breathe {
+  animation: sp05Breathe 4s ease-in-out infinite alternate;
+}
+
+@keyframes sp05Breathe {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.06); }
+}
+
+/* ==========================================================================
+   COVER / ENVELOPE (FULLSCREEN OVERLAY WITH GOLD ARCHE)
+   ========================================================================== */
+.sp05-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  background-color: var(--sp05-secondary);
+  transition: transform 1.2s cubic-bezier(0.76, 0, 0.24, 1), opacity 1s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.sp05-cover.sp05-is-opened {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sp05-cover-arch {
+  width: calc(100% - 40px);
+  height: calc(100% - 40px);
+  background-color: var(--sp05-secondary);
+  border: 4px solid var(--sp05-primary);
+  border-radius: 200px 0 200px 0; /* Elegant asymmetrical double arch from Elementor! */
+  box-shadow: 0 10px 30px rgba(var(--sp05-primary-rgb), 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 45px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.sp05-cover-arch::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(rgba(var(--sp05-primary-rgb), 0.05) 1px, transparent 1px);
+  background-size: 16px 16px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sp05-btn-buka {
+  background: var(--sp05-accent);
+  color: var(--sp05-primary);
+  padding: 14px 40px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  border: 2px solid var(--sp05-primary);
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(var(--sp05-accent-rgb), 0.3);
+  transition: all 0.3s ease;
+}
+
+.sp05-btn-buka:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--sp05-accent-rgb), 0.45);
+  background-color: #cca062;
+}
+
+/* ==========================================================================
+   OPENING SECTION (THE WEDDING DATE KIT WITH 3D SHADOW SHIFT CARD)
+   ========================================================================== */
+.sp05-opening-section {
+  padding: 80px 24px;
+}
+
+.sp05-title-wedding {
+  color: var(--sp05-primary);
+  font-family: var(--sp05-font-vertical);
+  letter-spacing: 0.1em;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Elementor block 3D box-shadow card */
+.sp05-photo-shadow-card {
+  border-radius: 20px;
+  box-shadow: 18px -18px 0px 0px rgba(121, 124, 94, 0.5); /* exact solid shift shadow from Elementor! */
+  border: 2px solid rgba(var(--sp05-primary-rgb), 0.1);
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  width: 90%;
+}
+
+.sp05-photo-shadow-card img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.sp05-date-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 2px solid var(--sp05-primary);
+  padding-left: 15px;
+}
+
+.sp05-btn-save-date {
+  background: var(--sp05-accent);
+  color: var(--sp05-primary);
+  padding: 10px 28px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 2px solid var(--sp05-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sp05-btn-save-date:hover {
+  background: var(--sp05-primary);
+  color: var(--sp05-secondary);
+}
+
+/* ==========================================================================
+   BRIDE & GROOM PROFILE SECTION (WITH BIG TOP ARCH AND WHITE MASK)
+   ========================================================================== */
+.sp05-mempelai-section {
+  padding: 80px 24px;
+  background-color: var(--sp05-secondary);
+  border-radius: 200px 200px 0 0; /* Top big arch shape! */
+  border-top: 4px solid var(--sp05-primary);
+}
+
+.sp05-mempelai-intro-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid var(--sp05-primary);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(var(--sp05-primary-rgb), 0.08);
+}
+
+.sp05-couple-frame {
+  width: 250px;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 3px solid var(--sp05-primary);
+  box-shadow: 0 10px 30px rgba(var(--sp05-primary-rgb), 0.15);
+  position: relative;
+}
+
+.sp05-couple-frame img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.sp05-btn-ig-circle {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--sp05-primary);
+  color: white !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.sp05-btn-ig-circle:hover {
+  transform: scale(1.1);
+  background-color: var(--sp05-accent);
+}
+
+/* ==========================================================================
+   EVENTS SECTION (WITH INTEGRATED SIDE VERTICAL TEXT UPRIGHT!)
+   ========================================================================== */
+.sp05-event-section {
+  padding: 80px 20px;
+  background-color: var(--sp05-secondary);
+  border-radius: 120px 0 120px 0; /* asymmetrical double arch! */
+  border-top: 4px solid var(--sp05-primary);
+  border-bottom: 4px solid var(--sp05-primary);
+}
+
+/* Stunning unique card layout with a vertical side banner! */
+.sp05-event-card-container {
+  display: flex;
+  background: var(--sp05-bg-light);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 35px rgba(var(--sp05-primary-rgb), 0.1);
+  border: 2px solid var(--sp05-primary);
+  max-width: 380px;
+  margin: 0 auto 30px auto;
+}
+
+.sp05-event-side-banner {
+  width: 60px;
+  background-color: var(--sp05-card-bg);
+  border-right: 2px solid var(--sp05-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.sp05-event-side-title {
+  font-family: var(--sp05-font-vertical);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sp05-primary);
+  writing-mode: vertical-lr;
+  text-orientation: upright;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.sp05-event-content {
+  flex-grow: 1;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.sp05-event-date-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin: 12px 0;
+  font-family: var(--sp05-font-accent);
+}
+
+.sp05-event-date-side {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sp05-primary);
+}
+
+.sp05-event-date-center {
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--sp05-primary);
+  border-left: 2px solid var(--sp05-primary);
+  border-right: 2px solid var(--sp05-primary);
+  padding: 0 12px;
+  line-height: 1.1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sp05-event-date-center span {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.sp05-btn-map {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--sp05-accent);
+  color: var(--sp05-primary) !important;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 2px solid var(--sp05-primary);
+  box-shadow: 0 4px 12px rgba(var(--sp05-accent-rgb), 0.25);
+  transition: all 0.3s ease;
+}
+
+.sp05-btn-map:hover {
+  background: var(--sp05-primary);
+  color: var(--sp05-secondary) !important;
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   COUNTDOWN TIMER
+   ========================================================================== */
+.sp05-countdown-wrapper {
+  margin: 25px 0;
+}
+
+.sp05-countdown {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.sp05-countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--sp05-primary);
+  border-radius: 14px;
+  min-width: 65px;
+  padding: 8px 5px;
+  box-shadow: 0 6px 15px rgba(var(--sp05-primary-rgb), 0.08);
+}
+
+.sp05-countdown-num {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--sp05-primary);
+  line-height: 1.1;
+  font-family: var(--sp05-font-accent);
+}
+
+.sp05-countdown-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sp05-primary);
+  opacity: 0.8;
+  margin-top: 3px;
+}
+
+.sp05-countdown-colon {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--sp05-primary);
+  animation: sp05Blink 1s infinite;
+}
+
+@keyframes sp05Blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ==========================================================================
+   MAPS SECTION
+   ========================================================================== */
+.sp05-maps-section {
+  padding: 80px 24px;
+}
+
+.sp05-iframe-wrapper {
+  border-radius: 35px;
+  overflow: hidden;
+  border: 4px solid var(--sp05-primary);
+  box-shadow: 0 10px 30px rgba(var(--sp05-primary-rgb), 0.15);
+}
+
+/* ==========================================================================
+   TIMELINE MILESTONES (STORY)
+   ========================================================================== */
+.sp05-timeline {
+  position: relative;
+  padding: 20px 0;
+}
+
+.sp05-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background: var(--sp05-primary);
+  opacity: 0.4;
+}
+
+.sp05-timeline-item {
+  position: relative;
+  padding-left: 50px;
+  margin-bottom: 35px;
+}
+
+.sp05-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--sp05-accent);
+  border: 3px solid var(--sp05-primary);
+  z-index: 2;
+}
+
+.sp05-story-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(var(--sp05-primary-rgb), 0.05);
+  border: 1px solid rgba(var(--sp05-primary-rgb), 0.1);
+}
+
+.sp05-story-year {
+  display: inline-block;
+  background: var(--sp05-accent);
+  color: var(--sp05-primary);
+  padding: 4px 14px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  border: 1px solid var(--sp05-primary);
+  font-family: var(--sp05-font-accent);
+}
+
+/* ==========================================================================
+   GALLERY SECTION
+   ========================================================================== */
+.sp05-strict-cover {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.6s ease;
+}
+
+.sp05-strict-cover:hover {
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   RSVP & WISHES SECTION (UNIFIED FORM)
+   ========================================================================== */
+.sp05-rsvp-wishes-section {
+  padding: 80px 24px;
+}
+
+.sp05-input-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.sp05-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sp05-primary);
+  margin-bottom: 6px;
+}
+
+.sp05-input, .sp05-select, .sp05-textarea {
+  width: 100%;
+  background: #fdfdfa;
+  border: 2px solid var(--sp05-primary);
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--sp05-text-dark);
+  font-family: var(--sp05-font-body);
+  transition: all 0.3s ease;
+}
+
+.sp05-input:focus, .sp05-select:focus, .sp05-textarea:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 4px 15px rgba(var(--sp05-primary-rgb), 0.08);
+}
+
+.sp05-btn-submit {
+  width: 100%;
+  background: var(--sp05-primary);
+  color: var(--sp05-secondary);
+  padding: 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(var(--sp05-primary-rgb), 0.2);
+  transition: all 0.3s ease;
+}
+
+.sp05-btn-submit:hover {
+  background-color: #383720;
+}
+
+.sp05-wishes-container {
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.sp05-wishes-container::-webkit-scrollbar {
+  width: 4px;
+}
+.sp05-wishes-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+.sp05-wishes-container::-webkit-scrollbar-thumb {
+  background: var(--sp05-primary);
+  border-radius: 10px;
+}
+
+.sp05-wish-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  border: 2px solid var(--sp05-primary);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+/* ==========================================================================
+   BANK DETAILS (LUXURY 2 STYLE)
+   ========================================================================== */
+.sp05-bank-section {
+  padding: 80px 24px;
+}
+
+.sp05-bank-card {
+  background: linear-gradient(135deg, var(--sp05-bg-light) 0%, var(--sp05-secondary) 100%);
+  border-radius: 24px;
+  padding: 24px;
+  border: 2px solid var(--sp05-primary);
+  box-shadow: 0 10px 25px rgba(var(--sp05-primary-rgb), 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.sp05-bank-card::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(var(--sp05-primary-rgb), 0.05);
+}
+
+.sp05-btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  color: var(--sp05-primary);
+  border: 2px solid var(--sp05-primary);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sp05-btn-copy:hover {
+  background: var(--sp05-primary);
+  color: var(--sp05-secondary);
+}
+
+/* ==========================================================================
+   FLOATING ACTION BUTTONS (AUDIO, SCROLL, FULLSCREEN, QR)
+   ========================================================================== */
+.sp05-floating-controls {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 999;
+}
+
+@media(min-width: 450px) {
+  .sp05-floating-controls {
+    right: calc(50% - 225px + 24px); /* locked to mobile width margin */
+  }
+}
+
+.sp05-control-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(var(--sp05-primary-rgb), 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--sp05-secondary);
+  border: 2px solid var(--sp05-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+}
+
+.sp05-control-btn:hover {
+  transform: scale(1.08);
+  background: var(--sp05-primary);
+}
+
+.sp05-control-btn:active {
+  transform: scale(0.95);
+}
+
+/* Three-bar Music Equalizer Animation */
+.global-music-waves {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  width: 16px;
+  height: 16px;
+}
+
+.global-music-waves span {
+  display: inline-block;
+  width: 3px;
+  background-color: currentColor;
+  border-radius: 1.5px;
+  animation: sp05Equalizer 1.2s ease-in-out infinite alternate;
+}
+
+.global-music-waves span:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+.global-music-waves span:nth-child(2) { height: 100%; animation-delay: 0.3s; }
+.global-music-waves span:nth-child(3) { height: 60%; animation-delay: 0s; }
+
+@keyframes sp05Equalizer {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1.1); }
+}
+
+/* ==========================================================================
+   QR PRESENCE CHECKIN MODAL
+   ========================================================================== */
+.sp05-qr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.sp05-qr-card {
+  background: white;
+  width: 100%;
+  max-width: 340px;
+  border-radius: 28px;
+  padding: 30px 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  position: relative;
+  border: 2px solid var(--sp05-primary);
+}
+
+.sp05-qr-image-wrapper {
+  background: #fdfaf9;
+  border: 2px dashed rgba(var(--sp05-primary-rgb), 0.3);
+  border-radius: 20px;
+  padding: 16px;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   SECTIONS WATERMARK & DIVIDERS
+   ========================================================================== */
+.sp05-watermark {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--sp05-primary);
+  opacity: 0.9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 90px !important; /* anti-overlap safety bottom padding */
+}
+
+.sp05-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 140px;
+  margin: 12px auto;
+}
+
+.sp05-divider-line {
+  height: 2px;
+  background: var(--sp05-primary);
+  flex-grow: 1;
+}
+
+.sp05-divider-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sp05-primary);
+  box-shadow: 0 0 8px rgba(var(--sp05-primary-rgb), 0.4);
+}

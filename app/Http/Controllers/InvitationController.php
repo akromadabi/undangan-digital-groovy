@@ -168,7 +168,7 @@ class InvitationController extends Controller
 
         // THEME ADDED BY BHAKTIAJI ILHAM
         $page = 'Invitation/Show';
-        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03'])) {
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp'])) {
             $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
         }
 
@@ -301,6 +301,22 @@ class InvitationController extends Controller
     public function demo(Request $request, string $slug)
     {
         $theme = \App\Models\Theme::where('slug', $slug)->firstOrFail();
+
+        $subscriptionPlans = \App\Models\SubscriptionPlan::with(['features' => function($query) {
+            $query->wherePivot('is_enabled', true);
+        }])->orderBy('sort_order')->get()->map(function($plan) {
+            return [
+                'id' => $plan->id,
+                'slug' => $plan->slug,
+                'name' => $plan->name,
+                'description' => $plan->description,
+                'price' => (float) $plan->price,
+                'duration_days' => $plan->duration_days,
+                'max_guests' => $plan->max_guests,
+                'max_galleries' => $plan->max_galleries,
+                'features' => $plan->features->pluck('slug')->toArray()
+            ];
+        });
         
         // ── CUSTOM DEMO FROM RESELLER DEMO USER ──
         $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
@@ -353,11 +369,7 @@ class InvitationController extends Controller
             }
 
             $page = 'Invitation/Show';
-            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03'])) {
-                $page = 'Invitation/' . $theme->slug . '/DynamicIndex';
-            }
-
-            return Inertia::render($page, [
+            $props = [
                 'invitation' => $invitation,
                 'sections' => $sections,
                 'brideGrooms' => $brideGrooms,
@@ -368,7 +380,16 @@ class InvitationController extends Controller
                 'guest' => new Guest(['name' => 'Tamu Kehormatan', 'slug' => 'tamu']),
                 'wishes' => $wishes,
                 'isDemo' => true,
-            ]);
+                'subscriptionPlans' => $subscriptionPlans,
+            ];
+
+            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp'])) {
+                $page = 'Invitation/DemoWrapper';
+                $props['themeSlug'] = $theme->slug;
+                $props['allowedPlans'] = $theme->allowed_plans;
+            }
+
+            return Inertia::render($page, $props);
         }
 
         $defaultData = $theme->default_data ?? [];
@@ -535,7 +556,7 @@ class InvitationController extends Controller
         });
 
         $page = 'Invitation/Show';
-        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03'])) {
+        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp'])) {
             $page = 'Invitation/' . $theme->slug . '/DynamicIndex';
         }
 
@@ -550,6 +571,7 @@ class InvitationController extends Controller
             'guest' => new Guest(['name' => 'Tamu Kehormatan', 'slug' => 'tamu']),
             'wishes' => $wishes,
             'isDemo' => true,
+            'subscriptionPlans' => $subscriptionPlans,
         ]);
     }
 

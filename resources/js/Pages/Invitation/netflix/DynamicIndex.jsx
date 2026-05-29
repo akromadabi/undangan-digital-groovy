@@ -244,9 +244,32 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
     const coupleName = mainName;
     const heroImg = getStorageUrl(invitation?.cover_image, null);
 
+    // Resolve YouTube cover embed ID
+    let coverEmbedId = '';
+    const coverVideoUrl = invitation?.cover_video_url;
+    if (coverVideoUrl) {
+        if (coverVideoUrl.includes('youtube.com/watch?v=')) {
+            coverEmbedId = coverVideoUrl.split('v=')[1]?.split('&')[0];
+        } else if (coverVideoUrl.includes('youtu.be/')) {
+            coverEmbedId = coverVideoUrl.split('youtu.be/')[1]?.split('?')[0];
+        } else if (coverVideoUrl.includes('youtube.com/embed/')) {
+            coverEmbedId = coverVideoUrl.split('embed/')[1]?.split('?')[0];
+        }
+    }
+
     return (
         <div className={`nf-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'nf-no-photo-mode' : ''}`}>
-            {globalShowPhotos && (
+            {globalShowPhotos && coverEmbedId ? (
+                <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                        title="Background Cover Video"
+                        frameBorder="0"
+                        className="absolute top-1/2 left-1/2 w-[115vw] h-[64.68vw] min-h-[100vh] min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                </div>
+            ) : globalShowPhotos ? (
                 <PremiumSlideshow
                     images={invitation?.cover_image ? invitation.cover_image.split(',') : []}
                     positionX={invitation?.cover_position_x}
@@ -255,7 +278,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
                     className="nf-cover__bg"
                     imgClassName="absolute inset-0 w-full h-full object-cover"
                 />
-            )}
+            ) : null}
             <div className="nf-cover__overlay" />
             <div className="nf-cover__content">
                 <img src={ASSETS.logo} alt="THE WEDDING" className="nf-cover__logo" />
@@ -321,9 +344,47 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
     const coupleName = mainName;
     const heroImg = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null);
 
+    // Resolve YouTube embed ID
+    let embedId = '';
+    const videoUrl = invitation?.video_url;
+    if (videoUrl) {
+        if (videoUrl.includes('youtube.com/watch?v=')) {
+            embedId = videoUrl.split('v=')[1]?.split('&')[0];
+        } else if (videoUrl.includes('youtu.be/')) {
+            embedId = videoUrl.split('youtu.be/')[1]?.split('?')[0];
+        } else if (videoUrl.includes('youtube.com/embed/')) {
+            embedId = videoUrl.split('embed/')[1]?.split('?')[0];
+        }
+    }
+
+    // Resolve YouTube opening embed ID
+    let openingEmbedId = '';
+    const openingVideoUrl = invitation?.opening_video_url;
+    if (openingVideoUrl) {
+        if (openingVideoUrl.includes('youtube.com/watch?v=')) {
+            openingEmbedId = openingVideoUrl.split('v=')[1]?.split('&')[0];
+        } else if (openingVideoUrl.includes('youtu.be/')) {
+            openingEmbedId = openingVideoUrl.split('youtu.be/')[1]?.split('?')[0];
+        } else if (openingVideoUrl.includes('youtube.com/embed/')) {
+            openingEmbedId = openingVideoUrl.split('embed/')[1]?.split('?')[0];
+        }
+    }
+
+    const activeEmbedId = openingEmbedId || (invitation.video_playback === 'background' || invitation.video_playback === 'both' ? embedId : '');
+
     return (
         <section id={id || "opening"} className="nf-opening">
-            {globalShowPhotos && (
+            {globalShowPhotos && activeEmbedId ? (
+                <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${activeEmbedId}?autoplay=1&mute=1&loop=1&playlist=${activeEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                        title="Background Video"
+                        frameBorder="0"
+                        className="absolute top-1/2 left-1/2 w-[115vw] h-[64.68vw] min-h-[100vh] min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                </div>
+            ) : globalShowPhotos ? (
                 <PremiumSlideshow
                     images={invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : [])}
                     positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
@@ -332,7 +393,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                     className="nf-opening__bg"
                     imgClassName="absolute inset-0 w-full h-full object-cover"
                 />
-            )}
+            ) : null}
             <div className="nf-opening__overlay" />
             <div className="nf-opening__content">
                 <img src={ASSETS.logo} alt="THE WEDDING" className="nf-opening__logo" />
@@ -372,12 +433,12 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                     )}
                 </div>
 
-                {/* Video jika ada */}
-                {invitation?.video_url && (
+                {/* Video jika ada (mode gallery / standard / both) */}
+                {invitation?.video_url && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback) && (
                     <div className="nf-opening__video">
                         <iframe
                             src={invitation.video_url.includes('watch?v=')
-                                ? invitation.video_url.replace('watch?v=', 'embed/') + '?autoplay=1&mute=1'
+                                ? invitation.video_url.replace('watch?v=', 'embed/') + '?autoplay=0&mute=0'
                                 : invitation.video_url}
                             title="Wedding Video" frameBorder="0"
                             allowFullScreen allow="autoplay; encrypted-media"
@@ -756,10 +817,105 @@ function LoveStorySection({ loveStories, id, invitation }) {
 /* ═══════════════════════════════════════
    GALLERY SECTION
    ═══════════════════════════════════════ */
-function GallerySection({ galleries }) {
+function GallerySection({ galleries, invitation }) {
     const { t } = useTranslation();
+    const [activeIdx, setActiveIdx] = useState(null);
     const safeGalleries = safeArr(galleries);
-    if (safeGalleries.length === 0 || !globalShowPhotos) return null;
+
+    const getYoutubeId = (url) => {
+        if (!url) return '';
+        let id = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            id = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            id = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            id = url.split('embed/')[1]?.split('?')[0];
+        }
+        return id;
+    };
+
+    // Combine photos and videos
+    const galleryItems = [];
+
+    if (globalShowPhotos) {
+        safeGalleries.forEach((g, idx) => {
+            galleryItems.push({
+                type: 'photo',
+                url: getStorageUrl(g.image_url, dummyPortrait),
+                title: t('invitation.save_the_date') === 'Save The Date' ? `Photo #${idx + 1}` : `Foto #${idx + 1}`
+            });
+        });
+    }
+
+    const showVideoInGallery = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideoInGallery) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                galleryItems.push({
+                    type: 'video',
+                    ytId: ytId,
+                    url: url,
+                    thumbnail: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+                    title: t('invitation.save_the_date') === 'Save The Date' ? `Moment Video #${idx + 1}` : `Momen Video #${idx + 1}`
+                });
+            }
+        });
+    }
+
+    if (galleryItems.length === 0) return null;
+
+    const handleCloseModal = () => {
+        setActiveIdx(null);
+        const audioEl = document.querySelector('audio');
+        if (audioEl) {
+            audioEl.play().catch(() => {});
+        }
+    };
+
+    const handlePrev = (e) => {
+        e.stopPropagation();
+        setActiveIdx((prev) => {
+            const nextIdx = prev === 0 ? galleryItems.length - 1 : prev - 1;
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                if (galleryItems[nextIdx]?.type === 'video') {
+                    audioEl.pause();
+                } else {
+                    audioEl.play().catch(() => {});
+                }
+            }
+            return nextIdx;
+        });
+    };
+
+    const handleNext = (e) => {
+        e.stopPropagation();
+        setActiveIdx((prev) => {
+            const nextIdx = prev === galleryItems.length - 1 ? 0 : prev + 1;
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                if (galleryItems[nextIdx]?.type === 'video') {
+                    audioEl.pause();
+                } else {
+                    audioEl.play().catch(() => {});
+                }
+            }
+            return nextIdx;
+        });
+    };
+
+    useEffect(() => {
+        if (activeIdx !== null && galleryItems[activeIdx]?.type === 'video') {
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                audioEl.pause();
+            }
+        }
+    }, [activeIdx]);
 
     return (
         <section id="gallery" className="nf-gallery">
@@ -769,15 +925,287 @@ function GallerySection({ galleries }) {
                 </h3>
             </Reveal>
             <div className="nf-gallery__grid">
-                {safeGalleries.map((g, idx) => {
-                    const src = getStorageUrl(g.image_url, dummyPortrait);
+                {galleryItems.map((item, idx) => {
+                    const isVideo = item.type === 'video';
                     return (
                         <Reveal key={idx} delay={(idx % 6) * 60} className="nf-gallery__item">
-                            <img src={src} alt={`Foto ${idx + 1}`} loading="lazy" />
+                            <div 
+                                onClick={() => setActiveIdx(idx)} 
+                                style={{ 
+                                    position: 'relative', 
+                                    cursor: 'pointer', 
+                                    overflow: 'hidden', 
+                                    borderRadius: '8px', 
+                                    aspectRatio: '16/10', 
+                                    width: '100%',
+                                    boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    backgroundColor: '#141414'
+                                }}
+                                className="nf-gallery-card-hover"
+                            >
+                                <img 
+                                    src={isVideo ? item.thumbnail : item.url} 
+                                    alt={item.title} 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s' }} 
+                                    className="nf-gallery-img"
+                                    loading="lazy" 
+                                />
+                                {isVideo ? (
+                                    <div 
+                                        style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                    >
+                                        <div 
+                                            style={{
+                                                width: '46px',
+                                                height: '46px',
+                                                borderRadius: '50%',
+                                                backgroundColor: '#E50914',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                boxShadow: '0 0 15px rgba(229, 9, 20, 0.7)',
+                                                transform: 'scale(1)',
+                                                transition: 'transform 0.2s'
+                                            }}
+                                            className="nf-play-btn"
+                                        >
+                                            <svg style={{ width: '18px', height: '18px', fill: '#FFFFFF', marginLeft: '3px' }} viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z"/>
+                                            </svg>
+                                        </div>
+                                        <span 
+                                            style={{
+                                                position: 'absolute',
+                                                bottom: '8px',
+                                                left: '8px',
+                                                color: '#FFF',
+                                                fontSize: '9px',
+                                                fontWeight: 'bold',
+                                                letterSpacing: '0.5px',
+                                                backgroundColor: 'rgba(229, 9, 20, 0.85)',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                border: '1px solid rgba(255,255,255,0.1)'
+                                            }}
+                                        >
+                                            🎥 VIDEO
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div 
+                                        style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            backgroundColor: 'rgba(0, 0, 0, 0)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            transition: 'background-color 0.3s'
+                                        }}
+                                        className="nf-photo-overlay"
+                                    >
+                                        <span 
+                                            style={{
+                                                position: 'absolute',
+                                                bottom: '8px',
+                                                left: '8px',
+                                                color: '#FFF',
+                                                fontSize: '9px',
+                                                fontWeight: 'bold',
+                                                letterSpacing: '0.5px',
+                                                backgroundColor: 'rgba(0, 0, 0, 0.65)',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                border: '1px solid rgba(255,255,255,0.1)'
+                                            }}
+                                        >
+                                            🖼️ PHOTO
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                         </Reveal>
                     );
                 })}
             </div>
+
+            {/* Lightbox / Theater Mode Modal */}
+            {activeIdx !== null && (
+                <div 
+                    className="nf-gallery-lightbox animate-in fade-in duration-300"
+                    onClick={handleCloseModal}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(10, 10, 10, 0.97)',
+                        zIndex: 20000,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '16px',
+                        backdropFilter: 'blur(8px)'
+                    }}
+                >
+                    {/* Close button */}
+                    <button 
+                        type="button"
+                        onClick={handleCloseModal}
+                        style={{
+                            position: 'absolute',
+                            top: '20px',
+                            right: '20px',
+                            background: 'rgba(229, 9, 20, 0.85)',
+                            border: 'none',
+                            color: '#FFF',
+                            fontSize: '24px',
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 20100,
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                            transition: 'background-color 0.2s'
+                        }}
+                    >
+                        &times;
+                    </button>
+
+                    {/* Prev button */}
+                    <button 
+                        type="button"
+                        onClick={handlePrev}
+                        style={{
+                            position: 'absolute',
+                            left: '20px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            color: '#FFF',
+                            fontSize: '32px',
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 20100,
+                            userSelect: 'none',
+                            transition: 'background-color 0.2s'
+                        }}
+                    >
+                        &#8249;
+                    </button>
+
+                    {/* Next button */}
+                    <button 
+                        type="button"
+                        onClick={handleNext}
+                        style={{
+                            position: 'absolute',
+                            right: '20px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            color: '#FFF',
+                            fontSize: '32px',
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 20100,
+                            userSelect: 'none',
+                            transition: 'background-color 0.2s'
+                        }}
+                    >
+                        &#8250;
+                    </button>
+
+                    {/* Active Content container */}
+                    <div 
+                        style={{
+                            position: 'relative',
+                            width: '100%',
+                            maxWidth: '900px',
+                            maxHeight: '75vh',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            aspectRatio: galleryItems[activeIdx].type === 'video' ? '16/9' : 'auto'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {galleryItems[activeIdx].type === 'video' ? (
+                            <iframe 
+                                src={`https://www.youtube.com/embed/${galleryItems[activeIdx].ytId}?autoplay=1&rel=0&showinfo=0&controls=1&mute=0`}
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    borderRadius: '8px',
+                                    border: '2px solid rgba(229, 9, 20, 0.3)',
+                                    boxShadow: '0 10px 40px rgba(0,0,0,0.8)'
+                                }}
+                            />
+                        ) : (
+                            <img 
+                                src={galleryItems[activeIdx].url} 
+                                alt={galleryItems[activeIdx].title} 
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '70vh',
+                                    objectFit: 'contain',
+                                    borderRadius: '8px',
+                                    border: '2px solid rgba(255, 255, 255, 0.15)',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.7)'
+                                }}
+                            />
+                        )}
+                    </div>
+
+                    {/* Caption */}
+                    <div 
+                        style={{
+                            marginTop: '20px',
+                            color: '#AAA',
+                            fontSize: '14px',
+                            textAlign: 'center',
+                            maxWidth: '90%'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ color: '#E50914', fontWeight: 'bold', fontSize: '16px', marginBottom: '4px', letterSpacing: '0.5px' }}>
+                            {galleryItems[activeIdx].title}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+                            {galleryItems[activeIdx].type === 'video' ? 'Wedflix Video Theater • HD Stereophonic' : 'Wedflix Gallery Slide • Full HD'}
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
@@ -1276,7 +1704,10 @@ function WedflixThemeContent({ invitation, sections, brideGrooms, events, galler
 
         dbSorted.forEach(s => {
             if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return;
-            if (s.section_key === 'gallery' && !(galleries?.length > 0)) return;
+            if (s.section_key === 'gallery') {
+                const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+                if (!(galleries?.length > 0 || hasVideos)) return;
+            }
             if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return;
             if (s.section_key === 'rsvp' && !enableRsvp) return;
             if (s.section_key === 'wishes' && !enableWishes) return;
@@ -1303,7 +1734,8 @@ function WedflixThemeContent({ invitation, sections, brideGrooms, events, galler
         if (loveStories?.length > 0) {
             fallbacks.push({ section_key: 'love_story' });
         }
-        if (galleries?.length > 0) {
+        const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+        if (galleries?.length > 0 || hasVideos) {
             fallbacks.push({ section_key: 'gallery' });
         }
         if (enableRsvp) {
@@ -1374,8 +1806,8 @@ function WedflixThemeContent({ invitation, sections, brideGrooms, events, galler
         'love_story': loveStories?.length > 0
             ? <LoveStorySection key="love_story" loveStories={loveStories} invitation={invitation} id="love_story" />
             : null,
-        'gallery':    galleries?.length > 0
-            ? <GallerySection   key="gallery"    galleries={galleries} />
+        'gallery':    (galleries?.length > 0 || (invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback)))
+            ? <GallerySection   key="gallery"    galleries={galleries} invitation={invitation} />
             : null,
         'bank':       bankAccounts?.length > 0
             ? <BankSection      key="bank"       bankAccounts={bankAccounts} id="bank" />

@@ -8,25 +8,32 @@ import { Trash2, Save, Settings, Check, Sparkles, Loader2, Info, Link as LinkIco
 export default function Galeri({ 
     galleries: initialGalleries, 
     maxGalleries, 
-    galleryMode, 
     mediaAssets = [], 
     invitation: initialInvitation, 
-    brideGrooms: initialBrideGrooms 
+    brideGrooms: initialBrideGrooms,
+    can_use_video_album = false
 }) {
     const { flash } = usePage().props;
+    const [activeTab, setActiveTab] = useState('photos');
     
     // Sync props to local states for immediate fluid UI updates
     const [localInvitation, setLocalInvitation] = useState(initialInvitation || {});
     const [localBrideGrooms, setLocalBrideGrooms] = useState(initialBrideGrooms || []);
     const [localGalleries, setLocalGalleries] = useState(initialGalleries || []);
+
+    // YouTube Video settings states
+    const [videoUrl, setVideoUrl] = useState(initialInvitation?.video_url || '');
+    const [videoPlayback, setVideoPlayback] = useState(initialInvitation?.video_playback || 'gallery');
+    const [savingVideo, setSavingVideo] = useState(false);
+    
+    // Unified YouTube Video List states
+    const [videoList, setVideoList] = useState(initialInvitation?.video_list || []);
+    const [newVideoUrl, setNewVideoUrl] = useState('');
+    const [savingVideoList, setSavingVideoList] = useState(false);
     
     const [uploading, setUploading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('');
     const [isDragOver, setIsDragOver] = useState(false);
-    
-    // Gallery display mode
-    const [mode, setMode] = useState(galleryMode || 'grid');
-    const [savingMode, setSavingMode] = useState(false);
     
     // Side-over drawer state
     const [selectedAsset, setSelectedAsset] = useState(null);
@@ -59,10 +66,131 @@ export default function Galeri({
 
     // Sync state when props change
     useEffect(() => {
-        if (initialInvitation) setLocalInvitation(initialInvitation);
+        if (initialInvitation) {
+            setLocalInvitation(initialInvitation);
+            setVideoUrl(initialInvitation.video_url || '');
+            setVideoPlayback(initialInvitation.video_playback || 'gallery');
+            setVideoList(initialInvitation.video_list || []);
+        }
         if (initialBrideGrooms) setLocalBrideGrooms(initialBrideGrooms);
         if (initialGalleries) setLocalGalleries(initialGalleries);
     }, [initialInvitation, initialBrideGrooms, initialGalleries]);
+
+    const handleAddVideo = async (e) => {
+        e.preventDefault();
+        if (!newVideoUrl.trim()) return;
+
+        if (!newVideoUrl.includes('youtube.com') && !newVideoUrl.includes('youtu.be')) {
+            alert('Masukkan link YouTube yang valid!');
+            return;
+        }
+
+        setSavingVideoList(true);
+        const updatedList = [...videoList, newVideoUrl.trim()];
+        try {
+            const response = await axios.post(route('theme.video_list.save'), {
+                video_list: updatedList
+            });
+            if (response.data.success) {
+                const list = response.data.video_list || updatedList;
+                setVideoList(list);
+                setNewVideoUrl('');
+                alert('Video berhasil ditambahkan ke album!');
+                
+                // Set as primary video automatically if none was set
+                if (!videoUrl) {
+                    await handleSelectPrimaryVideo(newVideoUrl.trim(), list);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Gagal menambahkan video.');
+        } finally {
+            setSavingVideoList(false);
+        }
+    };
+
+    const handleDeleteVideo = async (e, videoUrlToDelete) => {
+        e.stopPropagation();
+        if (!confirm('Apakah Anda yakin ingin menghapus video ini?')) return;
+
+        setSavingVideoList(true);
+        const updatedList = videoList.filter(url => url !== videoUrlToDelete);
+        try {
+            const response = await axios.post(route('theme.video_list.save'), {
+                video_list: updatedList
+            });
+            if (response.data.success) {
+                const list = response.data.video_list || updatedList;
+                setVideoList(list);
+                
+                // If primary video was deleted, set next available or empty
+                if (videoUrl === videoUrlToDelete) {
+                    const newPrimary = list.length > 0 ? list[0] : '';
+                    await handleSelectPrimaryVideo(newPrimary, list);
+                } else {
+                    // Update local invitation state to reflect list
+                    setLocalInvitation(prev => ({
+                        ...prev,
+                        video_list: list
+                    }));
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Gagal menghapus video.');
+        } finally {
+            setSavingVideoList(false);
+        }
+    };
+
+    const handleSelectPrimaryVideo = async (url, currentList = videoList) => {
+        setSavingVideo(true);
+        try {
+            const response = await axios.post(route('content.galeri.video'), {
+                video_url: url,
+                video_playback: videoPlayback
+            });
+            if (response.data.success) {
+                setVideoUrl(url);
+                setLocalInvitation(prev => ({
+                    ...prev,
+                    video_url: url,
+                    video_list: currentList
+                }));
+                alert('Video utama berhasil diperbarui!');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Gagal mengubah video utama.');
+        } finally {
+            setSavingVideo(false);
+        }
+    };
+
+    const handleSaveVideoSettings = async (e) => {
+        e.preventDefault();
+        setSavingVideo(true);
+        try {
+            const response = await axios.post(route('content.galeri.video'), {
+                video_url: videoUrl,
+                video_playback: videoPlayback
+            });
+            if (response.data.success) {
+                alert('Pengaturan gaya pemutaran video berhasil disimpan!');
+                setLocalInvitation(prev => ({
+                    ...prev,
+                    video_playback: videoPlayback
+                }));
+            }
+        } catch (error) {
+            console.error('Save video settings error:', error);
+            const msg = error.response?.data?.message || 'Gagal menyimpan pengaturan video.';
+            alert(msg);
+        } finally {
+            setSavingVideo(false);
+        }
+    };
 
     // Update uploader remaining count
     const remaining = maxGalleries - (localGalleries?.length || 0);
@@ -396,21 +524,6 @@ export default function Galeri({
         }
     };
 
-    // Save Gallery Display Mode (Grid / Carousel / Slide)
-    const handleModeChange = (newMode) => {
-        setMode(newMode);
-        setSavingMode(true);
-        router.post(route('content.galeri.mode'), { gallery_mode: newMode }, {
-            preserveScroll: true,
-            onFinish: () => setSavingMode(false),
-        });
-    };
-
-    const modes = [
-        { value: 'grid', label: 'Grid', desc: 'Tampilan kotak-kotak', icon: 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z' },
-        { value: 'carousel', label: 'Carousel', desc: 'Geser kiri-kanan', icon: 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z' },
-        { value: 'slide', label: 'Slide', desc: 'Satu per satu dengan tombol', icon: 'M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6' },
-    ];
 
     return (
         <DashboardLayout title="Pustaka Media & Album Foto Terpadu">
@@ -454,56 +567,327 @@ export default function Galeri({
                     </div>
                 </div>
 
-
-                {/* Upload Area */}
-                <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-semibold text-gray-700">Unggah Foto Baru ke Album</h4>
-                        <span className="text-xs text-gray-400">Unggah sekaligus banyak didukung (multi-upload)</span>
-                    </div>
-                    <div className="space-y-3">
-                        <label className="block cursor-pointer">
-                            <div 
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                                onDrop={handleDrop}
-                                className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
-                                    isDragOver 
-                                        ? 'border-[#E5654B] bg-orange-50/50 scale-[1.01]' 
-                                        : 'border-gray-200 hover:border-[#e87058] hover:bg-orange-50/10'
-                                }`}
-                            >
-                                {uploading ? (
-                                    <div className="text-[#E5654B] font-semibold flex flex-col items-center justify-center gap-2 py-4">
-                                        <svg className="w-6 h-6 animate-spin text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                        <span className="text-sm font-medium">{uploadStatus || 'Sedang memproses...'}</span>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="text-4xl mb-2 text-gray-300 flex justify-center">
-                                            <svg className="w-12 h-12 text-[#E5654B]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                        <div className="text-sm font-semibold text-gray-600">Pilih atau Drag & Drop foto di sini</div>
-                                        <div className="text-xs text-gray-400 mt-1">Mendukung format JPG, PNG, WEBP • Maks 10MB per file</div>
-                                        <div className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full text-[10px] font-medium mt-3">
-                                            <Info size={11} className="text-orange-600 flex-shrink-0" />
-                                            <span>Baru diunggah otomatis diaktifkan di Galeri jika kuota masih ada</span>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                            <input type="file" accept="image/*" className="hidden" multiple
-                                onChange={(e) => handleUpload(e.target.files)} disabled={uploading} />
-                        </label>
+                {/* Modern Segmented Navigation Tabs */}
+                <div className="flex justify-center md:justify-start">
+                    <div className="bg-gray-100 border border-gray-200/50 rounded-2xl p-1.5 flex gap-1 shadow-xs w-full max-w-sm">
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('photos')}
+                            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                                activeTab === 'photos'
+                                    ? 'bg-[#E5654B] text-white shadow-xs'
+                                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
+                            }`}
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>Galeri Foto</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('videos')}
+                            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                                activeTab === 'videos'
+                                    ? 'bg-[#E5654B] text-white shadow-xs'
+                                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
+                            }`}
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2-2v8a2 2 0 00-2 2z" />
+                            </svg>
+                            <span>Album Video</span>
+                        </button>
                     </div>
                 </div>
 
-                {/* Unified Photo Grid */}
-                <div className="space-y-3">
+
+                {activeTab === 'photos' && (
+                    <>
+                        {/* Upload Area */}
+                        <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">
+                            <div className="flex items-center justify-between mb-3">
+                                <h4 className="text-sm font-semibold text-gray-700">Unggah Foto Baru ke Album</h4>
+                                <span className="text-xs text-gray-400">Unggah sekaligus banyak didukung (multi-upload)</span>
+                            </div>
+                            <div className="space-y-3">
+                                <label className="block cursor-pointer">
+                                    <div 
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={handleDrop}
+                                        className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
+                                            isDragOver 
+                                                ? 'border-[#E5654B] bg-orange-50/50 scale-[1.01]' 
+                                                : 'border-gray-200 hover:border-[#e87058] hover:bg-orange-50/10'
+                                        }`}
+                                    >
+                                        {uploading ? (
+                                            <div className="text-[#E5654B] font-semibold flex flex-col items-center justify-center gap-2 py-4">
+                                                <svg className="w-6 h-6 animate-spin text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                <span className="text-sm font-medium">{uploadStatus || 'Sedang memproses...'}</span>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="text-4xl mb-2 text-gray-300 flex justify-center">
+                                                    <svg className="w-12 h-12 text-[#E5654B]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                <div className="text-sm font-semibold text-gray-600">Pilih atau Drag & Drop foto di sini</div>
+                                                <div className="text-xs text-gray-400 mt-1">Mendukung format JPG, PNG, WEBP • Maks 10MB per file</div>
+                                                <div className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full text-[10px] font-medium mt-3">
+                                                    <Info size={11} className="text-orange-600 flex-shrink-0" />
+                                                    <span>Baru diunggah otomatis diaktifkan di Galeri jika kuota masih ada</span>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                    <input type="file" accept="image/*" className="hidden" multiple
+                                        onChange={(e) => handleUpload(e.target.files)} disabled={uploading} />
+                                </label>
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                {activeTab === 'videos' && (
+                    <>
+                        {/* YouTube Video Settings Card */}
+                        <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-6">
+                            <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                                <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M23.498 6.163a3.003 3.003 0 00-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.516 0-9.387.508a3.003 3.003 0 00-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 002.11 2.11c1.871.502 9.387.502 9.387.502s7.517 0 9.387-.502a3.003 3.003 0 002.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-bold text-gray-800">Video Prewedding YouTube</h4>
+                                    <p className="text-xs text-gray-400">Hubungkan video YouTube Anda sebagai latar belakang undangan atau di dalam galeri.</p>
+                                </div>
+                            </div>
+
+                            {!can_use_video_album ? (
+                                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-50/40 via-red-50/20 to-amber-50/30 border border-orange-100 p-6 flex flex-col items-center text-center gap-4 shadow-sm">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-200/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
+                                    
+                                    <div className="w-12 h-12 rounded-2xl bg-orange-100/80 flex items-center justify-center text-[#E5654B] animate-pulse">
+                                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                    </div>
+                                    
+                                    <div className="space-y-1.5 max-w-md">
+                                        <h5 className="text-sm font-bold text-gray-800">Fitur Album Video YouTube Dikunci</h5>
+                                        <p className="text-xs text-gray-500 leading-relaxed font-sans">
+                                            Hubungkan video YouTube indah sebagai album visual prewedding di tema Anda (Netflix, TikTok, Spotify, Instagram, YouTube dll) secara tak terbatas. Upgrade paket Anda sekarang untuk membuka fitur premium ini!
+                                        </p>
+                                    </div>
+
+                                    <a
+                                        href="/pricing"
+                                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#E5654B] to-[#c94f3a] text-white rounded-2xl text-xs font-bold transition-all hover:shadow-md hover:shadow-orange-500/20 active:scale-[0.98]"
+                                    >
+                                        <Sparkles size={14} />
+                                        <span>Upgrade Sekarang</span>
+                                    </a>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleSaveVideoSettings} className="space-y-5">
+                                    <div className="space-y-4">
+                                        {/* URL Field to add video */}
+                                        <div className="space-y-1.5">
+                                            <label className="block text-xs font-bold text-gray-700 font-sans">Tambah Video YouTube ke Album</label>
+                                            <div className="flex gap-2 relative rounded-2xl">
+                                                <input
+                                                    type="text"
+                                                    value={newVideoUrl}
+                                                    onChange={(e) => setNewVideoUrl(e.target.value)}
+                                                    placeholder="Contoh: https://www.youtube.com/watch?v=ncaok-mSlro atau https://youtu.be/..."
+                                                    className="block flex-1 pl-4 pr-4 py-3 border border-gray-200 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-[#E5654B] focus:border-[#E5654B] transition-all bg-gray-50/30"
+                                                    disabled={savingVideoList}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleAddVideo}
+                                                    disabled={savingVideoList || !newVideoUrl}
+                                                    className="px-5 py-2.5 bg-[#E5654B] hover:bg-[#b03a24] text-white rounded-2xl text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-orange-500/10 active:scale-[0.98] min-w-[80px] justify-center cursor-pointer"
+                                                >
+                                                    {savingVideoList ? '...' : 'Tambah'}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* List of Videos in Album */}
+                                        {videoList.length > 0 && (
+                                            <div className="space-y-2">
+                                                <label className="block text-xs font-bold text-gray-700 font-sans">Daftar Album Video YouTube Anda</label>
+                                                <p className="text-[10px] text-gray-400 -mt-1 font-sans">Pilih video di bawah untuk dijadikan video utama/latar belakang fallback (ditandai dengan checkmark orange).</p>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                    {videoList.map((videoUrlItem, idx) => {
+                                                        let id = '';
+                                                        if (videoUrlItem.includes('youtube.com/watch?v=')) {
+                                                            id = videoUrlItem.split('v=')[1]?.split('&')[0];
+                                                        } else if (videoUrlItem.includes('youtu.be/')) {
+                                                            id = videoUrlItem.split('youtu.be/')[1]?.split('?')[0];
+                                                        } else if (videoUrlItem.includes('youtube.com/embed/')) {
+                                                            id = videoUrlItem.split('embed/')[1]?.split('?')[0];
+                                                        }
+                                                        const thumbUrl = id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300';
+                                                        const isPrimary = videoUrl === videoUrlItem;
+
+                                                        return (
+                                                            <div
+                                                                key={idx}
+                                                                onClick={() => handleSelectPrimaryVideo(videoUrlItem)}
+                                                                className={`relative aspect-[16/10] rounded-2xl overflow-hidden border-2 cursor-pointer group shadow-xs transition-all ${
+                                                                    isPrimary ? 'border-[#E5654B] ring-2 ring-orange-100 scale-[0.98]' : 'border-gray-200 hover:border-gray-300'
+                                                                }`}
+                                                            >
+                                                                <img src={thumbUrl} alt="YouTube Video Thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                                
+                                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                                                                    <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
+                                                                        <svg className="w-3.5 h-3.5 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Checkmark for primary video selection */}
+                                                                {isPrimary && (
+                                                                    <div className="absolute top-2 left-2 flex items-center gap-1 bg-[#E5654B] text-white px-2 py-0.5 rounded-full shadow-md font-bold text-[9px] border border-white z-10">
+                                                                        <span>✓ Utama</span>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Trash/Delete Button */}
+                                                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={(e) => handleDeleteVideo(e, videoUrlItem)}
+                                                                        className="w-5 h-5 rounded bg-white/95 hover:bg-red-50 text-gray-500 hover:text-red-500 shadow-sm flex items-center justify-center transition-colors animate-[fadeIn_0.2s_ease-out]"
+                                                                        title="Hapus video dari album"
+                                                                    >
+                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Playback Mode */}
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-bold text-gray-700">Gaya & Penempatan Pemutaran Video</label>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            {/* Mode 1: Background */}
+                                            <div
+                                                onClick={() => setVideoPlayback('background')}
+                                                className={`cursor-pointer rounded-2xl p-4 border transition-all duration-300 flex flex-col justify-between h-28 ${
+                                                    videoPlayback === 'background'
+                                                        ? 'border-[#E5654B] bg-orange-50/30 shadow-sm ring-1 ring-[#E5654B]/20'
+                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                                        videoPlayback === 'background' ? 'bg-[#E5654B] text-white' : 'bg-gray-100 text-gray-400'
+                                                    }`}>1</span>
+                                                    <svg className={`w-5 h-5 ${videoPlayback === 'background' ? 'text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs font-bold text-gray-800">Latar Belakang Saja (Muted)</div>
+                                                    <p className="text-[10px] text-gray-400 mt-0.5 leading-relaxed">Video diputar otomatis senyap di latar belakang pembuka.</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Mode 2: Gallery */}
+                                            <div
+                                                onClick={() => setVideoPlayback('gallery')}
+                                                className={`cursor-pointer rounded-2xl p-4 border transition-all duration-300 flex flex-col justify-between h-28 ${
+                                                    videoPlayback === 'gallery'
+                                                        ? 'border-[#E5654B] bg-orange-50/30 shadow-sm ring-1 ring-[#E5654B]/20'
+                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                                        videoPlayback === 'gallery' ? 'bg-[#E5654B] text-white' : 'bg-gray-100 text-gray-400'
+                                                    }`}>2</span>
+                                                    <svg className={`w-5 h-5 ${videoPlayback === 'gallery' ? 'text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs font-bold text-gray-800">Di Dalam Galeri Saja (Suara)</div>
+                                                    <p className="text-[10px] text-gray-400 mt-0.5 leading-relaxed">Video muncul di galeri dengan tombol putar bersuara.</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Mode 3: Both */}
+                                            <div
+                                                onClick={() => setVideoPlayback('both')}
+                                                className={`cursor-pointer rounded-2xl p-4 border transition-all duration-300 flex flex-col justify-between h-28 ${
+                                                    videoPlayback === 'both'
+                                                        ? 'border-[#E5654B] bg-orange-50/30 shadow-sm ring-1 ring-[#E5654B]/20'
+                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                                        videoPlayback === 'both' ? 'bg-[#E5654B] text-white' : 'bg-gray-100 text-gray-400'
+                                                    }`}>3</span>
+                                                    <svg className={`w-5 h-5 ${videoPlayback === 'both' ? 'text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs font-bold text-gray-800">Keduanya (Sangat Mewah)</div>
+                                                    <p className="text-[10px] text-gray-400 mt-0.5 leading-relaxed">Latar belakang senyap + pemutar di galeri bersuara.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <div className="flex justify-end border-t border-gray-100 pt-4">
+                                        <button
+                                            type="submit"
+                                            disabled={savingVideo}
+                                            className="px-5 py-2.5 bg-[#E5654B] hover:bg-[#b03a24] text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-orange-500/10 active:scale-[0.98]"
+                                        >
+                                            {savingVideo ? (
+                                                <>
+                                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                                    <span>Menyimpan...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Save className="w-3.5 h-3.5" />
+                                                    <span>Simpan Pengaturan Video</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
+                    </>
+                )}
+
+
+
+                {activeTab === 'photos' && (
+                    <>
+                        {/* Unified Photo Grid */}
+                        <div className="space-y-3">
                     <div className="flex items-center justify-between bg-orange-50/10 border border-orange-100/50 p-4 rounded-2xl">
                         <div>
                             <h3 className="text-xs font-extrabold uppercase tracking-wider text-orange-950">
@@ -672,6 +1056,8 @@ export default function Galeri({
                         </div>
                     )}
                 </div>
+                    </>
+                )}
             </div>
 
             {/* ═══ PREMIUM CENTRED MEDIA SETTINGS MODAL POPUP ═══ */}

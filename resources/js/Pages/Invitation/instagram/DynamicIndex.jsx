@@ -1087,14 +1087,61 @@ function ProfileStoryModal({ story, onClose }) {
 /* ═══════════════════════════════════════
    GALERI SECTION (InstaVite Profile Post Grid)
    ═══════════════════════════════════════ */
-function GallerySection({ galleries, language }) {
+function GallerySection({ galleries, language, invitation }) {
     const { t, locale } = useTranslation(language);
-    const safeGalleries = safeArr(galleries);
     const [selectedPhoto, setSelectedPhoto] = useState(null);
     const [brokenImages, setBrokenImages] = useState({});
     const [likedPosts, setLikedPosts] = useState({});
+    const safeGalleries = safeArr(galleries);
 
-    if (safeGalleries.length === 0 || !globalShowPhotos) return null;
+    const getYoutubeId = (url) => {
+        if (!url) return '';
+        let id = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            id = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            id = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            id = url.split('embed/')[1]?.split('?')[0];
+        }
+        return id;
+    };
+
+    // Combine photos and videos
+    const galleryItems = [];
+
+    if (globalShowPhotos) {
+        safeGalleries.forEach((g, idx) => {
+            galleryItems.push({
+                type: 'photo',
+                id: g.id || idx,
+                src: getStorageUrl(g.image_url),
+                caption: g.caption,
+                indexKey: g.id || idx
+            });
+        });
+    }
+
+    const showVideoInGallery = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideoInGallery) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                galleryItems.push({
+                    type: 'video',
+                    id: 'video-' + idx,
+                    ytId: ytId,
+                    src: 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg',
+                    caption: locale === 'en' ? ('Prewedding Video Moment #' + (idx + 1)) : ('Momen Video Prewedding #' + (idx + 1)),
+                    indexKey: 'video-' + idx
+                });
+            }
+        });
+    }
+
+    if (galleryItems.length === 0) return null;
 
     const handleImgError = (idx) => {
         setBrokenImages(prev => ({ ...prev, [idx]: true }));
@@ -1102,6 +1149,24 @@ function GallerySection({ galleries, language }) {
 
     const toggleLikePost = (id) => {
         setLikedPosts(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    const handleOpenPost = (item) => {
+        setSelectedPhoto(item);
+        if (item.type === 'video') {
+            const audioEl = document.querySelector('audio');
+            if (audioEl) {
+                audioEl.pause();
+            }
+        }
+    };
+
+    const handleClosePost = () => {
+        setSelectedPhoto(null);
+        const audioEl = document.querySelector('audio');
+        if (audioEl) {
+            audioEl.play().catch(() => {});
+        }
     };
 
     return (
@@ -1117,15 +1182,30 @@ function GallerySection({ galleries, language }) {
             </div>
 
             <div className="ig-gallery-grid-layout">
-                {safeGalleries.map((g, idx) => {
-                    const src = getStorageUrl(g.image_url);
-                    if (brokenImages[idx]) return null;
-                    const isLiked = likedPosts[g.id || idx];
+                {galleryItems.map((item, idx) => {
+                    const isVideo = item.type === 'video';
+                    if (brokenImages[idx] && !isVideo) return null;
+                    const isLiked = likedPosts[item.id];
                     const likeCount = isLiked ? 1000 : 999;
                     return (
-                        <Reveal key={g.id || idx} className="ig-gallery-post-item" variant="zoom" delay={(idx % 3) * 80}>
-                            <div className="ig-gallery-post-img-box" onClick={() => setSelectedPhoto({ ...g, src, indexKey: g.id || idx })}>
-                                <img src={src} alt={g.caption || 'Gallery'} className="ig-gallery-img" onError={() => handleImgError(idx)} loading="lazy" />
+                        <Reveal key={item.id} className="ig-gallery-post-item" variant="zoom" delay={(idx % 3) * 80}>
+                            <div className="ig-gallery-post-img-box" onClick={() => handleOpenPost(item)} style={{ position: 'relative' }}>
+                                <img src={item.src} alt={item.caption || 'Gallery'} className="ig-gallery-img" onError={() => handleImgError(idx)} loading="lazy" />
+                                
+                                {isVideo && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        right: '8px',
+                                        color: '#ffffff',
+                                        fontSize: '15px',
+                                        textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                        zIndex: 10
+                                    }}>
+                                        <i className="fas fa-video" />
+                                    </div>
+                                )}
+                                
                                 <div className="ig-gallery-post-hover-overlay">
                                     <span><i className="fas fa-heart" style={{ color: isLiked ? '#ff3040' : '#ffffff' }} /> {likeCount}</span>
                                     <span><i className="fas fa-comment" /> 45</span>
@@ -1138,23 +1218,39 @@ function GallerySection({ galleries, language }) {
 
             {/* InstaVite Post Detail Modal Overlay */}
             {selectedPhoto && (() => {
-                const id = selectedPhoto.indexKey;
+                const id = selectedPhoto.id;
                 const isLiked = likedPosts[id];
                 const likesCount = isLiked ? 9943 : 9942;
+                const isVideo = selectedPhoto.type === 'video';
                 return (
-                    <div className="ig-post-detail-modal" onClick={() => setSelectedPhoto(null)}>
+                    <div className="ig-post-detail-modal" onClick={handleClosePost}>
                         <div className="ig-post-modal-content" onClick={(e) => e.stopPropagation()}>
                             <div className="ig-modal-header">
-                                <span className="ig-modal-user-avatar"><i className="fas fa-heart" /></span>
-                                <span className="ig-modal-username">our.love.posts</span>
-                                <button className="ig-modal-close-btn" onClick={() => setSelectedPhoto(null)}><i className="fas fa-times" /></button>
+                                <span className="ig-modal-user-avatar" style={{ backgroundColor: isVideo ? '#e1306c' : 'var(--ig-primary)' }}><i className={isVideo ? "fas fa-video" : "fas fa-heart"} /></span>
+                                <span className="ig-modal-username">{isVideo ? 'our.love.reels' : 'our.love.posts'}</span>
+                                <button className="ig-modal-close-btn" onClick={handleClosePost}><i className="fas fa-times" /></button>
                             </div>
-                            <div className="ig-modal-photo-wrap">
-                                <img src={selectedPhoto.src} alt={selectedPhoto.caption} />
+                            <div className="ig-modal-photo-wrap" style={{ aspectRatio: isVideo ? '16/9' : 'auto', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {isVideo ? (
+                                    <iframe 
+                                        src={'https://www.youtube.com/embed/' + selectedPhoto.ytId + '?autoplay=1&rel=0&showinfo=0&controls=1&mute=0'}
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            aspectRatio: '16/9',
+                                            border: 'none'
+                                        }}
+                                    />
+                                ) : (
+                                    <img src={selectedPhoto.src} alt={selectedPhoto.caption} />
+                                )}
                             </div>
                             <div className="ig-modal-action-bar">
                                 <div className="ig-modal-action-left" onClick={() => toggleLikePost(id)} style={{ cursor: 'pointer' }}>
-                                    <i className={`${isLiked ? 'fas fa-heart' : 'far fa-heart'} ig-heart-modal`} style={{ color: isLiked ? '#ff3040' : 'var(--ig-text)' }} />
+                                    <i className={(isLiked ? 'fas fa-heart' : 'far fa-heart') + ' ig-heart-modal'} style={{ color: isLiked ? '#ff3040' : 'var(--ig-text)' }} />
                                     <i className="far fa-comment" style={{ marginLeft: 14 }} />
                                     <i className="far fa-paper-plane" style={{ marginLeft: 14 }} />
                                 </div>
@@ -1170,7 +1266,7 @@ function GallerySection({ galleries, language }) {
                                 )}
                             </div>
                             <div className="ig-modal-caption-text">
-                                <strong>our.love.posts</strong> {selectedPhoto.caption || 'Captured moments of our journey.'}
+                                <strong>{isVideo ? 'our.love.reels' : 'our.love.posts'}</strong> {selectedPhoto.caption || 'Captured moments of our journey.'}
                             </div>
                         </div>
                     </div>
@@ -1179,7 +1275,6 @@ function GallerySection({ galleries, language }) {
         </section>
     );
 }
-
 /* ═══════════════════════════════════════
    HADIAH SECTION (InstaVite Product Shop List UI)
    ═══════════════════════════════════════ */

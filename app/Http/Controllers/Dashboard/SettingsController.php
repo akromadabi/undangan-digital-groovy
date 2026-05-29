@@ -29,6 +29,7 @@ class SettingsController extends Controller
     {
         $request->validate([
             'cover_image' => 'nullable|string|max:500',
+            'cover_video_url' => 'nullable|string|max:500',
             'cover_title' => 'nullable|string|max:200',
             'cover_subtitle' => 'nullable|string|max:200',
             'is_private' => 'nullable|boolean',
@@ -39,6 +40,7 @@ class SettingsController extends Controller
         $invitation = $this->getUserInvitation($request);
         $invitation->update($request->only([
             'cover_image',
+            'cover_video_url',
             'cover_title',
             'cover_subtitle',
             'is_private',
