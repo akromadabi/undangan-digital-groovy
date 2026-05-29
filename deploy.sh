@@ -34,6 +34,7 @@ npm run build
 
 echo "🗄️ 5. Menjalankan migrasi database..."
 php artisan migrate --force
+php artisan db:seed --force
 
 echo "🧹 6. Membersihkan dan menyusun cache aplikasi..."
 php artisan optimize:clear
