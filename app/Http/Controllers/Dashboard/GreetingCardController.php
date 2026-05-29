@@ -238,8 +238,9 @@ class GreetingCardController extends Controller
         $qrApiUrl = "https://quickchart.io/qr?text=" . urlencode($cardUrl) . "&size=" . $qrSize . "&dark=e11d48&light=00000000&margin=1&centerImageUrl=" . urlencode($qrCenterIcon);
         
         try {
-            $qrData = file_get_contents($qrApiUrl);
-            if ($qrData) {
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(8)->get($qrApiUrl);
+            if ($response->successful()) {
+                $qrData = $response->body();
                 $qrIm = imagecreatefromstring($qrData);
                 if ($qrIm) {
                     $qw = imagesx($qrIm);
@@ -322,8 +323,9 @@ class GreetingCardController extends Controller
             // Draw a basic high contrast square QR fallback on deep background if API fails
             $qrFallbackApi = "https://quickchart.io/qr?text=" . urlencode($cardUrl) . "&size=" . $qrSize . "&dark=ffffff&light=000000";
             try {
-                $qrFallbackData = file_get_contents($qrFallbackApi);
-                if ($qrFallbackData) {
+                $responseFallback = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(5)->get($qrFallbackApi);
+                if ($responseFallback->successful()) {
+                    $qrFallbackData = $responseFallback->body();
                     $fbIm = imagecreatefromstring($qrFallbackData);
                     if ($fbIm) {
                         imagecopyresampled($im, $fbIm, $cx - $qrSize/2, $cy - $qrSize/2, 0, 0, $qrSize, $qrSize, imagesx($fbIm), imagesy($fbIm));
@@ -333,10 +335,10 @@ class GreetingCardController extends Controller
             } catch (\Exception $ex) {}
         }
  
-         // Save generated image to cache and output it
-         imagepng($im, $cachePath);
+        // Save generated image to cache and output it
+        imagepng($im, $cachePath);
         imagedestroy($im);
-
+ 
         return response()->file($cachePath, [
             'Content-Type' => 'image/png',
             'Cache-Control' => 'public, max-age=86400',
