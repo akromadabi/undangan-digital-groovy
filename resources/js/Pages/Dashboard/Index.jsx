@@ -1,3 +1,4 @@
+import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Mail, Sparkles, PhoneCall, LayoutDashboard } from 'lucide-react';
