@@ -264,11 +264,27 @@ export default function Form({ theme, plans = [] }) {
                 body: formData,
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
             });
+            
+            if (!response.ok) {
+                const contentType = response.headers.get("content-type");
+                let errorMessage = `Server error: ${response.status}`;
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const errorJson = await response.json();
+                    errorMessage = errorJson.message || errorJson.error || errorMessage;
+                } else {
+                    const errorText = await response.text();
+                    errorMessage = errorText.substring(0, 150) + '...';
+                }
+                throw new Error(errorMessage);
+            }
+
             const result = await response.json();
             setData('thumbnail', result.url);
             setThumbnailPreview(getThumbnailUrl(result.url));
         } catch (err) {
             console.error('Upload failed:', err);
+            alert(`Gagal mengunggah thumbnail: ${err.message}`);
+            setThumbnailPreview(getThumbnailUrl(data.thumbnail));
         } finally {
             setUploading(false);
         }
@@ -299,6 +315,20 @@ export default function Form({ theme, plans = [] }) {
                 body: formData,
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
             });
+
+            if (!response.ok) {
+                const contentType = response.headers.get("content-type");
+                let errorMessage = `Server error: ${response.status}`;
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const errorJson = await response.json();
+                    errorMessage = errorJson.message || errorJson.error || errorMessage;
+                } else {
+                    const errorText = await response.text();
+                    errorMessage = errorText.substring(0, 150) + '...';
+                }
+                throw new Error(errorMessage);
+            }
+
             const result = await response.json();
             const nextImages = [...(data.preview_images || [])];
             nextImages[index] = result.url;
@@ -319,6 +349,10 @@ export default function Form({ theme, plans = [] }) {
             }
         } catch (err) {
             console.error('Upload failed:', err);
+            alert(`Gagal mengunggah screenshot HP #${index + 1}: ${err.message}`);
+            const nextPreviews = [...previewImagesPreviews];
+            nextPreviews[index] = getThumbnailUrl(data.preview_images[index]);
+            setPreviewImagesPreviews(nextPreviews);
         } finally {
             setUploadingIndex(null);
         }
@@ -333,12 +367,13 @@ export default function Form({ theme, plans = [] }) {
         setPreviewImagesPreviews(nextPreviews);
 
         if (index === 0) {
+            const nextThumbnail = nextImages[0] || '';
             setData({
                 ...data,
                 preview_images: nextImages,
-                thumbnail: ''
+                thumbnail: nextThumbnail
             });
-            setThumbnailPreview('');
+            setThumbnailPreview(getThumbnailUrl(nextThumbnail));
         } else {
             setData('preview_images', nextImages);
         }

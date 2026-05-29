@@ -190,10 +190,25 @@ export default function ThemesCatalog({ themes }) {
                 body: formData,
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
             });
+
+            if (!response.ok) {
+                const contentType = response.headers.get("content-type");
+                let errorMessage = `Server error: ${response.status}`;
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const errorJson = await response.json();
+                    errorMessage = errorJson.message || errorJson.error || errorMessage;
+                } else {
+                    const errorText = await response.text();
+                    errorMessage = errorText.substring(0, 150) + '...';
+                }
+                throw new Error(errorMessage);
+            }
+
             const result = await response.json();
             setData('thumbnail', result.url);
         } catch (err) {
             console.error('Upload failed:', err);
+            alert(`Gagal mengunggah thumbnail: ${err.message}`);
         } finally {
             setUploading(false);
         }
@@ -214,6 +229,20 @@ export default function ThemesCatalog({ themes }) {
                 body: formData,
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
             });
+
+            if (!response.ok) {
+                const contentType = response.headers.get("content-type");
+                let errorMessage = `Server error: ${response.status}`;
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const errorJson = await response.json();
+                    errorMessage = errorJson.message || errorJson.error || errorMessage;
+                } else {
+                    const errorText = await response.text();
+                    errorMessage = errorText.substring(0, 150) + '...';
+                }
+                throw new Error(errorMessage);
+            }
+
             const result = await response.json();
             const nextImages = [...(data.preview_images || [])];
             nextImages[index] = result.url;
@@ -229,6 +258,7 @@ export default function ThemesCatalog({ themes }) {
             }
         } catch (err) {
             console.error('Upload failed:', err);
+            alert(`Gagal mengunggah screenshot HP #${index + 1}: ${err.message}`);
         } finally {
             setUploadingIndex(null);
         }
@@ -239,10 +269,11 @@ export default function ThemesCatalog({ themes }) {
         nextImages.splice(index, 1);
 
         if (index === 0) {
+            const nextThumbnail = nextImages[0] || '';
             setData({
                 ...data,
                 preview_images: nextImages,
-                thumbnail: ''
+                thumbnail: nextThumbnail
             });
         } else {
             setData('preview_images', nextImages);
