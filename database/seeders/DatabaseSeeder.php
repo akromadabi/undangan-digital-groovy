@@ -207,9 +207,11 @@ class DatabaseSeeder extends Seeder
 
         $defaultTheme = Theme::where('slug', 'utary')->first();
 
-        // ═══════════════════════════════════════
-        // 6. GLOBAL SETTINGS
-        // ═══════════════════════════════════════
+        // Only seed global settings and dummy data if the database has not been initialized
+        if (!GlobalSetting::where('setting_key', 'site_name')->exists()) {
+            // ═══════════════════════════════════════
+            // 6. GLOBAL SETTINGS
+            // ═══════════════════════════════════════
         $settings = [
             // General
             ['setting_key' => 'site_name', 'setting_value' => 'Undangan Digital Groovy', 'setting_type' => 'string', 'category' => 'general', 'description' => 'Nama situs'],
@@ -565,6 +567,7 @@ class DatabaseSeeder extends Seeder
                 'custom_url' => \App\Models\GreetingCard::generateUniqueSlug(),
                 'is_active' => true,
             ]);
+        }
         }
     }
 }
