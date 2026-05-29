@@ -851,7 +851,11 @@
                 <a-entity light="type: point; color: #FFD700; intensity: 0.8; distance: 5" position="1.5 1 0"></a-entity>
             @endif
 
+        @if($hasNft)
+        </a-nft>
+        @else
         </a-marker>
+        @endif
         <!-- ── Active Camera ── -->
         <a-entity camera></a-entity>
     </a-scene>
