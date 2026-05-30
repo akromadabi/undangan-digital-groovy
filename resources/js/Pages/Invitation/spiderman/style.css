@@ -1507,3 +1507,99 @@
     transform: translateY(-100%);
     opacity: 0;
 }
+
+/* ═══════════════════════════════════════
+   CREATIVE SPIDER-MAN ANIMATIONS & DIVIDERS
+   ═══════════════════════════════════════ */
+.spy-swinging-spider-global {
+    position: fixed;
+    top: -350px;
+    right: 8%;
+    width: 40px;
+    height: 350px;
+    z-index: 99;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: spySpiderSwingDown 22s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.spy-thread {
+    width: 1.5px;
+    height: 230px;
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+.spy-swinging-spider-global svg {
+    filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, 0.5));
+    animation: spySpiderDangle 2.5s ease-in-out infinite alternate;
+    transform-origin: 50% 0%;
+}
+
+@keyframes spySpiderSwingDown {
+    0%, 15% { top: -350px; }
+    22%, 48% { top: 0px; }
+    58%, 100% { top: -350px; }
+}
+
+@keyframes spySpiderDangle {
+    0% { transform: rotate(-6deg); }
+    100% { transform: rotate(6deg); }
+}
+
+/* Twitching legs simulation */
+.spy-leg-1, .spy-leg-3 {
+    animation: spyLegTwitch1 0.35s ease-in-out infinite alternate;
+}
+.spy-leg-2, .spy-leg-4 {
+    animation: spyLegTwitch2 0.35s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes spyLegTwitch1 {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(1.2px) rotate(1.5deg); }
+}
+@keyframes spyLegTwitch2 {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-1.2px) rotate(-1.5deg); }
+}
+
+/* Web section dividers */
+.spy-section-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 90%;
+    margin: 32px auto;
+    position: relative;
+    z-index: 2;
+}
+
+.spy-divider-line {
+    flex-grow: 1;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--spidey-red), transparent);
+    box-shadow: 0 0 6px var(--spidey-red);
+    opacity: 0.8;
+}
+
+.spy-divider-web-center {
+    margin: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 4px var(--spidey-accent));
+}
+
+.spy-divider-web-center svg {
+    animation: spyWebPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes spyWebPulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    100% { transform: scale(1.05); opacity: 1; }
+}
+

@@ -203,6 +203,57 @@ function SpideyWebBackground() {
 }
 
 /* ═══════════════════════════════════════
+   SPIDER-MAN SWINGING SPIDER
+   ═══════════════════════════════════════ */
+function SpideySwingingSpider() {
+    return (
+        <div className="spy-swinging-spider-global">
+            <div className="spy-thread" />
+            <svg width="32" height="32" viewBox="0 0 100 100" fill="#000000" xmlns="http://www.w3.org/2000/svg">
+                {/* Spider Body */}
+                <circle cx="50" cy="45" r="12" />
+                <circle cx="50" cy="65" r="18" />
+                {/* Spider Eyes (Glowing Red!) */}
+                <circle cx="45" cy="73" r="2.5" fill="#E60012" />
+                <circle cx="55" cy="73" r="2.5" fill="#E60012" />
+                {/* Left Legs */}
+                <path d="M40 45 C 20 40, 15 20, 10 30" stroke="#000000" strokeWidth="4.5" fill="none" strokeLinecap="round" className="spy-leg-1" />
+                <path d="M38 52 C 15 50, 10 35, 5 50" stroke="#000000" strokeWidth="4.5" fill="none" strokeLinecap="round" className="spy-leg-2" />
+                <path d="M38 60 C 15 65, 10 55, 8 70" stroke="#000000" strokeWidth="4.5" fill="none" strokeLinecap="round" className="spy-leg-3" />
+                <path d="M42 68 C 20 80, 15 75, 15 90" stroke="#000000" strokeWidth="4.5" fill="none" strokeLinecap="round" className="spy-leg-4" />
+                {/* Right Legs */}
+                <path d="M60 45 C 80 40, 85 20, 90 30" stroke="#000000" strokeWidth="4.5" fill="none" strokeLinecap="round" className="spy-leg-1" />
+                <path d="M62 52 C 85 50, 90 35, 95 50" stroke="#000000" strokeWidth="4.5" fill="none" strokeLinecap="round" className="spy-leg-2" />
+                <path d="M62 60 C 85 65, 90 55, 92 70" stroke="#000000" strokeWidth="4.5" fill="none" strokeLinecap="round" className="spy-leg-3" />
+                <path d="M58 68 C 80 80, 85 75, 85 90" stroke="#000000" strokeWidth="4.5" fill="none" strokeLinecap="round" className="spy-leg-4" />
+            </svg>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   SPIDER-MAN SECTION DIVIDER
+   ═══════════════════════════════════════ */
+function SpideySectionDivider() {
+    return (
+        <div className="spy-section-divider">
+            <div className="spy-divider-line" />
+            <div className="spy-divider-web-center">
+                <svg width="60" height="30" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0 L50 40 L100 0" stroke="var(--spidey-accent)" strokeWidth="1.5" opacity="0.6" fill="none" />
+                    <path d="M20 0 Q50 30 80 0" stroke="var(--spidey-accent)" strokeWidth="1.2" fill="none" opacity="0.6" />
+                    <path d="M35 0 Q50 20 65 0" stroke="var(--spidey-accent)" strokeWidth="1" fill="none" opacity="0.6" />
+                    <circle cx="50" cy="35" r="8" fill="var(--spidey-red)" stroke="#000000" strokeWidth="1.5" />
+                    <path d="M47 33 C46 32, 49 35, 49 35" fill="none" stroke="#000" strokeWidth="0.8" />
+                    <path d="M53 33 C54 32, 51 35, 51 35" fill="none" stroke="#000" strokeWidth="0.8" />
+                </svg>
+            </div>
+            <div className="spy-divider-line" />
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
    COVER SECTION (Animated Comic Cover)
    ═══════════════════════════════════════ */
 function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale }) {
@@ -1239,6 +1290,24 @@ export default function DynamicIndex({
     const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
     const { t, locale } = useTranslation(activeLanguage);
 
+    const couples = safeArr(brideGrooms);
+    const celebrant = couples[0] || {};
+
+    const celebrantAge = useMemo(() => {
+        if (!celebrant.birth_date || !events[0]?.event_date) {
+            const subtitle = invitation?.cover_subtitle || '';
+            const match = subtitle.match(/\b\d+\b/);
+            return match ? match[0] : null;
+        }
+        try {
+            const birthYear = new Date(celebrant.birth_date).getFullYear();
+            const eventYear = new Date(events[0].event_date).getFullYear();
+            return eventYear - birthYear;
+        } catch (e) {
+            return null;
+        }
+    }, [celebrant.birth_date, events, invitation?.cover_subtitle]);
+
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(false);
@@ -1558,8 +1627,12 @@ export default function DynamicIndex({
                         <div className="spy-comic-panel">
                             <SpideyMask size={70} style={{ margin: '0 auto 15px auto', display: 'block' }} />
                             <span className="spy-title-badge">AWESOME CELEBRATION</span>
-                            <h2 className="spy-comic-title" style={{ fontSize: '3rem' }}>{invitation?.cover_title || 'PETER PARKER'}</h2>
-                            <p className="spy-kids-order">{locale === 'en' ? "IS TURNING FIVE!" : "MEMASUKI USIA 5 TAHUN!"}</p>
+                            <h2 className="spy-comic-title" style={{ fontSize: '3rem' }}>{invitation?.cover_title || (celebrant.full_name || 'CELEBRANT').toUpperCase()}</h2>
+                            <p className="spy-kids-order">
+                                {celebrantAge 
+                                    ? (locale === 'en' ? `IS TURNING ${celebrantAge}!` : `MEMASUKI USIA ${celebrantAge} TAHUN!`)
+                                    : (locale === 'en' ? "BIRTHDAY PARTY CELEBRATION!" : "PERAYAAN HARI ULANG TAHUN!")}
+                            </p>
                             <p style={{ color: '#fff', marginTop: '15px' }}>
                                 {locale === 'en' 
                                     ? 'Scroll down or use menu navigation below to see full invitation details.'
@@ -1618,6 +1691,7 @@ export default function DynamicIndex({
     return (
         <ErrorBoundary>
             <div className={`spy-body ${!showAnimations ? 'spy-no-animations' : ''}`}>
+                <SpideySwingingSpider />
                 {/* Audio Reference Tag */}
                 {invitation?.music_url && (
                     <audio 
@@ -1656,7 +1730,12 @@ export default function DynamicIndex({
                         resolvedSections.map((s, idx) => renderSectionComponent(s, idx))
                     ) : (
                         <div className="spy-vertical-stack">
-                            {resolvedSections.map((s, idx) => renderSectionComponent(s, idx))}
+                            {resolvedSections.map((s, idx) => (
+                                <React.Fragment key={s.section_key || idx}>
+                                    {renderSectionComponent(s, idx)}
+                                    {idx < resolvedSections.length - 1 && s.section_key !== 'hero' && s.section_key !== 'closing' && <SpideySectionDivider />}
+                                </React.Fragment>
+                            ))}
                         </div>
                     )}
                 </div>

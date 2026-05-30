@@ -1,0 +1,476 @@
+(function($){
+    'use strict';
+
+    var handlersReady = false;
+    var DEBUG = false; // Set false to disable logs
+
+    /**
+     * Escape HTML special characters to prevent XSS.
+     * Used whenever user-sourced data (sticker names, URLs, pack names) is
+     * inserted into innerHTML strings.
+     */
+    function escHtml(str) {
+        if (!str) return '';
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function log(){
+        if(!DEBUG) return;
+        var args = ['[MagicComment]'];
+        for(var i=0;i<arguments.length;i++) args.push(arguments[i]);
+        console.log.apply(console, args);
+    }
+
+    function registerHandlers(){
+        if(handlersReady) return;
+        handlersReady = true;
+        log('Registering event handlers');
+
+        $(document).on('click','.mgcm-picker-trigger',function(e){
+            e.preventDefault();e.stopPropagation();
+            var dd=$(this).closest('.mgcm-picker-wrap').find('.mgcm-picker-dropdown');
+            $('.mgcm-picker-dropdown').not(dd).hide();
+            dd.toggle();
+        });
+        $(document).on('click',function(e){
+            if(!$(e.target).closest('.mgcm-picker-wrap').length) $('.mgcm-picker-dropdown').hide();
+        });
+        $(document).on('click','.mgcm-tab-btn',function(e){
+            e.preventDefault();e.stopPropagation();
+            var pk=$(this).data('pack'),dd=$(this).closest('.mgcm-picker-dropdown');
+            dd.find('.mgcm-tab-btn').removeClass('active');$(this).addClass('active');
+            dd.find('.mgcm-pack-panel').removeClass('active');
+            dd.find('.mgcm-pack-panel[data-pack="'+pk+'"]').addClass('active');
+        });
+        $(document).on('click','.mgcm-sticker-btn',function(e){
+            e.preventDefault();e.stopPropagation();
+            var wrap=$(this).closest('.mgcm-picker-wrap');
+            wrap.find('.mgcm-hidden-sticker').val($(this).data('code'));
+            wrap.find('.mgcm-selected-preview')
+                .html('<img src="'+escHtml($(this).data('url'))+'"><span class="mgcm-remove-sticker">&times;</span>')
+                .addClass('has-sticker');
+            wrap.find('.mgcm-picker-dropdown').hide();
+            log('Sticker selected:', $(this).data('code'));
+        });
+        $(document).on('click','.mgcm-remove-sticker',function(e){
+            e.preventDefault();e.stopPropagation();
+            var wrap=$(this).closest('.mgcm-picker-wrap');
+            wrap.find('.mgcm-hidden-sticker').val('');
+            wrap.find('.mgcm-selected-preview').empty().removeClass('has-sticker');
+        });
+        // Disable right click on stickers for security
+        $(document).on('contextmenu', '.mgcm-sticker-inline, .mgcm-sticker-btn img', function(e) {
+            e.preventDefault();
+        });
+        // Inject code into textarea before WeddingPress submit
+        $(document).on('mousedown click','.wdp-form-btn,.cui-form-btn,input[type="submit"]',function(e){
+            var form=$(this).closest('form');
+            var attSelect = form.find('.mgcm-attendance-select');
+            
+            if (attSelect.length && attSelect.prop('required') && !attSelect.val()) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.type === 'click') {
+                    alert('Silakan pilih Konfirmasi Kehadiran terlebih dahulu.');
+                }
+                return false;
+            }
+
+            if (e.type === 'mousedown') {
+                var hidden=form.find('.mgcm-hidden-sticker');
+                if(!hidden.length||!hidden.val()) return;
+                var ta=form.find('textarea').first();
+                if(!ta.length) return;
+                var code=hidden.val(),cur=ta.val();
+                if(cur.indexOf(code)===-1) ta.val(code+'\n\n'+cur);
+                log('Injected sticker code into textarea');
+                // Watch for WP clearing textarea after submit
+                var origLen=ta.val().length,checks=0;
+                var w=setInterval(function(){
+                    checks++;if(checks>30){clearInterval(w);return;}
+                    if(ta.val().length===0&&origLen>0){
+                        hidden.val('');
+                        form.find('.mgcm-selected-preview').empty().removeClass('has-sticker');
+                        clearInterval(w);
+                        // After submit, replace stickers in newly loaded comments
+                        setTimeout(replaceStickers,1000);
+                        setTimeout(replaceStickers,3000);
+                    }
+                },500);
+            }
+        });
+    }
+
+    function injectPickers(){
+        if(typeof MGCM_Data==='undefined'||!MGCM_Data.sticker_packs||!MGCM_Data.sticker_packs.length){
+            log('No MGCM_Data or sticker_packs');
+            return;
+        }
+        var allPacks=MGCM_Data.sticker_packs;
+        var widgets=$('[data-mgcm-enabled="yes"]');
+
+        // Frontend: find widgets by Elementor prefix_class or by hidden data div
+        $('.mgcm-stickers-yes').each(function(){
+            if(!$(this).attr('data-mgcm-enabled')){
+                $(this).attr('data-mgcm-enabled', 'yes');
+                widgets = widgets.add(this);
+            }
+        });
+
+        // Also find any widget containing the hidden data div (belt-and-suspenders)
+        $('.mgcm-widget-data-hidden[data-mgcm-text]').each(function(){
+            var w = $(this).closest('.elementor-widget');
+            if(w.length && !w.attr('data-mgcm-enabled')){
+                w.attr('data-mgcm-enabled', 'yes');
+                widgets = widgets.add(w);
+            }
+        });
+        
+        // Editor fallback: target widgets even if wrapper attribute is missing
+        if($('body').hasClass('elementor-editor-active') || $('body').hasClass('elementor-editor-preview')){
+            $('.elementor-widget-weddingpress-commentkit, .elementor-widget-weddingpress-kit2').each(function(){
+                if(!$(this).attr('data-mgcm-enabled')){
+                    if($(this).hasClass('mgcm-stickers-yes') || $(this).find('.mgcm-widget-data-hidden[data-mgcm-text]').length){
+                        $(this).attr('data-mgcm-enabled', 'yes');
+                        widgets = widgets.add(this);
+                    }
+                }
+            });
+        }
+        
+        log('Found',widgets.length,'widget(s) with stickers enabled');
+
+        widgets.each(function(){
+            var w=$(this);
+            // Hidden data is now inside the widget content
+            var hd = w.find('.mgcm-widget-data-hidden');
+            
+            var pos = (hd.length ? hd.attr('data-mgcm-pos') : w.attr('data-mgcm-pos')) || 'above';
+            var cols = (hd.length ? hd.attr('data-mgcm-cols') : w.attr('data-mgcm-cols')) || 3;
+            var rows = (hd.length ? hd.attr('data-mgcm-rows') : w.attr('data-mgcm-rows')) || 1;
+            var aStr = (hd.length ? hd.attr('data-mgcm-packs') : w.attr('data-mgcm-packs')) || '';
+            var btnText = (hd.length ? hd.attr('data-mgcm-text') : w.attr('data-mgcm-text')) || 'Pilih Stiker';
+            var btnIconB64 = (hd.length ? hd.attr('data-mgcm-icon') : w.attr('data-mgcm-icon')) || '';
+
+            var allowed=aStr?aStr.split(','):[];
+            var packs=[];
+            if(allowed.length){
+                for(var i=0;i<allPacks.length;i++){
+                    if(allowed.indexOf(allPacks[i].name)!==-1) packs.push(allPacks[i]);
+                }
+            } else {
+                packs=allPacks;
+            }
+            if(!packs.length) return;
+
+            var btnIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
+            if (btnIconB64) {
+                try { btnIcon = atob(btnIconB64); } catch(e){}
+            }
+
+            var forms=w.find('.form-submit');
+            forms.each(function(){
+                var fs=$(this);
+                if(fs.find('.mgcm-picker-wrap').length) return;
+
+                var h='<div class="mgcm-picker-wrap"><div class="mgcm-picker-row">';
+                h+='<button type="button" class="mgcm-picker-trigger">';
+                h+=btnIcon;
+                h+=' <span class="mgcm-btn-text-inner">' + btnText + '</span></button>';
+                h+='<div class="mgcm-selected-preview"></div>';
+                h+='</div>';
+                h+='<div class="mgcm-picker-dropdown mgcm-picker-'+pos+'" style="display:none;">';
+                h+='<div class="mgcm-picker-tabs">';
+                for(var i=0;i<packs.length;i++){
+                    h+='<button type="button" class="mgcm-tab-btn'+(i===0?' active':'')+'" data-pack="'+escHtml(packs[i].name)+'">'+escHtml(packs[i].name)+'</button>';
+                }
+                h+='</div><div class="mgcm-picker-content">';
+                for(var i=0;i<packs.length;i++){
+                    h+='<div class="mgcm-pack-panel'+(i===0?' active':'')+'" data-pack="'+escHtml(packs[i].name)+'" style="--cols:'+parseInt(cols,10)+'; grid-template-rows: repeat('+parseInt(rows,10)+', max-content);">';
+                    for(var j=0;j<packs[i].stickers.length;j++){
+                        var s=packs[i].stickers[j];
+                        h+='<button type="button" class="mgcm-sticker-btn" data-code="'+escHtml(s.code)+'" data-url="'+escHtml(s.url)+'"><img src="'+escHtml(s.url)+'" alt="'+escHtml(s.name)+'" loading="lazy"></button>';
+                    }
+                    h+='</div>';
+                }
+                h+='</div></div>';
+                h+='<input type="hidden" class="mgcm-hidden-sticker" value="">';
+                h+='</div>';
+                fs.prepend(h);
+            });
+        });
+    }
+
+    function replaceStickers(root){
+        if(typeof MGCM_Data==='undefined'||!MGCM_Data.sticker_map) return;
+        var map=MGCM_Data.sticker_map;
+        var parent = root ? $(root) : $(document);
+        var els=parent.find('.wdp-comment-text, .cui-comment-text');
+        if(parent.is('.wdp-comment-text, .cui-comment-text')) els = els.add(parent);
+        
+        els.each(function(){
+            var el=$(this);
+            var html=el.html(),changed=false;
+            if(!html || (html.indexOf(':mgcm_')===-1 && html.indexOf('[stiker_')===-1)) return; // quick skip
+            
+            var newHtml = html.replace(/(?::mgcm_|\[stiker_)[a-zA-Z0-9]+(?::|\])/g, function(match) {
+                if(map[match]) {
+                    changed = true;
+                    var d = map[match];
+                    return '<img class="mgcm-sticker mgcm-sticker-inline" style="display:block; margin-bottom:10px;" src="'+escHtml(d.url)+'" alt="'+escHtml(d.name)+'" loading="lazy">';
+                }
+                return match;
+            });
+            
+            if(changed) el.html(newHtml);
+        });
+    }
+
+    // Setup MutationObserver to catch dynamically added comments instantly
+    function setupObserver() {
+        if(typeof MutationObserver === 'undefined') return;
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if(mutation.addedNodes && mutation.addedNodes.length > 0) {
+                    for(var i=0; i<mutation.addedNodes.length; i++) {
+                        var node = mutation.addedNodes[i];
+                        if(node.nodeType === 1) { // Element node
+                            if($(node).find('.wdp-comment-text, .cui-comment-text').length > 0 || $(node).is('.wdp-comment-text, .cui-comment-text')) {
+                                replaceStickers(node);
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    function injectAttendanceButtons() {
+        var widgets = $('.elementor-widget-weddingpress-commentkit, .elementor-widget-weddingpress-kit2');
+
+        widgets.each(function() {
+            var w = $(this);
+            var hd = w.find('.mgcm-widget-data-hidden');
+            
+            // Check if feature is enabled via hidden data (more reliable in Elementor editor)
+            // Or via wrapper attribute (fallback for frontend)
+            var enabled = (hd.length && hd.attr('data-mgcm-att_btn') === 'yes') || w.attr('data-mgcm-attendance-btn') === 'yes';
+            var hideAttStr = (hd.length && hd.attr('data-mgcm-hide_att')) ? hd.attr('data-mgcm-hide_att') : ((hd.length && hd.attr('data-mgcm-hide-att')) ? hd.attr('data-mgcm-hide-att') : (w.attr('data-mgcm-hide-att') || ''));
+            var hideAttArr = hideAttStr ? hideAttStr.split(',') : [];
+            
+            if (!enabled) {
+                // Feature is disabled, make sure to restore original select
+                var form = w.find('form');
+                if (form.length) {
+                    var select = form.find('select');
+                    select.siblings('.mgcm-attendance-card').remove();
+                    
+                    if (hideAttArr.length > 0) {
+                        var originalOptionsCount = 0;
+                        var hiddenOptionsCount = 0;
+                        select.find('option').each(function() {
+                            var val = $(this).val();
+                            var text = $(this).text();
+                            if (!val) return;
+                            originalOptionsCount++;
+                            var isHidden = false;
+                            for (var i = 0; i < hideAttArr.length; i++) {
+                                if (hideAttArr[i]) {
+                                    var searchStr = hideAttArr[i].toLowerCase();
+                                    // Make sure Hadir doesn't hide Tidak Hadir
+                                    if (searchStr === 'hadir' && (val.toLowerCase().indexOf('tidak') !== -1 || text.toLowerCase().indexOf('tidak') !== -1)) {
+                                        continue;
+                                    }
+                                    if (val.toLowerCase().indexOf(searchStr) !== -1 || text.toLowerCase().indexOf(searchStr) !== -1) {
+                                        isHidden = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (isHidden) {
+                                $(this).hide().attr('disabled', 'disabled');
+                                hiddenOptionsCount++;
+                            } else {
+                                $(this).show().removeAttr('disabled');
+                            }
+                        });
+                        
+                        if (originalOptionsCount > 0 && hiddenOptionsCount >= originalOptionsCount) {
+                            select.removeAttr('required');
+                            select.closest('div, p').hide();
+                            var firstOpt = select.find('option[value!=""]').first();
+                            if(firstOpt.length) select.val(firstOpt.val()).trigger('change');
+                        } else {
+                            select.closest('div, p').show();
+                            select.show();
+                        }
+                    } else {
+                        select.closest('div, p').show();
+                        select.show();
+                    }
+                }
+                return;
+            }
+
+            var forms = w.find('form');
+            forms.each(function() {
+                var form = $(this);
+                // Usually the attendance is the only select or the one containing 'Hadir'
+                var select = form.find('select');
+                if (!select.length) return;
+                
+                // Remove old card to support live preview updates
+                select.siblings('.mgcm-attendance-card').remove();
+
+                // Hide original select
+                select.hide().addClass('mgcm-attendance-select');
+                
+                var group = $('<div class="mgcm-attendance-group"></div>');
+                var placeholderText = '';
+                var originalOptionsCount = 0;
+                
+                select.find('option').each(function() {
+                    var val = $(this).val();
+                    var text = $(this).text();
+                    
+                    // The option with empty value is usually the placeholder ("Konfirmasi Kehadiran")
+                    if (!val) {
+                        placeholderText = text;
+                        return;
+                    }
+                    
+                    originalOptionsCount++;
+
+                    var isHidden = false;
+                    for (var i = 0; i < hideAttArr.length; i++) {
+                        if (hideAttArr[i]) {
+                            var searchStr = hideAttArr[i].toLowerCase();
+                            // Make sure Hadir doesn't hide Tidak Hadir
+                            if (searchStr === 'hadir' && (val.toLowerCase().indexOf('tidak') !== -1 || text.toLowerCase().indexOf('tidak') !== -1)) {
+                                continue;
+                            }
+                            if (val.toLowerCase().indexOf(searchStr) !== -1 || text.toLowerCase().indexOf(searchStr) !== -1) {
+                                isHidden = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (isHidden) {
+                        return; // Skip this option because it's hidden
+                    }
+                    
+                    var btn = $('<button type="button" class="mgcm-attendance-btn" data-value="'+escHtml(val)+'">'+escHtml(text)+'</button>');
+                    
+                    if (select.val() === val) btn.addClass('active');
+                    
+                    btn.on('click', function(e) {
+                        e.preventDefault();
+                        group.find('.mgcm-attendance-btn').removeClass('active');
+                        $(this).addClass('active');
+                        select.val(val).trigger('change');
+                    });
+                    
+                    group.append(btn);
+                });
+                
+                var btnCount = group.find('.mgcm-attendance-btn').length;
+                if (btnCount === 0 && hideAttArr.length > 0 && originalOptionsCount > 0) {
+                    // All options are hidden, remove required
+                    select.removeAttr('required');
+                    
+                    // Hide parent wrapper so it doesn't leave an empty space in the editor/live
+                    select.closest('div, p').hide();
+
+                    // Select a default value so form validation passes if there's any hidden required behavior
+                    var firstOpt = select.find('option[value!=""]').first();
+                    if(firstOpt.length) select.val(firstOpt.val()).trigger('change');
+                } else {
+                    select.closest('div, p').show();
+                }
+
+                if (btnCount > 0) {
+                    var card = $('<div class="mgcm-attendance-card"></div>');
+                    
+                    // Add the label if placeholder exists
+                    if (placeholderText) {
+                        var label = $('<div class="mgcm-attendance-label">'+escHtml(placeholderText)+'</div>');
+                        card.append(label);
+                    }
+                    
+                    card.append(group);
+                    select.after(card);
+                } else {
+                    // If everything is hidden, maybe we hide the select entirely if not already
+                    // (It's already hidden above by select.hide())
+                }
+            });
+        });
+    }
+
+    function run(){
+        log('run() called');
+        registerHandlers();
+        injectPickers();
+        injectAttendanceButtons();
+        replaceStickers();
+    }
+
+    // Normal page
+    $(document).ready(function(){
+        log('document.ready');
+        setupObserver();
+        run();
+    });
+
+    // Elementor editor
+    $(window).on('elementor/frontend/init',function(){
+        log('elementor/frontend/init fired');
+        setTimeout(function(){
+            run();
+            if(typeof elementorFrontend!=='undefined'&&elementorFrontend.hooks){
+                log('Registering elementor element_ready hooks');
+                var h=function($s){log('element_ready fired for widget');setTimeout(run,300);};
+                elementorFrontend.hooks.addAction('frontend/element_ready/weddingpress-kit2.default',h);
+                elementorFrontend.hooks.addAction('frontend/element_ready/weddingpress-commentkit.default',h);
+            } else {
+                log('elementorFrontend.hooks not available');
+            }
+        },500);
+    });
+
+    // Polling fallback — checks every 2s for 2 minutes
+    var pollCount=0;
+    var poller=setInterval(function(){
+        pollCount++;
+        if(pollCount>60){clearInterval(poller);return;}
+        var widgets=$('[data-mgcm-enabled="yes"]');
+        // Also find by prefix class and hidden data div
+        $('.mgcm-stickers-yes').each(function(){ widgets = widgets.add(this); });
+        $('.mgcm-widget-data-hidden').each(function(){
+            var w = $(this).closest('.elementor-widget');
+            if(w.length) widgets = widgets.add(w);
+        });
+        if($('body').hasClass('elementor-editor-active') || $('body').hasClass('elementor-editor-preview')){
+            $('.elementor-widget-weddingpress-commentkit, .elementor-widget-weddingpress-kit2').each(function(){
+                widgets = widgets.add(this);
+            });
+        }
+        if(widgets.length){
+            var needsInjection=false;
+            widgets.each(function(){
+                if($(this).find('.form-submit').length && !$(this).find('.mgcm-picker-wrap').length){
+                    needsInjection=true;
+                }
+            });
+            if(needsInjection){
+                log('Poller: widget found without picker, injecting (poll #'+pollCount+')');
+                run();
+            }
+        }
+    },2000);
+
+})(jQuery);

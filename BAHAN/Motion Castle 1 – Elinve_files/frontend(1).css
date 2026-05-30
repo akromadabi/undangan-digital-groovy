@@ -1,0 +1,86 @@
+/* MagicComment Frontend — v1.1.4 */
+
+/* Hide by default unless the Elementor widget has stickers enabled */
+.elementor-widget:not(.mgcm-stickers-yes):not([data-mgcm-enabled="yes"]) .mgcm-picker-wrap{display:none !important}
+
+/* ===== Picker wrapper ===== */
+.mgcm-picker-wrap{position:relative;margin-bottom:15px;width:100%}
+.mgcm-picker-row{display:flex;align-items:flex-end;gap:15px;flex-wrap:nowrap}
+
+/* ===== Trigger button — forced single-line inline layout ===== */
+.mgcm-picker-trigger{background:#373737;border:none;border-radius:5px;padding:8px 16px;cursor:pointer;color:#ffffff;transition:all .2s;display:inline-flex !important;flex-direction:row !important;align-items:center !important;justify-content:center;gap:6px;font-weight:500;line-height:1;white-space:nowrap !important;flex-wrap:nowrap !important;box-shadow:0 1px 3px rgba(0,0,0,.06);width:auto !important;max-width:fit-content}
+.elementor-widget .mgcm-picker-wrap button.mgcm-picker-trigger { font-family:'Roboto',sans-serif; font-size:10px; }
+.mgcm-picker-trigger:hover{border:none;color:#ffffff;background:#444;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.mgcm-picker-trigger svg,.mgcm-picker-trigger i{display:inline-block !important;flex-shrink:0;font-size:1.1em;width:16px;height:16px;vertical-align:middle}
+.mgcm-btn-text-inner{display:inline !important;white-space:nowrap !important;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+
+/* ===== Selected sticker preview ===== */
+.mgcm-selected-preview{display:none}
+.mgcm-selected-preview.has-sticker{display:flex;align-items:center;justify-content:center;position:relative;width:80px;height:80px;border-radius:12px;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.06);box-shadow:0 2px 8px rgba(0,0,0,.08);flex-shrink:0;overflow:visible}
+.mgcm-selected-preview img{max-width:72px;max-height:72px;object-fit:contain;border-radius:6px}
+.mgcm-remove-sticker{position:absolute;top:-8px;right:-8px;background:linear-gradient(135deg,#ff6b6b,#e53e3e);color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:16px;line-height:24px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(229,62,62,.3);transition:all .15s}
+.mgcm-remove-sticker:hover{background:linear-gradient(135deg,#e53e3e,#c53030);transform:scale(1.1)}
+
+/* ===== Dropdown — Professional glassmorphism design ===== */
+.mgcm-picker-dropdown{position:absolute;left:0;width:300px;max-height:360px;background:rgba(255,255,255,.98);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;border:1px solid rgba(0,0,0,.06);box-shadow:0 12px 48px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.06);z-index:9999;overflow:hidden;animation:mgcmPA .25s cubic-bezier(.4,0,.2,1)}
+.mgcm-picker-above{bottom:calc(100% + 10px)}
+.mgcm-picker-below{top:calc(100% + 10px)}
+@keyframes mgcmPA{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* ===== Tabs ===== */
+.mgcm-picker-tabs{display:flex;overflow-x:auto;scrollbar-width:none;padding:10px 10px 0;gap:4px;border-bottom:1px solid rgba(0,0,0,.06);background:rgba(248,250,252,.8)}
+.mgcm-picker-tabs::-webkit-scrollbar{display:none}
+.mgcm-tab-btn{padding:7px 16px;border:none !important;background:none;border-radius:10px 10px 0 0;font-size:12px;font-weight:600;color:#94a3b8;cursor:pointer;white-space:nowrap;transition:all .2s;border-bottom:2px solid transparent !important}
+.mgcm-tab-btn:hover{color:#667eea;background:rgba(102,126,234,.05)}
+.mgcm-tab-btn.active{color:#667eea;border-bottom-color:#667eea !important;background:rgba(255,255,255,.9)}
+
+/* ===== Content grid (Carousel mode) ===== */
+.mgcm-picker-content{padding:12px;max-height:270px;overflow:hidden}
+.mgcm-pack-panel{display:none}
+.mgcm-pack-panel.active{
+    display:grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - (var(--cols, 5) - 1) * 8px) / var(--cols, 5));
+    gap:8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding-bottom:12px; /* Space for scrollbar */
+    scroll-snap-type:x mandatory;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(0,0,0,.15) transparent;
+}
+.mgcm-pack-panel.active::-webkit-scrollbar{height:6px}
+.mgcm-pack-panel.active::-webkit-scrollbar-track{background:transparent}
+.mgcm-pack-panel.active::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:6px}
+
+/* ===== Sticker buttons inside picker — clean, proportional ===== */
+.mgcm-sticker-btn{
+    scroll-snap-align:start;
+    aspect-ratio:1;
+    display:flex !important;align-items:center !important;justify-content:center !important;border:1px solid rgba(0,0,0,.06) !important;border-radius:12px !important;background:rgba(248,250,252,.6) !important;cursor:pointer;transition:all .2s cubic-bezier(.4,0,.2,1);padding:6px !important;box-sizing:border-box
+}
+.mgcm-sticker-btn:hover{background:rgba(102,126,234,.08) !important;border-color:rgba(102,126,234,.2) !important;transform:scale(1.06);box-shadow:0 3px 12px rgba(102,126,234,.12)}
+.mgcm-sticker-btn:active{transform:scale(.95)}
+.mgcm-sticker-btn img{width:100% !important;height:100% !important;max-width:none !important;max-height:none !important;object-fit:contain;border-radius:6px;pointer-events:none;-webkit-user-drag:none}
+
+/* ===== Inline stickers in comments ===== */
+.mgcm-sticker-inline{display:block;width:100px;height:auto;max-width:100%;object-fit:contain;margin:4px 0 8px 0;border-radius:4px}
+
+/* ===== Attendance Card & Buttons ===== */
+.mgcm-attendance-card{background:#ffffff;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.02)}
+.mgcm-attendance-label{font-size:14px;font-weight:600;color:#4a5568;margin-bottom:12px;display:block}
+.mgcm-attendance-group{display:flex;gap:8px;flex-wrap:wrap}
+.mgcm-attendance-btn{flex:1;min-width:80px;padding:8px 12px;background:#363636;border:none;border-radius:5px;color:#ffffff;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.02)}
+.elementor-widget .mgcm-attendance-group button.mgcm-attendance-btn { font-family:'Roboto',sans-serif; font-size:10px; }
+.mgcm-attendance-btn:hover{background:#444;color:#ffffff;border:none;transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,.04)}
+.mgcm-attendance-btn.active{background:#549266;color:#fff;border:none;box-shadow:0 4px 12px rgba(84,146,102,.25)}
+
+/* ===== Responsive ===== */
+@media(max-width:480px){
+    .mgcm-picker-dropdown{width:280px;left:-10px;max-height:300px}
+    .mgcm-pack-panel.active{--cols:4 !important}
+    .mgcm-picker-trigger{padding:6px 12px;font-size:12px}
+    .mgcm-picker-content{padding:8px}
+    .mgcm-sticker-btn{padding:4px !important}
+    .mgcm-attendance-btn{padding:8px 10px;font-size:13px}
+}
