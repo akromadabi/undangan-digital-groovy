@@ -162,11 +162,11 @@ export default function Galeri({
                     video_url: url,
                     video_list: currentList
                 }));
-                alert('Video utama berhasil diperbarui!');
+                alert('Video gallery berhasil diperbarui!');
             }
         } catch (error) {
             console.error(error);
-            alert('Gagal mengubah video utama.');
+            alert('Gagal mengubah video gallery.');
         } finally {
             setSavingVideo(false);
         }
@@ -176,13 +176,13 @@ export default function Galeri({
         try {
             await axios.post(route('settings.cover.save'), {
                 cover_video_url: isActive ? '' : url,
-                cover_image: isActive ? localInvitation.cover_image : '',
+                cover_image: localInvitation.cover_image || '',
             });
             setCoverVideoUrl(isActive ? '' : url);
             setLocalInvitation(prev => ({
                 ...prev,
                 cover_video_url: isActive ? '' : url,
-                cover_image: isActive ? prev.cover_image : ''
+                cover_image: prev.cover_image || ''
             }));
             alert(isActive ? 'Video cover dinonaktifkan!' : 'Video cover berhasil diaktifkan!');
         } catch (error) {
@@ -195,13 +195,13 @@ export default function Galeri({
         try {
             await axios.post(route('content.opening.save'), {
                 opening_video_url: isActive ? '' : url,
-                opening_image: isActive ? localInvitation.opening_image : '',
+                opening_image: localInvitation.opening_image || '',
             });
             setOpeningVideoUrl(isActive ? '' : url);
             setLocalInvitation(prev => ({
                 ...prev,
                 opening_video_url: isActive ? '' : url,
-                opening_image: isActive ? prev.opening_image : ''
+                opening_image: prev.opening_image || ''
             }));
             alert(isActive ? 'Video opening dinonaktifkan!' : 'Video opening berhasil diaktifkan!');
         } catch (error) {
@@ -805,8 +805,7 @@ export default function Galeri({
                                                                         </button>
                                                                     </div>
                                                                 </div>
-                                                                
-                                                                {/* Functional Placement Switcher - Direct Sync! */}
+                                                                                                                               {/* Functional Placement Switcher - Direct Sync! */}
                                                                 <div className="p-3 bg-gray-50 border-t border-gray-100 space-y-2 flex-grow flex flex-col justify-between">
                                                                     <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider">Hubungkan Video Sebagai:</p>
                                                                     <div className="grid grid-cols-3 gap-1">
@@ -820,7 +819,7 @@ export default function Galeri({
                                                                                     : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-100'
                                                                             }`}
                                                                         >
-                                                                            {isPrimary ? '✓ Utama' : 'Utama'}
+                                                                            {isPrimary ? '✓ Gallery' : 'Gallery'}
                                                                         </button>
 
                                                                         {/* Cover Video Button */}
@@ -855,8 +854,8 @@ export default function Galeri({
                                                     })}
                                                 </div>
                                             </div>
-                                        )}  )}
-                                    </div>
+                                         )}
+                                     </div>
 
                                     {/* Playback Mode */}
                                     <div className="space-y-2">
@@ -1490,26 +1489,6 @@ export default function Galeri({
                                             />
                                         </div>
                                     </div>
-
-                                    {/* Save Button */}
-                                    <button
-                                        type="button"
-                                        onClick={handleSavePosition}
-                                        disabled={savingPosition}
-                                        className="w-full py-2.5 px-4 bg-[#E5654B] text-white rounded-xl text-xs font-bold hover:bg-[#b03a24] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/10"
-                                    >
-                                        {savingPosition ? (
-                                            <>
-                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                                <span>Menyimpan...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Save className="w-3.5 h-3.5" />
-                                                <span>Simpan Posisi & Perbesaran</span>
-                                            </>
-                                        )}
-                                    </button>
                                 </div>
                             )}
 
@@ -1526,13 +1505,35 @@ export default function Galeri({
                                 <span>Hapus Permanen</span>
                             </button>
                             
-                            <button
-                                type="button"
-                                onClick={() => setSelectedAsset(null)}
-                                className="py-2 px-4 bg-gray-800 text-white rounded-xl text-xs font-bold hover:bg-gray-700 transition-colors"
-                            >
-                                Tutup
-                            </button>
+                            <div className="flex gap-2">
+                                {getPhotoUsages('/storage/' .concat(selectedAsset.file_path)).some(u => ['cover', 'opening', 'groom', 'bride'].includes(u.type)) && (
+                                    <button
+                                        type="button"
+                                        onClick={handleSavePosition}
+                                        disabled={savingPosition}
+                                        className="py-2 px-4 bg-[#E5654B] text-white rounded-xl text-xs font-bold hover:bg-[#b03a24] active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-md shadow-orange-500/10"
+                                    >
+                                        {savingPosition ? (
+                                            <>
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                <span>Menyimpan...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="w-3.5 h-3.5" />
+                                                <span>Simpan Posisi</span>
+                                            </>
+                                        )}
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedAsset(null)}
+                                    className="py-2 px-4 bg-gray-800 text-white rounded-xl text-xs font-bold hover:bg-gray-700 transition-colors"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>,

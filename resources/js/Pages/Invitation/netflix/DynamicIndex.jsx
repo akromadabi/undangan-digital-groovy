@@ -1,6 +1,7 @@
 import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';;
+import DressCodeBlock from '@/Components/DressCodeBlock';
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
@@ -723,6 +724,15 @@ function EventSection({ events, invitation, galleries }) {
                     </Reveal>
                 );
             })}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <div key={`dc-${idx}`} className="nf-event-item w-full mt-4">
+                                        <div className="nf-event-item__detail w-full text-center" style={{ padding: '20px', backgroundColor: '#181818', borderRadius: '8px', border: '1px solid #333' }}>
+                                            <DressCodeBlock event={ev} colors={{ primary: '#e50914', text: '#ffffff' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
+                                        </div>
+                                    </div>
+                                ))}
         </section>
     );
 }

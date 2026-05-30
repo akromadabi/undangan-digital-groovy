@@ -1,6 +1,7 @@
 import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';;
+import DressCodeBlock from '@/Components/DressCodeBlock';
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
@@ -703,6 +704,13 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                                 </div>
                             );
                         })}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {safeArr(events)?.filter(e => e.show_dress_code).map((e, idx) => (
+                                    <div key={`dc-${idx}`} className="sp-card w-full mt-4" style={{ padding: '20px', backgroundColor: '#fff', border: '1px dashed #ee4d2d' }}>
+                                        <DressCodeBlock event={e} colors={{ primary: '#ee4d2d', text: '#222222' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
+                                    </div>
+                                ))}
                     </div>
                 </div>
             )}

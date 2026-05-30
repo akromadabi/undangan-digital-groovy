@@ -336,10 +336,9 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
         if (pickerTarget === 'cover') {
             if (type === 'video') {
                 setCoverVideoUrl(url);
-                setCoverImage('');
                 try {
                     await axios.post(route('settings.cover.save'), {
-                        cover_image: '',
+                        cover_image: coverImage,
                         cover_video_url: url,
                         cover_title: coverTitle,
                         cover_subtitle: coverSubtitle,
@@ -352,11 +351,10 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                 }
             } else {
                 setCoverImage(url);
-                setCoverVideoUrl('');
                 try {
                     await axios.post(route('settings.cover.save'), {
                         cover_image: url,
-                        cover_video_url: '',
+                        cover_video_url: coverVideoUrl,
                         cover_title: coverTitle,
                         cover_subtitle: coverSubtitle,
                     });
@@ -370,10 +368,9 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
         } else if (pickerTarget === 'opening') {
             if (type === 'video') {
                 setOpeningVideoUrl(url);
-                setOpeningImage('');
                 try {
                     await axios.post(route('content.opening.save'), {
-                        opening_image: '',
+                        opening_image: openingImage,
                         opening_video_url: url,
                     });
                     showToast('success', 'Video Opening berhasil diubah!');
@@ -384,11 +381,10 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                 }
             } else {
                 setOpeningImage(url);
-                setOpeningVideoUrl('');
                 try {
                     await axios.post(route('content.opening.save'), {
                         opening_image: url,
-                        opening_video_url: '',
+                        opening_video_url: openingVideoUrl,
                     });
                     showToast('success', 'Foto Opening berhasil diubah!');
                     setTimeout(() => setPreviewKey(k => k + 1), 800);

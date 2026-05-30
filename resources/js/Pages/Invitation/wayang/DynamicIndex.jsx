@@ -697,8 +697,14 @@ function EventSection({ events, invitation, language, themeConfig }) {
 
                                 {/* Compact standalone Dress Code box below event list */}
                                 {listEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <div key={`dc-${idx}`} className="wy-event-card w-full mt-4" style={{ padding: '24px' }}>
+                                        <DressCodeBlock event={ev} colors={{ primary: '#a3563f', text: '#1a1a1a' }} fonts={{ heading: 'inherit' }} variant="classic" plain={true} />
+                                    </div>
+                                ))}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {listEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
                                     <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
-                                        <DressCodeBlock event={ev} colors={{ primary: '#a3563f', text: '#1a1a1a' }} fonts={{ heading: 'inherit' }} variant="classic" />
                                     </div>
                                 ))}
 

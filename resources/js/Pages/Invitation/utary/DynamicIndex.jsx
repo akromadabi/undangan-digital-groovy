@@ -1,6 +1,7 @@
 import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';;
+import DressCodeBlock from '@/Components/DressCodeBlock';
 import { Head, useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
@@ -655,6 +656,13 @@ function EventSection({ invitation, events }) {
                         </RevealDiv>
                     );
                 })}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {events?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <div key={`dc-${idx}`} className="utary-event__card w-full mt-4" style={{ padding: '24px', borderRadius: 0 }}>
+                                        <DressCodeBlock event={ev} colors={{ primary: 'var(--utary-gold)', text: 'var(--utary-text)' }} fonts={{ heading: 'var(--utary-font-display)' }} variant="modern" plain={true} />
+                                    </div>
+                                ))}
 
                 <RevealDiv>
                     <img src={eventFrameBottom} alt="" style={{ width: '100%', marginTop: '-1px' }} />

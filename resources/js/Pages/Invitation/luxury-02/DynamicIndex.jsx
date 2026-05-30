@@ -802,6 +802,13 @@ function EventSection({ events, galleries, showCountdown }) {
                         </Reveal>
                     );
                 })}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {list?.filter(evt => evt.show_dress_code).map((evt, idx) => (
+                                    <div key={`dc-${idx}`} className="lx2-event-card-ref w-full mt-4" style={{ padding: '24px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(197, 168, 128, 0.2)' }}>
+                                        <DressCodeBlock event={evt} colors={{ primary: '#c5a880', text: '#4a4a4a' }} fonts={{ heading: 'inherit' }} variant="modern" plain={true} />
+                                    </div>
+                                ))}
             </div>
         </section>
     );

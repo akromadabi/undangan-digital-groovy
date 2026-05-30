@@ -1,6 +1,7 @@
 import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';;
+import DressCodeBlock from '@/Components/DressCodeBlock';
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
@@ -791,6 +792,13 @@ function EventSection({ events, invitation, language, sections }) {
                         </Reveal>
                     );
                 })}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <div key={`dc-${idx}`} className="spty-tour-card w-full mt-4" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '20px', borderRadius: '8px' }}>
+                                        <DressCodeBlock event={ev} colors={{ primary: '#1ed760', text: '#ffffff' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
+                                    </div>
+                                ))}
             </div>
         </section>
     );

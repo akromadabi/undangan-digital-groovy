@@ -1122,6 +1122,15 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
 
                                 {/* Compact standalone Dress Code box below event list */}
                                 {safeArr(events)?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <Reveal key={`dc-${idx}`} className="wa-message-row wa-in" delay={150} style={{ width: '100%' }}>
+                                        <div className="wa-bubble" style={{ width: '100%', maxWidth: '340px' }}>
+                                            <DressCodeBlock event={ev} colors={{ primary: '#008069', text: 'var(--wa-text-main)' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
+                                        </div>
+                                    </Reveal>
+                                ))}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {safeArr(events)?.filter(ev => ev.show_dress_code).map((ev, idx) => (
                                     <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
                                     </div>
                                 ))}

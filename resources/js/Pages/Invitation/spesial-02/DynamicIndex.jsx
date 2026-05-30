@@ -781,12 +781,18 @@ function EventSection({ events, showPhotos, locale, showCountdown, galleries, in
                                         <i className="fas fa-location-arrow text-[8px]" /> Google Maps
                                     </a>
                                 )}
-                                <DressCodeBlock event={evt} colors={{ primary: 'var(--sp02-primary)', text: 'var(--sp02-text)' }} fonts={{ heading: 'var(--sp02-font-heading)' }} />
                             </div>
                         </div>
                     </Reveal>
                 );
             })}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {list?.filter(evt => evt.show_dress_code).map((evt, idx) => (
+                                    <div key={`dc-${idx}`} className="sp02-event-card w-full mt-4" style={{ padding: '24px' }}>
+                                        <DressCodeBlock event={evt} colors={{ primary: 'var(--sp02-primary)', text: 'var(--sp02-text)' }} fonts={{ heading: 'var(--sp02-font-heading)' }} variant="modern" plain={true} />
+                                    </div>
+                                ))}
         </div>
     );
 }

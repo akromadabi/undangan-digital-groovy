@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function DressCodeBlock({ event, colors, fonts, variant = 'modern' }) {
+export default function DressCodeBlock({ event, colors, fonts, variant = 'modern', plain = false }) {
     if (!event?.show_dress_code) return null;
 
     const paletteList = Array.isArray(event.dress_code_colors) 
@@ -14,8 +14,8 @@ export default function DressCodeBlock({ event, colors, fonts, variant = 'modern
     // RENDER: PLATFORM/APP BUBBLE STYLE (WhatsApp, Netflix, Spotify, TikTok, dsb)
     if (variant === 'app') {
         return (
-            <div className="mt-4 p-4 rounded-xl border text-center transition-all duration-300 w-full overflow-hidden"
-                style={{ 
+            <div className={plain ? "text-center w-full overflow-hidden" : "mt-4 p-4 rounded-xl border text-center transition-all duration-300 w-full overflow-hidden"}
+                style={plain ? {} : { 
                     backgroundColor: 'rgba(255, 255, 255, 0.04)', 
                     borderColor: 'rgba(255, 255, 255, 0.12)',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
@@ -72,8 +72,8 @@ export default function DressCodeBlock({ event, colors, fonts, variant = 'modern
     // RENDER: TRADITIONAL/CLASSIC ORNATE STYLE (Adat Jawa, Adat Sunda, Wayang, Moroccan)
     if (variant === 'classic') {
         return (
-            <div className="mt-5 p-5 rounded-2xl border-2 text-center transition-all duration-300 w-full relative overflow-hidden"
-                style={{ 
+            <div className={plain ? "text-center w-full relative overflow-hidden" : "mt-5 p-5 rounded-2xl border-2 text-center transition-all duration-300 w-full relative overflow-hidden"}
+                style={plain ? {} : { 
                     backgroundColor: primaryColor + '08', 
                     borderColor: primaryColor + '30',
                     backgroundImage: `radial-gradient(circle at 0% 0%, ${primaryColor}03 0%, transparent 50%), radial-gradient(circle at 100% 100%, ${primaryColor}03 0%, transparent 50%)`
@@ -140,8 +140,8 @@ export default function DressCodeBlock({ event, colors, fonts, variant = 'modern
 
     // RENDER: CLEAN MODERN MINIMALIST STYLE (Default/Spesial/Luxury)
     return (
-        <div className="mt-5 p-5 rounded-2xl border text-center transition-all duration-300 w-full"
-            style={{ 
+        <div className={plain ? "text-center w-full" : "mt-5 p-5 rounded-2xl border text-center transition-all duration-300 w-full"}
+            style={plain ? {} : { 
                 backgroundColor: primaryColor + '04', 
                 borderColor: primaryColor + '15',
                 boxShadow: '0 2px 10px rgba(0,0,0,0.01)'

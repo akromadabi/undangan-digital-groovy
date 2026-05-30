@@ -922,10 +922,16 @@ function EventSection({ events, invitation, language, sections }) {
                         );
                     })}
 
+                                {/* Compact standalone Dress Code box below event list */}
+                                {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <div key={`dc-${idx}`} className="ig-live-event-card w-full mt-4">
+                                        <DressCodeBlock event={ev} colors={{ primary: 'var(--ig-primary)', text: 'var(--ig-text)' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
+                                    </div>
+                                ))}
+
                     {/* Compact standalone Dress Code box below event list */}
                     {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
                         <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
-                            <DressCodeBlock event={ev} colors={{ primary: 'var(--ig-primary)', text: 'var(--ig-text)' }} fonts={{ heading: 'inherit' }} />
                         </div>
                     ))}
                     </div>

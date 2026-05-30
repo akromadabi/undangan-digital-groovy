@@ -1163,12 +1163,13 @@ function EventSection({ events, invitation, language, guest, isTyping, themeConf
                         );
                     })}
 
-                    {/* Compact standalone Dress Code box below event list */}
-                    {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
-                        <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
-                            <DressCodeBlock event={ev} colors={{ primary: '#10a37f', text: '#ececf1' }} fonts={{ heading: 'inherit' }} variant="app" />
-                        </div>
-                    ))}
+                                {/* Compact standalone Dress Code box below event list */}
+                                {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <div key={`dc-${idx}`} className="gpt-card w-full mt-4">
+                                        <DressCodeBlock event={ev} colors={{ primary: '#10a37f', text: '#ececf1' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
+                                    </div>
+                                ))}
+
                 </div>
             </ChatBubble>
         </div>
