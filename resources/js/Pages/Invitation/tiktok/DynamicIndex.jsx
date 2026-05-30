@@ -1210,20 +1210,6 @@ function GallerySection({ galleries, language, onToast, invitation }) {
     const { t } = useTranslation(language);
     const safePhotos = safeArr(galleries).sort((a, b) => a.sort_order - b.sort_order);
 
-    const getYoutubeId = (url) => {
-        if (!url) return '';
-        let id = '';
-        if (url.includes('youtube.com/watch?v=')) {
-            id = url.split('v=')[1]?.split('&')[0];
-        } else if (url.includes('youtu.be/')) {
-            id = url.split('youtu.be/')[1]?.split('?')[0];
-        } else if (url.includes('youtube.com/embed/')) {
-            id = url.split('embed/')[1]?.split('?')[0];
-        }
-        return id;
-    };
-
-    // Combine photos and videos
     const galleryItems = [];
     const isEn = t('invitation.save_the_date') === 'Save The Date';
 
@@ -1236,25 +1222,6 @@ function GallerySection({ galleries, language, onToast, invitation }) {
                 caption: ph.caption || (isEn ? 'Captured moments of our prewedding. ❤️' : 'Momen manis terindah prewedding kami. ❤️'),
                 label: '🖼️ PHOTO'
             });
-        });
-    }
-
-    const showVideoInGallery = invitation?.video_list?.length > 0 && 
-        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
-
-    if (showVideoInGallery) {
-        invitation.video_list.forEach((url, idx) => {
-            const ytId = getYoutubeId(url);
-            if (ytId) {
-                galleryItems.push({
-                    type: 'video',
-                    id: 'video-' + idx,
-                    ytId: ytId,
-                    src: 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg',
-                    caption: isEn ? ('Watch our prewedding story! 🎥✨') : ('Tonton kisah romantis prewedding kami! 🎥✨'),
-                    label: '🎥 VIDEO'
-                });
-            }
         });
     }
 
@@ -1284,16 +1251,6 @@ function GallerySection({ galleries, language, onToast, invitation }) {
                     }
                 }, 100);
             }
-            
-            // Auto pause BGM if initially opened video
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                if (galleryItems[activePhotoIdx]?.type === 'video') {
-                    audioEl.pause();
-                } else {
-                    audioEl.play().catch(() => {});
-                }
-            }
         }
     }, [activePhotoIdx]);
 
@@ -1304,25 +1261,10 @@ function GallerySection({ galleries, language, onToast, invitation }) {
         if (slideHeight <= 0) return;
         
         const currentIdx = Math.round(scrollTop / slideHeight);
-        
-        if (currentIdx >= 0 && currentIdx < galleryItems.length) {
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                if (galleryItems[currentIdx]?.type === 'video') {
-                    audioEl.pause();
-                } else {
-                    audioEl.play().catch(() => {});
-                }
-            }
-        }
     };
 
     const handleCloseModal = () => {
         setActivePhotoIdx(null);
-        const audioEl = document.querySelector('audio');
-        if (audioEl) {
-            audioEl.play().catch(() => {});
-        }
     };
 
     return (
@@ -1342,47 +1284,19 @@ function GallerySection({ galleries, language, onToast, invitation }) {
             <Reveal variant="zoom">
                 <div className="ttk-gallery__grid">
                     {galleryItems.map((ph, idx) => {
-                        const isVideo = ph.type === 'video';
                         return (
                             <div key={ph.id} className="ttk-gallery__item" onClick={() => setActivePhotoIdx(idx)} style={{ cursor: 'pointer', position: 'relative' }}>
                                 <img src={ph.src} alt={ph.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                
-                                {isVideo ? (
-                                    <div style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        backgroundColor: 'rgba(0,0,0,0.2)'
-                                    }}>
-                                        <div style={{
-                                            width: '36px',
-                                            height: '36px',
-                                            borderRadius: '50%',
-                                            backgroundColor: 'var(--ttk-red)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            boxShadow: '0 0 10px rgba(254,44,85,0.6)'
-                                        }}>
-                                            <svg style={{ width: '14px', height: '14px', fill: '#fff', marginLeft: '2px' }} viewBox="0 0 24 24">
-                                                <path d="M8 5v14l11-7z"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '6px',
-                                        right: '6px',
-                                        color: '#ffffff',
-                                        fontSize: '11px',
-                                        textShadow: '0 1px 3px rgba(0,0,0,0.6)'
-                                    }}>
-                                        <i className="far fa-image" />
-                                    </div>
-                                )}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '6px',
+                                    right: '6px',
+                                    color: '#ffffff',
+                                    fontSize: '11px',
+                                    textShadow: '0 1px 3px rgba(0,0,0,0.6)'
+                                }}>
+                                    <i className="far fa-image" />
+                                </div>
                             </div>
                         );
                     })}
@@ -1397,41 +1311,9 @@ function GallerySection({ galleries, language, onToast, invitation }) {
                     
                     <div className="ttk-gallery-fullscreen-scroll-container" ref={scrollContainerRef} onScroll={handleScroll}>
                         {galleryItems.map((ph, idx) => {
-                            const isVideo = ph.type === 'video';
-                            
                             return (
                                 <div key={ph.id} className="ttk-gallery-fullscreen-slide">
-                                    {isVideo ? (
-                                        <div style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            maxWidth: '500px',
-                                            maxHeight: '65vh',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            boxSizing: 'border-box',
-                                            padding: '8px'
-                                        }}>
-                                            <iframe 
-                                                src={'https://www.youtube.com/embed/' + ph.ytId + '?autoplay=1&rel=0&showinfo=0&controls=1&mute=0'}
-                                                frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                                style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    aspectRatio: '16/9',
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    borderRadius: '8px',
-                                                    backgroundColor: '#000',
-                                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-                                                }}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <img src={ph.src} className="ttk-gallery-fullscreen-img" alt={ph.caption} />
-                                    )}
+                                    <img src={ph.src} className="ttk-gallery-fullscreen-img" alt={ph.caption} />
                                     
                                     {/* Sidebar actions */}
                                     <div className="ttk-gallery-sidebar">
@@ -1463,12 +1345,12 @@ function GallerySection({ galleries, language, onToast, invitation }) {
                                     {/* Caption Box */}
                                     <div className="ttk-gallery-caption-box">
                                         <div className="ttk-gallery-user-row">
-                                            <div className="ttk-gallery-user-avatar">{isVideo ? '🎬' : '📸'}</div>
-                                            <span className="ttk-gallery-username">{isVideo ? 'prewedding_reels' : 'prewedding_diaries'}</span>
+                                            <div className="ttk-gallery-user-avatar">📸</div>
+                                            <span className="ttk-gallery-username">prewedding_diaries</span>
                                             <i className="fas fa-check-circle ttk-gallery-verified-badge" />
                                         </div>
                                         <p className="ttk-gallery-desc">{ph.caption}</p>
-                                        <div className="ttk-gallery-tags">{isVideo ? '#viralreels #lovevibe #trending' : '#prewedding #wedding #love #viral'}</div>
+                                        <div className="ttk-gallery-tags">#prewedding #wedding #love #viral</div>
                                         <div className="ttk-gallery-music-row">
                                             <i className="fas fa-music" />
                                             <div className="ttk-gallery-music-scroll">
@@ -1487,6 +1369,110 @@ function GallerySection({ galleries, language, onToast, invitation }) {
                     </div>
                 </div>
             )}
+        </section>
+    );
+}
+
+function VideoGallerySection({ invitation, language }) {
+    const { t } = useTranslation(language);
+    const isEn = t('invitation.save_the_date') === 'Save The Date';
+
+    const getYoutubeId = (url) => {
+        if (!url) return '';
+        let id = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            id = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            id = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            id = url.split('embed/')[1]?.split('?')[0];
+        }
+        return id;
+    };
+
+    const videoItems = [];
+    const showVideo = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideo) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                videoItems.push({
+                    ytId: ytId,
+                    url: url,
+                    title: isEn ? `Prewedding Reel #${idx + 1}` : `Reel Prewedding #${idx + 1}`
+                });
+            }
+        });
+    }
+
+    if (videoItems.length === 0) return null;
+
+    return (
+        <section className="ttk-section" id="video">
+            {/* Post Header */}
+            <div className="ttk-card__post-header">
+                <div className="ttk-card__post-avatar">🎬</div>
+                <div className="ttk-card__post-handle">prewedding_reels</div>
+                <i className="fas fa-check-circle ttk-card__post-badge" />
+            </div>
+
+            <Reveal variant="up">
+                <h2 className="ttk-section-title">{isEn ? 'Our Videos' : 'Video'}</h2>
+                <p className="ttk-section-subtitle">{isEn ? 'Watch our moments' : 'Saksikan kisah cinta kami'}</p>
+            </Reveal>
+
+            <Reveal variant="zoom">
+                <div 
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '24px',
+                        maxWidth: '800px',
+                        margin: '0 auto',
+                        width: '100%',
+                        padding: '0 16px'
+                    }}
+                >
+                    {videoItems.map((item, idx) => (
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                            {videoItems.length > 1 && (
+                                <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 'bold', margin: '0 0 4px', letterSpacing: '0.5px' }}>
+                                    {item.title}
+                                </h4>
+                            )}
+                            <div 
+                                style={{
+                                    position: 'relative',
+                                    width: '100%',
+                                    aspectRatio: '16/9',
+                                    overflow: 'hidden',
+                                    borderRadius: '12px',
+                                    border: '1px solid rgba(254, 44, 85, 0.3)',
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                                    backgroundColor: '#000'
+                                }}
+                            >
+                                <iframe 
+                                    src={`https://www.youtube.com/embed/${item.ytId}?autoplay=0&rel=0&showinfo=1&controls=1&mute=0`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        border: '0'
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </Reveal>
         </section>
     );
 }
@@ -1882,14 +1868,14 @@ function ClosingSection({ invitation, brideGrooms, language }) {
 /* ═══════════════════════════════════════
    TIKTOK BOTTOM NAVIGATION BAR
    ═══════════════════════════════════════ */
-function ViteTokBottomBar({ activeSection, onNavigate, hasStream, hasGallery, hasStory, hasBank, enableRsvp, language }) {
+function ViteTokBottomBar({ activeSection, onNavigate, hasStream, hasGallery, hasVideo, hasStory, hasBank, enableRsvp, language }) {
     const { locale } = useTranslation(language);
     const isEn = locale === 'en';
 
     // Map categories exactly per user instructions
     const isHome = activeSection === 'opening';
     const isDiscover = activeSection === 'event';
-    const isPlus = activeSection === 'gallery';
+    const isPlus = activeSection === 'gallery' || activeSection === 'video';
     const isInbox = activeSection === 'rsvp';
     const isProfile = activeSection === 'bride_groom';
 
@@ -1907,8 +1893,17 @@ function ViteTokBottomBar({ activeSection, onNavigate, hasStream, hasGallery, ha
                 <span>{isEn ? 'Discover' : 'Temukan'}</span>
             </div>
 
-            {/* Center Plus Button -> Gallery */}
-            <div onClick={() => onNavigate('gallery')} className={`ttk-nav-item ${isPlus ? 'is-active' : ''}`}>
+            {/* Center Plus Button -> Gallery / Video */}
+            <div 
+                onClick={() => {
+                    if (hasGallery) {
+                        onNavigate('gallery');
+                    } else if (hasVideo) {
+                        onNavigate('video');
+                    }
+                }} 
+                className={`ttk-nav-item ${isPlus ? 'is-active' : ''}`}
+            >
                 <div className="ttk-nav-plus">
                     <i className="fas fa-plus" />
                 </div>
@@ -2049,7 +2044,7 @@ export default function ViteTokTheme(props) {
     // Resolve visible sections list
     const resolvedSections = useMemo(() => {
         const safeSections = safeArr(sections);
-        const validKeys = ['opening', 'bride_groom', 'event', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
+        const validKeys = ['opening', 'bride_groom', 'event', 'love_story', 'gallery', 'video', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
         const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
         const hasStream = primaryEvent?.streaming_url || safeArr(primaryEvent?.streamings).length > 0;
 
@@ -2064,7 +2059,13 @@ export default function ViteTokTheme(props) {
                 if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return;
                 if (s.section_key === 'gallery') {
                     const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
-                    if (!((galleries?.length > 0 || hasVideos) && globalShowPhotos)) return;
+                    if (galleries?.length > 0 && globalShowPhotos) {
+                        resolved.push(s);
+                    }
+                    if (hasVideos) {
+                        resolved.push({ section_key: 'video' });
+                    }
+                    return;
                 }
                 if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return;
                 if (s.section_key === 'rsvp' && !enableRsvp) return;
@@ -2096,7 +2097,8 @@ export default function ViteTokTheme(props) {
 
             if (loveStories?.length > 0) fallbacks.push({ section_key: 'love_story' });
             const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
-            if ((galleries?.length > 0 || hasVideos) && globalShowPhotos) fallbacks.push({ section_key: 'gallery' });
+            if (galleries?.length > 0 && globalShowPhotos) fallbacks.push({ section_key: 'gallery' });
+            if (hasVideos) fallbacks.push({ section_key: 'video' });
             if (enableRsvp) {
                 fallbacks.push({ section_key: 'rsvp' });
             } else if (enableWishes) {
@@ -2331,6 +2333,8 @@ export default function ViteTokTheme(props) {
                 return <LoveStorySection key={key} {...sectionProps} />;
             case 'gallery':
                 return <GallerySection key={key} {...sectionProps} />;
+            case 'video':
+                return <VideoGallerySection key={key} {...sectionProps} />;
             case 'bank':
                 return <BankSection key={key} {...sectionProps} />;
             case 'rsvp':
@@ -2519,6 +2523,7 @@ export default function ViteTokTheme(props) {
                             onNavigate={handleNavigationClick}
                             hasStream={resolvedSections.some(s => s.section_key === 'livestream')}
                             hasGallery={resolvedSections.some(s => s.section_key === 'gallery')}
+                            hasVideo={resolvedSections.some(s => s.section_key === 'video')}
                             hasStory={resolvedSections.some(s => s.section_key === 'love_story')}
                             hasBank={resolvedSections.some(s => s.section_key === 'bank')}
                             enableRsvp={enableRsvp}

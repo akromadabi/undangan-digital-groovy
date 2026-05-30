@@ -45,6 +45,19 @@ function formatDate(d) {
     return new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+function getYoutubeId(url) {
+    if (!url) return '';
+    let id = '';
+    if (url.includes('youtube.com/watch?v=')) {
+        id = url.split('v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+        id = url.split('youtu.be/')[1]?.split('?')[0];
+    } else if (url.includes('youtube.com/embed/')) {
+        id = url.split('embed/')[1]?.split('?')[0];
+    }
+    return id;
+}
+
 function formatTime(t) {
     if (!t || t === 'Selesai') return t || '';
     return String(t).substring(0, 5);
@@ -174,7 +187,7 @@ function HeartDivider({ isDark }) {
 /* ═══════════════════════════════════════
    COVER SECTION
    ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverEmbedId, coverImages }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => b.gender === 'pria') || bgs[0];
@@ -199,16 +212,27 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 
     return (
         <div className={`lx4-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'lx4-no-photo-mode' : ''}`}>
-            {globalShowPhotos && (
+            {globalShowPhotos && coverEmbedId ? (
+                <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                        title="Background Cover Video"
+                        frameBorder="0"
+                        className="absolute top-1/2 left-1/2 w-[115vw] h-[64.68vw] min-h-[100vh] min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        style={{ border: 'none' }}
+                    />
+                </div>
+            ) : globalShowPhotos && coverImages.length > 0 ? (
                 <PremiumSlideshow
-                    images={invitation?.cover_image ? invitation.cover_image.split(',') : [ASSETS.cover]}
+                    images={coverImages}
                     positionX={invitation?.cover_position_x}
                     positionY={invitation?.cover_position_y}
                     zoom={invitation?.cover_zoom}
                     className="lx4-cover__bg"
                     imgClassName="absolute inset-0 w-full h-full object-cover"
                 />
-            )}
+            ) : null}
             <div className="lx4-cover__overlay" />
             <div className="lx4-cover__content">
                 {/* Circular Text Path Logo */}
@@ -241,7 +265,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
 /* ═══════════════════════════════════════
    HERO SLIDESHOW SECTION
    ═══════════════════════════════════════ */
-function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode }) {
+function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode, coverEmbedId, coverImages }) {
     const { t } = useTranslation();
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
     const targetDate = primaryEvent?.event_date || '';
@@ -322,7 +346,33 @@ function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode })
 
     return (
         <section id="hero" className="lx4-hero">
-            {globalShowPhotos && pics.map((src, idx) => (
+            {globalShowPhotos && coverEmbedId ? (
+                <>
+                    <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                            title="Background Cover Video"
+                            frameBorder="0"
+                            className="absolute top-1/2 left-1/2 w-[115vw] h-[64.68vw] min-h-[100vh] min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            style={{ border: 'none' }}
+                        />
+                    </div>
+                    <div className="absolute inset-0 w-full h-full z-[1]" style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }} />
+                </>
+            ) : globalShowPhotos && coverImages?.length > 1 ? (
+                <>
+                    <PremiumSlideshow
+                        images={coverImages}
+                        positionX={invitation?.cover_position_x}
+                        positionY={invitation?.cover_position_y}
+                        zoom={invitation?.cover_zoom}
+                        className="lx4-hero__bg is-active absolute inset-0 w-full h-full z-0"
+                        imgClassName="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 w-full h-full z-[1]" style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }} />
+                </>
+            ) : globalShowPhotos && pics.map((src, idx) => (
                 <div
                     key={src}
                     className={`lx4-hero__bg ${idx === bgIdx ? 'is-active' : ''}`}
@@ -373,7 +423,7 @@ function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode })
 /* ═══════════════════════════════════════
    OPENING SECTION
    ═══════════════════════════════════════ */
-function OpeningSection({ invitation, brideGrooms }) {
+function OpeningSection({ invitation, brideGrooms, openingEmbedId }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => b.gender === 'pria') || bgs[0] || {};
@@ -414,7 +464,18 @@ function OpeningSection({ invitation, brideGrooms }) {
                     </div>
                 )}
                 
-                {invitation.opening_image && (
+                {globalShowPhotos && openingEmbedId ? (
+                    <div className="lx4-opening__photo-wrapper relative aspect-[16/9]" style={{ margin: '30px auto', maxWidth: '320px', borderRadius: '16px', overflow: 'hidden', border: '4px solid #fff', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
+                        <iframe
+                            src={`https://www.youtube.com/embed/${openingEmbedId}?autoplay=0&rel=0&showinfo=1&controls=1&mute=0`}
+                            frameBorder="0"
+                            className="absolute inset-0 w-full h-full z-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            style={{ border: 'none' }}
+                        />
+                    </div>
+                ) : invitation.opening_image ? (
                     <div className="lx4-opening__photo-wrapper relative aspect-[4/3]" style={{ margin: '30px auto', maxWidth: '320px', borderRadius: '16px', overflow: 'hidden', border: '4px solid #fff', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
                         <PremiumSlideshow
                             images={invitation.opening_image.split(',')}
@@ -423,7 +484,7 @@ function OpeningSection({ invitation, brideGrooms }) {
                             zoom={invitation.opening_zoom}
                         />
                     </div>
-                )}
+                ) : null}
                 
                 <p className="lx4-opening__text" style={{ marginTop: '30px' }}>
                     {invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami menyampaikan kabar bahagia mengenai hari pernikahan kami.'}
@@ -938,6 +999,87 @@ function GallerySection({ galleries }) {
 }
 
 /* ═══════════════════════════════════════
+   VIDEO GALLERY SECTION
+   ═══════════════════════════════════════ */
+function VideoGallerySection({ invitation, locale }) {
+    const videoList = safeArr(invitation?.video_list);
+    const videoItems = [];
+
+    videoList.forEach((url, idx) => {
+        const ytId = getYoutubeId(url);
+        if (ytId) {
+            videoItems.push({
+                ytId,
+                url,
+                title: locale === 'en' ? `Moment Video #${idx + 1}` : `Momen Video #${idx + 1}`
+            });
+        }
+    });
+
+    if (videoItems.length === 0) return null;
+
+    return (
+        <section id="video" className="lx4-section">
+            <Reveal>
+                <h2 className="lx4-section-title">{locale === 'en' ? 'Video Gallery' : 'Galeri Video'}</h2>
+                <p className="lx4-section-subtitle">Our Video Moments</p>
+            </Reveal>
+
+            <div 
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px',
+                    width: '100%',
+                    maxWidth: '480px',
+                    margin: '20px auto 0 auto',
+                    padding: '0 16px'
+                }}
+            >
+                {videoItems.map((item, idx) => (
+                    <Reveal key={idx} variant="zoom" delay={idx * 50} className="w-full">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {videoItems.length > 1 && (
+                                <h4 style={{ color: 'var(--lx4-text-dark, #333)', fontSize: '0.9rem', fontWeight: 'bold', margin: '0', letterSpacing: '0.5px' }}>
+                                    {item.title}
+                                </h4>
+                            )}
+                            <div 
+                                style={{
+                                    position: 'relative',
+                                    width: '100%',
+                                    aspectRatio: '16/9',
+                                    overflow: 'hidden',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--lx4-gold-border, rgba(197, 168, 128, 0.3))',
+                                    boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
+                                    backgroundColor: '#000'
+                                }}
+                            >
+                                <iframe 
+                                    src={`https://www.youtube.com/embed/${item.ytId}?autoplay=0&rel=0&showinfo=1&controls=1&mute=0`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        border: '0'
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </Reveal>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+/* ═══════════════════════════════════════
    BANK GIFT SECTION
    ═══════════════════════════════════════ */
 function BankSection({ bankAccounts, invitation }) {
@@ -1438,7 +1580,7 @@ function Navigation({
     isFullscreen,
     toggleFullscreen
 }) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const [showQr, setShowQr] = useState(false);
 
     // Auto-scroll active menu item into viewport
@@ -1477,6 +1619,8 @@ function Navigation({
                 items.push({ id: 'love_story', label: t('nav.kisah'), icon: 'fas fa-history' });
             } else if (key === 'gallery') {
                 items.push({ id: 'gallery', label: t('nav.galeri'), icon: 'far fa-images' });
+            } else if (key === 'video') {
+                items.push({ id: 'video', label: locale === 'en' ? 'Videos' : 'Video', icon: 'fas fa-video' });
             } else if (key === 'rsvp') {
                 const hasWishes = validKeys.includes('wishes') || enableWishes;
                 items.push({ id: 'rsvp', label: hasWishes ? `${t('nav.rsvp')} & ${t('invitation.wishes_title')}` : t('nav.rsvp'), icon: 'fas fa-envelope' });
@@ -1621,7 +1765,32 @@ export default function DynamicIndex({
     guest,
     wishes
 }) {
-    const { t } = useTranslation(invitation?.language || 'id');
+    const { t, locale } = useTranslation(invitation?.language || 'id');
+
+    const coverVideoUrl = invitation?.cover_video_url;
+    const coverEmbedId = useMemo(() => getYoutubeId(coverVideoUrl), [coverVideoUrl]);
+
+    const generalVideoUrl = invitation?.video_url;
+    const generalEmbedId = useMemo(() => getYoutubeId(generalVideoUrl), [generalVideoUrl]);
+
+    const openingVideoUrl = invitation?.opening_video_url;
+    const openingEmbedId = useMemo(() => {
+        const id = getYoutubeId(openingVideoUrl);
+        return id || (invitation?.video_playback === 'background' || invitation?.video_playback === 'both' ? generalEmbedId : '');
+    }, [openingVideoUrl, invitation?.video_playback, generalEmbedId]);
+
+    const coverImages = useMemo(() => {
+        return (invitation?.cover_image || '')
+            .split(',')
+            .map(img => getStorageUrl(img.trim()))
+            .filter(Boolean);
+    }, [invitation?.cover_image]);
+
+    const hasVideos = useMemo(() => {
+        return safeArr(invitation?.video_list).length > 0 &&
+            (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+    }, [invitation?.video_list, invitation?.video_playback]);
+
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [activeSlideIdx, setActiveSlideIdx] = useState(0);
@@ -1727,7 +1896,7 @@ export default function DynamicIndex({
     // Resolve active sections in database & fallback
     const resolvedSections = useMemo(() => {
         const safeSections = safeArr(sections);
-        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
+        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'video', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
         const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
         const hasStream = primaryEvent?.streaming_url || safeArr(primaryEvent?.streamings).length > 0;
 
@@ -1743,7 +1912,15 @@ export default function DynamicIndex({
 
             dbSorted.forEach(s => {
                 if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return;
-                if (s.section_key === 'gallery' && !(galleries?.length > 0)) return;
+                if (s.section_key === 'gallery') {
+                    if (galleries?.length > 0 && showPhotos) {
+                        resolved.push(s);
+                    }
+                    if (hasVideos) {
+                        resolved.push({ section_key: 'video' });
+                    }
+                    return;
+                }
                 if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return;
                 if (s.section_key === 'rsvp' && !enableRsvp) return;
                 if (s.section_key === 'livestream' && !hasStream) return;
@@ -1775,7 +1952,8 @@ export default function DynamicIndex({
             }
 
             if (loveStories?.length > 0) fallbacks.push({ section_key: 'love_story' });
-            if (galleries?.length > 0) fallbacks.push({ section_key: 'gallery' });
+            if (showPhotos && galleries?.length > 0) fallbacks.push({ section_key: 'gallery' });
+            if (hasVideos) fallbacks.push({ section_key: 'video' });
             if (enableRsvp) {
                 fallbacks.push({ section_key: 'rsvp' });
             } else if (enableWishes) {
@@ -1788,7 +1966,7 @@ export default function DynamicIndex({
         }
 
         return resolved;
-    }, [sections, events, loveStories, galleries, bankAccounts, enableRsvp, enableWishes, showCountdown]);
+    }, [sections, events, loveStories, galleries, bankAccounts, enableRsvp, enableWishes, showCountdown, hasVideos, showPhotos]);
 
     // Slide mode: Sync activeSectionId with activeSlideIdx
     useEffect(() => {
@@ -1983,14 +2161,15 @@ export default function DynamicIndex({
         const key = section.section_key;
 
         const componentMap = {
-            'hero': <HeroSection key={key} invitation={invitation} brideGrooms={brideGrooms} events={events} galleries={galleries} layoutMode={layoutMode} />,
-            'opening': <OpeningSection key={key} invitation={invitation} brideGrooms={brideGrooms} />,
+            'hero': <HeroSection key={key} invitation={invitation} brideGrooms={brideGrooms} events={events} galleries={galleries} layoutMode={layoutMode} coverEmbedId={coverEmbedId} coverImages={coverImages} />,
+            'opening': <OpeningSection key={key} invitation={invitation} brideGrooms={brideGrooms} openingEmbedId={openingEmbedId} />,
             'bride_groom': <BrideGroomSection key={key} brideGrooms={brideGrooms} />,
             'countdown': null, // Embedded in event section
             'event': <EventSection key={key} events={events} galleries={galleries} showCountdown={showCountdownInEvent} />,
             'livestream': <LiveStreamingSection key={key} events={events} invitation={invitation} />,
             'love_story': <LoveStorySection key={key} loveStories={loveStories} />,
             'gallery': <GallerySection key={key} galleries={galleries} />,
+            'video': <VideoGallerySection key={key} invitation={invitation} locale={locale} />,
             'bank': <BankSection key={key} bankAccounts={bankAccounts} invitation={invitation} />,
             'rsvp': <UnifiedRsvpWishes key={key} invitation={invitation} wishes={wishes} guest={guest} enableRsvp={enableRsvp} enableWishes={enableWishes} />,
             'wishes': enableRsvp ? null : <UnifiedRsvpWishes key={key} invitation={invitation} wishes={wishes} guest={guest} enableRsvp={false} enableWishes={true} />,
@@ -2063,6 +2242,8 @@ export default function DynamicIndex({
                 guest={guest}
                 isOpened={isOpened}
                 onOpen={handleOpen}
+                coverEmbedId={coverEmbedId}
+                coverImages={coverImages}
             />
 
             {/* Main Area */}

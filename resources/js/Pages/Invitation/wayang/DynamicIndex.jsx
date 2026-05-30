@@ -46,6 +46,19 @@ function safeArr(val) {
     return [];
 }
 
+function getYoutubeId(url) {
+    if (!url) return '';
+    let id = '';
+    if (url.includes('youtube.com/watch?v=')) {
+        id = url.split('v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+        id = url.split('youtu.be/')[1]?.split('?')[0];
+    } else if (url.includes('youtube.com/embed/')) {
+        id = url.split('embed/')[1]?.split('?')[0];
+    }
+    return id;
+}
+
 function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
     const t = type || 'wedding';
     const isEn = String(locale).toLowerCase() === 'en';
@@ -349,9 +362,23 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
         return invitation.cover_image.split(',').map(url => getThemeAssetUrl(url, null)).filter(Boolean);
     }, [invitation?.cover_image]);
 
+    // Resolve YouTube cover embed ID
+    const coverEmbedId = useMemo(() => {
+        return getYoutubeId(invitation?.cover_video_url);
+    }, [invitation?.cover_video_url]);
+
     return (
         <div className={`wy-cover${isOpened ? ' wy-slide--hidden' : ''}`}>
-            {globalShowPhotos && coverImages.length > 0 ? (
+            {globalShowPhotos && coverEmbedId ? (
+                <div className="wy-bg-video-container filter brightness-[0.55] wy-cover-bg-image">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                        title="Background Cover Video"
+                        className="wy-bg-video-iframe"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                </div>
+            ) : globalShowPhotos && coverImages.length > 0 ? (
                 <PremiumSlideshow
                     images={coverImages}
                     positionX={invitation?.cover_position_x}
@@ -360,7 +387,9 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
                     className="wy-cover-bg-image"
                     imgClassName="absolute inset-0 w-full h-full object-cover filter brightness-[0.55]"
                 />
-            ) : null}
+            ) : (
+                <div className="wy-cover-bg-placeholder" style={{ position: 'absolute', inset: 0, backgroundColor: '#0f1115', zIndex: 0 }} />
+            )}
             <div className="wy-cover-wrapper">
                 {/* Rotating Circle Logo Text with Javanese Gunungan in center */}
                 <div className="wy-cover-circle-logo">
@@ -399,6 +428,23 @@ function OpeningSection({ invitation, brideGrooms, events, language, themeConfig
         return rawSource.split(',').map(url => getThemeAssetUrl(url, null)).filter(Boolean);
     }, [invitation?.opening_image, invitation?.cover_image]);
 
+    // Resolve YouTube opening embed ID (for background)
+    const openingBgEmbedId = useMemo(() => {
+        return getYoutubeId(invitation?.opening_video_url || (invitation?.video_playback === 'background' || invitation?.video_playback === 'both' ? invitation?.video_url : ''));
+    }, [invitation?.opening_video_url, invitation?.video_playback, invitation?.video_url]);
+
+    // Resolve YouTube opening embed ID (for inline player)
+    const openingEmbedId = useMemo(() => {
+        const playback = invitation?.video_playback || 'gallery';
+        if (invitation?.opening_video_url) {
+            return getYoutubeId(invitation.opening_video_url);
+        }
+        if (playback === 'standard' || playback === 'both') {
+            return getYoutubeId(invitation?.video_url);
+        }
+        return '';
+    }, [invitation?.opening_video_url, invitation?.video_playback, invitation?.video_url]);
+
     // Couples names
     const coupleName = themeConfig?.coupleName || 'Bimo & Raras';
 
@@ -421,19 +467,28 @@ function OpeningSection({ invitation, brideGrooms, events, language, themeConfig
     return (
         <section 
             id="opening" 
-            className={`wy-opening-section-hero ${globalShowPhotos && openingImages.length > 0 ? 'wy-has-bg' : ''}`}
+            className={`wy-opening-section-hero ${globalShowPhotos && (openingBgEmbedId || openingImages.length > 0) ? 'wy-has-bg' : ''}`}
         >
-            {globalShowPhotos && openingImages.length > 0 && (
+            {globalShowPhotos && openingBgEmbedId ? (
+                <div className="wy-bg-video-container filter brightness-[0.55]">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${openingBgEmbedId}?autoplay=1&mute=1&loop=1&playlist=${openingBgEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                        title="Background Opening Video"
+                        className="wy-bg-video-iframe"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                </div>
+            ) : globalShowPhotos && openingImages.length > 0 ? (
                 <PremiumSlideshow
                     images={openingImages}
                     positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
                     positionY={invitation?.opening_position_y ?? invitation?.cover_position_y}
                     zoom={invitation?.opening_zoom ?? invitation?.cover_zoom}
                     className="absolute inset-0 w-full h-full z-0"
-                    imgClassName="absolute inset-0 w-full h-full object-cover"
+                    imgClassName="absolute inset-0 w-full h-full object-cover filter brightness-[0.55]"
                 />
-            )}
-            {globalShowPhotos && openingImages.length > 0 && <div className="wy-opening-overlay" />}
+            ) : null}
+            {globalShowPhotos && (openingBgEmbedId || openingImages.length > 0) && <div className="wy-opening-overlay" />}
             
             {/* 1. Fullscreen Hero Block */}
             <div className="wy-opening-hero-block">
@@ -507,11 +562,12 @@ function OpeningSection({ invitation, brideGrooms, events, language, themeConfig
                         )}
                         {invitation.opening_ayat_source && (
                             <div className="wy-quote-source">
-                                {invitation.opening_ayat_source}
+                                — {invitation.opening_ayat_source}
                             </div>
                         )}
                     </Reveal>
                 )}
+
 
                 <div className="wy-divider-gunungan">
                     <img src={ASSETS.gunungan} className="wy-divider-gunungan-img" alt="Divider" />
@@ -885,6 +941,89 @@ function GallerySection({ galleries, language }) {
                     <img src={selectedImage} className="wy-lightbox-img" alt="Lightbox Preview" />
                 </div>
             )}
+
+            <div className="wy-divider-gunungan">
+                <img src={ASSETS.gunungan} className="wy-divider-gunungan-img" alt="Divider" />
+            </div>
+        </section>
+    );
+}
+
+function VideoGallerySection({ invitation, language }) {
+    const { t } = useTranslation(language);
+    const isEn = language === 'en';
+
+    const videoItems = [];
+    const showVideo = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideo) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                videoItems.push({
+                    ytId: ytId,
+                    url: url,
+                    title: isEn ? `Moment Video #${idx + 1}` : `Momen Video #${idx + 1}`
+                });
+            }
+        });
+    }
+
+    if (videoItems.length === 0) return null;
+
+    return (
+        <section id="video" className="wy-section">
+            <Reveal>
+                <h4 className="wy-section-subtitle">{isEn ? 'Video Gallery' : 'Galeri Video'}</h4>
+                <h2 className="wy-section-title">{isEn ? 'Our Moments' : 'Momen Berharga'}</h2>
+            </Reveal>
+
+            <div 
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px',
+                    maxWidth: '600px',
+                    margin: '0 auto',
+                    width: '100%',
+                    padding: '0 16px',
+                    boxSizing: 'border-box'
+                }}
+            >
+                {videoItems.map((item, idx) => (
+                    <Reveal key={idx} delay={idx * 100} className="w-full">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {videoItems.length > 1 && (
+                                <h4 style={{ color: 'var(--wy-primary)', fontSize: '0.95rem', fontWeight: 'bold', margin: '0 0 4px', textAlign: 'center', letterSpacing: '0.5px' }}>
+                                    {item.title}
+                                </h4>
+                            )}
+                            <div 
+                                style={{
+                                    position: 'relative',
+                                    width: '100%',
+                                    aspectRatio: '16/9',
+                                    overflow: 'hidden',
+                                    borderRadius: '12px',
+                                    border: '1px solid rgba(212, 175, 55, 0.35)',
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)'
+                                }}
+                            >
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${item.ytId}?autoplay=0&mute=0&rel=0`}
+                                    title={item.title}
+                                    frameBorder="0"
+                                    className="w-full h-full absolute inset-0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    style={{ border: 'none' }}
+                                />
+                            </div>
+                        </div>
+                    </Reveal>
+                ))}
+            </div>
 
             <div className="wy-divider-gunungan">
                 <img src={ASSETS.gunungan} className="wy-divider-gunungan-img" alt="Divider" />
@@ -1382,6 +1521,7 @@ export default function WayangTheme({
         'event',
         'livestream',
         'gallery',
+        'video',
         'rsvp',
         'bank',
         'closing', 'footer'
@@ -1428,17 +1568,32 @@ export default function WayangTheme({
             ];
         }
 
+        // Check if prewedding video list exists
+        const hasVideos = invitation?.video_list?.length > 0 && 
+            (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+        const hasVideoInBase = base.some(s => s.section_key === 'video');
+        if (!hasVideoInBase && hasVideos) {
+            const gallerySec = base.find(s => s.section_key === 'gallery');
+            const gallerySortOrder = gallerySec ? gallerySec.sort_order : 6;
+            base = [
+                ...base,
+                { section_key: 'video', sort_order: gallerySortOrder + 0.5, is_visible: true }
+            ];
+        }
+
         // If photo-less mode is active, filter out gallery section
         // If no active streams exist, filter out livestream section to prevent rendering empty slides
         return base
             .filter(s => s.is_visible && validKeys.includes(s.section_key))
             .filter(s => s.section_key !== 'livestream' || hasStreamUrl)
+            .filter(s => s.section_key !== 'video' || hasVideos)
             .filter(s => globalShowPhotos ? true : s.section_key !== 'gallery')
             .filter(s => s.section_key !== 'love_story' || (loveStories && loveStories.length > 0))
             .filter(s => s.section_key !== 'gallery' || (galleries && galleries.length > 0))
             .filter(s => s.section_key !== 'bank' || (bankAccounts && bankAccounts.length > 0))
             .sort((a, b) => a.sort_order - b.sort_order);
-    }, [sections, invitation, events]);
+    }, [sections, invitation, events, loveStories, galleries, bankAccounts]);
 
     // Auto-Scroll implementation
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(
@@ -1586,6 +1741,7 @@ export default function WayangTheme({
         'event':      <EventSection events={events} invitation={invitation} language={language} themeConfig={themeConfig} />,
         'livestream': <LiveStreamingSection events={events} invitation={invitation} language={language} themeConfig={themeConfig} />,
         'gallery':    <GallerySection galleries={galleries} language={language} />,
+        'video':      <VideoGallerySection invitation={invitation} language={language} />,
         'rsvp':       <RsvpSection wishes={wishes} invitation={invitation} guest={guest} language={language} />,
         'bank':       <GiftSection bankAccounts={bankAccounts} language={language} />,
         'closing':    <FooterSection invitation={invitation} brideGrooms={brideGrooms} language={language} themeConfig={themeConfig} />,
@@ -1625,6 +1781,8 @@ export default function WayangTheme({
                 return 'Live';
             case 'gallery':
                 return t('nav.galeri') || 'Gallery';
+            case 'video':
+                return 'Video';
             case 'rsvp':
                 return t('nav.rsvp') || 'RSVP';
             case 'bank':
@@ -1654,6 +1812,8 @@ export default function WayangTheme({
                 return 'fa-video';
             case 'gallery':
                 return 'fa-images';
+            case 'video':
+                return 'fa-video';
             case 'rsvp':
                 return 'fa-paper-plane';
             case 'bank':

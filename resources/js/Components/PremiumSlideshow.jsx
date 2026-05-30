@@ -32,7 +32,8 @@ export default function PremiumSlideshow({
                     className={imgClassName}
                     style={{
                         objectPosition: `${positionX ?? 50}% ${positionY ?? 50}%`,
-                        transform: `scale(${zoom ?? 1.0})`,
+                        transform: `scale(${zoom ?? 1.0}) translate(${(50 - (positionX ?? 50)) * (1 - 1 / (zoom ?? 1.0))}%, ${(50 - (positionY ?? 50)) * (1 - 1 / (zoom ?? 1.0))}%)`,
+                        transformOrigin: 'center',
                     }}
                 />
                 {overlayGradient && (
@@ -56,15 +57,17 @@ export default function PremiumSlideshow({
         <div className={`${className} overflow-hidden`}>
             {validImages.map((src, index) => {
                 const isActive = index === activeIndex;
+                const activeZoom = zoom ?? 1.0;
+                const inactiveZoom = activeZoom * 1.08;
                 
-                // Style for premium Ken Burns effect + cross-fade
+                const currentZoom = isActive ? activeZoom : inactiveZoom;
+
                 const style = {
                     objectPosition: `${positionX ?? 50}% ${positionY ?? 50}%`,
                     transition: `opacity ${transitionDuration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), transform ${interval + transitionDuration}ms linear`,
                     opacity: isActive ? 1 : 0,
-                    transform: isActive 
-                        ? `scale(${zoom ?? 1.0})` 
-                        : `scale(${(zoom ?? 1.0) * 1.08})`,
+                    transform: `scale(${currentZoom}) translate(${(50 - (positionX ?? 50)) * (1 - 1 / currentZoom)}%, ${(50 - (positionY ?? 50)) * (1 - 1 / currentZoom)}%)`,
+                    transformOrigin: 'center',
                     zIndex: isActive ? 1 : 0,
                 };
 

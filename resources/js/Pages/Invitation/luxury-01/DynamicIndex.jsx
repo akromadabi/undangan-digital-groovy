@@ -45,6 +45,19 @@ function formatDate(d) {
     return new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+function getYoutubeId(url) {
+    if (!url) return '';
+    let id = '';
+    if (url.includes('youtube.com/watch?v=')) {
+        id = url.split('v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+        id = url.split('youtu.be/')[1]?.split('?')[0];
+    } else if (url.includes('youtube.com/embed/')) {
+        id = url.split('embed/')[1]?.split('?')[0];
+    }
+    return id;
+}
+
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 
 function formatTime(t) {
@@ -225,7 +238,31 @@ export default function DynamicIndex({
     guest,
 }) {
     const wishesInputRef = React.useRef(null);
-    const { t } = useTranslation(invitation?.language || 'id');
+    const { t, locale } = useTranslation(invitation?.language || 'id');
+
+    const coverVideoUrl = invitation?.cover_video_url;
+    const coverEmbedId = useMemo(() => getYoutubeId(coverVideoUrl), [coverVideoUrl]);
+
+    const generalVideoUrl = invitation?.video_url;
+    const generalEmbedId = useMemo(() => getYoutubeId(generalVideoUrl), [generalVideoUrl]);
+
+    const openingVideoUrl = invitation?.opening_video_url;
+    const openingEmbedId = useMemo(() => {
+        const id = getYoutubeId(openingVideoUrl);
+        return id || (invitation?.video_playback === 'background' || invitation?.video_playback === 'both' ? generalEmbedId : '');
+    }, [openingVideoUrl, invitation?.video_playback, generalEmbedId]);
+
+    const coverImages = useMemo(() => {
+        return (invitation?.cover_image || '')
+            .split(',')
+            .map(img => getStorageUrl(img.trim()))
+            .filter(Boolean);
+    }, [invitation?.cover_image]);
+
+    const hasVideos = useMemo(() => {
+        return safeArr(invitation?.video_list).length > 0 &&
+            (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+    }, [invitation?.video_list, invitation?.video_playback]);
     // Autoplay states
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -389,7 +426,7 @@ export default function DynamicIndex({
     // Resolve Sections and Order
     const resolvedSections = useMemo(() => {
         const safeSections = safeArr(sections);
-        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
+        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'video', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
         const resolved = [];
 
         // Prepend virtual hero/slideshow section
@@ -405,7 +442,15 @@ export default function DynamicIndex({
 
             dbSorted.forEach(s => {
                 if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return;
-                if (s.section_key === 'gallery' && (!showPhotos || !(galleries?.length > 0))) return;
+                if (s.section_key === 'gallery') {
+                    if (galleries?.length > 0 && showPhotos) {
+                        resolved.push(s);
+                    }
+                    if (hasVideos) {
+                        resolved.push({ section_key: 'video' });
+                    }
+                    return;
+                }
                 if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return;
                 if (s.section_key === 'rsvp' && !enableRsvp) return;
                 
@@ -439,6 +484,7 @@ export default function DynamicIndex({
 
             if (loveStories?.length > 0) fallbacks.push({ section_key: 'love_story' });
             if (showPhotos && galleries?.length > 0) fallbacks.push({ section_key: 'gallery' });
+            if (hasVideos) fallbacks.push({ section_key: 'video' });
             if (enableRsvp) {
                 fallbacks.push({ section_key: 'rsvp' });
             } else if (enableWishes) {
@@ -451,7 +497,7 @@ export default function DynamicIndex({
         }
 
         return resolved;
-    }, [sections, loveStories, galleries, bankAccounts, enableRsvp, enableWishes, events, showPhotos]);
+    }, [sections, loveStories, galleries, bankAccounts, enableRsvp, enableWishes, events, showPhotos, hasVideos]);
 
     // Active navigation item tracking based on active slide or scroll positions
     useEffect(() => {
@@ -691,6 +737,8 @@ export default function DynamicIndex({
                 items.push({ id: 'love_story', label: t('nav.kisah'), icon: 'fas fa-history' });
             } else if (key === 'gallery') {
                 items.push({ id: 'gallery', label: t('nav.galeri'), icon: 'far fa-images' });
+            } else if (key === 'video') {
+                items.push({ id: 'video', label: locale === 'en' ? 'Videos' : 'Video', icon: 'fas fa-video' });
             } else if (key === 'rsvp') {
                 items.push({ id: 'rsvp', label: t('nav.rsvp'), icon: 'fas fa-envelope' });
             } else if (key === 'wishes') {
@@ -743,7 +791,18 @@ export default function DynamicIndex({
                 id="opening" 
                 className={`lx1-section lx1-section-opening lx1-opening-photo-mode ${!showPhotos ? 'lx1-no-photo-mode' : ''} relative overflow-hidden`}
             >
-                {showPhotos && hasCoverPhoto && (
+                {showPhotos && openingEmbedId ? (
+                    <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${openingEmbedId}?autoplay=1&mute=1&loop=1&playlist=${openingEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                            title="Background Opening Video"
+                            frameBorder="0"
+                            className="absolute top-1/2 left-1/2 w-[115vw] h-[64.68vw] min-h-[100vh] min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            style={{ border: 'none' }}
+                        />
+                    </div>
+                ) : showPhotos && hasCoverPhoto ? (
                     <PremiumSlideshow
                         images={openingBg.split(',')}
                         positionX={hasOpeningPhoto ? invitation.opening_position_x : invitation.cover_position_x}
@@ -752,7 +811,7 @@ export default function DynamicIndex({
                         className="absolute inset-0 w-full h-full z-0"
                         imgClassName="absolute inset-0 w-full h-full object-cover"
                     />
-                )}
+                ) : null}
                 <div className="lx1-section-content relative z-10">
                     <Reveal variant="down">
                         <h3 className="lx1-title-photo">{t('invitation.wedding_of')}</h3>
@@ -1073,6 +1132,84 @@ export default function DynamicIndex({
         </section>
     );
 
+    // Render 5.5 Video Gallery
+    const renderVideoGallery = () => {
+        const videoList = safeArr(invitation?.video_list);
+        const videoItems = [];
+
+        videoList.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                videoItems.push({
+                    ytId,
+                    url,
+                    title: locale === 'en' ? `Moment Video #${idx + 1}` : `Momen Video #${idx + 1}`
+                });
+            }
+        });
+
+        if (videoItems.length === 0) return null;
+
+        return (
+            <section id="video" className="lx1-section lx1-section-gallery" style={{ backgroundColor: 'var(--lx1-bg-light)' }}>
+                <div className="lx1-section-content">
+                    <Reveal variant="down">
+                        <h2 className="lx1-section-title">{locale === 'en' ? 'Video Gallery' : 'Galeri Video'}</h2>
+                    </Reveal>
+
+                    <div 
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '24px',
+                            width: '100%',
+                            marginTop: '10px'
+                        }}
+                    >
+                        {videoItems.map((item, idx) => (
+                            <Reveal key={idx} variant="zoom" delay={idx * 50} className="w-full">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {videoItems.length > 1 && (
+                                        <h4 style={{ color: 'var(--lx1-slate-dark)', fontSize: '0.9rem', fontWeight: 'bold', margin: '0 0 4px', letterSpacing: '0.5px' }}>
+                                            {item.title}
+                                        </h4>
+                                    )}
+                                    <div 
+                                        style={{
+                                            position: 'relative',
+                                            width: '100%',
+                                            aspectRatio: '16/9',
+                                            overflow: 'hidden',
+                                            borderRadius: '12px',
+                                            border: '1px solid var(--lx1-gold-border, rgba(197, 168, 128, 0.3))',
+                                            boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                                            backgroundColor: '#000'
+                                        }}
+                                    >
+                                        <iframe 
+                                            src={`https://www.youtube.com/embed/${item.ytId}?autoplay=0&rel=0&showinfo=1&controls=1&mute=0`}
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                border: '0'
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </Reveal>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+    };
+
     // Render 6. Bank/Gifts
     const renderBank = () => (
         <section id="bank" className="lx1-section lx1-section-bank">
@@ -1385,7 +1522,35 @@ export default function DynamicIndex({
                         onMouseLeave={handleMouseLeave}
                     >
                         <div className="lx1-hero-slide">
-                            <div className="lx1-hero-bg" style={{ backgroundImage: `url(${coverBgUrl})` }} />
+                            {showPhotos && coverEmbedId ? (
+                                <>
+                                    <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                                            title="Background Cover Video"
+                                            frameBorder="0"
+                                            className="absolute top-1/2 left-1/2 w-[115vw] h-[64.68vw] min-h-[100vh] min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            style={{ border: 'none' }}
+                                        />
+                                    </div>
+                                    <div className="absolute inset-0 w-full h-full z-[1]" style={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }} />
+                                </>
+                            ) : showPhotos && coverImages.length > 0 ? (
+                                <>
+                                    <PremiumSlideshow
+                                        images={coverImages}
+                                        positionX={invitation?.cover_position_x}
+                                        positionY={invitation?.cover_position_y}
+                                        zoom={invitation?.cover_zoom}
+                                        className="absolute inset-0 w-full h-full z-0"
+                                        imgClassName="absolute inset-0 w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 w-full h-full z-[1]" style={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }} />
+                                </>
+                            ) : (
+                                <div className="lx1-hero-bg" style={{ backgroundImage: `url(${coverBgUrl})` }} />
+                            )}
                             <div className="lx1-hero-content">
                                 <span className="lx1-hero-title">{t('invitation.wedding_of').toUpperCase()}</span>
                                 <h1 className="lx1-hero-names">
@@ -1414,6 +1579,8 @@ export default function DynamicIndex({
                 return wrapSection('love_story', renderLoveStory());
             case 'gallery':
                 return wrapSection('gallery', renderGallery());
+            case 'video':
+                return wrapSection('video', renderVideoGallery());
             case 'bank':
                 return wrapSection('bank', renderBank());
             case 'rsvp':
@@ -1448,13 +1615,28 @@ export default function DynamicIndex({
             </audio>
 
             {/* Buka Undangan Overlay Cover */}
-            <div 
-                                className={`lx1-cover-overlay ${isOpened ? 'lx1-opened' : ''} ${!showPhotos ? 'lx1-no-photo-mode' : ''}`}
-                                style={showPhotos ? { 
-                                    backgroundImage: `url(${coverBgUrl})`,
-                                    backgroundPosition: `${invitation?.cover_position_x ?? 50}% ${invitation?.cover_position_y ?? 50}%`
-                                } : undefined}
-                            >
+            <div className={`lx1-cover-overlay ${isOpened ? 'lx1-opened' : ''} ${!showPhotos ? 'lx1-no-photo-mode' : ''}`}>
+                {showPhotos && coverEmbedId ? (
+                    <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                            title="Background Cover Video"
+                            frameBorder="0"
+                            className="absolute top-1/2 left-1/2 w-[115vw] h-[64.68vw] min-h-[100vh] min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            style={{ border: 'none' }}
+                        />
+                    </div>
+                ) : showPhotos && coverImages.length > 0 ? (
+                    <PremiumSlideshow
+                        images={coverImages}
+                        positionX={invitation?.cover_position_x}
+                        positionY={invitation?.cover_position_y}
+                        zoom={invitation?.cover_zoom}
+                        className="absolute inset-0 w-full h-full z-0"
+                        imgClassName="absolute inset-0 w-full h-full object-cover"
+                    />
+                ) : null}
                 <div className="lx1-cover-content">
                     <h3 className="lx1-cover-title">{t('invitation.wedding_of').toUpperCase()}</h3>
                     <h1 className="lx1-cover-names">

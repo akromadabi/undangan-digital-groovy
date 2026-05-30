@@ -116,7 +116,7 @@ function useCountdown(targetDate) {
 /* ═══════════════════════════════════════
    SCROLL REVEAL COMPONENT
    ═══════════════════════════════════════ */
-function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
+function Reveal({ children, className = '', variant = 'up', delay = 0, id, style, ...props }) {
     const ref = useRef(null);
     const [visible, setVisible] = useState(!globalShowAnimations);
 
@@ -132,14 +132,21 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
     }, []);
 
     if (!globalShowAnimations) {
-        return <div className={className}>{children}</div>;
+        return <div id={id} style={style} className={className} {...props}>{children}</div>;
     }
+
+    const combinedStyle = {
+        ...(style || {}),
+        ...(delay ? { animationDelay: `${delay}ms` } : {})
+    };
 
     return (
         <div
             ref={ref}
+            id={id}
             className={`${className} wa-animated-bubble ${visible ? 'is-visible' : 'opacity-0 translate-y-3'}`}
-            style={delay ? { animationDelay: `${delay}ms` } : undefined}
+            style={combinedStyle}
+            {...props}
         >
             {children}
         </div>
@@ -206,11 +213,44 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
             .filter(Boolean);
     }, [invitation?.cover_image]);
 
+    // Resolve YouTube cover embed ID
+    const coverEmbedId = useMemo(() => {
+        let id = '';
+        const url = invitation?.cover_video_url;
+        if (url) {
+            if (url.includes('youtube.com/watch?v=')) {
+                id = url.split('v=')[1]?.split('&')[0];
+            } else if (url.includes('youtu.be/')) {
+                id = url.split('youtu.be/')[1]?.split('?')[0];
+            } else if (url.includes('youtube.com/embed/')) {
+                id = url.split('embed/')[1]?.split('?')[0];
+            }
+        }
+        return id;
+    }, [invitation?.cover_video_url]);
+
+    // Strip emoticons from the subtitle text
+    const cleanSubtitle = useMemo(() => {
+        const subtitle = invitation?.cover_subtitle || (locale === 'en' ? 'You have 1 unread message.' : 'Anda memiliki 1 pesan belum dibaca.');
+        return subtitle.replace(/[\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u2600-\u26FF\u2700-\u27BF\uFE0F\uD83C-\uDBFF\uDC00-\uDFFF|💬|😊|❤️|✉️|📩]/g, '').trim();
+    }, [invitation?.cover_subtitle, locale]);
+
     return (
         <div className={`wa-cover${isOpened ? ' is-opened' : ''}`}>
-            {/* Background Slideshow */}
+            {/* Background Slideshow or Background Video */}
             <div className="wa-cover-bg">
-                {showPhotos && coverImages.length > 0 ? (
+                {showPhotos && coverEmbedId ? (
+                    <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                            title="Background Cover Video"
+                            frameBorder="0"
+                            className="absolute top-1/2 left-1/2 w-[115vw] h-[64.68vw] min-h-[100vh] min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            style={{ border: 'none' }}
+                        />
+                    </div>
+                ) : showPhotos && coverImages.length > 0 ? (
                     <PremiumSlideshow
                         images={coverImages}
                         positionX={invitation?.cover_position_x}
@@ -230,38 +270,38 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
             <div className="wa-cover-middle">
                 <div className="wa-lock-card">
-                    <div className="wa-lock-header">
-                        <div className="wa-lock-avatar-wrap">
-                            {showPhotos && avatarSrc ? (
-                                <img src={avatarSrc} className="wa-lock-avatar" alt="Avatar" />
-                            ) : (
-                                <div className="wa-lock-monogram">{monogram}</div>
-                            )}
-                            <div className="wa-lock-online-dot" />
+                    {/* Native-style Push Notification Header */}
+                    <div className="wa-noti-header">
+                        <div className="wa-noti-app">
+                            <i className="fab fa-whatsapp" style={{ color: '#25D366', fontSize: '1.1rem' }} />
+                            <span className="wa-noti-app-name">WhatsApp</span>
                         </div>
-                        <div className="wa-lock-meta">
-                            <span className="wa-lock-name">
-                                {groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : invitation?.title || 'Undangan Digital'}
+                        <span className="wa-noti-time">{locale === 'en' ? 'now' : 'sekarang'}</span>
+                    </div>
+
+                    {/* Native-style Push Notification Body */}
+                    <div className="wa-noti-body">
+                        <div className="wa-noti-title">
+                            {groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : invitation?.title || 'Undangan Digital'}
+                        </div>
+                        <div className="wa-noti-message">
+                            <span className="wa-noti-to-label">
+                                {locale === 'en' ? 'SPECIAL INVITATION TO: ' : 'UNDANGAN SPESIAL KEPADA: '}
                             </span>
-                            <span className="wa-lock-status">{t('invitation.online') || 'online'}</span>
+                            <span className="wa-noti-guest-name">
+                                {guest?.name || (locale === 'en' ? 'Dear Guest' : 'Tamu Undangan')}
+                            </span>
                         </div>
-                    </div>
-
-                    <div className="wa-lock-content">
-                        <p style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: '#8696a0' }}>
-                            {locale === 'en' ? 'SPECIAL INVITATION TO:' : 'UNDANGAN SPESIAL KEPADA:'}
-                        </p>
-                        <h4 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', color: '#e9edef', fontWeight: 'bold' }}>
-                            {guest?.name || (locale === 'en' ? 'Dear Guest' : 'Tamu Undangan')}
-                        </h4>
                         
-                        <div className="wa-lock-msg">
-                            {invitation?.cover_subtitle || (locale === 'en' ? 'You have 1 unread message.' : 'Anda memiliki 1 pesan belum dibaca.')}
+                        <div className="wa-noti-subtitle">
+                            {cleanSubtitle}
                         </div>
                     </div>
 
+                    {/* Quick Action Button */}
                     <button type="button" onClick={onOpen} className="wa-lock-btn">
-                        <i className="fas fa-envelope-open" /> {t('invitation.open') || 'Buka Undangan'}
+                        <i className="fas fa-envelope-open" style={{ marginRight: '8px' }} />
+                        {t('invitation.open') || 'Buka Undangan'}
                     </button>
                 </div>
             </div>
@@ -283,6 +323,7 @@ function HeaderBar({
     enableQr, 
     hasStory, 
     hasGallery, 
+    hasVideo,
     hasBank, 
     hasStream, 
     hasRsvp, 
@@ -311,14 +352,7 @@ function HeaderBar({
         setMenuOpen(false);
         const el = document.getElementById(id);
         if (el) {
-            const headerOffset = 65; // ~65px offset
-            const elementPosition = el.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.scrollY - headerOffset;
-            
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth'
-            });
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     };
 
@@ -376,6 +410,11 @@ function HeaderBar({
                                     {language === 'en' ? 'Media Gallery' : 'Galeri Media'}
                                 </div>
                             )}
+                            {hasVideo && (
+                                <div className="wa-menu-item" onClick={() => scrollToSection('video')}>
+                                    {language === 'en' ? 'Video Gallery' : 'Galeri Video'}
+                                </div>
+                            )}
                             {hasRsvp && (
                                 <div className="wa-menu-item" onClick={() => scrollToSection('rsvp')}>
                                     {language === 'en' ? 'RSVP Confirmation' : 'Konfirmasi RSVP'}
@@ -397,24 +436,100 @@ function HeaderBar({
 /* ═══════════════════════════════════════
    DECORATIVE BOTTOM INPUT BAR
    ═══════════════════════════════════════ */
-function BottomBar({ language }) {
+function BottomBar({ language, onSend }) {
     const isEn = language === 'en';
+    const [text, setText] = useState('');
+    const [showEmoji, setShowEmoji] = useState(false);
+    const inputRef = useRef(null);
+
+    const emojis = ['😊', '😂', '❤️', '👍', '🎉', '😍', '🙏', '😭', '😜', '😎', '🌹', '💍', '👩‍❤️‍👨', '🎂', '👏', '✨', '🥳', '🌸', '🎈', '💌', '💖', '🤗'];
+
+    const handleEmojiClick = (emoji) => {
+        if (inputRef.current) {
+            const input = inputRef.current;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const val = input.value;
+            const before = val.substring(0, start);
+            const after = val.substring(end, val.length);
+            const newValue = before + emoji + after;
+            setText(newValue);
+            
+            setTimeout(() => {
+                input.focus();
+                input.setSelectionRange(start + emoji.length, start + emoji.length);
+            }, 0);
+        } else {
+            setText(prev => prev + emoji);
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSend();
+        }
+    };
+
+    const handleSend = () => {
+        if (!text.trim()) return;
+        onSend(text);
+        setText('');
+        setShowEmoji(false);
+    };
+
     return (
-        <div className="wa-bottom-bar select-none">
+        <div className="wa-bottom-bar">
+            {showEmoji && (
+                <>
+                    <div className="wa-emoji-backdrop" onClick={() => setShowEmoji(false)} />
+                    <div className="wa-emoji-picker-popover">
+                        {emojis.map(emoji => (
+                            <button
+                                key={emoji}
+                                type="button"
+                                className="wa-emoji-btn"
+                                onClick={() => handleEmojiClick(emoji)}
+                            >
+                                {emoji}
+                            </button>
+                        ))}
+                    </div>
+                </>
+            )}
+
             <div className="wa-input-container">
-                <i className="far fa-laugh wa-input-icon" />
-                <div className="wa-input-placeholder">
-                    {isEn ? 'Reply with love...' : 'Ketik ucapan doa restu...'}
-                </div>
-                <i className="fas fa-paperclip wa-input-icon" />
-                <i className="fas fa-camera wa-input-icon" />
+                <button 
+                    type="button" 
+                    className="wa-laugh-btn"
+                    onClick={() => setShowEmoji(!showEmoji)}
+                >
+                    <i className="far fa-laugh wa-input-icon-laugh" />
+                </button>
+                <input
+                    ref={inputRef}
+                    type="text"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder={isEn ? 'Reply with love...' : 'Ketik ucapan doa restu...'}
+                    className="wa-input-field"
+                />
+                <i className="fas fa-paperclip wa-input-icon" style={{ cursor: 'pointer' }} />
+                <i className="fas fa-camera wa-input-icon" style={{ cursor: 'pointer' }} />
             </div>
-            <div className="wa-send-btn">
-                <i className="fas fa-microphone" />
-            </div>
+            
+            <button 
+                type="button" 
+                className="wa-send-btn" 
+                onClick={handleSend}
+                style={{ cursor: text.trim() ? 'pointer' : 'default' }}
+            >
+                <i className={text.trim() ? "fas fa-paper-plane" : "fas fa-microphone"} />
+            </button>
         </div>
     );
 }
+
 
 /* ═══════════════════════════════════════
    MAIN THEME WORKSPACE
@@ -635,7 +750,11 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                 });
             });
         }
-        
+        return items;
+    }, [galleries, showPhotos, isEn]);
+
+    const videoItems = useMemo(() => {
+        const items = [];
         const hasVideos = invitation?.video_list?.length > 0 &&
             (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
         
@@ -644,9 +763,8 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                 const ytId = getYoutubeId(url);
                 if (ytId) {
                     items.push({
-                        type: 'video',
                         ytId: ytId,
-                        src: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+                        url: url,
                         title: isEn ? `Prewedding Video #${idx + 1}` : `Video Prewedding #${idx + 1}`,
                         id: `video-${idx}`
                     });
@@ -654,7 +772,9 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
             });
         }
         return items;
-    }, [galleries, invitation?.video_list, invitation?.video_playback, showPhotos, isEn]);
+    }, [invitation?.video_list, invitation?.video_playback, isEn]);
+
+    const hasVideos = videoItems.length > 0;
 
     // Handle lightbox audio control
     useEffect(() => {
@@ -760,6 +880,36 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
             .filter(Boolean);
     }, [invitation?.opening_image]);
 
+    // Resolve YouTube opening embed ID
+    const openingEmbedId = useMemo(() => {
+        let id = '';
+        const url = invitation?.opening_video_url || (invitation?.video_playback === 'background' || invitation?.video_playback === 'both' ? invitation?.video_url : '');
+        if (url) {
+            if (url.includes('youtube.com/watch?v=')) {
+                id = url.split('v=')[1]?.split('&')[0];
+            } else if (url.includes('youtu.be/')) {
+                id = url.split('youtu.be/')[1]?.split('?')[0];
+            } else if (url.includes('youtube.com/embed/')) {
+                id = url.split('embed/')[1]?.split('?')[0];
+            }
+        }
+        return id;
+    }, [invitation?.opening_video_url, invitation?.video_playback, invitation?.video_url]);
+
+    const handleBottomBarSend = (text) => {
+        rsvpForm.setData('message', text);
+        const el = document.getElementById('rsvp');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => {
+                const textarea = document.querySelector('.wa-textarea');
+                if (textarea) {
+                    textarea.focus();
+                }
+            }, 800);
+        }
+    };
+
     return (
         <div className={`wa-main-wrapper${!showAnimations ? ' wa-no-animations' : ''}`}>
             {/* Music Background tag */}
@@ -789,6 +939,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                         onToggleQr={() => setShowQr(true)}
                         hasStory={safeArr(loveStories).length > 0}
                         hasGallery={galleryItems.length > 0}
+                        hasVideo={hasVideos}
                         hasBank={safeArr(bankAccounts).length > 0}
                         hasStream={hasStream}
                         hasRsvp={enableRsvp || enableWishes}
@@ -816,15 +967,29 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                         {/* SECTION 1: Unified Premium Opening Card */}
                         <Reveal className="wa-opening-card-row" delay={100}>
                             <div className="wa-opening-card">
-                                {/* Top: Image/Slideshow of the Couple */}
-                                {showPhotos && (openingImages.length > 0 || coverImages.length > 0) && (
+                                {/* Top: Image/Slideshow or Video of the Couple */}
+                                {showPhotos && (openingEmbedId || openingImages.length > 0 || coverImages.length > 0) && (
                                     <div className="wa-opening-slideshow-container">
-                                        <PremiumSlideshow
-                                            images={openingImages.length > 0 ? openingImages : coverImages}
-                                            positionX={invitation?.opening_position_x}
-                                            positionY={invitation?.opening_position_y}
-                                            zoom={invitation?.opening_zoom}
-                                        />
+                                        {openingEmbedId ? (
+                                            <div className="w-full h-full relative aspect-video" style={{ minHeight: '220px' }}>
+                                                <iframe
+                                                    src={`https://www.youtube.com/embed/${openingEmbedId}?autoplay=0&mute=0&rel=0`}
+                                                    title="Opening Video"
+                                                    frameBorder="0"
+                                                    className="w-full h-full absolute inset-0"
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowFullScreen
+                                                    style={{ border: 'none' }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <PremiumSlideshow
+                                                images={openingImages.length > 0 ? openingImages : coverImages}
+                                                positionX={invitation?.opening_position_x}
+                                                positionY={invitation?.opening_position_y}
+                                                zoom={invitation?.opening_zoom}
+                                            />
+                                        )}
                                     </div>
                                 )}
 
@@ -1208,44 +1373,17 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                                                         loading="lazy" 
                                                     />
-                                                    
-                                                    {item.type === 'video' ? (
-                                                        <div style={{
-                                                            position: 'absolute',
-                                                            inset: 0,
-                                                            backgroundColor: 'rgba(0,0,0,0.35)',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}>
-                                                            <div style={{
-                                                                width: '32px',
-                                                                height: '32px',
-                                                                borderRadius: '50%',
-                                                                backgroundColor: '#008069',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                boxShadow: '0 2px 8px rgba(0, 128, 105, 0.4)'
-                                                            }}>
-                                                                <svg style={{ width: '12px', height: '12px', fill: '#ffffff', marginLeft: '1.5px' }} viewBox="0 0 24 24">
-                                                                    <path d="M8 5v14l11-7z"/>
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{
-                                                            position: 'absolute',
-                                                            inset: 0,
-                                                            backgroundColor: 'rgba(0,0,0,0)',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            transition: 'background-color 0.2s'
-                                                        }} className="wa-photo-overlay-hover">
-                                                            <i className="fas fa-search-plus" style={{ color: '#fff', fontSize: '14px', opacity: 0 }} />
-                                                        </div>
-                                                    )}
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        inset: 0,
+                                                        backgroundColor: 'rgba(0,0,0,0)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        transition: 'background-color 0.2s'
+                                                    }} className="wa-photo-overlay-hover">
+                                                        <i className="fas fa-search-plus" style={{ color: '#fff', fontSize: '14px', opacity: 0 }} />
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -1256,6 +1394,67 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                                                 : `Membagikan ${galleryItems.length} media. Ketuk untuk memperbesar.`}
                                         </p>
 
+                                        <div className="wa-meta">
+                                            <span>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+                                            <span className="wa-ticks">✓✓</span>
+                                        </div>
+                                    </div>
+                                </Reveal>
+                            </>
+                        )}
+
+                        {/* SECTION 9.5: Video Album Bubble */}
+                        {hasVideos && (
+                            <>
+                                <div id="video" className="wa-system-message select-none">
+                                    🎥 {isEn ? 'SHARED VIDEO GALLERY' : 'ALBUM GALERI VIDEO'}
+                                </div>
+                                <Reveal className="wa-message-row wa-out" delay={200}>
+                                    <div className="wa-bubble" style={{ width: '100%' }}>
+                                        <span style={{ fontWeight: 'bold', color: '#128c7e', fontSize: '0.8rem', display: 'block', marginBottom: '8px' }}>
+                                            📁 {isEn ? 'Videos Sent' : 'Video Terkirim'}
+                                        </span>
+                                        
+                                        <div style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '12px',
+                                            width: '100%',
+                                        }}>
+                                            {videoItems.map((item, idx) => (
+                                                <div key={idx} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                    {videoItems.length > 1 && (
+                                                        <span style={{ fontSize: '0.8rem', color: 'var(--wa-text-muted)', fontWeight: 600 }}>
+                                                            {item.title}
+                                                        </span>
+                                                    )}
+                                                    <div style={{
+                                                        position: 'relative',
+                                                        width: '100%',
+                                                        aspectRatio: '16/9',
+                                                        overflow: 'hidden',
+                                                        borderRadius: '6px',
+                                                        backgroundColor: '#000',
+                                                        border: '1px solid rgba(0, 128, 105, 0.2)'
+                                                    }}>
+                                                        <iframe 
+                                                            src={`https://www.youtube.com/embed/${item.ytId}?autoplay=0&rel=0&showinfo=1&controls=1&mute=0`}
+                                                            frameBorder="0"
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowFullScreen
+                                                            style={{
+                                                                position: 'absolute',
+                                                                top: 0,
+                                                                left: 0,
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                border: '0'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                         <div className="wa-meta">
                                             <span>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
                                             <span className="wa-ticks">✓✓</span>
@@ -1484,7 +1683,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                     </div>
 
                     {/* Bottom input bar decoration */}
-                    <BottomBar language={activeLanguage} />
+                    <BottomBar language={activeLanguage} onSend={handleBottomBarSend} />
 
                     {/* Floating Controls for Fullscreen / Music */}
                     <div className="wa-floating-controls select-none">
@@ -1574,27 +1773,11 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
 
                             {/* Theater frame content */}
                             <div className="wa-lightbox-content" onClick={e => e.stopPropagation()}>
-                                {galleryItems[activeLightBoxIdx].type === 'video' ? (
-                                    <iframe 
-                                        src={`https://www.youtube.com/embed/${galleryItems[activeLightBoxIdx].ytId}?autoplay=1&rel=0&showinfo=0&controls=1&mute=0`}
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        style={{
-                                            width: '100%',
-                                            aspectRatio: '16/9',
-                                            borderRadius: '8px',
-                                            border: '2px solid #008069',
-                                            boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-                                        }}
-                                    />
-                                ) : (
-                                    <img 
-                                        src={galleryItems[activeLightBoxIdx].src} 
-                                        alt={galleryItems[activeLightBoxIdx].title} 
-                                        className="wa-lightbox-img"
-                                    />
-                                )}
+                                <img 
+                                    src={galleryItems[activeLightBoxIdx].src} 
+                                    alt={galleryItems[activeLightBoxIdx].title} 
+                                    className="wa-lightbox-img"
+                                />
                             </div>
 
                             {/* Caption info under media */}
@@ -1603,7 +1786,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                                     {galleryItems[activeLightBoxIdx].title}
                                 </div>
                                 <div>
-                                    {galleryItems[activeLightBoxIdx].type === 'video' ? 'WhatsApp Video Player' : 'WhatsApp High-Quality Photo'}
+                                    WhatsApp High-Quality Photo
                                 </div>
                             </div>
                         </div>

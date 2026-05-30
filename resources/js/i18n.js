@@ -64,6 +64,7 @@ const translations = {
 
         // Invitation
         'invitation.open': 'Buka Undangan',
+        'invitation.online': 'online',
         'invitation.to': 'Kepada Yth.',
         'invitation.dear_guest': 'Kepada Yth. Bapak/Ibu/Saudara/i',
         'invitation.dear_guest_desc': 'Mohon maaf apabila ada kesalahan penulisan nama atau gelar.',
@@ -191,6 +192,7 @@ const translations = {
 
         // Invitation
         'invitation.open': 'Open Invitation',
+        'invitation.online': 'online',
         'invitation.to': 'Dear',
         'invitation.dear_guest': 'Dear Guest',
         'invitation.dear_guest_desc': 'We apologize if there are any spelling errors in names/titles.',

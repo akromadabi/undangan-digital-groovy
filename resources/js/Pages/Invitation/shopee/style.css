@@ -567,13 +567,13 @@
 .sp-flash-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .sp-flash-timer {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -597,6 +597,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .sp-flash-sale-body {

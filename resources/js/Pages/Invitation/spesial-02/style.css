@@ -92,9 +92,9 @@
     inset: 0;
     z-index: 50;
     display: flex;
-    flex-col: column;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     overflow: hidden;
     background-color: var(--sp02-bg);
     text-align: center;
@@ -109,16 +109,48 @@
 .sp02-cover__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(255, 251, 248, 0) 0%, rgba(255, 251, 248, 0.3) 30%, rgba(255, 251, 248, 0.7) 60%, rgba(255, 251, 248, 0.95) 85%);
+    background: linear-gradient(to bottom, rgba(255, 251, 248, 0) 0%, rgba(255, 251, 248, 0.25) 30%, rgba(255, 251, 248, 0.5) 60%, rgba(255, 251, 248, 0.8) 85%);
     z-index: 5;
 }
 
 .sp02-cover__content {
     position: relative;
     z-index: 10;
-    max-width: 380px;
-    padding: 0 24px 8vh 24px;
+    width: 100%;
+    max-width: 420px;
+    padding: 0 16px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Arched Glassmorphic Card Container for Cover */
+.sp02-cover-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(152, 106, 82, 0.2);
+    border-radius: 140px 140px 30px 30px; /* Arched top portal shape */
+    padding: 45px 24px 35px 24px;
+    box-shadow: 0 20px 45px rgba(91, 68, 71, 0.1);
+    width: 100%;
+    max-width: 340px;
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.sp02-cover-card::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(152, 106, 82, 0.12);
+    border-radius: 134px 134px 24px 24px;
+    pointer-events: none;
 }
 
 /* ─── Layered Premium Pampas Corner Ornaments ─── */
@@ -324,26 +356,54 @@
     object-fit: cover !important;
 }
 
-/* Circular couple photo frames */
+/* Arched couple photo frames - Luxury overhaul */
 .sp02-avatar-frame {
     position: relative;
     width: 140px;
-    height: 140px;
-    margin: 0 auto;
-    border-radius: 9999px;
-    padding: 4px;
+    height: 195px;
+    margin: 0 auto 20px auto;
+    border-radius: 70px 70px 0 0;
+    padding: 3px;
     background: linear-gradient(135deg, var(--sp02-secondary) 0%, var(--sp02-primary) 100%);
     box-shadow: 0 10px 25px rgba(152, 106, 82, 0.15);
 }
 
+.sp02-avatar-frame-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 67px 67px 0 0;
+    overflow: hidden;
+    position: relative;
+    background: var(--sp02-bg-soft);
+}
+
+/* Fallback Arched Monogram for Mempelai */
+.sp02-avatar-fallback-arch {
+    width: 130px;
+    height: 180px;
+    border-radius: 65px 65px 0 0;
+    border: 1px solid rgba(152, 106, 82, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--sp02-primary);
+    background-color: var(--sp02-bg-soft);
+    box-shadow: 0 6px 15px rgba(152, 106, 82, 0.05);
+    margin: 0 auto 20px auto;
+    font-family: var(--sp02-font-heading);
+    letter-spacing: 2px;
+}
+
 .sp02-mempelai-card {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px dashed rgba(152, 106, 82, 0.25);
-    border-radius: 36px;
-    padding: 45px 24px 35px 24px;
-    box-shadow: 0 15px 35px rgba(152, 106, 82, 0.05);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(152, 106, 82, 0.2);
+    border-radius: 32px;
+    padding: 40px 24px 32px 24px;
+    box-shadow: 0 15px 35px rgba(91, 68, 71, 0.06);
     margin: 24px auto;
     max-width: 360px;
     position: relative;
@@ -351,10 +411,19 @@
     transition: all 0.3s ease;
 }
 
+.sp02-mempelai-card::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px solid rgba(152, 106, 82, 0.12);
+    border-radius: 24px;
+    pointer-events: none;
+}
+
 .sp02-mempelai-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(152, 106, 82, 0.08);
-    border-color: var(--sp02-primary);
+    box-shadow: 0 20px 40px rgba(152, 106, 82, 0.09);
+    border-color: rgba(152, 106, 82, 0.4);
 }
 
 .sp02-mempelai-card-ornament-tl {
@@ -377,22 +446,37 @@
     animation: sp02FloatReverseFlipped 6s ease-in-out infinite;
 }
 
-.sp02-avatar-frame-inner {
-    width: 100%;
-    height: 100%;
-    border-radius: 9999px;
-    overflow: hidden;
-    position: relative;
-    background: var(--sp02-bg);
-}
-
 .sp02-avatar-frame__ornament {
     position: absolute;
     right: -12px;
-    bottom: 4px;
+    bottom: 2px;
     width: 60px;
     z-index: 10;
     pointer-events: none;
+}
+
+/* Premium Instagram Outline Pill Button */
+.sp02-mempelai-ig-pill {
+    background-color: rgba(152, 106, 82, 0.03);
+    color: var(--sp02-primary);
+    border: 1px solid rgba(152, 106, 82, 0.35);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 7px 16px;
+    border-radius: 9999px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.sp02-mempelai-ig-pill:hover {
+    background-color: var(--sp02-primary);
+    border-color: var(--sp02-primary);
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(152, 106, 82, 0.15);
 }
 
 /* General Layouts */
@@ -681,7 +765,7 @@
     padding: 24px;
     color: #ffffff;
     width: 100%;
-    max-width: 320px;
+    max-width: 380px;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
@@ -923,9 +1007,11 @@
 
 .sp02-nav-menu__inner--row {
     display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 4px;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
 }
 
 .sp02-nav-menu__inner--row::-webkit-scrollbar {
@@ -940,27 +1026,31 @@
     align-items: center;
     justify-content: center;
     color: rgba(255, 255, 255, 0.5);
-    font-size: 14px;
-    padding: 6px 8px;
-    border-radius: 12px;
-    flex: 1 0 auto;
-    min-width: 60px;
+    font-size: 13px;
+    padding: 4px 2px;
+    border-radius: 10px;
+    flex: 1;
+    min-width: 0;
     transition: all 0.25s ease;
     cursor: pointer;
     white-space: nowrap;
 }
 
 .sp02-nav-menu__item i {
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .sp02-nav-item-text {
-    font-size: 8px;
+    font-size: 7.5px;
     font-weight: 500;
-    margin-top: 4px;
+    margin-top: 2px;
     text-transform: none;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.2px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    text-align: center;
 }
 
 .sp02-nav-menu__item:hover {

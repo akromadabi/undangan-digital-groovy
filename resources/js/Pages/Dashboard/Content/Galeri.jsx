@@ -1349,7 +1349,7 @@ export default function Galeri({
                                                         height: '100%',
                                                         objectFit: 'cover',
                                                         objectPosition: `${posX}% ${posY}%`,
-                                                        transform: `scale(${zoom})`,
+                                                        transform: `scale(${zoom}) translate(${(50 - posX) * (1 - 1 / zoom)}%, ${(50 - posY) * (1 - 1 / zoom)}%)`,
                                                         transformOrigin: 'center'
                                                     }}
                                                 />
@@ -1374,7 +1374,7 @@ export default function Galeri({
                                                         height: '100%',
                                                         objectFit: 'cover',
                                                         objectPosition: `${posX}% ${posY}%`,
-                                                        transform: `scale(${zoom})`,
+                                                        transform: `scale(${zoom}) translate(${(50 - posX) * (1 - 1 / zoom)}%, ${(50 - posY) * (1 - 1 / zoom)}%)`,
                                                         transformOrigin: 'center'
                                                     }}
                                                 />

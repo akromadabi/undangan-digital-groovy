@@ -1,6 +1,6 @@
 import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useState, useEffect, useRef, useCallback } from 'react';;
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import DressCodeBlock from '@/Components/DressCodeBlock';
 import { useForm } from '@inertiajs/react';
 import './style.css';
@@ -28,6 +28,19 @@ function formatDate(d) {
 function formatTime(t) {
     if (!t || t === 'Selesai') return t || '';
     return String(t).substring(0, 5);
+}
+
+function getYoutubeId(url) {
+    if (!url) return '';
+    let id = '';
+    if (url.includes('youtube.com/watch?v=')) {
+        id = url.split('v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+        id = url.split('youtu.be/')[1]?.split('?')[0];
+    } else if (url.includes('youtube.com/embed/')) {
+        id = url.split('embed/')[1]?.split('?')[0];
+    }
+    return id;
 }
 
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
@@ -184,6 +197,8 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
     };
 }
 
+let globalShowPhotos = true;
+
 /* ═══════════════════════════════════════
    ERROR BOUNDARY
    ═══════════════════════════════════════ */
@@ -246,6 +261,12 @@ const ICONS = {
     chat: (
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+    ),
+    shopinvityPay: (
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
         </svg>
     ),
     
@@ -385,7 +406,7 @@ const ICONS = {
 /* ═══════════════════════════════════════
    COVER COMPONENT (RE-DESIGNED FOR MAX SHOPEE EXPRESS ACCURACY & DYNAMIC LANGUAGE)
    ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGuestName }) {
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGuestName, coverEmbedId, coverImages }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const themeConfig = getThemeLabels(invitation?.type || 'wedding', invitation?.language || 'id', brideGrooms, invitation);
@@ -413,16 +434,16 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGu
 
     return (
         <div className={`sp-cover${isOpened ? ' is-opened' : ''}`}>
-            {invitation?.cover_image && (
+            {globalShowPhotos && coverImages.length > 0 ? (
                 <PremiumSlideshow
-                    images={invitation.cover_image.split(',')}
+                    images={coverImages}
                     positionX={invitation?.cover_position_x}
                     positionY={invitation?.cover_position_y}
                     zoom={invitation?.cover_zoom}
                     className="sp-cover-bg"
                     imgClassName="absolute inset-0 w-full h-full object-cover"
                 />
-            )}
+            ) : null}
             <div className="sp-cover-gradient" />
             
             <div className="sp-cover-body">
@@ -467,7 +488,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showGu
 /* ═══════════════════════════════════════
    TAB 1: BERANDA (HOME) COMPONENT
    ═══════════════════════════════════════ */
-function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, formatCountdown, showCountdown }) {
+function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, formatCountdown, showCountdown, openingEmbedId }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const themeConfig = getThemeLabels(invitation?.type || 'wedding', invitation?.language || 'id', brideGrooms, invitation);
@@ -515,21 +536,33 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
         <div className={`sp-home-scroll ${showPhotosState}`}>
             {/* Banner Slider */}
             <div className="sp-banner-slider">
-                {showPhotos && (
+                {showPhotos && openingEmbedId ? (
+                    <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${openingEmbedId}?autoplay=1&mute=1&loop=1&playlist=${openingEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                            title="Opening Video"
+                            frameBorder="0"
+                            className="absolute top-1/2 left-1/2 w-full h-full min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            style={{ border: 'none', objectFit: 'cover', pointerEvents: 'none' }}
+                        />
+                    </div>
+                ) : showPhotos && banners.length > 0 ? (
                     <img src={banners[activeBannerIdx]} alt="Event Banner" className="sp-banner-image" />
-                )}
-                {!showPhotos && (
+                ) : (
                     <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Foto Dinonaktifkan</div>
                 )}
                 <div className="sp-banner-overlay">
                     <span className="sp-banner-badge">{bannerLabels[activeBannerIdx % bannerLabels.length]}</span>
                     <p className="sp-banner-text">{themeConfig.mainName}</p>
                 </div>
-                <div className="sp-banner-indicators">
-                    {banners.map((_, idx) => (
-                        <div key={idx} className={`sp-indicator-dot ${idx === activeBannerIdx ? 'is-active' : ''}`} />
-                    ))}
-                </div>
+                {!openingEmbedId && (
+                    <div className="sp-banner-indicators">
+                        {banners.map((_, idx) => (
+                            <div key={idx} className={`sp-indicator-dot ${idx === activeBannerIdx ? 'is-active' : ''}`} />
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* WeddingPay Bar */}
@@ -698,19 +731,12 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                                         <p style={{ fontSize: '0.65rem', color: '#7f8c8d', margin: '2px 0' }}>{formatDate(e.event_date)}</p>
                                         <div className="sp-product-bar-wrap">
                                             <div className="sp-product-bar" style={{ width: '100%' }}></div>
-                                            <span className="sp-product-bar-text">{isEn ? "COMING SOON" : "SEGERA HADIR"}</span>
+                                            <span className="sp-product-bar-text">{isEn ? "COMING SOON" : "SEGERA BERLANGSUNG"}</span>
                                         </div>
                                     </div>
                                 </div>
                             );
                         })}
-
-                                {/* Compact standalone Dress Code box below event list */}
-                                {safeArr(events)?.filter(e => e.show_dress_code).map((e, idx) => (
-                                    <div key={`dc-${idx}`} className="sp-card w-full mt-4" style={{ padding: '20px', backgroundColor: '#fff', border: '1px dashed #ee4d2d' }}>
-                                        <DressCodeBlock event={e} colors={{ primary: '#ee4d2d', text: '#222222' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
-                                    </div>
-                                ))}
                     </div>
                 </div>
             )}
@@ -720,8 +746,11 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                 <div className="sp-reviews-box" id="sp-reviews">
                     <div className="sp-reviews-header">
                         <span className="sp-reviews-title">{isEn ? "OUR DIARY LOVE STORY" : "CATATAN KISAH CINTA KAMI"}</span>
-                        <div className="sp-reviews-stats">
-                            <span>❤️ 5.0 / 5.0</span>
+                        <div className="sp-reviews-stats" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#ffb300' }}>
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                            <span>5.0 / 5.0</span>
                             <span style={{ fontSize: '0.72rem', color: '#888', fontWeight: 'normal' }}>({loveStories.length} {isEn ? "Chapters" : "Bab"})</span>
                         </div>
                     </div>
@@ -730,10 +759,20 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                         {safeArr(loveStories).map((s, idx) => (
                             <div key={idx} className="sp-review-card">
                                 <div className="sp-review-user-row">
-                                    <div className="sp-review-avatar">💑</div>
+                                    <div className="sp-review-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#7f8c8d' }}>
+                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+                                        </svg>
+                                    </div>
                                     <div className="sp-review-user-info">
                                         <span className="sp-review-username">{isEn ? "Chapter" : "Bab"} {idx + 1}: {s.title}</span>
-                                        <div className="sp-review-stars">❤️❤️❤️❤️❤️</div>
+                                        <div className="sp-review-stars" style={{ display: 'flex', gap: '2px', color: '#ffb300', fontSize: '0.65rem' }}>
+                                            {[...Array(5)].map((_, i) => (
+                                                <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                                </svg>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="sp-review-meta">{isEn ? "Variation: Eternal Loyalty | Deep Love Rating" : "Variasi: Kesetiaan Abadi | Penilaian Hati Mendalam"}</div>
@@ -763,9 +802,10 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
 /* ═══════════════════════════════════════
    TAB 2: GALLERY (SHOPEE VIDEO STYLE)
    ═══════════════════════════════════════ */
-function VideoTab({ invitation, galleries, setActiveTab }) {
+function VideoTab({ invitation, galleries, setActiveTab, hasVideos }) {
     const showPhotos = parseBool(invitation?.show_photos, true);
     const safeGalleries = safeArr(galleries);
+    const [activeSubTab, setActiveSubTab] = useState('photo');
 
     const [likes, setLikes] = useState({});
     const toggleLike = (idx) => {
@@ -784,28 +824,77 @@ function VideoTab({ invitation, galleries, setActiveTab }) {
         { image_url: invitation?.cover_image, caption: "Selamat menempuh hidup baru suci!" }
     ];
 
+    const videoList = safeArr(invitation?.video_list);
+    const videoSlides = [];
+    videoList.forEach((url, idx) => {
+        const ytId = getYoutubeId(url);
+        if (ytId) {
+            videoSlides.push({
+                ytId,
+                url,
+                caption: isEn ? `Moment Video #${idx + 1}` : `Momen Video #${idx + 1}`
+            });
+        }
+    });
+
+    const currentSlides = activeSubTab === 'video' ? videoSlides : slides;
+
     return (
         <div className="sp-video-tab">
-            <div className="sp-video-header">
-                <button className="sp-video-top-tab is-active">{isEn ? "Gallery" : "Galeri"}</button>
-                <button className="sp-video-top-tab" onClick={() => setActiveTab('notification')}>
-                    <span className="sp-live-badge-glow">💌 {isEn ? "RSVP & Wishes" : "RSVP & Ucapan"}</span>
-                </button>
-            </div>
+            {hasVideos ? (
+                <div className="sp-video-header">
+                    <button 
+                        className={`sp-video-top-tab ${activeSubTab === 'photo' ? 'is-active' : ''}`}
+                        onClick={() => setActiveSubTab('photo')}
+                    >
+                        {isEn ? "Photos" : "Foto"}
+                    </button>
+                    <button 
+                        className={`sp-video-top-tab ${activeSubTab === 'video' ? 'is-active' : ''}`}
+                        onClick={() => setActiveSubTab('video')}
+                    >
+                        {isEn ? "Videos" : "Video"}
+                    </button>
+                </div>
+            ) : (
+                <div className="sp-video-header">
+                    <button className="sp-video-top-tab is-active">{isEn ? "Gallery" : "Galeri"}</button>
+                    <button className="sp-video-top-tab" onClick={() => setActiveTab('notification')}>
+                        <span className="sp-live-badge-glow">{isEn ? "RSVP & Wishes" : "RSVP & Ucapan"}</span>
+                    </button>
+                </div>
+            )}
 
             <div className="sp-video-scroller">
-                {slides.map((s, idx) => {
+                {currentSlides.map((s, idx) => {
                     const isLiked = !!likes[idx];
                     const likeCount = isLiked ? 501 : 500;
                     return (
                         <div key={idx} className="sp-video-slide">
                             <div className="sp-video-media-wrap">
-                                {showPhotos && s.image_url ? (
-                                    <img src={getStorageUrl(s.image_url)} alt="Video Slide" className="sp-video-img" />
+                                {activeSubTab === 'video' ? (
+                                    showPhotos && s.ytId ? (
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${s.ytId}?autoplay=1&mute=1&loop=1&playlist=${s.ytId}&controls=1&showinfo=0&rel=0`}
+                                            title={`Video Slide ${idx}`}
+                                            frameBorder="0"
+                                            className="w-full h-full object-cover"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            style={{ border: 'none', width: '100%', height: '100%' }}
+                                        />
+                                    ) : (
+                                        <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%', color: '#fff', background: '#111' }}>
+                                            Mode Video Dinonaktifkan
+                                        </div>
+                                    )
                                 ) : (
-                                    <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%', color: '#fff', background: '#111' }}>
-                                        Mode Foto Dinonaktifkan
-                                    </div>
+                                    showPhotos && s.image_url ? (
+                                        <img src={getStorageUrl(s.image_url)} alt="Video Slide" className="sp-video-img" />
+                                    ) : (
+                                        <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%', color: '#fff', background: '#111' }}>
+                                            Mode Foto Dinonaktifkan
+                                        </div>
+                                    )
                                 )}
                             </div>
                             
@@ -861,7 +950,7 @@ function VideoTab({ invitation, galleries, setActiveTab }) {
 /* ═══════════════════════════════════════
    TAB 3: ACARA (EVENTS & GOOGLE MAPS - SHOPEE LIVE STYLE)
    ═══════════════════════════════════════ */
-function LiveTab({ invitation, events }) {
+function LiveTab({ invitation, events, openingEmbedId }) {
     const safeEvents = safeArr(events);
     const isEn = invitation?.language === 'en';
     const heroImg = getStorageUrl(invitation?.opening_image || invitation?.cover_image, '');
@@ -898,7 +987,16 @@ function LiveTab({ invitation, events }) {
         <div className="sp-live-tab">
             {/* Simulated Live Stream Player */}
             <div className="sp-live-player-box relative overflow-hidden">
-                {invitation?.opening_image || invitation?.cover_image ? (
+                {globalShowPhotos && openingEmbedId ? (
+                    <iframe
+                        src={`https://www.youtube.com/embed/${openingEmbedId}?autoplay=1&mute=1&loop=1&playlist=${openingEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                        title="Simulated Live Stream Background Video"
+                        frameBorder="0"
+                        className="absolute top-1/2 left-1/2 w-full h-full min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        style={{ border: 'none', objectFit: 'cover' }}
+                    />
+                ) : globalShowPhotos && (invitation?.opening_image || invitation?.cover_image) ? (
                     <PremiumSlideshow
                         images={invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : [])}
                         positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
@@ -915,11 +1013,21 @@ function LiveTab({ invitation, events }) {
                 <div className="sp-live-badge-overlay">
                     <span className="sp-live-red-dot">●</span>
                     <span className="sp-live-text-label">LIVE</span>
-                    <span className="sp-live-views">👁️ 9.9K</span>
+                    <span className="sp-live-views" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        9.9K
+                    </span>
                 </div>
 
                 <div className="sp-live-host-tag">
-                    <div className="sp-host-avatar">💑</div>
+                    <div className="sp-host-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#7f8c8d' }}>
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
                     <div className="sp-host-name">
                         <span className="sp-host-title">@{invitation?.slug || 'mempelai_bahagia'}</span>
                         <span className="sp-host-status">{isEn ? "Streaming Live" : "Sedang Siaran"}</span>
@@ -930,7 +1038,9 @@ function LiveTab({ invitation, events }) {
                 <div className="sp-live-hearts-container">
                     {hearts.map(h => (
                         <div key={h.id} className="sp-floating-heart" style={{ left: `${h.left}%` }}>
-                            ❤️
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#ee4d2d' }}>
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
                         </div>
                     ))}
                 </div>
@@ -946,16 +1056,23 @@ function LiveTab({ invitation, events }) {
                 </div>
 
                 {/* Simulated Interaction Button */}
-                <button className="sp-live-like-btn" onClick={addHeart}>
-                    💖
+                <button className="sp-live-like-btn" onClick={addHeart} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#ee4d2d' }}>
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
                 </button>
             </div>
 
             {/* Live Shopping Cart Section */}
             <div className="sp-live-cart-section">
-                <div className="sp-cart-header">
-                    <span className="sp-cart-icon">🛒</span>
-                    <span className="sp-cart-title">{isEn ? "Wedding Event Tickets" : "Keranjang Belanja Tiket Acara"}</span>
+                <div className="sp-cart-header" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span className="sp-cart-title">{isEn ? "Wedding Event Details" : "Rangkaian Acara Hari Bahagia"}</span>
                 </div>
 
                 <div className="sp-cart-list">
@@ -965,11 +1082,10 @@ function LiveTab({ invitation, events }) {
                             <div key={idx} className="sp-cart-product-item">
                                 <div className="sp-cart-prod-num">{idx + 1}</div>
                                 <div className="sp-cart-prod-details">
-                                    <h4 className="sp-cart-prod-title">⭐ {ev.event_name || 'Rangkaian Acara'}</h4>
+                                    <h4 className="sp-cart-prod-title">{ev.event_name || 'Rangkaian Acara'}</h4>
                                     <p className="sp-cart-prod-desc">{ev.venue_name}</p>
                                     <div className="sp-cart-price-row">
-                                        <span className="sp-cart-price-discount">{isEn ? "FREE VIP ENTRY" : "TIKET GRATIS VIP"}</span>
-                                        <span className="sp-cart-price-original">Rp 150.000</span>
+                                        <span className="sp-cart-price-discount">{isEn ? "VIP INVITATION" : "UNDANGAN KHUSUS VIP"}</span>
                                     </div>
                                     <div className="sp-cart-prod-meta">
                                         📅 {formatDate(ev.event_date)} | ⏰ {formatTime(ev.start_time)} WIB
@@ -990,18 +1106,47 @@ function LiveTab({ invitation, events }) {
             {safeEvents.map((ev, idx) => (
                 <div key={idx} className="sp-live-address-card">
                     <div className="sp-address-header">
-                        <span className="sp-address-icon">🚚</span>
-                        <span className="sp-address-title">{isEn ? "SHIPPING VENUE DETAILS" : "RINCIAN ALAMAT LOKASI ACARA"}</span>
+                        <span className="sp-address-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                        </span>
+                        <span className="sp-address-title">{isEn ? "VENUE DETAILS" : "RINCIAN ALAMAT LOKASI ACARA"}</span>
                     </div>
                     <div className="sp-address-body">
-                        <p className="sp-address-name">Penerima Restu: {ev.event_name || 'Acara'}</p>
-                        <p className="sp-address-phone">Jasa Kirim: Shopinvity Express Wedding</p>
+                        <p className="sp-address-name">{isEn ? "Event:" : "Acara:"} {ev.event_name || 'Acara'}</p>
+                        <p className="sp-address-phone">{isEn ? "Location Status: Officially Verified" : "Lokasi: Resmi Terverifikasi"}</p>
                         <p className="sp-address-detail">
                             <strong>{ev.venue_name}</strong> - {ev.venue_address}
                         </p>
                     </div>
                 </div>
             ))}
+
+            {/* Dress Code Section (using matching sp-live-address-card layout) */}
+            {safeEvents.map((ev, idx) => {
+                if (!ev.show_dress_code) return null;
+                return (
+                    <div key={`dc-${idx}`} className="sp-live-address-card">
+                        <div className="sp-address-header">
+                            <span className="sp-address-icon">👕</span>
+                            <span className="sp-address-title">
+                                {isEn ? `DRESS CODE (${ev.event_name})` : `ANJURAN DRESS CODE (${ev.event_name})`}
+                            </span>
+                        </div>
+                        <div className="sp-address-body">
+                            <DressCodeBlock
+                                event={ev}
+                                colors={{ primary: '#ee4d2d', text: '#2c3e50' }}
+                                fonts={{ heading: 'inherit' }}
+                                variant="modern"
+                                plain={true}
+                            />
+                        </div>
+                    </div>
+                );
+            })}
         </div>
     );
 }
@@ -1018,7 +1163,6 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
     const [numGuests, setNumGuests] = useState(1);
     const [message, setMessage] = useState('');
     const [success, setSuccess] = useState(false);
-    const [rating, setRating] = useState(5); // Default 5 Stars!
 
     const rsvpForm = useForm({
         sender_name: activeGuest.name || '',
@@ -1078,12 +1222,16 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
             {/* Shopinvity-style Order/Checkout Header */}
             <div className="sp-rsvp-checkout-header">
                 <div className="sp-checkout-store-row">
-                    <span className="sp-checkout-store-badge">🎉</span>
                     <span className="sp-checkout-store-name">{invitation?.type === 'wedding' ? (isEn ? "Wedding Ceremony" : "Pernikahan") : (isEn ? "Event Celebration" : "Perayaan Acara")}</span>
                     <span className="sp-checkout-preferred">Preferred</span>
                 </div>
                 <div className="sp-checkout-item-row">
-                    <div className="sp-checkout-item-img">💌</div>
+                    <div className="sp-checkout-item-img" style={{ display: 'flex', alignItems: 'center' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#ee4d2d' }}>
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                            <polyline points="22,6 12,13 2,6" />
+                        </svg>
+                    </div>
                     <div className="sp-checkout-item-desc">
                         <p className="sp-checkout-item-name">{isEn ? "Blessing Package (RSVP)" : "Paket Doa Restu & Konfirmasi Hadir"}</p>
                         <p className="sp-checkout-item-variant">{isEn ? "Variation: Attend & Send Blessing" : "Variasi: Hadir & Kirim Doa"}</p>
@@ -1095,13 +1243,13 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
             {(enableRsvp || enableWishes) && (
                 <div className="sp-rsvp-box">
                     <div className="sp-rsvp-title-row">
-                        <span className="sp-rsvp-heading">📝 {isEn ? "Complete Your Order" : "Lengkapi Pesanan Anda"}</span>
+                        <span className="sp-rsvp-heading">{isEn ? "Complete RSVP & Wishes" : "Lengkapi Doa Restu & RSVP"}</span>
                     </div>
 
                     <form onSubmit={handleSubmit}>
                         {/* Shopinvity-style name field */}
                         <div className="sp-checkout-field-group">
-                            <div className="sp-checkout-field-label">{isEn ? "Buyer Name" : "Nama Pembeli"}</div>
+                            <div className="sp-checkout-field-label">{isEn ? "Guest Name" : "Nama Tamu"}</div>
                             <input
                                 type="text"
                                 className="sp-input-text"
@@ -1118,9 +1266,9 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                                 <div className="sp-checkout-field-label">{isEn ? "Select Variation" : "Pilih Variasi"}</div>
                                 <div className="sp-rsvp-options">
                                     {[
-                                        { key: 'hadir', emoji: '✅', label: isEn ? 'Hadir' : 'Hadir' },
-                                        { key: 'tidak_hadir', emoji: '❌', label: isEn ? 'Tidak Hadir' : 'Tidak Hadir' },
-                                        { key: 'masih_ragu', emoji: '🤔', label: isEn ? 'Masih Ragu' : 'Masih Ragu' }
+                                        { key: 'hadir', label: isEn ? 'Hadir' : 'Hadir' },
+                                        { key: 'tidak_hadir', label: isEn ? 'Tidak Hadir' : 'Tidak Hadir' },
+                                        { key: 'masih_ragu', label: isEn ? 'Masih Ragu' : 'Masih Ragu' }
                                     ].map(opt => (
                                         <button
                                             key={opt.key}
@@ -1128,7 +1276,7 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                                             className={`sp-rsvp-opt-btn ${attendance === opt.key ? 'is-active' : ''}`}
                                             onClick={() => setAttendance(opt.key)}
                                         >
-                                            {opt.emoji} {opt.label}
+                                            {opt.label}
                                         </button>
                                     ))}
                                 </div>
@@ -1171,28 +1319,32 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                         {/* Order Summary */}
                         <div className="sp-checkout-summary">
                             <div className="sp-checkout-summary-row">
-                                <span>{isEn ? "Merchandise Subtotal" : "Subtotal Produk"}</span>
-                                <span style={{ color: '#ee4d2d', fontWeight: 'bold' }}>Rp 0</span>
+                                <span>{isEn ? "Attendance Confirmation" : "Konfirmasi Kehadiran"}</span>
+                                <span style={{ color: '#ee4d2d', fontWeight: 'bold' }}>
+                                    {attendance === 'hadir' ? (isEn ? 'Attend' : 'Hadir') : attendance === 'tidak_hadir' ? (isEn ? 'Absent' : 'Tidak Hadir') : (isEn ? 'Undecided' : 'Masih Ragu')}
+                                </span>
                             </div>
                             <div className="sp-checkout-summary-row">
-                                <span>{isEn ? "Shipping" : "Ongkos Kirim"}</span>
-                                <span style={{ color: '#27ae60', fontWeight: 'bold' }}>{isEn ? "FREE" : "GRATIS"}</span>
+                                <span>{isEn ? "RSVP Status" : "Status RSVP"}</span>
+                                <span style={{ color: '#27ae60', fontWeight: 'bold' }}>{isEn ? "CONFIRMED" : "TERKONFIRMASI"}</span>
                             </div>
                             <div className="sp-checkout-summary-row sp-checkout-total">
-                                <span>{isEn ? "Order Total" : "Total Pesanan"}</span>
-                                <span style={{ color: '#ee4d2d', fontWeight: 'bold', fontSize: '1rem' }}>Rp 0</span>
+                                <span>{isEn ? "Total Guests" : "Jumlah Hadir (Tamu)"}</span>
+                                <span style={{ color: '#ee4d2d', fontWeight: 'bold', fontSize: '1rem' }}>
+                                    {attendance === 'hadir' ? `${numGuests} ${isEn ? 'Person(s)' : 'Orang'}` : `-`}
+                                </span>
                             </div>
                         </div>
 
                         <button type="submit" disabled={isSubmitting} className="sp-form-submit">
                             {isSubmitting 
-                                ? (isEn ? "⏳ PLACING ORDER..." : "⏳ MEMPROSES PESANAN...")
-                                : (isEn ? "🛒 PLACE ORDER (SEND BLESSING)" : "🛒 BUAT PESANAN (KIRIM DOA)")}
+                                ? (isEn ? "SENDING BLESSING..." : "MENGIRIM DOA...")
+                                : (isEn ? "SUBMIT RSVP & BLESSING" : "KIRIM SEKARANG (RSVP & DOA)")}
                         </button>
 
                         {success && (
                             <div className="sp-form-success">
-                                ✅ {isEn ? "Order placed! Your blessings have been sent successfully!" : "Pesanan berhasil! Doa & ucapan Anda telah terkirim!"}
+                                {isEn ? "Your blessings have been sent successfully!" : "Doa & ucapan Anda telah terkirim!"}
                             </div>
                         )}
                     </form>
@@ -1205,9 +1357,14 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                     <div className="sp-checkout-reviews-header">
                         <span className="sp-reviews-count-badge">{recentWishes.length}</span>
                         <h3 style={{ margin: 0, fontSize: '0.85rem', fontWeight: '700' }}>
-                            {isEn ? "Buyer Reviews" : "Ulasan Pembeli"}
+                            {isEn ? "Guest Blessings" : "Daftar Doa & Ucapan"}
                         </h3>
-                        <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: '#ff5722', fontWeight: 'bold' }}>⭐ 5.0</span>
+                        <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: '#ff5722', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#ffb300' }}>
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                            5.0
+                        </span>
                     </div>
 
                     <div className="sp-chat-scroller">
@@ -1226,9 +1383,15 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                                         <div className="sp-chat-body">
                                             <div className="sp-chat-sender">
                                                 <span>{maskedName}</span>
-                                                <span className="sp-chat-tag">✓ {isEn ? "Verified" : "Terverifikasi"}</span>
+                                                <span className="sp-chat-tag">✓ {isEn ? "Verified Guest" : "Tamu Terverifikasi"}</span>
                                             </div>
-                                            <div className="sp-review-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <div className="sp-review-stars-row">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#ffb300', display: 'inline-block' }}>
+                                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                                    </svg>
+                                                ))}
+                                            </div>
                                             <div className="sp-review-variation-text">
                                                 {isEn ? "Variation: Attend & Bless" : "Variasi: Hadir & Kirim Doa"}
                                             </div>
@@ -1314,13 +1477,15 @@ function ProfileTab({ invitation, bankAccounts, guest }) {
             {/* Shopinvity Style Profile Header */}
             <div className="sp-profile-card">
                 <div className="sp-profile-pattern" />
-                <div className="sp-profile-avatar-circle">
-                    👤
+                <div className="sp-profile-avatar-circle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#ffffff' }}>
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+                    </svg>
                 </div>
                 <div className="sp-profile-details">
                     <h3 className="sp-profile-username">{guestName}</h3>
                     <div className="sp-profile-tier">
-                        👑 {isEn ? "Platinum Member" : "Anggota VIP Platinum"}
+                        {isEn ? "VIP Platinum Guest" : "Tamu VIP Platinum"}
                     </div>
                     <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.85)', marginTop: '2px' }}>
                         {isEn ? "Followers: 999 | Following: 99" : "Pengikut: 999 | Mengikuti: 99"}
@@ -1328,28 +1493,32 @@ function ProfileTab({ invitation, bankAccounts, guest }) {
                 </div>
             </div>
 
-            {/* WeddingPay, Koin Cinta, & SPayLater grid */}
+            {/* Hadiah Digital, Restu Hati, & Doa Abadi grid */}
             <div className="sp-profile-pay-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', background: '#ffffff', padding: '12px', textAlign: 'center', borderBottom: '1px solid #f1f2f6', marginBottom: '10px' }}>
                 <div style={{ borderRight: '1px solid #f1f2f6' }}>
-                    <p style={{ margin: 0, fontSize: '0.62rem', color: '#888' }}>WeddingPay</p>
-                    <h4 style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#ff5722', fontWeight: 'bold' }}>Rp ∞</h4>
+                    <p style={{ margin: 0, fontSize: '0.62rem', color: '#888' }}>{isEn ? "Digital Gift" : "Hadiah Digital"}</p>
+                    <h4 style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#ff5722', fontWeight: 'bold' }}>{isEn ? "Active" : "Aktif"}</h4>
                 </div>
                 <div style={{ borderRight: '1px solid #f1f2f6' }}>
-                    <p style={{ margin: 0, fontSize: '0.62rem', color: '#888' }}>Koin Cinta</p>
-                    <h4 style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#ffb300', fontWeight: 'bold' }}>999K</h4>
+                    <p style={{ margin: 0, fontSize: '0.62rem', color: '#888' }}>{isEn ? "Blessing Hearts" : "Restu Hati"}</p>
+                    <h4 style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#ffb300', fontWeight: 'bold' }}>{isEn ? "Unlimited" : "Tanpa Batas"}</h4>
                 </div>
                 <div>
-                    <p style={{ margin: 0, fontSize: '0.62rem', color: '#888' }}>SPayLater</p>
+                    <p style={{ margin: 0, fontSize: '0.62rem', color: '#888' }}>{isEn ? "Eternal Love" : "Doa Abadi"}</p>
                     <h4 style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#2ecc71', fontWeight: 'bold' }}>{isEn ? "Active" : "Aktif"}</h4>
                 </div>
             </div>
 
-            {/* SeaBank / Wallet digital gift card (Metode Pembayaran Tersimpan) */}
+            {/* SeaBank / Wallet digital gift card (Dompet Digital & Kado) */}
             {accounts.length > 0 && (
                 <div className="sp-seabank-gift-box">
                     <div className="sp-wallet-card-header">
-                        <div className="sp-wallet-header-left">
-                            💳 {isEn ? "Saved Payment Cards (Wedding Gift)" : "Kartu Metode Pembayaran (Hadiah Digital)"}
+                        <div className="sp-wallet-header-left" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
+                                <line x1="2" y1="10" x2="22" y2="10" />
+                            </svg>
+                            {isEn ? "Kado & Dompet Digital" : "Kado & Dompet Digital"}
                         </div>
                     </div>
                     <div className="sp-wallet-card-body">
@@ -1374,6 +1543,7 @@ function ProfileTab({ invitation, bankAccounts, guest }) {
    MAIN THEME EXPORT COMPONENT (PURE VIEWPORT HEIGHT SCROLL ISOLATION)
    ═══════════════════════════════════════ */
 function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
+    const { t, locale } = useTranslation(invitation?.language || 'id');
     const [isOpened, setIsOpened] = useState(false);
     const [activeTab, setActiveTab] = useState('home');
     const [isPlaying, setIsPlaying] = useState(false);
@@ -1381,6 +1551,30 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
     usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+
+    const coverVideoUrl = invitation?.cover_video_url;
+    const coverEmbedId = useMemo(() => getYoutubeId(coverVideoUrl), [coverVideoUrl]);
+
+    const generalVideoUrl = invitation?.video_url;
+    const generalEmbedId = useMemo(() => getYoutubeId(generalVideoUrl), [generalVideoUrl]);
+
+    const openingVideoUrl = invitation?.opening_video_url;
+    const openingEmbedId = useMemo(() => {
+        const id = getYoutubeId(openingVideoUrl);
+        return id || (invitation?.video_playback === 'background' || invitation?.video_playback === 'both' ? generalEmbedId : '');
+    }, [openingVideoUrl, invitation?.video_playback, generalEmbedId]);
+
+    const coverImages = useMemo(() => {
+        return (invitation?.cover_image || '')
+            .split(',')
+            .map(img => getStorageUrl(img.trim()))
+            .filter(Boolean);
+    }, [invitation?.cover_image]);
+
+    const hasVideos = useMemo(() => {
+        return safeArr(invitation?.video_list).length > 0 &&
+            (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+    }, [invitation?.video_list, invitation?.video_playback]);
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -1404,8 +1598,11 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
     const musicUrl = invitation?.music_url || null;
     const musicAutoplay = parseBool(invitation?.music_autoplay);
 
-        const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
+    const activeGuest = guest || { name: 'Tamu Undangan', slug: 'tamu' };
     const isEn = invitation?.language === 'en';
+
+    const showPhotos = parseBool(invitation?.show_photos, true);
+    globalShowPhotos = showPhotos;
 
     const themeConfig = getThemeLabels(invitation?.type || 'wedding', invitation?.language || 'id', brideGrooms, invitation);
 
@@ -1508,6 +1705,8 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
                         isOpened={isOpened}
                         onOpen={handleOpen}
                         showGuestName={showGuestName}
+                        coverEmbedId={coverEmbedId}
+                        coverImages={coverImages}
                     />
 
                     {/* 2. FIXED HEADER (Always rendered in background to prevent layout shift) */}
@@ -1581,7 +1780,11 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
                                                 <span />
                                             </div>
                                         ) : (
-                                            <i className="fas fa-volume-mute" style={{ fontSize: 13 }} />
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--sp-primary)' }}>
+                                                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                                                <line x1="23" y1="9" x2="17" y2="15" />
+                                                <line x1="17" y1="9" x2="23" y2="15" />
+                                            </svg>
                                         )}
                                     </button>
                                 </div>
@@ -1600,6 +1803,7 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
                                 setActiveTab={setActiveTab}
                                 formatCountdown={countdown}
                                 showCountdown={showCountdown}
+                                openingEmbedId={openingEmbedId}
                             />
                         )}
 
@@ -1608,6 +1812,7 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
                                 invitation={invitation}
                                 galleries={galleries}
                                 setActiveTab={setActiveTab}
+                                hasVideos={hasVideos}
                             />
                         )}
 
@@ -1615,6 +1820,7 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
                             <LiveTab
                                 invitation={invitation}
                                 events={events}
+                                openingEmbedId={openingEmbedId}
                             />
                         )}
 

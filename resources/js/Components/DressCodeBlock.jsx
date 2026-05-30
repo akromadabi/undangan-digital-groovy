@@ -11,6 +11,117 @@ export default function DressCodeBlock({ event, colors, fonts, variant = 'modern
     const textColor = colors?.text || '#2D2D2D';
     const headingFont = fonts?.heading || 'inherit';
 
+    // RENDER: NETFLIX THEME METADATA STYLE
+    if (variant === 'netflix') {
+        return (
+            <div className="w-full bg-[#181818]/60 border border-white/5 rounded-xl p-4 text-left transition-all duration-300 shadow-lg backdrop-blur-xs">
+                
+                {/* Section Title with Hanger Icon */}
+                <div className="flex items-center gap-2 mb-3.5">
+                    <svg className="w-4 h-4 text-[#e50914]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 17a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3c0-2-1.5-3.5-3.5-3.5h-13C4.5 13.5 3 15 3 17z" />
+                        <path d="M12 13.5V9a3.5 3.5 0 1 1 5 3" />
+                    </svg>
+                    <h5 className="text-[11px] font-extrabold text-white/90 uppercase tracking-widest" style={{ fontFamily: headingFont }}>
+                        Dress Code {event.event_name ? `(${event.event_name})` : ''}
+                    </h5>
+                </div>
+
+                {/* Synopsis-style Text Description */}
+                {event.dress_code_text && (
+                    <p className="text-xs text-white/70 leading-relaxed mb-4 whitespace-pre-line border-l-2 border-[#e50914]/60 pl-3">
+                        {event.dress_code_text}
+                    </p>
+                )}
+
+                {/* Grid Color Swatches */}
+                {paletteList.length > 0 && (
+                    <div className={event.dress_code_text ? "border-t border-white/5 pt-3.5" : ""}>
+                        <div className="space-y-3.5">
+                            {paletteList.map((group, gIdx) => (
+                                <div key={gIdx} className="flex items-center gap-4 py-0.5">
+                                    {group.label && (
+                                        <div className="text-[10px] font-bold text-white/45 uppercase tracking-wider w-20 flex-shrink-0 select-none">
+                                            {group.label}
+                                        </div>
+                                    )}
+                                    <div className="flex gap-2.5 flex-wrap items-center">
+                                        {Array.isArray(group.colors) && group.colors.map((color, cIdx) => (
+                                            <div key={cIdx} className="relative group/color">
+                                                <span className="w-6 h-6 rounded-full border-2 border-white/15 block shadow-md transition-all duration-250 hover:scale-115 hover:border-white/50 cursor-pointer" 
+                                                    style={{ 
+                                                        backgroundColor: color,
+                                                        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.4)'
+                                                    }} 
+                                                    title={color}
+                                                />
+                                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-0.5 bg-black/95 border border-white/10 rounded text-[9px] font-mono text-white opacity-0 pointer-events-none transition-opacity duration-200 group-hover/color:opacity-100 whitespace-nowrap z-25 shadow-2xl">
+                                                    {color}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // RENDER: YOUTUBE STYLE
+    if (variant === 'youtube') {
+        return (
+            <div className={plain ? "w-full text-left" : "w-full bg-[#1f1f1f] border border-[#2f2f2f] rounded-xl p-4 text-left transition-all duration-300 shadow-md"}
+                style={plain ? {} : {}}>
+                <div className="flex items-center gap-2 mb-3.5 pb-2 border-b border-[#2f2f2f]">
+                    {/* Coat Hanger SVG Icon styled like a YouTube tab icon */}
+                    <svg className="w-4 h-4 text-[#ff0000]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 17a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3c0-2-1.5-3.5-3.5-3.5h-13C4.5 13.5 3 15 3 17z" />
+                        <path d="M12 13.5V9a3.5 3.5 0 1 1 5 3" />
+                    </svg>
+                    <span className="text-xs font-bold uppercase tracking-wider text-white" 
+                        style={{ fontFamily: headingFont }}>
+                        Dress Code {event.event_name ? `(${event.event_name})` : ''}
+                    </span>
+                </div>
+
+                {event.dress_code_text && (
+                    <p className="text-[11px] sm:text-xs leading-relaxed mb-3.5 opacity-80 whitespace-pre-line text-left border-l-2 border-[#ff0000] pl-2 text-gray-300">
+                        {event.dress_code_text}
+                    </p>
+                )}
+
+                {paletteList.length > 0 && (
+                    <div className="space-y-3 mt-2 text-left bg-[#161616] p-2.5 rounded-lg border border-[#2f2f2f]">
+                        {paletteList.map((group, gIdx) => (
+                            <div key={gIdx} className="flex flex-col">
+                                {group.label && (
+                                    <span className="text-[9px] font-bold uppercase tracking-wider mb-1.5 opacity-60 text-gray-400">
+                                        {group.label}
+                                    </span>
+                                )}
+                                <div className="flex gap-2 flex-wrap">
+                                    {Array.isArray(group.colors) && group.colors.map((color, cIdx) => (
+                                        <div key={cIdx} className="flex items-center gap-1.5 bg-[#272727] hover:bg-[#3f3f3f] border border-transparent rounded-full px-2.5 py-1 shadow-sm transition-transform hover:scale-105">
+                                            <span className="w-3.5 h-3.5 rounded-full border border-white/20 block" 
+                                                style={{ backgroundColor: color }} 
+                                            />
+                                            <span className="text-[9px] font-mono tracking-wider uppercase opacity-85 text-white">
+                                                {color}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     // RENDER: PLATFORM/APP BUBBLE STYLE (WhatsApp, Netflix, Spotify, TikTok, dsb)
     if (variant === 'app') {
         return (
@@ -28,7 +139,7 @@ export default function DressCodeBlock({ event, colors, fonts, variant = 'modern
                     </svg>
                     <span className="text-xs font-bold uppercase tracking-wider" 
                         style={{ fontFamily: headingFont, color: primaryColor }}>
-                        Dress Code
+                        Dress Code {event.event_name ? `(${event.event_name})` : ''}
                     </span>
                 </div>
 
@@ -89,7 +200,7 @@ export default function DressCodeBlock({ event, colors, fonts, variant = 'modern
 
                 <h4 className="text-sm font-bold uppercase tracking-[0.2em] mb-2" 
                     style={{ fontFamily: headingFont, color: primaryColor }}>
-                    Panduan Busana (Dress Code)
+                    Dress Code {event.event_name ? `(${event.event_name})` : ''}
                 </h4>
 
                 {event.dress_code_text && (
@@ -151,7 +262,7 @@ export default function DressCodeBlock({ event, colors, fonts, variant = 'modern
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 7a3 3 0 10-3-3m3 3h.01M12 7v3m-8 6.5A1.5 1.5 0 005.5 18h13a1.5 1.5 0 001.5-1.5c0-.62-.38-1.16-.95-1.37L12.5 12.8a1.5 1.5 0 00-1 0L4.95 15.13A1.5 1.5 0 004 16.5z" />
                 </svg>
-                Dress Code
+                Dress Code {event.event_name ? `(${event.event_name})` : ''}
             </h4>
             {event.dress_code_text && (
                 <p className="text-xs sm:text-sm leading-relaxed mb-4 opacity-80 whitespace-pre-line"
@@ -173,7 +284,7 @@ export default function DressCodeBlock({ event, colors, fonts, variant = 'modern
                             <div className="flex gap-3.5 justify-center flex-wrap">
                                 {Array.isArray(group.colors) && group.colors.map((color, cIdx) => (
                                     <div key={cIdx} className="flex flex-col items-center gap-1 transition-transform hover:scale-105">
-                                        <span className="w-8.5 h-8.5 rounded-full border shadow-xs block relative" 
+                                        <span className="w-6 h-6 rounded-full border shadow-xs block relative" 
                                             style={{ backgroundColor: color, borderColor: primaryColor + '25' }}>
                                             <span className="absolute inset-0 rounded-full border border-white/10 pointer-events-none" />
                                         </span>

@@ -55,7 +55,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
         labels.eventHeader = isEn ? 'Live Events / Tour' : 'Jadwal Acara / Tur';
         labels.introBadge = isEn ? 'THE WEDDING OF' : 'PERNIKAHAN';
         labels.introTitle = invitation?.opening_title || (isEn ? 'The Wedding Album' : 'Album Pernikahan');
-        labels.introText = invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami meresmikan ikatan pernikahan kami.';
+        labels.introText = invitation?.opening_text || (isEn ? 'By the grace of God, please allow us to inaugurate our marriage union.' : 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami meresmikan ikatan pernikahan kami.');
         labels.profileHeader = isEn ? 'Featured Artists' : 'Artis Utama';
         labels.storyHeader = isEn ? 'Love Story Playlist' : 'Daftar Putar Kisah Cinta';
         labels.storySubtitle = isEn ? 'Lyrics synchronized with our hearts' : 'Lirik disinkronkan dengan hati kami';
@@ -66,7 +66,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
         labels.eventHeader = isEn ? 'Anniversary Tour' : 'Jadwal Perayaan / Tur';
         labels.introBadge = isEn ? 'ANNIVERSARY OF' : 'ANNIVERSARY';
         labels.introTitle = invitation?.opening_title || (isEn ? 'The Anniversary Album' : 'Album Anniversary');
-        labels.introText = invitation?.opening_text || 'Perjalanan kasih kami yang penuh berkat dan kebahagiaan.';
+        labels.introText = invitation?.opening_text || (isEn ? 'Our journey of love, full of blessings and happiness.' : 'Perjalanan kasih kami yang penuh berkat dan kebahagiaan.');
         labels.profileHeader = isEn ? 'Featured Couple' : 'Pasangan Utama';
         labels.storyHeader = isEn ? 'Love Journey Playlist' : 'Daftar Putar Perjalanan Kasih';
         labels.storySubtitle = isEn ? 'Lyrics synchronized with our years' : 'Lirik disinkronkan dengan tahun-tahun kami';
@@ -77,7 +77,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
         labels.eventHeader = isEn ? 'Graduation Tour' : 'Jadwal Acara / Wisuda';
         labels.introBadge = isEn ? 'THE GRADUATION OF' : 'WISUDA';
         labels.introTitle = invitation?.opening_title || (isEn ? 'The Graduation Album' : 'Album Wisuda');
-        labels.introText = invitation?.opening_text || 'Perayaan kelulusan dan awal dari perjalanan studi baru.';
+        labels.introText = invitation?.opening_text || (isEn ? 'Celebration of graduation and the beginning of a new academic journey.' : 'Perayaan kelulusan dan awal dari perjalanan studi baru.');
         labels.profileHeader = isEn ? 'Featured Graduate' : 'Profil Wisudawan';
         labels.storyHeader = isEn ? 'Study Journey Playlist' : 'Daftar Putar Perjalanan Studi';
         labels.storySubtitle = isEn ? 'Lyrics synchronized with our study days' : 'Lirik disinkronkan dengan perjuangan studi kami';
@@ -88,7 +88,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
         labels.eventHeader = isEn ? 'Birthday Party Tour' : 'Jadwal Perayaan / Tur';
         labels.introBadge = isEn ? 'THE BIRTHDAY OF' : 'ULANG TAHUN';
         labels.introTitle = invitation?.opening_title || (isEn ? 'The Birthday Album' : 'Album Ulang Tahun');
-        labels.introText = invitation?.opening_text || 'Syukuran pertambahan usia dan langkah baru penuh berkah.';
+        labels.introText = invitation?.opening_text || (isEn ? 'Thanksgiving for the addition of age and a new step full of blessings.' : 'Syukuran pertambahan usia dan langkah baru penuh berkah.');
         labels.profileHeader = isEn ? 'Featured Celebrant' : 'Profil Ulang Tahun';
         labels.storyHeader = isEn ? 'Life Milestones Playlist' : 'Daftar Putar Perjalanan Hidup';
         labels.storySubtitle = isEn ? 'Lyrics synchronized with our milestones' : 'Lirik disinkronkan dengan perjalanan usia kami';
@@ -99,7 +99,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
         labels.eventHeader = isEn ? 'Aqiqah Celebration Tour' : 'Jadwal Acara / Aqiqah';
         labels.introBadge = isEn ? 'THE AQIQAH OF' : 'AQIQAH';
         labels.introTitle = invitation?.opening_title || (isEn ? 'The Aqiqah Album' : 'Album Aqiqah');
-        labels.introText = invitation?.opening_text || 'Syukuran kehadiran buah hati tercinta yang menjadi penyejuk hati kami.';
+        labels.introText = invitation?.opening_text || (isEn ? 'Thanksgiving for the presence of our beloved baby who is the comfort of our hearts.' : 'Syukuran kehadiran buah hati tercinta yang menjadi penyejuk hati kami.');
         labels.profileHeader = isEn ? 'Featured Child' : 'Profil Anak';
         labels.storyHeader = isEn ? 'Baby Growth Playlist' : 'Daftar Putar Tumbuh Kembang';
         labels.storySubtitle = isEn ? 'Lyrics synchronized with our baby steps' : 'Lirik disinkronkan dengan tumbuh kembang buah hati kami';
@@ -110,7 +110,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
         labels.eventHeader = isEn ? 'Circumcision Tour' : 'Jadwal Syukuran / Tur';
         labels.introBadge = isEn ? 'THE CIRCUMCISION OF' : 'KHITANAN';
         labels.introTitle = invitation?.opening_title || (isEn ? 'The Circumcision Album' : 'Album Khitanan');
-        labels.introText = invitation?.opening_text || 'Syukuran khitanan putra kami sebagai bagian dari syariat dan kesehatan.';
+        labels.introText = invitation?.opening_text || (isEn ? 'Thanksgiving for the circumcision of our son as part of religious command and health.' : 'Syukuran khitanan putra kami sebagai bagian dari syariat dan kesehatan.');
         labels.profileHeader = isEn ? 'Featured Child' : 'Profil Anak';
         labels.storyHeader = isEn ? 'Growth Journey Playlist' : 'Daftar Putar Tumbuh Kembang';
         labels.storySubtitle = isEn ? 'Lyrics synchronized with our boy steps' : 'Lirik disinkronkan dengan kisah tumbuh kembang putra kami';
@@ -140,14 +140,28 @@ function formatTime(t) {
     return String(t).substring(0, 5);
 }
 
-function parseEventDate(dateString) {
+function getYoutubeId(url) {
+    if (!url) return '';
+    let id = '';
+    if (url.includes('youtube.com/watch?v=')) {
+        id = url.split('v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+        id = url.split('youtu.be/')[1]?.split('?')[0];
+    } else if (url.includes('youtube.com/embed/')) {
+        id = url.split('embed/')[1]?.split('?')[0];
+    }
+    return id;
+}
+
+function parseEventDate(dateString, locale = 'id') {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
     const d = new Date(dateString);
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
     
+    const loc = String(locale).toLowerCase() === 'en' ? 'en-US' : 'id-ID';
     const dayNum = String(d.getDate()).padStart(2, '0');
-    const dayName = d.toLocaleDateString('id-ID', { weekday: 'long' });
-    const monthName = d.toLocaleDateString('id-ID', { month: 'long' });
+    const dayName = d.toLocaleDateString(loc, { weekday: 'long' });
+    const monthName = d.toLocaleDateString(loc, { month: 'long' });
     const year = d.getFullYear();
     
     return { dayNum, dayName, monthName, year };
@@ -258,32 +272,31 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
     const coupleName = mainName;
 
-    const artworkUrl = getStorageUrl(invitation?.cover_image, null) || fallbackPhoto;
-    const [coverSrc, setCoverSrc] = useState(artworkUrl);
-
-    useEffect(() => {
-        setCoverSrc(artworkUrl);
-    }, [artworkUrl]);
-
-    const handleCoverError = () => {
-        if (coverSrc !== fallbackPhoto && fallbackPhoto) {
-            setCoverSrc(fallbackPhoto);
-        } else {
-            setCoverSrc(null);
-        }
-    };
+    const coverImages = invitation?.cover_image ? invitation.cover_image.split(',') : (fallbackPhoto ? [fallbackPhoto] : []);
+    const coverVideoId = getYoutubeId(invitation?.cover_video_url);
 
     return (
         <div className={`spty-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'spty-no-photo-mode' : ''}`}>
-            {globalShowPhotos && invitation?.cover_image && (
-                <PremiumSlideshow
-                    images={invitation.cover_image.split(',')}
-                    positionX={invitation?.cover_position_x}
-                    positionY={invitation?.cover_position_y}
-                    zoom={invitation?.cover_zoom}
-                    className="spty-cover__bg"
-                    imgClassName="absolute inset-0 w-full h-full object-cover"
-                />
+            {globalShowPhotos && coverVideoId ? (
+                <div className="spty-cover__bg absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+                    <iframe
+                        src={`https://www.youtube.com/embed/${coverVideoId}?autoplay=1&mute=1&loop=1&playlist=${coverVideoId}&controls=0&showinfo=0&rel=0&enablejsapi=1`}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] pointer-events-none"
+                    />
+                </div>
+            ) : (
+                globalShowPhotos && coverImages.length > 0 && (
+                    <PremiumSlideshow
+                        images={coverImages}
+                        positionX={invitation?.cover_position_x}
+                        positionY={invitation?.cover_position_y}
+                        zoom={invitation?.cover_zoom}
+                        className="spty-cover__bg"
+                        imgClassName="absolute inset-0 w-full h-full object-cover"
+                    />
+                )
             )}
             <div className="spty-cover__inner">
                 <div className="spty-cover__device">
@@ -294,9 +307,18 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                     </div>
 
                     <div className="spty-cover__artwork-wrap relative overflow-hidden">
-                        {globalShowPhotos && invitation?.cover_image ? (
+                        {globalShowPhotos && coverVideoId ? (
+                            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${coverVideoId}?autoplay=1&mute=1&loop=1&playlist=${coverVideoId}&controls=0&showinfo=0&rel=0&enablejsapi=1`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.77%] h-[100%] pointer-events-none"
+                                />
+                            </div>
+                        ) : globalShowPhotos && coverImages.length > 0 ? (
                             <PremiumSlideshow
-                                images={invitation.cover_image.split(',')}
+                                images={coverImages}
                                 positionX={invitation?.cover_position_x}
                                 positionY={invitation?.cover_position_y}
                                 zoom={invitation?.cover_zoom}
@@ -372,9 +394,8 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
     const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
     const { mainName, initials, labels } = themeConfig;
 
-    const coverBg = getStorageUrl(invitation?.opening_image || invitation?.cover_image, null) || fallbackPhoto;
-    const [playlistSrc, setPlaylistSrc] = useState(coverBg);
-    const totalWishes = safeArr(wishes).length;
+    const openingVideoId = getYoutubeId(invitation?.opening_video_url);
+    const openingImages = invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : (fallbackPhoto ? [fallbackPhoto] : []));
 
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
     const eventDateStr = primaryEvent?.event_date || primaryEvent?.date;
@@ -384,25 +405,23 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
         invitation.opening_ayat.trim().toLowerCase() === invitation.opening_ayat_translation.trim().toLowerCase();
     const showBigAyat = invitation?.opening_ayat && !isIdenticalQuote;
 
-    useEffect(() => {
-        setPlaylistSrc(coverBg);
-    }, [coverBg]);
-
-    const handlePlaylistError = () => {
-        if (playlistSrc !== fallbackPhoto && fallbackPhoto) {
-            setPlaylistSrc(fallbackPhoto);
-        } else {
-            setPlaylistSrc(null);
-        }
-    };
-
     return (
         <section id="opening" className="spty-section spty-opening">
             <div className="spty-opening__playlist-header">
-                {globalShowPhotos && (invitation?.opening_image || invitation?.cover_image) ? (
+                {globalShowPhotos && openingVideoId ? (
+                    <div className="spty-opening__playlist-img relative overflow-hidden bg-black">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${openingVideoId}?autoplay=0&rel=0&controls=1`}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="absolute inset-0 w-full h-full"
+                        />
+                    </div>
+                ) : globalShowPhotos && openingImages.length > 0 ? (
                     <div className="spty-opening__playlist-img relative overflow-hidden">
                         <PremiumSlideshow
-                            images={invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : [])}
+                            images={openingImages}
                             positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
                             positionY={invitation?.opening_position_y ?? invitation?.cover_position_y}
                             zoom={invitation?.opening_zoom ?? invitation?.cover_zoom}
@@ -576,7 +595,7 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                                 <h4 className="spty-artist-card__name">{groom.full_name}</h4>
                                 <p className="spty-artist-card__parents">
                                     {translateChildOrder(groom.child_order, groom.gender)}<br />
-                                    <strong>Bapak {groom.father_name} & Ibu {groom.mother_name}</strong>
+                                    <strong>{locale === 'en' ? 'Mr.' : 'Bapak'} {groom.father_name} & {locale === 'en' ? 'Mrs.' : 'Ibu'} {groom.mother_name}</strong>
                                 </p>
                                 {groom.instagram && (
                                     <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
@@ -603,7 +622,7 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                                     <h4 className="spty-artist-card__name">{groom.full_name}</h4>
                                     <p className="spty-artist-card__parents">
                                         {translateChildOrder(groom.child_order, 'pria')}<br />
-                                        <strong>Bapak {groom.father_name} & Ibu {groom.mother_name}</strong>
+                                        <strong>{locale === 'en' ? 'Mr.' : 'Bapak'} {groom.father_name} & {locale === 'en' ? 'Mrs.' : 'Ibu'} {groom.mother_name}</strong>
                                     </p>
                                     {groom.instagram && (
                                         <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
@@ -629,7 +648,7 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                                     <h4 className="spty-artist-card__name">{bride.full_name}</h4>
                                     <p className="spty-artist-card__parents">
                                         {translateChildOrder(bride.child_order, 'wanita')}<br />
-                                        <strong>Bapak {bride.father_name} & Ibu {bride.mother_name}</strong>
+                                        <strong>{locale === 'en' ? 'Mr.' : 'Bapak'} {bride.father_name} & {locale === 'en' ? 'Mrs.' : 'Ibu'} {bride.mother_name}</strong>
                                     </p>
                                     {bride.instagram && (
                                         <a href={`https://instagram.com/${bride.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
@@ -760,7 +779,7 @@ function EventSection({ events, invitation, language, sections }) {
 
             <div className="spty-tour">
                 {safeEvents.map((ev, idx) => {
-                    const { dayNum, dayName, monthName, year } = parseEventDate(ev.event_date || ev.date);
+                    const { dayNum, dayName, monthName, year } = parseEventDate(ev.event_date || ev.date, locale);
                     const formattedMonth = String(monthName).substring(0, 3);
                     const formattedTime = ev.start_time ? `${formatTime(ev.start_time)} ${ev.timezone || 'WIB'}` : '';
 
@@ -909,7 +928,7 @@ function LoveStorySection({ loveStories, language, invitation }) {
 
                 <div ref={containerRef} className="spty-lyrics__list">
                     {stories.map((story, idx) => {
-                        const formattedDate = story.story_date ? formatStoryDate(story.story_date) : '';
+                        const formattedDate = story.story_date ? formatStoryDate(story.story_date, locale) : '';
                         const isActive = activeIdx === idx;
                         return (
                             <div
@@ -930,14 +949,15 @@ function LoveStorySection({ loveStories, language, invitation }) {
     );
 }
 
-function formatStoryDate(dateStr) {
+function formatStoryDate(dateStr, locale = 'id') {
     if (!dateStr) return '';
     const datePattern = /^\d{4}-\d{2}-\d{2}/;
     if (datePattern.test(dateStr)) {
         try {
             const d = new Date(dateStr);
             if (!isNaN(d.getTime())) {
-                return d.toLocaleDateString('id-ID', {
+                const loc = String(locale).toLowerCase() === 'en' ? 'en-US' : 'id-ID';
+                return d.toLocaleDateString(loc, {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'
@@ -957,20 +977,6 @@ function GallerySection({ galleries, language, invitation }) {
     const [brokenImages, setBrokenImages] = useState({});
     const [activeIdx, setActiveIdx] = useState(null);
 
-    const getYoutubeId = (url) => {
-        if (!url) return '';
-        let id = '';
-        if (url.includes('youtube.com/watch?v=')) {
-            id = url.split('v=')[1]?.split('&')[0];
-        } else if (url.includes('youtu.be/')) {
-            id = url.split('youtu.be/')[1]?.split('?')[0];
-        } else if (url.includes('youtube.com/embed/')) {
-            id = url.split('embed/')[1]?.split('?')[0];
-        }
-        return id;
-    };
-
-    // Combine photos and videos
     const galleryItems = [];
 
     if (globalShowPhotos) {
@@ -985,25 +991,6 @@ function GallerySection({ galleries, language, invitation }) {
         });
     }
 
-    const showVideoInGallery = invitation?.video_list?.length > 0 && 
-        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
-
-    if (showVideoInGallery) {
-        invitation.video_list.forEach((url, idx) => {
-            const ytId = getYoutubeId(url);
-            if (ytId) {
-                galleryItems.push({
-                    type: 'video',
-                    ytId: ytId,
-                    src: 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg',
-                    title: locale === 'en' ? ('Prewedding Video Track #' + (idx + 1)) : ('Video Musik #' + (idx + 1)),
-                    subtitle: locale === 'en' ? 'Music Video • Featured Release' : 'Video Musik • Rilis Utama',
-                    id: 'video-' + idx
-                });
-            }
-        });
-    }
-
     if (galleryItems.length === 0) return null;
 
     const handleImgError = (idx) => {
@@ -1012,62 +999,21 @@ function GallerySection({ galleries, language, invitation }) {
 
     const handlePrev = (e) => {
         e.stopPropagation();
-        setActiveIdx((prev) => {
-            const nextIdx = prev === 0 ? galleryItems.length - 1 : prev - 1;
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                if (galleryItems[nextIdx]?.type === 'video') {
-                    audioEl.pause();
-                } else {
-                    audioEl.play().catch(() => {});
-                }
-            }
-            return nextIdx;
-        });
+        setActiveIdx((prev) => (prev === 0 ? galleryItems.length - 1 : prev - 1));
     };
 
     const handleNext = (e) => {
         e.stopPropagation();
-        setActiveIdx((prev) => {
-            const nextIdx = prev === galleryItems.length - 1 ? 0 : prev + 1;
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                if (galleryItems[nextIdx]?.type === 'video') {
-                    audioEl.pause();
-                } else {
-                    audioEl.play().catch(() => {});
-                }
-            }
-            return nextIdx;
-        });
+        setActiveIdx((prev) => (prev === galleryItems.length - 1 ? 0 : prev + 1));
     };
 
     const handleOpenModal = (idx) => {
         setActiveIdx(idx);
-        if (galleryItems[idx]?.type === 'video') {
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                audioEl.pause();
-            }
-        }
     };
 
     const handleCloseModal = () => {
         setActiveIdx(null);
-        const audioEl = document.querySelector('audio');
-        if (audioEl) {
-            audioEl.play().catch(() => {});
-        }
     };
-
-    useEffect(() => {
-        if (activeIdx !== null && galleryItems[activeIdx]?.type === 'video') {
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                audioEl.pause();
-            }
-        }
-    }, [activeIdx]);
 
     return (
         <section id="gallery" className="spty-section">
@@ -1076,66 +1022,37 @@ function GallerySection({ galleries, language, invitation }) {
 
             <div className="spty-gallery__grid">
                 {galleryItems.map((item, idx) => {
-                    const isVideo = item.type === 'video';
-                    if (brokenImages[idx] && !isVideo) return null;
+                    if (brokenImages[idx]) return null;
                     return (
                         <Reveal key={item.id} className="spty-gallery__item" variant="zoom" delay={(idx % 4) * 100}>
                             <div className="spty-gallery__img-wrap" onClick={() => handleOpenModal(idx)} style={{ cursor: 'pointer', position: 'relative' }}>
                                 <img src={item.src} alt={item.title} className="spty-gallery__img" onError={() => handleImgError(idx)} loading="lazy" />
-                                
-                                {isVideo ? (
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    backgroundColor: 'rgba(0,0,0,0)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'background-color 0.2s'
+                                }} className="spty-photo-overlay-hover">
                                     <div style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        backgroundColor: 'rgba(0,0,0,0.3)',
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                        border: '1px solid rgba(255,255,255,0.2)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        transition: 'background-color 0.2s'
-                                    }} className="spty-video-overlay-hover">
-                                        <div style={{
-                                            width: '42px',
-                                            height: '42px',
-                                            borderRadius: '50%',
-                                            backgroundColor: '#1db954',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            boxShadow: '0 4px 12px rgba(29, 185, 84, 0.4)'
-                                        }}>
-                                            <svg style={{ width: '16px', height: '16px', fill: '#000000', marginLeft: '2px' }} viewBox="0 0 24 24">
-                                                <path d="M8 5v14l11-7z"/>
-                                            </svg>
-                                        </div>
+                                        opacity: 0,
+                                        transition: 'opacity 0.2s'
+                                    }} className="spty-zoom-icon">
+                                        <i className="fas fa-search-plus" style={{ color: '#fff', fontSize: '12px' }} />
                                     </div>
-                                ) : (
-                                    <div style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        backgroundColor: 'rgba(0,0,0,0)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        transition: 'background-color 0.2s'
-                                    }} className="spty-photo-overlay-hover">
-                                        <div style={{
-                                            width: '36px',
-                                            height: '36px',
-                                            borderRadius: '50%',
-                                            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                            border: '1px solid rgba(255,255,255,0.2)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            opacity: 0,
-                                            transition: 'opacity 0.2s'
-                                        }} className="spty-zoom-icon">
-                                            <i className="fas fa-search-plus" style={{ color: '#fff', fontSize: '12px' }} />
-                                        </div>
-                                    </div>
-                                )}
+                                </div>
                             </div>
-                            <h5 className="spty-gallery__caption" style={{ color: isVideo ? '#1db954' : 'inherit' }}>{item.title}</h5>
+                            <h5 className="spty-gallery__caption">{item.title}</h5>
                             <p className="spty-gallery__type">{item.subtitle} • 2026</p>
                         </Reveal>
                     );
@@ -1252,38 +1169,22 @@ function GallerySection({ galleries, language, invitation }) {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            aspectRatio: galleryItems[activeIdx].type === 'video' ? '16/9' : 'auto'
+                            aspectRatio: 'auto'
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {galleryItems[activeIdx].type === 'video' ? (
-                            <iframe 
-                                src={'https://www.youtube.com/embed/' + galleryItems[activeIdx].ytId + '?autoplay=1&rel=0&showinfo=0&controls=1&mute=0'}
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    borderRadius: '8px',
-                                    border: '2px solid #1db954',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-                                }}
-                            />
-                        ) : (
-                            <img 
-                                src={galleryItems[activeIdx].src} 
-                                alt={galleryItems[activeIdx].title} 
-                                style={{
-                                    maxWidth: '100%',
-                                    maxHeight: '72vh',
-                                    objectFit: 'contain',
-                                    borderRadius: '8px',
-                                    border: '2px solid rgba(255, 255, 255, 0.1)',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-                                }}
-                            />
-                        )}
+                        <img 
+                            src={galleryItems[activeIdx].src} 
+                            alt={galleryItems[activeIdx].title} 
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '72vh',
+                                objectFit: 'contain',
+                                borderRadius: '8px',
+                                border: '2px solid rgba(255, 255, 255, 0.1)',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
+                            }}
+                        />
                     </div>
 
                     {/* Caption under Image */}
@@ -1301,10 +1202,91 @@ function GallerySection({ galleries, language, invitation }) {
                         <div style={{ color: '#1db954', fontWeight: 'bold', fontSize: '17px', marginBottom: '4px', letterSpacing: '0.5px' }}>
                             {galleryItems[activeIdx].title}
                         </div>
-                        <div>{galleryItems[activeIdx].type === 'video' ? 'Spotivite Premium Video Player' : 'Spotivite High-Fidelity Discography'}</div>
+                        <div>Spotivite High-Fidelity Discography</div>
                     </div>
                 </div>
             )}
+        </section>
+    );
+}
+
+function VideoGallerySection({ invitation, language }) {
+    const { t, locale } = useTranslation(language);
+    const isEn = locale === 'en';
+
+    const videoItems = [];
+    const showVideo = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideo) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                videoItems.push({
+                    ytId: ytId,
+                    url: url,
+                    title: isEn ? `Moment Video #${idx + 1}` : `Momen Video #${idx + 1}`
+                });
+            }
+        });
+    }
+
+    if (videoItems.length === 0) return null;
+
+    return (
+        <section id="video" className="spty-section">
+            <h3 className="spty-section-title"><span>#</span>MusicVideos</h3>
+            <h4 className="spty-section-header">{isEn ? 'Featured Video Moments' : 'Momen Video Utama'}</h4>
+            <div 
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px',
+                    maxWidth: '800px',
+                    margin: '0 auto',
+                    width: '100%',
+                    padding: '0 16px'
+                }}
+            >
+                {videoItems.map((item, idx) => (
+                    <Reveal key={idx} delay={idx * 100} className="w-full">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {videoItems.length > 1 && (
+                                <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 'bold', margin: '0 0 4px', letterSpacing: '0.5px' }}>
+                                    {item.title}
+                                </h4>
+                            )}
+                            <div 
+                                style={{
+                                    position: 'relative',
+                                    width: '100%',
+                                    aspectRatio: '16/9',
+                                    overflow: 'hidden',
+                                    borderRadius: '12px',
+                                    border: '1px solid rgba(29, 185, 84, 0.3)',
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                                    backgroundColor: '#000'
+                                }}
+                            >
+                                <iframe 
+                                    src={`https://www.youtube.com/embed/${item.ytId}?autoplay=0&rel=0&showinfo=1&controls=1&mute=0`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        border: '0'
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </Reveal>
+                ))}
+            </div>
         </section>
     );
 }
@@ -1636,7 +1618,7 @@ function ClosingSection({ invitation, brideGrooms, language }) {
     return (
         <section id="closing" className="spty-section spty-closing">
             <h3 className="spty-closing__title">{invitation?.closing_title || 'THANK YOU'}</h3>
-            <p className="spty-closing__text">{invitation?.closing_text || 'Merupakan suatu kehormatan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari bahagia kami.'}</p>
+            <p className="spty-closing__text">{invitation?.closing_text || (isEn ? 'It is a great honor for us if you would be pleased to attend our happy day.' : 'Merupakan suatu kehormatan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir di hari bahagia kami.')}</p>
 
             {(hasGroomParents || hasBrideParents) && (
                 <>
@@ -1930,7 +1912,7 @@ function SpotiviteThemeContent({ invitation, sections, brideGrooms, events, gall
     // Resolve visible sections
     const resolvedSections = useMemo(() => {
         const safeSections = safeArr(sections);
-        const validKeys = ['opening', 'bride_groom', 'event', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
+        const validKeys = ['opening', 'bride_groom', 'event', 'love_story', 'gallery', 'video', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
         const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
         const hasStream = primaryEvent?.streaming_url || safeArr(primaryEvent?.streamings).length > 0;
 
@@ -1947,7 +1929,13 @@ function SpotiviteThemeContent({ invitation, sections, brideGrooms, events, gall
                 if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return;
                 if (s.section_key === 'gallery') {
                     const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
-                    if (!(galleries?.length > 0 || hasVideos)) return;
+                    if (galleries?.length > 0) {
+                        resolved.push(s);
+                    }
+                    if (hasVideos) {
+                        resolved.push({ section_key: 'video' });
+                    }
+                    return;
                 }
                 if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return;
                 if (s.section_key === 'rsvp' && !enableRsvp) return;
@@ -1979,7 +1967,8 @@ function SpotiviteThemeContent({ invitation, sections, brideGrooms, events, gall
 
             if (loveStories?.length > 0) fallbacks.push({ section_key: 'love_story' });
             const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
-            if (galleries?.length > 0 || hasVideos) fallbacks.push({ section_key: 'gallery' });
+            if (galleries?.length > 0) fallbacks.push({ section_key: 'gallery' });
+            if (hasVideos) fallbacks.push({ section_key: 'video' });
             if (enableRsvp) {
                 fallbacks.push({ section_key: 'rsvp' });
             } else if (enableWishes) {
@@ -2210,6 +2199,8 @@ function SpotiviteThemeContent({ invitation, sections, brideGrooms, events, gall
                 return <LoveStorySection key={key} {...props} />;
             case 'gallery':
                 return <GallerySection key={key} {...props} />;
+            case 'video':
+                return <VideoGallerySection key={key} {...props} />;
             case 'bank':
                 return <BankSection key={key} {...props} />;
             case 'rsvp':

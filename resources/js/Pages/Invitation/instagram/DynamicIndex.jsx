@@ -1109,20 +1109,6 @@ function GallerySection({ galleries, language, invitation }) {
     const [likedPosts, setLikedPosts] = useState({});
     const safeGalleries = safeArr(galleries);
 
-    const getYoutubeId = (url) => {
-        if (!url) return '';
-        let id = '';
-        if (url.includes('youtube.com/watch?v=')) {
-            id = url.split('v=')[1]?.split('&')[0];
-        } else if (url.includes('youtu.be/')) {
-            id = url.split('youtu.be/')[1]?.split('?')[0];
-        } else if (url.includes('youtube.com/embed/')) {
-            id = url.split('embed/')[1]?.split('?')[0];
-        }
-        return id;
-    };
-
-    // Combine photos and videos
     const galleryItems = [];
 
     if (globalShowPhotos) {
@@ -1134,25 +1120,6 @@ function GallerySection({ galleries, language, invitation }) {
                 caption: g.caption,
                 indexKey: g.id || idx
             });
-        });
-    }
-
-    const showVideoInGallery = invitation?.video_list?.length > 0 && 
-        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
-
-    if (showVideoInGallery) {
-        invitation.video_list.forEach((url, idx) => {
-            const ytId = getYoutubeId(url);
-            if (ytId) {
-                galleryItems.push({
-                    type: 'video',
-                    id: 'video-' + idx,
-                    ytId: ytId,
-                    src: 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg',
-                    caption: locale === 'en' ? ('Prewedding Video Moment #' + (idx + 1)) : ('Momen Video Prewedding #' + (idx + 1)),
-                    indexKey: 'video-' + idx
-                });
-            }
         });
     }
 
@@ -1168,20 +1135,10 @@ function GallerySection({ galleries, language, invitation }) {
 
     const handleOpenPost = (item) => {
         setSelectedPhoto(item);
-        if (item.type === 'video') {
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                audioEl.pause();
-            }
-        }
     };
 
     const handleClosePost = () => {
         setSelectedPhoto(null);
-        const audioEl = document.querySelector('audio');
-        if (audioEl) {
-            audioEl.play().catch(() => {});
-        }
     };
 
     return (
@@ -1198,29 +1155,13 @@ function GallerySection({ galleries, language, invitation }) {
 
             <div className="ig-gallery-grid-layout">
                 {galleryItems.map((item, idx) => {
-                    const isVideo = item.type === 'video';
-                    if (brokenImages[idx] && !isVideo) return null;
+                    if (brokenImages[idx]) return null;
                     const isLiked = likedPosts[item.id];
                     const likeCount = isLiked ? 1000 : 999;
                     return (
                         <Reveal key={item.id} className="ig-gallery-post-item" variant="zoom" delay={(idx % 3) * 80}>
                             <div className="ig-gallery-post-img-box" onClick={() => handleOpenPost(item)} style={{ position: 'relative' }}>
                                 <img src={item.src} alt={item.caption || 'Gallery'} className="ig-gallery-img" onError={() => handleImgError(idx)} loading="lazy" />
-                                
-                                {isVideo && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '8px',
-                                        right: '8px',
-                                        color: '#ffffff',
-                                        fontSize: '15px',
-                                        textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                                        zIndex: 10
-                                    }}>
-                                        <i className="fas fa-video" />
-                                    </div>
-                                )}
-                                
                                 <div className="ig-gallery-post-hover-overlay">
                                     <span><i className="fas fa-heart" style={{ color: isLiked ? '#ff3040' : '#ffffff' }} /> {likeCount}</span>
                                     <span><i className="fas fa-comment" /> 45</span>
@@ -1236,32 +1177,16 @@ function GallerySection({ galleries, language, invitation }) {
                 const id = selectedPhoto.id;
                 const isLiked = likedPosts[id];
                 const likesCount = isLiked ? 9943 : 9942;
-                const isVideo = selectedPhoto.type === 'video';
                 return (
                     <div className="ig-post-detail-modal" onClick={handleClosePost}>
                         <div className="ig-post-modal-content" onClick={(e) => e.stopPropagation()}>
                             <div className="ig-modal-header">
-                                <span className="ig-modal-user-avatar" style={{ backgroundColor: isVideo ? '#e1306c' : 'var(--ig-primary)' }}><i className={isVideo ? "fas fa-video" : "fas fa-heart"} /></span>
-                                <span className="ig-modal-username">{isVideo ? 'our.love.reels' : 'our.love.posts'}</span>
+                                <span className="ig-modal-user-avatar" style={{ backgroundColor: 'var(--ig-primary)' }}><i className="fas fa-heart" /></span>
+                                <span className="ig-modal-username">our.love.posts</span>
                                 <button className="ig-modal-close-btn" onClick={handleClosePost}><i className="fas fa-times" /></button>
                             </div>
-                            <div className="ig-modal-photo-wrap" style={{ aspectRatio: isVideo ? '16/9' : 'auto', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {isVideo ? (
-                                    <iframe 
-                                        src={'https://www.youtube.com/embed/' + selectedPhoto.ytId + '?autoplay=1&rel=0&showinfo=0&controls=1&mute=0'}
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            aspectRatio: '16/9',
-                                            border: 'none'
-                                        }}
-                                    />
-                                ) : (
-                                    <img src={selectedPhoto.src} alt={selectedPhoto.caption} />
-                                )}
+                            <div className="ig-modal-photo-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <img src={selectedPhoto.src} alt={selectedPhoto.caption} />
                             </div>
                             <div className="ig-modal-action-bar">
                                 <div className="ig-modal-action-left" onClick={() => toggleLikePost(id)} style={{ cursor: 'pointer' }}>
@@ -1281,12 +1206,106 @@ function GallerySection({ galleries, language, invitation }) {
                                 )}
                             </div>
                             <div className="ig-modal-caption-text">
-                                <strong>{isVideo ? 'our.love.reels' : 'our.love.posts'}</strong> {selectedPhoto.caption || 'Captured moments of our journey.'}
+                                <strong>our.love.posts</strong> {selectedPhoto.caption || 'Captured moments of our journey.'}
                             </div>
                         </div>
                     </div>
                 );
             })()}
+        </section>
+    );
+}
+
+function VideoGallerySection({ invitation, language }) {
+    const { t, locale } = useTranslation(language);
+    const isEn = locale === 'en';
+
+    const getYoutubeId = (url) => {
+        if (!url) return '';
+        let id = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            id = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            id = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            id = url.split('embed/')[1]?.split('?')[0];
+        }
+        return id;
+    };
+
+    const videoItems = [];
+    const showVideo = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideo) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                videoItems.push({
+                    ytId: ytId,
+                    url: url,
+                    title: isEn ? `Moment Video #${idx + 1}` : `Momen Video #${idx + 1}`
+                });
+            }
+        });
+    }
+
+    if (videoItems.length === 0) return null;
+
+    return (
+        <section id="video" className="ig-section ig-gallery-feed">
+            <h3 className="ig-section-tag">@reels</h3>
+            <h4 className="ig-section-title-custom">{isEn ? 'Video Moments' : 'Momen Video Kami'}</h4>
+            <div 
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px',
+                    maxWidth: '800px',
+                    margin: '0 auto',
+                    width: '100%',
+                    padding: '0 16px'
+                }}
+            >
+                {videoItems.map((item, idx) => (
+                    <Reveal key={idx} delay={idx * 100} className="w-full">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {videoItems.length > 1 && (
+                                <h4 style={{ color: 'var(--ig-text)', fontSize: '0.95rem', fontWeight: 'bold', margin: '0 0 4px', letterSpacing: '0.5px' }}>
+                                    {item.title}
+                                </h4>
+                            )}
+                            <div 
+                                style={{
+                                    position: 'relative',
+                                    width: '100%',
+                                    aspectRatio: '16/9',
+                                    overflow: 'hidden',
+                                    borderRadius: '12px',
+                                    border: '1px solid rgba(0,0,0,0.1)',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                                    backgroundColor: '#000'
+                                }}
+                            >
+                                <iframe 
+                                    src={`https://www.youtube.com/embed/${item.ytId}?autoplay=0&rel=0&showinfo=1&controls=1&mute=0`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        border: '0'
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </Reveal>
+                ))}
+            </div>
         </section>
     );
 }
@@ -1692,6 +1711,8 @@ function InstaViteThemeContent({ invitation, sections, brideGrooms, events, wish
     const enableRsvp = parseBool(invitation?.enable_rsvp ?? true);
     const enableWishes = parseBool(invitation?.enable_wishes ?? true);
 
+    const hasStream = safeArr(events).some(e => e.streaming_url || (Array.isArray(e.streamings) && e.streamings.length > 0));
+
     // Dynamic list filter
     const resolvedSections = useMemo(() => {
         let list = safeArr(sections);
@@ -1707,8 +1728,55 @@ function InstaViteThemeContent({ invitation, sections, brideGrooms, events, wish
             list = list.filter(s => s.section_key !== 'wishes');
         }
 
-        return list.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-    }, [sections]);
+        const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+        let newList = [];
+        list.forEach(s => {
+            if (s.section_key === 'gallery') {
+                if (galleries?.length > 0) {
+                    newList.push(s);
+                }
+                if (hasVideos) {
+                    newList.push({ section_key: 'video', is_visible: true, sort_order: s.sort_order + 0.1 });
+                }
+            } else {
+                newList.push(s);
+            }
+        });
+
+        // Fallback check
+        if (newList.length === 0) {
+            const fallbacks = [
+                { section_key: 'opening', sort_order: 1 },
+                { section_key: 'bride_groom', sort_order: 2 },
+                { section_key: 'event', sort_order: 3 }
+            ];
+            if (hasStream) {
+                fallbacks.push({ section_key: 'livestream', sort_order: 4 });
+            }
+            if (loveStories?.length > 0) {
+                fallbacks.push({ section_key: 'love_story', sort_order: 5 });
+            }
+            if (galleries?.length > 0) {
+                fallbacks.push({ section_key: 'gallery', sort_order: 6 });
+            }
+            if (hasVideos) {
+                fallbacks.push({ section_key: 'video', sort_order: 7 });
+            }
+            if (enableRsvp) {
+                fallbacks.push({ section_key: 'rsvp', sort_order: 8 });
+            } else if (enableWishes) {
+                fallbacks.push({ section_key: 'wishes', sort_order: 8 });
+            }
+            if (bankAccounts?.length > 0) {
+                fallbacks.push({ section_key: 'bank', sort_order: 9 });
+            }
+            fallbacks.push({ section_key: 'closing', sort_order: 10 });
+            newList = fallbacks;
+        }
+
+        return newList.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    }, [sections, invitation, galleries, enableRsvp, enableWishes, bankAccounts, loveStories, hasStream]);
 
     const randomGalleryPhoto = useMemo(() => {
         const list = safeArr(galleries);
@@ -1892,6 +1960,7 @@ function InstaViteThemeContent({ invitation, sections, brideGrooms, events, wish
             case 'event': return <EventSection key={key} {...props} />;
             case 'livestream': return <LiveStreamingSection key={key} {...props} />;
             case 'gallery': return <GallerySection key={key} {...props} />;
+            case 'video': return <VideoGallerySection key={key} {...props} />;
             case 'bank': return <BankSection key={key} {...props} />;
             case 'rsvp':
             case 'wishes': return <UnifiedFormSection key={key} {...props} />;

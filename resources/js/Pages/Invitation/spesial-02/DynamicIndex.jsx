@@ -39,6 +39,19 @@ const ORNAMENTS = {
 /* ═══════════════════════════════════════
    STANDARD HELPERS
    ═══════════════════════════════════════ */
+function getYoutubeId(url) {
+    if (!url) return '';
+    let id = '';
+    if (url.includes('youtube.com/watch?v=')) {
+        id = url.split('v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+        id = url.split('youtu.be/')[1]?.split('?')[0];
+    } else if (url.includes('youtube.com/embed/')) {
+        id = url.split('embed/')[1]?.split('?')[0];
+    }
+    return id;
+}
+
 function safeArr(val) {
     if (Array.isArray(val)) return val;
     if (val && typeof val === 'object') return Object.values(val);
@@ -318,48 +331,50 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
             <FlowerOrnaments isFixed={false} />
 
             <div className="sp02-cover__content">
-                <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] font-semibold text-[var(--sp02-primary)] mb-3">
-                    {t('invitation.wedding_of').toUpperCase()}
-                </p>
+                <div className="sp02-cover-card">
+                    <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] font-semibold text-[var(--sp02-primary)] mb-3">
+                        {t('invitation.wedding_of').toUpperCase()}
+                    </p>
 
-                {/* Circular Couples Photo with Pampas Frame Overlay */}
-                {showPhotos && invitation?.cover_image && (
-                    <div className="relative w-36 h-36 mx-auto mb-6 sp02-breathe">
-                        <div className="w-full h-full rounded-full overflow-hidden relative border border-white shadow-md">
-                            <PremiumSlideshow
-                                images={invitation.cover_image.split(',')}
-                                positionX={invitation.cover_position_x}
-                                positionY={invitation.cover_position_y}
-                                zoom={invitation.cover_zoom}
-                            />
+                    {/* Circular Couples Photo with Pampas Frame Overlay */}
+                    {showPhotos && invitation?.cover_image && (
+                        <div className="relative w-36 h-36 mx-auto mb-6 sp02-breathe">
+                            <div className="w-full h-full rounded-full overflow-hidden relative border border-white shadow-md">
+                                <PremiumSlideshow
+                                    images={invitation.cover_image.split(',')}
+                                    positionX={invitation.cover_position_x}
+                                    positionY={invitation.cover_position_y}
+                                    zoom={invitation.cover_zoom}
+                                />
+                            </div>
+                            <img src={ORNAMENTS.frame} alt="" className="sp02-avatar-frame__ornament w-16" style={{ bottom: -2, right: -10 }} />
                         </div>
-                        <img src={ORNAMENTS.frame} alt="" className="sp02-avatar-frame__ornament w-16" style={{ bottom: -2, right: -10 }} />
-                    </div>
-                )}
+                    )}
 
-                {/* Initials fallback monogram */}
-                {(!showPhotos || !invitation?.cover_image) && (
-                    <div className="w-20 h-20 rounded-full border border-[var(--sp02-primary)]/20 flex items-center justify-center text-xl font-bold tracking-widest text-[var(--sp02-primary)] bg-[var(--sp02-bg-soft)]/90 shadow-sm mx-auto mb-6 sp02-breathe font-serif">
-                        {initials}
-                    </div>
-                )}
+                    {/* Initials fallback monogram */}
+                    {(!showPhotos || !invitation?.cover_image) && (
+                        <div className="w-20 h-20 rounded-full border border-[var(--sp02-primary)]/20 flex items-center justify-center text-xl font-bold tracking-widest text-[var(--sp02-primary)] bg-[var(--sp02-bg-soft)]/90 shadow-sm mx-auto mb-6 sp02-breathe font-serif">
+                            {initials}
+                        </div>
+                    )}
 
-                <h1 className="text-3xl sm:text-4xl text-[var(--sp02-primary)] sp02-font-script-style mb-4 leading-snug">
-                    {coupleName}
-                </h1>
-                
-                {showGuestName && guest && (
-                    <div className="my-5 bg-[var(--sp02-bg-soft)]/65 border border-[var(--sp02-secondary)]/20 rounded-2xl p-4 shadow-sm backdrop-blur-xs">
-                        <p className="text-[9px] uppercase tracking-[0.2em] opacity-50 mb-0.5">{t('invitation.to')}</p>
-                        <p className="text-md font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wide">{guestName}</p>
-                        <p className="text-[9px] opacity-40 mt-1 italic leading-tight">{t('invitation.dear_guest_desc')}</p>
-                    </div>
-                )}
+                    <h1 className="text-3xl sm:text-4xl text-[var(--sp02-primary)] sp02-font-script-style mb-4 leading-snug">
+                        {coupleName}
+                    </h1>
+                    
+                    {showGuestName && guest && (
+                        <div className="w-full my-5 bg-[var(--sp02-bg-soft)]/65 border border-[var(--sp02-secondary)]/20 rounded-2xl p-4 shadow-sm backdrop-blur-xs">
+                            <p className="text-[9px] uppercase tracking-[0.2em] opacity-50 mb-0.5">{t('invitation.to')}</p>
+                            <p className="text-md font-bold text-[var(--sp02-primary)] sp02-font-heading-style tracking-wide">{guestName}</p>
+                            <p className="text-[9px] opacity-40 mt-1 italic leading-tight">{t('invitation.dear_guest_desc')}</p>
+                        </div>
+                    )}
 
-                <button type="button" onClick={onOpen} id="tombol-buka" className="sp02-btn-primary mt-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    {t('invitation.open')}
-                </button>
+                    <button type="button" onClick={onOpen} id="tombol-buka" className="sp02-btn-primary mt-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        {t('invitation.open')}
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -539,8 +554,8 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                             </div>
                         )}
                         
-                        {!showPhotos && (
-                            <div className="w-16 h-16 rounded-full border border-[var(--sp02-primary)]/20 flex items-center justify-center font-bold text-lg text-[var(--sp02-primary)] bg-[var(--sp02-bg-soft)] shadow-sm mb-4 font-serif">
+                        {(!showPhotos || !groom.photo) && (
+                            <div className="sp02-avatar-fallback-arch">
                                 {groom.nickname?.charAt(0) || 'G'}
                             </div>
                         )}
@@ -561,7 +576,7 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                                 href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="sp02-btn-secondary mt-3 inline-flex items-center gap-1.5"
+                                className="sp02-mempelai-ig-pill"
                             >
                                 <i className="fab fa-instagram text-xs" /> @{groom.instagram.replace('@', '')}
                             </a>
@@ -595,8 +610,8 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                             </div>
                         )}
 
-                        {!showPhotos && (
-                            <div className="w-16 h-16 rounded-full border border-[var(--sp02-primary)]/20 flex items-center justify-center font-bold text-lg text-[var(--sp02-primary)] bg-[var(--sp02-bg-soft)] shadow-sm mb-4 font-serif">
+                        {(!showPhotos || !bride.photo) && (
+                            <div className="sp02-avatar-fallback-arch">
                                 {bride.nickname?.charAt(0) || 'B'}
                             </div>
                         )}
@@ -617,7 +632,7 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                                 href={`https://instagram.com/${bride.instagram.replace('@', '')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="sp02-btn-secondary mt-3 inline-flex items-center gap-1.5"
+                                className="sp02-mempelai-ig-pill"
                             >
                                 <i className="fab fa-instagram text-xs" /> @{bride.instagram.replace('@', '')}
                             </a>
@@ -861,6 +876,58 @@ function GallerySection({ galleries, showPhotos }) {
                         </Reveal>
                     );
                 })}
+            </div>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════
+   VIDEO GALLERY SECTION
+   ═══════════════════════════════════════ */
+function VideoGallerySection({ invitation, locale }) {
+    const videoList = safeArr(invitation?.video_list);
+    const videoItems = [];
+
+    videoList.forEach((url, idx) => {
+        const ytId = getYoutubeId(url);
+        if (ytId) {
+            videoItems.push({
+                ytId,
+                url,
+                title: locale === 'en' ? `Moment Video #${idx + 1}` : `Momen Video #${idx + 1}`
+            });
+        }
+    });
+
+    if (videoItems.length === 0) return null;
+
+    return (
+        <div className="max-w-lg mx-auto py-16 px-6">
+            <Reveal>
+                <FlowerSwirl title={locale === 'en' ? 'Video Gallery' : 'Galeri Video'} />
+            </Reveal>
+
+            <div className="flex flex-col gap-6 mt-6 px-1">
+                {videoItems.map((item, idx) => (
+                    <Reveal key={idx} variant="zoom" delay={idx * 100} className="w-full">
+                        <div className="flex flex-col gap-2 text-left">
+                            {videoItems.length > 1 && (
+                                <h4 className="text-xs sm:text-sm font-bold text-[var(--sp02-primary)] tracking-wide">
+                                    {item.title}
+                                </h4>
+                            )}
+                            <div className="relative w-full aspect-video overflow-hidden rounded-2xl border-2 border-white shadow-md bg-black">
+                                <iframe 
+                                    src={`https://www.youtube.com/embed/${item.ytId}?autoplay=0&rel=0&showinfo=1&controls=1&mute=0`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    className="absolute inset-0 w-full h-full border-0"
+                                />
+                            </div>
+                        </div>
+                    </Reveal>
+                ))}
             </div>
         </div>
     );
@@ -1269,6 +1336,11 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     const enableWishes = invitation?.enable_wishes !== false;
     const enableQr = invitation?.enable_qr !== false && invitation?.show_qr_code !== false;
 
+    const hasVideos = useMemo(() => {
+        return safeArr(invitation?.video_list).length > 0 &&
+            (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+    }, [invitation?.video_list, invitation?.video_playback]);
+
     useEffect(() => {
         globalShowPhotos = showPhotos;
         globalShowAnimations = showAnimations;
@@ -1281,11 +1353,39 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
         
         // Anti duplicate wishes/rsvp form check in i18n settings
         const hasRsvp = coverFiltered.some(s => s.section_key === 'rsvp');
-        return coverFiltered.filter(s => {
+        const filtered = coverFiltered.filter(s => {
             if (s.section_key === 'wishes' && hasRsvp) return false; // RSVP includes Wishes
             return true;
         });
-    }, [sections]);
+
+        // Insert video section right after gallery if hasVideos is true
+        const result = [];
+        filtered.forEach(s => {
+            result.push(s);
+            if (s.section_key === 'gallery' && hasVideos) {
+                if (!filtered.some(f => f.section_key === 'video')) {
+                    result.push({
+                        id: 'virtual-video-section',
+                        section_key: 'video',
+                        section_name: isEn ? 'Videos' : 'Video',
+                        is_visible: true
+                    });
+                }
+            }
+        });
+
+        // Fallback: If gallery is not in database sections but hasVideos is true, make sure video is still included
+        if (hasVideos && !result.some(r => r.section_key === 'video')) {
+            result.push({
+                id: 'virtual-video-section',
+                section_key: 'video',
+                section_name: isEn ? 'Videos' : 'Video',
+                is_visible: true
+            });
+        }
+
+        return result;
+    }, [sections, hasVideos, isEn]);
 
     const showCountdown = parseBool(invitation?.show_countdown);
     const showCountdownInEvent = useMemo(() => {
@@ -1533,6 +1633,9 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                         {sec.section_key === 'gallery' && (
                                             <GallerySection galleries={galleries} showPhotos={showPhotos} />
                                         )}
+                                        {sec.section_key === 'video' && (
+                                            <VideoGallerySection invitation={invitation} locale={locale} />
+                                        )}
                                         {sec.section_key === 'livestream' && (
                                             <LiveStreamingSection events={events} locale={locale} />
                                         )}
@@ -1597,6 +1700,9 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                                                 )}
                                                 {sec.section_key === 'gallery' && (
                                                     <GallerySection galleries={galleries} showPhotos={showPhotos} />
+                                                )}
+                                                {sec.section_key === 'video' && (
+                                                    <VideoGallerySection invitation={invitation} locale={locale} />
                                                 )}
                                                 {sec.section_key === 'livestream' && (
                                                     <LiveStreamingSection events={events} locale={locale} />

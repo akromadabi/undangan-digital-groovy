@@ -511,7 +511,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
 }
 
 /* ─── Mempelai / Celebrant Section (Shorts Style) ─── */
-function BrideGroomSection({ invitation, brideGrooms, events, id }) {
+function BrideGroomSection({ invitation, brideGrooms, events, id, galleries }) {
     const { t, locale } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const isSingleHost = bgs.length <= 1 || ['birthday', 'graduation', 'aqiqah', 'circumcision'].includes(invitation?.type);
@@ -520,6 +520,20 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
     const bride = bgs.find(b => b.gender === 'wanita' || b.gender === 'female' || String(b.gender).toLowerCase() === 'wanita' || String(b.gender).toLowerCase() === 'female') || bgs[1] || bgs[0] || {};
 
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+
+    const coverImg = useMemo(() => {
+        if (invitation?.cover_image) {
+            return getStorageUrl(invitation.cover_image.split(',')[0], dummyCover);
+        }
+        const list = safeArr(galleries);
+        if (list.length > 0) {
+            const firstItem = list.find(g => g.image_url || g.image_path);
+            if (firstItem) {
+                return getStorageUrl(firstItem.image_url || firstItem.image_path, dummyCover);
+            }
+        }
+        return dummyCover;
+    }, [invitation?.cover_image, galleries]);
 
     function ShortsCard({ person, roleLabel }) {
         if (!person) return null;
@@ -602,11 +616,10 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
                 const titleText = isSingleHost 
                     ? (groom?.nickname || groom?.full_name || 'Celebration') 
                     : bgs.map(b => b.nickname || b.full_name).filter(Boolean).join(' & ');
-                const coverImg = getStorageUrl(invitation?.cover_image?.split(',')[0], dummyCover);
                 return (
                     <div className="yt-premiere-card mt-6 mx-4">
                         <div className="yt-premiere-thumbnail" style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden', borderRadius: '12px 12px 0 0' }}>
-                            {globalShowPhotos && invitation?.cover_image ? (
+                            {globalShowPhotos && coverImg ? (
                                 <img src={coverImg} alt="Premiere" className="yt-premiere-img" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
                                 <div className="yt-premiere-img fallback" style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #111, #222)' }} />
@@ -727,8 +740,8 @@ function EventSection({ events, invitation }) {
 
                                 {/* Compact standalone Dress Code box below event list */}
                                 {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
-                                    <div key={`dc-${idx}`} className="yt-card w-full mt-4" style={{ padding: '20px', border: '1px solid #333', backgroundColor: '#0f0f0f' }}>
-                                        <DressCodeBlock event={ev} colors={{ primary: '#ff0000', text: '#ffffff' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
+                                    <div key={`dc-${idx}`} className="w-full mt-4">
+                                        <DressCodeBlock event={ev} colors={{ primary: '#ff0000', text: '#ffffff' }} fonts={{ heading: 'inherit' }} variant="youtube" plain={false} />
                                     </div>
                                 ))}
             </div>
@@ -774,20 +787,7 @@ function GallerySection({ galleries, invitation }) {
     const [activeIdx, setActiveIdx] = useState(null);
     const safeGalleries = safeArr(galleries);
 
-    const getYoutubeId = (url) => {
-        if (!url) return '';
-        let id = '';
-        if (url.includes('youtube.com/watch?v=')) {
-            id = url.split('v=')[1]?.split('&')[0];
-        } else if (url.includes('youtu.be/')) {
-            id = url.split('youtu.be/')[1]?.split('?')[0];
-        } else if (url.includes('youtube.com/embed/')) {
-            id = url.split('embed/')[1]?.split('?')[0];
-        }
-        return id;
-    };
-
-    // Combine photos and videos
+    // Combine photos only
     const galleryItems = [];
 
     if (globalShowPhotos) {
@@ -801,39 +801,12 @@ function GallerySection({ galleries, invitation }) {
         });
     }
 
-    const showVideoInGallery = invitation?.video_list?.length > 0 && 
-        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
-
-    if (showVideoInGallery) {
-        invitation.video_list.forEach((url, idx) => {
-            const ytId = getYoutubeId(url);
-            if (ytId) {
-                galleryItems.push({
-                    type: 'video',
-                    ytId: ytId,
-                    url: url,
-                    thumbnail: 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg',
-                    title: t('invitation.save_the_date') === 'Save The Date' ? ('Prewedding Teaser Video #' + (idx + 1)) : ('Video Prewedding #' + (idx + 1)),
-                    label: '🎥 VIDEO'
-                });
-            }
-        });
-    }
-
     if (galleryItems.length === 0) return null;
 
     const handlePrev = (e) => {
         e.stopPropagation();
         setActiveIdx((prev) => {
             const nextIdx = prev === 0 ? galleryItems.length - 1 : prev - 1;
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                if (galleryItems[nextIdx]?.type === 'video') {
-                    audioEl.pause();
-                } else {
-                    audioEl.play().catch(() => {});
-                }
-            }
             return nextIdx;
         });
     };
@@ -842,34 +815,13 @@ function GallerySection({ galleries, invitation }) {
         e.stopPropagation();
         setActiveIdx((prev) => {
             const nextIdx = prev === galleryItems.length - 1 ? 0 : prev + 1;
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                if (galleryItems[nextIdx]?.type === 'video') {
-                    audioEl.pause();
-                } else {
-                    audioEl.play().catch(() => {});
-                }
-            }
             return nextIdx;
         });
     };
 
     const handleCloseModal = () => {
         setActiveIdx(null);
-        const audioEl = document.querySelector('audio');
-        if (audioEl) {
-            audioEl.play().catch(() => {});
-        }
     };
-
-    useEffect(() => {
-        if (activeIdx !== null && galleryItems[activeIdx]?.type === 'video') {
-            const audioEl = document.querySelector('audio');
-            if (audioEl) {
-                audioEl.pause();
-            }
-        }
-    }, [activeIdx]);
 
     return (
         <section id="gallery" className="yt-gallery-section">
@@ -880,46 +832,20 @@ function GallerySection({ galleries, invitation }) {
 
             <div className="yt-gallery-grid">
                 {galleryItems.map((item, idx) => {
-                    const isVideo = item.type === 'video';
-                    const src = isVideo ? item.thumbnail : item.url;
+                    const src = item.url;
                     return (
                         <Reveal key={idx} delay={(idx % 4) * 60} className="yt-gallery-item-card">
                             <div className="yt-gallery-img-box" onClick={() => setActiveIdx(idx)} style={{ cursor: 'pointer', position: 'relative' }}>
                                 <img src={src} alt={item.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                <span className="yt-gallery-duration" style={{ backgroundColor: isVideo ? '#f00' : 'rgba(0,0,0,0.8)' }}>{item.label}</span>
-                                {isVideo && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        backgroundColor: 'rgba(0,0,0,0.2)'
-                                    }}>
-                                        <div style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            borderRadius: '50%',
-                                            backgroundColor: '#f00',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            boxShadow: '0 0 10px rgba(255,0,0,0.5)'
-                                        }}>
-                                            <svg style={{ width: '16px', height: '16px', fill: '#fff', marginLeft: '2px' }} viewBox="0 0 24 24">
-                                                <path d="M8 5v14l11-7z"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                )}
+                                <span className="yt-gallery-duration" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>{item.label}</span>
                             </div>
                             <div className="yt-gallery-item-info" onClick={() => setActiveIdx(idx)} style={{ cursor: 'pointer' }}>
-                                <div className="yt-channel-avatar mini" style={{ backgroundColor: isVideo ? '#ff0000' : '#4a4a4a' }}>
-                                    {isVideo ? '▶' : '🖼️'}
+                                <div className="yt-channel-avatar mini" style={{ backgroundColor: '#4a4a4a' }}>
+                                    🖼️
                                 </div>
                                 <div className="yt-gallery-item-meta">
                                     <h5 className="yt-gallery-item-title">{item.title}</h5>
-                                    <span className="yt-gallery-views-label">{isVideo ? 'YouTube Video • Premium Streaming' : 'Recommended for you'}</span>
+                                    <span className="yt-gallery-views-label">Recommended for you</span>
                                 </div>
                             </div>
                         </Reveal>
@@ -1037,38 +963,22 @@ function GallerySection({ galleries, invitation }) {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            aspectRatio: galleryItems[activeIdx].type === 'video' ? '16/9' : 'auto'
+                            aspectRatio: 'auto'
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {galleryItems[activeIdx].type === 'video' ? (
-                            <iframe 
-                                src={'https://www.youtube.com/embed/' + galleryItems[activeIdx].ytId + '?autoplay=1&rel=0&showinfo=0&controls=1&mute=0'}
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    borderRadius: '8px',
-                                    border: '2px solid rgba(255, 0, 0, 0.3)',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-                                }}
-                            />
-                        ) : (
-                            <img 
-                                src={galleryItems[activeIdx].url} 
-                                alt={galleryItems[activeIdx].title} 
-                                style={{
-                                    maxWidth: '100%',
-                                    maxHeight: '75vh',
-                                    objectFit: 'contain',
-                                    borderRadius: '8px',
-                                    border: '2px solid rgba(255, 255, 255, 0.1)',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-                                }}
-                            />
-                        )}
+                        <img 
+                            src={galleryItems[activeIdx].url} 
+                            alt={galleryItems[activeIdx].title} 
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '75vh',
+                                objectFit: 'contain',
+                                borderRadius: '8px',
+                                border: '2px solid rgba(255, 255, 255, 0.1)',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
+                            }}
+                        />
                     </div>
 
                     {/* Caption under Image */}
@@ -1086,10 +996,107 @@ function GallerySection({ galleries, invitation }) {
                         <div style={{ color: '#FFF', fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>
                             {galleryItems[activeIdx].title}
                         </div>
-                        <div>{galleryItems[activeIdx].type === 'video' ? 'YouTube Premium Stream • YouInvite Red' : 'Recommended for you • YouInvite HD'}</div>
+                        <div>Recommended for you • YouInvite HD</div>
                     </div>
                 </div>
             )}
+        </section>
+    );
+}
+
+function VideoGallerySection({ invitation }) {
+    const { t } = useTranslation();
+
+    const getYoutubeId = (url) => {
+        if (!url) return '';
+        let id = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            id = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            id = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            id = url.split('embed/')[1]?.split('?')[0];
+        }
+        return id;
+    };
+
+    const videoItems = [];
+    const showVideo = invitation?.video_list?.length > 0 && 
+        (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
+
+    if (showVideo) {
+        invitation.video_list.forEach((url, idx) => {
+            const ytId = getYoutubeId(url);
+            if (ytId) {
+                videoItems.push({
+                    ytId: ytId,
+                    url: url,
+                    title: t('invitation.save_the_date') === 'Save The Date' ? (`Prewedding Video #${idx + 1}`) : (`Video Prewedding #${idx + 1}`),
+                });
+            }
+        });
+    }
+
+    if (videoItems.length === 0) return null;
+
+    return (
+        <section id="video" className="yt-gallery-section">
+            <h3 className="yt-section-title-bar">
+                <span className="yt-red-pill-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M23 12c0 6.07-4.93 11-11 11S1 18.07 1 12 5.93 1 12 1s11 4.93 11 11zm-11-7.5c-4.14 0-7.5 3.36-7.5 7.5s3.36 7.5 7.5 7.5 7.5-3.36 7.5-7.5-3.36-7.5-7.5-7.5z"/></svg></span>
+                <span>Prewedding Video Playlist</span>
+            </h3>
+
+            <div 
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px',
+                    maxWidth: '800px',
+                    margin: '0 auto',
+                    width: '100%',
+                    padding: '0 16px',
+                    boxSizing: 'border-box'
+                }}
+            >
+                {videoItems.map((item, idx) => (
+                    <Reveal key={idx} delay={idx * 60} style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                            {videoItems.length > 1 && (
+                                <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 'bold', margin: '0 0 4px', letterSpacing: '0.5px' }}>
+                                    {item.title}
+                                </h4>
+                            )}
+                            <div 
+                                style={{
+                                    position: 'relative',
+                                    width: '100%',
+                                    aspectRatio: '16/9',
+                                    overflow: 'hidden',
+                                    borderRadius: '12px',
+                                    border: '1px solid rgba(255, 0, 0, 0.3)',
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                                    backgroundColor: '#000'
+                                }}
+                            >
+                                <iframe 
+                                    src={`https://www.youtube.com/embed/${item.ytId}?autoplay=0&rel=0&showinfo=1&controls=1&mute=0`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        border: '0'
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </Reveal>
+                ))}
+            </div>
         </section>
     );
 }
@@ -1685,7 +1692,7 @@ function BottomMenu({ activeSection, scrollToSection, onOpenRsvp }) {
             </button>
             <button type="button" onClick={() => scrollToSection('bride_groom')} className={`yt-bottom-menu-item ${activeSection === 'bride_groom' ? 'active' : ''}`}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M10 2H3v7h7V2zm0 10H3v7h7v-7zm11-10h-7v7h7V2zm0 10h-7v7h7v-7z"/></svg>
-                <span>Shorts</span>
+                <span>Mempelai</span>
             </button>
             <button type="button" onClick={onOpenRsvp} className="yt-bottom-menu-item-create" title="Comment / RSVP">
                 <div className="create-circle" style={{ backgroundColor: 'var(--yt-hover-bg)', border: '1.5px solid var(--yt-border)', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
@@ -1694,7 +1701,7 @@ function BottomMenu({ activeSection, scrollToSection, onOpenRsvp }) {
             </button>
             <button type="button" onClick={() => scrollToSection('event')} className={`yt-bottom-menu-item ${activeSection === 'event' ? 'active' : ''}`}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
-                <span>Playlist</span>
+                <span>Acara</span>
             </button>
             <button type="button" onClick={() => scrollToSection('bank')} className={`yt-bottom-menu-item ${activeSection === 'bank' ? 'active' : ''}`}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
@@ -1865,8 +1872,11 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
         }
         
         const hasVideos = invitation?.video_list?.length > 0 && (invitation.video_playback === 'gallery' || invitation.video_playback === 'both' || !invitation.video_playback);
-        if ((galleries && galleries.length > 0 && globalShowPhotos) || hasVideos) {
+        if (galleries && galleries.length > 0 && globalShowPhotos) {
             list.push({ key: 'gallery', isVisible: secGallery ? !!secGallery.is_visible : true });
+        }
+        if (hasVideos) {
+            list.push({ key: 'video', isVisible: secGallery ? !!secGallery.is_visible : true });
         }
 
         const hasStreaming = safeArr(events).some(e => e.streaming_url || (Array.isArray(e.streamings) && e.streamings.some(s => s.url)));
@@ -2018,6 +2028,7 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
                                                 invitation={invitation}
                                                 brideGrooms={brideGrooms}
                                                 events={events}
+                                                galleries={galleries}
                                             />
                                         );
                                     case 'event':
@@ -2039,6 +2050,10 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
                                     case 'gallery':
                                         return (
                                             <GallerySection key="gallery" galleries={galleries} invitation={invitation} />
+                                        );
+                                    case 'video':
+                                        return (
+                                            <VideoGallerySection key="video" invitation={invitation} />
                                         );
                                     case 'livestream':
                                         return (

@@ -379,6 +379,10 @@ Setiap foto profil mempelai, foto galeri, slideshow cover, dan slideshow opening
 
 ### 4.11 Seksi Video Undangan / Background Video (`video`)
 - **Auto-Hide Cerdas**: Seksi ini **WAJIB** otomatis menyembunyikan dirinya sendiri (kembali bernilai `null` atau terfilter keluar dari list sections) jika kolom URL video (`invitation?.video_url` atau `video`) di database dalam keadaan kosong.
+- **Pemisahan dari Galeri Foto**: Seksi video ini harus dipisah secara terdedikasi dan mandiri dari seksi foto galeri.
+- **Tampilan Inline Tanpa Popup**: Pemutar video **WAJIB** disematkan langsung di halaman (inline iframe) secara lebar penuh responsif, bukan berupa thumbnail yang memicu popup modal/lightbox.
+- **Dukungan Fullscreen Zoom**: Elemen iframe pemutar video wajib menyertakan atribut `allowFullScreen` agar pengguna dapat memutar video dalam mode layar penuh (zoom full) seperti standar YouTube.
+- **Bilingual Terjemahan Judul**: Judul seksi video wajib mendukung multi-bahasa menggunakan hooks `@/i18n` (contoh: `locale === 'en' ? 'Our Video' : 'Momen Video'`) seperti seksi lainnya, agar bisa disesuaikan dengan preferensi bahasa aktif.
 - **Responsivitas Aspek Rasio**: Pemutar video (baik embed YouTube, Vimeo, maupun file MP4 kustom) wajib dibungkus dalam wadah aspek rasio standar 16:9 agar responsif di seluruh layar ponsel tanpa terpotong (*black bars*):
   ```css
   .prefix-tema .video-container {
@@ -401,7 +405,7 @@ Setiap foto profil mempelai, foto galeri, slideshow cover, dan slideshow opening
 - **Kebijakan Autoplay & Suara**: Sesuai kebijakan browser modern, jika video diatur memutar otomatis (*autoplay*), properti `muted` wajib diset `true` (senyap). Jika pengguna mengaktifkan suara video, sistem wajib secara otomatis mem-pause lagu/musik latar belakang (`audioRef` & `isPlaying` state) undangan agar suara tidak saling bertabrakan.
 
 ### 4.12 Seksi Panduan Dresscode / Kode Busana (`dresscode`)
-- **Auto-Hide**: Seksi dresscode wajib disembunyikan jika statusnya dinonaktifkan (`invitation?.show_dresscode === false`) or data dresscode kosong.
+- **Auto-Hide**: Seksi dresscode wajib disembunyikan jika statusnya dinonaktifkan (`invitation?.show_dresscode === false`) atau data dresscode kosong.
 - **Lingkaran Palet Warna Dinamis**: Tampilkan rekomendasi warna dresscode dalam bentuk lingkaran warna visual yang dinamis berbasis data hex warna dari database. Gunakan susunan Flexbox/Grid yang rapi:
   ```jsx
   const colors = invitation?.dresscode_colors ? invitation.dresscode_colors.split(',') : [];
@@ -419,7 +423,13 @@ Setiap foto profil mempelai, foto galeri, slideshow cover, dan slideshow opening
       </div>
   )}
   ```
-- **Bilingual Terjemahan**: Judul dan penjelasan dresscode wajib mendukung multi-bahasa menggunakan hooks `@/i18n` (misalnya: `Dresscode` untuk Bahasa Inggris, dan `Panduan Pakaian / Kode Busana` untuk Bahasa Indonesia).
+- **Bilingual Terjemahan & Format Judul Dinamis**: Judul dan penjelasan dresscode wajib mendukung nama acara dinamis dan multi-bahasa menggunakan hooks `@/i18n`. Format penulisan judul standar yang disepakati adalah `Dress Code (Nama Acara)` (contoh: `Dress Code (Akad Nikah)` atau `Dress Code (Resepsi)`) agar mempermudah tamu dalam membedakan busana untuk masing-masing acara.
+- **Ukuran Bulatan Warna Standar**: Gunakan ukuran bulatan warna standar Tailwind **`w-6 h-6`** (setara dengan `24px`) agar proporsional dan menyelaraskan dengan tinggi teks labelnya secara visual di layar ponsel.
+
+### 4.13 Seksi Galeri Foto (`gallery`)
+- **Pemisahan Mutlak dari Video**: Seksi galeri foto wajib dipisah secara total dari seksi video. Tidak diperbolehkan menyisipkan link video YouTube atau memadukan video ke dalam barisan/grid foto prewedding. Galeri foto hanya boleh berisi kumpulan aset foto prewedding (`galleries`).
+- **Bilingual Terjemahan Judul**: Judul seksi galeri foto wajib mendukung multi-bahasa menggunakan hooks `@/i18n` (contoh: `t('invitation.gallery')` atau percabangan `locale === 'en' ? 'Our Moments' : 'Galeri Foto'`) agar judulnya berubah dinamis sesuai bahasa terpilih.
+- **Optimasi Foto**: Foto-foto dalam grid galeri wajib menggunakan kuncian dimensi aspek rasio (`object-fit: cover` dengan dimensi `width: 100% !important; height: 100% !important;`) di dalam wadah pembungkus (`overflow: hidden`) untuk mencegah distorsi visual atau area kosong pekat di layar seluler.
 
 ---
 
