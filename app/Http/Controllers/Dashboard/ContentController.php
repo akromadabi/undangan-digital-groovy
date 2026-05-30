@@ -207,6 +207,9 @@ class ContentController extends Controller
     public function saveVideoSettings(Request $request)
     {
         if (!$request->user()->hasFeatureAccess('video_album')) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Fitur Album Video dikunci oleh Paket Anda.'], 403);
+            }
             return back()->withErrors(['video_url' => 'Fitur Album Video dikunci oleh Paket Anda.']);
         }
 
@@ -220,6 +223,15 @@ class ContentController extends Controller
             'video_url' => $request->video_url,
             'video_playback' => $request->video_playback ?: 'gallery',
         ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'video_url' => $invitation->video_url,
+                'video_playback' => $invitation->video_playback,
+                'message' => 'Pengaturan video YouTube berhasil disimpan.'
+            ]);
+        }
 
         return back()->with('success', 'Pengaturan video YouTube berhasil disimpan.');
     }
