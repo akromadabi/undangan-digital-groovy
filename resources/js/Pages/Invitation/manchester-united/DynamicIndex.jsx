@@ -1733,6 +1733,35 @@ function UnitedInViteUnitedThemeContent({ invitation, sections, brideGrooms, eve
         return () => clearInterval(iv);
     }, [autoScrollEnabled, isOpened, isSlideMode, activeSlideIdx, navSections, nextSlide]);
 
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpened || !autoScrollEnabled) return;
+
+        const handleUserInteraction = (e) => {
+            if (
+                e.target.closest('button') || 
+                e.target.closest('.mu-float-btn') || 
+                e.target.closest('.mu-bottom-nav') || 
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select')
+            ) {
+                return;
+            }
+            setAutoScrollEnabled(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpened, autoScrollEnabled]);
+
     // Touch and Gesture Controls for Slider Modes
     const startX = useRef(0);
     const startY = useRef(0);

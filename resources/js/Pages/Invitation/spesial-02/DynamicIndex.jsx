@@ -1521,6 +1521,34 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
         if (target) setActiveSection(target);
     }, [slideIdx, resolvedSections, layoutMode]);
 
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpened || !autoScroll) return;
+
+        const handleUserInteraction = (e) => {
+            if (
+                e.target.closest('button') || 
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select') ||
+                e.target.closest('.sp02-nav-menu')
+            ) {
+                return;
+            }
+            setAutoScroll(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpened, autoScroll]);
+
     // Pixel auto scroll in scroll mode, and index swiper in slide modes
     useEffect(() => {
         if (!isOpened || !autoScroll) return;

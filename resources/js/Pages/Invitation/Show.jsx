@@ -296,6 +296,34 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
         return () => window.removeEventListener('scroll', handleScroll);
     }, [isOpen]);
 
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpen || !autoScrollEnabled) return;
+
+        const handleUserInteraction = (e) => {
+            // Ignore if interaction is on floating buttons, RSVP form, player bar, or inputs
+            if (
+                e.target.closest('button') || 
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select')
+            ) {
+                return;
+            }
+            setAutoScrollEnabled(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpen, autoScrollEnabled]);
+
     // Auto scroll logic
     useEffect(() => {
         if (!isOpen || !autoScrollEnabled) return;

@@ -1861,6 +1861,37 @@ function ViteGptThemeContent({ invitation, sections, brideGrooms, events, wishes
         }
     };
 
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpened || !autoScrollEnabled) return;
+
+        const handleUserInteraction = (e) => {
+            if (
+                e.target.closest('button') || 
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select') ||
+                e.target.closest('.gpt-floating-actions') ||
+                e.target.closest('.gpt-sidebar-drawer') ||
+                e.target.closest('.gpt-top-navbar') ||
+                e.target.closest('.gpt-stories-tray')
+            ) {
+                return;
+            }
+            setAutoScrollEnabled(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpened, autoScrollEnabled]);
+
     // Auto Scroll logic
     useEffect(() => {
         if (!isOpened || !autoScrollEnabled || isTypingUser || isTypingAi) return;

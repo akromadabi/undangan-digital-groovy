@@ -53,6 +53,9 @@ Route::get('/', function () {
     $adminWhatsapp = \App\Models\GlobalSetting::getValue('footer_whatsapp') ?: \App\Models\GlobalSetting::getValue('mpwav9_sender_number') ?: '6283132211830';
     $adminEmail = \App\Models\GlobalSetting::getValue('footer_email') ?: 'admin@groovy.com';
     $minModalCost = \App\Models\SubscriptionPlan::where('price', '>', 0)->min('price') ?: 15000;
+    $subscriptionPlans = \App\Models\SubscriptionPlan::where('price', '>', 0)
+        ->orderBy('sort_order')
+        ->get(['id', 'name', 'slug', 'price', 'suggested_price']);
 
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -65,6 +68,7 @@ Route::get('/', function () {
         'adminWhatsapp' => $adminWhatsapp,
         'adminEmail' => $adminEmail,
         'minModalCost' => (float) $minModalCost,
+        'subscriptionPlans' => $subscriptionPlans,
     ]);
 })->name('home');
 

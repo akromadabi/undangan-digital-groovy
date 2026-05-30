@@ -168,7 +168,7 @@ class InvitationController extends Controller
 
         // THEME ADDED BY BHAKTIAJI ILHAM
         $page = 'Invitation/Show';
-        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp'])) {
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman'])) {
             $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
         }
 
@@ -383,7 +383,7 @@ class InvitationController extends Controller
                 'subscriptionPlans' => $subscriptionPlans,
             ];
 
-            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp'])) {
+            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman'])) {
                 $page = 'Invitation/DemoWrapper';
                 $props['themeSlug'] = $theme->slug;
                 $props['allowedPlans'] = $theme->allowed_plans;
@@ -556,7 +556,7 @@ class InvitationController extends Controller
         });
 
         $page = 'Invitation/Show';
-        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp'])) {
+        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman'])) {
             $page = 'Invitation/' . $theme->slug . '/DynamicIndex';
         }
 

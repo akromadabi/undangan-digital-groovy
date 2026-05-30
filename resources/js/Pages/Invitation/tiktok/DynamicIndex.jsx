@@ -8,6 +8,19 @@ import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 
 /* ─── Standard Blueprint Helpers ─── */
+function getYoutubeId(url) {
+    if (!url) return '';
+    let id = '';
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+        id = match[2];
+    } else if (url.includes('youtube.com/embed/')) {
+        id = url.split('embed/')[1]?.split('?')[0];
+    }
+    return id;
+}
+
 function safeArr(val) {
     if (Array.isArray(val)) return val;
     if (val && typeof val === 'object') return Object.values(val);
@@ -307,6 +320,9 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
 
     const coupleName = mainName;
 
+    const coverVideoUrl = invitation?.cover_video_url;
+    const coverEmbedId = useMemo(() => getYoutubeId(coverVideoUrl), [coverVideoUrl]);
+
     const coverImages = useMemo(() => {
         if (!invitation?.cover_image) return [];
         return invitation.cover_image.split(',').map(url => getStorageUrl(url, fallbackPhoto)).filter(Boolean);
@@ -381,7 +397,16 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                     </div>
                 </div>
             )}
-            {globalShowPhotos && coverImages.length > 0 ? (
+            {globalShowPhotos && coverEmbedId ? (
+                <iframe
+                    src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                    title="Cover Video"
+                    frameBorder="0"
+                    className="ttk-video-cover--fullscreen"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    style={{ border: 'none', objectFit: 'cover', pointerEvents: 'none' }}
+                />
+            ) : globalShowPhotos && coverImages.length > 0 ? (
                 <PremiumSlideshow
                     images={coverImages}
                     positionX={invitation?.cover_position_x}
@@ -408,6 +433,9 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                 {/* Main center dynamic couple title */}
                 <div className="ttk-cover__center">
                     <Reveal variant="zoom">
+                        <div className="ttk-cover__wedding-badge">
+                            {labels.introBadge}
+                        </div>
                         <div className="ttk-glitch" data-text={coupleName}>
                             {coupleName}
                         </div>
@@ -423,6 +451,16 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                         {hashTags}
                     </div>
 
+                    {/* Guest Name Card */}
+                    <div className="ttk-cover__guest-card">
+                        <span className="ttk-cover__guest-label">
+                            {locale === 'en' ? 'Special Invitation to:' : 'Undangan Spesial Untuk:'}
+                        </span>
+                        <h4 className="ttk-cover__guest-name">
+                            {guestName}
+                        </h4>
+                    </div>
+
                     <div className="ttk-cover__login-container">
                         <div className="ttk-cover__login-title">
                             {locale === 'en' ? 'Log in to view invitation' : 'Masuk untuk Melihat Undangan'}
@@ -435,7 +473,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, langua
                             type="button"
                         >
                             <i className="fas fa-video" />
-                            <strong>{locale === 'en' ? `Continue as Guest (${guestName})` : `Lanjutkan sebagai Tamu (${guestName})`}</strong>
+                            <strong>{locale === 'en' ? 'Open Invitation' : 'Buka Undangan'}</strong>
                         </button>
                     </div>
 
@@ -456,6 +494,15 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
     const { t, locale } = useTranslation(language);
     const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
     const { mainName, isSingleHost, labels } = themeConfig;
+
+    const generalVideoUrl = invitation?.video_url;
+    const generalEmbedId = useMemo(() => getYoutubeId(generalVideoUrl), [generalVideoUrl]);
+
+    const openingVideoUrl = invitation?.opening_video_url;
+    const openingEmbedId = useMemo(() => {
+        const id = getYoutubeId(openingVideoUrl);
+        return id || (invitation?.video_playback === 'background' || invitation?.video_playback === 'both' ? generalEmbedId : '');
+    }, [openingVideoUrl, invitation?.video_playback, generalEmbedId]);
 
     const isEn = t('invitation.save_the_date') === 'Save The Date';
     // Premium fallback Unsplash prewedding image so that it never looks like a plain black box
@@ -530,7 +577,16 @@ function OpeningSection({ invitation, brideGrooms, language, fallbackPhoto, onTo
             {/* Photo opening card designed like a real ViteTok video layout (pembuka pakai foto opening seperti tiktok biasa) */}
             <Reveal variant="zoom" delay={100}>
                 <div className="ttk-live__container" style={{ aspectRatio: '9/14', height: 'auto', minHeight: '480px', margin: '0 15px' }}>
-                    {globalShowPhotos && openingImages.length > 0 ? (
+                    {globalShowPhotos && openingEmbedId ? (
+                        <iframe
+                            src={`https://www.youtube.com/embed/${openingEmbedId}?autoplay=1&mute=1&loop=1&playlist=${openingEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
+                            title="Opening Video"
+                            frameBorder="0"
+                            className="ttk-video-cover--portrait-container"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            style={{ border: 'none', objectFit: 'cover', pointerEvents: 'none' }}
+                        />
+                    ) : globalShowPhotos && openingImages.length > 0 ? (
                         <PremiumSlideshow
                             images={openingImages}
                             positionX={invitation?.opening_position_x ?? invitation?.cover_position_x}
@@ -2193,6 +2249,35 @@ export default function ViteTokTheme(props) {
         }
         touchStartRef.current = null;
     };
+
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpened || !autoScrollEnabled) return;
+
+        const handleUserInteraction = (e) => {
+            if (
+                e.target.closest('button') || 
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select') ||
+                e.target.closest('.ttk-bottom-nav') ||
+                e.target.closest('.ttk-persistent-sidebar')
+            ) {
+                return;
+            }
+            setAutoScrollEnabled(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpened, autoScrollEnabled]);
 
     // Auto-scroll loop
     useEffect(() => {

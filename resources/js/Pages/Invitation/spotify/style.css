@@ -1840,7 +1840,8 @@ html, body {
 .spty-wrapper img.spty-artist-card__photo,
 .spty-wrapper img.spty-album-artwork,
 .spty-wrapper .spty-cover__artwork,
-.spty-wrapper .spty-opening__playlist-img,
+.spty-wrapper img.spty-opening__playlist-img,
+.spty-wrapper .spty-opening__playlist-img img,
 .spty-wrapper .spty-couple__banner,
 .spty-wrapper .spty-gallery-grid img {
   width: 100% !important;

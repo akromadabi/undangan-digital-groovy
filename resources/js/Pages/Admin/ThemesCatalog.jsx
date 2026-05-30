@@ -145,6 +145,37 @@ export default function ThemesCatalog({ themes }) {
     const [uploading, setUploading] = useState(false);
     const [uploadingIndex, setUploadingIndex] = useState(null);
     const [sortKey, setSortKey] = useState('terbaru');
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+    const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+
+    const categoryDropdownRef = useRef(null);
+    const sortDropdownRef = useRef(null);
+
+    const categories = useMemo(() => {
+        const cats = themes?.map(t => t.category).filter(Boolean) || [];
+        return [...new Set(cats)];
+    }, [themes]);
+
+    const filteredThemes = useMemo(() => {
+        let list = [...(themes || [])];
+        if (selectedCategories.length > 0) {
+            list = list.filter(t => selectedCategories.includes(t.category));
+        }
+        if (searchQuery.trim()) {
+            list = list.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return list;
+    }, [themes, selectedCategories, searchQuery]);
+
+    const toggleCategory = (cat) => {
+        setSelectedCategories(prev => 
+            prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+        );
+    };
+
+    const clearCategories = () => setSelectedCategories([]);
 
     const fileInputRef = useRef(null);
     const bgDropdownRef = useRef(null);
@@ -162,11 +193,17 @@ export default function ThemesCatalog({ themes }) {
         return `/storage/${path}`;
     };
 
-    // Close background dropdown on click outside
+    // Close dropdowns on click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (bgDropdownRef.current && !bgDropdownRef.current.contains(event.target)) {
                 setIsBgDropdownOpen(false);
+            }
+            if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+                setIsCategoryDropdownOpen(false);
+            }
+            if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
+                setIsSortDropdownOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -343,34 +380,151 @@ export default function ThemesCatalog({ themes }) {
         <DynamicAdminLayout title="Katalog Tema dari Pusat">
             <Head title="Katalog Tema" />
             <div className="space-y-6">
-                <div className="bg-white rounded-2xl border border-[#e8e5e0] p-4 sm:p-6 shadow-sm">
+                <div className="bg-white rounded-2xl border border-[#e8e5e0] p-4 sm:p-6 shadow-sm space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
                             <h3 className="text-sm font-semibold text-gray-700">Daftar Tema Global</h3>
                             <p className="text-xs text-gray-400 mt-1">Berikut adalah pilihan desain undangan digital premium dari admin pusat yang dapat dinikmati oleh user client Anda. Klik "Kustomisasi Preview" pada kartu untuk mengubah template, latar belakang, dan gambar pratinjau tema di katalog brand Anda.</p>
                         </div>
-                        {/* Sort Bar */}
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                            {SORT_OPTIONS.map(opt => (
+                    </div>
+                    
+                    <div className="border-t border-gray-100 pt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        {/* Search Box */}
+                        <div className="relative flex-1 max-w-md w-full">
+                            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                placeholder="Cari tema..."
+                                className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-gray-200 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none bg-gray-50/50 hover:bg-gray-50 focus:bg-white transition-all text-gray-800"
+                            />
+                        </div>
+
+                        {/* Controls */}
+                        <div className="flex items-center gap-3.5 self-end md:self-auto flex-shrink-0">
+                            {/* Categories Dropdown */}
+                            <div className="relative" ref={categoryDropdownRef}>
                                 <button
-                                    key={opt.key}
                                     type="button"
-                                    onClick={() => setSortKey(opt.key)}
-                                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 border whitespace-nowrap ${
-                                        sortKey === opt.key
-                                            ? 'bg-[#E5654B] text-white border-[#E5654B] shadow-sm scale-105'
-                                            : 'bg-white text-gray-500 border-gray-200 hover:border-[#E5654B]/40 hover:text-[#E5654B]'
+                                    onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                                    className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center gap-2 select-none min-h-[42px] ${
+                                        selectedCategories.length > 0
+                                            ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                                     }`}
                                 >
-                                    {opt.label}
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    <span>
+                                        {selectedCategories.length === 0
+                                            ? 'Semua Kategori'
+                                            : `Kategori (${selectedCategories.length})`
+                                        }
+                                    </span>
+                                    <svg className={`w-3.5 h-3.5 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180 text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
                                 </button>
-                            ))}
+
+                                {isCategoryDropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
+                                            <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider font-semibold">KATEGORI</span>
+                                            {selectedCategories.length > 0 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={clearCategories}
+                                                    className="text-[10px] font-bold text-red-500 hover:underline"
+                                                >
+                                                    Reset
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
+                                            {categories.map((cat) => {
+                                                const isChecked = selectedCategories.includes(cat);
+                                                return (
+                                                    <label
+                                                        key={cat}
+                                                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors select-none text-xs font-semibold ${
+                                                            isChecked ? 'bg-[#E5654B]/5 text-[#E5654B]' : 'text-gray-700'
+                                                        }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isChecked}
+                                                            onChange={() => toggleCategory(cat)}
+                                                            className="rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 w-3.5 h-3.5 cursor-pointer accent-[#E5654B]"
+                                                        />
+                                                        <span className="capitalize">{cat}</span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Sort Dropdown */}
+                            <div className="relative" ref={sortDropdownRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                                    title="Urutkan Tema"
+                                    className={`p-2.5 rounded-2xl transition-all duration-200 border flex items-center justify-center select-none min-w-[42px] min-h-[42px] ${
+                                        isSortDropdownOpen
+                                            ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                                    }`}
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                    </svg>
+                                </button>
+
+                                {isSortDropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
+                                            <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider font-semibold">URUTKAN BERDASARKAN</span>
+                                        </div>
+                                        {SORT_OPTIONS.map(opt => {
+                                            const isActive = sortKey === opt.key;
+                                            return (
+                                                <button
+                                                    key={opt.key}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSortKey(opt.key);
+                                                        setIsSortDropdownOpen(false);
+                                                    }}
+                                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-bold transition-all ${
+                                                        isActive
+                                                            ? 'bg-[#E5654B]/10 text-[#E5654B]'
+                                                            : 'text-gray-600 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    <span>{opt.label}</span>
+                                                    {isActive && (
+                                                        <svg className="w-4 h-4 text-[#E5654B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {sortThemes(themes, sortKey)?.map(theme => (
+                    {sortThemes(filteredThemes, sortKey)?.map(theme => (
                         <div key={theme.id} className="relative group/catalog flex flex-col h-full bg-white rounded-2xl border border-[#e8e5e0] overflow-hidden hover:shadow-lg transition-all duration-300">
                             {/* ThemePreviewCard wrapped */}
                             <div className="flex-1">

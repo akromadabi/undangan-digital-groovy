@@ -1772,6 +1772,35 @@ export default function DynamicIndex({ invitation, brideGrooms, events, loveStor
         }
     };
 
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpened || !isAutoScrolling) return;
+
+        const handleUserInteraction = (e) => {
+            if (
+                e.target.closest('button') || 
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select') ||
+                e.target.closest('.yt-floating-control-dock') ||
+                e.target.closest('.yt-bottom-menu')
+            ) {
+                return;
+            }
+            setIsAutoScrolling(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpened, isAutoScrolling]);
+
     // Auto scroll logic managed via useEffect to avoid instant clearInterval on state re-render
     useEffect(() => {
         if (isAutoScrolling) {

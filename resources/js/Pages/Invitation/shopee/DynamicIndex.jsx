@@ -542,7 +542,7 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                             src={`https://www.youtube.com/embed/${openingEmbedId}?autoplay=1&mute=1&loop=1&playlist=${openingEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
                             title="Opening Video"
                             frameBorder="0"
-                            className="absolute top-1/2 left-1/2 w-full h-full min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                            className="absolute top-1/2 left-1/2 w-full h-full min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-[1.4]"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             style={{ border: 'none', objectFit: 'cover', pointerEvents: 'none' }}
                         />
@@ -992,7 +992,7 @@ function LiveTab({ invitation, events, openingEmbedId }) {
                         src={`https://www.youtube.com/embed/${openingEmbedId}?autoplay=1&mute=1&loop=1&playlist=${openingEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
                         title="Simulated Live Stream Background Video"
                         frameBorder="0"
-                        className="absolute top-1/2 left-1/2 w-full h-full min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-105"
+                        className="absolute top-1/2 left-1/2 w-full h-full min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-[1.4]"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         style={{ border: 'none', objectFit: 'cover' }}
                     />
@@ -1669,6 +1669,33 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
         return () => clearInterval(iv);
     }, [primaryEvent]);
 
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpened || !autoScrollEnabled) return;
+
+        const handleUserInteraction = (e) => {
+            if (
+                e.target.closest('button') || 
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select')
+            ) {
+                return;
+            }
+            setAutoScrollEnabled(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpened, autoScrollEnabled]);
+
     // Auto Scroll simulated in Beranda
     useEffect(() => {
         if (!isOpened || !autoScrollEnabled || activeTab !== 'home') return;
@@ -1765,7 +1792,7 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
                                         title={autoScrollEnabled ? "Matikan Auto Scroll" : "Aktifkan Auto Scroll"}
                                     >
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                            <path d="M12 5v14M19 12l-7 7-7-7" />
+                                            <path d="M12 5v14M19 12l-7 7-7-7" stroke="currentColor" />
                                         </svg>
                                     </button>
                                 </div>
@@ -1780,10 +1807,10 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
                                                 <span />
                                             </div>
                                         ) : (
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--sp-primary)' }}>
-                                                <path d="M11 5L6 9H2v6h4l5 4V5z" />
-                                                <line x1="23" y1="9" x2="17" y2="15" />
-                                                <line x1="17" y1="9" x2="23" y2="15" />
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5722" strokeWidth="2.5" style={{ color: '#ff5722', stroke: '#ff5722' }}>
+                                                <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="#ff5722" />
+                                                <line x1="23" y1="9" x2="17" y2="15" stroke="#ff5722" />
+                                                <line x1="17" y1="9" x2="23" y2="15" stroke="#ff5722" />
                                             </svg>
                                         )}
                                     </button>

@@ -283,7 +283,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen }) {
             ) : null}
             <div className="nf-cover__overlay" />
             <div className="nf-cover__content">
-                <img src={ASSETS.logo} alt="THE WEDDING" className="nf-cover__logo" />
+                <div className="nf-cover__logo-text">{labels.introBadge}</div>
                 <h1 className="nf-cover__title">{coupleName}</h1>
 
                 {/* Who's Watching Profiles */}
@@ -398,7 +398,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
             ) : null}
             <div className="nf-opening__overlay" />
             <div className="nf-opening__content">
-                <img src={ASSETS.logo} alt="THE WEDDING" className="nf-opening__logo" />
+                <div className="nf-opening__logo-text">{labels.introBadge}</div>
                 <h1 className="nf-opening__couple">{coupleName}</h1>
                 {invitation?.opening_ayat && (
                     <p className="nf-opening__ayat">&ldquo;{invitation.opening_ayat}&rdquo;</p>
@@ -1482,7 +1482,9 @@ function LiveStreamingSection({ events, invitation }) {
    CLOSING SECTION
    ═══════════════════════════════════════ */
 function ClosingSection({ invitation, brideGrooms, id }) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, [], invitation);
+    const { labels } = themeConfig;
     const bgs = safeArr(brideGrooms);
     const bride = bgs.find(bg => bg.gender === 'wanita' || bg.gender === 'female' || String(bg.gender).toLowerCase() === 'wanita' || String(bg.gender).toLowerCase() === 'female') || bgs[0] || {};
     const groom = bgs.find(bg => bg.gender === 'pria' || bg.gender === 'male' || String(bg.gender).toLowerCase() === 'pria' || String(bg.gender).toLowerCase() === 'male') || bgs[1] || bgs[0] || {};
@@ -1521,7 +1523,7 @@ function ClosingSection({ invitation, brideGrooms, id }) {
         <section id={id || "closing"} className="nf-closing">
             <div className="nf-closing__content">
                 <Reveal>
-                    <img src={ASSETS.logo} alt="The Wedding" className="nf-closing__logo" />
+                    <div className="nf-closing__logo-text">{labels.introBadge}</div>
                 </Reveal>
                 <Reveal delay={100}>
                     <h3 className="nf-closing__title">{displayClosingTitle}</h3>
@@ -1877,6 +1879,33 @@ function WedflixThemeContent({ invitation, sections, brideGrooms, events, galler
             activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
     }, [activeSection]);
+
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpened || !autoScrollEnabled) return;
+
+        const handleUserInteraction = (e) => {
+            if (
+                e.target.closest('button') || 
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select')
+            ) {
+                return;
+            }
+            setAutoScrollEnabled(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpened, autoScrollEnabled]);
 
     // Auto scroll logic
     useEffect(() => {

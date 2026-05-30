@@ -210,29 +210,7 @@ export default function Galeri({
         }
     };
 
-    const handleSaveVideoSettings = async (e) => {
-        e.preventDefault();
-        setSavingVideo(true);
-        try {
-            const response = await axios.post(route('content.galeri.video'), {
-                video_url: videoUrl,
-                video_playback: videoPlayback
-            });
-            if (response.data.success) {
-                alert('Pengaturan gaya pemutaran video berhasil disimpan!');
-                setLocalInvitation(prev => ({
-                    ...prev,
-                    video_playback: videoPlayback
-                }));
-            }
-        } catch (error) {
-            console.error('Save video settings error:', error);
-            const msg = error.response?.data?.message || 'Gagal menyimpan pengaturan video.';
-            alert(msg);
-        } finally {
-            setSavingVideo(false);
-        }
-    };
+
 
     // Update uploader remaining count
     const remaining = maxGalleries - (localGalleries?.length || 0);
@@ -737,7 +715,7 @@ export default function Galeri({
                                     </a>
                                 </div>
                             ) : (
-                                <form onSubmit={handleSaveVideoSettings} className="space-y-5">
+                                <div className="space-y-5">
                                     <div className="space-y-4">
                                         {/* URL Field to add video */}
                                         <div className="space-y-1.5">
@@ -856,104 +834,7 @@ export default function Galeri({
                                             </div>
                                          )}
                                      </div>
-
-                                    {/* Playback Mode */}
-                                    <div className="space-y-2">
-                                        <label className="block text-xs font-bold text-gray-700">Gaya & Penempatan Pemutaran Video</label>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                            {/* Mode 1: Background */}
-                                            <div
-                                                onClick={() => setVideoPlayback('background')}
-                                                className={`cursor-pointer rounded-2xl p-4 border transition-all duration-300 flex flex-col justify-between h-28 ${
-                                                    videoPlayback === 'background'
-                                                        ? 'border-[#E5654B] bg-orange-50/30 shadow-sm ring-1 ring-[#E5654B]/20'
-                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                }`}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                                        videoPlayback === 'background' ? 'bg-[#E5654B] text-white' : 'bg-gray-100 text-gray-400'
-                                                    }`}>1</span>
-                                                    <svg className={`w-5 h-5 ${videoPlayback === 'background' ? 'text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <div className="text-xs font-bold text-gray-800">Latar Belakang Saja (Muted)</div>
-                                                    <p className="text-[10px] text-gray-400 mt-0.5 leading-relaxed">Video diputar otomatis senyap di latar belakang pembuka.</p>
-                                                </div>
-                                            </div>
-
-                                            {/* Mode 2: Gallery */}
-                                            <div
-                                                onClick={() => setVideoPlayback('gallery')}
-                                                className={`cursor-pointer rounded-2xl p-4 border transition-all duration-300 flex flex-col justify-between h-28 ${
-                                                    videoPlayback === 'gallery'
-                                                        ? 'border-[#E5654B] bg-orange-50/30 shadow-sm ring-1 ring-[#E5654B]/20'
-                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                }`}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                                        videoPlayback === 'gallery' ? 'bg-[#E5654B] text-white' : 'bg-gray-100 text-gray-400'
-                                                    }`}>2</span>
-                                                    <svg className={`w-5 h-5 ${videoPlayback === 'gallery' ? 'text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <div className="text-xs font-bold text-gray-800">Di Dalam Galeri Saja (Suara)</div>
-                                                    <p className="text-[10px] text-gray-400 mt-0.5 leading-relaxed">Video muncul di galeri dengan tombol putar bersuara.</p>
-                                                </div>
-                                            </div>
-
-                                            {/* Mode 3: Both */}
-                                            <div
-                                                onClick={() => setVideoPlayback('both')}
-                                                className={`cursor-pointer rounded-2xl p-4 border transition-all duration-300 flex flex-col justify-between h-28 ${
-                                                    videoPlayback === 'both'
-                                                        ? 'border-[#E5654B] bg-orange-50/30 shadow-sm ring-1 ring-[#E5654B]/20'
-                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                }`}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                                        videoPlayback === 'both' ? 'bg-[#E5654B] text-white' : 'bg-gray-100 text-gray-400'
-                                                    }`}>3</span>
-                                                    <svg className={`w-5 h-5 ${videoPlayback === 'both' ? 'text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <div className="text-xs font-bold text-gray-800">Keduanya (Sangat Mewah)</div>
-                                                    <p className="text-[10px] text-gray-400 mt-0.5 leading-relaxed">Latar belakang senyap + pemutar di galeri bersuara.</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Submit Button */}
-                                    <div className="flex justify-end border-t border-gray-100 pt-4">
-                                        <button
-                                            type="submit"
-                                            disabled={savingVideo}
-                                            className="px-5 py-2.5 bg-[#E5654B] hover:bg-[#b03a24] text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-orange-500/10 active:scale-[0.98]"
-                                        >
-                                            {savingVideo ? (
-                                                <>
-                                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                                                    <span>Menyimpan...</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Save className="w-3.5 h-3.5" />
-                                                    <span>Simpan Pengaturan Video</span>
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                </form>
+                                </div>
                             )}
                         </div>
                     </>

@@ -2060,6 +2060,35 @@ export default function DynamicIndex({
         };
     }, [isOpened, autoScrollEnabled, isSlideMode, resolvedSections.length]);
 
+    // Pause auto scroll on user manual scroll/swipe
+    useEffect(() => {
+        if (!isOpened || !autoScrollEnabled) return;
+
+        const handleUserInteraction = (e) => {
+            if (
+                e.target.closest('button') || 
+                e.target.closest('.lx3-floating-btn') || 
+                e.target.closest('.lx3-nav-menu') || 
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('select')
+            ) {
+                return;
+            }
+            setAutoScrollEnabled(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+        };
+    }, [isOpened, autoScrollEnabled]);
+
     // Slide navigation functions
     const nextSlide = () => {
         setActiveSlideIdx(prev => Math.min(prev + 1, resolvedSections.length - 1));

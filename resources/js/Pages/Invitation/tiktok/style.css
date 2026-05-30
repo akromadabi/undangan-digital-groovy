@@ -147,7 +147,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 10px;
+    padding-top: calc(env(safe-area-inset-top, 24px) + 12px);
     font-size: 14px;
     font-weight: 700;
     text-shadow: 0 2px 4px rgba(0,0,0,0.8);
@@ -375,8 +375,54 @@
 }
 
 .ttk-cover__bottom-info {
-    max-width: 80%;
-    padding-bottom: 20px;
+    width: 100%;
+    max-width: 100%;
+    padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 24px);
+    box-sizing: border-box;
+}
+
+.ttk-cover__wedding-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--ttk-cyan);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 12px;
+    text-shadow: 1px 1px 0 var(--ttk-red);
+    display: inline-block;
+}
+
+.ttk-cover__guest-card {
+    background: rgba(18, 19, 26, 0.75);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--ttk-border);
+    border-left: 3px solid var(--ttk-red);
+    border-right: 3px solid var(--ttk-cyan);
+    border-radius: 12px;
+    padding: 12px 18px;
+    width: 100%;
+    max-width: 320px;
+    margin: 15px auto;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+}
+
+.ttk-cover__guest-label {
+    display: block;
+    font-size: 10px;
+    color: var(--ttk-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.ttk-cover__guest-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--ttk-white);
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 .ttk-cover__handle {
@@ -1985,4 +2031,39 @@
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
+}
+
+/* Full bleed YouTube background video styles */
+.ttk-video-cover--fullscreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.05);
+    pointer-events: none;
+    z-index: 1;
+}
+
+@media (min-aspect-ratio: 16/9) {
+    .ttk-video-cover--fullscreen {
+        width: 100vw;
+        height: 56.25vw;
+    }
+}
+
+@media (max-aspect-ratio: 16/9) {
+    .ttk-video-cover--fullscreen {
+        width: 177.77vh;
+        height: 100vh;
+    }
+}
+
+.ttk-video-cover--portrait-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.05);
+    pointer-events: none;
+    z-index: 0;
+    width: 276.54%;
+    height: 100%;
 }

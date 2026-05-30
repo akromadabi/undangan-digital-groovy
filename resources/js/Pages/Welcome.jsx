@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
+
 
 // Brand Partnership Logos (10 Distinct Premium Brands for Infinite Scrolling Ticker)
 const PARTNERS = [
@@ -202,22 +203,128 @@ const SORT_OPTIONS = [
     { key: 'disukai', label: 'Terfavorit' },
 ];
 
-export default function Welcome({ auth, canLogin, canRegister, appName, themes = [], recentInvitations = [], resellerCount = 15, invitationCount = 40, adminWhatsapp = '6283132211830', adminEmail = 'admin@groovy.com', minModalCost = 15000 }) {
+export default function Welcome({ auth, canLogin, canRegister, appName, themes = [], recentInvitations = [], resellerCount = 15, invitationCount = 40, adminWhatsapp = '6283132211830', adminEmail = 'admin@groovy.com', minModalCost = 15000, subscriptionPlans = [] }) {
     const { flash } = usePage().props;
     const [scrolled, setScrolled] = useState(false);
     const [showFlash, setShowFlash] = useState(true);
     const [activeFaq, setActiveFaq] = useState(null);
     const [mounted, setMounted] = useState(false);
     const [themeSortKey, setThemeSortKey] = useState('terbaru');
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+    const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
-    // Reseller profit calculator states
-    const [clientsCount, setClientsCount] = useState(30); // clients per month
-    const [sellingPrice, setSellingPrice] = useState(100000); // price per invitation
-    const modalCost = minModalCost; // Flat base cost per active invitation package paid to admin
+    const categoryDropdownRef = useRef(null);
+    const sortDropdownRef = useRef(null);
 
-    const monthlyRevenue = clientsCount * sellingPrice;
-    const monthlyCost = clientsCount * modalCost;
+    const categories = useMemo(() => {
+        const cats = themes?.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean) || [];
+        return [...new Set(cats)];
+    }, [themes]);
+
+    const filteredThemes = useMemo(() => {
+        let list = [...(themes || [])];
+        if (selectedCategories.length > 0) {
+            list = list.filter(t => t.category && selectedCategories.includes(t.category.trim().toLowerCase()));
+        }
+        if (searchQuery.trim()) {
+            list = list.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return list;
+    }, [themes, selectedCategories, searchQuery]);
+
+    const toggleCategory = (cat) => {
+        setSelectedCategories(prev => 
+            prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+        );
+    };
+
+    const clearCategories = () => setSelectedCategories([]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+                setIsCategoryDropdownOpen(false);
+            }
+            if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
+                setIsSortDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+
+    // Reseller profit calculator states (Dynamic Multi-Plan based on Admin Settings)
+    const defaultPlans = [
+        { id: 'silver', name: 'Silver', slug: 'silver', price: 49000, defaultQty: 10, defaultPrice: 99000 },
+        { id: 'gold', name: 'Gold', slug: 'gold', price: 99000, defaultQty: 15, defaultPrice: 199000 },
+        { id: 'platinum', name: 'Platinum', slug: 'platinum', price: 199000, defaultQty: 5, defaultPrice: 299000 }
+    ];
+
+    const activePlans = useMemo(() => {
+        if (subscriptionPlans && subscriptionPlans.length > 0) {
+            return subscriptionPlans.map(plan => {
+                let defaultPrice = plan.suggested_price ? Number(plan.suggested_price) : (Number(plan.price) * 2);
+                if (!plan.suggested_price) {
+                    if (plan.slug === 'silver') defaultPrice = 99000;
+                    else if (plan.slug === 'gold') defaultPrice = 199000;
+                    else if (plan.slug === 'platinum') defaultPrice = 299000;
+                }
+
+                let defaultQty = 10;
+                if (plan.slug === 'gold') defaultQty = 15;
+                if (plan.slug === 'platinum') defaultQty = 5;
+
+                return {
+                    id: plan.id,
+                    name: plan.name,
+                    slug: plan.slug,
+                    price: Number(plan.price),
+                    defaultQty,
+                    defaultPrice
+                };
+            });
+        }
+        return defaultPlans;
+    }, [subscriptionPlans]);
+
+    const [quantities, setQuantities] = useState({});
+    const [prices, setPrices] = useState({});
+
+    useEffect(() => {
+        const q = {};
+        const p = {};
+        activePlans.forEach(plan => {
+            q[plan.id] = plan.defaultQty;
+            p[plan.id] = plan.defaultPrice;
+        });
+        setQuantities(q);
+        setPrices(p);
+    }, [activePlans]);
+
+    const monthlyRevenue = useMemo(() => {
+        return activePlans.reduce((sum, plan) => {
+            const qty = quantities[plan.id] ?? plan.defaultQty;
+            const price = prices[plan.id] ?? plan.defaultPrice;
+            return sum + (qty * price);
+        }, 0);
+    }, [activePlans, quantities, prices]);
+
+    const monthlyCost = useMemo(() => {
+        return activePlans.reduce((sum, plan) => {
+            const qty = quantities[plan.id] ?? plan.defaultQty;
+            return sum + (qty * plan.price);
+        }, 0);
+    }, [activePlans, quantities]);
+
     const netProfit = monthlyRevenue - monthlyCost;
+    const totalQty = useMemo(() => {
+        return activePlans.reduce((sum, plan) => {
+            return sum + (quantities[plan.id] ?? plan.defaultQty);
+        }, 0);
+    }, [activePlans, quantities]);
 
     useEffect(() => {
         setMounted(true);
@@ -446,93 +553,126 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                         <p className="text-white/50 mt-3 max-w-lg mx-auto text-sm sm:text-base leading-relaxed">Sesuaikan parameter di bawah untuk memvisualisasikan profit bersih yang langsung masuk ke rekening agensi Anda.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-5xl mx-auto">
-                        {/* Control Panel (Sliders - Sleek glassmorphism look) */}
-                        <div className="lg:col-span-7 bg-[#1e293b]/70 border border-white/10 rounded-3xl p-8 shadow-2xl space-y-8 backdrop-blur-xl">
-                            <h3 className="text-lg font-black text-white border-b border-white/10 pb-4">Konfigurasi Penjualan</h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-5xl mx-auto">
+                        {/* Control Panel (Sliders for each plan - Dynamic White-Label Pricing) */}
+                        <div className="lg:col-span-7 bg-[#1e293b]/70 border border-white/10 rounded-3xl p-8 shadow-2xl space-y-6 backdrop-blur-xl flex flex-col justify-between">
+                            <h3 className="text-lg font-black text-white border-b border-white/10 pb-4 flex justify-between items-center">
+                                <span>Konfigurasi Penjualan</span>
+                                <span className="text-[10px] sm:text-xs font-bold text-white/45">Atur Volume & Harga Jual Paket</span>
+                            </h3>
                             
-                            {/* Slider 1: Clients per month */}
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm font-extrabold text-white/70">Kuantitas Penjualan per Bulan</span>
-                                    <span className="text-sm font-black text-[#E5654B] bg-[#E5654B]/10 border border-[#E5654B]/25 px-4 py-1.5 rounded-xl">
-                                        {clientsCount} Calon Mempelai
-                                    </span>
-                                </div>
-                                <input 
-                                    type="range" 
-                                    min="5" 
-                                    max="150" 
-                                    value={clientsCount} 
-                                    onChange={(e) => setClientsCount(Number(e.target.value))}
-                                    className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E5654B]"
-                                />
-                                <div className="flex justify-between text-[10px] text-white/35 font-extrabold">
-                                    <span>5 KLIEN</span>
-                                    <span>75 KLIEN</span>
-                                    <span>150 KLIEN</span>
-                                </div>
-                            </div>
+                            <div className="space-y-6 flex-1 py-2">
+                                {activePlans.map(plan => {
+                                    const qty = quantities[plan.id] ?? plan.defaultQty;
+                                    const price = prices[plan.id] ?? plan.defaultPrice;
+                                    const unitProfit = Math.max(0, price - plan.price);
 
-                            {/* Slider 2: Price per invitation */}
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm font-extrabold text-white/70">Harga Jual Paket Undangan Agensi</span>
-                                    <span className="text-sm font-black text-[#E5654B] bg-[#E5654B]/10 border border-[#E5654B]/25 px-4 py-1.5 rounded-xl">
-                                        Rp {sellingPrice.toLocaleString('id-ID')}
-                                    </span>
-                                </div>
-                                <input 
-                                    type="range" 
-                                    min="50000" 
-                                    max="300000" 
-                                    step="10000"
-                                    value={sellingPrice} 
-                                    onChange={(e) => setSellingPrice(Number(e.target.value))}
-                                    className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E5654B]"
-                                />
-                                <div className="flex justify-between text-[10px] text-white/35 font-extrabold">
-                                    <span>RP 50.000</span>
-                                    <span>RP 175.000</span>
-                                    <span>RP 300.000</span>
-                                </div>
-                            </div>
+                                    return (
+                                        <div key={plan.id} className="bg-white/5 border border-white/10 rounded-2xl p-4.5 space-y-3.5 transition-all hover:bg-white/10 duration-200">
+                                            {/* Plan Header */}
+                                            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                                <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wide">{plan.name} Package</span>
+                                                <span className="text-[9px] sm:text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                                                    Margin Rp {unitProfit.toLocaleString('id-ID')} / Pcs
+                                                </span>
+                                            </div>
 
-                            {/* Center parameters */}
-                            <div className="bg-white/5 border border-white/5 rounded-2xl p-4.5 flex justify-between items-center text-xs">
-                                <div className="text-white/60 font-semibold">Harga Modal Terendah dari Sistem Pusat (Dinamis):</div>
-                                <div className="text-[#ffb347] font-black text-sm">
-                                    Rp {modalCost.toLocaleString('id-ID')} <span className="text-white/40 text-[10px] font-normal">/undangan</span>
-                                </div>
+                                            {/* Quantity Slider */}
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between text-[11px] font-bold">
+                                                    <span className="text-white/50">Proyeksi Penjualan</span>
+                                                    <span className="text-[#E5654B] font-extrabold">{qty} Undangan / bulan</span>
+                                                </div>
+                                                <input 
+                                                    type="range" 
+                                                    min="0" 
+                                                    max="100" 
+                                                    value={qty} 
+                                                    onChange={(e) => {
+                                                        const val = Number(e.target.value);
+                                                        setQuantities(prev => ({ ...prev, [plan.id]: val }));
+                                                    }}
+                                                    className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E5654B]"
+                                                />
+                                            </div>
+
+                                            {/* Selling Price Slider */}
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between text-[11px] font-bold">
+                                                    <span className="text-white/50">Harga Jual Rekomendasi</span>
+                                                    <span className="text-[#ffb347] font-extrabold">Rp {price.toLocaleString('id-ID')}</span>
+                                                </div>
+                                                <input 
+                                                    type="range" 
+                                                    min={plan.price} 
+                                                    max={Math.max(plan.price * 4, plan.defaultPrice * 1.5)} 
+                                                    step="5000"
+                                                    value={price} 
+                                                    onChange={(e) => {
+                                                        const val = Number(e.target.value);
+                                                        setPrices(prev => ({ ...prev, [plan.id]: val }));
+                                                    }}
+                                                    className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#ffb347]"
+                                                />
+                                                <div className="flex justify-between text-[9px] text-white/30 font-bold uppercase tracking-wider mt-0.5">
+                                                    <span>Modal Sistem: Rp {plan.price.toLocaleString('id-ID')}</span>
+                                                    <span>Max: Rp {Math.max(plan.price * 4, plan.defaultPrice * 1.5).toLocaleString('id-ID')}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
                         {/* Profit Output Panel (Ultra Luxury golden outline) */}
-                        <div className="lg:col-span-5 bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-[#ffb347]/20 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-black/50">
+                        <div className="lg:col-span-5 bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-[#ffb347]/20 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-black/50 flex flex-col justify-between">
                             {/* Graphic accent */}
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[#E5654B]/25 rounded-full blur-2xl" />
                             
-                            <h3 className="text-xs font-black tracking-widest text-white/40 uppercase mb-8">ANALISIS PENDAPATAN BULANAN</h3>
+                            <div>
+                                <h3 className="text-xs font-black tracking-widest text-white/40 uppercase mb-8">ANALISIS PENDAPATAN BULANAN</h3>
 
-                            <div className="space-y-6">
-                                <div>
-                                    <span className="text-xs text-white/50 block font-semibold">Proyeksi Omset Kotor</span>
-                                    <span className="text-2xl font-black text-white mt-1 block">Rp {monthlyRevenue.toLocaleString('id-ID')}</span>
-                                </div>
-
-                                <div className="border-t border-white/5 pt-4">
-                                    <span className="text-xs text-white/50 block font-semibold">Pengeluaran Lisensi Pusat</span>
-                                    <span className="text-sm font-bold text-red-400 mt-1 block">Rp {monthlyCost.toLocaleString('id-ID')}</span>
-                                </div>
-
-                                <div className="border-t border-dashed border-white/10 pt-6">
-                                    <span className="text-xs text-[#ffb347] font-extrabold block uppercase tracking-wide">ESTIMASI LABA BERSIH (PROFIT) AGENSI</span>
-                                    <div className="text-3xl sm:text-4xl font-black text-emerald-400 mt-1.5 drop-shadow-md">
-                                        Rp {netProfit.toLocaleString('id-ID')}
+                                <div className="space-y-5">
+                                    <div>
+                                        <span className="text-xs text-white/50 block font-semibold">Proyeksi Omset Kotor</span>
+                                        <span className="text-2xl font-black text-white mt-1 block">Rp {monthlyRevenue.toLocaleString('id-ID')}</span>
                                     </div>
-                                    <span className="text-[10px] text-white/40 block mt-2.5 leading-relaxed font-semibold">
-                                        * Laba bersih di atas dihitung berdasarkan selisih penjualan langsung. Keuntungan 100% masuk ke bank Anda tanpa potongan platform.
-                                    </span>
+
+                                    <div className="border-t border-white/5 pt-4">
+                                        <span className="text-xs text-white/50 block font-semibold">Biaya Pembelian Modal</span>
+                                        <span className="text-sm font-bold text-red-400 mt-1 block">Rp {monthlyCost.toLocaleString('id-ID')}</span>
+                                    </div>
+
+                                    {/* Sales Breakdown inside Output Panel */}
+                                    <div className="border-t border-white/5 pt-4">
+                                        <span className="text-xs text-white/50 block font-semibold">Rincian Volume Penjualan:</span>
+                                        <div className="text-[10px] text-white/45 space-y-1.5 mt-2 font-bold uppercase tracking-wider">
+                                            {activePlans.map(plan => {
+                                                const qty = quantities[plan.id] ?? plan.defaultQty;
+                                                return (
+                                                    <div key={plan.id} className="flex justify-between">
+                                                        <span>{plan.name} Package</span>
+                                                        <span className="text-white">{qty} Pcs</span>
+                                                    </div>
+                                                );
+                                            })}
+                                            <div className="flex justify-between border-t border-white/5 pt-1.5 text-white/70">
+                                                <span>Total Unit Terjual</span>
+                                                <span className="text-[#ffb347] font-black">{totalQty} Pcs</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t border-dashed border-white/10 pt-5">
+                                        <span className="text-xs text-[#ffb347] font-extrabold block uppercase tracking-wide">ESTIMASI LABA BERSIH (PROFIT)</span>
+                                        <div className="text-3xl sm:text-4xl font-black text-emerald-400 mt-1.5 drop-shadow-md">
+                                            Rp {netProfit.toLocaleString('id-ID')}
+                                        </div>
+                                        <span className="text-[10px] text-white/40 block mt-2.5 leading-relaxed font-semibold">
+                                            * Laba bersih dihitung dari selisih harga jual dengan modal. 100% profit langsung masuk ke rekening Anda tanpa potongan platform.
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -629,35 +769,128 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                         <p className="text-gray-500 mt-2 max-w-lg mx-auto text-sm font-medium">Puluhan desain modern, responsif, dan elegan otomatis aktif di dashboard agensi Anda.</p>
                     </div>
 
-                    {/* Sort Bar */}
+                    {/* Overhauled Filters & Search Bar */}
                     {themes.length > 0 && (
-                        <div className="flex items-center justify-center gap-2 mb-8">
-                            {SORT_OPTIONS.map(opt => (
-                                <button
-                                    key={opt.key}
-                                    onClick={() => setThemeSortKey(opt.key)}
-                                    className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-200 border ${
-                                        themeSortKey === opt.key
-                                            ? 'bg-[#E5654B] text-white border-[#E5654B] shadow-md shadow-[#E5654B]/25 scale-105'
-                                            : 'bg-white text-gray-600 border-gray-200 hover:border-[#E5654B]/40 hover:text-[#E5654B]'
-                                    }`}
-                                >
-                                    {opt.label}
-                                </button>
-                            ))}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 max-w-full">
+                            {/* Search Box */}
+                            <div className="relative flex-1 max-w-md w-full">
+                                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                    placeholder="Cari tema pilihan Anda..."
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-gray-200 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none bg-gray-50/50 hover:bg-gray-50 focus:bg-white transition-all text-gray-800"
+                                />
+                            </div>
+
+                            {/* Dropdowns Group */}
+                            <div className="flex items-center gap-3.5 self-end md:self-auto">
+                                {/* Categories Dropdown */}
+                                <div className="relative" ref={categoryDropdownRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                                        className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center gap-2 select-none min-h-[42px] ${
+                                            selectedCategories.length > 0
+                                                ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
+                                                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                        </svg>
+                                        <span>
+                                            {selectedCategories.length === 0
+                                                ? 'Semua Kategori'
+                                                : `Kategori (${selectedCategories.length})`
+                                            }
+                                        </span>
+                                        <svg className={`w-3.5 h-3.5 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180 text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    {isCategoryDropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
+                                                <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">KATEGORI</span>
+                                                {selectedCategories.length > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={clearCategories}
+                                                        className="text-[10px] font-bold text-red-500 hover:underline"
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
+                                                {categories.map((cat) => {
+                                                    const isChecked = selectedCategories.includes(cat);
+                                                    return (
+                                                        <label
+                                                            key={cat}
+                                                            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors select-none text-xs font-semibold ${
+                                                                isChecked ? 'bg-[#E5654B]/5 text-[#E5654B]' : 'text-gray-700'
+                                                            }`}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isChecked}
+                                                                onChange={() => toggleCategory(cat)}
+                                                                className="rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 w-3.5 h-3.5 cursor-pointer accent-[#E5654B]"
+                                                            />
+                                                            <span className="capitalize">{cat}</span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                                                    {/* Sort Action Pills */}
+                                <div className="flex items-center gap-1.5 bg-gray-100/80 p-1 rounded-2xl border border-gray-200/40 select-none">
+                                    {SORT_OPTIONS.map(opt => {
+                                        const isActive = themeSortKey === opt.key;
+                                        return (
+                                            <button
+                                                key={opt.key}
+                                                type="button"
+                                                onClick={() => setThemeSortKey(opt.key)}
+                                                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
+                                                    isActive
+                                                        ? 'bg-[#E5654B] text-white shadow-md shadow-[#E5654B]/20'
+                                                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                                                }`}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>      </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     )}
 
+
                     {/* Theme Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-                        {sortThemes(themes, themeSortKey).map((theme) => (
-                            <div key={theme.id} className="flex-shrink-0">
-                                <ThemePreviewCard 
-                                    theme={theme}
-                                />
-                            </div>
-                        ))}
-                    </div>
+                    {filteredThemes.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                            {sortThemes(filteredThemes, themeSortKey).map((theme) => (
+                                <div key={theme.id} className="flex-shrink-0">
+                                    <ThemePreviewCard 
+                                        theme={theme}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 text-gray-400 border border-dashed border-gray-200 rounded-3xl">
+                            <p className="text-sm font-medium">Tidak ada tema dalam kategori ini.</p>
+                        </div>
+                    )}
 
                     {themes.length === 0 && (
                         <div className="text-center py-12 text-gray-400 border border-dashed border-gray-200 rounded-3xl">

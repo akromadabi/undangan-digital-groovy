@@ -219,6 +219,7 @@ class DatabaseSeeder extends Seeder
             ManchesterUnitedThemeSeeder::class,
             MoroccanThemeSeeder::class,
             WhatsappThemeSeeder::class,
+            SpidermanThemeSeeder::class,
         ]);
 
         // Restore custom fields (like uploaded thumbnails) after seeders have run

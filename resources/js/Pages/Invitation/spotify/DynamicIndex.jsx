@@ -394,7 +394,6 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
     const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
     const { mainName, initials, labels } = themeConfig;
 
-    const openingVideoId = getYoutubeId(invitation?.opening_video_url);
     const openingImages = invitation?.opening_image ? invitation.opening_image.split(',') : (invitation?.cover_image ? invitation.cover_image.split(',') : (fallbackPhoto ? [fallbackPhoto] : []));
 
     const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
@@ -408,17 +407,7 @@ function OpeningSection({ invitation, brideGrooms, events, wishes, onOpenMusic, 
     return (
         <section id="opening" className="spty-section spty-opening">
             <div className="spty-opening__playlist-header">
-                {globalShowPhotos && openingVideoId ? (
-                    <div className="spty-opening__playlist-img relative overflow-hidden bg-black">
-                        <iframe
-                            src={`https://www.youtube.com/embed/${openingVideoId}?autoplay=0&rel=0&controls=1`}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            className="absolute inset-0 w-full h-full"
-                        />
-                    </div>
-                ) : globalShowPhotos && openingImages.length > 0 ? (
+                {globalShowPhotos && openingImages.length > 0 ? (
                     <div className="spty-opening__playlist-img relative overflow-hidden">
                         <PremiumSlideshow
                             images={openingImages}

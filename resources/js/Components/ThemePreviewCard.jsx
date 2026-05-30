@@ -39,7 +39,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
 
         return (
             <div 
-                className={`phone-mockup relative ${widthClass} aspect-[9/18.5] bg-black border-[4px] sm:border-[5px] border-[#1a1a1a] rounded-[20px] sm:rounded-[24px] overflow-hidden transition-all duration-500 ${perspectiveClass} ${isScaledDown ? 'phone-back' : 'phone-front'} ${additionalClass}`}
+                className={`phone-mockup relative ${widthClass} aspect-[9/18.5] bg-black border-[2px] sm:border-[5px] border-[#1a1a1a] rounded-[12px] sm:rounded-[24px] overflow-hidden transition-all duration-500 ${perspectiveClass} ${isScaledDown ? 'phone-back' : 'phone-front'} ${additionalClass}`}
                 style={{
                     transformStyle: 'preserve-3d',
                     boxShadow: isScaledDown 
@@ -48,15 +48,15 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                 }}
             >
                 {/* Speaker/Camera Bar */}
-                <div className="absolute top-[4px] sm:top-[6px] left-1/2 -translate-x-1/2 w-7 sm:w-9 h-1.5 sm:h-2 bg-black rounded-full z-30 flex items-center justify-center">
+                <div className="absolute top-[2.5px] sm:top-[6px] left-1/2 -translate-x-1/2 w-6 sm:w-9 h-1 sm:h-2 bg-black rounded-full z-30 flex items-center justify-center">
                     {/* Camera */}
-                    <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-[#111] rounded-full mr-1 sm:mr-1.5" />
+                    <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-[#111] rounded-full mr-0.5 sm:mr-1.5" />
                     {/* Speaker */}
-                    <div className="w-2.5 sm:w-4 h-0.5 bg-[#222] rounded-full" />
+                    <div className="w-2 sm:w-4 h-0.5 bg-[#222] rounded-full" />
                 </div>
                 
                 {/* Screen Container */}
-                <div className="w-full h-full overflow-hidden bg-gray-900 rounded-[15px] sm:rounded-[19px] relative group-hover:shadow-inner">
+                <div className="w-full h-full overflow-hidden bg-gray-900 rounded-[9px] sm:rounded-[19px] relative group-hover:shadow-inner">
                     <img 
                         src={getImageUrl(imageSrc)} 
                         alt="Screen Preview"
@@ -65,7 +65,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                     {/* Glass glare overlay */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-10" />
                     {/* Bezel inner highlight */}
-                    <div className="absolute inset-0 border border-white/10 rounded-[15px] sm:rounded-[19px] pointer-events-none z-10" />
+                    <div className="absolute inset-0 border border-white/10 rounded-[9px] sm:rounded-[19px] pointer-events-none z-10" />
                 </div>
             </div>
         );
@@ -210,7 +210,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         if (!isDynamic) {
             // Full Mockup Mode (Fallback)
             return (
-                <div className={`${aspectClass} bg-gray-100 overflow-hidden relative w-full h-full`}>
+                <div className="absolute inset-0 bg-gray-100 overflow-hidden">
                     {theme.thumbnail ? (
                         <img
                             src={getImageUrl(theme.thumbnail)}
@@ -233,7 +233,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
 
         if (template === 'single-phone') {
             return (
-                <div className={`w-full h-full ${aspectClass} flex items-center justify-center p-3 sm:p-6 relative overflow-hidden`} style={{ perspective: '800px' }}>
+                <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-6 overflow-hidden" style={{ perspective: '800px' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
                     
                     {/* Natural ambient ground shadow */}
@@ -248,7 +248,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
 
         if (template === 'double-phone') {
             return (
-                <div className={`w-full h-full ${aspectClass} flex items-center justify-center relative overflow-hidden p-2 sm:p-4`} style={{ perspective: '800px' }}>
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-2 sm:p-4" style={{ perspective: '800px' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
                     
                     {/* Left phone ground shadow */}
@@ -271,7 +271,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
 
         if (template === 'triple-phone') {
             return (
-                <div className={`w-full h-full ${aspectClass} flex items-center justify-center relative overflow-hidden p-1 sm:p-2 triple-phone-layout`} style={{ perspective: '800px' }}>
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-1 sm:p-2 triple-phone-layout" style={{ perspective: '800px' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
                     
                     {/* Left phone shadow */}

@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import AnimatedLikeButton from '@/Components/AnimatedLikeButton';
+
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
@@ -102,7 +103,14 @@ export default function ResellerThemes({ reseller, themes = [] }) {
     };
 
     const [scrolled, setScrolled] = useState(false);
-    const [activeCategory, setActiveCategory] = useState('Semua');
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortThemeKey, setSortThemeKey] = useState('terbaru');
+    const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+    const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+
+    const categoryDropdownRef = useRef(null);
+    const sortDropdownRef = useRef(null);
 
     // Likes State
     const [likes, setLikes] = useState({});
@@ -200,15 +208,54 @@ export default function ResellerThemes({ reseller, themes = [] }) {
 
     // Extract unique categories
     const categories = useMemo(() => {
-        const cats = themes.map(t => t.category).filter(Boolean);
-        return ['Semua', ...new Set(cats)];
+        const cats = themes.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean);
+        return [...new Set(cats)];
     }, [themes]);
 
     // Filter themes
     const filteredThemes = useMemo(() => {
-        if (activeCategory === 'Semua') return themes;
-        return themes.filter(t => t.category === activeCategory);
-    }, [themes, activeCategory]);
+        let list = [...(themes || [])];
+        if (selectedCategories.length > 0) {
+            list = list.filter(t => t.category && selectedCategories.includes(t.category.trim().toLowerCase()));
+        }
+        if (searchQuery.trim()) {
+            list = list.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return list;
+    }, [themes, selectedCategories, searchQuery]);
+
+    const sortedThemes = useMemo(() => {
+        const arr = [...filteredThemes];
+        if (sortThemeKey === 'terbaru') return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
+        if (sortThemeKey === 'populer') return arr.sort((a, b) => ((b.usage_count || 0) + (b.base_usage || 0)) - ((a.usage_count || 0) + (a.base_usage || 0)));
+        if (sortThemeKey === 'disukai') return arr.sort((a, b) => {
+            const bL = likes[b.id] ?? ((b.base_likes || 0) + (b.real_likes || 0));
+            const aL = likes[a.id] ?? ((a.base_likes || 0) + (a.real_likes || 0));
+            return bL - aL;
+        });
+        return arr;
+    }, [filteredThemes, sortThemeKey, likes]);
+
+    const toggleCategory = (cat) => {
+        setSelectedCategories(prev => 
+            prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+        );
+    };
+
+    const clearCategories = () => setSelectedCategories([]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+                setIsCategoryDropdownOpen(false);
+            }
+            if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
+                setIsSortDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const siteTitle = `Semua Tema — ${reseller.brand_name}`;
     const siteMotto = reseller.site_motto || 'Pilih dari berbagai desain premium yang disesuaikan dengan kebutuhan acara Anda.';
@@ -304,35 +351,288 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                     <p className="mt-3 max-w-2xl text-sm" style={{ color: 'var(--text-secondary)' }}>Pilih dari berbagai desain premium yang disesuaikan dengan kebutuhan acara Anda.</p>
                 </div>
 
-                {/* Categories Filter */}
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-4 mb-8 snap-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                    {categories.map((cat, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => setActiveCategory(cat)}
-                            className="rl-btn"
-                            style={{
-                                background: activeCategory === cat ? 'linear-gradient(135deg, var(--accent), var(--accent-dark))' : 'var(--card-bg)',
-                                border: activeCategory === cat ? 'none' : '1px solid var(--card-border)',
-                                color: activeCategory === cat ? '#fff' : 'var(--text-secondary)',
-                                boxShadow: activeCategory === cat ? '0 4px 15px rgba(var(--accent-rgb), 0.3)' : 'none',
-                                padding: '0.5rem 1.25rem',
-                                borderRadius: '100px',
-                                fontWeight: 600,
-                                fontSize: '0.875rem',
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap',
-                                transition: 'all 0.2s ease',
-                            }}
-                        >
-                            {cat}
-                        </button>
-                    ))}
-                </div>
+                {/* Overhauled Filters & Search Bar */}
+                {themes.length > 0 && (
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem',
+                        marginBottom: '2rem',
+                        width: '100%'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '0.75rem',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
+                            {/* Search Box */}
+                            <div style={{
+                                position: 'relative',
+                                flex: '1',
+                                minWidth: '240px'
+                            }}>
+                                <svg style={{
+                                    position: 'absolute',
+                                    left: '0.85rem',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    width: '16px',
+                                    height: '16px',
+                                    color: 'var(--text-muted)'
+                                }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                    placeholder="Cari tema..."
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.625rem 1rem 0.625rem 2.25rem',
+                                        borderRadius: '100px',
+                                        border: '1.5px solid var(--card-border)',
+                                        fontSize: '0.8rem',
+                                        background: 'var(--card-bg)',
+                                        color: 'var(--text-primary)',
+                                        outline: 'none',
+                                        transition: 'border-color 0.2s',
+                                    }}
+                                    onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                                    onBlur={e => e.target.style.borderColor = 'var(--card-border)'}
+                                />
+                            </div>
+
+                            {/* Controls */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem'
+                            }}>
+                                {/* Category Select Dropdown */}
+                                <div style={{ position: 'relative' }} ref={categoryDropdownRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                                        style={{
+                                            padding: '0.625rem 1.15rem',
+                                            borderRadius: '100px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.04em',
+                                            border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
+                                            background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                            color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                        </svg>
+                                        <span>
+                                            {selectedCategories.length === 0 ? 'Semua Kategori' : `Kategori (${selectedCategories.length})`}
+                                        </span>
+                                        <svg style={{
+                                            width: '12px',
+                                            height: '12px',
+                                            transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
+                                            transition: 'transform 0.2s'
+                                        }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    {isCategoryDropdownOpen && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            right: 0,
+                                            top: '100%',
+                                            marginTop: '0.5rem',
+                                            width: '220px',
+                                            background: 'var(--card-bg)',
+                                            border: '1.5px solid var(--card-border)',
+                                            borderRadius: '16px',
+                                            boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                                            zIndex: 99,
+                                            padding: '0.5rem',
+                                            backdropFilter: 'blur(10px)',
+                                            WebkitBackdropFilter: 'blur(10px)'
+                                        }}>
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                padding: '0.25rem 0.5rem 0.5rem',
+                                                borderBottom: '1px solid var(--card-border)'
+                                            }}>
+                                                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kategori</span>
+                                                {selectedCategories.length > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={clearCategories}
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            fontSize: '0.65rem',
+                                                            fontWeight: 700,
+                                                            color: 'var(--accent)',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div style={{ maxHeight: '180px', overflowY: 'auto', padding: '0.25rem 0' }}>
+                                                {categories.map(cat => {
+                                                    const isChecked = selectedCategories.includes(cat);
+                                                    return (
+                                                        <label
+                                                            key={cat}
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '0.5rem',
+                                                                padding: '0.4rem 0.5rem',
+                                                                borderRadius: '8px',
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: 600,
+                                                                color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                cursor: 'pointer',
+                                                                background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent',
+                                                                transition: 'background 0.2s',
+                                                                margin: '2px 0'
+                                                            }}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isChecked}
+                                                                onChange={() => toggleCategory(cat)}
+                                                                style={{
+                                                                    accentColor: 'var(--accent)',
+                                                                    width: '13px',
+                                                                    height: '13px',
+                                                                    cursor: 'pointer'
+                                                                }}
+                                                            />
+                                                            <span style={{ textTransform: 'capitalize' }}>{cat}</span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Sort Dropdown */}
+                                <div style={{ position: 'relative' }} ref={sortDropdownRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                                        title="Urutkan Tema"
+                                        style={{
+                                            padding: '0.625rem',
+                                            borderRadius: '100px',
+                                            border: '1.5px solid ' + (isSortDropdownOpen ? 'var(--accent)' : 'var(--card-border)'),
+                                            background: isSortDropdownOpen ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                            color: isSortDropdownOpen ? 'var(--accent)' : 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            transition: 'all 0.2s',
+                                            width: '38px',
+                                            height: '38px'
+                                        }}
+                                    >
+                                        <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                        </svg>
+                                    </button>
+
+                                    {isSortDropdownOpen && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            right: 0,
+                                            top: '100%',
+                                            marginTop: '0.5rem',
+                                            width: '180px',
+                                            background: 'var(--card-bg)',
+                                            border: '1.5px solid var(--card-border)',
+                                            borderRadius: '16px',
+                                            boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                                            zIndex: 99,
+                                            padding: '0.5rem',
+                                            backdropFilter: 'blur(10px)',
+                                            WebkitBackdropFilter: 'blur(10px)'
+                                        }}>
+                                            <div style={{
+                                                padding: '0.25rem 0.5rem 0.5rem',
+                                                borderBottom: '1px solid var(--card-border)'
+                                            }}>
+                                                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Urutkan</span>
+                                            </div>
+                                            <div style={{ padding: '0.25rem 0' }}>
+                                                {[
+                                                    { key: 'terbaru', label: 'Terbaru' },
+                                                    { key: 'populer', label: 'Terpopuler' },
+                                                    { key: 'disukai', label: 'Terfavorit' }
+                                                ].map(opt => {
+                                                    const isActive = sortThemeKey === opt.key;
+                                                    return (
+                                                        <button
+                                                            key={opt.key}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setSortThemeKey(opt.key);
+                                                                setIsSortDropdownOpen(false);
+                                                            }}
+                                                            style={{
+                                                                width: '100%',
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                alignItems: 'center',
+                                                                padding: '0.4rem 0.5rem',
+                                                                borderRadius: '8px',
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: 700,
+                                                                background: isActive ? 'rgba(var(--accent-rgb), 0.08)' : 'transparent',
+                                                                color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                border: 'none',
+                                                                cursor: 'pointer',
+                                                                textAlign: 'left',
+                                                                transition: 'all 0.2s',
+                                                                margin: '2px 0'
+                                                            }}
+                                                        >
+                                                            <span>{opt.label}</span>
+                                                            {isActive && (
+                                                                <svg style={{ width: '14px', height: '14px', color: 'var(--accent)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            )}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Themes Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    {filteredThemes.map((theme) => (
+                    {sortedThemes.map((theme) => (
                         <ThemePreviewCard 
                             key={theme.id} 
                             theme={theme}
@@ -340,9 +640,9 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                         />
                     ))}
 
-                    {filteredThemes.length === 0 && (
+                    {sortedThemes.length === 0 && (
                         <div className="col-span-full py-20 text-center" style={{ color: 'var(--text-secondary)' }}>
-                            Belum ada tema dalam kategori ini.
+                            Belum ada tema dalam kategori ini atau tidak ada hasil pencarian yang cocok.
                         </div>
                     )}
                 </div>
