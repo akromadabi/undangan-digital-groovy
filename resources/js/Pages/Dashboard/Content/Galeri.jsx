@@ -23,6 +23,8 @@ export default function Galeri({
 
     // YouTube Video settings states
     const [videoUrl, setVideoUrl] = useState(initialInvitation?.video_url || '');
+    const [coverVideoUrl, setCoverVideoUrl] = useState(initialInvitation?.cover_video_url || '');
+    const [openingVideoUrl, setOpeningVideoUrl] = useState(initialInvitation?.opening_video_url || '');
     const [videoPlayback, setVideoPlayback] = useState(initialInvitation?.video_playback || 'gallery');
     const [savingVideo, setSavingVideo] = useState(false);
     
@@ -71,6 +73,8 @@ export default function Galeri({
             setVideoUrl(initialInvitation.video_url || '');
             setVideoPlayback(initialInvitation.video_playback || 'gallery');
             setVideoList(initialInvitation.video_list || []);
+            setCoverVideoUrl(initialInvitation.cover_video_url || '');
+            setOpeningVideoUrl(initialInvitation.opening_video_url || '');
         }
         if (initialBrideGrooms) setLocalBrideGrooms(initialBrideGrooms);
         if (initialGalleries) setLocalGalleries(initialGalleries);
@@ -165,6 +169,44 @@ export default function Galeri({
             alert('Gagal mengubah video utama.');
         } finally {
             setSavingVideo(false);
+        }
+    };
+
+    const handleToggleCoverVideo = async (url, isActive) => {
+        try {
+            await axios.post(route('settings.cover.save'), {
+                cover_video_url: isActive ? '' : url,
+                cover_image: isActive ? localInvitation.cover_image : '',
+            });
+            setCoverVideoUrl(isActive ? '' : url);
+            setLocalInvitation(prev => ({
+                ...prev,
+                cover_video_url: isActive ? '' : url,
+                cover_image: isActive ? prev.cover_image : ''
+            }));
+            alert(isActive ? 'Video cover dinonaktifkan!' : 'Video cover berhasil diaktifkan!');
+        } catch (error) {
+            console.error(error);
+            alert('Gagal mengubah video cover.');
+        }
+    };
+
+    const handleToggleOpeningVideo = async (url, isActive) => {
+        try {
+            await axios.post(route('content.opening.save'), {
+                opening_video_url: isActive ? '' : url,
+                opening_image: isActive ? localInvitation.opening_image : '',
+            });
+            setOpeningVideoUrl(isActive ? '' : url);
+            setLocalInvitation(prev => ({
+                ...prev,
+                opening_video_url: isActive ? '' : url,
+                opening_image: isActive ? prev.opening_image : ''
+            }));
+            alert(isActive ? 'Video opening dinonaktifkan!' : 'Video opening berhasil diaktifkan!');
+        } catch (error) {
+            console.error(error);
+            alert('Gagal mengubah video opening.');
         }
     };
 
@@ -718,14 +760,12 @@ export default function Galeri({
                                                     {savingVideoList ? '...' : 'Tambah'}
                                                 </button>
                                             </div>
-                                        </div>
-
-                                        {/* List of Videos in Album */}
+                                        </div>                                        {/* List of Videos in Album */}
                                         {videoList.length > 0 && (
                                             <div className="space-y-2">
                                                 <label className="block text-xs font-bold text-gray-700 font-sans">Daftar Album Video YouTube Anda</label>
-                                                <p className="text-[10px] text-gray-400 -mt-1 font-sans">Pilih video di bawah untuk dijadikan video utama/latar belakang fallback (ditandai dengan checkmark orange).</p>
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                <p className="text-[10px] text-gray-400 -mt-1 font-sans">Pilih peran dan penempatan fungsional untuk masing-masing video YouTube di bawah ini.</p>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                     {videoList.map((videoUrlItem, idx) => {
                                                         let id = '';
                                                         if (videoUrlItem.includes('youtube.com/watch?v=')) {
@@ -737,47 +777,85 @@ export default function Galeri({
                                                         }
                                                         const thumbUrl = id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300';
                                                         const isPrimary = videoUrl === videoUrlItem;
+                                                        const isCoverVideo = coverVideoUrl === videoUrlItem;
+                                                        const isOpeningVideo = openingVideoUrl === videoUrlItem;
 
                                                         return (
-                                                            <div
-                                                                key={idx}
-                                                                onClick={() => handleSelectPrimaryVideo(videoUrlItem)}
-                                                                className={`relative aspect-[16/10] rounded-2xl overflow-hidden border-2 cursor-pointer group shadow-xs transition-all ${
-                                                                    isPrimary ? 'border-[#E5654B] ring-2 ring-orange-100 scale-[0.98]' : 'border-gray-200 hover:border-gray-300'
-                                                                }`}
-                                                            >
-                                                                <img src={thumbUrl} alt="YouTube Video Thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                                
-                                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
-                                                                    <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
-                                                                        <svg className="w-3.5 h-3.5 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                            <div key={idx} className="flex flex-col bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-sm transition-all">
+                                                                <div
+                                                                    className="relative aspect-[16/10] group transition-all"
+                                                                >
+                                                                    <img src={thumbUrl} alt="YouTube Video Thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                                    
+                                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                                                                        <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
+                                                                            <svg className="w-3.5 h-3.5 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Trash/Delete Button */}
+                                                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => handleDeleteVideo(e, videoUrlItem)}
+                                                                            className="w-5 h-5 rounded bg-white/95 hover:bg-red-50 text-gray-500 hover:text-red-500 shadow-sm flex items-center justify-center transition-colors"
+                                                                            title="Hapus video dari album"
+                                                                        >
+                                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                        </button>
                                                                     </div>
                                                                 </div>
+                                                                
+                                                                {/* Functional Placement Switcher - Direct Sync! */}
+                                                                <div className="p-3 bg-gray-50 border-t border-gray-100 space-y-2 flex-grow flex flex-col justify-between">
+                                                                    <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider">Hubungkan Video Sebagai:</p>
+                                                                    <div className="grid grid-cols-3 gap-1">
+                                                                        {/* Primary Video Button */}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleSelectPrimaryVideo(videoUrlItem)}
+                                                                            className={`py-1.5 rounded-xl text-[9px] font-extrabold uppercase transition-all tracking-wide ${
+                                                                                isPrimary 
+                                                                                    ? 'bg-orange-500 text-white shadow-xs' 
+                                                                                    : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-100'
+                                                                            }`}
+                                                                        >
+                                                                            {isPrimary ? '✓ Utama' : 'Utama'}
+                                                                        </button>
 
-                                                                {/* Checkmark for primary video selection */}
-                                                                {isPrimary && (
-                                                                    <div className="absolute top-2 left-2 flex items-center gap-1 bg-[#E5654B] text-white px-2 py-0.5 rounded-full shadow-md font-bold text-[9px] border border-white z-10">
-                                                                        <span>✓ Utama</span>
+                                                                        {/* Cover Video Button */}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleToggleCoverVideo(videoUrlItem, isCoverVideo)}
+                                                                            className={`py-1.5 rounded-xl text-[9px] font-extrabold uppercase transition-all tracking-wide ${
+                                                                                isCoverVideo 
+                                                                                    ? 'bg-orange-500 text-white shadow-xs' 
+                                                                                    : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-100'
+                                                                            }`}
+                                                                        >
+                                                                            {isCoverVideo ? '✓ Sampul' : 'Sampul'}
+                                                                        </button>
+
+                                                                        {/* Opening Video Button */}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleToggleOpeningVideo(videoUrlItem, isOpeningVideo)}
+                                                                            className={`py-1.5 rounded-xl text-[9px] font-extrabold uppercase transition-all tracking-wide ${
+                                                                                isOpeningVideo 
+                                                                                    ? 'bg-orange-500 text-white shadow-xs' 
+                                                                                    : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-100'
+                                                                            }`}
+                                                                        >
+                                                                            {isOpeningVideo ? '✓ Pembuka' : 'Pembuka'}
+                                                                        </button>
                                                                     </div>
-                                                                )}
-
-                                                                {/* Trash/Delete Button */}
-                                                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={(e) => handleDeleteVideo(e, videoUrlItem)}
-                                                                        className="w-5 h-5 rounded bg-white/95 hover:bg-red-50 text-gray-500 hover:text-red-500 shadow-sm flex items-center justify-center transition-colors animate-[fadeIn_0.2s_ease-out]"
-                                                                        title="Hapus video dari album"
-                                                                    >
-                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         );
                                                     })}
                                                 </div>
                                             </div>
-                                        )}
+                                        )}  )}
                                     </div>
 
                                     {/* Playback Mode */}
