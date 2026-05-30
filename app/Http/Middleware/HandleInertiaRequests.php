@@ -38,7 +38,7 @@ class HandleInertiaRequests extends Middleware
                 }
                 
                 // Ensure basic features are always true in shared features prop
-                $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
+                $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing', 'music', 'dresscode', 'video_wedding'];
                 foreach ($basicFeatures as $bf) {
                     $featureAccess[$bf] = true;
                 }

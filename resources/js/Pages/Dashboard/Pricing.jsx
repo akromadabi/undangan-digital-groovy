@@ -5,14 +5,47 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 export default function Pricing({ plans, currentPlan, features }) {
     const { flash, auth } = usePage().props;
     const [showComparison, setShowComparison] = useState(false);
+    const [showFeatureDetails, setShowFeatureDetails] = useState(false);
 
     const formatCurrency = (a) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(a);
 
+    const FEATURE_DESCS = {
+        opening: 'Tampilan pembuka halaman undangan (Layar sapa)',
+        bride_groom: 'Detail profil mempelai (Nama, Orang Tua, Media Sosial)',
+        event: 'Informasi detail akad nikah, resepsi, dan peta lokasi interaktif',
+        gallery: 'Galeri album foto kenangan pre-wedding yang indah',
+        love_story: 'Halaman perjalanan kisah cinta romantis mempelai',
+        bank: 'Rekening Bank / E-Wallet untuk kirim kado atau amplop digital',
+        closing: 'Teks penutup undangan dan ucapan doa restu',
+        guestbook: 'Buku tamu interaktif untuk menerima ucapan doa restu dari pengunjung',
+        save_the_date: 'Fitur pengingat tanggal acara dan countdown waktu mundur',
+        turut_mengundang: 'Daftar nama-nama keluarga atau kerabat yang turut mengundang',
+        bride_groom_detail: 'Informasi detail biografi mendalam dari kedua mempelai',
+        dresscode: 'Fitur anjuran pakaian/dresscode untuk para tamu undangan',
+        video_wedding: 'Fitur untuk menampilkan video prewedding atau momen bahagia',
+        cover: 'Tampilan cover pembuka undangan digital premium',
+        guest: 'Manajemen kuota daftar nama tamu undangan tanpa batas',
+        rsvp: 'Sistem konfirmasi kehadiran tamu secara real-time',
+        music: 'Fitur pemutar musik latar (backsound) otomatis yang indah',
+        gift: 'Kirim kado fisik / hadiah alamat langsung ke lokasi mempelai',
+        whatsapp: 'Kirim undangan massal langsung via WhatsApp',
+        template: 'Bebas ganti pilihan tema dan variasi warna tanpa batas',
+        animasi: 'Efek animasi transisi premium di setiap elemen tema',
+        qr_code: 'Scan QR Code check-in tamu undangan secara praktis di hari H',
+        layar_sapa: 'Layar sambutan khusus untuk menyambut tamu VIP secara interaktif',
+        partikel: 'Efek partikel visual (daun gugur, salju, sakura, dll) di tema',
+        video_album: 'Koleksi album video prewedding tanpa batas dari YouTube',
+    };
+
+    const getFeatureDesc = (feature) => {
+        return feature.description || FEATURE_DESCS[feature.slug] || `Fitur detail untuk ${feature.name}`;
+    };
+
     const planMeta = {
-        free: { gradient: 'from-gray-100 to-gray-50', badgeBg: 'bg-gray-500', ring: 'ring-gray-300', btn: 'from-gray-400 to-gray-500', glow: 'shadow-gray-200/50', icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6' },
-        silver: { gradient: 'from-slate-100 to-slate-50', badgeBg: 'bg-slate-500', ring: 'ring-slate-300', btn: 'from-slate-500 to-slate-600', glow: 'shadow-slate-200/50', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
-        gold: { gradient: 'from-amber-50 to-yellow-50', badgeBg: 'bg-amber-500', ring: 'ring-amber-300', btn: 'from-amber-400 to-orange-500', glow: 'shadow-amber-200/50', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
-        platinum: { gradient: 'from-violet-50 to-purple-50', badgeBg: 'bg-violet-500', ring: 'ring-violet-300', btn: 'from-violet-500 to-purple-600', glow: 'shadow-violet-200/50', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+        free: { emoji: '🎁', gradient: 'from-gray-100 to-gray-50', badgeBg: 'bg-gray-500', ring: 'ring-gray-300', btn: 'from-gray-400 to-gray-500', glow: 'shadow-gray-200/50', icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6' },
+        silver: { emoji: '🥈', gradient: 'from-slate-100 to-slate-50', badgeBg: 'bg-slate-500', ring: 'ring-slate-300', btn: 'from-slate-500 to-slate-600', glow: 'shadow-slate-200/50', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
+        gold: { emoji: '👑', gradient: 'from-amber-50 to-yellow-50', badgeBg: 'bg-amber-500', ring: 'ring-amber-300', btn: 'from-amber-400 to-orange-500', glow: 'shadow-amber-200/50', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
+        platinum: { emoji: '💎', gradient: 'from-violet-50 to-purple-50', badgeBg: 'bg-violet-500', ring: 'ring-violet-300', btn: 'from-violet-500 to-purple-600', glow: 'shadow-violet-200/50', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
     };
 
     const handleUpgrade = (planId) => {
@@ -30,12 +63,31 @@ export default function Pricing({ plans, currentPlan, features }) {
         });
     });
 
-    // Group features by category
-    const featuresByCategory = {};
+    // Group features by custom category
+    const BASIC_SLUGS = [
+        'opening', 'bride_groom', 'event', 'gallery', 
+        'closing', 'guestbook', 'cover', 'guest', 
+        'rsvp', 'template', 'dresscode', 'music'
+    ];
+
+    const PREMIUM_SECTION_SLUGS = [
+        'love_story', 'bank', 'turut_mengundang', 'bride_groom_detail', 'video_wedding', 'video_album', 'save_the_date'
+    ];
+
+    const featuresByCategory = {
+        'FITUR UTAMA & DASAR': [],
+        'FITUR PREMIUM - SECTION': [],
+        'FITUR PREMIUM - PENGATURAN & LAINNYA': []
+    };
+
     (features || []).forEach(f => {
-        const cat = f.category || 'Lainnya';
-        if (!featuresByCategory[cat]) featuresByCategory[cat] = [];
-        featuresByCategory[cat].push(f);
+        if (BASIC_SLUGS.includes(f.slug)) {
+            featuresByCategory['FITUR UTAMA & DASAR'].push(f);
+        } else if (PREMIUM_SECTION_SLUGS.includes(f.slug)) {
+            featuresByCategory['FITUR PREMIUM - SECTION'].push(f);
+        } else {
+            featuresByCategory['FITUR PREMIUM - PENGATURAN & LAINNYA'].push(f);
+        }
     });
 
     const totalFeatures = (features || []).length;
@@ -48,7 +100,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{flash.error}</div>
                 )}
                 {flash?.success && (
-                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
+                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] px-4 py-3 rounded-xl text-sm"><svg className="w-4 h-4 inline mr-1 -mt-0.5 text-[#E5654B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg> {flash.success}</div>
                 )}
 
                 {/* Header */}
@@ -245,7 +297,7 @@ export default function Pricing({ plans, currentPlan, features }) {
                 {totalFeatures > 0 && (
                     <div className="text-center">
                         <button onClick={() => setShowComparison(!showComparison)}
-                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 rounded-full text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all">
+                             className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 rounded-full text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all">
                             <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
@@ -260,130 +312,168 @@ export default function Pricing({ plans, currentPlan, features }) {
 
                 {/* Feature Comparison Table */}
                 {showComparison && totalFeatures > 0 && (
-                    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                        {/* Table header */}
-                        <div className="overflow-x-auto relative">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50">
-                                        <th className="sticky left-0 z-20 bg-gray-50 text-left px-3 py-3 md:px-6 md:py-4 w-[160px] min-w-[140px] md:w-[280px] md:min-w-[200px] border-r border-gray-150 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
-                                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Fitur</span>
-                                        </th>
-                                        {plans.map(plan => {
-                                            const meta = planMeta[plan.slug] || planMeta.silver;
-                                            const isCurrent = currentPlan?.id === plan.id;
-                                            return (
-                                                <th key={plan.id} className="text-center px-2 py-3 md:px-4 md:py-4 min-w-[110px]">
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <span className={`inline-block px-3 py-0.5 rounded-full text-[10px] font-bold text-white ${meta.badgeBg}`}>
-                                                            {plan.name}
-                                                        </span>
-                                                        {isCurrent && (
-                                                            <span className="text-[9px] text-[#E5654B] font-semibold">Aktif</span>
-                                                        )}
-                                                    </div>
-                                                </th>
-                                            );
-                                        })}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {/* Quota rows */}
-                                    <tr>
-                                        <td colSpan={plans.length + 1} className="sticky left-0 z-10 px-3 py-2 md:px-6 md:py-2 bg-blue-50/90 text-left">
-                                            <span className="sticky left-3 md:left-6 inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-500 uppercase tracking-wider">
-                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                                </svg>
-                                                Kuota
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr className="group border-t border-gray-100 hover:bg-gray-50/50 transition-colors">
-                                        <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 text-xs md:text-[13px] text-gray-700 font-medium border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Jumlah Tamu</td>
-                                        {plans.map(plan => (
-                                            <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3">
-                                                <span className="text-xs md:text-sm font-bold text-gray-800">{plan.max_guests.toLocaleString()}</span>
-                                            </td>
-                                        ))}
-                                    </tr>
-                                    <tr className="group border-t border-gray-100 hover:bg-gray-50/50 transition-colors">
-                                        <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 text-xs md:text-[13px] text-gray-700 font-medium border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Foto Galeri</td>
-                                        {plans.map(plan => (
-                                            <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3">
-                                                <span className="text-xs md:text-sm font-bold text-gray-800">{plan.max_galleries}</span>
-                                            </td>
-                                        ))}
-                                    </tr>
-                                    <tr className="group border-t border-gray-100 hover:bg-gray-50/50 transition-colors">
-                                        <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 text-xs md:text-[13px] text-gray-700 font-medium border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Durasi Aktif</td>
-                                        {plans.map(plan => (
-                                            <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3 text-[11px] md:text-xs text-gray-500 font-medium">
-                                                {plan.duration_days > 0 ? `${plan.duration_days} hari` : '∞ Selamanya'}
-                                            </td>
-                                        ))}
-                                    </tr>
-
-                                    {/* Feature rows by category */}
-                                    {Object.entries(featuresByCategory).map(([category, catFeatures]) => (
-                                        <Fragment key={category}>
-                                            <tr>
-                                                <td colSpan={plans.length + 1} className="sticky left-0 z-10 px-3 py-2 md:px-6 md:py-2 bg-purple-50/95 text-left border-t-2 border-gray-200">
-                                                    <span className="sticky left-3 md:left-6 inline-flex items-center gap-1.5 text-[10px] font-bold text-purple-500 uppercase tracking-wider">
-                                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                                        </svg>
-                                                        {category}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            {catFeatures.map((feature, fi) => (
-                                                <tr key={feature.id} className="group border-t border-gray-100 hover:bg-gray-50/50 transition-colors">
-                                                    <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
-                                                        <div className="text-xs md:text-[13px] text-gray-700 font-medium">{feature.name}</div>
-                                                        {feature.description && (
-                                                            <div className="text-[9px] md:text-[10px] text-gray-400 mt-0.5 leading-relaxed">{feature.description}</div>
-                                                        )}
-                                                    </td>
-                                                    {plans.map(plan => {
-                                                        const enabled = planFeatureMap[plan.id]?.[feature.id];
-                                                        return (
-                                                            <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3">
-                                                                {enabled ? (
-                                                                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-orange-100 flex items-center justify-center mx-auto">
-                                                                        <svg className="w-3 h-3 md:w-3.5 md:h-3.5 text-[#c24b33]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                                        </svg>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
-                                                                        <svg className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
-                                                                        </svg>
-                                                                    </div>
-                                                                )}
-                                                            </td>
-                                                        );
-                                                    })}
-                                                </tr>
-                                            ))}
-                                        </Fragment>
-                                    ))}
-                                </tbody>
-                            </table>
+                    <div className="space-y-4">
+                        <div className="flex justify-end pr-1">
+                            <label className="flex items-center gap-2 text-xs font-semibold text-gray-600 bg-white px-3 py-1.5 rounded-lg border border-gray-200 cursor-pointer shadow-xs hover:bg-gray-50 transition-colors select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={showFeatureDetails}
+                                    onChange={(e) => setShowFeatureDetails(e.target.checked)}
+                                    className="w-4 h-4 rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 cursor-pointer"
+                                />
+                                Tampilkan Detail Deskripsi Fitur
+                            </label>
                         </div>
+                        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                            {/* Table header */}
+                            <div className="overflow-x-auto relative">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50">
+                                            <th className="sticky left-0 z-20 bg-gray-50 text-left px-3 py-3 md:px-6 md:py-4 w-[160px] min-w-[140px] md:w-[280px] md:min-w-[200px] border-r border-gray-150 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Fitur</span>
+                                            </th>
+                                            {showFeatureDetails && (
+                                                <th className="text-left px-3 py-3 md:px-6 md:py-4 w-[240px] min-w-[220px] max-w-[280px] border-b border-gray-200 bg-gray-50 border-r border-gray-100 whitespace-normal break-words">
+                                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Detail Fitur</span>
+                                                </th>
+                                            )}
+                                            {plans.map(plan => {
+                                                const meta = planMeta[plan.slug] || planMeta.silver;
+                                                const isCurrent = currentPlan?.id === plan.id;
+                                                return (
+                                                    <th key={plan.id} className="text-center px-2 py-3 md:px-4 md:py-4 min-w-[110px]">
+                                                        <div className="flex flex-col items-center gap-1">
+                                                            <span className={`inline-block px-3 py-0.5 rounded-full text-[10px] font-bold text-white ${meta.badgeBg}`}>
+                                                                {plan.name}
+                                                            </span>
+                                                            {isCurrent && (
+                                                                <span className="text-[9px] text-[#E5654B] font-semibold">Aktif</span>
+                                                            )}
+                                                        </div>
+                                                    </th>
+                                                );
+                                            })}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {/* Quota rows */}
+                                        <tr>
+                                            <td colSpan={showFeatureDetails ? plans.length + 2 : plans.length + 1} className="sticky left-0 z-10 px-3 py-2 md:px-6 md:py-2 bg-blue-50/90 text-left">
+                                                <span className="sticky left-3 md:left-6 inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-500 uppercase tracking-wider">
+                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                                    </svg>
+                                                    Kuota & Batasan
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr className="group border-t border-gray-100 hover:bg-gray-50/50 transition-colors">
+                                            <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 text-xs md:text-[13px] text-gray-700 font-medium border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Jumlah Tamu</td>
+                                            {showFeatureDetails && (
+                                                <td className="px-3 py-2.5 md:px-6 md:py-3 text-xs text-gray-500 leading-relaxed border-r border-gray-100 w-[240px] min-w-[220px] max-w-[280px] whitespace-normal break-words">
+                                                    Batas maksimal jumlah tamu yang dapat diundang
+                                                </td>
+                                            )}
+                                            {plans.map(plan => (
+                                                <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3">
+                                                    <span className="text-xs md:text-sm font-bold text-gray-800">{plan.max_guests.toLocaleString()}</span>
+                                                </td>
+                                            ))}
+                                        </tr>
+                                        <tr className="group border-t border-gray-100 hover:bg-gray-50/50 transition-colors">
+                                            <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 text-xs md:text-[13px] text-gray-700 font-medium border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Foto Galeri</td>
+                                            {showFeatureDetails && (
+                                                <td className="px-3 py-2.5 md:px-6 md:py-3 text-xs text-gray-500 leading-relaxed border-r border-gray-100 w-[240px] min-w-[220px] max-w-[280px] whitespace-normal break-words">
+                                                    Maksimal foto yang dapat diunggah ke galeri undangan
+                                                </td>
+                                            )}
+                                            {plans.map(plan => (
+                                                <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3">
+                                                    <span className="text-xs md:text-sm font-bold text-gray-800">{plan.max_galleries}</span>
+                                                </td>
+                                            ))}
+                                        </tr>
+                                        <tr className="group border-t border-gray-100 hover:bg-gray-50/50 transition-colors">
+                                            <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 text-xs md:text-[13px] text-gray-700 font-medium border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Durasi Aktif</td>
+                                            {showFeatureDetails && (
+                                                <td className="px-3 py-2.5 md:px-6 md:py-3 text-xs text-gray-500 leading-relaxed border-r border-gray-100 w-[240px] min-w-[220px] max-w-[280px] whitespace-normal break-words">
+                                                    Masa aktif undangan digital setelah dibuat
+                                                </td>
+                                            )}
+                                            {plans.map(plan => (
+                                                <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3 text-[11px] md:text-xs text-gray-500 font-medium">
+                                                    {plan.slug === 'free' ? '5 Hari (Trial)' : plan.duration_days > 0 ? `${plan.duration_days} hari` : '∞ Selamanya'}
+                                                </td>
+                                            ))}
+                                        </tr>
 
-                        {/* Table footer with CTA */}
-                        <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                            <p className="text-xs text-gray-400">
-                                Semua fitur dikelola secara dinamis oleh admin
-                            </p>
-                            <Link href="/pricing" className="text-xs font-semibold text-amber-600 hover:text-amber-700 flex items-center gap-1">
-                                Ada pertanyaan? Hubungi kami
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </Link>
+                                        {/* Feature rows by category */}
+                                        {Object.entries(featuresByCategory).map(([category, catFeatures]) => (
+                                            <Fragment key={category}>
+                                                <tr>
+                                                    <td colSpan={showFeatureDetails ? plans.length + 2 : plans.length + 1} className="sticky left-0 z-10 px-3 py-2 md:px-6 md:py-2 bg-purple-50/95 text-left border-t-2 border-gray-200">
+                                                        <span className="sticky left-3 md:left-6 inline-flex items-center gap-1.5 text-[10px] font-bold text-purple-500 uppercase tracking-wider">
+                                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                                            </svg>
+                                                            {category}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                {catFeatures.map((feature, fi) => (
+                                                    <tr key={feature.id} className="group border-t border-gray-100 hover:bg-gray-50/50 transition-colors">
+                                                        <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                                                            <div className="text-xs md:text-[13px] text-gray-700 font-medium">{feature.name}</div>
+                                                            {!showFeatureDetails && (
+                                                                <div className="text-[9px] md:text-[10px] text-gray-400 mt-0.5 leading-relaxed">{getFeatureDesc(feature)}</div>
+                                                            )}
+                                                        </td>
+                                                        {showFeatureDetails && (
+                                                            <td className="px-3 py-2.5 md:px-6 md:py-3 text-xs text-gray-500 leading-relaxed border-r border-gray-100 w-[240px] min-w-[220px] max-w-[280px] whitespace-normal break-words">
+                                                                {getFeatureDesc(feature)}
+                                                            </td>
+                                                        )}
+                                                        {plans.map(plan => {
+                                                            const enabled = planFeatureMap[plan.id]?.[feature.id];
+                                                            return (
+                                                                <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3">
+                                                                    {enabled ? (
+                                                                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#FF8a65] to-[#E5654B] text-white flex items-center justify-center mx-auto shadow-[0_2px_8px_rgba(229,101,75,0.3)] hover:scale-110 hover:shadow-[0_4px_12px_rgba(229,101,75,0.5)] transition-all duration-200">
+                                                                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                            </svg>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-50/50 flex items-center justify-center mx-auto text-gray-300">
+                                                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                                            </svg>
+                                                                        </div>
+                                                                    )}
+                                                                </td>
+                                                            );
+                                                        })}
+                                                    </tr>
+                                                ))}
+                                            </Fragment>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Table footer with CTA */}
+                            <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                                <p className="text-xs text-gray-400">
+                                    Semua fitur dikelola secara dinamis oleh admin
+                                </p>
+                                <Link href="/pricing" className="text-xs font-semibold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+                                    Ada pertanyaan? Hubungi kami
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 )}

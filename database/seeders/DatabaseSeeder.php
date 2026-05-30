@@ -118,6 +118,8 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Save The Date', 'slug' => 'save_the_date', 'category' => 'content', 'icon' => 'MdCalendarToday'],
             ['name' => 'Turut Mengundang', 'slug' => 'turut_mengundang', 'category' => 'content', 'icon' => 'MdGroups'],
             ['name' => 'BrideGroom Detail', 'slug' => 'bride_groom_detail', 'category' => 'content', 'icon' => 'MdPersonPin'],
+            ['name' => 'Dresscode', 'slug' => 'dresscode', 'category' => 'content', 'icon' => 'MdCheckroom', 'description' => 'Fitur anjuran pakaian/dresscode untuk para tamu undangan'],
+            ['name' => 'Video Wedding', 'slug' => 'video_wedding', 'category' => 'content', 'icon' => 'MdPlayCircleOutline', 'description' => 'Fitur untuk menambahkan video pernikahan/galeri video'],
 
             // Settings features
             ['name' => 'Cover', 'slug' => 'cover', 'category' => 'settings', 'icon' => 'MdImage'],
@@ -139,8 +141,8 @@ class DatabaseSeeder extends Seeder
         // ═══════════════════════════════════════
         if (PlanFeatureAccess::count() === 0) {
             // Free plan: basic features only
-            $freeEnabled = ['opening', 'bride_groom', 'event', 'gallery', 'closing', 'guestbook', 'cover', 'guest', 'rsvp', 'template'];
-            $freeLocked = ['love_story', 'bank', 'save_the_date', 'turut_mengundang', 'bride_groom_detail', 'music', 'gift', 'whatsapp'];
+            $freeEnabled = ['opening', 'bride_groom', 'event', 'gallery', 'closing', 'guestbook', 'cover', 'guest', 'rsvp', 'template', 'dresscode', 'video_wedding', 'music'];
+            $freeLocked = ['love_story', 'bank', 'save_the_date', 'turut_mengundang', 'bride_groom_detail', 'gift', 'whatsapp'];
 
             foreach ($featureModels as $slug => $feature) {
                 PlanFeatureAccess::create([

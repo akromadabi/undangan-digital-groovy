@@ -1,4 +1,5 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Rochester&display=swap');
 
 /* ═══════════════════════════════════════════════════════════════════════
    WHATSAPP THEME CUSTOM CSS STYLESHEET
@@ -211,12 +212,80 @@
 }
 
 .wa-lock-msg {
-    font-size: 0.95rem;
-    line-height: 1.4;
-    background-color: #202c33;
-    padding: 12px;
-    border-radius: 8px;
-    border-left: 3px solid #25d366;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(32, 44, 51, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 14px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    text-align: left;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+.wa-lock-msg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #00a884;
+}
+.wa-lock-msg-icon {
+    font-size: 1.25rem;
+    color: #00a884;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 168, 132, 0.15);
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: wa-pulse-icon 2s infinite;
+}
+@keyframes wa-pulse-icon {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0.4); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(0, 168, 132, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0); }
+}
+.wa-lock-msg-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.wa-lock-msg-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #00a884;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.wa-lock-msg-desc {
+    font-size: 0.88rem;
+    color: #e9edef;
+    margin: 0;
+    line-height: 1.35;
+}
+.wa-lock-msg-badge {
+    background-color: #00a884;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 5px rgba(0, 168, 132, 0.3);
 }
 
 .wa-lock-btn {
@@ -313,13 +382,16 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background-color: #128C7E;
+    background: linear-gradient(135deg, #128C7E, #075E54);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 0.9rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 0.95rem;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .wa-header-meta {
@@ -1183,21 +1255,24 @@
 }
 
 .wa-opening-card-monogram {
-    width: 54px;
-    height: 54px;
+    width: 68px;
+    height: 68px;
     border-radius: 50%;
-    background-color: var(--wa-header-light);
+    background: linear-gradient(135deg, #008069, #128C7E);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: 'Playfair Display', Georgia, serif;
     font-weight: 700;
-    font-size: 1.25rem;
-    margin: -51px auto 14px auto;
+    font-style: italic;
+    font-size: 1.2rem;
+    padding-right: 2px; /* Optical adjustment for italic slant */
+    margin: -58px auto 14px auto;
     position: relative;
     z-index: 10;
-    border: 4px solid var(--wa-bubble-in);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    border: 4px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(7, 94, 84, 0.3);
 }
 
 .wa-opening-card-subtitle {

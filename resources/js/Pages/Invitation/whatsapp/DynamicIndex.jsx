@@ -4,6 +4,7 @@ import { useForm, Head } from '@inertiajs/react';
 import './style.css';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
+import DressCodeBlock from '@/Components/DressCodeBlock';
 
 /* ═══════════════════════════════════════
    STANDARD HELPERS & UTILITIES
@@ -1117,6 +1118,12 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                                             </div>
                                         </div>
                                     </Reveal>
+                                ))}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {safeArr(events)?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
+                                    </div>
                                 ))}
                             </>
                         )}

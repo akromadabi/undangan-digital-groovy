@@ -121,7 +121,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
         if (isUserAdminOrSuper) return false;
         
         // Basic features are always unlocked for any plan
-        const basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
+        const basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing', 'music', 'dresscode', 'video_wedding'];
         if (basicFeatures.includes(featureSlug)) return false;
         
         if (!features) return true;

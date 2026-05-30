@@ -8,7 +8,7 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
     </svg>
 );
 
-export default function Index({ resellers, filters }) {
+export default function Index({ resellers, filters, centralHost }) {
     const [search, setSearch] = useState(filters?.search || '');
 
     const handleSearch = (e) => {
@@ -89,7 +89,13 @@ export default function Index({ resellers, filters }) {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm text-[#555]">{r.reseller_settings?.brand_name || '-'}</div>
-                                            <div className="text-xs text-[#bbb]">{r.reseller_settings?.subdomain ? `${r.reseller_settings.subdomain}.domain.com` : '-'}</div>
+                                            <div className="text-xs text-[#bbb]">
+                                                {r.reseller_settings?.custom_domain 
+                                                    ? r.reseller_settings.custom_domain 
+                                                    : (r.reseller_settings?.subdomain 
+                                                        ? `${r.reseller_settings.subdomain}.${centralHost}` 
+                                                        : '-')}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <span className="text-sm font-medium text-[#333]">{r.reseller_users_count || 0}</span>

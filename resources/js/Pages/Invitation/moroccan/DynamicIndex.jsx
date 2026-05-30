@@ -1,5 +1,7 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';;
+import DressCodeBlock from '@/Components/DressCodeBlock';
 import { useForm, Head, router } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
@@ -752,6 +754,13 @@ function EventSection({ events, invitation, sections, language, themeConfig }) {
                         </Reveal>
                     );
                 })}
+
+                                {/* Compact standalone Dress Code box below event list */}
+                                {listEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
+                                        <DressCodeBlock event={ev} colors={{ primary: '#c49a45', text: '#2d2d2d' }} fonts={{ heading: 'inherit' }} variant="classic" />
+                                    </div>
+                                ))}
             </div>
 
             <MoroccanStarDivider />
@@ -1099,6 +1108,7 @@ function BankSection({ bankAccounts, language }) {
 
 // 9. Unified RSVP & Wishes Section
 function UnifiedRsvpWishes({ invitation, wishes, guest, language, enableRsvp, enableWishes }) {
+    const wishesInputRef = React.useRef(null);
     const isEn = language === 'en';
     const activeGuest = guest || { name: '', id: null };
     const guestName = activeGuest.name || new URLSearchParams(window.location.search).get('to') || '';
@@ -1242,7 +1252,20 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, language, enableRsvp, en
                     {enableWishes && (
                         <div className="mc-form-group">
                             <label className="mc-form-label" htmlFor="wish_message">{isEn ? 'Wishes & Prayers' : 'Pesan / Ucapan'}</label>
-                            <textarea
+                            <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                                 id="wish_message"
                                 value={message}
                                 onChange={e => setMessage(e.target.value)}
@@ -1251,6 +1274,8 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, language, enableRsvp, en
                                 rows={4}
                                 required={!enableRsvp}
                             />
+                                </WishesEmojiPicker>
+                                </WishesEmojiPicker>
                         </div>
                     )}
 

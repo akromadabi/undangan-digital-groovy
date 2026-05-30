@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useForm } from '@inertiajs/react';
@@ -1567,6 +1568,7 @@ function BankSection({ bankAccounts, language, onToast }) {
    UNIFIED FORM RSVP & WISHES SECTION (ALWAYS EXPANDED RSVP - rsvp selalu ada)
    ═══════════════════════════════════════ */
 function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishes, language, onToast }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation(language);
     const isEn = t('invitation.save_the_date') === 'Save The Date';
 
@@ -1712,7 +1714,14 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
 
                             <div className="ttk-form__group">
                                 <label className="ttk-form__label">{isEn ? 'Blessing Message' : 'Doa Restu'}</label>
-                                <textarea
+                                <WishesEmojiPicker
+                                    value={data.message}
+                                    onChange={(newValue) => setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={true}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                                     value={data.message}
                                     onChange={e => handleFormChange('message', e.target.value)}
                                     placeholder={isEn ? 'Write your comment...' : 'Tuliskan ucapan selamat / doa restu...'}
@@ -1721,6 +1730,7 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                                     required
                                     disabled={processing}
                                 />
+                                </WishesEmojiPicker>
                                 {errors.message && <span style={{ fontSize: 10, color: 'var(--ttk-red)' }}>{errors.message}</span>}
                             </div>
 

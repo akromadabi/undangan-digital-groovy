@@ -117,7 +117,7 @@ class Invitation extends Model
         }
 
         // Basic features are always accessible
-        $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
+        $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing', 'music', 'dresscode', 'video_wedding'];
         if (in_array($featureSlug, $basicFeatures)) {
             return true;
         }

@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useForm } from '@inertiajs/react';
@@ -1389,6 +1390,7 @@ function BankSection({ bankAccounts, language }) {
    RSVP & WISHES SECTION (Collaborative Playlist UI)
    ═══════════════════════════════════════ */
 function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishes, language }) {
+    const wishesInputRef = React.useRef(null);
     const { t, locale } = useTranslation(language);
     const activeGuest = guest || { name: '', id: null };
     const isEn = locale === 'en';
@@ -1519,7 +1521,14 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
 
                     {/* Wishes text area */}
                     {enableWishes && (
-                        <textarea
+                        <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={true}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                             className="spty-input"
                             rows="3"
                             placeholder={isEn ? 'Write your wishes/messages...' : 'Tulis ucapan dan doa Anda...'}
@@ -1527,6 +1536,7 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                             value={message}
                             onChange={e => setMessage(e.target.value)}
                         />
+                                </WishesEmojiPicker>
                     )}
 
                     <button

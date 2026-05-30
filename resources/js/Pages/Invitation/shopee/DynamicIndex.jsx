@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm } from '@inertiajs/react';
@@ -1001,6 +1002,7 @@ function LiveTab({ invitation, events }) {
    TAB 4: UCAPAN & RSVP (SHOPEE CHECKOUT / FORM ORDER STYLE)
    ═══════════════════════════════════════ */
 function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
+    const wishesInputRef = React.useRef(null);
     const activeGuest = guest || { name: '', id: null };
 
     const [sharedName, setSharedName] = useState(activeGuest.name || '');
@@ -1139,7 +1141,14 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                         {enableWishes && (
                             <div className="sp-checkout-field-group">
                                 <div className="sp-checkout-field-label">{isEn ? "Message / Blessing" : "Pesan / Ucapan Doa"}</div>
-                                <textarea
+                                <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                                     className="sp-input-text"
                                     placeholder={invitation?.type === 'wedding' ? (isEn ? "Write your wedding blessings..." : "Tulis doa & ucapan terbaik untuk kedua mempelai...") : (isEn ? "Write your blessings..." : "Tulis doa & ucapan terbaik...")}
                                     rows="3"
@@ -1147,6 +1156,7 @@ function NotifTab({ invitation, wishes, guest, enableRsvp, enableWishes }) {
                                     value={message}
                                     onChange={e => setMessage(e.target.value)}
                                 />
+                                </WishesEmojiPicker>
                             </div>
                         )}
 

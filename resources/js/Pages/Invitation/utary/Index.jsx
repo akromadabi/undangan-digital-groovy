@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Head } from '@inertiajs/react';
 import './style.css';
@@ -759,6 +760,7 @@ function GiftSection() {
 
 /* ── RSVP ── */
 function RsvpSection() {
+    const wishesInputRef = React.useRef(null);
     const [form, setForm] = useState({ name: '', attendance: 'hadir', guests: '1', message: '' });
     const [wishes, setWishes] = useState([
         { name: 'Ahmad', text: 'Selamat menempuh hidup baru! Barakallahu lakuma.', time: '2 jam lalu' },
@@ -819,8 +821,23 @@ function RsvpSection() {
                             </div>
                             <div className="utary-rsvp__field">
                                 <label className="utary-rsvp__label">Ucapan &amp; Doa</label>
-                                <textarea className="utary-rsvp__textarea" placeholder="Tulis ucapan untuk kedua mempelai..."
+                                <WishesEmojiPicker
+                                    value={form.message}
+                                    onChange={(newValue) => setForm({ ...form, message: newValue })}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <WishesEmojiPicker
+                                    value={form.message}
+                                    onChange={(newValue) => setForm({ ...form, message: newValue })}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef} className="utary-rsvp__textarea" placeholder="Tulis ucapan untuk kedua mempelai..."
                                     value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} />
+                                </WishesEmojiPicker>
+                                </WishesEmojiPicker>
                             </div>
                             <button type="submit" className="utary-rsvp__submit">Kirim Konfirmasi</button>
                         </form>

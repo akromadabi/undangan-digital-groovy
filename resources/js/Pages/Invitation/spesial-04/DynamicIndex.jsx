@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useForm, Head } from '@inertiajs/react';
@@ -761,6 +762,7 @@ function GallerySection({ galleries, showPhotos }) {
 
 // 9. unified RSVP & WISHES SECTION (Elementor & unified RSVP/wishes)
 function RsvpWishesSection({ invitation, wishes, locale }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation();
     const isEn = locale === 'en';
     
@@ -880,13 +882,21 @@ function RsvpWishesSection({ invitation, wishes, locale }) {
                         {/* Wish Message */}
                         <div className="sp04-input-group">
                             <label className="sp04-label">{isEn ? 'Wish & Blessing' : 'Ucapan & Doa'}</label>
-                            <textarea 
+                            <WishesEmojiPicker
+                                    value={data.message}
+                                    onChange={(newValue) => setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef} 
                                 className="sp04-textarea"
                                 rows="3"
                                 placeholder={isEn ? 'Write your wishes...' : 'Tulis ucapan dan doa terbaik Anda...'}
                                 value={data.message}
                                 onChange={e => setData('message', e.target.value)}
                             />
+                                </WishesEmojiPicker>
                             {errors.message && <div className="text-[10px] text-red-500 mt-1">{errors.message}</div>}
                         </div>
 

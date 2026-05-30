@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useForm } from '@inertiajs/react';
@@ -222,6 +223,7 @@ export default function DynamicIndex({
     wishes,
     guest,
 }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation(invitation?.language || 'id');
     // Autoplay states
     const [isOpened, setIsOpened] = useState(false);
@@ -1180,13 +1182,21 @@ export default function DynamicIndex({
                             {hasWishes && (
                                 <div className="lx1-form-group">
                                     <label className="lx1-form-label">{invitation?.language === 'en' ? 'Wishes & Prayers' : 'Pesan / Ucapan'}</label>
-                                    <textarea 
+                                    <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef} 
                                         className="lx1-form-textarea" 
                                         required={!hasRsvp}
                                         placeholder={t('invitation.wishes_msg')}
                                         value={message} 
                                         onChange={e => setMessage(e.target.value)}
                                     />
+                                </WishesEmojiPicker>
                                 </div>
                             )}
 

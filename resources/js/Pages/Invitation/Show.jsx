@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { Head, useForm } from '@inertiajs/react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
@@ -38,6 +39,7 @@ const AnimateIn = ({ children, type = 'fadeUp', delay = 0, className = '', durat
 };
 
 export default function Show({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
+    const wishesInputRef = React.useRef(null);
     const { t, locale } = useTranslation(invitation?.language || 'id');
     const getSectionName = (sec) => {
         const key = sec.section_key;
@@ -743,6 +745,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                             className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-full text-xs font-semibold text-white"
                                                                             style={{ backgroundColor: colors.primary }}><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg> Buka Maps</a>
                                                                     )}
+                                                                </div>
+                                                            </AnimateIn>
+                                                        ))}
+
+                                                        {/* Compact standalone Dress Code box below event list */}
+                                                        {events?.filter(evt => evt.show_dress_code).map((evt, idx) => (
+                                                            <AnimateIn key={`dc-${idx}`} type="fadeUp" delay={400 + idx * 150}>
+                                                                <div className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
                                                                     <DressCodeBlock event={evt} colors={colors} fonts={fonts} />
                                                                 </div>
                                                             </AnimateIn>
@@ -960,10 +970,25 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                     onChange={(e) => wishForm.setData('sender_name', e.target.value)}
                                                                     placeholder={t('invitation.wishes_name')} required
                                                                     className="w-full border rounded-xl px-4 py-2.5 text-sm outline-none" style={{ borderColor: colors.primary + '40' }} />
-                                                                <textarea value={wishForm.data.message}
+                                                                <WishesEmojiPicker
+                                    value={wishForm.data.message}
+                                    onChange={(newValue) => wishForm.setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <WishesEmojiPicker
+                                    value={wishForm.data.message}
+                                    onChange={(newValue) => wishForm.setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef} value={wishForm.data.message}
                                                                     onChange={(e) => wishForm.setData('message', e.target.value)}
                                                                     placeholder={t('invitation.wishes_msg')} required rows={3}
                                                                     className="w-full border rounded-xl px-4 py-2.5 text-sm resize-none outline-none" style={{ borderColor: colors.primary + '40' }} />
+                                </WishesEmojiPicker>
+                                </WishesEmojiPicker>
                                                                 <button type="submit" disabled={wishForm.processing}
                                                                     className="w-full py-3 rounded-xl text-white font-semibold text-sm" style={{ backgroundColor: colors.primary }}>
                                                                     {wishForm.processing ? t('common.saving') : t('invitation.send_wish')}

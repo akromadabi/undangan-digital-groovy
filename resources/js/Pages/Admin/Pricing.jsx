@@ -11,6 +11,39 @@ export default function Pricing({ planPricing, features = [] }) {
     const { flash } = usePage().props;
     const [saved, setSaved] = useState(false);
     const [showComparison, setShowComparison] = useState(false);
+    const [showFeatureDetails, setShowFeatureDetails] = useState(false);
+
+    const FEATURE_DESCS = {
+        opening: 'Tampilan pembuka halaman undangan (Layar sapa)',
+        bride_groom: 'Detail profil mempelai (Nama, Orang Tua, Media Sosial)',
+        event: 'Informasi detail akad nikah, resepsi, dan peta lokasi interaktif',
+        gallery: 'Galeri album foto kenangan pre-wedding yang indah',
+        love_story: 'Halaman perjalanan kisah cinta romantis mempelai',
+        bank: 'Rekening Bank / E-Wallet untuk kirim kado atau amplop digital',
+        closing: 'Teks penutup undangan dan ucapan doa restu',
+        guestbook: 'Buku tamu interaktif untuk menerima ucapan doa restu dari pengunjung',
+        save_the_date: 'Fitur pengingat tanggal acara dan countdown waktu mundur',
+        turut_mengundang: 'Daftar nama-nama keluarga atau kerabat yang turut mengundang',
+        bride_groom_detail: 'Informasi detail biografi mendalam dari kedua mempelai',
+        dresscode: 'Fitur anjuran pakaian/dresscode untuk para tamu undangan',
+        video_wedding: 'Fitur untuk menampilkan video prewedding atau momen bahagia',
+        cover: 'Tampilan cover pembuka undangan digital premium',
+        guest: 'Manajemen kuota daftar nama tamu undangan tanpa batas',
+        rsvp: 'Sistem konfirmasi kehadiran tamu secara real-time',
+        music: 'Fitur pemutar musik latar (backsound) otomatis yang indah',
+        gift: 'Kirim kado fisik / hadiah alamat langsung ke lokasi mempelai',
+        whatsapp: 'Kirim undangan massal langsung via WhatsApp',
+        template: 'Bebas ganti pilihan tema dan variasi warna tanpa batas',
+        animasi: 'Efek animasi transisi premium di setiap elemen tema',
+        qr_code: 'Scan QR Code check-in tamu undangan secara praktis di hari H',
+        layar_sapa: 'Layar sambutan khusus untuk menyambut tamu VIP secara interaktif',
+        partikel: 'Efek partikel visual (daun gugur, salju, sakura, dll) di tema',
+        video_album: 'Koleksi album video prewedding tanpa batas dari YouTube',
+    };
+
+    const getFeatureDesc = (feature) => {
+        return feature.description || FEATURE_DESCS[feature.slug] || `Fitur detail untuk ${feature.name}`;
+    };
 
     // Build feature access map: { planId: { featureId: is_enabled } }
     const planFeatureMap = {};
@@ -21,12 +54,31 @@ export default function Pricing({ planPricing, features = [] }) {
         });
     });
 
-    // Group features by category
-    const featuresByCategory = {};
+    // Group features by custom category
+    const BASIC_SLUGS = [
+        'opening', 'bride_groom', 'event', 'gallery', 
+        'closing', 'guestbook', 'cover', 'guest', 
+        'rsvp', 'template', 'dresscode', 'music'
+    ];
+
+    const PREMIUM_SECTION_SLUGS = [
+        'love_story', 'bank', 'turut_mengundang', 'bride_groom_detail', 'video_wedding', 'video_album', 'save_the_date'
+    ];
+
+    const featuresByCategory = {
+        'FITUR UTAMA & DASAR': [],
+        'FITUR PREMIUM - SECTION': [],
+        'FITUR PREMIUM - PENGATURAN & LAINNYA': []
+    };
+
     (features || []).forEach(f => {
-        const cat = f.category || 'Lainnya';
-        if (!featuresByCategory[cat]) featuresByCategory[cat] = [];
-        featuresByCategory[cat].push(f);
+        if (BASIC_SLUGS.includes(f.slug)) {
+            featuresByCategory['FITUR UTAMA & DASAR'].push(f);
+        } else if (PREMIUM_SECTION_SLUGS.includes(f.slug)) {
+            featuresByCategory['FITUR PREMIUM - SECTION'].push(f);
+        } else {
+            featuresByCategory['FITUR PREMIUM - PENGATURAN & LAINNYA'].push(f);
+        }
     });
 
     const totalFeatures = (features || []).length;
@@ -125,6 +177,16 @@ export default function Pricing({ planPricing, features = [] }) {
                                                     </span>
                                                 )}
                                             </p>
+                                            {plan.slug === 'free' && (
+                                                <div className="mt-3 text-[11px] text-blue-700 bg-blue-50 border border-blue-100 rounded-xl p-3 leading-relaxed">
+                                                    <strong>💡 Informasi Sistem Trial Otomatis Paket Free:</strong>
+                                                    <ul className="list-disc pl-4 mt-1 space-y-0.5 text-blue-600">
+                                                        <li><strong>Hari 1 - 2:</strong> Aktif dengan <strong>Fitur Premium Lengkap</strong> secara bersih (tanpa watermark/label).</li>
+                                                        <li><strong>Hari 3 - 5:</strong> Aktif dengan <strong>Fitur Premium Lengkap</strong>, namun muncul Label Trial di undangan pengunjung.</li>
+                                                        <li><strong>Hari 5+:</strong> Undangan dinonaktifkan otomatis.</li>
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </div>
                                         {profit > 0 && (
                                             <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-xl">
@@ -203,7 +265,18 @@ export default function Pricing({ planPricing, features = [] }) {
 
                     {/* Feature Comparison Table */}
                     {showComparison && totalFeatures > 0 && (
-                        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm mt-6">
+                        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm mt-6 p-4">
+                            <div className="flex justify-end mb-4 pr-2">
+                                <label className="inline-flex items-center gap-2 cursor-pointer text-xs md:text-sm font-semibold text-gray-600 hover:text-gray-800 transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        checked={showFeatureDetails}
+                                        onChange={(e) => setShowFeatureDetails(e.target.checked)}
+                                        className="w-4 h-4 rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 cursor-pointer"
+                                    />
+                                    Tampilkan Detail Deskripsi Fitur
+                                </label>
+                            </div>
                             <div className="overflow-x-auto relative">
                                 <table className="w-full border-collapse">
                                     <thead>
@@ -211,6 +284,11 @@ export default function Pricing({ planPricing, features = [] }) {
                                             <th className="sticky left-0 z-20 bg-gray-50 text-left px-3 py-3 md:px-6 md:py-4 w-[160px] min-w-[140px] md:w-[280px] md:min-w-[200px] border-r border-gray-150 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Fitur</span>
                                             </th>
+                                            {showFeatureDetails && (
+                                                <th className="text-left px-3 py-3 md:px-6 md:py-4 w-[240px] min-w-[220px] max-w-[280px] border-b border-gray-200 bg-gray-50 border-r border-gray-100 whitespace-normal break-words">
+                                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Detail Fitur</span>
+                                                </th>
+                                            )}
                                             {planPricing.map(plan => (
                                                 <th key={plan.id} className="text-center px-2 py-3 md:px-4 md:py-4 min-w-[110px]">
                                                     <span className="inline-block px-3 py-0.5 rounded-full text-[10px] font-bold bg-[#E5654B]/10 text-[#E5654B]">
@@ -223,7 +301,7 @@ export default function Pricing({ planPricing, features = [] }) {
                                     <tbody>
                                         {/* Quota rows */}
                                         <tr className="border-b border-gray-200">
-                                            <td colSpan={planPricing.length + 1} className="sticky left-0 z-10 px-3 py-2 md:px-6 md:py-2 bg-blue-50/80 text-left">
+                                            <td colSpan={showFeatureDetails ? planPricing.length + 2 : planPricing.length + 1} className="sticky left-0 z-10 px-3 py-2 md:px-6 md:py-2 bg-blue-50/80 text-left">
                                                 <span className="sticky left-3 md:left-6 inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-500 uppercase tracking-wider">
                                                     Kuota & Batasan
                                                 </span>
@@ -231,6 +309,11 @@ export default function Pricing({ planPricing, features = [] }) {
                                         </tr>
                                         <tr className="group border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
                                             <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 text-xs md:text-[13px] text-gray-700 font-medium border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Jumlah Tamu</td>
+                                            {showFeatureDetails && (
+                                                <td className="px-3 py-2.5 md:px-6 md:py-3 text-xs text-gray-500 leading-relaxed border-r border-gray-100 w-[240px] min-w-[220px] max-w-[280px] whitespace-normal break-words">
+                                                    Batas maksimal jumlah tamu yang dapat diundang
+                                                </td>
+                                            )}
                                             {planPricing.map(plan => (
                                                 <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3">
                                                     <span className="text-xs md:text-sm font-bold text-gray-800">{plan.max_guests?.toLocaleString()}</span>
@@ -239,6 +322,11 @@ export default function Pricing({ planPricing, features = [] }) {
                                         </tr>
                                         <tr className="group border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
                                             <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 text-xs md:text-[13px] text-gray-700 font-medium border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Foto Galeri</td>
+                                            {showFeatureDetails && (
+                                                <td className="px-3 py-2.5 md:px-6 md:py-3 text-xs text-gray-500 leading-relaxed border-r border-gray-100 w-[240px] min-w-[220px] max-w-[280px] whitespace-normal break-words">
+                                                    Maksimal foto yang dapat diunggah ke galeri undangan
+                                                </td>
+                                            )}
                                             {planPricing.map(plan => (
                                                 <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3">
                                                     <span className="text-xs md:text-sm font-bold text-gray-800">{plan.max_galleries}</span>
@@ -247,9 +335,14 @@ export default function Pricing({ planPricing, features = [] }) {
                                         </tr>
                                         <tr className="group border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
                                             <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 text-xs md:text-[13px] text-gray-700 font-medium border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Durasi Aktif</td>
+                                            {showFeatureDetails && (
+                                                <td className="px-3 py-2.5 md:px-6 md:py-3 text-xs text-gray-500 leading-relaxed border-r border-gray-100 w-[240px] min-w-[220px] max-w-[280px] whitespace-normal break-words">
+                                                    Masa aktif undangan digital setelah dibuat
+                                                </td>
+                                            )}
                                             {planPricing.map(plan => (
                                                 <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3 text-[11px] md:text-xs text-gray-500 font-medium">
-                                                    {plan.duration_days > 0 ? `${plan.duration_days} hari` : 'Selamanya (∞)'}
+                                                    {plan.slug === 'free' ? '5 hari (Trial)' : (plan.duration_days > 0 ? `${plan.duration_days} hari` : 'Selamanya (∞)')}
                                                 </td>
                                             ))}
                                         </tr>
@@ -258,7 +351,7 @@ export default function Pricing({ planPricing, features = [] }) {
                                         {Object.entries(featuresByCategory).map(([category, catFeatures]) => (
                                             <Fragment key={category}>
                                                 <tr className="border-b border-gray-200">
-                                                    <td colSpan={planPricing.length + 1} className="sticky left-0 z-10 px-3 py-2 md:px-6 md:py-2 bg-purple-50/80 text-left border-t border-gray-100">
+                                                    <td colSpan={showFeatureDetails ? planPricing.length + 2 : planPricing.length + 1} className="sticky left-0 z-10 px-3 py-2 md:px-6 md:py-2 bg-purple-50/80 text-left border-t border-gray-100">
                                                         <span className="sticky left-3 md:left-6 inline-flex items-center gap-1.5 text-[10px] font-bold text-purple-500 uppercase tracking-wider">
                                                             {category}
                                                         </span>
@@ -268,24 +361,29 @@ export default function Pricing({ planPricing, features = [] }) {
                                                     <tr key={feature.id} className="group border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
                                                         <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-3 py-2.5 md:px-6 md:py-3 border-r border-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                                                             <div className="text-xs md:text-[13px] text-gray-700 font-medium">{feature.name}</div>
-                                                            {feature.description && (
-                                                                <div className="text-[9px] md:text-[10px] text-gray-400 mt-0.5 leading-relaxed">{feature.description}</div>
+                                                            {!showFeatureDetails && (
+                                                                <div className="text-[9px] md:text-[10px] text-gray-400 mt-0.5 leading-relaxed">{getFeatureDesc(feature)}</div>
                                                             )}
                                                         </td>
+                                                        {showFeatureDetails && (
+                                                            <td className="px-3 py-2.5 md:px-6 md:py-3 text-xs text-gray-500 leading-relaxed border-r border-gray-100 w-[240px] min-w-[220px] max-w-[280px] whitespace-normal break-words">
+                                                                {getFeatureDesc(feature)}
+                                                            </td>
+                                                        )}
                                                         {planPricing.map(plan => {
-                                                            const enabled = planFeatureMap[plan.id]?.[feature.id];
+                                                            const enabled = plan.slug === 'free' ? true : planFeatureMap[plan.id]?.[feature.id];
                                                             return (
                                                                 <td key={plan.id} className="text-center px-2 py-2 md:px-4 md:py-3">
                                                                     {enabled ? (
-                                                                        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-orange-100 flex items-center justify-center mx-auto">
-                                                                            <svg className="w-3 h-3 md:w-3.5 md:h-3.5 text-[#E5654B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#FF8a65] to-[#E5654B] text-white flex items-center justify-center mx-auto shadow-[0_2px_8px_rgba(229,101,75,0.3)] hover:scale-110 hover:shadow-[0_4px_12px_rgba(229,101,75,0.5)] transition-all duration-200">
+                                                                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
                                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                                             </svg>
                                                                         </div>
                                                                     ) : (
-                                                                        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
-                                                                            <svg className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
+                                                                        <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-50/50 flex items-center justify-center mx-auto text-gray-300">
+                                                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                                                             </svg>
                                                                         </div>
                                                                     )}

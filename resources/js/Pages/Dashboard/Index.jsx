@@ -165,7 +165,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                 </div>
 
                 {/* ═══ Upgrade Banner ═══ */}
-                {dashboardSubscription?.plan_slug === 'free' && (
+                {dashboardSubscription?.plan_slug !== 'platinum' && (
                     <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white flex-shrink-0 shadow-sm">

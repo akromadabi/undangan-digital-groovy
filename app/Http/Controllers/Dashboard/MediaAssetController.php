@@ -39,6 +39,12 @@ class MediaAssetController extends Controller
             return response()->json(['error' => 'Undangan tidak ditemukan'], 404);
         }
 
+        if ($request->hasFile('file') && !$request->file('file')->isValid()) {
+            return response()->json([
+                'error' => 'Gagal mengunggah berkas: ' . $request->file('file')->getErrorMessage()
+            ], 400);
+        }
+
         $request->validate([
             'file' => 'required|image|max:10240', // Maksimum 10MB
         ]);
@@ -90,7 +96,7 @@ class MediaAssetController extends Controller
                 'asset' => $asset,
                 'url' => '/storage/' . $path,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

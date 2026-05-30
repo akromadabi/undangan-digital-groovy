@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useForm } from '@inertiajs/react';
@@ -1189,6 +1190,7 @@ const dummyWishes = [
 
 /* ─── RSVP & Wishes (YouInvite Comments Section) ─── */
 function RsvpSection({ invitation, onSubmit, processing, errors, wishesList, enableWishes }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation();
     
     const { data, setData, post, reset } = useForm({
@@ -1268,7 +1270,14 @@ function RsvpSection({ invitation, onSubmit, processing, errors, wishesList, ena
                     </div>
 
                     <div className="yt-comment-form-row mt-2">
-                        <textarea
+                        <WishesEmojiPicker
+                                    value={data.wish}
+                                    onChange={(newValue) => setData('wish', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={true}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                             placeholder="Tulis Doa & Ucapan Selamat Anda Di Sini (Doa terbaik Anda)..."
                             value={data.wish}
                             onChange={(e) => setData('wish', e.target.value)}
@@ -1276,6 +1285,7 @@ function RsvpSection({ invitation, onSubmit, processing, errors, wishesList, ena
                             rows={2}
                             className="yt-comment-textarea-line"
                         />
+                                </WishesEmojiPicker>
                     </div>
                     {errors.wish && <p className="text-red-500 text-[10px] mt-1">{errors.wish}</p>}
 

@@ -253,7 +253,7 @@ export default function DashboardLayout({ children, title }) {
                             }`}>
                             <div className="flex items-center justify-between">
                                 <span>Paket {subscription.plan?.name || 'Free'}</span>
-                                {subscription.plan?.slug === 'free' && (
+                                {subscription.plan?.slug !== 'platinum' && (
                                     <Link href="/pricing" className="text-[#E5654B] font-semibold hover:underline">Upgrade</Link>
                                 )}
                             </div>

@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm } from '@inertiajs/react';
@@ -1302,6 +1303,7 @@ function BankSection({ bankAccounts, id }) {
    RSVP SECTION
    ═══════════════════════════════════════ */
 function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishes }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation();
     const activeGuest = guest || { name: '', id: null };
     const isEn = t('invitation.save_the_date') === 'Save The Date';
@@ -1412,7 +1414,14 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
 
                     {/* Ucapan - hanya jika Wishes aktif */}
                     {enableWishes && (
-                        <textarea
+                        <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={true}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                             className="nf-input nf-wishes__textarea"
                             placeholder={isEn ? 'Write your wishes...' : 'Tulis ucapan untuk kedua mempelai...'}
                             value={message}
@@ -1420,6 +1429,7 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                             rows={3}
                             required={!enableRsvp}
                         />
+                                </WishesEmojiPicker>
                     )}
 
                     <button type="submit" disabled={isSubmitting} className="nf-submit-btn">

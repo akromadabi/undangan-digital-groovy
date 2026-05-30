@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import AnimatedLikeButton from '@/Components/AnimatedLikeButton';
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
 
@@ -190,6 +190,39 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
     const marqueeRef = useRef(null);
 
     const [showComparison, setShowComparison] = useState(false);
+    const [showFeatureDetails, setShowFeatureDetails] = useState(false);
+
+    const FEATURE_DESCS = {
+        opening: 'Tampilan pembuka halaman undangan (Layar sapa)',
+        bride_groom: 'Detail profil mempelai (Nama, Orang Tua, Media Sosial)',
+        event: 'Informasi detail akad nikah, resepsi, dan peta lokasi interaktif',
+        gallery: 'Galeri album foto kenangan pre-wedding yang indah',
+        love_story: 'Halaman perjalanan kisah cinta romantis mempelai',
+        bank: 'Rekening Bank / E-Wallet untuk kirim kado atau amplop digital',
+        closing: 'Teks penutup undangan dan ucapan doa restu',
+        guestbook: 'Buku tamu interaktif untuk menerima ucapan doa restu dari pengunjung',
+        save_the_date: 'Fitur pengingat tanggal acara dan countdown waktu mundur',
+        turut_mengundang: 'Daftar nama-nama keluarga atau kerabat yang turut mengundang',
+        bride_groom_detail: 'Informasi detail biografi mendalam dari kedua mempelai',
+        dresscode: 'Fitur anjuran pakaian/dresscode untuk para tamu undangan',
+        video_wedding: 'Fitur untuk menampilkan video prewedding atau momen bahagia',
+        cover: 'Tampilan cover pembuka undangan digital premium',
+        guest: 'Manajemen kuota daftar nama tamu undangan tanpa batas',
+        rsvp: 'Sistem konfirmasi kehadiran tamu secara real-time',
+        music: 'Fitur pemutar musik latar (backsound) otomatis yang indah',
+        gift: 'Kirim kado fisik / hadiah alamat langsung ke lokasi mempelai',
+        whatsapp: 'Kirim undangan massal langsung via WhatsApp',
+        template: 'Bebas ganti pilihan tema dan variasi warna tanpa batas',
+        animasi: 'Efek animasi transisi premium di setiap elemen tema',
+        qr_code: 'Scan QR Code check-in tamu undangan secara praktis di hari H',
+        layar_sapa: 'Layar sambutan khusus untuk menyambut tamu VIP secara interaktif',
+        partikel: 'Efek partikel visual (daun gugur, salju, sakura, dll) di tema',
+        video_album: 'Koleksi album video prewedding tanpa batas dari YouTube',
+    };
+
+    const getFeatureDesc = (feature) => {
+        return feature.description || FEATURE_DESCS[feature.slug] || `Fitur detail untuk ${feature.name}`;
+    };
 
     // Build feature access map: { planId: { featureId: is_enabled } }
     const planFeatureMap = {};
@@ -200,12 +233,31 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
         });
     });
 
-    // Group features by category
-    const featuresByCategory = {};
+    // Group features by custom category
+    const BASIC_SLUGS = [
+        'opening', 'bride_groom', 'event', 'gallery', 
+        'closing', 'guestbook', 'cover', 'guest', 
+        'rsvp', 'template', 'dresscode', 'music'
+    ];
+
+    const PREMIUM_SECTION_SLUGS = [
+        'love_story', 'bank', 'turut_mengundang', 'bride_groom_detail', 'video_wedding', 'video_album', 'save_the_date'
+    ];
+
+    const featuresByCategory = {
+        'FITUR UTAMA & DASAR': [],
+        'FITUR PREMIUM - SECTION': [],
+        'FITUR PREMIUM - PENGATURAN & LAINNYA': []
+    };
+
     (features || []).forEach(f => {
-        const cat = f.category || 'Lainnya';
-        if (!featuresByCategory[cat]) featuresByCategory[cat] = [];
-        featuresByCategory[cat].push(f);
+        if (BASIC_SLUGS.includes(f.slug)) {
+            featuresByCategory['FITUR UTAMA & DASAR'].push(f);
+        } else if (PREMIUM_SECTION_SLUGS.includes(f.slug)) {
+            featuresByCategory['FITUR PREMIUM - SECTION'].push(f);
+        } else {
+            featuresByCategory['FITUR PREMIUM - PENGATURAN & LAINNYA'].push(f);
+        }
     });
 
     const totalFeatures = (features || []).length;
@@ -750,7 +802,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                         <div className="rl-plan__name">{plan.name}</div>
                                         <div className="rl-plan__price">
                                             {plan.price > 0 ? formatRp(plan.price) : <span style={{ color: '#4ade80' }}>Gratis</span>}
-                                            {plan.duration_days > 0 && <span className="rl-plan__duration"> / {plan.duration_days} hari</span>}
+                                            {(plan.duration_days > 0 || plan.slug === 'free') && <span className="rl-plan__duration"> / {plan.slug === 'free' ? '5 hari' : `${plan.duration_days} hari`}</span>}
                                         </div>
                                         <div className="rl-plan__divider" />
                                         <ul className="rl-plan__features">
@@ -777,11 +829,30 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
 
                         {/* Feature Comparison Table */}
                         {showComparison && totalFeatures > 0 && (
-                            <div className="rl-comparison-table-wrap">
+                            <div className="rl-comparison-table-wrap" style={{ display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.25rem', paddingRight: '0.5rem' }}>
+                                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={showFeatureDetails}
+                                            onChange={(e) => setShowFeatureDetails(e.target.checked)}
+                                            style={{
+                                                accentColor: '#E5654B',
+                                                width: '16px',
+                                                height: '16px',
+                                                cursor: 'pointer'
+                                            }}
+                                        />
+                                        Tampilkan Detail Deskripsi Fitur
+                                    </label>
+                                </div>
                                 <table className="rl-comparison-table">
                                     <thead>
                                         <tr>
                                             <th>Fitur</th>
+                                            {showFeatureDetails && (
+                                                <th style={{ textAlign: 'left', width: '240px', minWidth: '220px', maxWidth: '280px', whiteSpace: 'normal', wordBreak: 'break-word' }}>Detail Fitur</th>
+                                            )}
                                             {plans.map(plan => (
                                                 <th key={plan.id}>{plan.name}</th>
                                             ))}
@@ -790,27 +861,42 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                     <tbody>
                                         {/* Quota rows */}
                                         <tr className="rl-comparison-cat-row">
-                                            <td colSpan={plans.length + 1}>
+                                            <td colSpan={showFeatureDetails ? plans.length + 2 : plans.length + 1}>
                                                 <span className="rl-comparison-cat-label">Kuota & Batasan</span>
                                             </td>
                                         </tr>
                                         <tr className="rl-comparison-row">
                                             <td>Jumlah Tamu</td>
+                                            {showFeatureDetails && (
+                                                <td style={{ textAlign: 'left', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', width: '240px', minWidth: '220px', maxWidth: '280px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                                                    Batas maksimal jumlah tamu yang dapat diundang
+                                                </td>
+                                            )}
                                             {plans.map(plan => (
                                                 <td key={plan.id} style={{ fontWeight: 700 }}>{plan.max_guests?.toLocaleString()}</td>
                                             ))}
                                         </tr>
                                         <tr className="rl-comparison-row">
                                             <td>Foto Galeri</td>
+                                            {showFeatureDetails && (
+                                                <td style={{ textAlign: 'left', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', width: '240px', minWidth: '220px', maxWidth: '280px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                                                    Maksimal foto yang dapat diunggah ke galeri undangan
+                                                </td>
+                                            )}
                                             {plans.map(plan => (
                                                 <td key={plan.id} style={{ fontWeight: 700 }}>{plan.max_galleries}</td>
                                             ))}
                                         </tr>
                                         <tr className="rl-comparison-row">
                                             <td>Durasi Aktif</td>
+                                            {showFeatureDetails && (
+                                                <td style={{ textAlign: 'left', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', width: '240px', minWidth: '220px', maxWidth: '280px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                                                    Masa aktif undangan digital setelah dibuat
+                                                </td>
+                                            )}
                                             {plans.map(plan => (
                                                 <td key={plan.id} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                                    {plan.duration_days > 0 ? `${plan.duration_days} hari` : 'Selamanya (∞)'}
+                                                    {plan.slug === 'free' ? '5 hari (Trial)' : (plan.duration_days > 0 ? `${plan.duration_days} hari` : 'Selamanya (∞)')}
                                                 </td>
                                             ))}
                                         </tr>
@@ -819,7 +905,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                         {Object.entries(featuresByCategory).map(([category, catFeatures]) => (
                                             <Fragment key={category}>
                                                 <tr className="rl-comparison-cat-row">
-                                                    <td colSpan={plans.length + 1}>
+                                                    <td colSpan={showFeatureDetails ? plans.length + 2 : plans.length + 1}>
                                                         <span className="rl-comparison-cat-label">{category}</span>
                                                     </td>
                                                 </tr>
@@ -827,18 +913,31 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                                     <tr key={feature.id} className="rl-comparison-row">
                                                         <td>
                                                             <div style={{ fontWeight: 600 }}>{feature.name}</div>
-                                                            {feature.description && (
-                                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', lineHeight: '1.4' }}>{feature.description}</div>
+                                                            {!showFeatureDetails && (
+                                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', lineHeight: '1.4' }}>{getFeatureDesc(feature)}</div>
                                                             )}
                                                         </td>
+                                                        {showFeatureDetails && (
+                                                            <td style={{ textAlign: 'left', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', width: '240px', minWidth: '220px', maxWidth: '280px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                                                                {getFeatureDesc(feature)}
+                                                            </td>
+                                                        )}
                                                         {plans.map(plan => {
-                                                            const enabled = planFeatureMap[plan.id]?.[feature.id];
+                                                            const enabled = plan.slug === 'free' ? true : planFeatureMap[plan.id]?.[feature.id];
                                                             return (
                                                                 <td key={plan.id}>
                                                                     {enabled ? (
-                                                                        <div className="rl-comparison-icon rl-comparison-icon--enabled">✓</div>
+                                                                        <div className="rl-comparison-icon rl-comparison-icon--enabled">
+                                                                            <svg style={{ width: '12px', height: '12px', stroke: '#ffffff', strokeWidth: 4, strokeLinecap: 'round', strokeLinejoin: 'round' }} viewBox="0 0 24 24" fill="none">
+                                                                                <path d="M5 13l4 4L19 7" />
+                                                                            </svg>
+                                                                        </div>
                                                                     ) : (
-                                                                        <div className="rl-comparison-icon rl-comparison-icon--disabled">−</div>
+                                                                        <div className="rl-comparison-icon rl-comparison-icon--disabled">
+                                                                            <svg style={{ width: '10px', height: '10px', stroke: '#d1d5db', strokeWidth: 3.5, strokeLinecap: 'round', strokeLinejoin: 'round' }} viewBox="0 0 24 24" fill="none">
+                                                                                <path d="M6 18L18 6M6 6l12 12" />
+                                                                            </svg>
+                                                                        </div>
                                                                     )}
                                                                 </td>
                                                             );
@@ -1760,14 +1859,19 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     font-weight: 700;
     font-size: 0.8rem;
     margin: 0 auto;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .rl-comparison-icon--enabled {
-    background: rgba(74,222,128,0.12);
-    color: #4ade80;
+    background: linear-gradient(135deg, #FF8a65 0%, #E5654B 100%);
+    box-shadow: 0 2px 6px rgba(229, 101, 75, 0.35);
+}
+.rl-comparison-icon--enabled:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(229, 101, 75, 0.55);
 }
 .rl-comparison-icon--disabled {
-    background: rgba(255,255,255,0.05);
-    color: var(--text-muted);
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
 }
 
 /* Compact mobile styles */

@@ -9,9 +9,9 @@ export default function Form({ plan, features }) {
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: plan?.name || '', slug: plan?.slug || '', description: plan?.description || '',
-        price: plan?.price || 0, suggested_price: plan?.suggested_price ?? '', duration_days: plan?.duration_days || 30,
-        max_guests: plan?.max_guests || 50, max_galleries: plan?.max_galleries || 5,
-        sort_order: plan?.sort_order || 0, features: featureAccess,
+        price: plan?.price ?? 0, suggested_price: plan?.suggested_price ?? '', duration_days: plan?.duration_days ?? 30,
+        max_guests: plan?.max_guests ?? 50, max_galleries: plan?.max_galleries ?? 5,
+        sort_order: plan?.sort_order ?? 0, features: featureAccess,
     });
 
     const handleSubmit = (e) => {
@@ -31,6 +31,25 @@ export default function Form({ plan, features }) {
             <Head title={isEdit ? 'Edit Paket' : 'Tambah Paket'} />
             <div className="max-w-2xl space-y-6">
                 <Link href={`${adminRoutePrefix}/plans`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali</Link>
+
+                {plan?.slug === 'free' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 space-y-2 text-sm text-blue-800">
+                        <h4 className="font-bold flex items-center gap-2 text-blue-900">
+                            💡 Informasi Sistem Trial Paket Free (Otomatis)
+                        </h4>
+                        <p className="leading-relaxed">
+                            Paket Free memiliki siklus hidup otomatis yang dikontrol langsung oleh sistem backend:
+                        </p>
+                        <ul className="list-disc pl-5 space-y-1">
+                            <li><strong>Hari 1 s.d 2:</strong> Aktif dengan <strong>Fitur Premium Lengkap</strong> secara bersih (tanpa watermark/label trial).</li>
+                            <li><strong>Hari 3 s.d 5:</strong> Aktif dengan <strong>Fitur Premium Lengkap</strong>, namun muncul Label Trial di undangan pengunjung.</li>
+                            <li><strong>Hari 5+:</strong> Undangan akan <strong>dinonaktifkan otomatis</strong> (diarahkan ke halaman Expired).</li>
+                        </ul>
+                        <p className="text-xs text-blue-600 font-medium">
+                            *Catatan: Pengaturan form statis di bawah (seperti Durasi, Batas Tamu, dll.) tetap dapat disimpan untuk konsistensi database, namun sistem backend di atas akan tetap berjalan otomatis secara dinamis.
+                        </p>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-5">

@@ -12,7 +12,6 @@ class FeatureSeeder extends Seeder
         $features = [
             ['name' => 'Animasi',     'slug' => 'animasi',       'category' => 'settings', 'description' => 'Akses ke pengaturan animasi dan transisi tema'],
             ['name' => 'QR Code',     'slug' => 'qr_code',       'category' => 'other',    'description' => 'Fitur QR code untuk tamu undangan'],
-            ['name' => 'Jumlah Tamu', 'slug' => 'jumlah_tamu',   'category' => 'other',    'description' => 'Kontrol batas maksimum jumlah tamu undangan'],
             ['name' => 'Layar Sapa',  'slug' => 'layar_sapa',    'category' => 'settings', 'description' => 'Layar sambutan sebelum masuk ke undangan'],
         ];
 

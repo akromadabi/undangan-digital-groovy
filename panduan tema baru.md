@@ -309,6 +309,7 @@ Seksi pembuka harus ada dan terstruktur dengan kriteria berikut:
   - Form memiliki nama lengkap (otomatis terisi nama tamu dari URL `?to=slug` jika ada), pilihan kehadiran (Hadir / Tidak Hadir), jumlah orang (hanya muncul jika Kehadiran = Hadir), dan kolom pesan doa/ucapan.
 - **Scrollable Wishes List**: Batasi penampilan list ucapan maksimal **5 item terbaru** dengan kuncian CSS `max-height: 280px` and `overflow-y: auto` agar halaman tidak memanjang tanpa batas di seluler.
 - **Filter Duplikasi Section**: Jika RSVP aktif, hilangkan seksi `wishes` dari list sections agar tidak memicu duplikasi form di halaman.
+- **Fitur Emoticon di Komentar**: Jika form komentar/ucapan dilengkapi dengan pemilih emoticon (*emoji picker*), pastikan popover/overlay pemilih emoji berada di dalam modal khusus atau memiliki pengaturan `z-index` yang tepat agar tidak terpotong oleh batas layar atau menutupi tombol kirim secara permanen. Ikon emoticon yang dirender di dalam teks ucapan wajib memiliki kuncian CSS tinggi proporsional (misalnya, `height: 1.2em` atau `font-size: 1.2rem` dengan `display: inline-block`) agar tidak merusak tinggi baris (*line-height*) teks ucapan.
 
 ### 4.8 Seksi Penutup & Tanda Tangan Formal (`closing` / `footer`)
 - **Tanda Tangan Formal Dinamis**: Menampilkan tanda tangan keluarga besar secara otomatis berdasarkan nama orang tua di database:
@@ -375,6 +376,50 @@ Setiap foto profil mempelai, foto galeri, slideshow cover, dan slideshow opening
 > 
 > * **Cara Kerja Browser:** Karena CSS global tema hanya mengunci ukuran dimensi dan `object-fit`, properti inline dinamis dari database seperti `object-position` (untuk geser koordinat X/Y) dan `transform: scale` (untuk perbesaran/zoom) tidak menggunakan `!important`, sehingga tetap akan diterapkan secara sempurna oleh browser sebagai overlay style.
 > * **Kuncian Wadah (Parent Container):** Selalu pastikan elemen pembungkus (parent container) dari gambar mempelai, cover, dan opening yang mendukung zoom memiliki properti `overflow: hidden`. Ini penting agar bagian gambar yang ter-zoom tidak melebar keluar batas frame/lingkaran wadahnya.
+
+### 4.11 Seksi Video Undangan / Background Video (`video`)
+- **Auto-Hide Cerdas**: Seksi ini **WAJIB** otomatis menyembunyikan dirinya sendiri (kembali bernilai `null` atau terfilter keluar dari list sections) jika kolom URL video (`invitation?.video_url` atau `video`) di database dalam keadaan kosong.
+- **Responsivitas Aspek Rasio**: Pemutar video (baik embed YouTube, Vimeo, maupun file MP4 kustom) wajib dibungkus dalam wadah aspek rasio standar 16:9 agar responsif di seluruh layar ponsel tanpa terpotong (*black bars*):
+  ```css
+  .prefix-tema .video-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9 !important;
+      overflow: hidden;
+      border-radius: 12px;
+  }
+  .prefix-tema .video-container iframe,
+  .prefix-tema .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      border: 0;
+  }
+  ```
+- **Kebijakan Autoplay & Suara**: Sesuai kebijakan browser modern, jika video diatur memutar otomatis (*autoplay*), properti `muted` wajib diset `true` (senyap). Jika pengguna mengaktifkan suara video, sistem wajib secara otomatis mem-pause lagu/musik latar belakang (`audioRef` & `isPlaying` state) undangan agar suara tidak saling bertabrakan.
+
+### 4.12 Seksi Panduan Dresscode / Kode Busana (`dresscode`)
+- **Auto-Hide**: Seksi dresscode wajib disembunyikan jika statusnya dinonaktifkan (`invitation?.show_dresscode === false`) or data dresscode kosong.
+- **Lingkaran Palet Warna Dinamis**: Tampilkan rekomendasi warna dresscode dalam bentuk lingkaran warna visual yang dinamis berbasis data hex warna dari database. Gunakan susunan Flexbox/Grid yang rapi:
+  ```jsx
+  const colors = invitation?.dresscode_colors ? invitation.dresscode_colors.split(',') : [];
+  
+  {colors.length > 0 && (
+      <div className="dresscode-colors-flex">
+          {colors.map((color, idx) => (
+              <div 
+                  key={idx} 
+                  className="dresscode-color-circle" 
+                  style={{ backgroundColor: color.trim() }}
+                  title={color.trim()}
+              />
+          ))}
+      </div>
+  )}
+  ```
+- **Bilingual Terjemahan**: Judul dan penjelasan dresscode wajib mendukung multi-bahasa menggunakan hooks `@/i18n` (misalnya: `Dresscode` untuk Bahasa Inggris, dan `Panduan Pakaian / Kode Busana` untuk Bahasa Indonesia).
 
 ---
 

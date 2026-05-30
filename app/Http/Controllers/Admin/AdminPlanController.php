@@ -19,7 +19,7 @@ class AdminPlanController extends Controller
 
     public function create()
     {
-        $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
+        $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing', 'music', 'dresscode', 'video_wedding'];
         return Inertia::render('Admin/Plans/Form', [
             'features' => Feature::whereNotIn('slug', $basicFeatures)->get(),
         ]);
@@ -65,7 +65,7 @@ class AdminPlanController extends Controller
 
     public function edit(SubscriptionPlan $plan)
     {
-        $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing'];
+        $basicFeatures = ['opening', 'cover', 'event', 'bride_groom', 'bride_groom_detail', 'closing', 'music', 'dresscode', 'video_wedding'];
         return Inertia::render('Admin/Plans/Form', [
             'plan' => $plan->load('featureAccess.feature'),
             'features' => Feature::whereNotIn('slug', $basicFeatures)->get(),

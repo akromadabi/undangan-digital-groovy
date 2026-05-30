@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Head, useForm } from '@inertiajs/react';
@@ -1022,6 +1023,7 @@ const parseBool = (val, defaultVal = true) => {
 };
 
 function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishes, id }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation();
     const activeGuest = guest || { name: '', id: null };
     const guestName = activeGuest.name || new URLSearchParams(window.location.search).get('to') || '';
@@ -1171,13 +1173,21 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                             {enableWishes && (
                                 <div className="utary-rsvp__field">
                                     <label className="utary-rsvp__label">{isEn ? 'Wishes & Prayers' : 'Ucapan & Doa'}</label>
+                                    <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
                                     <textarea
+                                    ref={wishesInputRef}
                                         className="utary-rsvp__textarea"
                                         placeholder={isEn ? 'Write your wishes...' : 'Tulis ucapan untuk kedua mempelai...'}
                                         value={message}
                                         onChange={e => setMessage(e.target.value)}
                                         required={!enableRsvp}
                                     />
+                                </WishesEmojiPicker>
                                 </div>
                             )}
 

@@ -25,9 +25,12 @@ class SuperAdminResellerController extends Controller
             ->latest()
             ->paginate(20);
 
+        $centralHost = parse_url(config('app.url'), PHP_URL_HOST);
+
         return Inertia::render('SuperAdmin/Resellers/Index', [
             'resellers' => $resellers,
             'filters' => $request->only('search'),
+            'centralHost' => $centralHost ?: 'undangan.com',
         ]);
     }
 

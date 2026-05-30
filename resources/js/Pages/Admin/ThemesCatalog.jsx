@@ -203,7 +203,10 @@ export default function ThemesCatalog({ themes }) {
             const response = await fetch(`${resolvedPrefix}/upload`, {
                 method: 'POST',
                 body: formData,
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
+                headers: { 
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content 
+                },
             });
 
             if (!response.ok) {
@@ -242,7 +245,10 @@ export default function ThemesCatalog({ themes }) {
             const response = await fetch(`${resolvedPrefix}/upload`, {
                 method: 'POST',
                 body: formData,
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
+                headers: { 
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content 
+                },
             });
 
             if (!response.ok) {

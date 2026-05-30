@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useForm, Head } from '@inertiajs/react';
@@ -966,6 +967,7 @@ function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
    RSVP & WISHES UNIFIED FORM SECTION
    ═══════════════════════════════════════ */
 function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation();
     const activeGuest = guest || { name: '', id: null };
     const guestName = activeGuest.name || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : '') || '';
@@ -1105,7 +1107,14 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                             <label className="text-[10px] font-bold text-[var(--sp02-text-light)] uppercase tracking-wider block mb-1.5">
                                 {isEn ? 'Wishes & Prayers' : 'Pesan / Ucapan'}
                             </label>
-                            <textarea
+                            <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                                 placeholder={t('invitation.wishes_placeholder') || 'Tulis pesan doa dan ucapan manis Anda di sini...'}
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
@@ -1113,6 +1122,7 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                                 rows={3}
                                 required={!enableRsvp}
                             />
+                                </WishesEmojiPicker>
                         </div>
                     )}
 

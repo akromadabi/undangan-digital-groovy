@@ -1,5 +1,7 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';;
+import DressCodeBlock from '@/Components/DressCodeBlock';
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
@@ -294,7 +296,13 @@ function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode })
     const pics = useMemo(() => {
         const list = safeArr(galleries);
         if (list.length > 0) {
-            return list.map(p => getStorageUrl(p.image_path || p.image_url));
+            return list.map(p => getStorageUrl(p.image_path || p.image_url))
+
+ {/* Compact standalone Dress Code box below event list */}
+ {list?.filter(p => p.show_dress_code).map((p, idx) => (
+     <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
+     </div>
+ ))};
         }
         return [getStorageUrl(invitation?.cover_image, ASSETS.cover)];
     }, [galleries, invitation]);
@@ -1028,6 +1036,7 @@ function BankSection({ bankAccounts, invitation }) {
    UNIFIED RSVP & WISHES CONTAINER
    ═══════════════════════════════════════ */
 function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation();
     const activeGuest = guest || { name: '', id: null };
     const guestName = activeGuest.name || new URLSearchParams(window.location.search).get('to') || '';
@@ -1163,7 +1172,20 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                         {enableWishes && (
                             <div className="lx2-form-group">
                                 <label htmlFor="wish_message">{isEn ? 'Wishes & Prayers' : 'Pesan / Ucapan'}</label>
-                                <textarea
+                                <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                                     id="wish_message"
                                     rows="3"
                                     className="lx2-textarea"
@@ -1172,6 +1194,8 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                                     placeholder={t('invitation.wishes_placeholder')}
                                     required={!enableRsvp}
                                 />
+                                </WishesEmojiPicker>
+                                </WishesEmojiPicker>
                             </div>
                         )}
 

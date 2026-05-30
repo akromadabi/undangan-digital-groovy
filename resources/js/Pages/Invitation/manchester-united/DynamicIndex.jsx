@@ -1,3 +1,4 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm } from '@inertiajs/react';
@@ -1211,6 +1212,7 @@ function BankSection({ bankAccounts, id, themeConfig }) {
    RSVP & WISHES (Supporters Zone)
    ═══════════════════════════════════════ */
 function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishes }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation();
     const activeGuest = guest || { name: '', id: null };
     const isEn = t('invitation.save_the_date') === 'Save The Date';
@@ -1336,13 +1338,21 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                                 {enableWishes && (
                                     <div className="mu-form-group">
                                         <label>SUPPORTERS DOAS & TRIBUTES</label>
-                                        <textarea
+                                        <WishesEmojiPicker
+                                    value={message}
+                                    onChange={setMessage}
+                                    inputRef={wishesInputRef}
+                                    isDark={true}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                                             rows="4"
                                             value={message}
                                             onChange={e => setMessage(e.target.value)}
                                             placeholder="Write your wishes for the couple..."
                                             className="mu-form-textarea"
                                         />
+                                </WishesEmojiPicker>
                                     </div>
                                 )}
 

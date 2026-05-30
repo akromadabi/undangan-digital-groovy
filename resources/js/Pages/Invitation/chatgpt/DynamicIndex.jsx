@@ -1,5 +1,7 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';;
+import DressCodeBlock from '@/Components/DressCodeBlock';
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
@@ -1160,6 +1162,13 @@ function EventSection({ events, invitation, language, guest, isTyping, themeConf
                             </Reveal>
                         );
                     })}
+
+                    {/* Compact standalone Dress Code box below event list */}
+                    {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                        <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
+                            <DressCodeBlock event={ev} colors={{ primary: '#10a37f', text: '#ececf1' }} fonts={{ heading: 'inherit' }} variant="app" />
+                        </div>
+                    ))}
                 </div>
             </ChatBubble>
         </div>
@@ -1378,6 +1387,7 @@ function BankSection({ bankAccounts, language, guest, isTyping, themeConfig }) {
    RSVP & UCAPAN TERPADU SECTION (ViteGPT comments box)
    ═══════════════════════════════════════ */
 function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishes, language, isTyping, themeConfig }) {
+    const wishesInputRef = React.useRef(null);
     const isEn = language === 'en';
     const guestName = guest?.name || 'Tamu Undangan';
     const guestNameFromUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null;
@@ -1492,7 +1502,20 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                             {enableWishes && (
                                 <div className="gpt-form-group">
                                     <label>{isEn ? 'Your Blessings / Comment' : 'Tulis Ucapan & Doa'}</label>
+                                    <WishesEmojiPicker
+                                    value={data.message}
+                                    onChange={(newValue) => setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={true}
+                                >
+                                    <WishesEmojiPicker
+                                    value={data.message}
+                                    onChange={(newValue) => setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={true}
+                                >
                                     <textarea
+                                    ref={wishesInputRef}
                                         value={data.message}
                                         onChange={(e) => setData('message', e.target.value)}
                                         className="gpt-form-textarea"
@@ -1500,6 +1523,8 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                                         rows="3"
                                         required
                                     />
+                                </WishesEmojiPicker>
+                                </WishesEmojiPicker>
                                 </div>
                             )}
 

@@ -1,5 +1,7 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';;
+import DressCodeBlock from '@/Components/DressCodeBlock';
 import { useForm, Head } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
@@ -693,6 +695,13 @@ function EventSection({ events, invitation, language, themeConfig }) {
                 );
             })}
 
+                                {/* Compact standalone Dress Code box below event list */}
+                                {listEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                                    <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
+                                        <DressCodeBlock event={ev} colors={{ primary: '#a3563f', text: '#1a1a1a' }} fonts={{ heading: 'inherit' }} variant="classic" />
+                                    </div>
+                                ))}
+
             <div className="wy-divider-gunungan">
                 <img src={ASSETS.gunungan} className="wy-divider-gunungan-img" alt="Divider" />
             </div>
@@ -880,6 +889,7 @@ function GallerySection({ galleries, language }) {
 
 // 8. RSVP & Wishes Section
 function RsvpSection({ wishes, invitation, guest, language }) {
+    const wishesInputRef = React.useRef(null);
     const { t } = useTranslation(language);
     const enableRsvp = parseBool(invitation?.enable_rsvp);
     const enableWishes = parseBool(invitation?.enable_wishes);
@@ -1015,7 +1025,20 @@ function RsvpSection({ wishes, invitation, guest, language }) {
                     {enableWishes && (
                         <div className="wy-form-group">
                             <label className="wy-form-label">{isEn ? 'Wishes & Prayers' : 'Ucapan & Doa'}</label>
-                            <textarea
+                            <WishesEmojiPicker
+                                    value={wishForm.data.message}
+                                    onChange={(newValue) => wishForm.setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <WishesEmojiPicker
+                                    value={wishForm.data.message}
+                                    onChange={(newValue) => wishForm.setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                                 rows="3"
                                 className="wy-form-textarea"
                                 value={wishForm.data.message}
@@ -1023,6 +1046,8 @@ function RsvpSection({ wishes, invitation, guest, language }) {
                                 placeholder={isEn ? 'Write your wishes...' : 'Tulis ucapan dan doa restu...'}
                                 required={!enableRsvp}
                             />
+                                </WishesEmojiPicker>
+                                </WishesEmojiPicker>
                         </div>
                     )}
 

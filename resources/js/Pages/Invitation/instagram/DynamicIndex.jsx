@@ -1,5 +1,7 @@
+import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { useTranslation } from '@/i18n';
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';;
+import DressCodeBlock from '@/Components/DressCodeBlock';
 import { useForm } from '@inertiajs/react';
 import './style.css';
 import ParticleEffect from '@/Components/ParticleEffect';
@@ -917,8 +919,15 @@ function EventSection({ events, invitation, language, sections }) {
                                         </a>
                                     </div>
                                 </Reveal>
-                            );
-                        })}
+                        );
+                    })}
+
+                    {/* Compact standalone Dress Code box below event list */}
+                    {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
+                        <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
+                            <DressCodeBlock event={ev} colors={{ primary: 'var(--ig-primary)', text: 'var(--ig-text)' }} fonts={{ heading: 'inherit' }} />
+                        </div>
+                    ))}
                     </div>
                 </div>
             </div>
@@ -1347,6 +1356,7 @@ function BankSection({ bankAccounts, language }) {
    RSVP & WISHES SECTION (InstaVite Comments Drawer UI)
    ═══════════════════════════════════════ */
 function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishes, language }) {
+    const wishesInputRef = React.useRef(null);
     const { t, locale } = useTranslation(language);
     const guestNameFromUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null;
     const defaultSenderName = guest?.name || guestNameFromUrl || '';
@@ -1454,7 +1464,20 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                         {enableWishes && (
                             <div className="ig-form-group">
                                 <label>{locale === 'en' ? 'Your Wish / Comment' : 'Tulis Ucapan & Doa'}</label>
-                                <textarea
+                                <WishesEmojiPicker
+                                    value={data.message}
+                                    onChange={(newValue) => setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <WishesEmojiPicker
+                                    value={data.message}
+                                    onChange={(newValue) => setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea
+                                    ref={wishesInputRef}
                                     value={data.message}
                                     onChange={(e) => setData('message', e.target.value)}
                                     className="ig-form-textarea"
@@ -1462,6 +1485,8 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                                     rows="3"
                                     required
                                 />
+                                </WishesEmojiPicker>
+                                </WishesEmojiPicker>
                             </div>
                         )}
 

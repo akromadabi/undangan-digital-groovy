@@ -90,6 +90,12 @@ class DashboardController extends Controller
         @ini_set('post_max_size', '25M');
         @ini_set('max_execution_time', '120');
 
+        if ($request->hasFile('file') && !$request->file('file')->isValid()) {
+            return response()->json([
+                'error' => 'Gagal mengunggah berkas: ' . $request->file('file')->getErrorMessage()
+            ], 400);
+        }
+
         $request->validate([
             'file' => 'required|file|max:20480',
             'folder' => 'nullable|string',
@@ -134,7 +140,7 @@ class DashboardController extends Controller
                 'url' => '/storage/' . $path,
                 'path' => $path,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
