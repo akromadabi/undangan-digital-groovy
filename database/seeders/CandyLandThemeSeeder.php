@@ -36,6 +36,8 @@ class CandyLandThemeSeeder extends Seeder
                 'is_premium' => true,
                 'is_active' => true,
                 'sort_order' => 26,
+                'type' => ['wedding', 'birthday', 'graduation', 'aqiqah', 'circumcision', 'anniversary', 'general'],
+                'allowed_plans' => null,
                 // Default data for previewing the theme (configured for Ulang Tahun / Birthday)
                 'default_data' => [
                     'invitation' => [
