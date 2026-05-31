@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Trash2, Save, Settings, Check, Sparkles, Loader2, Info, Link as LinkIcon, Maximize2, Minimize2, Smile, RotateCcw } from 'lucide-react';
+import { Trash2, Save, Settings, Check, Sparkles, Loader2, Info, Link as LinkIcon, Maximize2, Minimize2, Smile, RotateCcw, AlertTriangle } from 'lucide-react';
 
 export default function Galeri({ 
     galleries: initialGalleries, 
@@ -1479,6 +1479,14 @@ export default function Galeri({
                                                 onChange={(e) => setZoom(Number(e.target.value))}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#E5654B]"
                                             />
+                                            {['groom', 'bride'].includes(activeCropTarget) && zoom > 1.8 && (
+                                                <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-3 text-[10px] sm:text-[11px] leading-relaxed flex items-start gap-2 mt-2 animate-fade-in font-sans">
+                                                    <AlertTriangle size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                                                    <div>
+                                                        <span className="font-bold">Tips Kualitas Foto:</span> Melakukan pembesaran (zoom) terlalu tinggi pada foto berdua/ramai berpotensi membuat gambar pecah saat tampil di undangan. Kami menyarankan mengunggah foto setengah badan/close-up masing-masing mempelai secara terpisah untuk hasil maksimal.
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

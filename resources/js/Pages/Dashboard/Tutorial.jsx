@@ -834,6 +834,21 @@ export const FAQ_DATABASE = [
             'Jika Anda memilih jenis kelamin (gender) yang sama pada kedua mempelai (misalnya Pria-Pria atau Wanita-Wanita), sistem akan memunculkan peringatan validasi untuk memastikan data yang Anda input sudah sesuai.'
         ],
         mockup: null
+    },
+    {
+        id: 'faq-foto-mempelai-pecah',
+        category: 'desain-tema',
+        question: 'Mengapa foto profil mempelai saya terlihat pecah atau buram setelah di-crop/zoom?',
+        answer: 'Foto yang pecah atau buram setelah di-crop terjadi karena tingkat pembesaran (zoom) yang terlalu tinggi pada area foto yang kecil (misalnya memotong satu wajah dari foto berdua/ramai). Sistem kami telah ditingkatkan untuk mempertahankan resolusi unggahan hingga 1600px, namun disarankan menggunakan foto portrait masing-masing mempelai secara terpisah demi kualitas ketajaman maksimal.',
+        keywords: ['pecah', 'buram', 'blur', 'foto pecah', 'foto buram', 'crop pecah', 'zoom pecah', 'resolusi rendah', 'kualitas foto', 'gambar rusak'],
+        steps: [
+            'Hindari meng-crop satu wajah dari foto berdua atau foto berkelompok dengan jarak jauh.',
+            'Unggah file foto terpisah untuk masing-masing mempelai (pria dan wanita).',
+            'Gunakan foto setengah badan (portrait) atau close-up dengan resolusi tinggi langsung dari kamera ponsel atau fotografer.',
+            'Buka menu "Galeri & Media", pilih foto profil masing-masing, dan atur pembesaran (zoom) secukupnya (di bawah 1.5x - 1.8x).',
+            'Klik "Terapkan Posisi" dan simpan pengaturan untuk melihat hasil pemotongan yang tajam.'
+        ],
+        mockup: null
     }
 ];
 
@@ -1005,6 +1020,7 @@ export default function Tutorial() {
             'faq-beda-album-galeri',
             'faq-cara-crop',
             'faq-foto-tidak-pas',
+            'faq-foto-mempelai-pecah',
             'faq-reposition-preset',
             'faq-swap-mempelai',
             'faq-slideshow-cover',

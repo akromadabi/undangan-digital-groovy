@@ -13,7 +13,7 @@ class ImageCompressor
      * @param string|UploadedFile $file The file path or UploadedFile object.
      * @return bool True if compression was attempted and succeeded, false otherwise.
      */
-    public static function compress($file)
+    public static function compress($file, $maxDim = 1600)
     {
         $filePath = $file instanceof UploadedFile ? $file->getRealPath() : $file;
 
@@ -55,8 +55,7 @@ class ImageCompressor
             return false;
         }
 
-        // 2. Resize image if dimensions are too large (max 800px for optimal mobile size)
-        $maxDim = 800;
+        // 2. Resize image if dimensions are too large (optimal high resolution limit)
         if ($width > $maxDim || $height > $maxDim) {
             $ratio = $width / $height;
             if ($ratio > 1) {
