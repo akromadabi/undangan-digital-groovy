@@ -39,21 +39,23 @@ class MusicHelper
         $fileName = 'youtube_' . $videoId . '.mp3';
         $storagePath = 'music/' . $fileName;
         
-        if (Storage::disk('public')->exists($storagePath)) {
+        $fileAlreadyExists = Storage::disk('public')->exists($storagePath);
+        if ($fileAlreadyExists) {
             // Coba ambil metadata dari library atau invitation yang sudah ada
             $existing = \App\Models\MusicLibrary::where('url', '/storage/' . $storagePath)->first();
             if (!$existing) {
-                $existing = \App\Models\Invitation::where('music_url', '/storage/' . $storagePath)
-                    ->select('title')
-                    ->first();
+                $existing = \App\Models\Invitation::where('music_url', '/storage/' . $storagePath)->first();
             }
             if ($existing) {
                 $metadata = [
                     'title' => $existing->title ?? $existing->invitation_title ?? '',
                     'artist' => $existing->artist ?? ''
                 ];
+                return '/storage/' . $storagePath;
             }
-            return '/storage/' . $storagePath;
+            
+            // Jika metadata belum ada di database, kita LENGKAPI dulu dengan request ke Cobalt API,
+            // namun kita bypass pengunduhan ulang file audio di akhir jika data sudah terunduh.
         }
         
         // List of Cobalt API endpoints for robustness (Cobalt v10 Community Instances)
@@ -123,6 +125,12 @@ class MusicHelper
             } catch (\Exception $e) {
                 Log::warning("Cobalt instance {$instance} failed: " . $e->getMessage());
             }
+        }
+
+        // Jika file sudah ada di Storage, dan kita berhasil mengambil metadata dari Cobalt (atau Cobalt gagal sekalipun),
+        // kita langsung kembalikan path lokal karena file audio fisiknya sudah ada.
+        if ($fileAlreadyExists) {
+            return '/storage/' . $storagePath;
         }
 
         if (!$audioUrl) {
