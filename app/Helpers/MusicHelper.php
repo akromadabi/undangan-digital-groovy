@@ -41,14 +41,11 @@ class MusicHelper
         
         $fileAlreadyExists = Storage::disk('public')->exists($storagePath);
         if ($fileAlreadyExists) {
-            // Coba ambil metadata dari library atau invitation yang sudah ada
+            // Coba ambil metadata dari library yang sudah ada
             $existing = \App\Models\MusicLibrary::where('url', '/storage/' . $storagePath)->first();
-            if (!$existing) {
-                $existing = \App\Models\Invitation::where('music_url', '/storage/' . $storagePath)->first();
-            }
             if ($existing) {
                 $metadata = [
-                    'title' => $existing->title ?? $existing->invitation_title ?? '',
+                    'title' => $existing->title ?? '',
                     'artist' => $existing->artist ?? ''
                 ];
                 return '/storage/' . $storagePath;
@@ -97,20 +94,27 @@ class MusicHelper
                             // Clean up channel name suffix or cover brackets from title/artist
                             $parts = explode(' - ', $filename);
                             if (count($parts) >= 2) {
-                                $title = trim($parts[0]);
-                                $artist = trim($parts[1]);
+                                // YouTube format is typically: Artist - Title
+                                $artist = trim($parts[0]);
+                                $title = trim($parts[1]);
 
-                                // Remove common parenthesis info from artist (e.g. cover details)
+                                // Remove common parenthesis and bracket info from both artist and title
                                 $artist = trim(preg_replace('/\s*\(.*?\)\s*/', '', $artist));
                                 $artist = trim(preg_replace('/\s*\[.*?\]\s*/', '', $artist));
+                                $title = trim(preg_replace('/\s*\(.*?\)\s*/', '', $title));
+                                $title = trim(preg_replace('/\s*\[.*?\]\s*/', '', $title));
 
                                 $metadata = [
                                     'title' => $title,
                                     'artist' => $artist
                                 ];
                             } else {
+                                $title = trim($parts[0]);
+                                $title = trim(preg_replace('/\s*\(.*?\)\s*/', '', $title));
+                                $title = trim(preg_replace('/\s*\[.*?\]\s*/', '', $title));
+                                
                                 $metadata = [
-                                    'title' => trim($parts[0]),
+                                    'title' => $title,
                                     'artist' => ''
                                 ];
                             }

@@ -78,8 +78,8 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
                     ...data,
                     url: response.data.url,
                     source_type: 'url',
-                    title: data.title || response.data.title || '',
-                    artist: data.artist || response.data.artist || '',
+                    title: response.data.title || data.title || '',
+                    artist: response.data.artist || data.artist || '',
                 });
                 if (response.data.size) {
                     setUploadSize(response.data.size);
