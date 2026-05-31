@@ -39,6 +39,11 @@ class SuperAdminActivityLogController extends Controller
             $query->where('category', $request->input('category'));
         }
 
+        // Filter by Activity Type / Jenis Tindakan (create, update, delete, login)
+        if ($request->filled('activity_type') && $request->input('activity_type') !== 'all') {
+            $query->where('activity_type', $request->input('activity_type'));
+        }
+
         $logs = $query->paginate(50)->withQueryString();
 
         // Standardized categories list for filters
@@ -63,7 +68,7 @@ class SuperAdminActivityLogController extends Controller
 
         return Inertia::render('SuperAdmin/Logs', [
             'logs' => $logs,
-            'filters' => $request->only(['search', 'role', 'category']),
+            'filters' => $request->only(['search', 'role', 'category', 'activity_type']),
             'categories' => $categories,
         ]);
     }

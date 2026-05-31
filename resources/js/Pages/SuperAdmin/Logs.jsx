@@ -24,7 +24,12 @@ export default function LogsPage({ logs, filters, categories }) {
     const [search, setSearch] = useState(filters.search || '');
     const [role, setRole] = useState(filters.role || 'all');
     const [category, setCategory] = useState(filters.category || 'all');
+    const [activityType, setActivityType] = useState(filters.activity_type || 'all');
     const [isFiltering, setIsFiltering] = useState(false);
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(
+        (filters.role && filters.role !== 'all') || 
+        (filters.category && filters.category !== 'all')
+    );
     
     // Restore modal states
     const [restoringLog, setRestoringLog] = useState(null);
@@ -37,11 +42,13 @@ export default function LogsPage({ logs, filters, categories }) {
         const searchVal = newFilters.hasOwnProperty('search') ? newFilters.search : search;
         const roleVal = newFilters.hasOwnProperty('role') ? newFilters.role : role;
         const categoryVal = newFilters.hasOwnProperty('category') ? newFilters.category : category;
+        const activityTypeVal = newFilters.hasOwnProperty('activity_type') ? newFilters.activity_type : activityType;
 
         router.get('/super-admin/logs', {
             search: searchVal,
             role: roleVal,
-            category: categoryVal
+            category: categoryVal,
+            activity_type: activityTypeVal
         }, {
             preserveState: true,
             replace: true,
@@ -60,6 +67,8 @@ export default function LogsPage({ logs, filters, categories }) {
         setSearch('');
         setRole('all');
         setCategory('all');
+        setActivityType('all');
+        setShowAdvancedFilters(false);
         setIsFiltering(true);
         router.get('/super-admin/logs', {}, {
             preserveState: false,
@@ -108,14 +117,14 @@ export default function LogsPage({ logs, filters, categories }) {
     const getRoleBadge = (role) => {
         switch (role) {
             case 'super_admin':
-                return <span className="px-2.5 py-0.5 text-[10px] font-bold bg-red-50 text-red-600 rounded-full border border-red-150 uppercase tracking-wide">Super Admin</span>;
+                return <span className="px-2 py-0.5 text-[9px] font-bold bg-red-50 text-red-600 rounded border border-red-150 uppercase tracking-wide">Super Admin</span>;
             case 'reseller':
-                return <span className="px-2.5 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-600 rounded-full border border-blue-150 uppercase tracking-wide">Reseller</span>;
+                return <span className="px-2 py-0.5 text-[9px] font-bold bg-blue-50 text-blue-600 rounded border border-blue-150 uppercase tracking-wide">Reseller</span>;
             case 'user':
-                return <span className="px-2.5 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-600 rounded-full border border-emerald-150 uppercase tracking-wide">User</span>;
+                return <span className="px-2 py-0.5 text-[9px] font-bold bg-emerald-50 text-emerald-600 rounded border border-emerald-150 uppercase tracking-wide">User</span>;
             case 'guest':
             default:
-                return <span className="px-2.5 py-0.5 text-[10px] font-bold bg-gray-50 text-gray-600 rounded-full border border-gray-150 uppercase tracking-wide">Guest</span>;
+                return <span className="px-2 py-0.5 text-[9px] font-bold bg-gray-50 text-gray-600 rounded border border-gray-150 uppercase tracking-wide">Guest</span>;
         }
     };
 
@@ -123,15 +132,15 @@ export default function LogsPage({ logs, filters, categories }) {
     const getActivityBadge = (type) => {
         switch (type) {
             case 'create':
-                return <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100/60 text-emerald-700 rounded-lg">TAMBAH</span>;
+                return <span className="px-1.5 py-0.5 text-[9px] font-bold bg-emerald-100 text-emerald-700 rounded">TAMBAH</span>;
             case 'update':
-                return <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-100/60 text-amber-700 rounded-lg">UBAH</span>;
+                return <span className="px-1.5 py-0.5 text-[9px] font-bold bg-amber-100 text-amber-700 rounded">EDIT</span>;
             case 'delete':
-                return <span className="px-2 py-0.5 text-[10px] font-semibold bg-rose-100/60 text-rose-700 rounded-lg">HAPUS</span>;
+                return <span className="px-1.5 py-0.5 text-[9px] font-bold bg-rose-100 text-rose-700 rounded">HAPUS</span>;
             case 'login':
-                return <span className="px-2 py-0.5 text-[10px] font-semibold bg-indigo-100/60 text-indigo-700 rounded-lg">MASUK</span>;
+                return <span className="px-1.5 py-0.5 text-[9px] font-bold bg-indigo-100 text-indigo-700 rounded">MASUK</span>;
             default:
-                return <span className="px-2 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-700 rounded-lg">{type?.toUpperCase() || 'LAINNYA'}</span>;
+                return <span className="px-1.5 py-0.5 text-[9px] font-bold bg-gray-100 text-gray-700 rounded">{type?.toUpperCase() || 'LAINNYA'}</span>;
         }
     };
 
@@ -139,7 +148,7 @@ export default function LogsPage({ logs, filters, categories }) {
         <SuperAdminLayout title="Log Aktifitas Sistem">
             <Head title="Log Aktifitas - Super Admin" />
 
-            <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
+            <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                 {/* Toast Notification */}
                 {toast && (
                     <div className={`fixed top-5 right-5 z-50 rounded-2xl p-4 flex items-start gap-3 shadow-lg border max-w-sm animate-in slide-in-from-top-4 ${
@@ -156,102 +165,161 @@ export default function LogsPage({ logs, filters, categories }) {
                 )}
 
                 {/* Top Info Bar */}
-                <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="bg-white rounded-2xl border border-[#e8e5e0] p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
-                        <h2 className="text-xl font-bold text-[#1a1a1a] flex items-center gap-2">
-                            <Database className="w-5 h-5 text-[#E5654B]" /> Riwayat Aktifitas Pengguna
+                        <h2 className="text-lg font-bold text-[#1a1a1a] flex items-center gap-2">
+                            <Database className="w-4.5 h-4.5 text-[#E5654B]" /> Riwayat Aktifitas Pengguna
                         </h2>
-                        <p className="text-xs text-[#888] mt-1">Lacak seluruh aksi tambah, ubah, dan hapus data di seluruh platform secara real-time.</p>
+                        <p className="text-[11px] text-[#888] mt-0.5">Lacak seluruh aksi tambah, ubah, dan hapus data secara real-time.</p>
                     </div>
-                    <div className="text-xs font-semibold text-[#E5654B] bg-[#fdf5f3] border border-[#fcebe7] px-3.5 py-1.5 rounded-full shrink-0">
-                        Total Catatan: {logs.total} entri
+                    <div className="text-[11px] font-semibold text-[#E5654B] bg-[#fdf5f3] border border-[#fcebe7] px-3 py-1 rounded-full shrink-0">
+                        Total: {logs.total} entri
                     </div>
                 </div>
 
                 {/* Filters Section */}
-                <div className="bg-white rounded-2xl border border-[#e8e5e0] p-5 shadow-sm space-y-4">
-                    <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                        {/* Text Search */}
-                        <div className="relative md:col-span-2">
-                            <input 
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Cari pelaku, kata kunci deskripsi log..."
-                                className="w-full border border-[#e8e5e0] rounded-xl pl-10 pr-4 py-2.5 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all bg-[#faf9f6]/40"
-                            />
-                            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+                <div className="space-y-3">
+                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-3 sm:p-4 shadow-sm space-y-3">
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            {/* Text Search */}
+                            <form onSubmit={handleSearchSubmit} className="relative flex-1">
+                                <input 
+                                    type="text"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Cari pelaku, deskripsi log..."
+                                    className="w-full border border-[#e8e5e0] rounded-xl pl-9 pr-20 py-2 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all bg-[#faf9f6]/40"
+                                />
+                                <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-3" />
+                                
+                                <button 
+                                    type="submit"
+                                    className="absolute right-1.5 top-1.5 bg-[#E5654B] text-white hover:bg-[#d4523a] text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                                >
+                                    Cari
+                                </button>
+                            </form>
+
+                            <div className="flex gap-2 shrink-0">
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:py-2 text-xs font-bold rounded-xl transition-all border ${
+                                        showAdvancedFilters 
+                                            ? 'bg-[#fdf5f3] border-[#fcebe7] text-[#E5654B]' 
+                                            : 'bg-white border-[#e8e5e0] text-gray-600 hover:bg-[#faf9f6]'
+                                    }`}
+                                >
+                                    <Filter className="w-3.5 h-3.5" />
+                                    <span>Filter Peran & Kategori</span>
+                                    {(role !== 'all' || category !== 'all') && (
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#E5654B]" />
+                                    )}
+                                </button>
+
+                                {(search || role !== 'all' || category !== 'all' || activityType !== 'all') && (
+                                    <button 
+                                        type="button"
+                                        onClick={handleReset}
+                                        className="text-xs font-semibold text-gray-500 hover:text-gray-800 px-3.5 py-2.5 sm:py-2 rounded-xl transition-colors hover:bg-gray-100"
+                                    >
+                                        Reset
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
-                        {/* Filter Role */}
-                        <div className="relative">
-                            <select 
-                                value={role}
-                                onChange={(e) => { setRole(e.target.value); handleFilterChange({ role: e.target.value }); }}
-                                className="w-full border border-[#e8e5e0] rounded-xl pl-3 pr-8 py-2.5 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all bg-[#faf9f6]/40 appearance-none font-medium text-gray-700"
-                            >
-                                <option value="all">Semua Peran (Role)</option>
-                                <option value="super_admin">Super Admin</option>
-                                <option value="reseller">Reseller</option>
-                                <option value="user">User biasa</option>
-                                <option value="guest">Tamu Undangan (Guest)</option>
-                            </select>
-                            <Filter className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
-                        </div>
+                        {/* Collapsible Advanced Filters */}
+                        {showAdvancedFilters && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[#f5f3f0] transition-all duration-300 ease-in-out">
+                                {/* Filter Peran/Role */}
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Peran Pengguna</label>
+                                    <div className="relative">
+                                        <select 
+                                            value={role}
+                                            onChange={(e) => { setRole(e.target.value); handleFilterChange({ role: e.target.value }); }}
+                                            className="w-full border border-[#e8e5e0] rounded-xl pl-3 pr-8 py-2 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all bg-[#faf9f6]/40 appearance-none font-medium text-gray-700"
+                                        >
+                                            <option value="all">Semua Peran (Role)</option>
+                                            <option value="super_admin">Super Admin</option>
+                                            <option value="reseller">Reseller</option>
+                                            <option value="user">User</option>
+                                            <option value="guest">Guest</option>
+                                        </select>
+                                        <Filter className="w-3 h-3 text-gray-400 absolute right-3 top-3 pointer-events-none" />
+                                    </div>
+                                </div>
 
-                        {/* Filter Category */}
-                        <div className="relative">
-                            <select 
-                                value={category}
-                                onChange={(e) => { setCategory(e.target.value); handleFilterChange({ category: e.target.value }); }}
-                                className="w-full border border-[#e8e5e0] rounded-xl pl-3 pr-8 py-2.5 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all bg-[#faf9f6]/40 appearance-none font-medium text-gray-700"
-                            >
-                                {categories.map(cat => (
-                                    <option key={cat.value} value={cat.value}>{cat.label}</option>
-                                ))}
-                            </select>
-                            <Filter className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
-                        </div>
-                    </form>
+                                {/* Filter Kategori */}
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Kategori Aktivitas</label>
+                                    <div className="relative">
+                                        <select 
+                                            value={category}
+                                            onChange={(e) => { setCategory(e.target.value); handleFilterChange({ category: e.target.value }); }}
+                                            className="w-full border border-[#e8e5e0] rounded-xl pl-3 pr-8 py-2 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all bg-[#faf9f6]/40 appearance-none font-medium text-gray-700"
+                                        >
+                                            {categories.map(cat => (
+                                                <option key={cat.value} value={cat.value}>{cat.label}</option>
+                                            ))}
+                                        </select>
+                                        <Filter className="w-3 h-3 text-gray-400 absolute right-3 top-3 pointer-events-none" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
-                    <div className="flex items-center justify-between border-t border-[#f5f3f0] pt-4 text-xs">
-                        <div className="flex items-center gap-1.5 text-gray-500">
-                            {isFiltering && (
-                                <span className="flex items-center gap-1.5 font-medium text-[#E5654B] animate-pulse">
-                                    <RefreshCw className="w-3 h-3 animate-spin" /> Memfilter data log...
-                                </span>
-                            )}
+                    {/* Segmented Action / Tindakan Filter Tabs */}
+                    <div className="flex items-center justify-between gap-4 overflow-x-auto pb-1 scrollbar-none">
+                        <div className="flex gap-1 p-1 bg-[#f5f3f0] rounded-xl shrink-0">
+                            {[
+                                { value: 'all', label: 'Semua Tindakan', colorClass: 'bg-white text-gray-800 shadow-sm border border-gray-200/10' },
+                                { value: 'create', label: 'Tambah', colorClass: 'bg-emerald-600 text-white shadow-sm font-bold' },
+                                { value: 'update', label: 'Edit', colorClass: 'bg-amber-500 text-white shadow-sm font-bold' },
+                                { value: 'delete', label: 'Hapus', colorClass: 'bg-rose-500 text-white shadow-sm font-bold' },
+                            ].map((tab) => {
+                                const isActive = activityType === tab.value;
+                                return (
+                                    <button
+                                        key={tab.value}
+                                        type="button"
+                                        onClick={() => { setActivityType(tab.value); handleFilterChange({ activity_type: tab.value }); }}
+                                        className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                                            isActive 
+                                                ? tab.colorClass 
+                                                : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'
+                                        }`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                );
+                            })}
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button 
-                                onClick={handleReset} 
-                                className="text-gray-500 hover:text-gray-800 font-semibold px-3 py-1.5 rounded-lg transition-colors border border-transparent hover:border-gray-200"
-                            >
-                                Reset Filter
-                            </button>
-                            <button 
-                                onClick={() => handleFilterChange()}
-                                className="bg-[#E5654B] text-white hover:bg-[#d4523a] font-bold px-4 py-1.5 rounded-lg transition-colors shadow-sm"
-                            >
-                                Terapkan Pencarian
-                            </button>
-                        </div>
+                        
+                        {isFiltering && (
+                            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#E5654B] shrink-0 animate-pulse">
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Memfilter...
+                            </span>
+                        )}
                     </div>
                 </div>
 
-                {/* Logs Table */}
+                {/* Logs Data Container (Desktop Table / Mobile Cards) */}
                 <div className="bg-white rounded-2xl border border-[#e8e5e0] shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
+                    {/* Desktop View */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr className="bg-[#faf9f6] text-xs font-bold text-gray-500 border-b border-[#e8e5e0] uppercase tracking-wider">
-                                    <th className="px-5 py-4">Waktu</th>
-                                    <th className="px-5 py-4">Pelaku</th>
-                                    <th className="px-5 py-4">Peran (Role)</th>
-                                    <th className="px-5 py-4">Aktivitas</th>
-                                    <th className="px-5 py-4">Kategori</th>
-                                    <th className="px-5 py-4">Deskripsi</th>
-                                    <th className="px-5 py-4 text-center">Aksi</th>
+                                    <th className="px-4 py-3">Waktu</th>
+                                    <th className="px-4 py-3">Pelaku</th>
+                                    <th className="px-4 py-3">Peran (Role)</th>
+                                    <th className="px-4 py-3">Aktivitas</th>
+                                    <th className="px-4 py-3">Kategori</th>
+                                    <th className="px-4 py-3">Deskripsi</th>
+                                    <th className="px-4 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#f5f3f0] text-gray-700">
@@ -262,42 +330,42 @@ export default function LogsPage({ logs, filters, categories }) {
                                         
                                         return (
                                             <tr key={log.id} className="hover:bg-gray-50/50 transition-colors">
-                                                <td className="px-5 py-3.5 whitespace-nowrap text-xs text-gray-500 font-medium">
+                                                <td className="px-4 py-2.5 whitespace-nowrap text-xs text-gray-500 font-medium">
                                                     <span className="flex items-center gap-1.5">
                                                         <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                                         {formatTime(log.created_at)}
                                                     </span>
                                                 </td>
-                                                <td className="px-5 py-3.5">
+                                                <td className="px-4 py-2.5">
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center shrink-0 border border-[#e8e5e0]">
                                                             <UserIcon className="w-3.5 h-3.5 text-gray-500" />
                                                         </div>
                                                         <div>
-                                                            <span className="font-semibold block text-[13px] text-gray-800">
+                                                            <span className="font-semibold block text-[13px] text-gray-800 leading-none">
                                                                 {log.user?.name ?? 'Tamu Publik'}
                                                             </span>
-                                                            <span className="text-[10px] text-gray-400 block -mt-0.5 truncate max-w-[150px]">
+                                                            <span className="text-[10px] text-gray-400 block mt-0.5 truncate max-w-[150px]">
                                                                 {log.user?.email ?? '-'}
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <td className="px-4 py-2.5 whitespace-nowrap">
                                                     {getRoleBadge(log.role)}
                                                 </td>
-                                                <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <td className="px-4 py-2.5 whitespace-nowrap">
                                                     {getActivityBadge(log.activity_type)}
                                                 </td>
-                                                <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <td className="px-4 py-2.5 whitespace-nowrap">
                                                     <span className="px-2 py-1 text-[11px] font-semibold text-gray-600 bg-gray-100 rounded-lg">
                                                         {categories.find(c => c.value === log.category)?.label || log.category}
                                                     </span>
                                                 </td>
-                                                <td className="px-5 py-3.5 text-[13px] font-medium text-gray-800 leading-snug">
+                                                <td className="px-4 py-2.5 text-[13px] font-medium text-gray-850 leading-snug">
                                                     {log.description}
                                                 </td>
-                                                <td className="px-5 py-3.5 text-center whitespace-nowrap">
+                                                <td className="px-4 py-2.5 text-center whitespace-nowrap">
                                                     {isDelete ? (
                                                         hasPayload ? (
                                                             <button
@@ -329,19 +397,96 @@ export default function LogsPage({ logs, filters, categories }) {
                         </table>
                     </div>
 
+                    {/* Mobile View */}
+                    <div className="block md:hidden divide-y divide-[#f5f3f0]">
+                        {logs.data.length > 0 ? (
+                            logs.data.map((log) => {
+                                const isDelete = log.activity_type === 'delete';
+                                const hasPayload = log.payload !== null;
+                                
+                                return (
+                                    <div key={log.id} className="p-4 hover:bg-gray-50/50 transition-colors space-y-2.5">
+                                        <div className="flex justify-between items-start gap-2">
+                                            <div className="flex flex-wrap gap-1.5 items-center">
+                                                {getActivityBadge(log.activity_type)}
+                                                <span className="px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 bg-gray-100 rounded-lg">
+                                                    {categories.find(c => c.value === log.category)?.label || log.category}
+                                                </span>
+                                                {getRoleBadge(log.role)}
+                                            </div>
+                                            <span className="text-[10px] text-gray-400 font-medium flex items-center gap-1 shrink-0">
+                                                <Calendar className="w-3 h-3" />
+                                                {formatTime(log.created_at)}
+                                            </span>
+                                        </div>
+                                        
+                                        <p className="text-[12.5px] font-medium text-gray-800 leading-snug">
+                                            {log.description}
+                                        </p>
+                                        
+                                        <div className="flex justify-between items-center pt-2.5 border-t border-[#f5f3f0]/65">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0 border border-[#e8e5e0]">
+                                                    <UserIcon className="w-3 h-3 text-gray-500" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold text-xs text-gray-700 leading-none">
+                                                        {log.user?.name ?? 'Tamu Publik'}
+                                                    </span>
+                                                    <span className="text-[9px] text-gray-400 leading-none mt-0.5 max-w-[150px] truncate">
+                                                        {log.user?.email ?? '-'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            {isDelete ? (
+                                                hasPayload ? (
+                                                    <button
+                                                        onClick={() => setRestoringLog(log)}
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-white bg-[#E5654B] hover:bg-[#d4523a] rounded-xl shadow-sm transition-colors"
+                                                    >
+                                                        <RotateCcw className="w-2.5 h-2.5" /> Restore
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-[11px] text-gray-400 font-medium italic select-none">No Payload</span>
+                                                )
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className="p-12 text-center text-gray-400 text-xs font-medium">
+                                <Shield className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                Tidak ada riwayat aktifitas ditemukan untuk kriteria ini.
+                            </div>
+                        )}
+                    </div>
+
                     {/* Pagination */}
                     {logs.last_page > 1 && (
-                        <div className="bg-[#faf9f6] border-t border-[#e8e5e0] px-5 py-4 flex items-center justify-between">
+                        <div className="bg-[#faf9f6] border-t border-[#e8e5e0] px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <div className="text-xs font-medium text-gray-500">
                                 Menampilkan {logs.from ?? 0} - {logs.to ?? 0} dari {logs.total} data
                             </div>
-                            <div className="flex gap-1.5">
+                            <div className="flex flex-wrap gap-1 justify-center">
                                 {logs.links.map((link, idx) => {
+                                    const clickHandler = () => {
+                                        if (link.url) {
+                                            router.get(link.url, { 
+                                                search, 
+                                                role, 
+                                                category, 
+                                                activity_type: activityType 
+                                            });
+                                        }
+                                    };
+                                    
                                     if (link.label.includes('Previous')) {
                                         return (
                                             <button
                                                 key={idx}
-                                                onClick={() => link.url && router.get(link.url, { search, role, category })}
+                                                onClick={clickHandler}
                                                 disabled={!link.url}
                                                 className="px-2 py-1.5 text-xs font-bold bg-white rounded-lg border border-[#e8e5e0] hover:bg-[#f5f3f0] disabled:opacity-50 text-gray-600 transition-colors"
                                             >
@@ -353,7 +498,7 @@ export default function LogsPage({ logs, filters, categories }) {
                                         return (
                                             <button
                                                 key={idx}
-                                                onClick={() => link.url && router.get(link.url, { search, role, category })}
+                                                onClick={clickHandler}
                                                 disabled={!link.url}
                                                 className="px-2 py-1.5 text-xs font-bold bg-white rounded-lg border border-[#e8e5e0] hover:bg-[#f5f3f0] disabled:opacity-50 text-gray-600 transition-colors"
                                             >
@@ -364,7 +509,7 @@ export default function LogsPage({ logs, filters, categories }) {
                                     return (
                                         <button
                                             key={idx}
-                                            onClick={() => link.url && router.get(link.url, { search, role, category })}
+                                            onClick={clickHandler}
                                             disabled={link.active}
                                             className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
                                                 link.active 
