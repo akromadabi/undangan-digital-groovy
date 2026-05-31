@@ -210,10 +210,6 @@ export default function DemoPlanSelector({ plans = [], selectedPlanSlug = 'plati
                         <p className="text-xs text-gray-500 mt-1 px-4 leading-relaxed select-none">
                             Lihat perbedaan masa aktif, jumlah tamu, batas foto, serta seksi yang aktif secara langsung.
                         </p>
-                        
-                        <p className="text-[10px] text-gray-400 mt-2 px-4 leading-relaxed select-none">
-                            💡 <span className="italic">Tip: Tekan tombol <strong>'H'</strong> di keyboard, atau <strong>ketuk (tap) layar HP 3 kali secara cepat</strong> untuk menyembunyikan/menampilkan kembali panel ini.</span>
-                        </p>
 
                         {/* Global Comparison Button */}
                         <button
@@ -303,19 +299,6 @@ export default function DemoPlanSelector({ plans = [], selectedPlanSlug = 'plati
                     >
                         Tutup & Terapkan Simulasi
                     </button>
-
-                    {onHideCompletely && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsOpen(false);
-                                onHideCompletely();
-                            }}
-                            className="mt-2.5 w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold uppercase tracking-wider rounded-2xl transition-all active:scale-[0.98] border border-red-100"
-                        >
-                            🚫 Sembunyikan Menu Simulasi (Rekam Video)
-                        </button>
-                    )}
                 </div>
             </div>
 
