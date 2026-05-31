@@ -412,14 +412,15 @@ export const FAQ_DATABASE = [
     {
         id: 'faq-musik',
         category: 'desain-tema',
-        question: '16. Bagaimana cara mengganti musik latar (Backsound)?',
-        answer: 'Undangan digital Anda akan terasa lebih hidup dengan latar belakang musik yang romantis dan sesuai dengan selera Anda.',
-        keywords: ['musik', 'lagu', 'backsound', 'suara', 'sound', 'mp3', 'audio', 'ganti lagu', 'autoplay', 'lagu latar'],
+        question: '16. Bagaimana cara mengganti dan menambahkan musik latar (Backsound)?',
+        answer: 'Undangan digital Anda akan terasa lebih hidup dengan latar belakang musik yang romantis. Anda dapat menggunakan pilihan lagu romantis dari pustaka sistem, mengunggah file kustom Anda sendiri, atau mengonversi video YouTube langsung menjadi musik latar secara instan.',
+        keywords: ['musik', 'lagu', 'backsound', 'suara', 'sound', 'mp3', 'audio', 'ganti lagu', 'autoplay', 'lagu latar', 'upload musik', 'youtube ke mp3', 'konversi youtube', 'kustom musik'],
         steps: [
-            'Pilih menu "Musik" di panel samping.',
-            'Anda dapat mendengarkan dan menggunakan pilihan lagu romantis yang sudah kami sediakan di dalam pustaka sistem.',
-            'Jika Anda berlangganan paket Premium, Anda dapat mengunggah file musik buatan sendiri dalam format `.mp3` dengan batas ukuran maksimal 5MB.',
-            'Klik tombol "Simpan Musik" untuk menerapkan musik latar baru pada undangan Anda.'
+            'Pilih menu "Musik" di panel samping kiri.',
+            'Opsi 1 (Pustaka Musik): Jelajahi dan pilih langsung lagu romantis dari pustaka musik bawaan sistem.',
+            'Opsi 2 (Upload File Kustom): Jika Anda berlangganan paket Premium, klik tombol upload untuk mengunggah file kustom berformat `.mp3` milik Anda sendiri (Maksimal 5MB).',
+            'Opsi 3 (Konversi YouTube): Tempelkan tautan/link video YouTube ke kolom konverter kustom yang disediakan, lalu sistem akan mengonversi audio tersebut secara instan ke MP3.',
+            'Pratinjau lagu akan muncul di panel musik. Klik tombol "Simpan Musik" di bagian bawah untuk menerapkannya.'
         ],
         mockup: 'musik'
     },
@@ -543,14 +544,15 @@ export const FAQ_DATABASE = [
         id: 'faq-foto-tidak-pas',
         category: 'desain-tema',
         question: '25. Mengapa posisi foto saya terlihat tidak pas, terpotong, atau tidak rata?',
-        answer: 'Hal ini biasanya disebabkan oleh perbedaan orientasi foto asli (landscape/lebar) dengan wadah tampilan undangan yang mayoritas berbentuk vertikal (portrait 9:16) untuk layar HP.',
-        keywords: ['tidak pas', 'terpotong', 'miring', 'tidak rata', 'pecah', 'kepotong', 'posisi salah', 'gepeng', 'lonjong'],
+        answer: 'Hal ini biasanya disebabkan oleh perbedaan orientasi foto asli dengan wadah tampilan undangan yang mayoritas berbentuk vertikal (portrait 9:16) untuk layar HP. Anda dapat menggunakan fitur crop dan reposisi visual kami yang mendukung Pinch-to-Zoom di perangkat mobile.',
+        keywords: ['tidak pas', 'terpotong', 'miring', 'tidak rata', 'pecah', 'kepotong', 'posisi salah', 'gepeng', 'lonjong', 'pinch to zoom', 'cubit layar', 'hp zoom', 'reposisi foto'],
         steps: [
             'Gunakan foto berorientasi Portrait (tegak) untuk hasil terbaik di halaman Sampul/Cover dan Pembuka.',
-            'Jika menggunakan foto Landscape, gunakan fitur Reposisi Visual di Galeri untuk menggeser sumbu X/Y agar fokus gambar berada di tengah.',
-            'Gunakan slider Zoom untuk memperkecil gambar jika bagian penting foto terpotong di luar bingkai.',
-            'Gunakan tombol preset "Fokus Wajah" untuk menaikkan posisi fokus foto ke area atas bingkai agar kepala mempelai tidak terpotong.',
-            'Pastikan ukuran file foto Anda tidak terlalu besar agar proses muat ulang reposisi di server berjalan lancar.'
+            'Buka menu "Galeri & Media", lalu pilih foto yang ingin diatur dan klik tombol edit/crop.',
+            'Jika menggunakan ponsel/HP, gunakan gerakan mencubit dengan dua jari (Pinch-to-Zoom) langsung pada area simulator layar HP untuk memperbesar/memperkecil gambar secara dinamis.',
+            'Seret (drag) gambar secara langsung untuk mengatur koordinat fokus tengah agar bagian kepala mempelai tidak terpotong.',
+            'Gunakan tombol preset edit cepat di bagian bawah seperti "Fokus Wajah" (fokus otomatis bagian atas wajah), "Penuhi Lebar", atau "Sesuaikan".',
+            'Klik "Terapkan Posisi" untuk menyimpan konfigurasi koordinat foto.'
         ],
         mockup: null
     },
@@ -775,6 +777,63 @@ export const FAQ_DATABASE = [
             'Klik tombol "Simpan Acara" di bagian bawah untuk menyimpan perubahan.'
         ],
         mockup: null
+    },
+    {
+        id: 'faq-pencarian-musik',
+        category: 'desain-tema',
+        question: 'Bagaimana cara mencari dan memilih lagu di Pustaka Musik?',
+        answer: 'Untuk memudahkan Anda menemukan lagu yang tepat, kami menyediakan fitur pencarian lagu real-time serta filter kategori musik di dalam pustaka sistem.',
+        keywords: ['cari musik', 'cari lagu', 'pencarian musik', 'pustaka musik', 'filter lagu', 'pilih lagu', 'real-time search', 'romantis'],
+        steps: [
+            'Masuk ke halaman "Musik" di dashboard Anda.',
+            'Ketik nama lagu, penyanyi, atau kata kunci di kolom "Cari Musik...". Daftar lagu akan otomatis tersaring saat Anda mengetik secara real-time.',
+            'Gunakan filter kategori di samping kolom pencarian untuk melihat musik dengan nuansa tertentu (misal: Tradisional, Modern, Pop, dll.).',
+            'Klik tombol Play untuk mendengarkan pratinjau (preview) musik terlebih dahulu.',
+            'Klik "Pilih Musik" pada lagu pilihan Anda, lalu klik "Simpan Musik" di bagian bawah.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-potong-musik',
+        category: 'desain-tema',
+        question: 'Bagaimana cara memotong (crop) durasi lagu kustom yang saya unggah?',
+        answer: 'Jika Anda hanya ingin memutar bagian reff atau rentang waktu tertentu dari musik kustom Anda, Anda dapat menggunakan fitur potong musik kustom kami.',
+        keywords: ['potong musik', 'crop musik', 'potong lagu', 'durasi musik', 'reff', 'pangkas audio', 'edit musik', 'detik mulai', 'detik selesai'],
+        steps: [
+            'Upload atau konversi lagu kustom Anda di menu "Musik".',
+            'Pada kotak pratinjau (Preview) lagu Anda, klik tombol "Potong Musik" di samping tombol kompres.',
+            'Masukkan detik mulai (misalnya detik ke-15) dan detik selesai (misalnya detik ke-75) pada kolom yang disediakan sesuai dengan total durasi lagu.',
+            'Klik tombol "Terapkan Potongan". Sistem akan memotong berkas musik secara fisik di server, memperkecil ukurannya secara signifikan, dan memperbarui pratinjau lagu Anda secara instan.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-kompres-musik',
+        category: 'desain-tema',
+        question: 'Bagaimana cara mengatasi ukuran file musik kustom yang terlalu besar (di atas 5MB)?',
+        answer: 'Kami menyediakan fitur kompresi tag-stripping otomatis yang dapat membuang metadata gambar/tag yang tidak perlu untuk memperkecil ukuran file tanpa mengurangi kualitas suara.',
+        keywords: ['kompres musik', 'compress musik', 'file besar', 'audio compress', 'metadata', 'tag strip', 'limit 5mb', 'hemat ukuran', 'perkecil musik'],
+        steps: [
+            'Unggah berkas musik Anda di menu "Musik". Jika ukurannya mendekati atau melebihi limit 5MB, sistem akan menampilkan detail ukurannya.',
+            'Pada kotak pratinjau (Preview) lagu Anda, klik tombol "Kompres File".',
+            'Tunggu proses kompresi selesai. Sistem akan menampilkan detail persentase hemat ukuran (misal dari 7MB menjadi 3.2MB) setelah membersihkan tag tak perlu.',
+            'Klik "Simpan Musik" untuk menerapkan perubahan.'
+        ],
+        mockup: null
+    },
+    {
+        id: 'faq-swap-mempelai',
+        category: 'desain-tema',
+        question: 'Bagaimana cara menukar posisi foto/data mempelai pria & wanita yang tertukar, dan mengapa ada peringatan gender?',
+        answer: 'Untuk mempermudah koreksi input, kami menyediakan fitur Tukar Posisi instan. Sistem juga melakukan validasi gender otomatis agar tidak terjadi kesalahan pemasangan mempelai.',
+        keywords: ['tukar mempelai', 'swap mempelai', 'salah input', 'pria wanita tertukar', 'validasi gender', 'peringatan gender', 'tukar posisi', 'tukar data'],
+        steps: [
+            'Buka menu "Mempelai" di dashboard.',
+            'Jika Anda tidak sengaja memasukkan data pengantin wanita di kolom pria (atau sebaliknya), klik tombol "Tukar Posisi data Mempelai" (ikon panah bolak-balik) di bagian atas.',
+            'Seluruh nama, foto, biografi, sosial media, dan data orang tua pria & wanita akan langsung ditukar posisinya secara instan tanpa perlu mengetik ulang.',
+            'Jika Anda memilih jenis kelamin (gender) yang sama pada kedua mempelai (misalnya Pria-Pria atau Wanita-Wanita), sistem akan memunculkan peringatan validasi untuk memastikan data yang Anda input sudah sesuai.'
+        ],
+        mockup: null
     }
 ];
 
@@ -921,6 +980,9 @@ export default function Tutorial() {
             'faq-ganti-tema',
             'faq-autoplay',
             'faq-musik',
+            'faq-pencarian-musik',
+            'faq-potong-musik',
+            'faq-kompres-musik',
             'faq-video-cover',
             'faq-tambah-tamu',
             'faq-hadiah',
@@ -944,6 +1006,7 @@ export default function Tutorial() {
             'faq-cara-crop',
             'faq-foto-tidak-pas',
             'faq-reposition-preset',
+            'faq-swap-mempelai',
             'faq-slideshow-cover',
             'faq-bulk-toggle',
             'faq-video-album',
