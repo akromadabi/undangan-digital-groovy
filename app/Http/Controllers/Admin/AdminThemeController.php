@@ -12,13 +12,19 @@ class AdminThemeController extends Controller
     public function index()
     {
         $themes = Theme::withCount('invitations')->orderBy('sort_order')->get();
-        return Inertia::render('Admin/Themes/Index', ['themes' => $themes]);
+        return Inertia::render('Admin/Themes/Index', [
+            'themes' => $themes,
+            'availableCategories' => $this->getAvailableCategories()
+        ]);
     }
 
     public function create()
     {
         $plans = \App\Models\SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug']);
-        return Inertia::render('Admin/Themes/Form', ['plans' => $plans]);
+        return Inertia::render('Admin/Themes/Form', [
+            'plans' => $plans,
+            'categories' => $this->getAvailableCategories()
+        ]);
     }
 
     public function store(Request $request)
@@ -54,7 +60,8 @@ class AdminThemeController extends Controller
         $plans = \App\Models\SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug']);
         return Inertia::render('Admin/Themes/Form', [
             'theme' => $theme->load('sections'),
-            'plans' => $plans
+            'plans' => $plans,
+            'categories' => $this->getAvailableCategories()
         ]);
     }
 
@@ -95,5 +102,143 @@ class AdminThemeController extends Controller
     {
         $theme->delete();
         return redirect()->back()->with('success', 'Tema berhasil dihapus.');
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'category' => 'required|string|max:50',
+        ]);
+
+        $newCat = ucwords(strtolower(trim($request->category)));
+
+        if ($newCat === '') {
+            return redirect()->back()->withErrors(['category' => 'Nama kategori tidak boleh kosong.']);
+        }
+
+        $manuallyAdded = \App\Models\GlobalSetting::getValue('theme_categories', []);
+        if (!is_array($manuallyAdded)) {
+            $manuallyAdded = [];
+        }
+
+        $allCats = $this->getAvailableCategories();
+        $allCatsLower = array_map('strtolower', $allCats);
+
+        if (in_array(strtolower($newCat), $allCatsLower)) {
+            return redirect()->back()->with('success', "Kategori '{$newCat}' sudah ada di dalam daftar.");
+        }
+
+        $manuallyAdded[] = $newCat;
+        $manuallyAdded = array_unique(array_map(function($cat) {
+            return ucwords(strtolower(trim($cat)));
+        }, $manuallyAdded));
+
+        \App\Models\GlobalSetting::setValue('theme_categories', array_values($manuallyAdded), 'json');
+
+        return redirect()->back()->with('success', "Kategori '{$newCat}' berhasil ditambahkan.");
+    }
+
+    public function updateCategory(Request $request)
+    {
+        $request->validate([
+            'old_category' => 'required|string|max:50',
+            'new_category' => 'required|string|max:50',
+        ]);
+
+        $old = ucwords(strtolower(trim($request->old_category)));
+        $new = ucwords(strtolower(trim($request->new_category)));
+
+        $affected = Theme::whereRaw('LOWER(TRIM(category)) = ?', [strtolower($old)])
+            ->update(['category' => $new]);
+
+        $manuallyAdded = \App\Models\GlobalSetting::getValue('theme_categories', []);
+        if (is_array($manuallyAdded)) {
+            $updatedManual = [];
+            $found = false;
+            foreach ($manuallyAdded as $cat) {
+                if (strtolower(trim($cat)) === strtolower($old)) {
+                    $updatedManual[] = $new;
+                    $found = true;
+                } else {
+                    $updatedManual[] = ucwords(strtolower(trim($cat)));
+                }
+            }
+            if ($found) {
+                $updatedManual = array_unique($updatedManual);
+                \App\Models\GlobalSetting::setValue('theme_categories', array_values($updatedManual), 'json');
+            }
+        }
+
+        return redirect()->back()->with('success', "Kategori '{$old}' berhasil diubah menjadi '{$new}' pada {$affected} tema.");
+    }
+
+    public function deleteCategory(Request $request)
+    {
+        $request->validate([
+            'category' => 'required|string|max:50',
+        ]);
+
+        $cat = ucwords(strtolower(trim($request->category)));
+
+        $affected = Theme::whereRaw('LOWER(TRIM(category)) = ?', [strtolower($cat)])
+            ->update(['category' => 'Elegant']);
+
+        $manuallyAdded = \App\Models\GlobalSetting::getValue('theme_categories', []);
+        if (is_array($manuallyAdded)) {
+            $updatedManual = [];
+            foreach ($manuallyAdded as $item) {
+                if (strtolower(trim($item)) !== strtolower($cat)) {
+                    $updatedManual[] = ucwords(strtolower(trim($item)));
+                }
+            }
+            \App\Models\GlobalSetting::setValue('theme_categories', array_values($updatedManual), 'json');
+        }
+
+        return redirect()->back()->with('success', "Kategori '{$cat}' berhasil dihapus. {$affected} tema telah dialihkan ke kategori 'Elegant'.");
+    }
+
+    private function getAvailableCategories()
+    {
+        $defaultCategories = [
+            'Premium',
+            'Elegant',
+            'Modern',
+            'Floral',
+            'Islamic',
+            'Rustic',
+            'Minimalist',
+            'Playful',
+            'Anime'
+        ];
+
+        $manuallyAdded = \App\Models\GlobalSetting::getValue('theme_categories', []);
+        if (!is_array($manuallyAdded)) {
+            $manuallyAdded = [];
+        }
+
+        $usedCategories = \App\Models\Theme::distinct()
+            ->whereNotNull('category')
+            ->where('category', '!=', '')
+            ->pluck('category')
+            ->toArray();
+
+        $merged = array_merge($defaultCategories, $manuallyAdded, $usedCategories);
+
+        $normalized = [];
+        foreach ($merged as $cat) {
+            $cat = trim($cat);
+            if ($cat === '') {
+                continue;
+            }
+            
+            $titleCased = ucwords(strtolower($cat));
+            if (!in_array($titleCased, $normalized)) {
+                $normalized[] = $titleCased;
+            }
+        }
+
+        sort($normalized);
+
+        return $normalized;
     }
 }

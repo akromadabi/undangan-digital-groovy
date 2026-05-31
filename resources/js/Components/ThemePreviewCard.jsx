@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from '@inertiajs/react';
+import AnimatedLikeButton from './AnimatedLikeButton';
 
 const getImageUrl = (path) => {
     if (!path) return '';
@@ -9,6 +10,75 @@ const getImageUrl = (path) => {
 
 export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = true, onlyMockup = false, aspectClass = 'aspect-[3/4]' }) {
     const isDynamic = theme.preview_template && theme.preview_template !== 'full-mockup' && theme.preview_images && theme.preview_images.length > 0;
+    
+    // Likes internal state
+    const [liked, setLiked] = useState(() => {
+        try {
+            const key1 = localStorage.getItem('likedThemes');
+            if (key1) {
+                const parsed = JSON.parse(key1);
+                if (parsed[theme.id]) return true;
+            }
+            const key2 = localStorage.getItem('liked_themes');
+            if (key2) {
+                const parsed = JSON.parse(key2);
+                if (parsed.includes(theme.id)) return true;
+            }
+        } catch {}
+        return false;
+    });
+
+    const [count, setCount] = useState(() => {
+        const base = Number(theme.base_likes || 0);
+        const real = Number(theme.real_likes || 0);
+        return base + real;
+    });
+
+    const handleLikeClick = async (e) => {
+        if (e) {
+            e.preventDefault?.();
+            e.stopPropagation?.();
+        }
+        
+        const nextLiked = !liked;
+        setLiked(nextLiked);
+        setCount(prev => nextLiked ? prev + 1 : Math.max(0, prev - 1));
+        
+        try {
+            const key1Val = JSON.parse(localStorage.getItem('likedThemes') || '{}');
+            if (nextLiked) key1Val[theme.id] = true;
+            else delete key1Val[theme.id];
+            localStorage.setItem('likedThemes', JSON.stringify(key1Val));
+            
+            const key2Val = JSON.parse(localStorage.getItem('liked_themes') || '[]');
+            if (nextLiked) {
+                if (!key2Val.includes(theme.id)) key2Val.push(theme.id);
+            } else {
+                const idx = key2Val.indexOf(theme.id);
+                if (idx > -1) key2Val.splice(idx, 1);
+            }
+            localStorage.setItem('liked_themes', JSON.stringify(key2Val));
+        } catch {}
+        
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            const response = await fetch(`/theme/${theme.id}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ liked: nextLiked })
+            });
+            const result = await response.json();
+            if (result.success) {
+                setCount(result.likes);
+            }
+        } catch (err) {
+            console.error('Like request failed:', err);
+        }
+    };
     
     // Background Styles
     const bgStyles = {
@@ -233,13 +303,13 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
 
         if (template === 'single-phone') {
             return (
-                <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-6 overflow-hidden" style={{ perspective: '800px' }}>
+                <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4 overflow-hidden" style={{ perspective: '800px' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
                     
                     {/* Natural ambient ground shadow */}
                     {renderGroundShadow('translate-y-[80%]', 'w-[54%] max-w-[145px]', 'opacity-65')}
                     
-                    <div className="relative z-10 animate-in fade-in zoom-in duration-300 w-[70%] max-w-[185px]">
+                    <div className="relative z-10 animate-in fade-in zoom-in duration-300 w-[82%] sm:w-[70%] max-w-[185px]">
                         {renderPhone(images[0])}
                     </div>
                 </div>
@@ -248,7 +318,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
 
         if (template === 'double-phone') {
             return (
-                <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-2 sm:p-4" style={{ perspective: '800px' }}>
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-1 sm:p-3" style={{ perspective: '800px' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
                     
                     {/* Left phone ground shadow */}
@@ -258,11 +328,11 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                     {renderGroundShadow('translate-x-[19%] rotate-[4deg]', 'w-[55%] max-w-[150px]', 'opacity-60', 'bottom-[7%]')}
                     
                     {/* Back Left Phone */}
-                    <div className="absolute w-[55%] max-w-[150px] -translate-x-[35%] -translate-y-[2%] transform transition-transform duration-500 group-hover:-translate-x-[39%] z-10">
+                    <div className="absolute w-[62%] sm:w-[55%] max-w-[150px] -translate-x-[32%] -translate-y-[2%] transform transition-transform duration-500 group-hover:-translate-x-[36%] z-10">
                         {renderPhone(images[1] || images[0], true, '', true, false)}
                     </div>
                     {/* Front Right Phone */}
-                    <div className="absolute w-[55%] max-w-[150px] translate-x-[19%] translate-y-[6%] transform transition-transform duration-500 group-hover:translate-x-[23%] z-20">
+                    <div className="absolute w-[62%] sm:w-[55%] max-w-[150px] translate-x-[16%] translate-y-[6%] transform transition-transform duration-500 group-hover:translate-x-[20%] z-20">
                         {renderPhone(images[0], false, '', false, true)}
                     </div>
                 </div>
@@ -284,15 +354,15 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                     {renderGroundShadow('translate-x-[0%] rotate-[0deg]', 'w-[46%] max-w-[130px]', 'opacity-50', 'bottom-[7%]')}
                     
                     {/* Left Back Phone */}
-                    <div className="absolute w-[46%] max-w-[130px] -translate-x-[46%] -translate-y-[4%] transform transition-transform duration-500 group-hover:-translate-x-[53%] z-10">
+                    <div className="absolute w-[52%] sm:w-[46%] max-w-[130px] -translate-x-[42%] -translate-y-[4%] transform transition-transform duration-500 group-hover:-translate-x-[48%] z-10">
                         {renderPhone(images[1] || images[0], true, '', true, false)}
                     </div>
                     {/* Right Back Phone */}
-                    <div className="absolute w-[46%] max-w-[130px] translate-x-[46%] -translate-y-[4%] transform transition-transform duration-500 group-hover:translate-x-[53%] z-10">
+                    <div className="absolute w-[52%] sm:w-[46%] max-w-[130px] translate-x-[42%] -translate-y-[4%] transform transition-transform duration-500 group-hover:translate-x-[48%] z-10">
                         {renderPhone(images[2] || images[0], true, '', false, true)}
                     </div>
                     {/* Center Front Phone */}
-                    <div className="absolute w-[46%] max-w-[130px] translate-y-[5%] z-20 transform transition-transform duration-500 group-hover:scale-[1.03] group-hover:translate-y-[3%]">
+                    <div className="absolute w-[52%] sm:w-[46%] max-w-[130px] translate-y-[5%] z-20 transform transition-transform duration-500 group-hover:scale-[1.03] group-hover:translate-y-[3%]">
                         {renderPhone(images[0], false, '', false, false)}
                     </div>
                 </div>
@@ -405,12 +475,23 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                         {theme.name}
                     </h4>
                     <div className="flex items-center justify-between mt-1.5">
-                        <span className="text-[11px] text-gray-400 capitalize">{theme.category || 'Umum'}</span>
-                        {theme.is_premium ? (
-                            <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full tracking-wider">PREMIUM</span>
-                        ) : (
-                            <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full tracking-wider">GRATIS</span>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] text-gray-400 capitalize">{theme.category || 'Umum'}</span>
+                            {theme.is_premium ? (
+                                <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full tracking-wider">PREMIUM</span>
+                            ) : (
+                                <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full tracking-wider">GRATIS</span>
+                            )}
+                        </div>
+
+                        {/* Like Button in bottom right */}
+                        <div className="relative z-30 select-none">
+                            <AnimatedLikeButton 
+                                count={count}
+                                liked={liked}
+                                onClick={handleLikeClick}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

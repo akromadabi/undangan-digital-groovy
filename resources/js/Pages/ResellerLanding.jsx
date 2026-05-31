@@ -793,6 +793,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                 {/* Controls */}
                                 <div style={{
                                     display: 'flex',
+                                    flexWrap: 'wrap',
                                     alignItems: 'center',
                                     gap: '0.75rem'
                                 }}>
@@ -841,14 +842,12 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                                 top: '100%',
                                                 marginTop: '0.5rem',
                                                 width: '220px',
-                                                background: 'var(--card-bg)',
-                                                border: '1.5px solid var(--card-border)',
+                                                background: T.isDark ? '#1e293b' : '#ffffff',
+                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
                                                 borderRadius: '16px',
                                                 boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
                                                 zIndex: 99,
-                                                padding: '0.5rem',
-                                                backdropFilter: 'blur(10px)',
-                                                WebkitBackdropFilter: 'blur(10px)'
+                                                padding: '0.5rem'
                                             }}>
                                                 <div style={{
                                                     display: 'flex',

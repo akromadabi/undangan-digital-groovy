@@ -37,116 +37,112 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
     }
 
     let labels = {
-        ticketBadge: 'VIP EVENT TICKET',
-        matchChampionship: isEn ? 'SPECIAL EVENT CHAMPIONSHIP' : 'ACARA SPESIAL CHAMPIONSHIP',
+        ticketBadge: 'TIKET UNDANGAN VIP',
+        matchChampionship: 'ACARA SPESIAL KAMI',
         
-        coupleTitleBadge: 'KEY PERSON',
-        coupleTitle: 'EVENT LINEUP',
+        coupleTitleBadge: 'KEDUA MEMPELAI',
+        coupleTitle: 'MEMPELAI PRIA & WANITA',
         
-        storyTitleBadge: 'EVENT TIMELINE',
-        storyTitle: isEn ? 'KEY MOMENTS' : 'PERJALANAN ACARA',
+        storyTitleBadge: 'KISAH KITA',
+        storyTitle: 'PERJALANAN INDAH CINTA KAMI',
         
-        eventTitleBadge: 'EVENT FIXTURES',
-        eventTitle: isEn ? 'THE SPECIAL EVENT SCHEDULE' : 'JADWAL ACARA SPESIAL',
+        eventTitleBadge: 'JADWAL ACARA',
+        eventTitle: 'JADWAL RANGKAIAN ACARA',
         
-        streamTitleBadge: 'BROADCASTING',
-        streamTitle: isEn ? 'LIVE STREAMING' : 'SIARAN LANGSUNG',
-        streamSubtitle: isEn ? 'Join our event virtually' : 'Saksikan momen bahagia kami secara virtual',
+        streamTitleBadge: 'SIARAN LANGSUNG',
+        streamTitle: 'SIARAN LANGSUNG',
+        streamSubtitle: 'Saksikan momen bahagia kami secara virtual',
         
-        closingQuote: invitation?.closing_text || (isEn 
-            ? 'It is an honor and a happiness for us if you are willing to attend and support our event.' 
-            : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan dukungan dan doa restu.'),
+        closingQuote: invitation?.closing_text || 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan dukungan dan doa restu.',
             
-        signatureHeader: isEn ? 'FAMILY TRIBUTES' : 'KAMI YANG BERBAHAGIA',
-        signatureTitle: isEn ? 'We Who Are Joyful,' : 'Kami Yang Berbahagia,',
+        signatureHeader: 'KAMI YANG BERBAHAGIA',
+        signatureTitle: 'Kami Yang Berbahagia,',
         
-        vsDisplay: 'VS',
-        loveScoreBadge: 'EVENT STATUS',
-        scorerListText: isEn ? 'GREAT CELEBRATION' : 'PERAYAAN BESAR',
+        vsDisplay: '&',
+        loveScoreBadge: 'STATUS CINTA',
+        scorerListText: 'CINTA ABADI',
         
-        playerRole: isEn ? 'SQUAD MEMBER / HOST' : 'ANGGOTA SKUAD / UTAMA',
+        playerRole: 'MEMPELAI / UTAMA',
         playerNumber: '10',
     };
 
     if (t === 'wedding') {
-        labels.ticketBadge = 'VIP MATCH TICKET';
-        labels.matchChampionship = 'THE WEDDING CHAMPIONSHIP';
-        labels.coupleTitleBadge = 'KEY PLAYERS';
-        labels.coupleTitle = 'MATCHDAY LINEUP';
-        labels.storyTitleBadge = 'MATCH TIMELINE';
-        labels.storyTitle = 'KEY MOMENTS OF LOVE';
-        labels.eventTitleBadge = 'MATCH FIXTURES';
-        labels.eventTitle = 'THE WEDDING SCHEDULE';
-        labels.closingQuote = invitation?.closing_text || (isEn 
-            ? 'It is an honor and a happiness for us if you are willing to attend and give your blessings to the newlyweds.' 
-            : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.');
-        labels.vsDisplay = 'VS';
-        labels.loveScoreBadge = 'LOVE SCORE';
-        labels.scorerListText = 'ETERNAL LOYALTY';
+        labels.ticketBadge = 'TIKET UNDANGAN VIP';
+        labels.matchChampionship = 'ACARA PERNIKAHAN BAHAGIA';
+        labels.coupleTitleBadge = 'KEDUA MEMPELAI';
+        labels.coupleTitle = 'MEMPELAI PRIA & WANITA';
+        labels.storyTitleBadge = 'KISAH CINTA';
+        labels.storyTitle = 'PERJALANAN INDAH CINTA KAMI';
+        labels.eventTitleBadge = 'DETAIL ACARA';
+        labels.eventTitle = 'JADWAL RANGKAIAN ACARA';
+        labels.closingQuote = invitation?.closing_text || 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.';
+        labels.vsDisplay = '&';
+        labels.loveScoreBadge = 'STATUS CINTA';
+        labels.scorerListText = 'CINTA ABADI';
     } else if (t === 'anniversary') {
-        labels.ticketBadge = 'VIP ANNIVERSARY TICKET';
-        labels.matchChampionship = 'THE ANNIVERSARY CHAMPIONSHIP';
-        labels.coupleTitleBadge = 'KEY PLAYERS';
-        labels.coupleTitle = 'MATCHDAY LINEUP';
-        labels.storyTitleBadge = 'ANNIVERSARY TIMELINE';
-        labels.storyTitle = 'KEY MOMENTS OF TOGETHERNESS';
-        labels.eventTitleBadge = 'ANNIVERSARY FIXTURES';
-        labels.eventTitle = 'THE CELEBRATION SCHEDULE';
-        labels.vsDisplay = 'VS';
-        labels.loveScoreBadge = 'YEARS SCORE';
-        labels.scorerListText = 'ETERNAL LOVE';
+        labels.ticketBadge = 'TIKET VIP PERAYAAN';
+        labels.matchChampionship = 'PERAYAAN HARI JADI';
+        labels.coupleTitleBadge = 'PASANGAN';
+        labels.coupleTitle = 'KEBERSAMAAN KAMI';
+        labels.storyTitleBadge = 'KISAH KITA';
+        labels.storyTitle = 'MOMEN INDAH KEBERSAMAAN';
+        labels.eventTitleBadge = 'DETAIL ACARA';
+        labels.eventTitle = 'JADWAL PERAYAAN';
+        labels.vsDisplay = '&';
+        labels.loveScoreBadge = 'TAHUN BERSAMA';
+        labels.scorerListText = 'CINTA ABADI';
     } else if (t === 'graduation') {
-        labels.ticketBadge = 'VIP GRADUATION TICKET';
-        labels.matchChampionship = 'THE GRADUATION CHAMPIONSHIP';
-        labels.coupleTitleBadge = 'CHAMPION';
-        labels.coupleTitle = 'GRADUATE LINEUP';
-        labels.storyTitleBadge = 'ACADEMIC TIMELINE';
-        labels.storyTitle = 'KEY MOMENTS OF STUDY';
-        labels.eventTitleBadge = 'GRADUATION FIXTURES';
-        labels.eventTitle = 'THE SYUKURAN SCHEDULE';
+        labels.ticketBadge = 'TIKET ACARA WISUDA VIP';
+        labels.matchChampionship = 'SYUKURAN KELULUSAN';
+        labels.coupleTitleBadge = 'WISUDAWAN';
+        labels.coupleTitle = 'ACARA WISUDA';
+        labels.storyTitleBadge = 'PERJALANAN STUDI';
+        labels.storyTitle = 'MOMEN PERJUANGAN BELAJAR';
+        labels.eventTitleBadge = 'DETAIL ACARA';
+        labels.eventTitle = 'JADWAL SYUKURAN';
         labels.vsDisplay = '★';
-        labels.loveScoreBadge = 'GPA SCORE';
-        labels.scorerListText = 'ACADEMIC EXCELLENCE';
-        labels.playerRole = isEn ? 'CHAMPION / GRADUATE' : 'JUARA / WISUDAWAN';
+        labels.loveScoreBadge = 'IPK';
+        labels.scorerListText = 'PRESTASI AKADEMIK';
+        labels.playerRole = 'WISUDAWAN / UTAMA';
     } else if (t === 'birthday') {
-        labels.ticketBadge = 'VIP BIRTHDAY TICKET';
-        labels.matchChampionship = 'THE BIRTHDAY CHAMPIONSHIP';
-        labels.coupleTitleBadge = 'CELEBRANT';
-        labels.coupleTitle = 'BIRTHDAY LINEUP';
-        labels.storyTitleBadge = 'LIFE TIMELINE';
-        labels.storyTitle = 'KEY MOMENTS OF LIFE';
-        labels.eventTitleBadge = 'BIRTHDAY FIXTURES';
-        labels.eventTitle = 'THE CELEBRATION SCHEDULE';
+        labels.ticketBadge = 'TIKET HARI LAHIR VIP';
+        labels.matchChampionship = 'PERAYAAN ULANG TAHUN';
+        labels.coupleTitleBadge = 'YANG BERULANG TAHUN';
+        labels.coupleTitle = 'HARI LAHIR';
+        labels.storyTitleBadge = 'PERJALANAN HIDUP';
+        labels.storyTitle = 'MOMEN INDAH PERJALANAN HIDUP';
+        labels.eventTitleBadge = 'DETAIL ACARA';
+        labels.eventTitle = 'JADWAL PERAYAAN';
         labels.vsDisplay = '🎂';
-        labels.loveScoreBadge = 'AGE SCORE';
-        labels.scorerListText = 'ETERNAL JOY';
-        labels.playerRole = isEn ? 'CELEBRANT / HOST' : 'YANG BERULANG TAHUN';
+        labels.loveScoreBadge = 'USIA';
+        labels.scorerListText = 'KEBAHAGIAAN ABADI';
+        labels.playerRole = 'YANG BERULANG TAHUN';
     } else if (t === 'aqiqah') {
-        labels.ticketBadge = 'VIP AQIQAH TICKET';
-        labels.matchChampionship = 'THE AQIQAH CHAMPIONSHIP';
-        labels.coupleTitleBadge = 'NEWBORN';
-        labels.coupleTitle = 'BABY LINEUP';
-        labels.storyTitleBadge = 'GROWTH TIMELINE';
-        labels.storyTitle = 'KEY MOMENTS OF BABY';
-        labels.eventTitleBadge = 'AQIQAH FIXTURES';
-        labels.eventTitle = 'THE AQIQAH SCHEDULE';
+        labels.ticketBadge = 'TIKET SYUKURAN AQIQAH VIP';
+        labels.matchChampionship = 'SYUKURAN AQIQAH';
+        labels.coupleTitleBadge = 'BAYI';
+        labels.coupleTitle = 'KELUARGA';
+        labels.storyTitleBadge = 'PERJALANAN TUMBUH';
+        labels.storyTitle = 'MOMEN KEBAHAGIAAN BAYI';
+        labels.eventTitleBadge = 'DETAIL ACARA';
+        labels.eventTitle = 'JADWAL SYUKURAN';
         labels.vsDisplay = '👶';
-        labels.loveScoreBadge = 'GROWTH SCORE';
-        labels.scorerListText = 'GRACE & BLESSINGS';
-        labels.playerRole = isEn ? 'NEWBORN / BABY' : 'BUAH HATI / BAYI';
+        labels.loveScoreBadge = 'USIA BAYI';
+        labels.scorerListText = 'BERKAH & DOA';
+        labels.playerRole = 'BUAH HATI / BAYI';
     } else if (t === 'circumcision') {
-        labels.ticketBadge = 'VIP CIRCUMCISION TICKET';
-        labels.matchChampionship = 'THE CIRCUMCISION CHAMPIONSHIP';
-        labels.coupleTitleBadge = 'CHAMPION';
-        labels.coupleTitle = 'CHILD LINEUP';
-        labels.storyTitleBadge = 'GROWTH TIMELINE';
-        labels.storyTitle = 'KEY MOMENTS OF CHILD';
-        labels.eventTitleBadge = 'CIRCUMCISION FIXTURES';
-        labels.eventTitle = 'THE SYUKURAN SCHEDULE';
+        labels.ticketBadge = 'TIKET SYUKURAN KHITAN VIP';
+        labels.matchChampionship = 'SYUKURAN KHITANAN';
+        labels.coupleTitleBadge = 'ANAK';
+        labels.coupleTitle = 'KELUARGA';
+        labels.storyTitleBadge = 'PERJALANAN TUMBUH';
+        labels.storyTitle = 'MOMEN KEBAHAGIAAN ANAK';
+        labels.eventTitleBadge = 'DETAIL ACARA';
+        labels.eventTitle = 'JADWAL SYUKURAN';
         labels.vsDisplay = '👦';
-        labels.loveScoreBadge = 'BRAVERY SCORE';
-        labels.scorerListText = 'GRACE & BLESSINGS';
-        labels.playerRole = isEn ? 'CHAMPION / CHILD' : 'PUTRA / ANAK';
+        labels.loveScoreBadge = 'KEBERANIAN';
+        labels.scorerListText = 'BERKAH & DOA';
+        labels.playerRole = 'PUTRA / ANAK';
     }
 
     return {
@@ -269,27 +265,39 @@ function PitchDecoration() {
 function UnitedInViteCrest({ size = 120 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0px 4px 10px rgba(0,0,0,0.35))', margin: 'auto' }}>
-            {/* Shield Background in Crimson Red */}
-            <path d="M50 5C26 5 15 15 15 45C15 70 35 90 50 95C65 90 85 70 85 45C85 15 74 5 50 5Z" fill="#C70101" stroke="#F1C40F" strokeWidth="2.5" />
+            {/* Soft Champagne Gold Inner Shield Background */}
+            <path d="M30,22 L70,22 C70,22 75,55 50,75 C25,55 30,22 30,22 Z" fill="#dfba6b" stroke="#a81d22" strokeWidth="1.5" />
             
-            {/* Football Arch / Ribbon lines */}
-            <path d="M20 40H80V46H20V40Z" fill="#F1C40F" opacity="0.12" />
+            {/* Top Banner (Manchester style but Red with Gold letters "UNITED IN") */}
+            <path d="M15,10 C35,16 65,16 85,10 L82,22 C62,27 38,27 18,22 Z" fill="#a81d22" stroke="#dfba6b" strokeWidth="1" />
+            <text x="50" y="19" fill="#dfba6b" fontFamily="'Montserrat', sans-serif" fontWeight="900" fontSize="6.5" textAnchor="middle">UNITED IN</text>
 
-            {/* Gold Overlapping Wedding Rings */}
-            <circle cx="44" cy="24" r="6" stroke="#F1C40F" strokeWidth="1.8" />
-            <circle cx="56" cy="24" r="6" stroke="#F1C40F" strokeWidth="1.8" />
+            {/* Bottom Banner (United style but Red with Gold letters "LOVE") */}
+            <path d="M15,79 C35,73 65,73 85,79 L82,91 C62,86 38,86 18,91 Z" fill="#a81d22" stroke="#dfba6b" strokeWidth="1" />
+            <text x="50" y="88" fill="#dfba6b" fontFamily="'Montserrat', sans-serif" fontWeight="900" fontSize="7" textAnchor="middle">LOVE</text>
 
-            {/* Heart-Shaped Football Centerpiece */}
-            <path d="M50 72C40 62 30 52 30 40C30 30 38 22 48 22C52 22 55 25 57 27C59 25 62 22 66 22C76 22 84 30 84 40C84 52 74 62 64 72L57 79L50 72Z" fill="#F1C40F" />
-            
-            {/* Red Football panels inside gold heart */}
-            <path d="M47 35L53 35L55 41L50 45L45 41L47 35Z" fill="#C70101" />
-            <path d="M41 48L46 51L44 57L39 57L37 52L41 48Z" fill="#C70101" />
-            <path d="M59 48L63 52L61 57L56 57L54 51L59 48Z" fill="#C70101" />
-            <path d="M50 63L53 58L58 60L56 65L50 63Z" fill="#C70101" />
+            {/* Left Circle with Gold border & Red Heart */}
+            <circle cx="20" cy="51" r="7" fill="#a81d22" stroke="#dfba6b" strokeWidth="1" />
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#dfba6b" transform="translate(16.5, 48.5) scale(0.3)" />
 
-            {/* Golden Ribbon Text */}
-            <text x="50%" y="88" fill="#F1C40F" fontFamily="Impact, sans-serif" fontWeight="900" fontSize="7.5" textAnchor="middle" letterSpacing="0.6">EST. 2026</text>
+            {/* Right Circle with Gold border & Red Heart */}
+            <circle cx="80" cy="51" r="7" fill="#a81d22" stroke="#dfba6b" strokeWidth="1" />
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#dfba6b" transform="translate(76.5, 48.5) scale(0.3)" />
+
+            {/* Overlocking Wedding Rings at the top */}
+            <circle cx="44" cy="32" r="5.5" fill="none" stroke="#a81d22" strokeWidth="1.8" />
+            <circle cx="56" cy="32" r="5.5" fill="none" stroke="#a81d22" strokeWidth="1.8" />
+            <polygon points="56,24 53.5,26.5 56,29 58.5,26.5" fill="#a81d22" />
+
+            {/* Interlocking Hearts in the center */}
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#a81d22" stroke="#dfba6b" strokeWidth="1.5" transform="translate(32, 42) scale(0.7) rotate(-15 12 12)" />
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#a81d22" stroke="#dfba6b" strokeWidth="1.5" transform="translate(48, 44) scale(0.7) rotate(15 12 12)" />
+
+            {/* Love Vine / Floral Detail at the bottom */}
+            <path d="M36,66 C40,70 60,70 64,66" fill="none" stroke="#a81d22" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="50" cy="68" r="2.5" fill="#a81d22" />
+            <circle cx="44" cy="67" r="1.8" fill="#a81d22" />
+            <circle cx="56" cy="67" r="1.8" fill="#a81d22" />
         </svg>
     );
 }
@@ -297,7 +305,7 @@ function UnitedInViteCrest({ size = 120 }) {
 /* ═══════════════════════════════════════
    COVER SECTION (VIP Match Ticket)
    ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeConfig }) {
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeConfig, primaryEvent }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -307,6 +315,10 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
     const coupleName = themeConfig?.coupleName || ((groom?.nickname && bride?.nickname)
         ? `${groom.nickname} & ${bride.nickname}`
         : (invitation?.cover_title || 'Bimo & Raras'));
+
+    const qrData = guest
+        ? `${window.location.origin}/u/${invitation.slug}/checkin?to=${guest.slug}`
+        : `${window.location.origin}/u/${invitation.slug}`;
 
     return (
         <div className={`mu-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'mu-no-photo-mode' : ''}`}>
@@ -335,7 +347,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
 
                 {/* Ticket Header */}
                 <div className="mu-ticket-header">
-                    <span className="mu-ticket-badge">{themeConfig?.labels?.ticketBadge || "VIP MATCH TICKET"}</span>
+                    <span className="mu-ticket-badge">{themeConfig?.labels?.ticketBadge || "TIKET UNDANGAN VIP"}</span>
                     <span className="mu-ticket-serial">NO: MU-{String(invitation?.id || 99).padStart(4, '0')}</span>
                 </div>
                 
@@ -349,46 +361,38 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
                     </div>
 
                     <div className="mu-ticket-main">
-                        <h2 className="mu-stadium-label">THEATRE OF DREAMS • OLD TRAFFORD</h2>
+                        <h2 className="mu-stadium-label">{(primaryEvent?.venue_name || 'THEATRE OF LOVE').toUpperCase()}</h2>
                         <h1 className="mu-match-title">{coupleName.toUpperCase()}</h1>
                         <p className="mu-match-date">
-                            {invitation?.countdown_target_date ? formatDate(invitation.countdown_target_date.substring(0, 10)).toUpperCase() : 'DECEMBER 2026'}
+                            {invitation?.countdown_target_date ? formatDate(invitation.countdown_target_date.substring(0, 10)).toUpperCase() : 'DESEMBER 2026'}
                         </p>
-                        
-                        {/* Seat information details */}
-                        <div className="mu-seat-details">
-                            <div>
-                                <span>STAND</span>
-                                <strong>SIR ALEX FERGUSON</strong>
-                            </div>
-                            <div>
-                                <span>ROW</span>
-                                <strong>FOREVER</strong>
-                            </div>
-                            <div>
-                                <span>SEAT</span>
-                                <strong>TOGETHER</strong>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
                 {/* Guest Ticket Section */}
                 <div className="mu-ticket-guest">
-                    <div className="mu-barcode-wrap">
-                        <div className="mu-barcode" />
-                        <span className="mu-barcode-text">GUEST ACCESS: {guestName ? guestName.toUpperCase() : 'VIP SUPPORTER'}</span>
+                    <div className="mu-barcode-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '10px 0' }}>
+                        <div className="mu-qr-img-wrap-ticket" style={{ background: '#fff', padding: '6px', borderRadius: '6px', display: 'inline-block', marginBottom: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
+                            <img
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&color=a81d22&data=${encodeURIComponent(qrData)}`}
+                                alt="Check-in QR"
+                                style={{ display: 'block', width: '100px', height: '100px', objectFit: 'contain' }}
+                            />
+                        </div>
+                        <span className="mu-barcode-text" style={{ fontSize: '10px', marginTop: '4px' }}>
+                            {guest ? 'PINDAI QR UNTUK VERIFIKASI MASUK' : 'PINDAI QR AKSES UNDANGAN'}
+                        </span>
                     </div>
-                    <p className="mu-guest-label">{t('invitation.dear_guest')}</p>
+                    <p className="mu-guest-label">{t('invitation.to') || 'Kepada Yth.'}</p>
                     <h3 className="mu-guest-name">{guestName || 'Tamu Undangan'}</h3>
-                    <p className="mu-guest-desc">{t('invitation.dear_guest_desc')}</p>
+                    <p className="mu-guest-desc">Merupakan suatu kehormatan apabila Bapak/Ibu/Saudara/i berkenan hadir di hari bahagia kami.</p>
                 </div>
 
                 <button onClick={onOpen} id="tombol-buka" className="mu-btn-kickoff">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" className="mu-btn-icon">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
                     </svg>
-                    KICK-OFF MATCH
+                    BUKA UNDANGAN
                 </button>
             </div>
         </div>
@@ -426,15 +430,9 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                     <div className="mu-scoreboard-scanlines" />
                     
                     {/* Scoreboard Broadcast Header */}
-                    <div className="mu-scoreboard-header-premium">
-                        <div className="mu-live-indicator">
-                            <span className="mu-live-dot-premium" />
-                            <span>LIVE</span>
-                        </div>
-                        <div className="mu-match-center-title">{themeConfig?.labels?.matchChampionship || "THE WEDDING CHAMPIONSHIP"}</div>
-                        <div className="mu-match-time-premium">
-                            <span className="mu-clock-icon">⏱️</span>
-                            <span className="mu-clock-time">90:00+</span>
+                    <div className="mu-scoreboard-header-premium" style={{ justifyContent: 'center', padding: '12px 10px' }}>
+                        <div className="mu-match-center-title" style={{ fontSize: '0.95rem', letterSpacing: '2px', fontWeight: '800' }}>
+                            {themeConfig?.labels?.matchChampionship || "ACARA PERNIKAHAN BAHAGIA"}
                         </div>
                     </div>
                     
@@ -445,31 +443,16 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                             <div className="mu-matchup-card groom-card animate-float-slow" style={{ margin: '0 auto' }}>
                                 <div className="mu-card-crest-glow" />
                                 <div className="mu-card-inner">
-                                    <div className="mu-card-header">
-                                        <span className="mu-card-rating">99</span>
-                                        <span className="mu-card-pos">HP</span>
-                                    </div>
-                                    <div className="mu-card-photo-wrap">
+                                    <div className="mu-card-photo-wrap" style={{ marginTop: '10px' }}>
                                         {globalShowPhotos && hostPhoto ? (
                                             <img src={hostPhoto} alt={coupleName} className="mu-card-photo" />
                                         ) : (
                                             <div className="mu-card-monogram">{coupleName.charAt(0)}</div>
                                         )}
                                     </div>
-                                    <div className="mu-card-info">
+                                    <div className="mu-card-info" style={{ marginBottom: '10px' }}>
                                         <h4 className="mu-card-name">{coupleName.toUpperCase()}</h4>
                                         <span className="mu-card-role">{themeConfig?.labels?.playerRole.toUpperCase()}</span>
-                                    </div>
-                                    <div className="mu-card-stats">
-                                        <div className="mu-stat-row">
-                                            <span>🔥 POW</span><strong>99</strong>
-                                        </div>
-                                        <div className="mu-stat-row">
-                                            <span>🤝 LOY</span><strong>99</strong>
-                                        </div>
-                                        <div className="mu-stat-row">
-                                            <span>✨ KND</span><strong>99</strong>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -480,45 +463,30 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                                 <div className="mu-matchup-card groom-card animate-float-slow">
                                     <div className="mu-card-crest-glow" />
                                     <div className="mu-card-inner">
-                                        <div className="mu-card-header">
-                                            <span className="mu-card-rating">99</span>
-                                            <span className="mu-card-pos">GR</span>
-                                        </div>
-                                        <div className="mu-card-photo-wrap">
+                                        <div className="mu-card-photo-wrap" style={{ marginTop: '10px' }}>
                                             {globalShowPhotos && groomPhoto ? (
                                                 <img src={groomPhoto} alt={groomNickname} className="mu-card-photo" />
                                             ) : (
                                                 <div className="mu-card-monogram">{groomNickname.charAt(0)}</div>
                                             )}
                                         </div>
-                                        <div className="mu-card-info">
+                                        <div className="mu-card-info" style={{ marginBottom: '10px' }}>
                                             <h4 className="mu-card-name">{groomNickname.toUpperCase()}</h4>
-                                            <span className="mu-card-role">FORWARD / GROOM</span>
-                                        </div>
-                                        <div className="mu-card-stats">
-                                            <div className="mu-stat-row">
-                                                <span>❤️ PAS</span><strong>99</strong>
-                                            </div>
-                                            <div className="mu-stat-row">
-                                                <span>🤝 LOY</span><strong>99</strong>
-                                            </div>
-                                            <div className="mu-stat-row">
-                                                <span>🔥 COM</span><strong>99</strong>
-                                            </div>
+                                            <span className="mu-card-role">MEMPELAI PRIA</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* VS Score Display */}
                                 <div className="mu-scoreboard-vs-premium">
-                                    <div className="mu-score-row">
-                                        <span className="mu-score-digit neon-red">9</span>
-                                        <span className="mu-score-divider">{themeConfig?.labels?.vsDisplay || "-"}</span>
-                                        <span className="mu-score-digit neon-gold">10</span>
+                                    <div className="mu-score-row-clean">
+                                        <span className="mu-score-heart animate-pulse">❤️</span>
+                                        <span className="mu-score-divider">{themeConfig?.labels?.vsDisplay || "&"}</span>
+                                        <span className="mu-score-heart animate-pulse">❤️</span>
                                     </div>
-                                    <div className="mu-score-badge">{themeConfig?.labels?.loveScoreBadge || "LOVE SCORE"}</div>
+                                    <div className="mu-score-badge">{themeConfig?.labels?.loveScoreBadge || "STATUS CINTA"}</div>
                                     <div className="mu-scorer-list">
-                                        <i className="fas fa-heartbeat animate-pulse" /> {themeConfig?.labels?.scorerListText || "ETERNAL LOYALTY"}
+                                        <i className="fas fa-heartbeat animate-pulse" /> {themeConfig?.labels?.scorerListText || "CINTA ABADI"}
                                     </div>
                                 </div>
 
@@ -526,31 +494,16 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                                 <div className="mu-matchup-card bride-card animate-float-slow">
                                     <div className="mu-card-crest-glow" />
                                     <div className="mu-card-inner">
-                                        <div className="mu-card-header">
-                                            <span className="mu-card-rating">99</span>
-                                            <span className="mu-card-pos">BR</span>
-                                        </div>
-                                        <div className="mu-card-photo-wrap">
+                                        <div className="mu-card-photo-wrap" style={{ marginTop: '10px' }}>
                                             {globalShowPhotos && bridePhoto ? (
                                                 <img src={bridePhoto} alt={brideNickname} className="mu-card-photo" />
                                             ) : (
                                                 <div className="mu-card-monogram">{brideNickname.charAt(0)}</div>
                                             )}
                                         </div>
-                                        <div className="mu-card-info">
+                                        <div className="mu-card-info" style={{ marginBottom: '10px' }}>
                                             <h4 className="mu-card-name">{brideNickname.toUpperCase()}</h4>
-                                            <span className="mu-card-role">MIDFIELDER / BRIDE</span>
-                                        </div>
-                                        <div className="mu-card-stats">
-                                            <div className="mu-stat-row">
-                                                <span>❤️ CHM</span><strong>99</strong>
-                                            </div>
-                                            <div className="mu-stat-row">
-                                                <span>✨ KND</span><strong>99</strong>
-                                            </div>
-                                            <div className="mu-stat-row">
-                                                <span>😊 SML</span><strong>99</strong>
-                                            </div>
+                                            <span className="mu-card-role">MEMPELAI WANITA</span>
                                         </div>
                                     </div>
                                 </div>
@@ -559,7 +512,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                     </div>
 
                     <div className="mu-scoreboard-footer-premium">
-                        <i className="fas fa-trophy" /> SIR ALEX FERGUSON STAND • THEATRE OF DREAMS
+                        <i className="fas fa-heart" /> {(primaryEvent?.venue_name || 'GEDUNG PERNIKAHAN').toUpperCase()}
                     </div>
                     
                     {/* Integrated Countdown Timer */}
@@ -573,7 +526,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                 {/* Intro Box with nice Stadium program look */}
                 <Reveal delay={100} className="mu-intro-box-premium">
                     <div className="mu-intro-box-header">
-                        <span className="mu-intro-badge">OFFICIAL MATCHDAY PROGRAMME</span>
+                        <span className="mu-intro-badge">UNDANGAN PERNIKAHAN RESMI</span>
                     </div>
                     <div className="mu-intro-box-body">
                         <span className="mu-title-badge-premium">{themeConfig?.labels?.ticketBadge ? (themeConfig.labels.ticketBadge.replace('VIP ', '').replace(' TICKET', '')) : t('invitation.wedding_of').toUpperCase()}</span>
@@ -633,17 +586,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                     )}
                 </Reveal>
 
-                {invitation?.video_url && (
-                    <Reveal delay={300} className="mu-video-container-premium">
-                        <iframe
-                            src={invitation.video_url.includes('watch?v=')
-                                ? invitation.video_url.replace('watch?v=', 'embed/') + '?autoplay=1&mute=1'
-                                : invitation.video_url}
-                            title="Wedding Intro Video" frameBorder="0"
-                            allowFullScreen allow="autoplay; encrypted-media"
-                        />
-                    </Reveal>
-                )}
+
             </div>
         </section>
     );
@@ -764,20 +707,20 @@ function BrideGroomSection({ invitation, brideGrooms, id, themeConfig }) {
             <div className="mu-container-inner">
                 <Reveal>
                     <h2 className="mu-section-title">
-                        <span className="mu-title-badge">{themeConfig?.labels?.coupleTitleBadge || "KEY PLAYERS"}</span>
-                        {themeConfig?.labels?.coupleTitle || "MATCHDAY LINEUP"}
+                        <span className="mu-title-badge">{themeConfig?.labels?.coupleTitleBadge || "KEDUA MEMPELAI"}</span>
+                        {themeConfig?.labels?.coupleTitle || "PROFIL MEMPELAI"}
                     </h2>
                 </Reveal>
 
                 {themeConfig?.isSingleHost ? (
                     <div className="mu-lineup-row" style={{ justifyContent: 'center' }}>
-                        <PlayerCard person={bgs[0] || {}} side="center" number="10" pos={themeConfig?.labels?.playerRole} />
+                        <PlayerCard person={bgs[0] || {}} side="center" number="" pos={themeConfig?.labels?.playerRole || "MEMPELAI"} />
                     </div>
                 ) : (
                     <div className="mu-lineup-row">
-                        <PlayerCard person={groom} side="left" number="09" pos="FORWARD (GROOM)" />
-                        <div className="mu-lineup-vs">VS</div>
-                        <PlayerCard person={bride} side="right" number="10" pos="MIDFIELDER (BRIDE)" />
+                        <PlayerCard person={groom} side="left" number="" pos="MEMPELAI PRIA" />
+                        <div className="mu-lineup-vs">&</div>
+                        <PlayerCard person={bride} side="right" number="" pos="MEMPELAI WANITA" />
                     </div>
                 )}
             </div>
@@ -854,8 +797,8 @@ function CountdownSection({ events, id }) {
             <div className="mu-container-inner">
                 <Reveal>
                     <h2 className="mu-section-title">
-                        <span className="mu-title-badge">KICK-OFF SCHEDULE</span>
-                        COUNTDOWN TO SHIELD
+                        <span className="mu-title-badge">HITUNG MUNDUR ACARA</span>
+                        HARI BAHAGIA
                     </h2>
                 </Reveal>
                 <Reveal delay={150} className="mu-countdown-wrapper">
@@ -893,10 +836,10 @@ function TimelineEvent({ story, index }) {
         <div ref={ref} className={`mu-timeline-node ${isEven ? 'mu-timeline-node--left' : 'mu-timeline-node--right'} ${isActive ? 'is-active' : ''}`}>
             <div className="mu-timeline-card">
                 <div className="mu-timeline-minute">
-                    {index === 0 ? "10'" : index === 1 ? "45'" : index === 2 ? "90'" : "120'"}
+                    {String(index + 1).padStart(2, '0')}
                 </div>
                 <div className="mu-timeline-details">
-                    <span className="mu-timeline-badge">{story.title || `MATCH EVENT ${index+1}`}</span>
+                    <span className="mu-timeline-badge">{story.title || `MOMEN ${index+1}`}</span>
                     {story.story_date && <span className="mu-timeline-date">{formatStoryDate(story.story_date)}</span>}
                     <p className="mu-timeline-desc">{story.description || story.story}</p>
                 </div>
@@ -950,8 +893,8 @@ function EventSection({ events, invitation, themeConfig }) {
         return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((evt.event_name || '') + ' - ' + names)}&dates=${ds}T${st}/${ds}T${st}&location=${encodeURIComponent([evt.venue_name, evt.venue_address].filter(Boolean).join(', '))}&sf=true&output=xml`;
     };
 
-    const eventTitleBadge = themeConfig?.labels?.eventTitleBadge || "MATCH FIXTURES";
-    const eventTitle = themeConfig?.labels?.eventTitle || "THE WEDDING SCHEDULE";
+    const eventTitleBadge = themeConfig?.labels?.eventTitleBadge || "DETAIL ACARA";
+    const eventTitle = themeConfig?.labels?.eventTitle || "JADWAL RANGKAIAN ACARA";
 
     return (
         <section id="event" className="mu-events">
@@ -973,8 +916,8 @@ function EventSection({ events, invitation, themeConfig }) {
                         return (
                             <Reveal key={idx} delay={idx * 100} className="mu-event-fixture">
                                 <div className="mu-fixture-header">
-                                    <span className="mu-fixture-leg">{isAkad ? 'LEG 1' : `LEG ${idx + 1}`}</span>
-                                    <span className="mu-fixture-title">{ev.event_name || 'Event Match'}</span>
+                                    <span className="mu-fixture-leg">{isAkad ? 'UTAMA' : `SESI ${idx + 1}`}</span>
+                                    <span className="mu-fixture-title">{ev.event_name || 'Acara Pernikahan'}</span>
                                 </div>
                                 <div className="mu-fixture-body">
                                     {d && (
@@ -1000,11 +943,11 @@ function EventSection({ events, invitation, themeConfig }) {
                                 <div className="mu-fixture-footer">
                                     {ev.gmaps_link && (
                                         <a href={ev.gmaps_link} target="_blank" rel="noreferrer" className="mu-btn-card">
-                                            <i className="fas fa-map-marker-alt" /> GET DIRECTIONS
+                                            <i className="fas fa-map-marker-alt" /> PETUNJUK JALAN
                                         </a>
                                     )}
                                     <a href={getCalUrl(ev)} target="_blank" rel="noreferrer" className="mu-btn-card mu-btn-card--secondary">
-                                        <i className="far fa-calendar-plus" /> ADD TO CALENDAR
+                                        <i className="far fa-calendar-plus" /> TAMBAH KE KALENDER
                                     </a>
                                 </div>
                             </Reveal>
@@ -1013,8 +956,8 @@ function EventSection({ events, invitation, themeConfig }) {
 
                                 {/* Compact standalone Dress Code box below event list */}
                                 {safeEvents?.filter(ev => ev.show_dress_code).map((ev, idx) => (
-                                    <div key={`dc-${idx}`} className="mu-card w-full mt-4" style={{ padding: '20px', border: '1px solid #da291c', backgroundColor: 'rgba(0,0,0,0.4)' }}>
-                                        <DressCodeBlock event={ev} colors={{ primary: '#da291c', text: '#ffffff' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
+                                    <div key={`dc-${idx}`} className="mu-card w-full mt-4" style={{ padding: '20px', border: '1px solid #a81d22', backgroundColor: 'rgba(0,0,0,0.4)' }}>
+                                        <DressCodeBlock event={ev} colors={{ primary: '#a81d22', text: '#ffffff' }} fonts={{ heading: 'inherit' }} variant="app" plain={true} />
                                     </div>
                                 ))}
                 </div>
@@ -1045,7 +988,7 @@ function LivestreamSection({ events, invitation, themeConfig }) {
     if (streamsList.length === 0) return null;
     const isEn = t('invitation.save_the_date') === 'Save The Date';
 
-    const streamTitleBadge = themeConfig?.labels?.streamTitleBadge || "BROADCASTING";
+    const streamTitleBadge = themeConfig?.labels?.streamTitleBadge || "SIARAN LANGSUNG";
     const streamTitle = themeConfig?.labels?.streamTitle || (isEn ? 'LIVE STREAMING' : 'SIARAN LANGSUNG');
     const streamSubtitle = themeConfig?.labels?.streamSubtitle || (isEn ? 'Join our wedding virtually' : 'Saksikan momen bahagia kami secara virtual');
 
@@ -1071,7 +1014,7 @@ function LivestreamSection({ events, invitation, themeConfig }) {
                     <div className="mu-streams-list">
                         {streamsList.map((stream, idx) => (
                             <button key={idx} type="button" onClick={() => window.open(stream.url, '_blank')} className="mu-btn-broadcast">
-                                <i className="fas fa-video" /> WATCH ON {stream.platform.toUpperCase()}
+                                <i className="fas fa-video" /> TONTON DI {stream.platform.toUpperCase()}
                             </button>
                         ))}
                     </div>
@@ -1084,32 +1027,54 @@ function LivestreamSection({ events, invitation, themeConfig }) {
 /* ═══════════════════════════════════════
    GALLERY SECTION
    ═══════════════════════════════════════ */
-function GallerySection({ galleries }) {
+function GallerySection({ galleries, invitation }) {
     const safeGalleries = safeArr(galleries);
-    if (safeGalleries.length === 0 || !globalShowPhotos) return null;
+    if ((safeGalleries.length === 0 || !globalShowPhotos) && !invitation?.video_url) return null;
 
     return (
         <section id="gallery" className="mu-gallery">
             <PitchDecoration />
             <div className="mu-container-inner">
-                <Reveal>
-                    <h2 className="mu-section-title">
-                        <span className="mu-title-badge">MATCH GALLERY</span>
-                        CAPTURED MOMENTS
-                    </h2>
-                </Reveal>
-                
-                <div className="mu-gallery-grid">
-                    {safeGalleries.map((g, idx) => {
-                        const src = getStorageUrl(g.image_url, null);
-                        return (
-                            <Reveal key={idx} delay={(idx % 6) * 60} className="mu-gallery-item">
-                                <img src={src} alt={`Gallery ${idx + 1}`} loading="lazy" />
-                                {g.caption && <div className="mu-gallery-caption">{g.caption}</div>}
-                            </Reveal>
-                        );
-                    })}
-                </div>
+                {safeGalleries.length > 0 && globalShowPhotos && (
+                    <>
+                        <Reveal>
+                            <h2 className="mu-section-title">
+                                <span className="mu-title-badge">GALERI FOTO</span>
+                                MOMEN BAHAGIA
+                            </h2>
+                        </Reveal>
+                        
+                        <div className="mu-gallery-grid" style={{ marginBottom: invitation?.video_url ? '40px' : '0px' }}>
+                            {safeGalleries.map((g, idx) => {
+                                const src = getStorageUrl(g.image_url, null);
+                                return (
+                                    <Reveal key={idx} delay={(idx % 6) * 60} className="mu-gallery-item">
+                                        <img src={src} alt={`Gallery ${idx + 1}`} loading="lazy" />
+                                        {g.caption && <div className="mu-gallery-caption">{g.caption}</div>}
+                                    </Reveal>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
+
+                {invitation?.video_url && (
+                    <Reveal delay={200}>
+                        <div style={{ textAlign: 'center', marginBottom: '20px', marginTop: '10px' }}>
+                            <span className="mu-title-badge">VIDEO TEASER</span>
+                            <h3 style={{ color: 'var(--mu-text-white)', fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 800, margin: '5px 0' }}>TEASER PERNIKAHAN</h3>
+                        </div>
+                        <div className="mu-video-container-premium">
+                            <iframe
+                                src={invitation.video_url.includes('watch?v=')
+                                    ? invitation.video_url.replace('watch?v=', 'embed/') + '?autoplay=0&mute=0'
+                                    : invitation.video_url}
+                                title="Wedding Intro Video" frameBorder="0"
+                                allowFullScreen allow="autoplay; encrypted-media"
+                            />
+                        </div>
+                    </Reveal>
+                )}
             </div>
         </section>
     );
@@ -1177,7 +1142,7 @@ function BankSection({ bankAccounts, id, themeConfig }) {
         }
     };
 
-    const bankTitleBadge = themeConfig?.labels?.ticketBadge ? (themeConfig.labels.ticketBadge.replace('VIP ', '').replace(' TICKET', '') + ' SPONSOR') : "SPONSORSHIP & FUNDING";
+    const bankTitleBadge = "HADIAH PERNIKAHAN";
 
     return (
         <section id={id || "bank"} className="mu-bank">
@@ -1186,7 +1151,7 @@ function BankSection({ bankAccounts, id, themeConfig }) {
                 <Reveal>
                     <h2 className="mu-section-title">
                         <span className="mu-title-badge">{bankTitleBadge}</span>
-                        TRANSFER WINDOW
+                        KIRIM HADIAH
                     </h2>
                     <p className="mu-subtitle">{t('invitation.gift_desc')}</p>
                 </Reveal>
@@ -1205,7 +1170,7 @@ function BankSection({ bankAccounts, id, themeConfig }) {
                             </div>
                             <div className="mu-bank-card-footer">
                                 <button className="mu-btn-copy" onClick={() => copy(acc.account_number, idx)}>
-                                    {copiedIdx === idx ? '✓ COPIED' : 'COPY BANK NUMBER'}
+                                    {copiedIdx === idx ? '✓ TERSALIN' : 'SALIN NOMOR REKENING'}
                                 </button>
                             </div>
                         </Reveal>
@@ -1283,8 +1248,8 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
             <div className="mu-container-inner">
                 <Reveal>
                     <h2 className="mu-section-title">
-                        <span className="mu-title-badge">SUPPORTERS CLUB</span>
-                        ATTENDANCE REGISTRATION
+                        <span className="mu-title-badge">KONFIRMASI & UCAPAN</span>
+                        KEHADIRAN & DOA RESTU
                     </h2>
                 </Reveal>
 
@@ -1294,20 +1259,20 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                         {success ? (
                             <div className="mu-form-success">
                                 <div className="mu-trophy-symbol">🏆</div>
-                                <h3>CONGRATULATIONS!</h3>
-                                <p>Konfirmasi kehadiran supporter berhasil dikirim ke database pertandingan pernikahan.</p>
-                                <button onClick={() => setSuccess(false)} className="mu-btn-ticket-submit">SUBMIT ANOTHER RESPONSE</button>
+                                <h3>TERIMA KASIH!</h3>
+                                <p>Konfirmasi kehadiran dan ucapan Anda berhasil dikirim.</p>
+                                <button onClick={() => setSuccess(false)} className="mu-btn-ticket-submit">KIRIM RESPON LAIN</button>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="mu-rsvp-form">
                                 <div className="mu-form-group">
-                                    <label>SUPPORTER NAME</label>
+                                    <label>NAMA TAMU</label>
                                     <input
                                         type="text"
                                         value={sharedName}
                                         onChange={e => setSharedName(e.target.value)}
                                         required
-                                        placeholder="Enter full name"
+                                        placeholder="Tulis nama lengkap Anda"
                                         className="mu-form-input"
                                     />
                                 </div>
@@ -1315,21 +1280,21 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                                 {enableRsvp && (
                                     <>
                                         <div className="mu-form-group">
-                                            <label>MATCH ATTENDANCE</label>
+                                            <label>KONFIRMASI KEHADIRAN</label>
                                             <select
                                                 value={attendance}
                                                 onChange={e => setAttendance(e.target.value)}
                                                 className="mu-form-select"
                                             >
-                                                <option value="hadir">{isEn ? 'Attending Leg 1 & 2' : 'Hadir Kedua Leg'}</option>
-                                                <option value="tidak_hadir">{isEn ? 'Absent / Not Attending' : 'Absen / Tidak Hadir'}</option>
-                                                <option value="masih_ragu">{isEn ? 'Undecided / Maybe' : 'Belum Pasti / Ragu'}</option>
+                                                <option value="hadir">Hadir</option>
+                                                <option value="tidak_hadir">Absen / Tidak Hadir</option>
+                                                <option value="masih_ragu">Belum Pasti / Ragu-ragu</option>
                                             </select>
                                         </div>
                                         
                                         {attendance === 'hadir' && (
                                             <div className="mu-form-group">
-                                                <label>NUMBER OF TICKETS (PAX)</label>
+                                                <label>JUMLAH TAMU (PAX)</label>
                                                 <input
                                                     type="number"
                                                     min="1"
@@ -1345,27 +1310,28 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
 
                                 {enableWishes && (
                                     <div className="mu-form-group">
-                                        <label>SUPPORTERS DOAS & TRIBUTES</label>
+                                        <label>KIRIM UCAPAN & DOA RESTU</label>
                                         <WishesEmojiPicker
-                                    value={message}
-                                    onChange={setMessage}
-                                    inputRef={wishesInputRef}
-                                    isDark={true}
-                                >
-                                    <textarea
-                                    ref={wishesInputRef}
-                                            rows="4"
                                             value={message}
-                                            onChange={e => setMessage(e.target.value)}
-                                            placeholder="Write your wishes for the couple..."
-                                            className="mu-form-textarea"
-                                        />
-                                </WishesEmojiPicker>
+                                            onChange={setMessage}
+                                            inputRef={wishesInputRef}
+                                            isDark={true}
+                                        >
+                                            <textarea
+                                                ref={wishesInputRef}
+                                                rows="4"
+                                                value={message}
+                                                onChange={e => setMessage(e.target.value)}
+                                                placeholder="Tulis ucapan dan doa restu Anda untuk kedua mempelai..."
+                                                className="mu-form-textarea"
+                                                style={{ width: '100%' }}
+                                            />
+                                        </WishesEmojiPicker>
                                     </div>
                                 )}
 
                                 <button type="submit" disabled={isSubmitting} className="mu-btn-ticket-submit">
-                                    {isSubmitting ? 'TRANSMITTING...' : 'BOOK MATCH TICKETS'}
+                                    {isSubmitting ? 'MENGIRIM...' : 'KIRIM KONFIRMASI'}
                                 </button>
                             </form>
                         )}
@@ -1374,15 +1340,15 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                     {/* Wishes Feed */}
                     {enableWishes && (
                         <Reveal delay={150} className="mu-rsvp-wishes-panel">
-                            <h3 className="mu-feed-title">SUPPORTERS RECENT TRIBUTES</h3>
+                            <h3 className="mu-feed-title">DOA RESTU & UCAPAN TAMU</h3>
                             <div className="mu-wishes-feed">
                                 {recentWishes.length === 0 ? (
-                                    <p className="mu-no-wishes">No tributes submitted yet. Be the first to tribute!</p>
+                                    <p className="mu-no-wishes">Belum ada ucapan. Jadilah yang pertama memberikan ucapan!</p>
                                 ) : (
                                     recentWishes.map((w, idx) => (
                                         <div key={idx} className="mu-wish-bubble">
                                             <div className="mu-wish-header">
-                                                <span className="mu-supporter-badge">SUPPORTER</span>
+                                                <span className="mu-supporter-badge">TAMU</span>
                                                 <strong className="mu-wish-sender">{w.sender_name}</strong>
                                             </div>
                                             <p className="mu-wish-msg">{w.message}</p>
@@ -1521,6 +1487,10 @@ function UnitedInViteUnitedThemeContent({ invitation, sections, brideGrooms, eve
     const themeConfig = React.useMemo(() => {
         return getThemeLabels(invitation?.type, locale, brideGrooms, invitation);
     }, [invitation?.type, locale, brideGrooms, invitation]);
+
+    const primaryEvent = React.useMemo(() => {
+        return safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+    }, [events]);
 
     // Layout configuration
     const layoutMode = invitation?.layout_mode || 'scroll';
@@ -1863,7 +1833,7 @@ function UnitedInViteUnitedThemeContent({ invitation, sections, brideGrooms, eve
         love_story: <LoveStorySection loveStories={loveStories} themeConfig={themeConfig} />,
         event: <EventSection events={events} invitation={invitation} themeConfig={themeConfig} />,
         livestream: <LivestreamSection events={events} invitation={invitation} themeConfig={themeConfig} />,
-        gallery: <GallerySection galleries={galleries} />,
+        gallery: <GallerySection galleries={galleries} invitation={invitation} />,
         rsvp: (
             <UnifiedFormSection
                 invitation={invitation}
@@ -1956,6 +1926,7 @@ function UnitedInViteUnitedThemeContent({ invitation, sections, brideGrooms, eve
                 isOpened={isOpened}
                 onOpen={handleOpen}
                 themeConfig={themeConfig}
+                primaryEvent={primaryEvent}
             />
 
             {/* Floating Action Controls */}

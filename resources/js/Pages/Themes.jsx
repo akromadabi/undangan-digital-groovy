@@ -12,29 +12,77 @@ const getThumbnailUrl = (path) => {
 export default function Themes({ themes = [], appName = 'Groovy' }) {
     const { auth } = usePage().props;
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [selectedTypes, setSelectedTypes] = useState([]);
     const [search, setSearch] = useState('');
     const [themeSortKey, setThemeSortKey] = useState('terbaru');
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+    const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
     const categoryDropdownRef = useRef(null);
+    const typeDropdownRef = useRef(null);
     const sortDropdownRef = useRef(null);
 
+    // Unique normalized categories list with counts
     const categories = useMemo(() => {
-        const cats = themes.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean);
-        return [...new Set(cats)];
+        const counts = {};
+        themes.forEach(t => {
+            const cat = t.category ? t.category.trim().toLowerCase() : '';
+            if (cat) {
+                counts[cat] = (counts[cat] || 0) + 1;
+            }
+        });
+        const uniqueCats = [...new Set(themes.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean))];
+        return uniqueCats.map(cat => ({
+            name: cat,
+            count: counts[cat] || 0
+        })).sort((a, b) => a.name.localeCompare(b.name));
     }, [themes]);
+
+    // Memoize event types with theme counts
+    const eventTypesWithCount = useMemo(() => {
+        const list = [
+            { key: 'wedding', label: 'Pernikahan' },
+            { key: 'birthday', label: 'Ulang Tahun' },
+            { key: 'graduation', label: 'Wisuda' },
+            { key: 'aqiqah', label: 'Aqiqah' },
+            { key: 'circumcision', label: 'Khitanan' },
+            { key: 'anniversary', label: 'Anniversary' },
+            { key: 'general', label: 'Umum / Semua Acara' }
+        ];
+        return list.map(opt => {
+            const count = themes?.filter(t => {
+                const types = Array.isArray(t.type) ? t.type : [];
+                return types.includes(opt.key) || (opt.key !== 'general' && types.includes('general'));
+            }).length || 0;
+            return { ...opt, count };
+        });
+    }, [themes]);
+
+    const toggleType = (typeKey) => {
+        setSelectedTypes(prev =>
+            prev.includes(typeKey) ? prev.filter(t => t !== typeKey) : [...prev, typeKey]
+        );
+    };
+
+    const clearTypes = () => setSelectedTypes([]);
 
     const filteredThemes = useMemo(() => {
         let list = [...(themes || [])];
         if (selectedCategories.length > 0) {
             list = list.filter(t => t.category && selectedCategories.includes(t.category.trim().toLowerCase()));
         }
+        if (selectedTypes.length > 0) {
+            list = list.filter(t => {
+                const types = Array.isArray(t.type) ? t.type : [];
+                return types.some(type => selectedTypes.includes(type)) || types.includes('general');
+            });
+        }
         if (search.trim()) {
             list = list.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
         }
         return list;
-    }, [themes, selectedCategories, search]);
+    }, [themes, selectedCategories, selectedTypes, search]);
 
     const sortedThemes = useMemo(() => {
         const arr = [...filteredThemes];
@@ -44,9 +92,9 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
         return arr;
     }, [filteredThemes, themeSortKey]);
 
-    const toggleCategory = (cat) => {
+    const toggleCategory = (catName) => {
         setSelectedCategories(prev => 
-            prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+            prev.includes(catName) ? prev.filter(c => c !== catName) : [...prev, catName]
         );
     };
 
@@ -56,6 +104,9 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
         const handleClickOutside = (event) => {
             if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
                 setIsCategoryDropdownOpen(false);
+            }
+            if (typeDropdownRef.current && !typeDropdownRef.current.contains(event.target)) {
+                setIsTypeDropdownOpen(false);
             }
             if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
                 setIsSortDropdownOpen(false);
@@ -129,7 +180,8 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
                                     placeholder="Cari tema..."
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-gray-200 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none bg-white hover:bg-gray-50/50 transition-all text-gray-800"
+                                    style={{ paddingLeft: '2.5rem' }}
+                                    className="w-full pr-4 py-2.5 rounded-2xl border border-gray-200 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none bg-white hover:bg-gray-50/50 transition-all text-gray-800"
                                 />
                             </div>
 
@@ -176,21 +228,95 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                                             </div>
                                             <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
                                                 {categories.map((cat) => {
-                                                    const isChecked = selectedCategories.includes(cat);
+                                                    const isChecked = selectedCategories.includes(cat.name);
                                                     return (
                                                         <label
-                                                            key={cat}
-                                                            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors select-none text-xs font-semibold ${
+                                                            key={cat.name}
+                                                            className={`flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors select-none text-xs font-semibold ${
                                                                 isChecked ? 'bg-[#E5654B]/5 text-[#E5654B]' : 'text-gray-700'
                                                             }`}
                                                         >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={isChecked}
-                                                                onChange={() => toggleCategory(cat)}
-                                                                className="rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 w-3.5 h-3.5 cursor-pointer accent-[#E5654B]"
-                                                            />
-                                                            <span className="capitalize">{cat}</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={() => toggleCategory(cat.name)}
+                                                                    className="rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 w-3.5 h-3.5 cursor-pointer accent-[#E5654B]"
+                                                                />
+                                                                <span className="capitalize">{cat.name}</span>
+                                                            </div>
+                                                            <span className="text-[9px] font-bold text-gray-400 bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded-md">
+                                                                {cat.count}
+                                                            </span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Event Types Dropdown */}
+                                <div className="relative" ref={typeDropdownRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+                                        className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center gap-2 select-none min-h-[42px] ${
+                                            selectedTypes.length > 0
+                                                ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
+                                                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span>
+                                            {selectedTypes.length === 0
+                                                ? 'Semua Acara'
+                                                : `Acara (${selectedTypes.length})`
+                                            }
+                                        </span>
+                                        <svg className={`w-3.5 h-3.5 transition-transform duration-200 ${isTypeDropdownOpen ? 'rotate-180 text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    {isTypeDropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
+                                                <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">TIPE ACARA</span>
+                                                {selectedTypes.length > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={clearTypes}
+                                                        className="text-[10px] font-bold text-red-500 hover:underline"
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
+                                                {eventTypesWithCount.map((type) => {
+                                                    const isChecked = selectedTypes.includes(type.key);
+                                                    return (
+                                                        <label
+                                                            key={type.key}
+                                                            className={`flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors select-none text-xs font-semibold ${
+                                                                isChecked ? 'bg-[#E5654B]/5 text-[#E5654B]' : 'text-gray-700'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={() => toggleType(type.key)}
+                                                                    className="rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 w-3.5 h-3.5 cursor-pointer accent-[#E5654B]"
+                                                                />
+                                                                <span>{type.label}</span>
+                                                            </div>
+                                                            <span className="text-[9px] font-bold text-gray-400 bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded-md">
+                                                                {type.count}
+                                                            </span>
                                                         </label>
                                                     );
                                                 })}

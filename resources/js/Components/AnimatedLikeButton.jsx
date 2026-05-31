@@ -37,7 +37,7 @@ export default function AnimatedLikeButton({ count = 0, liked = false, onClick }
             setTimeout(() => setBurst(false), 650);
         }
 
-        if (onClick) await onClick();
+        if (onClick) await onClick(e);
     };
 
     return (

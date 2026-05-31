@@ -34,7 +34,7 @@ Route::get('/', function () {
 
     $themes = \App\Models\Theme::where('is_active', true)
         ->orderBy('sort_order')
-        ->get(['id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'preview_url', 'category', 'is_premium'])
+        ->get(['id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'preview_url', 'category', 'is_premium', 'base_likes', 'real_likes'])
         ->map(function ($theme) {
             $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
             return $theme;
@@ -85,7 +85,7 @@ Route::get('/katalog-tema', function () {
 
     // Domain utama: tampilkan katalog semua tema global
     $themes = \App\Models\Theme::where('is_active', true)
-        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'preview_url')
+        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'preview_url', 'base_likes', 'real_likes')
         ->orderBy('sort_order')
         ->get()
         ->map(function ($theme) {
@@ -106,6 +106,8 @@ Route::get('/faq', function () {
     }
     abort(404);
 })->name('faq');
+
+Route::post('/theme/{theme}/like', [ThemeSettingsController::class, 'toggleLike'])->name('theme.like');
 
 // ═══════════════════════════════════════
 // Public Invitation (no auth needed)
@@ -285,7 +287,6 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
     Route::post('/theme/layout', [ThemeSettingsController::class, 'updateLayout'])->name('theme.layout');
     Route::post('/theme/settings', [ThemeSettingsController::class, 'updateSettings'])->name('theme.settings.save');
     Route::post('/theme/change', [ThemeSettingsController::class, 'changeTheme'])->name('theme.change');
-    Route::post('/theme/{theme}/like', [ThemeSettingsController::class, 'toggleLike'])->name('theme.like');
     Route::post('/theme/sections', [ThemeSettingsController::class, 'updateSections'])->name('theme.sections');
     Route::post('/theme/video-list', [ThemeSettingsController::class, 'saveVideoList'])->name('theme.video_list.save');
 
@@ -385,6 +386,9 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     // Global Management (themes, plans, music, quotes, settings)
     Route::resource('plans', AdminPlanController::class);
     Route::post('themes/{theme}/toggle-active', [AdminThemeController::class, 'toggleActive'])->name('themes.toggle-active');
+    Route::post('themes/categories/store', [AdminThemeController::class, 'storeCategory'])->name('themes.categories.store');
+    Route::post('themes/categories/update', [AdminThemeController::class, 'updateCategory'])->name('themes.categories.update');
+    Route::post('themes/categories/delete', [AdminThemeController::class, 'deleteCategory'])->name('themes.categories.delete');
     Route::resource('themes', AdminThemeController::class);
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');

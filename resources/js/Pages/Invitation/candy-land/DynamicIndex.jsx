@@ -211,6 +211,89 @@ function BalloonEffect({ active }) {
 }
 
 /* ═══════════════════════════════════════
+   THEME LABELS HELPER
+   ═══════════════════════════════════════ */
+function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
+    const t = type || 'birthday';
+    const isEn = String(locale).toLowerCase() === 'en';
+    const bgs = safeArr(brideGrooms);
+    const host = bgs[0] || {};
+    
+    let mainName = '';
+    let initials = '';
+    let isSingleHost = true;
+    
+    if (['wedding', 'anniversary'].includes(t)) {
+        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+        mainName = groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom';
+        initials = `${groom.nickname?.charAt(0) || 'B'}${bride.nickname?.charAt(0) || 'R'}`;
+        isSingleHost = false;
+    } else {
+        mainName = host.nickname || host.full_name || 'Host';
+        initials = mainName.charAt(0) || 'H';
+        isSingleHost = true;
+    }
+
+    let labels = {
+        coverHeader: isEn ? 'SWEET CELEBRATION' : 'PERAYAAN MANIS',
+        coverSubtitle: invitation?.cover_subtitle || (isEn ? "Sweet Party Bash" : "Pesta Ceria"),
+        profileHeader: isEn ? 'THE CELEBRANT' : 'YANG MERAYAKAN',
+        kidOrderFallback: isEn ? 'SWEET CELEBRATION BOY/GIRL' : 'ANAK TERCINTA',
+        storyBadge: isEn ? 'MILESTONES' : 'TUMBUH KEMBANG',
+        storyHeader: isEn ? 'SWEET JOURNEY' : 'PERJALANAN USIA',
+        eventBadge: isEn ? 'PARTY DETAILS' : 'DETAIL ACARA',
+        eventHeader: isEn ? 'JOIN THE SWEETS' : 'LOKASI ISTANA PERMEN',
+        giftBadge: isEn ? 'GIFT BOX' : 'KADO DIGITAL',
+        giftHeader: isEn ? 'DIGITAL GIFT' : 'KIRIM HADIAH',
+        closingTitle: isEn ? 'SWEET ENDINGS!' : 'TERIMA KASIH!',
+        closingText: isEn ? "Thank you for sharing this sweet milestone with us!" : "Merupakan kehormatan manis bagi kami apabila kalian berkenan hadir. Terima kasih!"
+    };
+
+    if (t === 'wedding') {
+        labels.coverHeader = isEn ? 'THE WEDDING OF' : 'PERNIKAHAN DARI';
+        labels.profileHeader = isEn ? 'THE COUPLE' : 'KEDUA MEMPELAI';
+        labels.storyBadge = isEn ? 'LOVE STORY' : 'KISAH CINTA';
+        labels.storyHeader = isEn ? 'OUR LOVE JOURNEY' : 'PERJALANAN CINTA';
+        labels.eventBadge = isEn ? 'WEDDING DETAILS' : 'DETAIL ACARA';
+        labels.eventHeader = isEn ? 'JOIN OUR CELEBRATION' : 'LOKASI PERNIKAHAN';
+        labels.giftBadge = isEn ? 'DIGITAL ENVELOPE' : 'DOMPET DIGITAL';
+        labels.giftHeader = isEn ? 'SEND GIFT' : 'KIRIM KADO';
+        labels.closingTitle = isEn ? 'HAPPY ENDINGS!' : 'TERIMA KASIH!';
+        labels.closingText = isEn ? "Thank you for sharing this beautiful day with us!" : "Merupakan kehormatan bagi kami apabila kalian berkenan hadir. Terima kasih!";
+    } else if (t === 'anniversary') {
+        labels.coverHeader = isEn ? 'THE ANNIVERSARY OF' : 'ANNIVERSARY DARI';
+        labels.profileHeader = isEn ? 'THE COUPLE' : 'PASANGAN BERBAHAGIA';
+        labels.storyBadge = isEn ? 'JOURNEY' : 'KISAH PERJALANAN';
+        labels.storyHeader = isEn ? 'OUR YEARS OF LOVE' : 'PERJALANAN KASIH';
+        labels.eventBadge = isEn ? 'CELEBRATION DETAILS' : 'DETAIL ACARA';
+        labels.eventHeader = isEn ? 'JOIN OUR CELEBRATION' : 'LOKASI ACARA';
+        labels.giftBadge = isEn ? 'DIGITAL GIFT' : 'KADO DIGITAL';
+        labels.giftHeader = isEn ? 'SEND GIFT' : 'KIRIM KADO';
+        labels.closingTitle = isEn ? 'HAPPY ENDINGS!' : 'TERIMA KASIH!';
+        labels.closingText = isEn ? "Thank you for sharing this anniversary milestone with us!" : "Merupakan kehormatan bagi kami apabila kalian berkenan hadir. Terima kasih!";
+    } else if (t === 'graduation') {
+        labels.coverHeader = isEn ? 'THE GRADUATION OF' : 'WISUDA DARI';
+        labels.profileHeader = isEn ? 'THE GRADUATE' : 'WISUDAWAN/WATI';
+        labels.storyBadge = isEn ? 'ACADEMIC PATH' : 'PERJALANAN STUDI';
+        labels.storyHeader = isEn ? 'MY STUDY JOURNEY' : 'PERJALANAN STUDI';
+        labels.eventBadge = isEn ? 'WISUDA DETAILS' : 'DETAIL ACARA';
+        labels.eventHeader = isEn ? 'JOIN OUR CELEBRATION' : 'LOKASI SYUKURAN';
+        labels.giftBadge = isEn ? 'GRADUATION GIFT' : 'HADIAH KELULUSAN';
+        labels.giftHeader = isEn ? 'SEND GIFT' : 'KIRIM KADO';
+        labels.closingTitle = isEn ? 'THANK YOU!' : 'TERIMA KASIH!';
+        labels.closingText = isEn ? "Thank you for supporting my academic journey!" : "Merupakan kehormatan bagi kami apabila kalian berkenan hadir. Terima kasih!";
+    }
+
+    return {
+        mainName,
+        initials,
+        isSingleHost,
+        labels
+    };
+}
+
+/* ═══════════════════════════════════════
    COVER SECTION
    ═══════════════════════════════════════ */
 function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale }) {
@@ -218,11 +301,13 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale
     const activeGuest = guest || null;
     const guestName = activeGuest?.name || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null);
     
+    const themeConfig = getThemeLabels(invitation?.type || 'birthday', locale, brideGrooms, invitation);
+    const { mainName, initials, isSingleHost, labels } = themeConfig;
     const couples = safeArr(brideGrooms);
     const celebrant = couples[0] || {};
     
-    const coverTitle = invitation?.cover_title || celebrant.nickname || "Rara";
-    const coverSubtitle = invitation?.cover_subtitle || (locale === 'en' ? "Sweet Birthday Bash" : "Pesta Ulang Tahun Ceria");
+    const coverTitle = invitation?.cover_title || mainName;
+    const coverSubtitle = invitation?.cover_subtitle || labels.coverSubtitle;
 
     const coverImages = useMemo(() => {
         return (invitation?.cover_image || '')
@@ -252,17 +337,17 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale
             </div>
             
             <div className="candy-cover-card animate-[candy-float_6s_ease-in-out_infinite]">
-                <span className="candy-title-badge">SWEET CELEBRATION</span>
+                <span className="candy-title-badge">{labels.coverHeader}</span>
                 
                 <h1 className="candy-cover-title">{coverTitle}</h1>
                 <p className="candy-cover-subtitle">{coverSubtitle}</p>
                 
                 <div className="candy-avatar-frame">
                     {celebrant.photo && globalShowPhotos ? (
-                        <img src={getStorageUrl(celebrant.photo)} alt={celebrant.nickname} />
+                        <img src={getStorageUrl(celebrant.photo)} alt={mainName} />
                     ) : (
                         <span className="candy-avatar-fallback">
-                            {celebrant.nickname ? celebrant.nickname.charAt(0) : 'R'}
+                            {initials}
                         </span>
                     )}
                 </div>
@@ -283,7 +368,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale
                     <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V8h14v10zm-2-9H7v2h10V9zm0 4H7v2h10v-2z"/>
                     </svg>
-                    BUKA UNDANGAN MANIS
+                    BUKA UNDANGAN
                 </button>
             </div>
         </div>
@@ -334,8 +419,8 @@ function OpeningSection({ invitation, id, locale }) {
 
                     <p className="candy-section-subtitle mb-0 text-[14px]">
                         {invitation?.opening_text || (locale === 'en' 
-                            ? "We are very excited to invite you to celebrate our child's birthday!"
-                            : "Kami sangat gembira mengundang Anda untuk merayakan hari ulang tahun anak kami tercinta!")}
+                            ? "We are very excited to invite you to celebrate with us!"
+                            : "Kami sangat gembira mengundang Anda untuk merayakan hari istimewa kami tercinta!")}
                     </p>
                 </Reveal>
             </div>
@@ -344,15 +429,15 @@ function OpeningSection({ invitation, id, locale }) {
 }
 
 /* ═══════════════════════════════════════
-   CELEBRANT SECTION (Birthday Kid)
+   CELEBRANT SECTION (Birthday Kid / Couple)
    ═══════════════════════════════════════ */
-function BrideGroomSection({ brideGrooms, id, locale }) {
+function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
     const couples = safeArr(brideGrooms);
-    const celebrant = couples[0] || {};
+    const groom = couples.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || couples[0] || {};
+    const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
     
-    const initials = (celebrant.nickname || celebrant.full_name || 'R')
-        .substring(0, 2)
-        .toUpperCase();
+    const themeConfig = getThemeLabels(invitation?.type || 'birthday', locale, brideGrooms, invitation);
+    const { isSingleHost, labels } = themeConfig;
 
     const translateChildOrder = (childOrder, gender) => {
         if (!childOrder) return '';
@@ -402,8 +487,6 @@ function BrideGroomSection({ brideGrooms, id, locale }) {
         }
     };
 
-    const hasParents = celebrant.father_name || celebrant.mother_name;
-
     // Interactive cake state
     const [candleBlown, setCandleBlown] = useState(false);
     const [cakeConfetti, setCakeConfetti] = useState(false);
@@ -415,99 +498,115 @@ function BrideGroomSection({ brideGrooms, id, locale }) {
         setTimeout(() => setCakeConfetti(false), 5000); // confetti runs for 5s
     };
 
+    function Card({ person, side }) {
+        if (!person) return null;
+        const persInitials = (person.nickname || person.full_name || 'R')
+            .substring(0, 2)
+            .toUpperCase();
+        
+        return (
+            <div className="candy-panel text-center flex-1 max-w-[280px] w-full">
+                <div className="candy-avatar-frame my-6 mx-auto">
+                    {globalShowPhotos && person.photo ? (
+                        <img src={getStorageUrl(person.photo)} alt={person.full_name} className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="candy-avatar-fallback">{persInitials}</div>
+                    )}
+                </div>
+                
+                <h2 className="candy-kid-name">{person.full_name}</h2>
+                <p className="candy-kid-order">
+                    {translateChildOrder(person.child_order, person.gender) || (locale === 'en' ? labels.kidOrderFallback : 'PUTRA/PUTRI TERCINTA')}
+                </p>
+                
+                {person.bio && (
+                    <p className="candy-kid-bio">{person.bio}</p>
+                )}
+
+                {person.instagram && (
+                    <a 
+                        href={`https://instagram.com/${person.instagram.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="candy-btn-action bg-gradient-to-r from-pink-400 to-rose-400 hover:shadow-lg text-xs"
+                        style={{ padding: '8px 18px', display: 'inline-flex', marginBottom: '16px' }}
+                    >
+                        <i className="fab fa-instagram mr-1.5" /> @{person.instagram.replace('@', '')}
+                    </a>
+                )}
+
+                {(person.father_name || person.mother_name) && (
+                    <div className="bg-rose-50/30 border border-rose-100/10 rounded-2xl p-4 mt-2">
+                        <p className="text-[11px] font-bold opacity-50 mb-1">{locale === 'en' ? 'BELOVED CHILD OF' : 'PUTRA/PUTRI TERCINTA DARI'}</p>
+                        <p className="font-bold text-[14px] text-rose-700">
+                            {[person.father_name, person.mother_name].filter(Boolean).join(' & ')}
+                        </p>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     return (
         <section id={id || "bride_groom"} className="py-12 px-6">
             <div className="max-w-md mx-auto">
-                <Reveal className="candy-panel text-center">
-                    <span className="candy-title-badge">{locale === 'en' ? 'THE CELEBRANT' : 'YANG MERAYAKAN'}</span>
+                <Reveal className="text-center">
+                    <span className="candy-title-badge">{labels.profileHeader}</span>
                     
-                    <div className="candy-avatar-frame my-6">
-                        {globalShowPhotos && celebrant.photo ? (
-                            <img src={getStorageUrl(celebrant.photo)} alt={celebrant.full_name} className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="candy-avatar-fallback">{initials}</div>
-                        )}
+                    <div className="flex flex-col justify-center items-center gap-6 mt-6">
+                        <Card person={groom} side={isSingleHost ? 'center' : 'left'} />
+                        {!isSingleHost && <span className="text-3xl text-pink-500 font-bold">&</span>}
+                        {!isSingleHost && <Card person={bride} side="right" />}
                     </div>
-                    
-                    <h2 className="candy-kid-name">{celebrant.full_name}</h2>
-                    <p className="candy-kid-order">
-                        {translateChildOrder(celebrant.child_order, celebrant.gender) || (locale === 'en' ? 'SWEET BIRTHDAY BOY/GIRL' : 'ANAK TERCINTA')}
-                    </p>
-                    
-                    {celebrant.bio && (
-                        <p className="candy-kid-bio">{celebrant.bio}</p>
-                    )}
 
-                    {celebrant.instagram && (
-                        <a 
-                            href={`https://instagram.com/${celebrant.instagram.replace('@', '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="candy-btn-action bg-gradient-to-r from-pink-400 to-rose-400 hover:shadow-lg text-xs"
-                            style={{ padding: '8px 18px', display: 'inline-flex', marginBottom: '16px' }}
-                        >
-                            <svg className="w-4 h-4 fill-current mr-1.5" viewBox="0 0 24 24">
-                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                            </svg>
-                            @{celebrant.instagram.replace('@', '')}
-                        </a>
-                    )}
-
-                    {hasParents && (
-                        <div className="bg-rose-50/30 border border-rose-100/10 rounded-2xl p-4 mt-2">
-                            <p className="text-[11px] font-bold opacity-50 mb-1">{locale === 'en' ? 'BELOVED CHILD OF' : 'PUTRA/PUTRI TERCINTA DARI'}</p>
-                            <p className="font-bold text-[14px] text-rose-700">
-                                {[celebrant.father_name, celebrant.mother_name].filter(Boolean).join(' & ')}
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Interactive Blow Candle Widget */}
-                    <div className="candy-cake-box">
-                        <span className="text-xs font-bold text-rose-500 uppercase tracking-widest block mb-4">
-                            {candleBlown ? "🍰 HAPPY BIRTHDAY! 🍰" : "👉 TIUP LILINNYA! (KLIK API)"}
-                        </span>
-                        
-                        <div className="relative inline-block my-2">
-                            <div 
-                                className={`candy-flame ${candleBlown ? 'is-blown' : ''}`}
-                                onClick={blowCandle} 
-                            />
-                            <div className="candy-candle" />
-                            <div className="candy-cake-top" />
-                            <div className="candy-cake-cream" />
-                            <div className="candy-cake-bottom" />
-                        </div>
-                        
-                        {candleBlown && (
-                            <p className="text-[12px] italic text-emerald-600 mt-2 font-bold animate-bounce">
-                                Yaaay! Lilin berhasil ditiup! Semoga semua harapan menjadi kenyataan! ✨
-                            </p>
-                        )}
-                        
-                        {/* Internal confetti falling shower */}
-                        {cakeConfetti && (
-                            <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden rounded-3xl">
-                                {[...Array(20)].map((_, i) => {
-                                    const delay = Math.random() * 2000;
-                                    const left = Math.random() * 90;
-                                    const color = ['#FF4B72', '#00D2FC', '#FFC107', '#9C27B0'][i % 4];
-                                    return (
-                                        <div 
-                                            key={i} 
-                                            className="candy-confetti" 
-                                            style={{ 
-                                                left: `${left}%`, 
-                                                backgroundColor: color, 
-                                                animationDelay: `${delay}ms`,
-                                                animationDuration: '2.5s'
-                                            }} 
-                                        />
-                                    );
-                                })}
+                    {/* Interactive Blow Candle Widget (only for Single Celebrant / Ulang Tahun / Khitanan / Aqiqah) */}
+                    {isSingleHost && (
+                        <div className="candy-panel candy-cake-box mt-6 relative overflow-hidden">
+                            <span className="text-xs font-bold text-rose-500 uppercase tracking-widest block mb-4">
+                                {candleBlown ? "🍰 HAPPY BIRTHDAY! 🍰" : "👉 TIUP LILINNYA! (KLIK API)"}
+                            </span>
+                            
+                            <div className="relative inline-block my-2">
+                                <div 
+                                    className={`candy-flame ${candleBlown ? 'is-blown' : ''}`}
+                                    onClick={blowCandle} 
+                                />
+                                <div className="candy-candle" />
+                                <div className="candy-cake-top" />
+                                <div className="candy-cake-cream" />
+                                <div className="candy-cake-bottom" />
                             </div>
-                        )}
-                    </div>
+                            
+                            {candleBlown && (
+                                <p className="text-[12px] italic text-emerald-600 mt-2 font-bold animate-bounce">
+                                    Yaaay! Lilin berhasil ditiup! Semoga semua harapan menjadi kenyataan! ✨
+                                </p>
+                            )}
+                            
+                            {/* Internal confetti falling shower */}
+                            {cakeConfetti && (
+                                <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden rounded-3xl">
+                                    {[...Array(20)].map((_, i) => {
+                                        const delay = Math.random() * 2000;
+                                        const left = Math.random() * 90;
+                                        const color = ['#FF4B72', '#00D2FC', '#FFC107', '#9C27B0'][i % 4];
+                                        return (
+                                            <div 
+                                                key={i} 
+                                                className="candy-confetti" 
+                                                style={{ 
+                                                    left: `${left}%`, 
+                                                    backgroundColor: color, 
+                                                    animationDelay: `${delay}ms`,
+                                                    animationDuration: '2.5s'
+                                                }} 
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </Reveal>
             </div>
         </section>
@@ -1061,18 +1160,83 @@ function BankSection({ bankAccounts, id, locale }) {
 /* ═══════════════════════════════════════
    CLOSING SECTION
    ═══════════════════════════════════════ */
-function ClosingSection({ invitation, id, locale }) {
+function ClosingSection({ invitation, id, locale, brideGrooms }) {
+    const couples = safeArr(brideGrooms);
+    const themeConfig = getThemeLabels(invitation?.type || 'birthday', locale, brideGrooms, invitation);
+    const { isSingleHost, labels } = themeConfig;
+    const isEn = locale === 'en';
+    const brandName = invitation?.user?.reseller_settings?.brand_name 
+        || invitation?.user?.reseller?.reseller_settings?.brand_name 
+        || 'Undangan Digital Groovy';
+
+    const groom = couples.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || couples[0] || {};
+    const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
+
+    const groomFather = groom.father_name || '';
+    const groomMother = groom.mother_name || '';
+    const brideFather = bride.father_name || '';
+    const brideMother = bride.mother_name || '';
+
+    const hasGroomParents = groomFather || groomMother;
+    const hasBrideParents = brideFather || brideMother;
+
     return (
         <section id={id || "closing"} className="py-16 px-6 text-center">
             <div className="max-w-md mx-auto">
                 <Reveal className="candy-panel">
                     <span className="text-4xl block mb-2">🧁</span>
-                    <h2 className="candy-section-title">{invitation?.closing_title || (locale === 'en' ? 'SWEET ENDINGS!' : 'TERIMA KASIH!')}</h2>
-                    <p className="candy-section-subtitle text-[14px] opacity-85 leading-relaxed mt-4 max-w-xs mx-auto mb-0">
-                        {invitation?.closing_text || (locale === 'en' 
-                            ? "Thank you for sharing this sweet milestone with us!"
-                            : "Merupakan kehormatan manis bagi kami apabila kalian berkenan hadir. Terima kasih!")}
+                    <h2 className="candy-section-title">{invitation?.closing_title || labels.closingTitle}</h2>
+                    <p className="candy-section-subtitle text-[14px] opacity-85 leading-relaxed mt-4 max-w-xs mx-auto mb-6">
+                        {invitation?.closing_text || labels.closingText}
                     </p>
+
+                    {isSingleHost ? (
+                        (groomFather || groomMother) && (
+                            <div className="bg-rose-50/50 border border-rose-100/40 rounded-2xl p-4 my-5 relative">
+                                <p className="text-[11px] font-bold text-rose-400/80 uppercase tracking-widest mb-1">
+                                    {isEn ? "WE ARE GRATEFUL," : "KAMI YANG MENGUNDANG,"}
+                                </p>
+                                <p className="font-bold text-[14px] text-rose-700">
+                                    {groomFather && groomMother 
+                                        ? (isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`)
+                                        : (groomFather ? (isEn ? `Family of Mr. ${groomFather}` : `Kel. Bapak ${groomFather}`) : (isEn ? `Family of Mrs. ${groomMother}` : `Kel. Ibu ${groomMother}`))}
+                                </p>
+                            </div>
+                        )
+                    ) : (
+                        <div className="bg-rose-50/50 border border-rose-100/40 rounded-2xl p-4 my-5 relative space-y-4">
+                            <p className="text-[11px] font-bold text-rose-400/80 uppercase tracking-widest mb-1">
+                                {isEn ? "WE ARE GRATEFUL," : "KAMI YANG MENGUNDANG,"}
+                            </p>
+                            <div className="font-bold text-[14px] text-rose-700 space-y-2">
+                                {hasGroomParents && (
+                                    <div>
+                                        {groomFather && groomMother 
+                                            ? (isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`)
+                                            : (groomFather ? (isEn ? `Family of Mr. ${groomFather}` : `Kel. Bapak ${groomFather}`) : (isEn ? `Family of Mrs. ${groomMother}` : `Kel. Ibu ${groomMother}`))}
+                                    </div>
+                                )}
+                                {hasBrideParents && (
+                                    <div>
+                                        {brideFather && brideMother 
+                                            ? (isEn ? `Family of Mr. ${brideFather} & Mrs. ${brideMother}` : `Kel. Bapak ${brideFather} & Ibu ${brideMother}`)
+                                            : (brideFather ? (isEn ? `Family of Mr. ${brideFather}` : `Kel. Bapak ${brideFather}`) : (isEn ? `Family of Mrs. ${brideMother}` : `Kel. Ibu ${brideMother}`))}
+                                    </div>
+                                )}
+                                {!hasGroomParents && !hasBrideParents && (
+                                    <div>
+                                        {isEn ? 'Both Families of the Couple' : 'Keluarga Besar Kedua Mempelai'}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mt-8 border-t border-rose-100/60 pt-6">
+                        <p className="text-xs text-rose-400/80 font-semibold tracking-wide">
+                            Made with ❤️ by <span className="text-rose-500 font-bold">{brandName}</span>
+                        </p>
+                    </div>
                 </Reveal>
             </div>
         </section>
@@ -1296,7 +1460,7 @@ export default function DynamicIndex({
                                         <OpeningSection invitation={invitation} id={section.section_key} locale={locale} />
                                     )}
                                     {section.section_key === 'bride_groom' && (
-                                        <BrideGroomSection brideGrooms={brideGrooms} id={section.section_key} locale={locale} />
+                                        <BrideGroomSection brideGrooms={brideGrooms} id={section.section_key} locale={locale} invitation={invitation} />
                                     )}
                                     {section.section_key === 'love_story' && (
                                         <LoveStorySection loveStories={loveStories} id={section.section_key} locale={locale} />
@@ -1328,7 +1492,7 @@ export default function DynamicIndex({
                                         <BankSection bankAccounts={bankAccounts} id={section.section_key} locale={locale} />
                                     )}
                                     {section.section_key === 'closing' && (
-                                        <ClosingSection invitation={invitation} id={section.section_key} locale={locale} />
+                                        <ClosingSection invitation={invitation} id={section.section_key} locale={locale} brideGrooms={brideGrooms} />
                                     )}
                                 </div>
                             );

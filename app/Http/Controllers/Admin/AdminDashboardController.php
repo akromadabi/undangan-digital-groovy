@@ -55,7 +55,7 @@ class AdminDashboardController extends Controller
     public function themes()
     {
         $user = auth()->user();
-        $themes = \App\Models\Theme::where('is_active', true)->orderBy('sort_order')->get();
+        $themes = \App\Models\Theme::withCount('invitations')->where('is_active', true)->orderBy('sort_order')->get();
         
         $customSettings = \App\Models\ResellerThemeSetting::where('reseller_id', $user->id)
             ->get()
@@ -72,7 +72,11 @@ class AdminDashboardController extends Controller
                 'preview_template' => $theme->preview_template,
                 'preview_bg_style' => $theme->preview_bg_style,
                 'category' => $theme->category,
+                'type' => is_array($theme->type) ? $theme->type : ($theme->type ? [$theme->type] : []),
                 'is_premium' => $theme->is_premium,
+                'base_likes' => $theme->base_likes,
+                'real_likes' => $theme->real_likes,
+                'invitations_count' => $theme->invitations_count,
                 'custom_setting' => $custom ? [
                     'preview_template' => $custom->preview_template ?: 'default',
                     'preview_bg_style' => $custom->preview_bg_style ?: 'default',

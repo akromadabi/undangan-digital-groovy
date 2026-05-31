@@ -5,16 +5,16 @@
    THEME CONSTANTS & CSS VARIABLES
    ═══════════════════════════════════════ */
 :root {
-    --mu-red: #c21d24; /* Rich Crimson Red from reference */
-    --mu-red-glow: rgba(194, 29, 36, 0.4);
-    --mu-gold: #fbe116; /* Crest Gold/Yellow from reference */
-    --mu-gold-glow: rgba(251, 225, 22, 0.3);
-    --mu-black: #080808;
-    --mu-charcoal: #121212;
-    --mu-accent: #1E1E1E;
-    --mu-light-accent: #2A2A2A;
+    --mu-red: #a81d22; /* Softer Velvet Crimson Red */
+    --mu-red-glow: rgba(168, 29, 34, 0.35);
+    --mu-gold: #dfba6b; /* Soft Champagne Gold */
+    --mu-gold-glow: rgba(223, 186, 107, 0.25);
+    --mu-black: #130f10; /* Warm Deep Espresso/Charcoal Black */
+    --mu-charcoal: #191415; /* Softer Warm Charcoal */
+    --mu-accent: #241a1c; /* Soft Romantic Crimson-Tinted Card BG */
+    --mu-light-accent: #332528;
     --mu-text-white: #FFFFFF;
-    --mu-text-gray: #B3B3B3;
+    --mu-text-gray: #CCCCCC;
     
     --font-heading: 'Montserrat', sans-serif;
     --font-body: 'Plus Jakarta Sans', sans-serif;
@@ -870,6 +870,24 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 6px;
+}
+
+.mu-score-row-clean {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 8px;
+}
+
+.mu-score-heart {
+    font-size: 2.2rem;
+    filter: drop-shadow(0 0 10px var(--mu-red));
+    animation: mu-heart-scale 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes mu-heart-scale {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.18); }
 }
 
 .mu-score-digit {
@@ -1854,6 +1872,7 @@
 }
 
 .mu-form-input, .mu-form-select, .mu-form-textarea {
+    width: 100%;
     background-color: var(--mu-accent);
     border: 1px solid var(--mu-light-accent);
     border-radius: 4px;

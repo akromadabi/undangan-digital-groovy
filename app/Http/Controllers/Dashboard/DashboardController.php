@@ -136,6 +136,24 @@ class DashboardController extends Controller
 
             $path = $file->storeAs($folder, $filename, 'public');
 
+            // Simpan rekam data di database media_assets jika user memiliki invitation aktif
+            $user = $request->user();
+            if ($user && $user->invitation) {
+                $invitation = $user->invitation;
+                
+                // Daftar folder yang berhubungan dengan undangan
+                $invitationFolders = ['covers', 'backgrounds', 'cover', 'openings', 'opening', 'bride_grooms', 'avatars', 'mempelai', 'couples', 'galleries', 'gallery', 'uploads'];
+                if (in_array($folder, $invitationFolders)) {
+                    \App\Models\MediaAsset::create([
+                        'invitation_id' => $invitation->id,
+                        'file_path' => $path,
+                        'file_name' => $file->getClientOriginalName(),
+                        'file_size' => Storage::disk('public')->size($path),
+                        'mime_type' => $file->getClientMimeType(),
+                    ]);
+                }
+            }
+
             return response()->json([
                 'url' => '/storage/' . $path,
                 'path' => $path,

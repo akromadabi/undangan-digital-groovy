@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import WizardLayout from '@/Layouts/WizardLayout';
 
 export default function LinkStep({ step, currentSlug }) {
@@ -18,19 +19,13 @@ export default function LinkStep({ step, currentSlug }) {
     const doCheck = async (slugValue) => {
         setChecking(true);
         try {
-            const res = await fetch(route('wizard.link.check', undefined, false), {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content 
-                },
-                body: JSON.stringify({ slug: slugValue }),
+            const res = await axios.post(route('wizard.link.check', undefined, false), {
+                slug: slugValue,
             });
-            if (!res.ok) throw new Error('Network error');
-            const resData = await res.json();
-            setAvailable(resData.available);
-            return resData.available;
+            setAvailable(res.data.available);
+            return res.data.available;
         } catch (e) {
+            console.error('Failed to check link availability:', e);
             setAvailable(null);
             return null;
         } finally {

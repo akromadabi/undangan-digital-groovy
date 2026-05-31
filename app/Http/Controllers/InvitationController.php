@@ -95,6 +95,12 @@ class InvitationController extends Controller
             session()->put($sessionKey, true);
         }
 
+        // Log the view in invitation_views_logs for daily/monthly statistics
+        \DB::table('invitation_views_logs')->insert([
+            'invitation_id' => $invitation->id,
+            'created_at' => now(),
+        ]);
+
         $guestSlug = $request->query('to');
         $guest = null;
 

@@ -144,7 +144,7 @@ const eventTypes = [
     { id: 'general', name: 'Umum / General (Semua Acara)', desc: 'Izinkan tema digunakan untuk Semua jenis acara.' },
 ];
 
-export default function Form({ theme, plans = [] }) {
+export default function Form({ theme, plans = [], categories = [] }) {
     const { adminRoutePrefix } = usePage().props;
     const isEdit = !!theme;
     const fileInputRef = useRef(null);
@@ -163,6 +163,8 @@ export default function Form({ theme, plans = [] }) {
     const [uploadingIndex, setUploadingIndex] = useState(null);
 
 
+
+    // Dynamic category handling is now done using the dynamic categories prop.
 
     // State untuk mengontrol tab editor ("visual" vs "json") - maintained for backend compatibility
     const [colorTab, setColorTab] = useState('visual');
@@ -184,7 +186,7 @@ export default function Form({ theme, plans = [] }) {
         preview_images: theme?.preview_images || [],
         preview_template: theme?.preview_template || 'full-mockup',
         preview_bg_style: theme?.preview_bg_style || 'gradient-indigo',
-        category: theme?.category || 'elegant', 
+        category: theme?.category ? theme.category.trim() : 'Elegant', 
         type: Array.isArray(theme?.type) ? theme.type : (theme?.type ? [theme.type] : ['wedding']), 
         is_premium: theme?.is_premium || false, 
         allowed_plans: theme?.allowed_plans || [],
@@ -201,6 +203,8 @@ export default function Form({ theme, plans = [] }) {
     // Menangani sinkronisasi state saat properti theme berubah (Mengatasi Bug State Preservation di Inertia)
     useEffect(() => {
         if (theme) {
+            const cat = theme.category ? theme.category.trim() : 'Elegant';
+            
             setData({
                 name: theme.name || '',
                 slug: theme.slug || '',
@@ -208,7 +212,7 @@ export default function Form({ theme, plans = [] }) {
                 preview_images: theme.preview_images || [],
                 preview_template: theme.preview_template || 'full-mockup',
                 preview_bg_style: theme.preview_bg_style || 'gradient-indigo',
-                category: theme.category || 'elegant',
+                category: cat,
                 type: Array.isArray(theme.type) ? theme.type : (theme.type ? [theme.type] : []),
                 is_premium: theme.is_premium || false,
                 allowed_plans: theme.allowed_plans || [],
@@ -520,14 +524,14 @@ export default function Form({ theme, plans = [] }) {
 
                                 <div>
                                     <label className={labelClass}>Kategori Desain</label>
-                                    <select value={data.category} onChange={(e) => setData('category', e.target.value)}
-                                        className={inputClass}>
-                                        <option value="elegant">Elegant</option>
-                                        <option value="modern">Modern</option>
-                                        <option value="floral">Floral</option>
-                                        <option value="islamic">Islamic</option>
-                                        <option value="rustic">Rustic</option>
-                                        <option value="minimalist">Minimalist</option>
+                                    <select 
+                                        value={data.category || 'Elegant'} 
+                                        onChange={(e) => setData('category', e.target.value)}
+                                        className={inputClass}
+                                    >
+                                        {categories.map((cat) => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 
@@ -697,13 +701,14 @@ export default function Form({ theme, plans = [] }) {
                                             onClick={() => setData('is_active', !data.is_active)}
                                             className={`${
                                                 data.is_active ? 'bg-emerald-500' : 'bg-gray-200'
-                                            } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none`}
+                                            } relative inline-flex h-6 w-11 flex-shrink-0 items-center cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none`}
+                                            style={{ padding: '2px' }}
                                         >
                                             <span
                                                 aria-hidden="true"
                                                 className={`${
                                                     data.is_active ? 'translate-x-5' : 'translate-x-0'
-                                                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out`}
+                                                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs transition duration-200 ease-in-out`}
                                             />
                                         </button>
                                     </div>

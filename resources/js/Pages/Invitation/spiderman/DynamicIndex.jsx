@@ -74,9 +74,93 @@ function formatTime(t) {
     return String(t).substring(0, 5);
 }
 
+/* ═══════════════════════════════════════
+   THEME LABELS HELPER
+   ═══════════════════════════════════════ */
+function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) {
+    const t = type || 'birthday';
+    const isEn = String(locale).toLowerCase() === 'en';
+    const bgs = safeArr(brideGrooms);
+    const host = bgs[0] || {};
+    
+    let mainName = '';
+    let initials = '';
+    let isSingleHost = true;
+    
+    if (['wedding', 'anniversary'].includes(t)) {
+        const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
+        const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || {};
+        mainName = groom.nickname && bride.nickname ? `${groom.nickname} & ${bride.nickname}` : 'Bride & Groom';
+        initials = `${groom.nickname?.charAt(0) || 'B'}${bride.nickname?.charAt(0) || 'R'}`;
+        isSingleHost = false;
+    } else {
+        mainName = host.nickname || host.full_name || 'Host';
+        initials = mainName.charAt(0) || 'H';
+        isSingleHost = true;
+    }
+
+    let labels = {
+        coverHeader: isEn ? 'AWESOME CELEBRATION' : 'PERAYAAN LUAR BIASA',
+        coverSubtitle: invitation?.cover_subtitle || (isEn ? "Awesome Birthday Party" : "Pesta Ulang Tahun"),
+        profileHeader: isEn ? 'THE CELEBRANT' : 'YANG MERAYAKAN',
+        kidOrderFallback: isEn ? 'BIRTHDAY BOY/GIRL' : 'ANAK TERCINTA',
+        storyBadge: isEn ? 'MILESTONES' : 'TUMBUH KEMBANG',
+        storyHeader: isEn ? 'AWESOME JOURNEY' : 'PERJALANAN USIA',
+        eventBadge: isEn ? 'ACTION SCHEDULE' : 'JADWAL AKSI',
+        eventHeader: isEn ? 'JOIN THE ADVENTURE' : 'LOKASI MARKAS SPIDEY',
+        giftBadge: isEn ? 'GIFT BOX' : 'KADO DIGITAL',
+        giftHeader: isEn ? 'DIGITAL GIFT' : 'KIRIM HADIAH',
+        closingTitle: isEn ? 'AWESOME ENDINGS!' : 'TERIMA KASIH!',
+        closingText: isEn ? "Thank you for swinging by and sharing this awesome milestone with us!" : "Merupakan kehormatan manis bagi kami apabila kalian berkenan hadir. Terima kasih!"
+    };
+
+    if (t === 'wedding') {
+        labels.coverHeader = isEn ? 'THE WEDDING OF' : 'PERNIKAHAN DARI';
+        labels.profileHeader = isEn ? 'THE POWER COUPLE' : 'KEDUA MEMPELAI';
+        labels.storyBadge = isEn ? 'LOVE STORY' : 'KISAH CINTA';
+        labels.storyHeader = isEn ? 'OUR HEROIC LOVE JOURNEY' : 'PERJALANAN CINTA';
+        labels.eventBadge = isEn ? 'WEDDING DETAILS' : 'JADWAL ACARA';
+        labels.eventHeader = isEn ? 'JOIN OUR CELEBRATION' : 'LOKASI PERNIKAHAN';
+        labels.giftBadge = isEn ? 'DIGITAL ENVELOPE' : 'DOMPET DIGITAL';
+        labels.giftHeader = isEn ? 'SEND GIFT' : 'KIRIM KADO';
+        labels.closingTitle = isEn ? 'HAPPY ENDINGS!' : 'TERIMA KASIH!';
+        labels.closingText = isEn ? "Thank you for sharing this heroic day with us!" : "Merupakan kehormatan bagi kami apabila kalian berkenan hadir. Terima kasih!";
+    } else if (t === 'anniversary') {
+        labels.coverHeader = isEn ? 'THE ANNIVERSARY OF' : 'ANNIVERSARY DARI';
+        labels.profileHeader = isEn ? 'THE HAPPY COUPLE' : 'PASANGAN BERBAHAGIA';
+        labels.storyBadge = isEn ? 'JOURNEY' : 'KISAH PERJALANAN';
+        labels.storyHeader = isEn ? 'OUR YEARS OF ADVENTURE' : 'PERJALANAN KASIH';
+        labels.eventBadge = isEn ? 'CELEBRATION DETAILS' : 'JADWAL ACARA';
+        labels.eventHeader = isEn ? 'JOIN OUR CELEBRATION' : 'LOKASI ACARA';
+        labels.giftBadge = isEn ? 'DIGITAL GIFT' : 'KADO DIGITAL';
+        labels.giftHeader = isEn ? 'SEND GIFT' : 'KIRIM KADO';
+        labels.closingTitle = isEn ? 'HAPPY ENDINGS!' : 'TERIMA KASIH!';
+        labels.closingText = isEn ? "Thank you for sharing this anniversary adventure with us!" : "Merupakan kehormatan bagi kami apabila kalian berkenan hadir. Terima kasih!";
+    } else if (t === 'graduation') {
+        labels.coverHeader = isEn ? 'THE GRADUATION OF' : 'WISUDA DARI';
+        labels.profileHeader = isEn ? 'THE GRADUATE' : 'WISUDAWAN/WATI';
+        labels.storyBadge = isEn ? 'ACADEMIC PATH' : 'PERJALANAN STUDI';
+        labels.storyHeader = isEn ? 'MY HEROIC JOURNEY' : 'PERJALANAN STUDI';
+        labels.eventBadge = isEn ? 'WISUDA DETAILS' : 'JADWAL ACARA';
+        labels.eventHeader = isEn ? 'JOIN OUR CELEBRATION' : 'LOKASI SYUKURAN';
+        labels.giftBadge = isEn ? 'GRADUATION GIFT' : 'HADIAH KELULUSAN';
+        labels.giftHeader = isEn ? 'SEND GIFT' : 'KIRIM KADO';
+        labels.closingTitle = isEn ? 'THANK YOU!' : 'TERIMA KASIH!';
+        labels.closingText = isEn ? "Thank you for supporting my academic journey!" : "Merupakan kehormatan bagi kami apabila kalian berkenan hadir. Terima kasih!";
+    }
+
+    return {
+        mainName,
+        initials,
+        isSingleHost,
+        labels
+    };
+}
+
 // Global flags to sync states across components
 let globalShowPhotos = true;
 let globalShowAnimations = true;
+
 
 /* ═══════════════════════════════════════
    ERROR BOUNDARY
@@ -255,17 +339,18 @@ function SpideySectionDivider() {
 
 /* ═══════════════════════════════════════
    COVER SECTION (Animated Comic Cover)
-   ═══════════════════════════════════════ */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale }) {
+   ═══════════════════════════════════════ */function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale }) {
     const { t } = useTranslation();
     const activeGuest = guest || null;
     const guestName = activeGuest?.name || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : null);
     
-    const couples = safeArr(brideGrooms);
-    const celebrant = couples[0] || {};
+    const bgs = safeArr(brideGrooms);
+    const themeConfig = getThemeLabels(invitation?.type || 'birthday', locale, brideGrooms, invitation);
+    const { mainName, initials, isSingleHost, labels } = themeConfig;
     
-    const coverTitle = invitation?.cover_title || celebrant.nickname || "Peter Parker";
-    const coverSubtitle = invitation?.cover_subtitle || (locale === 'en' ? "Birthday Bash" : "Pesta Ulang Tahun");
+    const coverTitle = invitation?.cover_title || mainName || "Peter Parker";
+    const coverSubtitle = invitation?.cover_subtitle || labels.coverSubtitle;
+    const host = bgs[0] || {};
 
     const coverImages = useMemo(() => {
         return (invitation?.cover_image || '')
@@ -310,11 +395,11 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale
                 {/* Spidey Emblem */}
                 <div className="spy-cover-emblem-wrap">
                     <div className="spy-avatar-web-frame" />
-                    {celebrant.photo && globalShowPhotos ? (
-                        <img src={getStorageUrl(celebrant.photo)} alt={celebrant.nickname} className="spy-cover-emblem" />
+                    {host.photo && globalShowPhotos ? (
+                        <img src={getStorageUrl(host.photo)} alt={host.nickname} className="spy-cover-emblem" />
                     ) : (
                         <div className="spy-cover-emblem spy-avatar-fallback">
-                            {celebrant.nickname ? celebrant.nickname.charAt(0) : 'S'}
+                            {initials}
                         </div>
                     )}
                 </div>
@@ -340,7 +425,6 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale
         </div>
     );
 }
-
 /* ═══════════════════════════════════════
    OPENING SECTION (Welcome Comic)
    ═══════════════════════════════════════ */
@@ -402,17 +486,13 @@ function OpeningSection({ invitation, id, locale }) {
 /* ═══════════════════════════════════════
    CELEBRANT SECTION (Birthday Kid)
    ═══════════════════════════════════════ */
-function BrideGroomSection({ brideGrooms, id, locale }) {
-    const { t } = useTranslation();
+function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
     const couples = safeArr(brideGrooms);
-    const celebrant = couples[0] || {};
+    const groom = couples.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || couples[0] || {};
+    const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
     
-    const initials = (celebrant.nickname || celebrant.full_name || 'K')
-        .split(' ')
-        .map(w => w.charAt(0))
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
+    const themeConfig = getThemeLabels(invitation?.type || 'birthday', locale, brideGrooms, invitation);
+    const { isSingleHost, labels } = themeConfig;
 
     const translateChildOrder = (childOrder, gender) => {
         if (!childOrder) return '';
@@ -462,56 +542,137 @@ function BrideGroomSection({ brideGrooms, id, locale }) {
         }
     };
 
-    const hasParents = celebrant.father_name || celebrant.mother_name;
+    // Blow candle state
+    const [candleBlown, setCandleBlown] = useState(false);
+    const [cakeConfetti, setCakeConfetti] = useState(false);
+
+    const blowCandle = () => {
+        if(candleBlown) return;
+        setCandleBlown(true);
+        setCakeConfetti(true);
+        setTimeout(() => setCakeConfetti(false), 5000);
+    };
+
+    function Card({ person, side }) {
+        if (!person) return null;
+        const persInitials = (person.nickname || person.full_name || 'R')
+            .substring(0, 2)
+            .toUpperCase();
+        
+        return (
+            <Reveal className="spy-comic-panel spy-profile-card flex-1 w-full max-w-[280px]">
+                <div className="spy-avatar-wrapper">
+                    <div className="spy-avatar-web-frame" />
+                    {globalShowPhotos && person.photo ? (
+                        <img src={getStorageUrl(person.photo)} alt={person.full_name} className="class-foto-profil" />
+                    ) : (
+                        <div className="spy-avatar-fallback">{persInitials}</div>
+                    )}
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                    <SpideyMask size={35} />
+                    <h2 className="spy-kids-name" style={{ margin: 0 }}>{person.full_name}</h2>
+                </div>
+                
+                <p className="spy-kids-order" style={{ marginTop: '5px' }}>
+                    {translateChildOrder(person.child_order, person.gender) || (locale === 'en' ? labels.kidOrderFallback : 'PUTRA/PUTRI TERCINTA')}
+                </p>
+                
+                {person.bio && (
+                    <p className="spy-kids-bio">{person.bio}</p>
+                )}
+
+                {person.instagram && (
+                    <a 
+                        href={`https://instagram.com/${person.instagram.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="spy-btn-social"
+                        style={{ display: 'inline-flex', marginBottom: '16px' }}
+                    >
+                        <i className="fab fa-instagram" /> @{person.instagram.replace('@', '')}
+                    </a>
+                )}
+
+                {(person.father_name || person.mother_name) && (
+                    <div className="spy-parents-box">
+                        <p className="spy-parents-label">{locale === 'en' ? 'BELOVED CHILD OF' : 'PUTRA/PUTRI TERCINTA DARI'}</p>
+                        <p className="spy-parents-names">
+                            {[person.father_name, person.mother_name].filter(Boolean).join(' & ')}
+                        </p>
+                    </div>
+                )}
+            </Reveal>
+        );
+    }
 
     return (
         <section id={id || "bride_groom"} className="spy-scroll-section">
-            <div className="spy-container-inner">
-                <Reveal className="spy-comic-panel spy-profile-card">
-                    <span className="spy-title-badge">{locale === 'en' ? 'THE CELEBRANT' : 'YANG MERAYAKAN'}</span>
-                    
-                    <div className="spy-avatar-wrapper">
-                        <div className="spy-avatar-web-frame" />
-                        {globalShowPhotos && celebrant.photo ? (
-                            <img src={getStorageUrl(celebrant.photo)} alt={celebrant.full_name} className="class-foto-profil" />
-                        ) : (
-                            <div className="spy-avatar-fallback">{initials}</div>
-                        )}
-                    </div>
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                        <SpideyMask size={35} />
-                        <h2 className="spy-kids-name" style={{ margin: 0 }}>{celebrant.full_name}</h2>
-                    </div>
-                    
-                    <p className="spy-kids-order" style={{ marginTop: '5px' }}>
-                        {translateChildOrder(celebrant.child_order, celebrant.gender) || (locale === 'en' ? 'BIRTHDAY BOY' : 'ANAK TERCINTA')}
-                    </p>
-                    
-                    {celebrant.bio && (
-                        <p className="spy-kids-bio">{celebrant.bio}</p>
-                    )}
-
-                    {celebrant.instagram && (
-                        <a 
-                            href={`https://instagram.com/${celebrant.instagram.replace('@', '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="spy-btn-social"
-                        >
-                            <i className="fab fa-instagram" /> @{celebrant.instagram.replace('@', '')}
-                        </a>
-                    )}
-
-                    {hasParents && (
-                        <div className="spy-parents-box">
-                            <p className="spy-parents-label">{locale === 'en' ? 'BELOVED CHILD OF' : 'PUTRA/PUTRI TERCINTA DARI'}</p>
-                            <p className="spy-parents-names">
-                                {[celebrant.father_name, celebrant.mother_name].filter(Boolean).join(' & ')}
-                            </p>
-                        </div>
-                    )}
+            <div className="spy-container-inner text-center">
+                <Reveal>
+                    <span className="spy-title-badge mb-6">{labels.profileHeader}</span>
                 </Reveal>
+                
+                <div className="spy-couples-flex" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%' }}>
+                    <Card person={groom} side={isSingleHost ? 'center' : 'left'} />
+                    {!isSingleHost && <div className="spy-ampersand-divider" style={{ fontSize: '2.5rem', color: 'var(--spidey-red)', fontWeight: 'bold', fontFamily: 'Impact, sans-serif', textShadow: '2px 2px 0px #000, -2px -2px 0px #000' }}>&</div>}
+                    {!isSingleHost && <Card person={bride} side="right" />}
+                </div>
+
+                {/* Interactive Blow Candle Widget for Spiderman theme (only in single host birthday/syukuran) */}
+                {isSingleHost && (
+                    <Reveal className="spy-comic-panel candy-cake-box mt-6 relative overflow-hidden" style={{ width: '100%', maxWidth: '380px', margin: '24px auto 0 auto' }}>
+                        <span className="text-xs font-bold text-rose-500 uppercase tracking-widest block mb-4" style={{ color: 'var(--spidey-accent)', fontFamily: 'Impact, sans-serif' }}>
+                            {candleBlown ? "🍰 HAPPY BIRTHDAY! 🍰" : "👉 TIUP LILINNYA! (KLIK API)"}
+                        </span>
+                        
+                        <div className="relative inline-block my-2" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <div 
+                                className={`candy-flame ${candleBlown ? 'is-blown' : ''}`}
+                                onClick={blowCandle} 
+                                style={{ cursor: 'pointer' }}
+                            />
+                            <div className="candy-candle" />
+                            <div className="candy-cake-top" />
+                            <div className="candy-cake-cream" />
+                            <div className="candy-cake-bottom" />
+                        </div>
+                        
+                        {candleBlown && (
+                            <p className="text-[12px] italic text-emerald-400 mt-2 font-bold animate-bounce" style={{ color: '#4ade80' }}>
+                                Yaaay! Lilin berhasil ditiup! Semoga semua harapan menjadi kenyataan! ✨
+                            </p>
+                        )}
+                        
+                        {cakeConfetti && (
+                            <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden rounded-3xl" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                                {[...Array(20)].map((_, i) => {
+                                    const delay = Math.random() * 2000;
+                                    const left = Math.random() * 90;
+                                    const color = ['#FF4B72', '#00D2FC', '#FFC107', '#9C27B0'][i % 4];
+                                    return (
+                                        <div 
+                                            key={i} 
+                                            className="candy-confetti" 
+                                            style={{ 
+                                                left: `${left}%`, 
+                                                backgroundColor: color, 
+                                                animationDelay: `${delay}ms`,
+                                                position: 'absolute',
+                                                top: '-10px',
+                                                width: '8px',
+                                                height: '8px',
+                                                borderRadius: '50%',
+                                                animation: 'candy-fall 3s linear infinite'
+                                            }}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </Reveal>
+                )}
             </div>
         </section>
     );
@@ -1116,30 +1277,85 @@ function BankGiftSection({ bankAccounts, id, locale }) {
 /* ═══════════════════════════════════════
    CLOSING SECTION
    ═══════════════════════════════════════ */
-function ClosingSection({ invitation, id, locale }) {
+function ClosingSection({ invitation, id, locale, brideGrooms }) {
+    const couples = safeArr(brideGrooms);
+    const themeConfig = getThemeLabels(invitation?.type || 'birthday', locale, brideGrooms, invitation);
+    const { isSingleHost, labels } = themeConfig;
+    const isEn = locale === 'en';
     const brandName = invitation?.user?.reseller_settings?.brand_name 
         || invitation?.user?.reseller?.reseller_settings?.brand_name 
         || 'TrueLove Invitation';
 
+    const groom = couples.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || couples[0] || {};
+    const bride = couples.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || couples[1] || couples[0] || {};
+
+    const groomFather = groom.father_name || '';
+    const groomMother = groom.mother_name || '';
+    const brideFather = bride.father_name || '';
+    const brideMother = bride.mother_name || '';
+
+    const hasGroomParents = groomFather || groomMother;
+    const hasBrideParents = brideFather || brideMother;
+
     return (
         <section id={id || "closing"} className="spy-scroll-section" style={{ borderBottom: 'none' }}>
-            <div className="spy-container-inner">
+            <div className="spy-container-inner text-center">
                 <Reveal className="spy-comic-panel spy-closing-card">
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
                         <SpideyMask size={60} />
                     </div>
                     <h2 className="spy-closing-title">
-                        {invitation?.closing_title || (locale === 'en' ? 'THANK YOU!' : 'TERIMA KASIH')}
+                        {invitation?.closing_title || labels.closingTitle}
                     </h2>
                     
                     <p style={{ color: '#fff', fontSize: '1rem', lineHeight: '1.6' }}>
-                        {invitation?.closing_text || (locale === 'en'
-                            ? 'Thank you for being part of our special celebrations. Your blessings are the best gifts we could receive!'
-                            : 'Terima kasih telah menjadi bagian dari hari bahagia kami. Doa dan dukungan Anda adalah kado terindah bagi kami!')}
+                        {invitation?.closing_text || labels.closingText}
                     </p>
 
-                    <p className="spy-watermark">
-                        Made with ❤️ by <a href="#" target="_blank" rel="noopener noreferrer">{brandName}</a>
+                    {isSingleHost ? (
+                        (groomFather || groomMother) && (
+                            <div className="spy-parents-box" style={{ marginTop: '25px', padding: '16px', border: '2px dashed rgba(255,255,255,0.15)', borderRadius: '8px' }}>
+                                <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--spidey-accent)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>
+                                    {isEn ? "WE ARE GRATEFUL," : "KAMI YANG MENGUNDANG,"}
+                                </p>
+                                <p className="spy-parents-names" style={{ margin: 0 }}>
+                                    {groomFather && groomMother 
+                                        ? (isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`)
+                                        : (groomFather ? (isEn ? `Family of Mr. ${groomFather}` : `Kel. Bapak ${groomFather}`) : (isEn ? `Family of Mrs. ${groomMother}` : `Kel. Ibu ${groomMother}`))}
+                                </p>
+                            </div>
+                        )
+                    ) : (
+                        <div className="spy-parents-box" style={{ marginTop: '25px', padding: '16px', border: '2px dashed rgba(255,255,255,0.15)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--spidey-accent)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>
+                                {isEn ? "WE ARE GRATEFUL," : "KAMI YANG MENGUNDANG,"}
+                            </p>
+                            <div className="spy-parents-names" style={{ display: 'flex', flexDirection: 'column', gap: '4px', margin: 0 }}>
+                                {hasGroomParents && (
+                                    <div>
+                                        {groomFather && groomMother 
+                                            ? (isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`)
+                                            : (groomFather ? (isEn ? `Family of Mr. ${groomFather}` : `Kel. Bapak ${groomFather}`) : (isEn ? `Family of Mrs. ${groomMother}` : `Kel. Ibu ${groomMother}`))}
+                                    </div>
+                                )}
+                                {hasBrideParents && (
+                                    <div>
+                                        {brideFather && brideMother 
+                                            ? (isEn ? `Family of Mr. ${brideFather} & Mrs. ${brideMother}` : `Kel. Bapak ${brideFather} & Ibu ${brideMother}`)
+                                            : (brideFather ? (isEn ? `Family of Mr. ${brideFather}` : `Kel. Bapak ${brideFather}`) : (isEn ? `Family of Mrs. ${brideMother}` : `Kel. Ibu ${brideMother}`))}
+                                    </div>
+                                )}
+                                {!hasGroomParents && !hasBrideParents && (
+                                    <div>
+                                        {isEn ? 'Both Families of the Couple' : 'Keluarga Besar Kedua Mempelai'}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    <p className="spy-watermark" style={{ marginTop: '30px', paddingBottom: '10px' }}>
+                        Made with ❤️ by <span style={{ color: 'var(--spidey-accent)', fontWeight: 'bold' }}>{brandName}</span>
                     </p>
                 </Reveal>
             </div>
@@ -1644,7 +1860,7 @@ export default function DynamicIndex({
             case 'opening':
                 return wrap(<OpeningSection invitation={invitation} id={sectionId} locale={locale} />);
             case 'bride_groom':
-                return wrap(<BrideGroomSection brideGrooms={brideGrooms} id={sectionId} locale={locale} />);
+                return wrap(<BrideGroomSection brideGrooms={brideGrooms} id={sectionId} locale={locale} invitation={invitation} />);
             case 'event':
                 return wrap(<EventSection events={events} invitation={invitation} id={sectionId} locale={locale} />);
             case 'love_story':
@@ -1680,7 +1896,7 @@ export default function DynamicIndex({
             case 'bank':
                 return wrap(<BankGiftSection bankAccounts={bankAccounts} id={sectionId} locale={locale} />);
             case 'closing':
-                return wrap(<ClosingSection invitation={invitation} id={sectionId} locale={locale} />);
+                return wrap(<ClosingSection invitation={invitation} id={sectionId} locale={locale} brideGrooms={brideGrooms} />);
             case 'livestream':
                 return wrap(<LiveStreamingSection events={events} invitation={invitation} id={sectionId} locale={locale} />);
             default:

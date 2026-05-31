@@ -355,276 +355,272 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                 {themes.length > 0 && (
                     <div style={{
                         display: 'flex',
-                        flexDirection: 'column',
-                        gap: '1rem',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: '8px',
                         marginBottom: '2rem',
-                        width: '100%'
+                        width: '100%',
+                        padding: '10px',
+                        background: 'var(--card-bg)',
+                        border: '1.5px solid var(--card-border)',
+                        borderRadius: '16px',
+                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
                     }}>
+                        {/* Search Box */}
+                        <div style={{
+                            position: 'relative',
+                            flexGrow: '1'
+                        }}>
+                            <svg style={{
+                                position: 'absolute',
+                                left: '0.75rem',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                width: '14px',
+                                height: '14px',
+                                color: 'var(--text-muted)'
+                            }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                placeholder="Cari tema..."
+                                style={{
+                                    width: '100%',
+                                    height: '34px',
+                                    padding: '0 10px 0 2.25rem',
+                                    borderRadius: '12px',
+                                    border: '1.5px solid var(--card-border)',
+                                    fontSize: '0.75rem',
+                                    background: 'rgba(255, 255, 255, 0.03)',
+                                    color: 'var(--text-primary)',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s',
+                                }}
+                                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                                onBlur={e => e.target.style.borderColor = 'var(--card-border)'}
+                            />
+                        </div>
+
+                        {/* Controls */}
                         <div style={{
                             display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '0.75rem',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            gap: '8px',
+                            flexShrink: '0'
                         }}>
-                            {/* Search Box */}
-                            <div style={{
-                                position: 'relative',
-                                flex: '1',
-                                minWidth: '240px'
-                            }}>
-                                <svg style={{
-                                    position: 'absolute',
-                                    left: '0.85rem',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    width: '16px',
-                                    height: '16px',
-                                    color: 'var(--text-muted)'
-                                }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                </svg>
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={e => setSearchQuery(e.target.value)}
-                                    placeholder="Cari tema..."
+                            {/* Category Select Dropdown */}
+                            <div style={{ position: 'relative' }} ref={categoryDropdownRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
                                     style={{
-                                        width: '100%',
-                                        padding: '0.625rem 1rem 0.625rem 2.25rem',
-                                        borderRadius: '100px',
-                                        border: '1.5px solid var(--card-border)',
-                                        fontSize: '0.8rem',
-                                        background: 'var(--card-bg)',
-                                        color: 'var(--text-primary)',
-                                        outline: 'none',
-                                        transition: 'border-color 0.2s',
+                                        height: '34px',
+                                        padding: '0 12px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 700,
+                                        border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
+                                        background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                                        color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        transition: 'all 0.2s'
                                     }}
-                                    onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-                                    onBlur={e => e.target.style.borderColor = 'var(--card-border)'}
-                                />
-                            </div>
+                                >
+                                    <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    <span className="hidden sm:inline">
+                                        {selectedCategories.length === 0 ? 'Semua Kategori' : `Kategori (${selectedCategories.length})`}
+                                    </span>
+                                    <span className="sm:hidden">
+                                        {selectedCategories.length === 0 ? 'Kategori' : `Kat (${selectedCategories.length})`}
+                                    </span>
+                                    <svg style={{
+                                        width: '12px',
+                                        height: '12px',
+                                        transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
+                                        transition: 'transform 0.2s'
+                                    }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
 
-                            {/* Controls */}
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.75rem'
-                            }}>
-                                {/* Category Select Dropdown */}
-                                <div style={{ position: 'relative' }} ref={categoryDropdownRef}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                                        style={{
-                                            padding: '0.625rem 1.15rem',
-                                            borderRadius: '100px',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 700,
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.04em',
-                                            border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
-                                            background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
-                                            color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                        </svg>
-                                        <span>
-                                            {selectedCategories.length === 0 ? 'Semua Kategori' : `Kategori (${selectedCategories.length})`}
-                                        </span>
-                                        <svg style={{
-                                            width: '12px',
-                                            height: '12px',
-                                            transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
-                                            transition: 'transform 0.2s'
-                                        }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-
-                                    {isCategoryDropdownOpen && (
+                                {isCategoryDropdownOpen && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: '100%',
+                                        marginTop: '0.375rem',
+                                        width: '208px',
+                                        background: T.isDark ? '#1e293b' : '#ffffff',
+                                        border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                        borderRadius: '12px',
+                                        boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                                        zIndex: 99,
+                                        padding: '6px'
+                                    }}>
                                         <div style={{
-                                            position: 'absolute',
-                                            right: 0,
-                                            top: '100%',
-                                            marginTop: '0.5rem',
-                                            width: '220px',
-                                            background: 'var(--card-bg)',
-                                            border: '1.5px solid var(--card-border)',
-                                            borderRadius: '16px',
-                                            boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-                                            zIndex: 99,
-                                            padding: '0.5rem',
-                                            backdropFilter: 'blur(10px)',
-                                            WebkitBackdropFilter: 'blur(10px)'
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            padding: '4px 8px 6px',
+                                            borderBottom: '1px solid var(--card-border)'
                                         }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                padding: '0.25rem 0.5rem 0.5rem',
-                                                borderBottom: '1px solid var(--card-border)'
-                                            }}>
-                                                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kategori</span>
-                                                {selectedCategories.length > 0 && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={clearCategories}
+                                            <span style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kategori</span>
+                                            {selectedCategories.length > 0 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={clearCategories}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        fontSize: '9px',
+                                                        fontWeight: 700,
+                                                        color: 'var(--accent)',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    Reset
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div style={{ maxHeight: '180px', overflowY: 'auto', padding: '4px 0' }}>
+                                            {categories.map(cat => {
+                                                const isChecked = selectedCategories.includes(cat);
+                                                return (
+                                                    <label
+                                                        key={cat}
                                                         style={{
-                                                            background: 'none',
-                                                            border: 'none',
-                                                            fontSize: '0.65rem',
-                                                            fontWeight: 700,
-                                                            color: 'var(--accent)',
-                                                            cursor: 'pointer'
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px',
+                                                            padding: '6px 8px',
+                                                            borderRadius: '8px',
+                                                            fontSize: '11px',
+                                                            fontWeight: 600,
+                                                            color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
+                                                            cursor: 'pointer',
+                                                            background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent',
+                                                            transition: 'background 0.2s',
+                                                            margin: '2px 0'
                                                         }}
                                                     >
-                                                        Reset
-                                                    </button>
-                                                )}
-                                            </div>
-                                            <div style={{ maxHeight: '180px', overflowY: 'auto', padding: '0.25rem 0' }}>
-                                                {categories.map(cat => {
-                                                    const isChecked = selectedCategories.includes(cat);
-                                                    return (
-                                                        <label
-                                                            key={cat}
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isChecked}
+                                                            onChange={() => toggleCategory(cat)}
                                                             style={{
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '0.5rem',
-                                                                padding: '0.4rem 0.5rem',
-                                                                borderRadius: '8px',
-                                                                fontSize: '0.75rem',
-                                                                fontWeight: 600,
-                                                                color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
-                                                                cursor: 'pointer',
-                                                                background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent',
-                                                                transition: 'background 0.2s',
-                                                                margin: '2px 0'
+                                                                accentColor: 'var(--accent)',
+                                                                width: '12px',
+                                                                height: '12px',
+                                                                cursor: 'pointer'
                                                             }}
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={isChecked}
-                                                                onChange={() => toggleCategory(cat)}
-                                                                style={{
-                                                                    accentColor: 'var(--accent)',
-                                                                    width: '13px',
-                                                                    height: '13px',
-                                                                    cursor: 'pointer'
-                                                                }}
-                                                            />
-                                                            <span style={{ textTransform: 'capitalize' }}>{cat}</span>
-                                                        </label>
-                                                    );
-                                                })}
-                                            </div>
+                                                        />
+                                                        <span style={{ textTransform: 'capitalize' }}>{cat}</span>
+                                                    </label>
+                                                );
+                                            })}
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
+                            </div>
 
-                                {/* Sort Dropdown */}
-                                <div style={{ position: 'relative' }} ref={sortDropdownRef}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                                        title="Urutkan Tema"
-                                        style={{
-                                            padding: '0.625rem',
-                                            borderRadius: '100px',
-                                            border: '1.5px solid ' + (isSortDropdownOpen ? 'var(--accent)' : 'var(--card-border)'),
-                                            background: isSortDropdownOpen ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
-                                            color: isSortDropdownOpen ? 'var(--accent)' : 'var(--text-secondary)',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            transition: 'all 0.2s',
-                                            width: '38px',
-                                            height: '38px'
-                                        }}
-                                    >
-                                        <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                                        </svg>
-                                    </button>
+                            {/* Sort Dropdown */}
+                            <div style={{ position: 'relative' }} ref={sortDropdownRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                                    title="Urutkan Tema"
+                                    style={{
+                                        width: '34px',
+                                        height: '34px',
+                                        borderRadius: '12px',
+                                        border: '1.5px solid ' + (isSortDropdownOpen ? 'var(--accent)' : 'var(--card-border)'),
+                                        background: isSortDropdownOpen ? 'rgba(var(--accent-rgb), 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                                        color: isSortDropdownOpen ? 'var(--accent)' : 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                    </svg>
+                                </button>
 
-                                    {isSortDropdownOpen && (
+                                {isSortDropdownOpen && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: '100%',
+                                        marginTop: '0.375rem',
+                                        width: '160px',
+                                        background: T.isDark ? '#1e293b' : '#ffffff',
+                                        border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                        borderRadius: '12px',
+                                        boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                                        zIndex: 99,
+                                        padding: '6px'
+                                    }}>
                                         <div style={{
-                                            position: 'absolute',
-                                            right: 0,
-                                            top: '100%',
-                                            marginTop: '0.5rem',
-                                            width: '180px',
-                                            background: 'var(--card-bg)',
-                                            border: '1.5px solid var(--card-border)',
-                                            borderRadius: '16px',
-                                            boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-                                            zIndex: 99,
-                                            padding: '0.5rem',
-                                            backdropFilter: 'blur(10px)',
-                                            WebkitBackdropFilter: 'blur(10px)'
+                                            padding: '4px 8px 6px',
+                                            borderBottom: '1px solid var(--card-border)'
                                         }}>
-                                            <div style={{
-                                                padding: '0.25rem 0.5rem 0.5rem',
-                                                borderBottom: '1px solid var(--card-border)'
-                                            }}>
-                                                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Urutkan</span>
-                                            </div>
-                                            <div style={{ padding: '0.25rem 0' }}>
-                                                {[
-                                                    { key: 'terbaru', label: 'Terbaru' },
-                                                    { key: 'populer', label: 'Terpopuler' },
-                                                    { key: 'disukai', label: 'Terfavorit' }
-                                                ].map(opt => {
-                                                    const isActive = sortThemeKey === opt.key;
-                                                    return (
-                                                        <button
-                                                            key={opt.key}
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setSortThemeKey(opt.key);
-                                                                setIsSortDropdownOpen(false);
-                                                            }}
-                                                            style={{
-                                                                width: '100%',
-                                                                display: 'flex',
-                                                                justifyContent: 'space-between',
-                                                                alignItems: 'center',
-                                                                padding: '0.4rem 0.5rem',
-                                                                borderRadius: '8px',
-                                                                fontSize: '0.75rem',
-                                                                fontWeight: 700,
-                                                                background: isActive ? 'rgba(var(--accent-rgb), 0.08)' : 'transparent',
-                                                                color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-                                                                border: 'none',
-                                                                cursor: 'pointer',
-                                                                textAlign: 'left',
-                                                                transition: 'all 0.2s',
-                                                                margin: '2px 0'
-                                                            }}
-                                                        >
-                                                            <span>{opt.label}</span>
-                                                            {isActive && (
-                                                                <svg style={{ width: '14px', height: '14px', color: 'var(--accent)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                                </svg>
-                                                            )}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
+                                            <span style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Urutkan</span>
                                         </div>
-                                    )}
-                                </div>
+                                        <div style={{ padding: '4px 0' }}>
+                                            {[
+                                                { key: 'terbaru', label: 'Terbaru' },
+                                                { key: 'populer', label: 'Terpopuler' },
+                                                { key: 'disukai', label: 'Terfavorit' }
+                                            ].map(opt => {
+                                                const isActive = sortThemeKey === opt.key;
+                                                return (
+                                                    <button
+                                                        key={opt.key}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSortThemeKey(opt.key);
+                                                            setIsSortDropdownOpen(false);
+                                                        }}
+                                                        style={{
+                                                            width: '100%',
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center',
+                                                            padding: '6px 8px',
+                                                            borderRadius: '8px',
+                                                            fontSize: '11px',
+                                                            fontWeight: 700,
+                                                            background: isActive ? 'rgba(var(--accent-rgb), 0.08)' : 'transparent',
+                                                            color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            textAlign: 'left',
+                                                            transition: 'all 0.2s',
+                                                            margin: '2px 0'
+                                                        }}
+                                                    >
+                                                        <span>{opt.label}</span>
+                                                        {isActive && (
+                                                            <svg style={{ width: '14px', height: '14px', color: 'var(--accent)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -1483,15 +1483,15 @@ function LiveStreamingSection({ events, invitation }) {
    ═══════════════════════════════════════ */
 function ClosingSection({ invitation, brideGrooms, id }) {
     const { t, locale } = useTranslation();
-    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, [], invitation);
-    const { labels } = themeConfig;
+    const themeConfig = getThemeLabels(invitation?.type || 'wedding', locale, brideGrooms, invitation);
+    const { isSingleHost, labels } = themeConfig;
     const bgs = safeArr(brideGrooms);
     const bride = bgs.find(bg => bg.gender === 'wanita' || bg.gender === 'female' || String(bg.gender).toLowerCase() === 'wanita' || String(bg.gender).toLowerCase() === 'female') || bgs[0] || {};
     const groom = bgs.find(bg => bg.gender === 'pria' || bg.gender === 'male' || String(bg.gender).toLowerCase() === 'pria' || String(bg.gender).toLowerCase() === 'male') || bgs[1] || bgs[0] || {};
 
-    const coupleName = (groom?.nickname && bride?.nickname)
-        ? `${groom.nickname} & ${bride.nickname}`
-        : (invitation?.cover_title || 'The Wedding');
+    const coupleName = isSingleHost
+        ? (groom.nickname || groom.full_name || invitation?.cover_title || 'The Host')
+        : ((groom?.nickname && bride?.nickname) ? `${groom.nickname} & ${bride.nickname}` : (invitation?.cover_title || 'The Wedding'));
 
     const isEn = t('invitation.save_the_date') === 'Save The Date';
     const groomFather = groom.father_name;
@@ -1539,26 +1539,36 @@ function ClosingSection({ invitation, brideGrooms, id }) {
                             {isEn ? 'We Who Are Joyful,' : 'Kami Yang Berbahagia,'}
                         </div>
                         <div style={{ fontSize: '0.8rem', opacity: 0.85, display: 'flex', flexDirection: 'column', gap: '4px', color: '#fff', fontStyle: 'normal' }}>
-                            {hasGroomParents && (
-                                <div>
-                                    {isEn 
-                                        ? `Family of Mr. ${groomFather || '...'} & Mrs. ${groomMother || '...'}`
-                                        : `Kel. Bapak ${groomFather || '...'} & Ibu ${groomMother || '...'}`
-                                    }
-                                </div>
-                            )}
-                            {hasBrideParents && (
-                                <div>
-                                    {isEn 
-                                        ? `Family of Mr. ${brideFather || '...'} & Mrs. ${brideMother || '...'}`
-                                        : `Kel. Bapak ${brideFather || '...'} & Ibu ${brideMother || '...'}`
-                                    }
-                                </div>
-                            )}
-                            {!hasGroomParents && !hasBrideParents && (
-                                <div>
-                                    {isEn ? 'Both Families of the Couple' : 'Keluarga Besar Kedua Mempelai'}
-                                </div>
+                            {isSingleHost ? (
+                                hasGroomParents && (
+                                    <div>
+                                        {groomFather && groomMother 
+                                            ? (isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`)
+                                            : (groomFather ? (isEn ? `Family of Mr. ${groomFather}` : `Kel. Bapak ${groomFather}`) : (isEn ? `Family of Mrs. ${groomMother}` : `Kel. Ibu ${groomMother}`))}
+                                    </div>
+                                )
+                            ) : (
+                                <>
+                                    {hasGroomParents && (
+                                        <div>
+                                            {groomFather && groomMother 
+                                                ? (isEn ? `Family of Mr. ${groomFather} & Mrs. ${groomMother}` : `Kel. Bapak ${groomFather} & Ibu ${groomMother}`)
+                                                : (groomFather ? (isEn ? `Family of Mr. ${groomFather}` : `Kel. Bapak ${groomFather}`) : (isEn ? `Family of Mrs. ${groomMother}` : `Kel. Ibu ${groomMother}`))}
+                                        </div>
+                                    )}
+                                    {hasBrideParents && (
+                                        <div>
+                                            {brideFather && brideMother 
+                                                ? (isEn ? `Family of Mr. ${brideFather} & Mrs. ${brideMother}` : `Kel. Bapak ${brideFather} & Ibu ${brideMother}`)
+                                                : (brideFather ? (isEn ? `Family of Mr. ${brideFather}` : `Kel. Bapak ${brideFather}`) : (isEn ? `Family of Mrs. ${brideMother}` : `Kel. Ibu ${brideMother}`))}
+                                        </div>
+                                    )}
+                                    {!hasGroomParents && !hasBrideParents && (
+                                        <div>
+                                            {isEn ? 'Both Families of the Couple' : 'Keluarga Besar Kedua Mempelai'}
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>

@@ -848,7 +848,11 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                                     );
                                                 })}
                                             </div>
-                                                                    {/* Sort Action Pills */}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Sort Action Pills */}
                                 <div className="flex items-center gap-1.5 bg-gray-100/80 p-1 rounded-2xl border border-gray-200/40 select-none">
                                     {SORT_OPTIONS.map(opt => {
                                         const isActive = themeSortKey === opt.key;
@@ -867,8 +871,6 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                             </button>
                                         );
                                     })}
-                                </div>      </div>
-                                    )}
                                 </div>
                             </div>
                         </div>

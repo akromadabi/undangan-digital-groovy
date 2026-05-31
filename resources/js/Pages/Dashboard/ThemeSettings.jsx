@@ -1,5 +1,5 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
@@ -38,6 +38,12 @@ const PARTICLE_OPTIONS = [
     { key: 'flower', label: 'Bunga' },
     { key: 'sparkle', label: 'Sparkle' },
     { key: 'birds', label: 'Burung' },
+];
+
+const SORT_OPTIONS = [
+    { key: 'terbaru', label: 'Terbaru' },
+    { key: 'populer', label: 'Terpopuler' },
+    { key: 'disukai', label: 'Terfavorit' },
 ];
 
 const ToggleSwitch = ({ checked, onChange, label, desc, icon, disabled = false }) => (
@@ -167,8 +173,52 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     const [showParticle, setShowParticle] = useState(false);
     const [toast, setToast] = useState(null); // { type: 'success'|'error', msg: '' }
     const [previewKey, setPreviewKey] = useState(0);
-    const [selectedCategory, setSelectedCategory] = useState('Semua');
+    const [selectedCategories, setSelectedCategories] = useState([]);
     const [sortThemeKey, setSortThemeKey] = useState('terbaru');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+    const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+
+    const categoryDropdownRef = useRef(null);
+    const sortDropdownRef = useRef(null);
+
+    // Close dropdowns on click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+                setIsCategoryDropdownOpen(false);
+            }
+            if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
+                setIsSortDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Unique normalized categories list with counts
+    const categories = useMemo(() => {
+        const counts = {};
+        themes?.forEach(t => {
+            const cat = t.category ? t.category.trim().toLowerCase() : '';
+            if (cat) {
+                counts[cat] = (counts[cat] || 0) + 1;
+            }
+        });
+        const uniqueCats = [...new Set(themes?.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean) || [])];
+        return uniqueCats.map(cat => ({
+            name: cat,
+            count: counts[cat] || 0
+        })).sort((a, b) => a.name.localeCompare(b.name));
+    }, [themes]);
+
+    const toggleCategory = (cat) => {
+        setSelectedCategories(prev => 
+            prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+        );
+    };
+
+    const clearCategories = () => setSelectedCategories([]);
 
     // Sort helper for theme list
     const sortThemesFn = (arr, key) => {
@@ -433,8 +483,8 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
     };
 
     const SECTION_EDIT_ROUTES = {
-        cover: null,
-        opening: null, // Sekarang ditangani oleh modal unggah foto opening di tempat
+        cover: '/settings/cover',
+        opening: '/content/teks-sambutan',
         closing: '/content/teks-sambutan',
         mempelai: '/content/mempelai',
         countdown: '/content/teks-sambutan',
@@ -724,59 +774,165 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                     Pilih Tema Undangan
                                 </h3>
                                 <p className="text-[10px] text-gray-400 mt-1">Silakan pilih desain tema terbaik untuk undangan pernikahan digital Anda.</p>
-                                
-                                {/* Category Badges + Sort Bar */}
-                                {(() => {
-                                    const uniqueCategories = ['Semua', ...Array.from(new Set(themes?.map(t => t.category?.toUpperCase()).filter(Boolean)))];
-                                    return (
-                                        <div className="mt-3 pt-1 space-y-2">
-                                            {/* Category filter */}
-                                            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-                                                {uniqueCategories.map(cat => (
-                                                    <button
-                                                        key={cat}
-                                                        type="button"
-                                                        onClick={() => setSelectedCategory(cat)}
-                                                        className={`px-3 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all duration-200 ${
-                                                            selectedCategory === cat
-                                                                ? 'bg-[#E5654B] text-white shadow-md shadow-orange-100 scale-105'
-                                                                : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-transparent'
-                                                        }`}
-                                                    >
-                                                        {cat}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            {/* Sort bar */}
-                                            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-                                                <span className="text-[10px] text-gray-400 font-semibold flex-shrink-0">Urutkan:</span>
-                                                {[{key:'terbaru',label:'Terbaru'},{key:'populer',label:'Terpopuler'},{key:'disukai',label:'Terfavorit'}].map(opt => (
-                                                    <button
-                                                        key={opt.key}
-                                                        type="button"
-                                                        onClick={() => setSortThemeKey(opt.key)}
-                                                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition-all duration-200 border ${
-                                                            sortThemeKey === opt.key
-                                                                ? 'bg-[#E5654B] text-white border-[#E5654B] scale-105'
-                                                                : 'bg-white text-gray-500 border-gray-200 hover:border-[#E5654B]/40 hover:text-[#E5654B]'
-                                                        }`}
-                                                    >
-                                                        {opt.label}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
+                                {/* Filter Panel (Compact Single Line Layout) */}
+                                 <div className="bg-white rounded-2xl border border-gray-100 p-2 shadow-sm flex flex-row items-center gap-2 w-full mt-3">
+                                     {/* Search Box */}
+                                     <div className="relative flex-grow">
+                                         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                         </svg>
+                                         <input
+                                             type="text"
+                                             value={searchQuery}
+                                             onChange={e => setSearchQuery(e.target.value)}
+                                             placeholder="Cari tema..."
+                                             style={{ paddingLeft: '2.25rem' }}
+                                             className="w-full pr-3 py-1.5 rounded-xl border border-gray-200 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none bg-gray-50/50 hover:bg-gray-50 focus:bg-white transition-all text-gray-800"
+                                         />
+                                     </div>
+
+                                     {/* Controls */}
+                                     <div className="flex items-center gap-2 flex-shrink-0">
+                                         {/* Categories Dropdown */}
+                                         <div className="relative" ref={categoryDropdownRef}>
+                                             <button
+                                                 type="button"
+                                                 onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                                                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 border flex items-center gap-1.5 select-none h-[32px] ${
+                                                     selectedCategories.length > 0
+                                                         ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
+                                                         : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                                                 }`}
+                                             >
+                                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                                 </svg>
+                                                 <span className="hidden sm:inline">
+                                                     {selectedCategories.length === 0
+                                                         ? 'Kategori'
+                                                         : `Kat (${selectedCategories.length})`
+                                                     }
+                                                 </span>
+                                                 <span className="sm:hidden">
+                                                     {selectedCategories.length === 0
+                                                         ? 'Kat'
+                                                         : `Kat (${selectedCategories.length})`
+                                                     }
+                                                 </span>
+                                                 <svg className={`w-3 h-3 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180 text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                                 </svg>
+                                             </button>
+
+                                             {isCategoryDropdownOpen && (
+                                                 <div className="absolute right-0 mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                                     <div className="px-2 py-1 border-b border-gray-100 flex items-center justify-between">
+                                                         <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider font-semibold">Kategori</span>
+                                                         {selectedCategories.length > 0 && (
+                                                             <button
+                                                                 type="button"
+                                                                 onClick={clearCategories}
+                                                                 className="text-[9px] font-bold text-red-500 hover:underline"
+                                                             >
+                                                                 Reset
+                                                             </button>
+                                                         )}
+                                                     </div>
+                                                     <div className="max-h-40 overflow-y-auto py-0.5 scrollbar-thin">
+                                                         {categories.map((cat) => {
+                                                             const isChecked = selectedCategories.includes(cat.name);
+                                                             return (
+                                                                 <label
+                                                                     key={cat.name}
+                                                                     className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors select-none text-[10px] font-semibold ${
+                                                                         isChecked ? 'bg-[#E5654B]/5 text-[#E5654B]' : 'text-gray-700'
+                                                                     }`}
+                                                                 >
+                                                                     <div className="flex items-center gap-2">
+                                                                         <input
+                                                                             type="checkbox"
+                                                                             checked={isChecked}
+                                                                             onChange={() => toggleCategory(cat.name)}
+                                                                             className="rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 w-3 h-3 cursor-pointer accent-[#E5654B]"
+                                                                         />
+                                                                         <span className="capitalize">{cat.name}</span>
+                                                                     </div>
+                                                                     <span className="text-[9px] font-bold text-gray-400 bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded-md">
+                                                                         {cat.count}
+                                                                     </span>
+                                                                 </label>
+                                                             );
+                                                         })}
+                                                     </div>
+                                                 </div>
+                                             )}
+                                         </div>
+
+                                         {/* Sort Dropdown */}
+                                         <div className="relative" ref={sortDropdownRef}>
+                                             <button
+                                                 type="button"
+                                                 onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                                                 title="Urutkan Tema"
+                                                 className={`p-1.5 rounded-xl transition-all duration-200 border flex items-center justify-center select-none h-[32px] w-[32px] ${
+                                                     isSortDropdownOpen
+                                                         ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
+                                                         : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                                                 }`}
+                                             >
+                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                                 </svg>
+                                             </button>
+
+                                             {isSortDropdownOpen && (
+                                                 <div className="absolute right-0 mt-1.5 w-40 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                                     <div className="px-2 py-1 border-b border-gray-100 mb-0.5">
+                                                         <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider font-semibold">Urutkan</span>
+                                                     </div>
+                                                     {SORT_OPTIONS.map(opt => {
+                                                         const isActive = sortThemeKey === opt.key;
+                                                         return (
+                                                             <button
+                                                                 key={opt.key}
+                                                                 type="button"
+                                                                 onClick={() => {
+                                                                     setSortThemeKey(opt.key);
+                                                                     setIsSortDropdownOpen(false);
+                                                                 }}
+                                                                 className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left text-[10px] font-bold transition-all ${
+                                                                     isActive
+                                                                         ? 'bg-[#E5654B]/10 text-[#E5654B]'
+                                                                         : 'text-gray-600 hover:bg-gray-50'
+                                                                 }`}
+                                                             >
+                                                                 <span>{opt.label}</span>
+                                                                 {isActive && (
+                                                                     <svg className="w-3.5 h-3.5 text-[#E5654B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                     </svg>
+                                                                 )}
+                                                             </button>
+                                                         );
+                                                     })}
+                                                 </div>
+                                             )}
+                                         </div>
+                                     </div>
+                                 </div>
                             </div>
 
                             {/* Theme Grid */}
                             <div className="grid grid-cols-2 gap-4 pb-4">
                                 {(() => {
-                                    const base = selectedCategory === 'Semua'
-                                        ? themes
-                                        : themes?.filter(t => t.category?.toUpperCase() === selectedCategory);
-                                    const filteredThemes = sortThemesFn(base || [], sortThemeKey);
+                                    let base = [...(themes || [])];
+                                    if (selectedCategories.length > 0) {
+                                        base = base.filter(t => t.category && selectedCategories.includes(t.category.trim().toLowerCase()));
+                                    }
+                                    if (searchQuery.trim()) {
+                                        base = base.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+                                    }
+                                    const filteredThemes = sortThemesFn(base, sortThemeKey);
                                     return filteredThemes?.map(theme => {
                                         const isSelected = selectedThemeId === theme.id;
                                         return (
@@ -955,33 +1111,36 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                                     <span className="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">🖼️ Foto</span>
                                                 ) : null)}
                                             </span>
-                                            {((!planLocked && SECTION_EDIT_ROUTES[section.section_key]) || ['cover', 'opening'].includes(section.section_key)) && (
-                                                <button
-                                                    onClick={() => {
-                                                        if (section.section_key === 'cover') {
-                                                            openMediaPicker('cover');
-                                                        } else if (section.section_key === 'opening') {
-                                                            openMediaPicker('opening');
-                                                        } else {
-                                                            router.visit(SECTION_EDIT_ROUTES[section.section_key]);
-                                                        }
-                                                    }}
-                                                    type="button"
-                                                    className="mr-1.5 p-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-[#E5654B] hover:text-[#c24b33] transition-all duration-200"
-                                                    title={isPhotoSection(section.section_key) ? "Upload/Ubah Foto" : "Edit Konten"}
-                                                >
-                                                    {isPhotoSection(section.section_key) ? (
+                                            <div className="flex items-center gap-1">
+                                                {/* Button 1: Camera button specifically for cover and opening popup media picker */}
+                                                {['cover', 'opening'].includes(section.section_key) && (
+                                                    <button
+                                                        onClick={() => openMediaPicker(section.section_key)}
+                                                        type="button"
+                                                        className="p-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-[#E5654B] hover:text-[#c24b33] transition-all duration-200"
+                                                        title="Upload/Ubah Foto atau Video"
+                                                    >
                                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
                                                         </svg>
-                                                    ) : (
+                                                    </button>
+                                                )}
+
+                                                {/* Button 2: Pencil/Edit button for all sections that have a route defined in SECTION_EDIT_ROUTES */}
+                                                {!planLocked && SECTION_EDIT_ROUTES[section.section_key] && (
+                                                    <button
+                                                        onClick={() => router.visit(SECTION_EDIT_ROUTES[section.section_key])}
+                                                        type="button"
+                                                        className="p-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-[#E5654B] hover:text-[#c24b33] transition-all duration-200"
+                                                        title="Edit Teks & Konten"
+                                                    >
                                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                                         </svg>
-                                                    )}
-                                                </button>
-                                            )}
+                                                    </button>
+                                                )}
+                                            </div>
                                             {locked ? (
                                                 <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${planLocked ? 'bg-amber-50 text-amber-600 border border-amber-100 shadow-xs' : 'bg-gray-200 text-gray-500'}`}>
                                                     {planLocked ? 'Locked' : 'Aktif'}

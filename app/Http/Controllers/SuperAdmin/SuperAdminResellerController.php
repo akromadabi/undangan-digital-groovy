@@ -25,6 +25,35 @@ class SuperAdminResellerController extends Controller
             ->latest()
             ->paginate(20);
 
+        $resellers->getCollection()->transform(function ($reseller) {
+            $resellerUserIds = User::where('reseller_id', $reseller->id)->pluck('id');
+
+            $totalViews = Invitation::whereIn('user_id', $resellerUserIds)->sum('views_count');
+
+            $todayViews = \DB::table('invitation_views_logs')
+                ->whereIn('invitation_id', function ($query) use ($resellerUserIds) {
+                    $query->select('id')->from('invitations')->whereIn('user_id', $resellerUserIds);
+                })
+                ->whereDate('created_at', today())
+                ->count();
+
+            $monthViews = \DB::table('invitation_views_logs')
+                ->whereIn('invitation_id', function ($query) use ($resellerUserIds) {
+                    $query->select('id')->from('invitations')->whereIn('user_id', $resellerUserIds);
+                })
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count();
+
+            $reseller->visitor_stats = [
+                'today' => $todayViews,
+                'month' => $monthViews,
+                'total' => $totalViews,
+            ];
+
+            return $reseller;
+        });
+
         $centralHost = parse_url(config('app.url'), PHP_URL_HOST);
 
         return Inertia::render('SuperAdmin/Resellers/Index', [

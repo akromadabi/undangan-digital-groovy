@@ -78,19 +78,6 @@ class MediaAssetController extends Controller
                 'mime_type' => $file->getClientMimeType(),
             ]);
 
-            // Auto-gallery fallback for backwards compatibility
-            $url = '/storage/' . $path;
-            $maxGalleries = $request->user()->currentPlan()?->max_galleries ?? 3;
-            $currentCount = $invitation->galleries()->count();
-            if ($currentCount < $maxGalleries) {
-                Gallery::create([
-                    'invitation_id' => $invitation->id,
-                    'image_url' => $url,
-                    'caption' => null,
-                    'sort_order' => $currentCount,
-                ]);
-            }
-
             return response()->json([
                 'success' => true,
                 'asset' => $asset,
@@ -208,30 +195,40 @@ class MediaAssetController extends Controller
             $invitation->save();
         } elseif ($target === 'groom') {
             $groom = $invitation->brideGrooms()->where('gender', 'pria')->first();
-            if ($groom) {
-                $groom->photo = $active ? $url : null;
-                if ($active) {
-                    $groom->photo_position_x = 50;
-                    $groom->photo_position_y = 50;
-                    $groom->photo_zoom = 1.0;
-                }
-                $groom->save();
-            } else {
-                return response()->json(['error' => 'Data mempelai pria belum dibuat'], 400);
+            if (!$groom) {
+                $isSingle = !in_array($invitation->type, ['wedding', 'anniversary']);
+                $orderNumber = $isSingle ? 1 : 2;
+                $groom = new BrideGroom([
+                    'invitation_id' => $invitation->id,
+                    'gender' => 'pria',
+                    'order_number' => $orderNumber,
+                    'full_name' => 'Mempelai Pria',
+                ]);
             }
+            $groom->photo = $active ? $url : null;
+            if ($active) {
+                $groom->photo_position_x = 50;
+                $groom->photo_position_y = 50;
+                $groom->photo_zoom = 1.0;
+            }
+            $groom->save();
         } elseif ($target === 'bride') {
             $bride = $invitation->brideGrooms()->where('gender', 'wanita')->first();
-            if ($bride) {
-                $bride->photo = $active ? $url : null;
-                if ($active) {
-                    $bride->photo_position_x = 50;
-                    $bride->photo_position_y = 50;
-                    $bride->photo_zoom = 1.0;
-                }
-                $bride->save();
-            } else {
-                return response()->json(['error' => 'Data mempelai wanita belum dibuat'], 400);
+            if (!$bride) {
+                $bride = new BrideGroom([
+                    'invitation_id' => $invitation->id,
+                    'gender' => 'wanita',
+                    'order_number' => 1,
+                    'full_name' => 'Mempelai Wanita',
+                ]);
             }
+            $bride->photo = $active ? $url : null;
+            if ($active) {
+                $bride->photo_position_x = 50;
+                $bride->photo_position_y = 50;
+                $bride->photo_zoom = 1.0;
+            }
+            $bride->save();
         } elseif ($target === 'gallery') {
             if ($active) {
                 $maxGalleries = $request->user()->currentPlan()?->max_galleries ?? 3;

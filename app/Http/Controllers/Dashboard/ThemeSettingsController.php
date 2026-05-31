@@ -340,10 +340,12 @@ class ThemeSettingsController extends Controller
             }
         }
 
+        $theme->refresh();
+
         return response()->json([
             'success' => true,
-            'likes' => $theme->base_likes + $theme->real_likes,
-            'real_likes' => $theme->real_likes,
+            'likes' => (int)$theme->base_likes + (int)$theme->real_likes,
+            'real_likes' => (int)$theme->real_likes,
         ]);
     }
 
