@@ -32,6 +32,16 @@ class MusicHelper
             return null;
         }
         
+        // 🌟 SOLUSI OPTIMASI PENYIMPANAN (DEDUPLIKASI OTOMATIS):
+        // Cek jika lagu YouTube ini sudah pernah dikonversi sebelumnya oleh siapa pun di platform.
+        // Jika sudah ada, langsung gunakan file tersebut demi menghemat 100% penyimpanan & kuota server!
+        $fileName = 'youtube_' . $videoId . '.mp3';
+        $storagePath = 'music/' . $fileName;
+        
+        if (Storage::disk('public')->exists($storagePath)) {
+            return '/storage/' . $storagePath;
+        }
+        
         // List of Cobalt API endpoints for robustness
         $instances = [
             'https://api.cobalt.tools/api/json',
@@ -96,9 +106,6 @@ class MusicHelper
         }
 
         // Save to public storage
-        $fileName = 'youtube_' . $videoId . '_' . time() . '.mp3';
-        $storagePath = 'music/' . $fileName;
-        
         Storage::disk('public')->put($storagePath, $fileContents);
 
         return '/storage/' . $storagePath;
