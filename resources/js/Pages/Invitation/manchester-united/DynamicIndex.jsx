@@ -465,7 +465,15 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                                     <div className="mu-card-inner">
                                         <div className="mu-card-photo-wrap" style={{ marginTop: '10px' }}>
                                             {globalShowPhotos && groomPhoto ? (
-                                                <img src={groomPhoto} alt={groomNickname} className="mu-card-photo" />
+                                                <img 
+                                                    src={groomPhoto} 
+                                                    alt={groomNickname} 
+                                                    className="mu-card-photo" 
+                                                    style={{
+                                                        objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                                        transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                                    }}
+                                                />
                                             ) : (
                                                 <div className="mu-card-monogram">{groomNickname.charAt(0)}</div>
                                             )}
@@ -496,7 +504,15 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                                     <div className="mu-card-inner">
                                         <div className="mu-card-photo-wrap" style={{ marginTop: '10px' }}>
                                             {globalShowPhotos && bridePhoto ? (
-                                                <img src={bridePhoto} alt={brideNickname} className="mu-card-photo" />
+                                                <img 
+                                                    src={bridePhoto} 
+                                                    alt={brideNickname} 
+                                                    className="mu-card-photo" 
+                                                    style={{
+                                                        objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                                        transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                                    }}
+                                                />
                                             ) : (
                                                 <div className="mu-card-monogram">{brideNickname.charAt(0)}</div>
                                             )}
@@ -518,7 +534,7 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
                     {/* Integrated Countdown Timer */}
                     {countdownTarget && (
                         <div className="mu-scoreboard-countdown-premium">
-                            <CountdownTimer targetDate={countdownTarget} />
+                            <CountdownTimer targetDate={countdownTarget} startTime={primaryEvent?.start_time} />
                         </div>
                     )}
                 </Reveal>
@@ -668,7 +684,15 @@ function BrideGroomSection({ invitation, brideGrooms, id, themeConfig }) {
                 {/* Player Profile Image/Avatar */}
                 {globalShowPhotos && photo ? (
                     <div className="mu-player-photo-wrap">
-                        <img src={photo} alt={person.full_name} className="mu-player-photo" />
+                        <img 
+                            src={photo} 
+                            alt={person.full_name} 
+                            className="mu-player-photo" 
+                            style={{
+                                objectPosition: `${person.photo_position_x ?? 50}% ${person.photo_position_y ?? 50}%`,
+                                transform: `scale(${person.photo_zoom ?? 1.0})`,
+                            }}
+                        />
                     </div>
                 ) : (
                     <div className="mu-player-monogram">
@@ -731,14 +755,15 @@ function BrideGroomSection({ invitation, brideGrooms, id, themeConfig }) {
 /* ═══════════════════════════════════════
    COUNTDOWN TIMER
    ═══════════════════════════════════════ */
-function CountdownTimer({ targetDate }) {
+function CountdownTimer({ targetDate, startTime }) {
     const { t } = useTranslation();
     const [cd, setCd] = useState({ d: 0, h: 0, m: 0, s: 0 });
     
     useEffect(() => {
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
-        const target = new Date(`${ds}T08:00:00`);
+        const timeStr = startTime ? String(startTime).substring(0, 5) : '08:00';
+        const target = new Date(`${ds}T${timeStr}:00`);
         if (isNaN(target.getTime())) return;
         
         const tick = () => {
@@ -754,7 +779,7 @@ function CountdownTimer({ targetDate }) {
         tick();
         const iv = setInterval(tick, 1000);
         return () => clearInterval(iv);
-    }, [targetDate]);
+    }, [targetDate, startTime]);
 
     return (
         <div className="mu-countdown">
@@ -803,7 +828,7 @@ function CountdownSection({ events, id }) {
                 </Reveal>
                 <Reveal delay={150} className="mu-countdown-wrapper">
                     <div className="mu-jumbotron-led">
-                        <CountdownTimer targetDate={primaryEvent.event_date} />
+                        <CountdownTimer targetDate={primaryEvent.event_date} startTime={primaryEvent.start_time} />
                     </div>
                 </Reveal>
             </div>

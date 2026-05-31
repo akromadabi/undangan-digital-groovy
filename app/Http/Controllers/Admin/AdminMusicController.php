@@ -7,6 +7,7 @@ use App\Models\MusicLibrary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
+use App\Helpers\MusicHelper;
 
 class AdminMusicController extends Controller
 {
@@ -31,9 +32,30 @@ class AdminMusicController extends Controller
             'source_type' => 'required|in:url,upload',
         ]);
 
-        MusicLibrary::create($request->only(['title', 'artist', 'category', 'url', 'source_type']));
+        $url = $request->input('url');
+        $isYouTube = false;
 
-        return back()->with('success', 'Musik berhasil ditambahkan.');
+        if ($url) {
+            try {
+                $localPath = MusicHelper::convertYoutubeToMp3($url);
+                if ($localPath) {
+                    $url = $localPath;
+                    $isYouTube = true;
+                }
+            } catch (\Exception $e) {
+                return back()->withErrors(['url' => $e->getMessage()]);
+            }
+        }
+
+        MusicLibrary::create([
+            'title' => $request->input('title'),
+            'artist' => $request->input('artist'),
+            'category' => $request->input('category'),
+            'url' => $url,
+            'source_type' => $request->input('source_type'),
+        ]);
+
+        return back()->with('success', $isYouTube ? 'Lagu dari YouTube berhasil dikonversi ke MP3 dan ditambahkan ke Koleksi!' : 'Musik berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
@@ -45,10 +67,30 @@ class AdminMusicController extends Controller
             'url' => 'required|string|max:500',
         ]);
 
+        $url = $request->input('url');
         $track = MusicLibrary::findOrFail($id);
-        $track->update($request->only(['title', 'artist', 'category', 'url']));
+        $isYouTube = false;
 
-        return back()->with('success', 'Musik berhasil diperbarui.');
+        if ($url && $url !== $track->url) {
+            try {
+                $localPath = MusicHelper::convertYoutubeToMp3($url);
+                if ($localPath) {
+                    $url = $localPath;
+                    $isYouTube = true;
+                }
+            } catch (\Exception $e) {
+                return back()->withErrors(['url' => $e->getMessage()]);
+            }
+        }
+
+        $track->update([
+            'title' => $request->input('title'),
+            'artist' => $request->input('artist'),
+            'category' => $request->input('category'),
+            'url' => $url,
+        ]);
+
+        return back()->with('success', $isYouTube ? 'Lagu dari YouTube berhasil dikonversi ke MP3 dan diperbarui!' : 'Musik berhasil diperbarui.');
     }
 
     public function destroy($id)

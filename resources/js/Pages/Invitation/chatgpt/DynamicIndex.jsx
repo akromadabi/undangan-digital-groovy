@@ -850,7 +850,15 @@ function BrideGroomSection({ brideGrooms, language, guest, isTyping, themeConfig
                             <Reveal className="gpt-card gpt-couple-card" delay={100} style={{ maxWidth: '320px', width: '100%' }}>
                                 <div className="gpt-couple-avatar-wrap">
                                     {globalShowPhotos && hostPhoto ? (
-                                        <img src={hostPhoto} alt={host.nickname} className="gpt-couple-photo" />
+                                        <img 
+                                            src={hostPhoto} 
+                                            alt={host.nickname} 
+                                            className="gpt-couple-photo" 
+                                            style={{
+                                                objectPosition: `${host.photo_position_x ?? 50}% ${host.photo_position_y ?? 50}%`,
+                                                transform: `scale(${host.photo_zoom ?? 1.0})`,
+                                            }}
+                                        />
                                     ) : (
                                         <div className="gpt-couple-monogram">{host.nickname?.charAt(0) || 'H'}</div>
                                     )}
@@ -907,7 +915,15 @@ function BrideGroomSection({ brideGrooms, language, guest, isTyping, themeConfig
                         <Reveal className="gpt-card gpt-couple-card" delay={100}>
                             <div className="gpt-couple-avatar-wrap">
                                 {globalShowPhotos && groomPhoto ? (
-                                    <img src={groomPhoto} alt={groom.nickname} className="gpt-couple-photo" />
+                                    <img 
+                                        src={groomPhoto} 
+                                        alt={groom.nickname} 
+                                        className="gpt-couple-photo" 
+                                        style={{
+                                            objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                            transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                        }}
+                                    />
                                 ) : (
                                     <div className="gpt-couple-monogram">{groom.nickname?.charAt(0) || 'G'}</div>
                                 )}
@@ -941,7 +957,15 @@ function BrideGroomSection({ brideGrooms, language, guest, isTyping, themeConfig
                         <Reveal className="gpt-card gpt-couple-card" delay={200}>
                             <div className="gpt-couple-avatar-wrap">
                                 {globalShowPhotos && bridePhoto ? (
-                                    <img src={bridePhoto} alt={bride.nickname} className="gpt-couple-photo" />
+                                    <img 
+                                        src={bridePhoto} 
+                                        alt={bride.nickname} 
+                                        className="gpt-couple-photo" 
+                                        style={{
+                                            objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                            transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                        }}
+                                    />
                                 ) : (
                                     <div className="gpt-couple-monogram">{bride.nickname?.charAt(0) || 'B'}</div>
                                 )}
@@ -992,7 +1016,8 @@ function CountdownSection({ invitation, events, language, guest, isTyping, theme
     useEffect(() => {
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
-        const target = new Date(`${ds}T08:00:00`);
+        const timeStr = primaryEvent?.start_time ? String(primaryEvent.start_time).substring(0, 5) : '08:00';
+        const target = new Date(`${ds}T${timeStr}:00`);
         if (isNaN(target.getTime())) return;
 
         const tick = () => {
@@ -1009,7 +1034,7 @@ function CountdownSection({ invitation, events, language, guest, isTyping, theme
         tick();
         const iv = setInterval(tick, 1000);
         return () => clearInterval(iv);
-    }, [targetDate]);
+    }, [targetDate, primaryEvent?.start_time]);
 
     return (
         <div id="countdown" className="gpt-section">

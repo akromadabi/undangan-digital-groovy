@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Helpers\MusicHelper;
 
 class SettingsController extends Controller
 {
@@ -269,10 +270,28 @@ class SettingsController extends Controller
             'music_autoplay' => 'boolean',
         ]);
 
+        $musicUrl = $request->input('music_url');
         $invitation = $this->getUserInvitation($request);
-        $invitation->update($request->only(['music_url', 'music_autoplay']));
+        $isYouTube = false;
 
-        return back()->with('success', 'Pengaturan musik berhasil disimpan.');
+        if ($musicUrl) {
+            try {
+                $localPath = MusicHelper::convertYoutubeToMp3($musicUrl);
+                if ($localPath) {
+                    $musicUrl = $localPath;
+                    $isYouTube = true;
+                }
+            } catch (\Exception $e) {
+                return back()->withErrors(['music_url' => $e->getMessage()]);
+            }
+        }
+
+        $invitation->update([
+            'music_url' => $musicUrl,
+            'music_autoplay' => $request->input('music_autoplay', true)
+        ]);
+
+        return back()->with('success', $isYouTube ? 'Musik dari YouTube berhasil dikonversi ke MP3!' : 'Pengaturan musik berhasil disimpan.');
     }
 
     public function hadiah(Request $request)

@@ -455,13 +455,14 @@ function OpeningSection({ invitation, brideGrooms, scrollToSection, loveStories,
 /* ═══════════════════════════════════════
    COUNTDOWN  (inside bride_groom or standalone)
    ═══════════════════════════════════════ */
-function CountdownTimer({ targetDate }) {
+function CountdownTimer({ targetDate, startTime }) {
     const { t } = useTranslation();
     const [cd, setCd] = useState({ d: 0, h: 0, m: 0 });
     useEffect(() => {
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
-        const target = new Date(`${ds}T08:00:00`);
+        const timeStr = startTime ? String(startTime).substring(0, 5) : '08:00';
+        const target = new Date(`${ds}T${timeStr}:00`);
         if (isNaN(target.getTime())) return;
         const tick = () => {
             const diff = target - new Date();
@@ -473,7 +474,7 @@ function CountdownTimer({ targetDate }) {
             });
         };
         tick(); const iv = setInterval(tick, 1000); return () => clearInterval(iv);
-    }, [targetDate]);
+    }, [targetDate, startTime]);
 
     return (
         <div className="nf-countdown">
@@ -561,7 +562,15 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
             <Reveal className={`nf-couple__card nf-couple__card--${side}`} delay={side === 'left' ? 0 : 200}>
                 {globalShowPhotos && person.photo && (
                     <div className="nf-couple__photo-wrap">
-                        <img src={photo} alt={person.full_name} className="nf-couple__photo" />
+                        <img 
+                            src={photo} 
+                            alt={person.full_name} 
+                            className="nf-couple__photo" 
+                            style={{
+                                objectPosition: `${person.photo_position_x ?? 50}% ${person.photo_position_y ?? 50}%`,
+                                transform: `scale(${person.photo_zoom ?? 1.0})`,
+                            }}
+                        />
                     </div>
                 )}
                 <p className="nf-couple__full-name">{person.full_name}</p>
@@ -619,7 +628,7 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
                                 </div>
                             );
                         })()}
-                        <CountdownTimer targetDate={primaryEvent.event_date} />
+                        <CountdownTimer targetDate={primaryEvent.event_date} startTime={primaryEvent.start_time} />
                     </div>
                 </Reveal>
             )}
@@ -752,7 +761,7 @@ function CountdownSection({ events }) {
                 </h3>
             </Reveal>
             <Reveal delay={200}>
-                <CountdownTimer targetDate={primaryEvent.event_date} />
+                <CountdownTimer targetDate={primaryEvent.event_date} startTime={primaryEvent.start_time} />
             </Reveal>
         </section>
     );

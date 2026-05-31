@@ -642,7 +642,15 @@ function BrideGroomSection({ brideGrooms, invitation, language, onOpenStory }) {
                             </div>
                             <div className="ig-card-avatar-wrap" onClick={() => onOpenStory(getStorageUrl(bgs[0].photo, '/images/demo/korea-8.jpg'), bgs[0].full_name, bgs[0].nickname ? bgs[0].nickname.toLowerCase() : 'profile')} style={{ cursor: 'pointer' }}>
                                 {globalShowPhotos && bgs[0].photo ? (
-                                    <img src={getStorageUrl(bgs[0].photo)} alt={bgs[0].full_name} className="ig-card-photo" />
+                                    <img 
+                                        src={getStorageUrl(bgs[0].photo)} 
+                                        alt={bgs[0].full_name} 
+                                        className="ig-card-photo" 
+                                        style={{
+                                            objectPosition: `${bgs[0].photo_position_x ?? 50}% ${bgs[0].photo_position_y ?? 50}%`,
+                                            transform: `scale(${bgs[0].photo_zoom ?? 1.0})`,
+                                        }}
+                                    />
                                 ) : (
                                     <div className="ig-card-monogram">{bgs[0].nickname?.charAt(0) || 'H'}</div>
                                 )}
@@ -678,7 +686,16 @@ function BrideGroomSection({ brideGrooms, invitation, language, onOpenStory }) {
                                 </div>
                                 <div className="ig-card-avatar-wrap" onClick={() => onOpenStory(groomSrc, groom.full_name, groom.nickname ? groom.nickname.toLowerCase() : 'groom')} style={{ cursor: 'pointer' }}>
                                     {globalShowPhotos && groomSrc ? (
-                                        <img src={groomSrc} alt={groom.full_name} className="ig-card-photo" onError={() => setGroomSrc(null)} />
+                                        <img 
+                                            src={groomSrc} 
+                                            alt={groom.full_name} 
+                                            className="ig-card-photo" 
+                                            onError={() => setGroomSrc(null)} 
+                                            style={{
+                                                objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                                transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                            }}
+                                        />
                                     ) : (
                                         <div className="ig-card-monogram">{groom.nickname?.charAt(0) || 'B'}</div>
                                     )}
@@ -713,7 +730,16 @@ function BrideGroomSection({ brideGrooms, invitation, language, onOpenStory }) {
                                 </div>
                                 <div className="ig-card-avatar-wrap" onClick={() => onOpenStory(brideSrc, bride.full_name, bride.nickname ? bride.nickname.toLowerCase() : 'bride')} style={{ cursor: 'pointer' }}>
                                     {globalShowPhotos && brideSrc ? (
-                                        <img src={brideSrc} alt={bride.full_name} className="ig-card-photo" onError={() => setBrideSrc(null)} />
+                                        <img 
+                                            src={brideSrc} 
+                                            alt={bride.full_name} 
+                                            className="ig-card-photo" 
+                                            onError={() => setBrideSrc(null)} 
+                                            style={{
+                                                objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                                transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                            }}
+                                        />
                                     ) : (
                                         <div className="ig-card-monogram">{bride.nickname?.charAt(0) || 'R'}</div>
                                     )}
@@ -873,7 +899,7 @@ function EventSection({ events, invitation, language, sections }) {
 
             {/* Countdown Overlay Widget */}
             {showCountdownWidget && (
-                <CountdownTimer targetDate={primaryEvent.event_date} language={language} />
+                <CountdownTimer targetDate={primaryEvent.event_date} startTime={primaryEvent.start_time} language={language} />
             )}
 
             <div className="ig-live-card-container">
@@ -988,14 +1014,15 @@ function LiveStreamingSection({ events, invitation, language }) {
 /* ═══════════════════════════════════════
    COUNTDOWN TIMER COMPONENT
    ═══════════════════════════════════════ */
-function CountdownTimer({ targetDate, language }) {
+function CountdownTimer({ targetDate, startTime, language }) {
     const { t } = useTranslation(language);
     const [cd, setCd] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
     useEffect(() => {
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
-        const target = new Date(`${ds}T08:00:00`);
+        const timeStr = startTime ? String(startTime).substring(0, 5) : '08:00';
+        const target = new Date(`${ds}T${timeStr}:00`);
         if (isNaN(target.getTime())) return;
 
         const tick = () => {
@@ -1012,7 +1039,7 @@ function CountdownTimer({ targetDate, language }) {
         tick();
         const iv = setInterval(tick, 1000);
         return () => clearInterval(iv);
-    }, [targetDate]);
+    }, [targetDate, startTime]);
 
     return (
         <div className="ig-countdown-widget">

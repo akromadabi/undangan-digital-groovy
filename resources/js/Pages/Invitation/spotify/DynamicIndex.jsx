@@ -574,7 +574,16 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                         <Reveal className="spty-artist-card" variant="zoom">
                             <div className="spty-artist-card__photo-wrap">
                                 {globalShowPhotos && groomSrc ? (
-                                    <img src={groomSrc} alt={groom.full_name} className="spty-artist-card__photo" onError={() => setGroomSrc(null)} />
+                                    <img 
+                                        src={groomSrc} 
+                                        alt={groom.full_name} 
+                                        className="spty-artist-card__photo" 
+                                        onError={() => setGroomSrc(null)} 
+                                        style={{
+                                            objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                            transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                        }}
+                                    />
                                 ) : (
                                     <div className="spty-artist-card__monogram">{(groom.nickname?.charAt(0) || initials)}</div>
                                 )}
@@ -601,7 +610,16 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                             <Reveal className="spty-artist-card" variant="left">
                                 <div className="spty-artist-card__photo-wrap">
                                     {globalShowPhotos && groomSrc ? (
-                                        <img src={groomSrc} alt={groom.full_name} className="spty-artist-card__photo" onError={() => setGroomSrc(null)} />
+                                        <img 
+                                            src={groomSrc} 
+                                            alt={groom.full_name} 
+                                            className="spty-artist-card__photo" 
+                                            onError={() => setGroomSrc(null)} 
+                                            style={{
+                                                objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                                transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                            }}
+                                        />
                                     ) : (
                                         <div className="spty-artist-card__monogram">{(groom.nickname?.charAt(0) || 'B')}</div>
                                     )}
@@ -627,7 +645,16 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                             <Reveal className="spty-artist-card" variant="right" delay={150}>
                                 <div className="spty-artist-card__photo-wrap">
                                     {globalShowPhotos && brideSrc ? (
-                                        <img src={brideSrc} alt={bride.full_name} className="spty-artist-card__photo" onError={() => setBrideSrc(null)} />
+                                        <img 
+                                            src={brideSrc} 
+                                            alt={bride.full_name} 
+                                            className="spty-artist-card__photo" 
+                                            onError={() => setBrideSrc(null)} 
+                                            style={{
+                                                objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                                transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                            }}
+                                        />
                                     ) : (
                                         <div className="spty-artist-card__monogram">{(bride.nickname?.charAt(0) || 'R')}</div>
                                     )}
@@ -657,14 +684,15 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
 /* ═══════════════════════════════════════
    COUNTDOWN TIMER SECTION
    ═══════════════════════════════════════ */
-function CountdownTimer({ targetDate, language }) {
+function CountdownTimer({ targetDate, startTime, language }) {
     const { t } = useTranslation(language);
     const [cd, setCd] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
     useEffect(() => {
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
-        const target = new Date(`${ds}T08:00:00`);
+        const timeStr = startTime ? String(startTime).substring(0, 5) : '08:00';
+        const target = new Date(`${ds}T${timeStr}:00`);
         if (isNaN(target.getTime())) return;
 
         const tick = () => {
@@ -763,7 +791,7 @@ function EventSection({ events, invitation, language, sections }) {
             <h4 className="spty-section-header">{labels.eventHeader}</h4>
 
             {showCountdownInEvent && (
-                <CountdownTimer targetDate={primaryEvent.event_date} language={language} />
+                <CountdownTimer targetDate={primaryEvent.event_date} startTime={primaryEvent.start_time} language={language} />
             )}
 
             <div className="spty-tour">
