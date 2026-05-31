@@ -1179,12 +1179,7 @@ function RsvpSection({ wishes, invitation, guest, language }) {
                     {enableWishes && (
                         <div className="wy-form-group">
                             <label className="wy-form-label">{isEn ? 'Wishes & Prayers' : 'Ucapan & Doa'}</label>
-                            <WishesEmojiPicker
-                                    value={wishForm.data.message}
-                                    onChange={(newValue) => wishForm.setData('message', newValue)}
-                                    inputRef={wishesInputRef}
-                                    isDark={false}
-                                >
+                            
                                     <WishesEmojiPicker
                                     value={wishForm.data.message}
                                     onChange={(newValue) => wishForm.setData('message', newValue)}
@@ -1201,7 +1196,7 @@ function RsvpSection({ wishes, invitation, guest, language }) {
                                 required={!enableRsvp}
                             />
                                 </WishesEmojiPicker>
-                                </WishesEmojiPicker>
+                                
                         </div>
                     )}
 

@@ -77,6 +77,8 @@
         $brandName = $resellerSetting->brand_name ?: $brandName;
         if ($resellerSetting->brand_logo) {
             $faviconUrl = asset('storage/' . $resellerSetting->brand_logo);
+        } else {
+            $faviconUrl = asset('favicon.ico');
         }
     }
 
@@ -144,6 +146,8 @@
         $metaDescription = $resellerSetting->site_motto ?: 'Buat undangan pernikahan digital elegan dengan mudah, cepat, dan gratis.';
         if ($resellerSetting->brand_logo) {
             $metaImage = '/storage/' . $resellerSetting->brand_logo;
+        } else {
+            $metaImage = null;
         }
     }
 

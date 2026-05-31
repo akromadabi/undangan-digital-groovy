@@ -998,12 +998,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                     onChange={(e) => wishForm.setData('sender_name', e.target.value)}
                                                                     placeholder={t('invitation.wishes_name')} required
                                                                     className="w-full border rounded-xl px-4 py-2.5 text-sm outline-none" style={{ borderColor: colors.primary + '40' }} />
-                                                                <WishesEmojiPicker
-                                    value={wishForm.data.message}
-                                    onChange={(newValue) => wishForm.setData('message', newValue)}
-                                    inputRef={wishesInputRef}
-                                    isDark={false}
-                                >
+                                                                
                                     <WishesEmojiPicker
                                     value={wishForm.data.message}
                                     onChange={(newValue) => wishForm.setData('message', newValue)}
@@ -1016,7 +1011,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                     placeholder={t('invitation.wishes_msg')} required rows={3}
                                                                     className="w-full border rounded-xl px-4 py-2.5 text-sm resize-none outline-none" style={{ borderColor: colors.primary + '40' }} />
                                 </WishesEmojiPicker>
-                                </WishesEmojiPicker>
+                                
                                                                 <button type="submit" disabled={wishForm.processing}
                                                                     className="w-full py-3 rounded-xl text-white font-semibold text-sm" style={{ backgroundColor: colors.primary }}>
                                                                     {wishForm.processing ? t('common.saving') : t('invitation.send_wish')}

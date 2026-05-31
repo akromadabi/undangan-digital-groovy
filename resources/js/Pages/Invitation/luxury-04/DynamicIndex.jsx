@@ -1394,12 +1394,6 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                                     inputRef={wishesInputRef}
                                     isDark={false}
                                 >
-                                    <WishesEmojiPicker
-                                    value={message}
-                                    onChange={setMessage}
-                                    inputRef={wishesInputRef}
-                                    isDark={false}
-                                >
                                     <textarea
                                     ref={wishesInputRef}
                                     id="wish_message"
@@ -1410,7 +1404,6 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                                     placeholder={t('invitation.wishes_placeholder')}
                                     required={!enableRsvp}
                                 />
-                                </WishesEmojiPicker>
                                 </WishesEmojiPicker>
                             </div>
                         )}

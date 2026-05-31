@@ -221,6 +221,7 @@ class DatabaseSeeder extends Seeder
             WhatsappThemeSeeder::class,
             SpidermanThemeSeeder::class,
             CandyLandThemeSeeder::class,
+            RoomJogjaThemeSeeder::class,
         ]);
 
         // Restore custom fields (like uploaded thumbnails) after seeders have run

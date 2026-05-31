@@ -61,10 +61,12 @@ class LoginRequest extends FormRequest
                 });
             });
         } else {
-            // Central login: Super Admin, Reseller, or central client
+            // Central login: Super Admin, or central client (reseller role 'admin' must log in via their own subdomain)
             $query->where(function ($q) {
-                $q->whereNull('reseller_id')
-                  ->orWhereIn('role', ['super_admin', 'admin']);
+                $q->where(function ($sub) {
+                    $sub->whereNull('reseller_id')
+                        ->where('role', 'user');
+                })->orWhere('role', 'super_admin');
             });
         }
 

@@ -96,6 +96,9 @@
         padding: 1rem;
         border-radius: 0.75rem;
     }
+    main .theme-card {
+        padding: 0 !important;
+    }
 
     /* Card headers */
     main h3.text-lg {

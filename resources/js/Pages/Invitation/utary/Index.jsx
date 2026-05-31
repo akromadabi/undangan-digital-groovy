@@ -821,12 +821,7 @@ function RsvpSection() {
                             </div>
                             <div className="utary-rsvp__field">
                                 <label className="utary-rsvp__label">Ucapan &amp; Doa</label>
-                                <WishesEmojiPicker
-                                    value={form.message}
-                                    onChange={(newValue) => setForm({ ...form, message: newValue })}
-                                    inputRef={wishesInputRef}
-                                    isDark={false}
-                                >
+                                
                                     <WishesEmojiPicker
                                     value={form.message}
                                     onChange={(newValue) => setForm({ ...form, message: newValue })}
@@ -837,7 +832,7 @@ function RsvpSection() {
                                     ref={wishesInputRef} className="utary-rsvp__textarea" placeholder="Tulis ucapan untuk kedua mempelai..."
                                     value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} />
                                 </WishesEmojiPicker>
-                                </WishesEmojiPicker>
+                                
                             </div>
                             <button type="submit" className="utary-rsvp__submit">Kirim Konfirmasi</button>
                         </form>

@@ -1522,12 +1522,6 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                                     inputRef={wishesInputRef}
                                     isDark={false}
                                 >
-                                    <WishesEmojiPicker
-                                    value={data.message}
-                                    onChange={(newValue) => setData('message', newValue)}
-                                    inputRef={wishesInputRef}
-                                    isDark={false}
-                                >
                                     <textarea
                                     ref={wishesInputRef}
                                     value={data.message}
@@ -1537,7 +1531,6 @@ function UnifiedFormSection({ invitation, wishes, guest, enableRsvp, enableWishe
                                     rows="3"
                                     required
                                 />
-                                </WishesEmojiPicker>
                                 </WishesEmojiPicker>
                             </div>
                         )}

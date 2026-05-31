@@ -50,41 +50,54 @@ class InvitationController extends Controller
         $owner = $invitation->user;
 
         if ($owner && !$owner->isSuperAdmin() && !$owner->isAdmin()) {
-            $subscription = $invitation->activeSubscription;
-            if ($subscription) {
-                if ($subscription->plan && $subscription->plan->slug === 'free') {
-                    $startsAt = $subscription->starts_at;
-                    if ($startsAt) {
-                        if ($startsAt->lt(now()->subDays(5))) {
-                            $isExpired = true;
-                        } elseif ($startsAt->lt(now()->subDays(2))) {
-                            $showFreeBadge = true;
-                            $trialExpiresAt = $startsAt->copy()->addDays(5)->timestamp * 1000;
+            if (!$owner->is_active) {
+                $isExpired = true;
+            } else {
+                $subscription = $invitation->activeSubscription;
+                if ($subscription) {
+                    if ($subscription->plan && $subscription->plan->slug === 'free') {
+                        $startsAt = $subscription->starts_at;
+                        if ($startsAt) {
+                            if ($startsAt->lt(now()->subDays(5))) {
+                                $isExpired = true;
+                            } elseif ($startsAt->lt(now()->subDays(2))) {
+                                $showFreeBadge = true;
+                                $trialExpiresAt = $startsAt->copy()->addDays(5)->timestamp * 1000;
+                            }
+                        } else {
+                            $isExpired = true; // Legacy fallback
                         }
                     } else {
-                        $isExpired = true; // Legacy fallback
+                        // For non-free subscriptions, check if expires_at is in the past
+                        if ($subscription->expires_at && $subscription->expires_at->isPast()) {
+                            $isExpired = true;
+                        }
                     }
-                }
-            } else {
-                // Fallback to invitation creation date if no active subscription exists
-                $createdAt = $invitation->created_at;
-                if ($createdAt) {
-                    if ($createdAt->lt(now()->subDays(5))) {
-                        $isExpired = true;
-                    } elseif ($createdAt->lt(now()->subDays(2))) {
-                        $showFreeBadge = true;
-                        $trialExpiresAt = $createdAt->copy()->addDays(5)->timestamp * 1000;
+                } else {
+                    // Fallback to invitation creation date if no active subscription exists
+                    $createdAt = $invitation->created_at;
+                    if ($createdAt) {
+                        if ($createdAt->lt(now()->subDays(5))) {
+                            $isExpired = true;
+                        } elseif ($createdAt->lt(now()->subDays(2))) {
+                            $showFreeBadge = true;
+                            $trialExpiresAt = $createdAt->copy()->addDays(5)->timestamp * 1000;
+                        }
                     }
                 }
             }
         }
 
         if ($isExpired) {
-            return Inertia::render('Invitation/Expired', [
-                'brand_name' => $brandName,
-                'brand_url' => $brandUrl,
-                'title' => $invitation->title,
-            ]);
+            // Deactivate the user when their invitation has expired (so they cannot access the dashboard)
+            if ($owner && $owner->is_active && !$owner->isSuperAdmin() && !$owner->isAdmin()) {
+                $owner->update(['is_active' => false]);
+            }
+
+            if ($invitation->theme && $invitation->theme->slug) {
+                return redirect()->route('demo.theme', ['slug' => $invitation->theme->slug]);
+            }
+            return redirect()->route('login');
         }
 
         // Increment views_count and unique_views_count
@@ -174,9 +187,16 @@ class InvitationController extends Controller
 
         // THEME ADDED BY BHAKTIAJI ILHAM
         $page = 'Invitation/Show';
-        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land'])) {
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja'])) {
             $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
         }
+
+        // Resolve WhatsApp Support Link for the active theme badge
+        $whatsappNumber = $resellerSetting && $resellerSetting->footer_whatsapp 
+            ? $resellerSetting->footer_whatsapp 
+            : (\App\Models\GlobalSetting::getValue('whatsapp_support') ?: '6281234567890');
+        $whatsappNumberClean = preg_replace('/[^0-9]/', '', $whatsappNumber);
+        $whatsappLink = "https://wa.me/" . $whatsappNumberClean . "?text=" . urlencode("Halo Admin, saya ingin menanyakan tentang aktivasi/upgrade undangan digital saya.");
 
         return Inertia::render($page, [
             'invitation' => $invitation,
@@ -192,6 +212,7 @@ class InvitationController extends Controller
             'trial_expires_at' => $trialExpiresAt,
             'brand_name' => $brandName,
             'brand_url' => $brandUrl,
+            'admin_whatsapp_url' => $whatsappLink,
         ]);
 
     }
@@ -320,7 +341,15 @@ class InvitationController extends Controller
                 'duration_days' => $plan->duration_days,
                 'max_guests' => $plan->max_guests,
                 'max_galleries' => $plan->max_galleries,
-                'features' => $plan->features->pluck('slug')->toArray()
+                'features' => $plan->features->pluck('slug')->toArray(),
+                'feature_details' => $plan->features->map(function($f) {
+                    return [
+                        'name' => $f->name,
+                        'slug' => $f->slug,
+                        'description' => $f->description,
+                        'icon' => $f->icon,
+                    ];
+                })->toArray()
             ];
         });
         
@@ -332,6 +361,18 @@ class InvitationController extends Controller
                 ->with(['brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
                 ->first();
         }
+
+        // Fallback: Jika reseller belum mengatur demo sendiri, cari demo dari Super Admin dengan tema yang sama
+        if (!$customDemoInvitation) {
+            $superAdmin = \App\Models\User::where('role', 'super_admin')->first();
+            if ($superAdmin) {
+                $customDemoInvitation = Invitation::where('user_id', $superAdmin->id)
+                    ->where('theme_id', $theme->id)
+                    ->with(['brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
+                    ->first();
+            }
+        }
+
 
         if ($customDemoInvitation) {
             // We use the reseller's custom demo invitation data!
@@ -389,7 +430,7 @@ class InvitationController extends Controller
                 'subscriptionPlans' => $subscriptionPlans,
             ];
 
-            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land'])) {
+            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja'])) {
                 $page = 'Invitation/DemoWrapper';
                 $props['themeSlug'] = $theme->slug;
                 $props['allowedPlans'] = $theme->allowed_plans;
@@ -562,11 +603,7 @@ class InvitationController extends Controller
         });
 
         $page = 'Invitation/Show';
-        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land'])) {
-            $page = 'Invitation/' . $theme->slug . '/DynamicIndex';
-        }
-
-        return Inertia::render($page, [
+        $props = [
             'invitation' => $invitation,
             'sections' => $sections,
             'brideGrooms' => $brideGrooms,
@@ -578,7 +615,15 @@ class InvitationController extends Controller
             'wishes' => $wishes,
             'isDemo' => true,
             'subscriptionPlans' => $subscriptionPlans,
-        ]);
+        ];
+
+        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja'])) {
+            $page = 'Invitation/DemoWrapper';
+            $props['themeSlug'] = $theme->slug;
+            $props['allowedPlans'] = $theme->allowed_plans;
+        }
+
+        return Inertia::render($page, $props);
     }
 
     public function showAr(Request $request, string $slug)

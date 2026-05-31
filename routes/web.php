@@ -184,7 +184,7 @@ Route::get('/api/check-subdomain', function (\Illuminate\Http\Request $request) 
 // ═══════════════════════════════════════
 // Onboarding Wizard
 // ═══════════════════════════════════════
-Route::middleware(['auth'])->prefix('wizard')->name('wizard.')->group(function () {
+Route::middleware(['auth', 'invitation.lock'])->prefix('wizard')->name('wizard.')->group(function () {
     Route::get('/verification', [WizardController::class, 'verification'])->name('verification');
     Route::post('/verification', [WizardController::class, 'completeVerification'])->name('verification.complete');
 
@@ -205,7 +205,7 @@ Route::middleware(['auth'])->prefix('wizard')->name('wizard.')->group(function (
 // ═══════════════════════════════════════
 // User Dashboard
 // ═══════════════════════════════════════
-Route::middleware(['auth', 'onboarding'])->group(function () {
+Route::middleware(['auth', 'onboarding', 'invitation.lock'])->group(function () {
     // Main Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/invitations', [DashboardController::class, 'list'])->name('dashboard.invitations');

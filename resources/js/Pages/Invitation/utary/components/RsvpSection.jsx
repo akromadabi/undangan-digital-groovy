@@ -51,12 +51,7 @@ export default function RsvpSection({ RevealDiv, rsvpForm, handleRsvp, wishForm,
                             <div className="utary-rsvp__field">
                                 <label className="utary-rsvp__label">Ucapan & Doa</label>
                                 <input type="text" className="utary-rsvp__input" placeholder="Nama Anda" value={wishForm.data.sender_name} onChange={e => wishForm.setData('sender_name', e.target.value)} />
-                                <WishesEmojiPicker
-                                    value={wishForm.data.message}
-                                    onChange={(newValue) => wishForm.setData('message', newValue)}
-                                    inputRef={wishesInputRef}
-                                    isDark={false}
-                                >
+                                
                                     <WishesEmojiPicker
                                     value={wishForm.data.message}
                                     onChange={(newValue) => wishForm.setData('message', newValue)}
@@ -67,7 +62,7 @@ export default function RsvpSection({ RevealDiv, rsvpForm, handleRsvp, wishForm,
                                     ref={wishesInputRef} className="utary-rsvp__input" placeholder="Tulis ucapan & doa..." rows="4" 
                                     value={wishForm.data.message} onChange={e => wishForm.setData('message', e.target.value)} style={{ marginTop: '10px' }} />
                                 </WishesEmojiPicker>
-                                </WishesEmojiPicker>
+                                
                             </div>
                             <button type="submit" disabled={wishForm.processing} className="utary-rsvp__btn">
                                 {wishForm.processing ? 'Lagi Mengirim...' : 'Kirim Ucapan'}

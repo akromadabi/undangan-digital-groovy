@@ -61,6 +61,7 @@ export default function WishesEmojiPicker({
             styledChild = React.cloneElement(child, {
                 style: {
                     ...(child.props.style || {}),
+                    width: '100%',
                     paddingRight: '40px',
                     boxSizing: 'border-box'
                 }

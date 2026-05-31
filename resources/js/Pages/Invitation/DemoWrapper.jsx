@@ -1,4 +1,4 @@
-import React, { useState, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useMemo, lazy, Suspense, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import DemoPlanSelector from '@/Components/DemoPlanSelector';
 
@@ -23,6 +23,70 @@ export default function DemoWrapper({
     isDemo, 
     subscriptionPlans 
 }) {
+    // State to hide the demo plan selector for clean screen recording (video preview)
+    const [hideDemoSelector, setHideDemoSelector] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.has('x') ||
+                   params.get('hide_selector') === 'true' || 
+                   params.get('video') === 'true' || 
+                   params.get('preview') === 'true';
+        }
+        return false;
+    });
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Don't trigger if user is typing in form elements
+            if (
+                e.target.tagName === 'INPUT' || 
+                e.target.tagName === 'TEXTAREA' || 
+                e.target.isContentEditable
+            ) {
+                return;
+            }
+            if (e.key.toLowerCase() === 'h') {
+                setHideDemoSelector(prev => !prev);
+            }
+        };
+
+        // Triple click / tap tracking for mobile devices
+        let lastClick = 0;
+        let clickCount = 0;
+        const handleClicks = (e) => {
+            // Don't trigger if user is typing in form elements or clicking inside interactive selector buttons
+            if (
+                e.target.tagName === 'INPUT' || 
+                e.target.tagName === 'TEXTAREA' || 
+                e.target.isContentEditable ||
+                e.target.closest('button') ||
+                e.target.closest('a') ||
+                e.target.closest('select')
+            ) {
+                return;
+            }
+            const now = Date.now();
+            if (now - lastClick < 350) {
+                clickCount++;
+            } else {
+                clickCount = 1;
+            }
+            lastClick = now;
+
+            if (clickCount === 3) {
+                setHideDemoSelector(prev => !prev);
+                clickCount = 0;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('click', handleClicks);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('click', handleClicks);
+        };
+    }, []);
+
     // 1. Determine default simulated plan based on allowedPlans
     const defaultPlan = useMemo(() => {
         if (allowedPlans && allowedPlans.length > 0) {
@@ -33,6 +97,7 @@ export default function DemoWrapper({
     }, [allowedPlans]);
 
     const [simulatedPlanSlug, setSimulatedPlanSlug] = useState(defaultPlan);
+
 
     const activePlan = useMemo(() => {
         if (subscriptionPlans) {
@@ -72,6 +137,59 @@ export default function DemoWrapper({
         return lazy(() => import(`./${themeSlug}/DynamicIndex.jsx`));
     }, [themeSlug]);
 
+    // Simulated invitation to apply package features in real-time
+    const simulatedInvitation = useMemo(() => {
+        if (!invitation) return invitation;
+        const copy = { ...invitation };
+        if (activePlan) {
+            // Check show_photos feature
+            const hasPhotos = activePlan.features.includes('show_photos');
+            copy.show_photos = hasPhotos;
+            copy.hide_photos = !hasPhotos;
+
+            // Check music feature
+            if (!activePlan.features.includes('music')) {
+                copy.music_url = null;
+                copy.music_autoplay = false;
+            }
+
+            // Check rsvp feature
+            if (!activePlan.features.includes('rsvp')) {
+                copy.enable_rsvp = false;
+            }
+
+            // Check guestbook feature
+            if (!activePlan.features.includes('guestbook')) {
+                copy.enable_wishes = false;
+            }
+
+            // Check save_the_date feature
+            if (!activePlan.features.includes('save_the_date')) {
+                copy.show_countdown = false;
+            }
+
+            // Check animasi feature
+            if (!activePlan.features.includes('animasi')) {
+                copy.show_animations = false;
+            }
+
+            // Check qr_code feature
+            if (!activePlan.features.includes('qr_code')) {
+                copy.show_qr_code = false;
+                copy.enable_qr = false;
+            }
+        }
+        return copy;
+    }, [invitation, activePlan]);
+
+    // Simulated wishes (empty if guestbook feature is disabled)
+    const simulatedWishes = useMemo(() => {
+        if (activePlan && !activePlan.features.includes('guestbook')) {
+            return [];
+        }
+        return wishes;
+    }, [wishes, activePlan]);
+
     return (
         <>
             <Suspense fallback={
@@ -83,26 +201,27 @@ export default function DemoWrapper({
                 </div>
             }>
                 <ThemeComponent 
-                    invitation={invitation}
+                    invitation={simulatedInvitation}
                     sections={filteredSections}
                     brideGrooms={brideGrooms}
                     events={events}
                     galleries={slicedGalleries}
                     loveStories={loveStories}
                     bankAccounts={bankAccounts}
-                    wishes={wishes}
+                    wishes={simulatedWishes}
                     guest={guest}
                     isDemo={false} // pass false so the theme component itself does not render the trigger or do simulation!
                 />
             </Suspense>
 
             {/* Simulated Plan Selector Floating Widget */}
-            {isDemo && subscriptionPlans && (
+            {isDemo && subscriptionPlans && !hideDemoSelector && (
                 <DemoPlanSelector 
                     plans={subscriptionPlans}
                     selectedPlanSlug={simulatedPlanSlug}
                     onChangePlan={setSimulatedPlanSlug}
                     allowedPlans={allowedPlans}
+                    onHideCompletely={() => setHideDemoSelector(true)}
                 />
             )}
         </>

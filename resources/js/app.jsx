@@ -294,6 +294,7 @@ createInertiaApp({
                                 brandName={props.brand_name} 
                                 brandUrl={props.brand_url} 
                                 trialExpiresAt={props.trial_expires_at}
+                                adminWhatsappUrl={props.admin_whatsapp_url}
                             />
                         )}
                         <GlobalImageCropSynchronizer 

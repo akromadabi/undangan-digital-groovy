@@ -188,11 +188,14 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
     const [showContactModal, setShowContactModal] = useState(false);
     const [sortThemeKey, setSortThemeKey] = useState('terbaru');
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [selectedTypes, setSelectedTypes] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+    const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
     const categoryDropdownRef = useRef(null);
+    const typeDropdownRef = useRef(null);
     const sortDropdownRef = useRef(null);
 
     const categories = useMemo(() => {
@@ -200,16 +203,50 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
         return [...new Set(cats)];
     }, [themes]);
 
+    // Memoize event types with theme counts
+    const eventTypesWithCount = useMemo(() => {
+        const list = [
+            { key: 'wedding', label: 'Pernikahan' },
+            { key: 'birthday', label: 'Ulang Tahun' },
+            { key: 'graduation', label: 'Wisuda' },
+            { key: 'aqiqah', label: 'Aqiqah' },
+            { key: 'circumcision', label: 'Khitanan' },
+            { key: 'anniversary', label: 'Anniversary' },
+            { key: 'general', label: 'Umum / Semua Acara' }
+        ];
+        return list.map(opt => {
+            const count = themes?.filter(t => {
+                const types = Array.isArray(t.type) ? t.type : [];
+                return types.includes(opt.key) || (opt.key !== 'general' && types.includes('general'));
+            }).length || 0;
+            return { ...opt, count };
+        });
+    }, [themes]);
+
+    const toggleType = (typeKey) => {
+        setSelectedTypes(prev =>
+            prev.includes(typeKey) ? prev.filter(t => t !== typeKey) : [...prev, typeKey]
+        );
+    };
+
+    const clearTypes = () => setSelectedTypes([]);
+
     const filteredThemes = useMemo(() => {
         let list = [...(themes || [])];
         if (selectedCategories.length > 0) {
             list = list.filter(t => t.category && selectedCategories.includes(t.category.trim().toLowerCase()));
         }
+        if (selectedTypes.length > 0) {
+            list = list.filter(t => {
+                const types = Array.isArray(t.type) ? t.type : [];
+                return types.some(type => selectedTypes.includes(type)) || types.includes('general');
+            });
+        }
         if (searchQuery.trim()) {
             list = list.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
         }
         return list;
-    }, [themes, selectedCategories, searchQuery]);
+    }, [themes, selectedCategories, selectedTypes, searchQuery]);
 
     const toggleCategory = (cat) => {
         setSelectedCategories(prev => 
@@ -223,6 +260,9 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
         const handleClickOutside = (event) => {
             if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
                 setIsCategoryDropdownOpen(false);
+            }
+            if (typeDropdownRef.current && !typeDropdownRef.current.contains(event.target)) {
+                setIsTypeDropdownOpen(false);
             }
             if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
                 setIsSortDropdownOpen(false);
@@ -735,29 +775,10 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                     </div>
                     {/* Overhauled Filters & Search Bar */}
                     {themes.length > 0 && (
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '1rem',
-                            marginTop: '1.5rem',
-                            width: '100%',
-                            maxWidth: '750px',
-                            marginLeft: 'auto',
-                            marginRight: 'auto'
-                        }}>
-                            <div style={{
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                gap: '0.75rem',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
+                        <div className="rl-filter-panel">
+                            <div className="rl-filter-row">
                                 {/* Search Box */}
-                                <div style={{
-                                    position: 'relative',
-                                    flex: '1',
-                                    minWidth: '240px'
-                                }}>
+                                <div className="rl-filter-search-container">
                                     <svg style={{
                                         position: 'absolute',
                                         left: '0.85rem',
@@ -774,60 +795,36 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
                                         placeholder="Cari tema..."
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.625rem 1rem 0.625rem 2.25rem',
-                                            borderRadius: '100px',
-                                            border: '1.5px solid var(--card-border)',
-                                            fontSize: '0.8rem',
-                                            background: 'var(--card-bg)',
-                                            color: 'var(--text-primary)',
-                                            outline: 'none',
-                                            transition: 'border-color 0.2s',
-                                        }}
-                                        onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-                                        onBlur={e => e.target.style.borderColor = 'var(--card-border)'}
+                                        className="rl-filter-search-input"
                                     />
                                 </div>
 
                                 {/* Controls */}
-                                <div style={{
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    alignItems: 'center',
-                                    gap: '0.75rem'
-                                }}>
+                                <div className="rl-filter-controls">
                                     {/* Category Select Dropdown */}
-                                    <div style={{ position: 'relative' }} ref={categoryDropdownRef}>
+                                    <div className="rl-filter-dropdown-wrapper" ref={categoryDropdownRef}>
                                         <button
                                             type="button"
                                             onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
                                             style={{
-                                                padding: '0.625rem 1.15rem',
-                                                borderRadius: '100px',
-                                                fontSize: '0.75rem',
-                                                fontWeight: 700,
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.04em',
                                                 border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
                                                 background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
-                                                color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '0.5rem',
-                                                transition: 'all 0.2s'
+                                                color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
                                             }}
+                                            className="rl-filter-btn"
                                         >
-                                            <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                            </svg>
-                                            <span>
-                                                {selectedCategories.length === 0 ? 'Semua Kategori' : `Kategori (${selectedCategories.length})`}
-                                            </span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                                                <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                                </svg>
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {selectedCategories.length === 0 ? 'Kategori' : `Kategori (${selectedCategories.length})`}
+                                                </span>
+                                            </div>
                                             <svg style={{
                                                 width: '12px',
                                                 height: '12px',
+                                                flexShrink: 0,
                                                 transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
                                                 transition: 'transform 0.2s'
                                             }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -836,75 +833,39 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                         </button>
 
                                         {isCategoryDropdownOpen && (
-                                            <div style={{
-                                                position: 'absolute',
-                                                right: 0,
-                                                top: '100%',
-                                                marginTop: '0.5rem',
-                                                width: '220px',
+                                            <div className="rl-filter-dropdown-menu" style={{
                                                 background: T.isDark ? '#1e293b' : '#ffffff',
                                                 border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
-                                                borderRadius: '16px',
-                                                boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-                                                zIndex: 99,
-                                                padding: '0.5rem'
                                             }}>
-                                                <div style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                    padding: '0.25rem 0.5rem 0.5rem',
-                                                    borderBottom: '1px solid var(--card-border)'
-                                                }}>
-                                                    <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kategori</span>
+                                                <div className="rl-filter-dropdown-menu-header">
+                                                    <span className="rl-filter-dropdown-menu-title">Kategori</span>
                                                     {selectedCategories.length > 0 && (
                                                         <button
                                                             type="button"
                                                             onClick={clearCategories}
-                                                            style={{
-                                                                background: 'none',
-                                                                border: 'none',
-                                                                fontSize: '0.65rem',
-                                                                fontWeight: 700,
-                                                                color: 'var(--accent)',
-                                                                cursor: 'pointer'
-                                                            }}
+                                                            className="rl-filter-dropdown-menu-reset"
                                                         >
                                                             Reset
                                                         </button>
                                                     )}
                                                 </div>
-                                                <div style={{ maxHeight: '180px', overflowY: 'auto', padding: '0.25rem 0' }}>
+                                                <div className="rl-filter-dropdown-list">
                                                     {categories.map(cat => {
                                                         const isChecked = selectedCategories.includes(cat);
                                                         return (
                                                             <label
                                                                 key={cat}
+                                                                className="rl-filter-checkbox-label"
                                                                 style={{
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '0.5rem',
-                                                                    padding: '0.4rem 0.5rem',
-                                                                    borderRadius: '8px',
-                                                                    fontSize: '0.75rem',
-                                                                    fontWeight: 600,
                                                                     color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
-                                                                    cursor: 'pointer',
-                                                                    background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent',
-                                                                    transition: 'background 0.2s',
-                                                                    margin: '2px 0'
+                                                                    background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
                                                                 }}
                                                             >
                                                                 <input
                                                                     type="checkbox"
                                                                     checked={isChecked}
                                                                     onChange={() => toggleCategory(cat)}
-                                                                    style={{
-                                                                        accentColor: 'var(--accent)',
-                                                                        width: '13px',
-                                                                        height: '13px',
-                                                                        cursor: 'pointer'
-                                                                    }}
+                                                                    className="rl-filter-checkbox-input"
                                                                 />
                                                                 <span style={{ textTransform: 'capitalize' }}>{cat}</span>
                                                             </label>
@@ -915,44 +876,160 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                         )}
                                     </div>
 
-                                    {/* Sort Action Pills */}
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.375rem',
-                                        background: 'var(--card-bg)',
-                                        border: '1.5px solid var(--card-border)',
-                                        padding: '3px',
-                                        borderRadius: '100px',
-                                        overflow: 'hidden'
-                                    }}>
-                                        {[
-                                            { key: 'terbaru', label: 'Terbaru' },
-                                            { key: 'populer', label: 'Terpopuler' },
-                                            { key: 'disukai', label: 'Terfavorit' }
-                                        ].map(opt => {
-                                            const isActive = sortThemeKey === opt.key;
-                                            return (
-                                                <button
-                                                    key={opt.key}
-                                                    type="button"
-                                                    onClick={() => setSortThemeKey(opt.key)}
-                                                    style={{
-                                                        padding: '0.45rem 1rem',
-                                                        borderRadius: '100px',
-                                                        fontSize: '0.75rem',
-                                                        fontWeight: 700,
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.2s',
-                                                        border: 'none',
-                                                        background: isActive ? 'var(--accent)' : 'transparent',
-                                                        color: isActive ? '#fff' : 'var(--text-secondary)',
-                                                    }}
-                                                >
-                                                    {opt.label}
-                                                </button>
-                                            );
-                                        })}
+                                    {/* Event Types Select Dropdown */}
+                                    <div className="rl-filter-dropdown-wrapper" ref={typeDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+                                            style={{
+                                                border: '1.5px solid ' + (selectedTypes.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
+                                                background: selectedTypes.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                                color: selectedTypes.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
+                                            }}
+                                            className="rl-filter-btn"
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                                                <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {selectedTypes.length === 0 ? 'Acara' : `Acara (${selectedTypes.length})`}
+                                                </span>
+                                            </div>
+                                            <svg style={{
+                                                width: '12px',
+                                                height: '12px',
+                                                flexShrink: 0,
+                                                transform: isTypeDropdownOpen ? 'rotate(180deg)' : 'none',
+                                                transition: 'transform 0.2s'
+                                            }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        {isTypeDropdownOpen && (
+                                            <div className="rl-filter-dropdown-menu" style={{
+                                                background: T.isDark ? '#1e293b' : '#ffffff',
+                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                            }}>
+                                                <div className="rl-filter-dropdown-menu-header">
+                                                    <span className="rl-filter-dropdown-menu-title">Tipe Acara</span>
+                                                    {selectedTypes.length > 0 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={clearTypes}
+                                                            className="rl-filter-dropdown-menu-reset"
+                                                        >
+                                                            Reset
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="rl-filter-dropdown-list">
+                                                    {eventTypesWithCount.map(type => {
+                                                        const isChecked = selectedTypes.includes(type.key);
+                                                        return (
+                                                            <label
+                                                                key={type.key}
+                                                                className="rl-filter-checkbox-label"
+                                                                style={{
+                                                                    color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                    background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
+                                                                }}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={() => toggleType(type.key)}
+                                                                    className="rl-filter-checkbox-input"
+                                                                />
+                                                                <span>{type.label}</span>
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Sort Dropdown */}
+                                    <div className="rl-filter-dropdown-wrapper" ref={sortDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                                            style={{
+                                                border: '1.5px solid ' + (isSortDropdownOpen ? 'var(--accent)' : 'var(--card-border)'),
+                                                background: isSortDropdownOpen ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                                color: isSortDropdownOpen ? 'var(--accent)' : 'var(--text-secondary)',
+                                                width: '38px',
+                                                height: '38px',
+                                                borderRadius: '100px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                flexShrink: 0
+                                            }}
+                                            title="Urutkan Tema"
+                                        >
+                                            <svg style={{ width: '16px', height: '16px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                            </svg>
+                                        </button>
+
+                                        {isSortDropdownOpen && (
+                                            <div className="rl-filter-dropdown-menu" style={{
+                                                background: T.isDark ? '#1e293b' : '#ffffff',
+                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                            }}>
+                                                <div className="rl-filter-dropdown-menu-header" style={{ borderBottom: '1px solid var(--card-border)', paddingBottom: '0.5rem' }}>
+                                                    <span className="rl-filter-dropdown-menu-title">Urutkan</span>
+                                                </div>
+                                                <div className="rl-filter-dropdown-list">
+                                                    {[
+                                                        { key: 'terbaru', label: 'Terbaru' },
+                                                        { key: 'populer', label: 'Terpopuler' },
+                                                        { key: 'disukai', label: 'Terfavorit' }
+                                                    ].map(opt => {
+                                                        const isActive = sortThemeKey === opt.key;
+                                                        return (
+                                                            <button
+                                                                key={opt.key}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setSortThemeKey(opt.key);
+                                                                    setIsSortDropdownOpen(false);
+                                                                }}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'space-between',
+                                                                    padding: '0.4rem 0.5rem',
+                                                                    borderRadius: '8px',
+                                                                    fontSize: '0.75rem',
+                                                                    fontWeight: 600,
+                                                                    cursor: 'pointer',
+                                                                    transition: 'background 0.2s',
+                                                                    border: 'none',
+                                                                    background: isActive ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent',
+                                                                    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                    textAlign: 'left',
+                                                                    margin: '2px 0'
+                                                                }}
+                                                            >
+                                                                <span>{opt.label}</span>
+                                                                {isActive && (
+                                                                    <svg style={{ width: '14px', height: '14px', color: 'var(--accent)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                )}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1985,6 +2062,148 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     transition: all 0.2s; border: 1px solid rgba(255,255,255,0.04);
 }
 .rl-social-icon:hover { color: #fff; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); transform: scale(1.05); }
+
+/* ── FILTERS & SEARCH BAR ── */
+.rl-filter-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 750px;
+    margin-left: auto;
+    margin-right: auto;
+    background: var(--card-bg) !important;
+    border: 1.5px solid var(--card-border) !important;
+    border-radius: 20px !important;
+    padding: 1.25rem !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04) !important;
+}
+.rl-filter-row {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    align-items: center;
+}
+.rl-filter-search-container {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+}
+.rl-filter-search-input {
+    width: 100%;
+    padding: 0.625rem 1rem 0.625rem 2.25rem !important;
+    border-radius: 100px !important;
+    border: 1.5px solid var(--card-border) !important;
+    font-size: 0.8rem !important;
+    background: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.rl-filter-search-input:focus {
+    border-color: var(--accent) !important;
+}
+.rl-filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.rl-filter-dropdown-wrapper {
+    position: relative;
+}
+.rl-filter-btn {
+    padding: 0.625rem 1.15rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    height: 38px;
+    border-width: 1.5px;
+    border-style: solid;
+}
+.rl-filter-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0.5rem;
+    width: 220px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    z-index: 99;
+    padding: 0.5rem;
+}
+.rl-filter-dropdown-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0.5rem 0.5rem;
+    border-bottom: 1px solid var(--card-border);
+}
+.rl-filter-dropdown-menu-title {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.rl-filter-dropdown-menu-reset {
+    background: none;
+    border: none;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+}
+.rl-filter-dropdown-list {
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 0.25rem 0;
+}
+.rl-filter-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin: 2px 0;
+}
+.rl-filter-checkbox-input {
+    accent-color: var(--accent);
+    width: 13px;
+    height: 13px;
+    cursor: pointer;
+}
+
+@media (max-width: 640px) {
+    .rl-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .rl-filter-search-container {
+        width: 100%;
+    }
+    .rl-filter-controls {
+        width: 100%;
+    }
+    .rl-filter-dropdown-wrapper {
+        flex: 1;
+    }
+    .rl-filter-btn {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {

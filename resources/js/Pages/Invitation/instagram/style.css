@@ -575,6 +575,7 @@ body {
   font-weight: 800;
   font-size: 0.8rem;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .ig-story-user-avatar img {
@@ -984,6 +985,7 @@ body {
   justify-content: center;
   font-size: 0.65rem;
   color: #fff;
+  flex-shrink: 0;
 }
 
 .ig-reels-username-mini {
@@ -1275,6 +1277,7 @@ body {
   justify-content: center;
   font-size: 0.65rem;
   font-weight: 800;
+  flex-shrink: 0;
 }
 
 .ig-comment-content-area {
@@ -1808,6 +1811,7 @@ body {
   justify-content: center;
   font-weight: 800;
   font-size: 0.72rem;
+  flex-shrink: 0;
 }
 
 .ig-comment-body-area {
@@ -2374,6 +2378,7 @@ body {
   border-radius: 50%;
   overflow: hidden;
   background-color: #333;
+  flex-shrink: 0;
 }
 
 .ig-story-modal-avatar img {

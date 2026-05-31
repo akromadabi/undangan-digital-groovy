@@ -89,7 +89,6 @@ class SettingsController extends Controller
             'liveUrl' => $invitation ? url('/live/' . $invitation->slug) : null,
         ]);
     }
-
     public function saveTamu(Request $request)
     {
         $request->validate([

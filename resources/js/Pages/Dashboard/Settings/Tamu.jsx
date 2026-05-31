@@ -4,7 +4,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 
 const defaultTemplate = `Assalamu'alaikum Warahmatullahi Wabarakatuh
 
-Yth. Bapak/Ibu/Saudara/i *{nama}*,
+Yth. *{nama}*,
 
 Tanpa mengurangi rasa hormat, perkenankan kami mengundang Anda untuk hadir dalam acara pernikahan kami.
 
@@ -724,7 +724,6 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                     </div>
                 )}
 
-                {/* ═══ TEMPLATE PESAN MODAL ═══ */}
                 {showTemplateModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowTemplateModal(false); }}>
                         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
@@ -738,6 +737,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                             <p className="text-xs text-gray-400">
                                 Gunakan <code className="bg-gray-100 px-1 rounded">{'{nama}'}</code> untuk nama tamu dan <code className="bg-gray-100 px-1 rounded">{'{link}'}</code> untuk link undangan
                             </p>
+                            
                             <textarea value={template} onChange={(e) => setTemplate(e.target.value)}
                                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-300 resize-none font-mono" rows={12} />
                             <div className="flex justify-end gap-2">

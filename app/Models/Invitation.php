@@ -229,4 +229,19 @@ class Invitation extends Model
     {
         return $this->sections()->where('is_visible', true)->orderBy('sort_order');
     }
+
+    public function isLocked(): bool
+    {
+        $primaryEvent = $this->events()->where('is_primary', true)->first() ?: $this->events()->first();
+        if (!$primaryEvent || !$primaryEvent->event_date) {
+            return false;
+        }
+
+        try {
+            $eventDate = \Carbon\Carbon::parse($primaryEvent->event_date);
+            return now()->greaterThan($eventDate->addDays(3)->endOfDay());
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

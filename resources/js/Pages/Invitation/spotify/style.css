@@ -162,8 +162,9 @@ html, body {
     align-items: center;
     background-color: var(--spty-black);
     padding: 24px;
-    transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease, filter 0.8s ease;
+    transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease, filter 0.8s ease, visibility 0.8s;
     overflow-y: auto;
+    visibility: visible;
 }
 
 .spty-cover.is-opened {
@@ -171,6 +172,7 @@ html, body {
     opacity: 0;
     filter: blur(15px);
     pointer-events: none;
+    visibility: hidden;
 }
 
 .spty-cover__bg {
