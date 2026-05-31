@@ -608,7 +608,16 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                             <div className="sp-couple-card sp-single-host-card">
                                 <div className="sp-couple-photo-wrap">
                                     {showPhotos && bgs[0].photo ? (
-                                        <img src={getStorageUrl(bgs[0].photo)} alt={bgs[0].full_name} className="sp-couple-photo" />
+                                        <img 
+                                            src={getStorageUrl(bgs[0].photo)} 
+                                            alt={bgs[0].full_name} 
+                                            className="sp-couple-photo" 
+                                            style={{
+                                                objectPosition: `${bgs[0].photo_position_x ?? 50}% ${bgs[0].photo_position_y ?? 50}%`,
+                                                transform: `scale(${bgs[0].photo_zoom ?? 1.0})`,
+                                                transformOrigin: 'center'
+                                            }}
+                                        />
                                     ) : (
                                         <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Foto Profil</div>
                                     )}
@@ -637,7 +646,16 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                                 <div className="sp-couple-card">
                                     <div className="sp-couple-photo-wrap">
                                         {showPhotos && groom.photo ? (
-                                            <img src={getStorageUrl(groom.photo)} alt={groom.full_name} className="sp-couple-photo" />
+                                            <img 
+                                                src={getStorageUrl(groom.photo)} 
+                                                alt={groom.full_name} 
+                                                className="sp-couple-photo" 
+                                                style={{
+                                                    objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                                    transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                                    transformOrigin: 'center'
+                                                }}
+                                            />
                                         ) : (
                                             <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Pria Terganteng</div>
                                         )}
@@ -663,7 +681,16 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                                 <div className="sp-couple-card">
                                     <div className="sp-couple-photo-wrap">
                                         {showPhotos && bride.photo ? (
-                                            <img src={getStorageUrl(bride.photo)} alt={bride.full_name} className="sp-couple-photo" />
+                                            <img 
+                                                src={getStorageUrl(bride.photo)} 
+                                                alt={bride.full_name} 
+                                                className="sp-couple-photo" 
+                                                style={{
+                                                    objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                                    transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                                    transformOrigin: 'center'
+                                                }}
+                                            />
                                         ) : (
                                             <div className="sp-photo-placeholder" style={{ width: '100%', height: '100%' }}>Wanita Tercantik</div>
                                         )}

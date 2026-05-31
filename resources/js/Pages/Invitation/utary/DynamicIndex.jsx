@@ -431,7 +431,10 @@ function CoupleSection({ invitation, brideGrooms, id }) {
                                     WebkitMaskPosition: 'center',
                                     maskPosition: 'center',
                                     WebkitMaskRepeat: 'no-repeat',
-                                    maskRepeat: 'no-repeat'
+                                    maskRepeat: 'no-repeat',
+                                    objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                    transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                    transformOrigin: 'center'
                                 }}
                             />
                         </div>
@@ -472,7 +475,10 @@ function CoupleSection({ invitation, brideGrooms, id }) {
                                     WebkitMaskPosition: 'center',
                                     maskPosition: 'center',
                                     WebkitMaskRepeat: 'no-repeat',
-                                    maskRepeat: 'no-repeat'
+                                    maskRepeat: 'no-repeat',
+                                    objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                    transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                    transformOrigin: 'center'
                                 }}
                             />
                         </div>

@@ -396,7 +396,16 @@ function SpideySectionDivider() {
                 <div className="spy-cover-emblem-wrap">
                     <div className="spy-avatar-web-frame" />
                     {host.photo && globalShowPhotos ? (
-                        <img src={getStorageUrl(host.photo)} alt={host.nickname} className="spy-cover-emblem" />
+                        <img 
+                            src={getStorageUrl(host.photo)} 
+                            alt={host.nickname} 
+                            className="spy-cover-emblem" 
+                            style={{
+                                objectPosition: `${host.photo_position_x ?? 50}% ${host.photo_position_y ?? 50}%`,
+                                transform: `scale(${host.photo_zoom ?? 1.0})`,
+                                transformOrigin: 'center'
+                            }}
+                        />
                     ) : (
                         <div className="spy-cover-emblem spy-avatar-fallback">
                             {initials}
@@ -564,7 +573,16 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
                 <div className="spy-avatar-wrapper">
                     <div className="spy-avatar-web-frame" />
                     {globalShowPhotos && person.photo ? (
-                        <img src={getStorageUrl(person.photo)} alt={person.full_name} className="class-foto-profil" />
+                        <img 
+                            src={getStorageUrl(person.photo)} 
+                            alt={person.full_name} 
+                            className="class-foto-profil" 
+                            style={{
+                                objectPosition: `${person.photo_position_x ?? 50}% ${person.photo_position_y ?? 50}%`,
+                                transform: `scale(${person.photo_zoom ?? 1.0})`,
+                                transformOrigin: 'center'
+                            }}
+                        />
                     ) : (
                         <div className="spy-avatar-fallback">{persInitials}</div>
                     )}

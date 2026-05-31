@@ -133,7 +133,8 @@
         }
 
         if ($invitation->cover_image) {
-            $metaImage = $invitation->cover_image;
+            $coverImages = explode(',', $invitation->cover_image);
+            $metaImage = trim($coverImages[0]);
             if (!str_starts_with($metaImage, 'http') && !str_starts_with($metaImage, '/')) {
                 $metaImage = '/storage/' . $metaImage;
             }

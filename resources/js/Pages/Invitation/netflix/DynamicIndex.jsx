@@ -898,7 +898,7 @@ function GallerySection({ galleries, invitation }) {
                             <img 
                                 src={item.url} 
                                 alt={item.title} 
-                                style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s' }} 
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%', transition: 'transform 0.4s' }} 
                                 className="nf-gallery-img"
                                 loading="lazy" 
                             />

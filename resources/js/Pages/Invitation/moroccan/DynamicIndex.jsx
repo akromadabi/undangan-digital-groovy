@@ -575,7 +575,16 @@ function CoupleSection({ brideGrooms, language, id, themeConfig }) {
                 {globalShowPhotos && m.photo ? (
                     <Reveal className="mc-profile-frame-wrap" variant="zoom">
                         <div className="mc-profile-arch-frame">
-                            <img src={getThemeAssetUrl(m.photo, '')} className="mc-profile-photo" alt={m.full_name} />
+                            <img 
+                                src={getThemeAssetUrl(m.photo, '')} 
+                                className="mc-profile-photo" 
+                                alt={m.full_name} 
+                                style={{
+                                    objectPosition: `${m.photo_position_x ?? 50}% ${m.photo_position_y ?? 50}%`,
+                                    transform: `scale(${m.photo_zoom ?? 1.0})`,
+                                    transformOrigin: 'center'
+                                }}
+                            />
                         </div>
                         <img src={ASSETS.lantern} className="mc-profile-lantern-decor" alt="Lantern Decor" />
                     </Reveal>

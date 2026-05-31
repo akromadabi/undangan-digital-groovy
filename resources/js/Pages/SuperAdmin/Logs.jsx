@@ -28,7 +28,8 @@ export default function LogsPage({ logs, filters, categories }) {
     const [isFiltering, setIsFiltering] = useState(false);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(
         (filters.role && filters.role !== 'all') || 
-        (filters.category && filters.category !== 'all')
+        (filters.category && filters.category !== 'all') ||
+        (filters.activity_type && filters.activity_type !== 'all')
     );
     
     // Restore modal states
@@ -172,8 +173,14 @@ export default function LogsPage({ logs, filters, categories }) {
                         </h2>
                         <p className="text-[11px] text-[#888] mt-0.5">Lacak seluruh aksi tambah, ubah, dan hapus data secara real-time.</p>
                     </div>
-                    <div className="text-[11px] font-semibold text-[#E5654B] bg-[#fdf5f3] border border-[#fcebe7] px-3 py-1 rounded-full shrink-0">
-                        Total: {logs.total} entri
+                    <div className="text-[11px] font-semibold text-[#E5654B] bg-[#fdf5f3] border border-[#fcebe7] px-3 py-1 rounded-full shrink-0 flex items-center justify-center">
+                        {isFiltering ? (
+                            <span className="flex items-center gap-1">
+                                <RefreshCw className="w-3 h-3 animate-spin" /> Memfilter...
+                            </span>
+                        ) : (
+                            `Total: ${logs.total} entri`
+                        )}
                     </div>
                 </div>
 
@@ -188,13 +195,13 @@ export default function LogsPage({ logs, filters, categories }) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder="Cari pelaku, deskripsi log..."
-                                    className="w-full border border-[#e8e5e0] rounded-xl pl-9 pr-20 py-2 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all bg-[#faf9f6]/40"
+                                    className="w-full border border-[#e8e5e0] rounded-xl pl-10 pr-20 py-2 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all bg-[#faf9f6]/40"
                                 />
-                                <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-3" />
+                                <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                                 
                                 <button 
                                     type="submit"
-                                    className="absolute right-1.5 top-1.5 bg-[#E5654B] text-white hover:bg-[#d4523a] text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                                    className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-[#E5654B] text-white hover:bg-[#d4523a] text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
                                 >
                                     Cari
                                 </button>
@@ -211,8 +218,8 @@ export default function LogsPage({ logs, filters, categories }) {
                                     }`}
                                 >
                                     <Filter className="w-3.5 h-3.5" />
-                                    <span>Filter Peran & Kategori</span>
-                                    {(role !== 'all' || category !== 'all') && (
+                                    <span>Filter Peran, Kategori & Tindakan</span>
+                                    {(role !== 'all' || category !== 'all' || activityType !== 'all') && (
                                         <span className="w-1.5 h-1.5 rounded-full bg-[#E5654B]" />
                                     )}
                                 </button>
@@ -231,7 +238,7 @@ export default function LogsPage({ logs, filters, categories }) {
 
                         {/* Collapsible Advanced Filters */}
                         {showAdvancedFilters && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[#f5f3f0] transition-all duration-300 ease-in-out">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-[#f5f3f0] transition-all duration-300 ease-in-out">
                                 {/* Filter Peran/Role */}
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Peran Pengguna</label>
@@ -247,7 +254,7 @@ export default function LogsPage({ logs, filters, categories }) {
                                             <option value="user">User</option>
                                             <option value="guest">Guest</option>
                                         </select>
-                                        <Filter className="w-3 h-3 text-gray-400 absolute right-3 top-3 pointer-events-none" />
+                                        <Filter className="w-3 h-3 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                                     </div>
                                 </div>
 
@@ -264,44 +271,29 @@ export default function LogsPage({ logs, filters, categories }) {
                                                 <option key={cat.value} value={cat.value}>{cat.label}</option>
                                             ))}
                                         </select>
-                                        <Filter className="w-3 h-3 text-gray-400 absolute right-3 top-3 pointer-events-none" />
+                                        <Filter className="w-3 h-3 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                {/* Filter Tindakan */}
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tindakan</label>
+                                    <div className="relative">
+                                        <select 
+                                            value={activityType}
+                                            onChange={(e) => { setActivityType(e.target.value); handleFilterChange({ activity_type: e.target.value }); }}
+                                            className="w-full border border-[#e8e5e0] rounded-xl pl-3 pr-8 py-2 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] transition-all bg-[#faf9f6]/40 appearance-none font-medium text-gray-700"
+                                        >
+                                            <option value="all">Semua Tindakan</option>
+                                            <option value="create">Tambah</option>
+                                            <option value="update">Edit</option>
+                                            <option value="delete">Hapus</option>
+                                            <option value="login">Masuk (Login)</option>
+                                        </select>
+                                        <Filter className="w-3 h-3 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                                     </div>
                                 </div>
                             </div>
-                        )}
-                    </div>
-
-                    {/* Segmented Action / Tindakan Filter Tabs */}
-                    <div className="flex items-center justify-between gap-4 overflow-x-auto pb-1 scrollbar-none">
-                        <div className="flex gap-1 p-1 bg-[#f5f3f0] rounded-xl shrink-0">
-                            {[
-                                { value: 'all', label: 'Semua Tindakan', colorClass: 'bg-white text-gray-800 shadow-sm border border-gray-200/10' },
-                                { value: 'create', label: 'Tambah', colorClass: 'bg-emerald-600 text-white shadow-sm font-bold' },
-                                { value: 'update', label: 'Edit', colorClass: 'bg-amber-500 text-white shadow-sm font-bold' },
-                                { value: 'delete', label: 'Hapus', colorClass: 'bg-rose-500 text-white shadow-sm font-bold' },
-                            ].map((tab) => {
-                                const isActive = activityType === tab.value;
-                                return (
-                                    <button
-                                        key={tab.value}
-                                        type="button"
-                                        onClick={() => { setActivityType(tab.value); handleFilterChange({ activity_type: tab.value }); }}
-                                        className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                                            isActive 
-                                                ? tab.colorClass 
-                                                : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'
-                                        }`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        
-                        {isFiltering && (
-                            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#E5654B] shrink-0 animate-pulse">
-                                <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Memfilter...
-                            </span>
                         )}
                     </div>
                 </div>

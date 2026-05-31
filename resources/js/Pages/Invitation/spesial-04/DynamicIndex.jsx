@@ -476,6 +476,11 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                                 src={getStorageUrl(groom.photo, '/images/demo/korea-8.jpg')} 
                                 alt={groom.full_name || 'Sandi'} 
                                 className="class-foto-profil" 
+                                style={{
+                                    objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                    transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                    transformOrigin: 'center'
+                                }}
                             />
                         </div>
                     ) : (
@@ -519,6 +524,11 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
                                 src={getStorageUrl(bride.photo, '/images/demo/korea-3.jpg')} 
                                 alt={bride.full_name || 'Arti'} 
                                 className="class-foto-profil" 
+                                style={{
+                                    objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                    transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                    transformOrigin: 'center'
+                                }}
                             />
                         </div>
                     ) : (

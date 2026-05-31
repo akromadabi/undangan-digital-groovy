@@ -714,7 +714,16 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language, onToa
                     style={{ cursor: 'pointer' }}
                 >
                     {globalShowPhotos && photoUrl ? (
-                        <img src={photoUrl} alt={person.nickname} className="ttk-profile-card__avatar" />
+                        <img 
+                            src={photoUrl} 
+                            alt={person.nickname} 
+                            className="ttk-profile-card__avatar" 
+                            style={{
+                                objectPosition: `${person.photo_position_x ?? 50}% ${person.photo_position_y ?? 50}%`,
+                                transform: `scale(${person.photo_zoom ?? 1.0})`,
+                                transformOrigin: 'center'
+                            }}
+                        />
                     ) : (
                         <div className="ttk-profile-card__monogram">{monogramInitial}</div>
                     )}

@@ -343,6 +343,10 @@ function HeaderBar({
         return `${gChar}&${bChar}`;
     }, [groom, bride]);
 
+    const headerPhotoConfig = useMemo(() => {
+        return bride.photo ? bride : (groom.photo ? groom : null);
+    }, [groom, bride]);
+
     const avatarSrc = useMemo(() => {
         const target = bride.photo || groom.photo || '';
         return getStorageUrl(target, null);
@@ -362,7 +366,16 @@ function HeaderBar({
                 <i className="fas fa-arrow-left wa-back-icon" onClick={() => window.history.back()} />
                 <div className="wa-header-avatar-wrap">
                     {globalShowPhotos && avatarSrc ? (
-                        <img src={avatarSrc} className="wa-header-avatar" alt="Avatar" />
+                        <img 
+                            src={avatarSrc} 
+                            className="wa-header-avatar" 
+                            alt="Avatar" 
+                            style={headerPhotoConfig ? {
+                                objectPosition: `${headerPhotoConfig.photo_position_x ?? 50}% ${headerPhotoConfig.photo_position_y ?? 50}%`,
+                                transform: `scale(${headerPhotoConfig.photo_zoom ?? 1.0})`,
+                                transformOrigin: 'center'
+                            } : undefined}
+                        />
                     ) : (
                         <div className="wa-header-monogram">{monogram}</div>
                     )}
@@ -1058,7 +1071,15 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                                     <div className="wa-profile-card">
                                         <div className="wa-profile-avatar">
                                             {showPhotos && groom.photo ? (
-                                                <img src={getStorageUrl(groom.photo)} alt={groom.full_name} />
+                                                <img 
+                                                    src={getStorageUrl(groom.photo)} 
+                                                    alt={groom.full_name} 
+                                                    style={{
+                                                        objectPosition: `${groom.photo_position_x ?? 50}% ${groom.photo_position_y ?? 50}%`,
+                                                        transform: `scale(${groom.photo_zoom ?? 1.0})`,
+                                                        transformOrigin: 'center'
+                                                    }}
+                                                />
                                             ) : (
                                                 <div className="wa-profile-monogram">{groom.nickname?.charAt(0) || 'G'}</div>
                                             )}
@@ -1104,7 +1125,15 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                                     <div className="wa-profile-card">
                                         <div className="wa-profile-avatar">
                                             {showPhotos && bride.photo ? (
-                                                <img src={getStorageUrl(bride.photo)} alt={bride.full_name} />
+                                                <img 
+                                                    src={getStorageUrl(bride.photo)} 
+                                                    alt={bride.full_name} 
+                                                    style={{
+                                                        objectPosition: `${bride.photo_position_x ?? 50}% ${bride.photo_position_y ?? 50}%`,
+                                                        transform: `scale(${bride.photo_zoom ?? 1.0})`,
+                                                        transformOrigin: 'center'
+                                                    }}
+                                                />
                                             ) : (
                                                 <div className="wa-profile-monogram">{bride.nickname?.charAt(0) || 'B'}</div>
                                             )}

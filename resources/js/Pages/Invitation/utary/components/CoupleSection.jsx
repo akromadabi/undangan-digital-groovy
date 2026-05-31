@@ -34,7 +34,10 @@ export default function CoupleSection({ RevealDiv, brideGrooms }) {
                                         WebkitMaskPosition: 'center',
                                         maskPosition: 'center',
                                         WebkitMaskRepeat: 'no-repeat',
-                                        maskRepeat: 'no-repeat'
+                                        maskRepeat: 'no-repeat',
+                                        objectPosition: `${bg.photo_position_x ?? 50}% ${bg.photo_position_y ?? 50}%`,
+                                        transform: `scale(${bg.photo_zoom ?? 1.0})`,
+                                        transformOrigin: 'center'
                                     }}
                                 />
                             </div>

@@ -596,7 +596,16 @@ function CoupleSection({ brideGrooms, language, id, themeConfig }) {
             <div className="wy-couple-card">
                 {globalShowPhotos && m.photo && (
                     <Reveal className="wy-profile-frame-wrap" variant="zoom">
-                        <img src={finalPhoto} className="wy-profile-photo" alt={m.full_name} />
+                        <img 
+                            src={finalPhoto} 
+                            className="wy-profile-photo" 
+                            alt={m.full_name} 
+                            style={{
+                                objectPosition: `${m.photo_position_x ?? 50}% ${m.photo_position_y ?? 50}%`,
+                                transform: `scale(${m.photo_zoom ?? 1.0})`,
+                                transformOrigin: 'center'
+                            }}
+                        />
                         <img src={ASSETS.gunungan} className="wy-profile-wayang-overlay" alt="Wayang Ornament" />
                     </Reveal>
                 )}

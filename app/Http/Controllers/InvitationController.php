@@ -599,6 +599,10 @@ class InvitationController extends Controller
             : '';
 
         $photoUrl = $invitation->cover_image;
+        if ($photoUrl) {
+            $coverImages = explode(',', $photoUrl);
+            $photoUrl = trim($coverImages[0]);
+        }
         if ($photoUrl && !str_starts_with($photoUrl, 'http') && !str_starts_with($photoUrl, '/')) {
             $photoUrl = asset('storage/' . $photoUrl);
         } elseif ($photoUrl && str_starts_with($photoUrl, '/')) {
