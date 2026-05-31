@@ -42,11 +42,13 @@ class MusicHelper
             return '/storage/' . $storagePath;
         }
         
-        // List of Cobalt API endpoints for robustness
+        // List of Cobalt API endpoints for robustness (Cobalt v10 Community Instances)
         $instances = [
-            'https://api.cobalt.tools/api/json',
-            'https://cobalt.tools/api/json',
-            'https://api.cobalt.best/api/json'
+            'https://apicobalt.mgytr.top/',
+            'https://dog.kittycat.boo/',
+            'https://fox.kittycat.boo/',
+            'https://cobaltapi.kittycat.boo/',
+            'https://cobaltapi.squair.xyz/',
         ];
 
         $audioUrl = null;
@@ -54,14 +56,15 @@ class MusicHelper
 
         foreach ($instances as $instance) {
             try {
+                // Cobalt v10 Payload
                 $response = Http::withHeaders([
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                 ])->timeout(15)->post($instance, [
                     'url' => $youtubeUrl,
-                    'isAudioOnly' => true,
-                    'aFormat' => 'mp3',
-                    'filenamePattern' => 'basic'
+                    'downloadMode' => 'audio',
+                    'audioFormat' => 'mp3',
+                    'filenameStyle' => 'basic'
                 ]);
 
                 if ($response->successful()) {
@@ -69,6 +72,8 @@ class MusicHelper
                     if (isset($data['url'])) {
                         $audioUrl = $data['url'];
                         break;
+                    } elseif (isset($data['error']['code'])) {
+                        $errorMessage = "Cobalt Error: " . $data['error']['code'];
                     } elseif (isset($data['text'])) {
                         $errorMessage = $data['text'];
                     }

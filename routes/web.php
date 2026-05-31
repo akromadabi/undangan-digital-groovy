@@ -270,6 +270,7 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
 
         Route::get('/musik', [SettingsController::class, 'musik'])->middleware('feature:music')->name('musik');
         Route::post('/musik', [SettingsController::class, 'saveMusik'])->middleware('feature:music')->name('musik.save');
+        Route::post('/musik/convert-youtube', [SettingsController::class, 'convertYoutube'])->middleware('feature:music')->name('musik.convert');
 
         Route::get('/hadiah', [SettingsController::class, 'hadiah'])->middleware('feature:gift')->name('hadiah');
         Route::get('/whatsapp', [SettingsController::class, 'whatsapp'])->middleware('feature:whatsapp')->name('whatsapp');
@@ -401,6 +402,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::post('/music/{id}/toggle', [AdminMusicController::class, 'toggleActive'])->name('music.toggle');
     Route::post('/music/categories', [AdminMusicController::class, 'saveCategories'])->name('music.saveCategories');
     Route::post('/music/claim', [AdminMusicController::class, 'claimUserMusic'])->name('music.claim');
+    Route::post('/music/convert-youtube', [AdminMusicController::class, 'convertYoutube'])->name('music.convert');
 
     // Quote Templates
     Route::get('/quotes', [\App\Http\Controllers\Admin\AdminQuoteController::class, 'index'])->name('quotes.index');

@@ -151,4 +151,32 @@ class AdminMusicController extends Controller
 
         return back()->with('success', 'Musik kustom user berhasil ditarik dan dimasukkan ke Koleksi Resmi!');
     }
+
+    public function convertYoutube(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|string|max:500',
+        ]);
+
+        try {
+            $localPath = MusicHelper::convertYoutubeToMp3($request->input('url'));
+            if (!$localPath) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Format link YouTube tidak valid.'
+                ], 422);
+            }
+
+            return response()->json([
+                'success' => true,
+                'url' => $localPath,
+                'message' => 'YouTube berhasil dikonversi ke MP3.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
 }

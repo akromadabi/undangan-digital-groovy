@@ -27,6 +27,7 @@ const MAX_SIZE_MB = 20;
 export default function Musik({ invitation, platformMusic = [] }) {
     const { flash } = usePage().props;
     const [uploading, setUploading] = useState(false);
+    const [converting, setConverting] = useState(false);
     const [tab, setTab] = useState('platform');
     const [filter, setFilter] = useState('all');
     const [playingId, setPlayingId] = useState(null);
@@ -43,6 +44,33 @@ export default function Musik({ invitation, platformMusic = [] }) {
     const showNotif = (type, message) => {
         setUploadNotif({ type, message });
         if (type === 'success') setTimeout(() => setUploadNotif(null), 4000);
+    };
+
+    const handleYoutubeConvert = async (url) => {
+        if (!url) return;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+        const matches = url.match(regExp);
+        if (!matches || matches[2].length !== 11) {
+            return;
+        }
+
+        setConverting(true);
+        setUploadNotif(null);
+
+        try {
+            const response = await axios.post(route('settings.musik.convert'), { url });
+            if (response.data.success && response.data.url) {
+                setData('music_url', response.data.url);
+                setPreviewKey(k => k + 1);
+                showNotif('success', 'Link YouTube berhasil dikonversi ke MP3!');
+            }
+        } catch (e) {
+            console.error(e);
+            const msg = e.response?.data?.message || e.message || 'Konversi gagal';
+            showNotif('error', `Gagal mengonversi YouTube ke MP3: ${msg}`);
+        } finally {
+            setConverting(false);
+        }
     };
 
     const handleMusicUpload = async (file) => {
@@ -261,11 +289,25 @@ export default function Musik({ invitation, platformMusic = [] }) {
                             </div>
                         )}
 
+                        {converting && (
+                            <div className="bg-purple-50 border border-purple-200 text-purple-700 rounded-xl p-4 flex items-center gap-3 text-sm animate-pulse">
+                                <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                                <div className="flex-1 font-medium">Sedang mendeteksi & mengonversi video YouTube ke MP3... Mohon tunggu sebentar.</div>
+                            </div>
+                        )}
+
                         <div className="bg-white rounded-2xl border border-gray-200 p-6">
                             <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1.5"><LinkIcon size={14} /> URL Musik</label>
-                            <input type="text" value={data.music_url} onChange={(e) => { setData('music_url', e.target.value); setPreviewKey(k => k + 1); }}
+                            <input type="text" value={data.music_url} 
+                                onChange={(e) => { 
+                                    const val = e.target.value;
+                                    setData('music_url', val); 
+                                    setPreviewKey(k => k + 1);
+                                    handleYoutubeConvert(val);
+                                }}
+                                disabled={converting}
                                 placeholder="https://example.com/music.mp3"
-                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400" />
+                                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400 disabled:opacity-50" />
                             <p className="text-xs text-gray-400 mt-2">Paste URL file MP3 atau upload file di bawah</p>
                         </div>
 

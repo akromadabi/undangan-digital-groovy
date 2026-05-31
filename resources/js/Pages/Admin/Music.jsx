@@ -34,6 +34,7 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
     const [showForm, setShowForm] = useState(false);
     const [editId, setEditId] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [converting, setConverting] = useState(false);
     const [filter, setFilter] = useState('all');
     const [playingId, setPlayingId] = useState(null);
     const [uploadNotif, setUploadNotif] = useState(null);
@@ -47,6 +48,33 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
     const showNotif = (type, message) => {
         setUploadNotif({ type, message });
         if (type === 'success') setTimeout(() => setUploadNotif(null), 4000);
+    };
+
+    const handleYoutubeConvert = async (url) => {
+        if (!url) return;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+        const matches = url.match(regExp);
+        if (!matches || matches[2].length !== 11) {
+            return;
+        }
+
+        setConverting(true);
+        setUploadNotif(null);
+
+        try {
+            const response = await axios.post(`${adminRoutePrefix}/music/convert-youtube`, { url });
+            if (response.data.success && response.data.url) {
+                setData('url', response.data.url);
+                setData('source_type', 'url');
+                showNotif('success', 'Link YouTube berhasil dikonversi ke MP3!');
+            }
+        } catch (e) {
+            console.error(e);
+            const msg = e.response?.data?.message || e.message || 'Konversi gagal';
+            showNotif('error', `Gagal mengonversi YouTube ke MP3: ${msg}`);
+        } finally {
+            setConverting(false);
+        }
     };
 
     const handleOpenClaim = (song) => {
@@ -354,6 +382,12 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
                                         </button>
                                     </div>
                                 )}
+                                {converting && (
+                                    <div className="bg-orange-50 border border-orange-200 text-[#b03a24] rounded-xl p-4 flex items-center gap-3 text-sm animate-pulse">
+                                        <div className="w-4 h-4 border-2 border-[#E5654B] border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                                        <div className="flex-1 font-medium">Sedang mendeteksi & mengonversi video YouTube ke MP3... Mohon tunggu sebentar.</div>
+                                    </div>
+                                )}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-[#666] mb-1">Judul Lagu *</label>
@@ -381,9 +415,16 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-[#666] mb-1 flex items-center gap-1.5"><LinkIcon size={14} /> URL / Link Musik *</label>
-                                    <input type="text" value={data.url} onChange={(e) => { setData('url', e.target.value); setData('source_type', 'url'); }}
+                                    <input type="text" value={data.url} 
+                                        onChange={(e) => { 
+                                            const val = e.target.value;
+                                            setData('url', val); 
+                                            setData('source_type', 'url'); 
+                                            handleYoutubeConvert(val);
+                                        }}
+                                        disabled={converting}
                                         placeholder="https://example.com/music.mp3" required
-                                        className="w-full border border-[#e8e5e0] rounded-xl px-4 py-2.5 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B]" />
+                                        className="w-full border border-[#e8e5e0] rounded-xl px-4 py-2.5 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] disabled:opacity-50" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-[#666] mb-2 flex items-center gap-1.5"><Upload size={14} /> Atau Upload File MP3</label>

@@ -294,6 +294,34 @@ class SettingsController extends Controller
         return back()->with('success', $isYouTube ? 'Musik dari YouTube berhasil dikonversi ke MP3!' : 'Pengaturan musik berhasil disimpan.');
     }
 
+    public function convertYoutube(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|string|max:500',
+        ]);
+
+        try {
+            $localPath = MusicHelper::convertYoutubeToMp3($request->input('url'));
+            if (!$localPath) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Format link YouTube tidak valid.'
+                ], 422);
+            }
+
+            return response()->json([
+                'success' => true,
+                'url' => $localPath,
+                'message' => 'YouTube berhasil dikonversi ke MP3.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
     public function hadiah(Request $request)
     {
         $invitation = $this->getUserInvitation($request);
