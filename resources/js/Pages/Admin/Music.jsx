@@ -44,7 +44,7 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
     const [claimingSong, setClaimingSong] = useState(null);
     const [claimData, setClaimData] = useState({ title: '', artist: '', category: 'romantis', url: '' });
     
-    // Audio manipulation states
+    // Audio manipulation states for Admin Library Form
     const [cropOpen, setCropOpen] = useState(false);
     const [cropStart, setCropStart] = useState(0);
     const [cropEnd, setCropEnd] = useState(60);
@@ -52,6 +52,15 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
     const [cropping, setCropping] = useState(false);
     const [compressing, setCompressing] = useState(false);
     const [uploadSize, setUploadSize] = useState(null);
+
+    // Audio manipulation states for Claim/Tarik Form
+    const [claimCropOpen, setClaimCropOpen] = useState(false);
+    const [claimCropStart, setClaimCropStart] = useState(0);
+    const [claimCropEnd, setClaimCropEnd] = useState(60);
+    const [claimAudioDuration, setClaimAudioDuration] = useState(0);
+    const [claimCropping, setClaimCropping] = useState(false);
+    const [claimCompressing, setClaimCompressing] = useState(false);
+    const [claimUploadSize, setClaimUploadSize] = useState(null);
 
     const audioRef = useRef(null);
 
@@ -115,6 +124,79 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
             url: song.music_url
         });
         setClaimingSong(song);
+
+        // Reset claim audio states
+        setClaimCropOpen(false);
+        setClaimCropStart(0);
+        setClaimCropEnd(60);
+        setClaimAudioDuration(0);
+        setClaimUploadSize(null);
+
+        // Fetch file size dynamically via HEAD request
+        if (song.music_url) {
+            axios.head(song.music_url).then(res => {
+                const len = res.headers['content-length'];
+                if (len) {
+                    const mb = (parseInt(len) / 1024 / 1024).toFixed(1);
+                    setClaimUploadSize(`${mb} MB`);
+                }
+            }).catch(err => console.log('Failed to fetch size via HEAD', err));
+        }
+    };
+
+    const handleClaimCrop = async () => {
+        if (!claimData.url) return;
+        setClaimCropping(true);
+        setUploadNotif(null);
+        try {
+            const response = await axios.post(`${adminRoutePrefix}/music/crop`, {
+                url: claimData.url,
+                start: claimCropStart,
+                end: claimCropEnd
+            });
+            if (response.data.success && response.data.url) {
+                setClaimData({ ...claimData, url: response.data.url });
+                setClaimUploadSize(null); // Will be reloaded
+                showNotif('success', 'Musik kustom berhasil dipotong!');
+                setClaimCropOpen(false);
+            }
+        } catch (e) {
+            console.error(e);
+            const msg = e.response?.data?.message || e.message || 'Gagal memotong musik';
+            showNotif('error', msg);
+        } finally {
+            setClaimCropping(false);
+        }
+    };
+
+    const handleClaimCompress = async () => {
+        if (!claimData.url) return;
+        setClaimCompressing(true);
+        setUploadNotif(null);
+        try {
+            const response = await axios.post(`${adminRoutePrefix}/music/compress`, {
+                url: claimData.url
+            });
+            if (response.data.success && response.data.url) {
+                setClaimData({ ...claimData, url: response.data.url });
+                
+                if (response.data.stats) {
+                    const { before, after, savings_pct } = response.data.stats;
+                    const bMB = (before / 1024 / 1024).toFixed(1);
+                    const aMB = (after / 1024 / 1024).toFixed(1);
+                    setClaimUploadSize(`${aMB} MB`);
+                    showNotif('success', `Musik kustom berhasil dikompres dari ${bMB} MB menjadi ${aMB} MB (Hemat ${savings_pct}%!)`);
+                } else {
+                    showNotif('success', 'Musik kustom berhasil dikompres!');
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            const msg = e.response?.data?.message || e.message || 'Gagal mengompres musik';
+            showNotif('error', msg);
+        } finally {
+            setClaimCompressing(false);
+        }
     };
 
     const handleClaimSubmit = (e) => {
@@ -717,6 +799,57 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
                                         ))}
                                     </div>
                                 </div>
+                                {claimData.url && (
+                                    <div className="bg-[#f5f3f0] rounded-xl p-4 border border-[#e8e5e0] space-y-3">
+                                        <div className="flex items-center justify-between border-b border-[#e8e5e0] pb-2">
+                                            <p className="text-xs text-[#999] font-bold flex items-center gap-1.5">
+                                                <span>Preview & Optimasi:</span>
+                                                {claimUploadSize && <span className="text-xs font-semibold text-[#E5654B] bg-[#fdf5f3] px-2 py-0.5 rounded-full">Ukuran: {claimUploadSize}</span>}
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <button type="button" onClick={() => setClaimCropOpen(!claimCropOpen)}
+                                                    className="text-xs bg-[#fdf5f3] text-[#E5654B] px-2.5 py-1.5 rounded-lg hover:bg-[#fcebe7] transition-all font-semibold">
+                                                    {claimCropOpen ? 'Tutup Potong' : 'Potong Musik'}
+                                                </button>
+                                                <button type="button" onClick={handleClaimCompress} disabled={claimCompressing}
+                                                    className="text-xs bg-emerald-50 text-emerald-600 px-2.5 py-1.5 rounded-lg hover:bg-emerald-100 transition-all font-semibold disabled:opacity-50">
+                                                    {claimCompressing ? 'Mengompres...' : 'Kompres File'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <audio controls className="w-full" key={claimData.url} src={claimData.url}
+                                            onLoadedMetadata={(e) => {
+                                                const dur = Math.round(e.target.duration);
+                                                setClaimAudioDuration(dur);
+                                                setClaimCropEnd(prev => prev > dur || prev === 60 ? dur : prev);
+                                            }}></audio>
+
+                                        {claimCropOpen && (
+                                            <div className="bg-white rounded-xl p-3 border border-[#e8e5e0] space-y-3 animate-[fadeIn_0.2s_ease-out]">
+                                                <div className="text-xs font-bold text-gray-700">Tentukan Rentang Potong (Total: {claimAudioDuration} detik)</div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="block text-[10px] font-semibold text-gray-500 mb-1">Mulai (Detik)</label>
+                                                        <input type="number" min="0" max={claimCropEnd - 1} value={claimCropStart}
+                                                            onChange={e => setClaimCropStart(Math.max(0, parseInt(e.target.value) || 0))}
+                                                            className="w-full border border-[#e8e5e0] rounded-lg px-3 py-1.5 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B]" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-semibold text-gray-500 mb-1">Selesai (Detik)</label>
+                                                        <input type="number" min={claimCropStart + 1} max={claimAudioDuration} value={claimCropEnd}
+                                                            onChange={e => setClaimCropEnd(Math.min(claimAudioDuration, parseInt(e.target.value) || claimAudioDuration))}
+                                                            className="w-full border border-[#e8e5e0] rounded-lg px-3 py-1.5 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B]" />
+                                                    </div>
+                                                </div>
+                                                <div className="text-[10px] text-gray-400">Pilih durasi musik yang diinginkan. Ini akan memotong berkas fisik di server dan memperkecil ukurannya secara signifikan.</div>
+                                                <button type="button" onClick={handleClaimCrop} disabled={claimCropping}
+                                                    className="w-full py-2 bg-[#E5654B] text-white rounded-lg text-xs font-semibold hover:bg-[#d4523a] disabled:opacity-50">
+                                                    {claimCropping ? 'Memproses Potong...' : 'Terapkan Potongan'}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="flex gap-2 pt-2">
                                     <button 
                                         type="submit" 
