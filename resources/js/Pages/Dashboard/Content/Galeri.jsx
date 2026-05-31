@@ -47,6 +47,28 @@ export default function Galeri({
     const [savingBulk, setSavingBulk] = useState(false);
     const [togglingAssetId, setTogglingAssetId] = useState(null);
 
+    // Toast Notification System
+    const [toast, setToast] = useState(null); // { type: 'success' | 'error' | 'warning', msg: '' }
+    const toastTimeoutRef = useRef(null);
+
+    const showToast = (type, msg) => {
+        if (toastTimeoutRef.current) {
+            clearTimeout(toastTimeoutRef.current);
+        }
+        setToast({ type, msg });
+        toastTimeoutRef.current = setTimeout(() => {
+            setToast(null);
+        }, 3500);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (toastTimeoutRef.current) {
+                clearTimeout(toastTimeoutRef.current);
+            }
+        };
+    }, []);
+
     // Freeze body scroll when setting modal is open
     useEffect(() => {
         if (selectedAsset) {
@@ -87,7 +109,7 @@ export default function Galeri({
         if (!newVideoUrl.trim()) return;
 
         if (!newVideoUrl.includes('youtube.com') && !newVideoUrl.includes('youtu.be')) {
-            alert('Masukkan link YouTube yang valid!');
+            showToast('error', 'Masukkan link YouTube yang valid!');
             return;
         }
 
@@ -101,7 +123,7 @@ export default function Galeri({
                 const list = response.data.video_list || updatedList;
                 setVideoList(list);
                 setNewVideoUrl('');
-                alert('Video berhasil ditambahkan ke album!');
+                showToast('success', 'Video berhasil ditambahkan ke album!');
                 
                 // Set as primary video automatically if none was set
                 if (!videoUrl) {
@@ -110,7 +132,7 @@ export default function Galeri({
             }
         } catch (error) {
             console.error(error);
-            alert('Gagal menambahkan video.');
+            showToast('error', 'Gagal menambahkan video.');
         } finally {
             setSavingVideoList(false);
         }
@@ -144,7 +166,7 @@ export default function Galeri({
             }
         } catch (error) {
             console.error(error);
-            alert('Gagal menghapus video.');
+            showToast('error', 'Gagal menghapus video.');
         } finally {
             setSavingVideoList(false);
         }
@@ -164,11 +186,11 @@ export default function Galeri({
                     video_url: url,
                     video_list: currentList
                 }));
-                alert('Video gallery berhasil diperbarui!');
+                showToast('success', 'Video gallery berhasil diperbarui!');
             }
         } catch (error) {
             console.error(error);
-            alert('Gagal mengubah video gallery.');
+            showToast('error', 'Gagal mengubah video gallery.');
         } finally {
             setSavingVideo(false);
         }
@@ -186,10 +208,10 @@ export default function Galeri({
                 cover_video_url: isActive ? '' : url,
                 cover_image: prev.cover_image || ''
             }));
-            alert(isActive ? 'Video cover dinonaktifkan!' : 'Video cover berhasil diaktifkan!');
+            showToast('success', isActive ? 'Video cover dinonaktifkan!' : 'Video cover berhasil diaktifkan!');
         } catch (error) {
             console.error(error);
-            alert('Gagal mengubah video cover.');
+            showToast('error', 'Gagal mengubah video cover.');
         }
     };
 
@@ -205,10 +227,10 @@ export default function Galeri({
                 opening_video_url: isActive ? '' : url,
                 opening_image: prev.opening_image || ''
             }));
-            alert(isActive ? 'Video opening dinonaktifkan!' : 'Video opening berhasil diaktifkan!');
+            showToast('success', isActive ? 'Video opening dinonaktifkan!' : 'Video opening berhasil diaktifkan!');
         } catch (error) {
             console.error(error);
-            alert('Gagal mengubah video opening.');
+            showToast('error', 'Gagal mengubah video opening.');
         }
     };
 
@@ -255,7 +277,7 @@ export default function Galeri({
             setBulkSelectedIds(prev => prev.filter(x => x !== id));
         } else {
             if (bulkSelectedIds.length >= maxGalleries) {
-                alert(`Oops! Batas kuota galeri Anda adalah ${maxGalleries} foto. Kurangi pilihan lain terlebih dahulu.`);
+                showToast('warning', `Oops! Batas kuota galeri Anda adalah ${maxGalleries} foto. Kurangi pilihan lain terlebih dahulu.`);
                 return;
             }
             setBulkSelectedIds(prev => [...prev, id]);
@@ -271,11 +293,11 @@ export default function Galeri({
             if (response.data.success) {
                 setLocalGalleries(response.data.galleries);
                 setBulkMode(false);
-                alert('Galeri prewedding berhasil diperbarui secara masal!');
+                showToast('success', 'Galeri prewedding berhasil diperbarui secara masal!');
             }
         } catch (e) {
             console.error('Bulk gallery save error:', e);
-            alert('Gagal menyinkronkan galeri secara masal.');
+            showToast('error', 'Gagal menyinkronkan galeri secara masal.');
         } finally {
             setSavingBulk(false);
         }
@@ -363,7 +385,7 @@ export default function Galeri({
             } catch (e) {
                 console.error(`Gagal mengunggah file ke-${i + 1}:`, e);
                 const errMsg = e.response?.data?.error || 'Gagal mengunggah beberapa berkas.';
-                alert(errMsg);
+                showToast('error', errMsg);
             }
         }
 
@@ -374,7 +396,7 @@ export default function Galeri({
                 setUploading(false);
                 setUploadStatus('');
                 if (successCount > 0) {
-                    alert(`${successCount} foto berhasil ditambahkan ke Album.`);
+                    showToast('success', `${successCount} foto berhasil ditambahkan ke Album.`);
                 }
             }
         });
@@ -388,7 +410,7 @@ export default function Galeri({
         
         // Quota safety validation for Gallery
         if (target === 'gallery' && newValue && remaining <= 0) {
-            alert(`Oops! Batas kuota galeri Anda adalah ${maxGalleries} foto. Hapus foto galeri lain terlebih dahulu.`);
+            showToast('warning', `Oops! Batas kuota galeri Anda adalah ${maxGalleries} foto. Hapus foto galeri lain terlebih dahulu.`);
             return;
         }
 
@@ -419,7 +441,7 @@ export default function Galeri({
         } catch (e) {
             console.error('Usage toggle error:', e);
             const msg = e.response?.data?.error || 'Gagal merubah status penggunaan foto.';
-            alert(msg);
+            showToast('error', msg);
         }
     };
 
@@ -429,7 +451,7 @@ export default function Galeri({
         
         // Quota safety validation
         if (newValue && remaining <= 0) {
-            alert(`Oops! Batas kuota galeri Anda adalah ${maxGalleries} foto. Hapus foto galeri lain terlebih dahulu.`);
+            showToast('warning', `Oops! Batas kuota galeri Anda adalah ${maxGalleries} foto. Hapus foto galeri lain terlebih dahulu.`);
             return;
         }
 
@@ -449,7 +471,7 @@ export default function Galeri({
         } catch (e) {
             console.error('Quick toggle error:', e);
             const msg = e.response?.data?.error || 'Gagal merubah status galeri.';
-            alert(msg);
+            showToast('error', msg);
         } finally {
             setTogglingAssetId(null);
         }
@@ -475,11 +497,11 @@ export default function Galeri({
                 if (response.data.brideGrooms) {
                     setLocalBrideGrooms(response.data.brideGrooms);
                 }
-                alert('Fokus visual & perbesaran berhasil disimpan!');
+                showToast('success', 'Pengaturan gambar Anda berhasil');
             }
         } catch (e) {
             console.error('Position save error:', e);
-            alert('Gagal menyimpan posisi foto.');
+            showToast('error', 'Gagal menyimpan posisi foto.');
         } finally {
             setSavingPosition(false);
         }
@@ -619,13 +641,13 @@ export default function Galeri({
                 router.reload({
                     preserveScroll: true,
                     onFinish: () => {
-                        alert('Foto berhasil dihapus secara permanen.');
+                        showToast('success', 'Foto berhasil dihapus secara permanen.');
                     }
                 });
             }
         } catch (e) {
             console.error('Delete asset error:', e);
-            alert('Gagal menghapus foto.');
+            showToast('error', 'Gagal menghapus foto.');
         }
     };
 
@@ -1509,6 +1531,74 @@ export default function Galeri({
                 </div>,
                 document.body
             )}
+
+            {/* Elegant Toast Notification */}
+            {toast && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] max-w-md w-full px-4 sm:px-0 pointer-events-none animate-[toastSlideUp_0.4s_cubic-bezier(0.16,1,0.3,1)]">
+                    <div className={`mx-auto pointer-events-auto flex items-center justify-between gap-3.5 px-4.5 py-3 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border backdrop-blur-md transition-all duration-300 ${
+                        toast.type === 'success' 
+                            ? 'bg-emerald-950/90 border-emerald-500/30 text-emerald-100 shadow-emerald-950/10' 
+                            : toast.type === 'warning'
+                            ? 'bg-amber-950/90 border-amber-500/30 text-amber-100 shadow-amber-950/10'
+                            : 'bg-rose-950/90 border-rose-500/30 text-rose-100 shadow-rose-950/10'
+                    }`}>
+                        <div className="flex items-center gap-3">
+                            {toast.type === 'success' && (
+                                <div className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400 flex-shrink-0">
+                                    <svg className="w-5 h-5 animate-[scaleIn_0.2s_ease]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            )}
+                            {toast.type === 'warning' && (
+                                <div className="p-1 rounded-lg bg-amber-500/20 text-amber-400 flex-shrink-0">
+                                    <svg className="w-5 h-5 animate-[scaleIn_0.2s_ease]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                            )}
+                            {toast.type === 'error' && (
+                                <div className="p-1 rounded-lg bg-rose-500/20 text-rose-400 flex-shrink-0">
+                                    <svg className="w-5 h-5 animate-[scaleIn_0.2s_ease]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18.36 6.64a9 9 0 11-12.73 0 9 9 0 0112.73 0zM12 9v4m0 4h.01" />
+                                    </svg>
+                                </div>
+                            )}
+                            <p className="text-sm font-semibold tracking-wide leading-relaxed">
+                                {toast.msg}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setToast(null)}
+                            className="p-1 rounded-lg hover:bg-white/10 active:scale-95 transition-all text-current opacity-70 hover:opacity-100 flex-shrink-0"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
+            <style>{`
+                @keyframes toastSlideUp {
+                    from {
+                        opacity: 0;
+                        transform: translate(-50%, 24px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translate(-50%, 0) scale(1);
+                    }
+                }
+                @keyframes scaleIn {
+                    from {
+                        transform: scale(0);
+                    }
+                    to {
+                        transform: scale(1);
+                    }
+                }
+            `}</style>
         </DashboardLayout>
     );
 }

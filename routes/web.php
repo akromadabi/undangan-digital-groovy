@@ -400,6 +400,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::delete('/music/{id}', [AdminMusicController::class, 'destroy'])->name('music.destroy');
     Route::post('/music/{id}/toggle', [AdminMusicController::class, 'toggleActive'])->name('music.toggle');
     Route::post('/music/categories', [AdminMusicController::class, 'saveCategories'])->name('music.saveCategories');
+    Route::post('/music/claim', [AdminMusicController::class, 'claimUserMusic'])->name('music.claim');
 
     // Quote Templates
     Route::get('/quotes', [\App\Http\Controllers\Admin\AdminQuoteController::class, 'index'])->name('quotes.index');

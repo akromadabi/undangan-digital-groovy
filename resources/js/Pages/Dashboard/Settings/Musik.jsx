@@ -32,6 +32,7 @@ export default function Musik({ invitation, platformMusic = [] }) {
     const [playingId, setPlayingId] = useState(null);
     const [uploadNotif, setUploadNotif] = useState(null); // { type: 'error'|'success', message }
     const [previewKey, setPreviewKey] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
     const audioRef = useRef(null);
 
     const { data, setData, post, processing } = useForm({
@@ -103,7 +104,13 @@ export default function Musik({ invitation, platformMusic = [] }) {
         setPlayingId(id);
     };
 
-    const filtered = filter === 'all' ? platformMusic : platformMusic.filter(t => t.category === filter);
+    const filtered = platformMusic.filter(track => {
+        const matchesCategory = filter === 'all' || track.category === filter;
+        const matchesSearch = searchQuery === '' || 
+            (track.title && track.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (track.artist && track.artist.toLowerCase().includes(searchQuery.toLowerCase()));
+        return matchesCategory && matchesSearch;
+    });
 
     return (
         <DashboardLayout title="Musik">
@@ -138,6 +145,31 @@ export default function Musik({ invitation, platformMusic = [] }) {
                 {/* Platform Music Tab */}
                 {tab === 'platform' && (
                     <div className="space-y-4">
+                        {/* Search Input Bar */}
+                        <div className="relative">
+                            <input 
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Cari lagu atau artis..."
+                                className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400"
+                            />
+                            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            {searchQuery && (
+                                <button 
+                                    type="button"
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <XCircle size={16} />
+                                </button>
+                            )}
+                        </div>
+
                         <div className="flex gap-2 flex-wrap">
                             {CATEGORIES.map(c => (
                                 <button key={c.value} onClick={() => setFilter(c.value)}

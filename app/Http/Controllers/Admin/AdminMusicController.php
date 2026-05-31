@@ -16,9 +16,17 @@ class AdminMusicController extends Controller
         $tracks = MusicLibrary::orderBy('sort_order')->orderByDesc('created_at')->get();
         $categories = Cache::get('music_categories', []);
 
+        // Query daftar musik kustom unik yang digunakan oleh user yang belum masuk ke Koleksi Resmi
+        $customSongs = \App\Models\Invitation::whereNotNull('music_url')
+            ->whereNotIn('music_url', MusicLibrary::pluck('url'))
+            ->select('music_url', \DB::raw('count(*) as use_count'), \DB::raw('MAX(title) as invitation_title'))
+            ->groupBy('music_url')
+            ->get();
+
         return Inertia::render('Admin/Music', [
             'tracks' => $tracks,
             'categories' => $categories,
+            'customSongs' => $customSongs,
         ]);
     }
 
@@ -118,5 +126,29 @@ class AdminMusicController extends Controller
         Cache::forever('music_categories', $request->categories);
 
         return back()->with('success', 'Kategori berhasil disimpan.');
+    }
+
+    public function claimUserMusic(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'artist' => 'nullable|string|max:255',
+            'category' => 'required|string|max:50',
+            'url' => 'required|string|max:500',
+        ]);
+
+        $url = $request->input('url');
+
+        // Tambahkan lagu kustom ini ke Koleksi Platform resmi
+        MusicLibrary::create([
+            'title' => $request->input('title'),
+            'artist' => $request->input('artist'),
+            'category' => $request->input('category'),
+            'url' => $url,
+            'source_type' => str_contains($url, 'youtube_') ? 'url' : 'upload',
+            'is_active' => true
+        ]);
+
+        return back()->with('success', 'Musik kustom user berhasil ditarik dan dimasukkan ke Koleksi Resmi!');
     }
 }
