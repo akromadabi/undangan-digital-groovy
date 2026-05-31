@@ -78,7 +78,7 @@ export default function VerifyOtp({ phoneHint }) {
     };
 
     const handleLogout = () => {
-        router.post(route('logout'));
+        router.post('/logout');
     };
 
     return (

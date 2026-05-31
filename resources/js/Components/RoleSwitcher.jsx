@@ -37,7 +37,17 @@ export default function RoleSwitcher({ auth }) {
         : ['admin', 'user'];
 
     const handleRoleSwitch = (role) => {
-        if (role === currentRole) return;
+        if (role === currentRole) {
+            setIsOpen(false);
+            if (role === 'super_admin') {
+                router.visit('/super-admin');
+            } else if (role === 'admin') {
+                router.visit('/admin');
+            } else {
+                router.visit('/dashboard');
+            }
+            return;
+        }
         setIsOpen(false);
         router.post(`/impersonate/switch-role/${role}`, {}, {
             onSuccess: () => {

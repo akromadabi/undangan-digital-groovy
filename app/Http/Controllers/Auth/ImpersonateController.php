@@ -47,7 +47,7 @@ class ImpersonateController extends Controller
         // Login as the user
         auth()->login($user);
 
-        return redirect()->route('dashboard')->with('success', "Sekarang Anda masuk sebagai {$user->name}.");
+        return redirect('/dashboard')->with('success', "Sekarang Anda masuk sebagai {$user->name}.");
     }
 
     /**
@@ -77,7 +77,7 @@ class ImpersonateController extends Controller
         // Login as the reseller
         auth()->login($user);
 
-        return redirect()->route('admin.dashboard')->with('success', "Sekarang Anda masuk sebagai Reseller {$user->name}.");
+        return redirect('/admin')->with('success', "Sekarang Anda masuk sebagai Reseller {$user->name}.");
     }
 
     /**
@@ -297,7 +297,7 @@ class ImpersonateController extends Controller
         // Login as the demo user
         auth()->login($demoUser);
 
-        return redirect()->route('dashboard')->with('success', "Sekarang Anda mengelola Akun Demo.");
+        return redirect('/dashboard')->with('success', "Sekarang Anda mengelola Akun Demo.");
     }
 
     /**
@@ -317,7 +317,7 @@ class ImpersonateController extends Controller
         if (!$impersonator) {
             session()->forget(['impersonator_id', 'impersonator_role']);
             auth()->logout();
-            return redirect()->route('login')->with('error', 'Sesi asli tidak ditemukan.');
+            return redirect('/login')->with('error', 'Sesi asli tidak ditemukan.');
         }
 
         // Login back as impersonator
@@ -327,9 +327,9 @@ class ImpersonateController extends Controller
         session()->forget(['impersonator_id', 'impersonator_role']);
 
         if ($impersonatorRole === 'super_admin') {
-            return redirect()->route('super-admin.dashboard')->with('success', 'Kembali ke panel Super Admin.');
+            return redirect('/super-admin')->with('success', 'Kembali ke panel Super Admin.');
         } elseif ($impersonatorRole === 'admin') {
-            return redirect()->route('admin.dashboard')->with('success', 'Kembali ke panel Reseller.');
+            return redirect('/admin')->with('success', 'Kembali ke panel Reseller.');
         }
 
         return redirect('/dashboard');
@@ -402,7 +402,7 @@ class ImpersonateController extends Controller
             ]);
             auth()->login($reseller);
 
-            return redirect()->route('admin.dashboard')->with('success', "Ganti ke peran Reseller ({$reseller->name}).");
+            return redirect('/admin')->with('success', "Ganti ke peran Reseller ({$reseller->name}).");
         }
 
         // 3. Switch to User (client)
@@ -442,7 +442,7 @@ class ImpersonateController extends Controller
                 ]);
                 auth()->login($user);
 
-                return redirect()->route('dashboard')->with('success', "Ganti ke peran User ({$user->name}).");
+                return redirect('/dashboard')->with('success', "Ganti ke peran User ({$user->name}).");
             }
         }
 

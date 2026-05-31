@@ -13,6 +13,15 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+
+        // Redirect if Admin or Super Admin tries to access client dashboard under their original role
+        if ($user->isSuperAdmin()) {
+            return redirect('/super-admin');
+        }
+        if ($user->isAdmin()) {
+            return redirect('/admin');
+        }
+
         $invitation = $user->invitation;
 
         $stats = [];

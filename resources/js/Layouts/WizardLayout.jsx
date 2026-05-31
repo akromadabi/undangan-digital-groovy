@@ -71,7 +71,7 @@ function UserMenu() {
     return (
         <div className="flex items-center gap-2 text-sm text-gray-600">
             <span className="hidden sm:block">Hi, {auth.user?.name}</span>
-            <Link href={route('logout')} method="post" as="button" className="text-gray-400 hover:text-red-500">
+            <Link href="/logout" method="post" as="button" className="text-gray-400 hover:text-red-500">
                 ☰
             </Link>
         </div>
