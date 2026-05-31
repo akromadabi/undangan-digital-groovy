@@ -60,7 +60,7 @@ export default function Index({ resellers, filters, centralHost }) {
                 </form>
 
                 {/* Desktop and Mobile Container */}
-                <div className="bg-white sm:bg-transparent rounded-2xl sm:rounded-none border sm:border-none border-[#e8e5e0] overflow-hidden">
+                <div className="space-y-4">
                     {/* DESKTOP TABLE VIEW */}
                     <div className="hidden sm:block overflow-x-auto bg-white rounded-2xl border border-[#e8e5e0]">
                         <table className="w-full">
@@ -259,18 +259,17 @@ export default function Index({ resellers, filters, centralHost }) {
                             </div>
                         )}
                     </div>
-                </div>
 
                     {/* Pagination */}
                     {resellers?.links && resellers.links.length > 3 && (
-                        <div className="px-6 py-3 border-t border-[#f0ede8] flex items-center justify-between">
+                        <div className="bg-white rounded-2xl border border-[#e8e5e0] px-4 py-3 flex items-center justify-between shadow-3xs">
                             <span className="text-xs text-[#999]">
                                 Showing {resellers.from}-{resellers.to} of {resellers.total}
                             </span>
                             <div className="flex items-center gap-1">
                                 {resellers.links.map((link, i) => (
                                     <Link key={i} href={link.url || '#'}
-                                        className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${link.active ? 'bg-[#E5654B] text-white' : link.url ? 'text-[#999] hover:bg-[#f5f3f0]' : 'text-[#ddd] cursor-not-allowed'}`}
+                                        className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${link.active ? 'bg-[#E5654B] text-white font-bold' : link.url ? 'text-[#999] hover:bg-[#f5f3f0]' : 'text-[#ddd] cursor-not-allowed'}`}
                                         dangerouslySetInnerHTML={{ __html: link.label }} />
                                 ))}
                             </div>
