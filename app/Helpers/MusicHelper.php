@@ -12,10 +12,11 @@ class MusicHelper
      * Convert a YouTube URL to an MP3 file, download it, and store it locally.
      *
      * @param string $youtubeUrl
+     * @param array|null $metadata Reference to return parsed title/artist
      * @return string|null The local storage path or null if not a YouTube URL
      * @throws \Exception
      */
-    public static function convertYoutubeToMp3($youtubeUrl)
+    public static function convertYoutubeToMp3($youtubeUrl, &$metadata = null)
     {
         if (empty($youtubeUrl)) {
             return null;
@@ -39,6 +40,19 @@ class MusicHelper
         $storagePath = 'music/' . $fileName;
         
         if (Storage::disk('public')->exists($storagePath)) {
+            // Coba ambil metadata dari library atau invitation yang sudah ada
+            $existing = \App\Models\MusicLibrary::where('url', '/storage/' . $storagePath)->first();
+            if (!$existing) {
+                $existing = \App\Models\Invitation::where('music_url', '/storage/' . $storagePath)
+                    ->select('title')
+                    ->first();
+            }
+            if ($existing) {
+                $metadata = [
+                    'title' => $existing->title ?? $existing->invitation_title ?? '',
+                    'artist' => $existing->artist ?? ''
+                ];
+            }
             return '/storage/' . $storagePath;
         }
         
@@ -71,6 +85,34 @@ class MusicHelper
                     $data = $response->json();
                     if (isset($data['url'])) {
                         $audioUrl = $data['url'];
+
+                        // Extract filename and parse title / artist
+                        if (isset($data['filename'])) {
+                            $filename = $data['filename'];
+                            // Strip extension
+                            $filename = preg_replace('/\.[^.]+$/', '', $filename);
+
+                            // Clean up channel name suffix or cover brackets from title/artist
+                            $parts = explode(' - ', $filename);
+                            if (count($parts) >= 2) {
+                                $title = trim($parts[0]);
+                                $artist = trim($parts[1]);
+
+                                // Remove common parenthesis info from artist (e.g. cover details)
+                                $artist = trim(preg_replace('/\s*\(.*?\)\s*/', '', $artist));
+                                $artist = trim(preg_replace('/\s*\[.*?\]\s*/', '', $artist));
+
+                                $metadata = [
+                                    'title' => $title,
+                                    'artist' => $artist
+                                ];
+                            } else {
+                                $metadata = [
+                                    'title' => trim($parts[0]),
+                                    'artist' => ''
+                                ];
+                            }
+                        }
                         break;
                     } elseif (isset($data['error']['code'])) {
                         $errorMessage = "Cobalt Error: " . $data['error']['code'];
@@ -114,5 +156,82 @@ class MusicHelper
         Storage::disk('public')->put($storagePath, $fileContents);
 
         return '/storage/' . $storagePath;
+    }
+
+    /**
+     * Trim and compress (strip tags) an MP3 file.
+     *
+     * @param string $url
+     * @param float $start
+     * @param float $end
+     * @return string New cropped URL
+     * @throws \Exception
+     */
+    public static function cropAndCompressMp3($url, $start, $end)
+    {
+        $relativePath = str_replace('/storage/', '', $url);
+        $fullPath = storage_path('app/public/' . $relativePath);
+
+        if (!file_exists($fullPath)) {
+            throw new \Exception("Berkas musik asli tidak ditemukan.");
+        }
+
+        if ($start < 0 || $end <= $start) {
+            throw new \Exception("Waktu potong tidak valid.");
+        }
+
+        $duration = $end - $start;
+
+        // Perform trimming and tag stripping using falahati/php-mp3
+        $mpeg = \falahati\PHPMP3\MpegAudio::fromFile($fullPath);
+        $mpeg->trim($start, $duration);
+        $mpeg->stripTags();
+
+        // Generate trimmed filename
+        $pathInfo = pathinfo($fullPath);
+        // Remove existing trimmed suffix if editing an already trimmed file
+        $cleanName = preg_replace('/_trimmed_[0-9]+_[0-9]+$/', '', $pathInfo['filename']);
+        $newFilename = $cleanName . '_trimmed_' . intval($start) . '_' . intval($end) . '.' . $pathInfo['extension'];
+        $newLocalPath = $pathInfo['dirname'] . '/' . $newFilename;
+
+        $mpeg->saveFile($newLocalPath);
+
+        $newRelativePath = str_replace(storage_path('app/public/'), '', $newLocalPath);
+        return '/storage/' . str_replace('\\', '/', $newRelativePath);
+    }
+
+    /**
+     * Compress MP3 by stripping tags.
+     *
+     * @param string $url
+     * @param array $stats Output statistics
+     * @return string Same URL
+     * @throws \Exception
+     */
+    public static function compressMp3($url, &$stats = null)
+    {
+        $relativePath = str_replace('/storage/', '', $url);
+        $fullPath = storage_path('app/public/' . $relativePath);
+
+        if (!file_exists($fullPath)) {
+            throw new \Exception("Berkas musik tidak ditemukan.");
+        }
+
+        $sizeBefore = filesize($fullPath);
+
+        $mpeg = \falahati\PHPMP3\MpegAudio::fromFile($fullPath);
+        $mpeg->stripTags();
+        $mpeg->saveFile($fullPath);
+
+        clearstatcache();
+        $sizeAfter = filesize($fullPath);
+
+        $stats = [
+            'before' => $sizeBefore,
+            'after' => $sizeAfter,
+            'savings_pct' => $sizeBefore > 0 ? round((($sizeBefore - $sizeAfter) / $sizeBefore) * 100, 1) : 0
+        ];
+
+        return $url;
     }
 }

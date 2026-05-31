@@ -159,7 +159,8 @@ class AdminMusicController extends Controller
         ]);
 
         try {
-            $localPath = MusicHelper::convertYoutubeToMp3($request->input('url'));
+            $metadata = null;
+            $localPath = MusicHelper::convertYoutubeToMp3($request->input('url'), $metadata);
             if (!$localPath) {
                 return response()->json([
                     'success' => false,
@@ -167,10 +168,68 @@ class AdminMusicController extends Controller
                 ], 422);
             }
 
+            $size = @filesize(storage_path('app/public/' . str_replace('/storage/', '', $localPath)));
+            $sizeFormatted = $size ? round($size / 1024 / 1024, 1) . ' MB' : null;
+
             return response()->json([
                 'success' => true,
                 'url' => $localPath,
+                'title' => $metadata['title'] ?? '',
+                'artist' => $metadata['artist'] ?? '',
+                'size' => $sizeFormatted,
                 'message' => 'YouTube berhasil dikonversi ke MP3.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function cropMusic(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|string|max:500',
+            'start' => 'required|numeric|min:0',
+            'end' => 'required|numeric|gt:start',
+        ]);
+
+        try {
+            $newUrl = MusicHelper::cropAndCompressMp3(
+                $request->input('url'),
+                $request->input('start'),
+                $request->input('end')
+            );
+
+            return response()->json([
+                'success' => true,
+                'url' => $newUrl,
+                'message' => 'Musik berhasil dipotong!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function compressMusic(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|string|max:500',
+        ]);
+
+        try {
+            $stats = null;
+            $newUrl = MusicHelper::compressMp3($request->input('url'), $stats);
+
+            return response()->json([
+                'success' => true,
+                'url' => $newUrl,
+                'stats' => $stats,
+                'message' => 'Metadata dibersihkan! Ukuran berkas dikompres.'
             ]);
         } catch (\Exception $e) {
             return response()->json([

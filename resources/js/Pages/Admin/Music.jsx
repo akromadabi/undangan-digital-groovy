@@ -43,6 +43,16 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
     const [activeTab, setActiveTab] = useState('library');
     const [claimingSong, setClaimingSong] = useState(null);
     const [claimData, setClaimData] = useState({ title: '', artist: '', category: 'romantis', url: '' });
+    
+    // Audio manipulation states
+    const [cropOpen, setCropOpen] = useState(false);
+    const [cropStart, setCropStart] = useState(0);
+    const [cropEnd, setCropEnd] = useState(60);
+    const [audioDuration, setAudioDuration] = useState(0);
+    const [cropping, setCropping] = useState(false);
+    const [compressing, setCompressing] = useState(false);
+    const [uploadSize, setUploadSize] = useState(null);
+
     const audioRef = useRef(null);
 
     const showNotif = (type, message) => {
@@ -64,8 +74,16 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
         try {
             const response = await axios.post(`${adminRoutePrefix}/music/convert-youtube`, { url });
             if (response.data.success && response.data.url) {
-                setData('url', response.data.url);
-                setData('source_type', 'url');
+                setData({
+                    ...data,
+                    url: response.data.url,
+                    source_type: 'url',
+                    title: data.title || response.data.title || '',
+                    artist: data.artist || response.data.artist || '',
+                });
+                if (response.data.size) {
+                    setUploadSize(response.data.size);
+                }
                 showNotif('success', 'Link YouTube berhasil dikonversi ke MP3!');
             }
         } catch (e) {
@@ -190,9 +208,15 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
             const response = await axios.post(`${adminRoutePrefix}/upload`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            setData('url', response.data.url);
-            setData('source_type', 'upload');
-            showNotif('success', `File "${file.name}" berhasil diupload!`);
+            setData({
+                ...data,
+                url: response.data.url,
+                source_type: 'upload',
+                title: data.title || file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "),
+            });
+            const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+            setUploadSize(`${sizeMB} MB`);
+            showNotif('success', `File "${file.name}" (${sizeMB} MB) berhasil diupload!`);
         } catch (e) {
             console.error(e);
             const msg = e.response?.data?.errors
@@ -201,6 +225,61 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
             showNotif('error', `Upload gagal: ${msg}`);
         }
         setUploading(false);
+    };
+
+    const handleCrop = async () => {
+        if (!data.url) return;
+        setCropping(true);
+        setUploadNotif(null);
+        try {
+            const response = await axios.post(`${adminRoutePrefix}/music/crop`, {
+                url: data.url,
+                start: cropStart,
+                end: cropEnd
+            });
+            if (response.data.success && response.data.url) {
+                setData('url', response.data.url);
+                setUploadSize(null); // Will be reloaded
+                showNotif('success', 'Musik berhasil dipotong!');
+                setCropOpen(false);
+            }
+        } catch (e) {
+            console.error(e);
+            const msg = e.response?.data?.message || e.message || 'Gagal memotong musik';
+            showNotif('error', msg);
+        } finally {
+            setCropping(false);
+        }
+    };
+
+    const handleCompress = async () => {
+        if (!data.url) return;
+        setCompressing(true);
+        setUploadNotif(null);
+        try {
+            const response = await axios.post(`${adminRoutePrefix}/music/compress`, {
+                url: data.url
+            });
+            if (response.data.success && response.data.url) {
+                setData('url', response.data.url);
+                
+                if (response.data.stats) {
+                    const { before, after, savings_pct } = response.data.stats;
+                    const bMB = (before / 1024 / 1024).toFixed(1);
+                    const aMB = (after / 1024 / 1024).toFixed(1);
+                    setUploadSize(`${aMB} MB`);
+                    showNotif('success', `Musik berhasil dikompres dari ${bMB} MB menjadi ${aMB} MB (Hemat ${savings_pct}%!)`);
+                } else {
+                    showNotif('success', 'Musik berhasil dikompres!');
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            const msg = e.response?.data?.message || e.message || 'Gagal mengompres musik';
+            showNotif('error', msg);
+        } finally {
+            setCompressing(false);
+        }
     };
 
     const togglePlay = (id, url) => {
@@ -444,9 +523,54 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
                                     </label>
                                 </div>
                                 {data.url && (
-                                    <div className="bg-[#f5f3f0] rounded-xl p-3">
-                                        <p className="text-xs text-[#999] mb-2">Preview:</p>
-                                        <audio controls className="w-full" key={data.url} src={data.url}></audio>
+                                    <div className="bg-[#f5f3f0] rounded-xl p-4 border border-[#e8e5e0] space-y-3">
+                                        <div className="flex items-center justify-between border-b border-[#e8e5e0] pb-2">
+                                            <p className="text-xs text-[#999] font-bold flex items-center gap-1.5">
+                                                <span>Preview:</span>
+                                                {uploadSize && <span className="text-xs font-semibold text-[#E5654B] bg-[#fdf5f3] px-2 py-0.5 rounded-full">Ukuran: {uploadSize}</span>}
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <button type="button" onClick={() => setCropOpen(!cropOpen)}
+                                                    className="text-xs bg-[#fdf5f3] text-[#E5654B] px-2.5 py-1.5 rounded-lg hover:bg-[#fcebe7] transition-all font-semibold">
+                                                    {cropOpen ? 'Tutup Potong' : 'Potong Musik'}
+                                                </button>
+                                                <button type="button" onClick={handleCompress} disabled={compressing}
+                                                    className="text-xs bg-emerald-50 text-emerald-600 px-2.5 py-1.5 rounded-lg hover:bg-emerald-100 transition-all font-semibold disabled:opacity-50">
+                                                    {compressing ? 'Mengompres...' : 'Kompres File'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <audio controls className="w-full" key={data.url} src={data.url}
+                                            onLoadedMetadata={(e) => {
+                                                const dur = Math.round(e.target.duration);
+                                                setAudioDuration(dur);
+                                                setCropEnd(prev => prev > dur || prev === 60 ? dur : prev);
+                                            }}></audio>
+
+                                        {cropOpen && (
+                                            <div className="bg-white rounded-xl p-3 border border-[#e8e5e0] space-y-3 animate-[fadeIn_0.2s_ease-out]">
+                                                <div className="text-xs font-bold text-gray-700">Tentukan Rentang Potong (Total: {audioDuration} detik)</div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="block text-[10px] font-semibold text-gray-500 mb-1">Mulai (Detik)</label>
+                                                        <input type="number" min="0" max={cropEnd - 1} value={cropStart}
+                                                            onChange={e => setCropStart(Math.max(0, parseInt(e.target.value) || 0))}
+                                                            className="w-full border border-[#e8e5e0] rounded-lg px-3 py-1.5 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B]" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-semibold text-gray-500 mb-1">Selesai (Detik)</label>
+                                                        <input type="number" min={cropStart + 1} max={audioDuration} value={cropEnd}
+                                                            onChange={e => setCropEnd(Math.min(audioDuration, parseInt(e.target.value) || audioDuration))}
+                                                            className="w-full border border-[#e8e5e0] rounded-lg px-3 py-1.5 text-xs focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B]" />
+                                                    </div>
+                                                </div>
+                                                <div className="text-[10px] text-gray-400">Pilih durasi musik yang diinginkan (misal detik ke 10 hingga 80). Ini akan memotong berkas fisik di server dan memperkecil ukurannya secara signifikan.</div>
+                                                <button type="button" onClick={handleCrop} disabled={cropping}
+                                                    className="w-full py-2 bg-[#E5654B] text-white rounded-lg text-xs font-semibold hover:bg-[#d4523a] disabled:opacity-50">
+                                                    {cropping ? 'Memproses Potong...' : 'Terapkan Potongan'}
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                                 <div className="flex gap-2">

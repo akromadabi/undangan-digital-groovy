@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Instagram, Youtube, Facebook, Twitter, Plus, X as XIcon, Globe, Image as ImageIcon, UploadCloud, Save, Trash2, Heart, AlertTriangle, Info, User, GraduationCap, Calendar, Cake, ShieldCheck, Smile } from 'lucide-react';
+import { Instagram, Youtube, Facebook, Twitter, Plus, X as XIcon, Globe, Image as ImageIcon, UploadCloud, Save, Trash2, Heart, AlertTriangle, Info, User, GraduationCap, Calendar, Cake, ShieldCheck, Smile, ArrowLeftRight } from 'lucide-react';
 
 const SOCMED_OPTIONS = [
     { key: 'instagram', label: 'Instagram', icon: Instagram, placeholder: '@username atau link', color: 'text-pink-500' },
@@ -61,7 +61,33 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
     const update = (index, field, value) => {
         const updated = [...data.bride_grooms];
         updated[index] = { ...updated[index], [field]: value };
+        
+        // Enforce opposite gender if eventType allows (wedding/anniversary)
+        if (field === 'gender' && !isSingleSubject) {
+            const otherIndex = 1 - index;
+            const otherGender = value === 'pria' ? 'wanita' : 'pria';
+            updated[otherIndex] = { ...updated[otherIndex], gender: otherGender };
+        }
+
         setData('bride_grooms', updated);
+    };
+
+    const swapPositions = () => {
+        if (isSingleSubject) return;
+
+        const updated = [...data.bride_grooms];
+        const temp = updated[0];
+        updated[0] = updated[1];
+        updated[1] = temp;
+        setData('bride_grooms', updated);
+
+        const updatedSocmed = [...visibleSocmed];
+        const tempSocmed = updatedSocmed[0];
+        updatedSocmed[0] = updatedSocmed[1];
+        updatedSocmed[1] = tempSocmed;
+        setVisibleSocmed(updatedSocmed);
+
+        setShowSocmedPicker(Array(size).fill(false));
     };
 
     const addSocmed = (personIndex, key) => {
@@ -145,9 +171,11 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
 
     const getTabsConfig = () => {
         if (eventType === 'wedding') {
+            const gender1 = data.bride_grooms[0]?.gender === 'wanita' ? 'Wanita' : 'Pria';
+            const gender2 = data.bride_grooms[1]?.gender === 'wanita' ? 'Wanita' : 'Pria';
             return [
-                { idx: 0, label: 'Mempelai 1 (Wanita)', icon: Heart },
-                { idx: 1, label: 'Mempelai 2 (Pria)', icon: Heart },
+                { idx: 0, label: `Mempelai 1 (${gender1})`, icon: Heart },
+                { idx: 1, label: `Mempelai 2 (${gender2})`, icon: Heart },
             ];
         }
         if (eventType === 'anniversary') {
@@ -244,21 +272,32 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
 
                 {/* Tab Bar (only render if multiple tabs exist) */}
                 {!isSingleSubject && (
-                    <div className="bg-white rounded-xl border border-gray-200 p-1 flex gap-0.5 shadow-sm">
-                        {tabs.map((tab) => {
-                            const TabIcon = tab.icon;
-                            return (
-                                <button key={tab.idx} type="button"
-                                    onClick={() => setActiveTab(tab.idx)}
-                                    className={`flex-1 py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${activeTab === tab.idx
-                                        ? 'bg-[#E5654B] text-white shadow-sm'
-                                        : 'text-gray-500 hover:bg-gray-50'
-                                    }`}>
-                                    <TabIcon size={14} className="flex-shrink-0" />
-                                    {tab.label}
-                                </button>
-                            );
-                        })}
+                    <div className="flex items-stretch gap-2">
+                        <div className="bg-white rounded-xl border border-gray-200 p-1 flex-1 flex gap-0.5 shadow-sm">
+                            {tabs.map((tab) => {
+                                const TabIcon = tab.icon;
+                                return (
+                                    <button key={tab.idx} type="button"
+                                        onClick={() => setActiveTab(tab.idx)}
+                                        className={`flex-1 py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${activeTab === tab.idx
+                                            ? 'bg-[#E5654B] text-white shadow-sm'
+                                            : 'text-gray-500 hover:bg-gray-50'
+                                        }`}>
+                                        <TabIcon size={14} className="flex-shrink-0" />
+                                        {tab.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <button
+                            type="button"
+                            onClick={swapPositions}
+                            title="Tukar Posisi Mempelai"
+                            className="bg-white hover:bg-orange-50 hover:text-[#c24b33] hover:border-orange-200 border border-gray-200 text-gray-500 px-3.5 rounded-xl text-xs font-bold transition-all active:scale-[0.98] flex items-center gap-1.5 shadow-sm flex-shrink-0"
+                        >
+                            <ArrowLeftRight size={13} className="text-[#E5654B]" />
+                            <span className="hidden sm:inline">Tukar Letak</span>
+                        </button>
                     </div>
                 )}
 

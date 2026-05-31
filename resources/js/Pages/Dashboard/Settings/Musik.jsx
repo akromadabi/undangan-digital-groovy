@@ -34,6 +34,16 @@ export default function Musik({ invitation, platformMusic = [] }) {
     const [uploadNotif, setUploadNotif] = useState(null); // { type: 'error'|'success', message }
     const [previewKey, setPreviewKey] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
+    
+    // Audio manipulation states
+    const [cropOpen, setCropOpen] = useState(false);
+    const [cropStart, setCropStart] = useState(0);
+    const [cropEnd, setCropEnd] = useState(60);
+    const [audioDuration, setAudioDuration] = useState(0);
+    const [cropping, setCropping] = useState(false);
+    const [compressing, setCompressing] = useState(false);
+    const [uploadSize, setUploadSize] = useState(null);
+
     const audioRef = useRef(null);
 
     const { data, setData, post, processing } = useForm({
@@ -62,6 +72,9 @@ export default function Musik({ invitation, platformMusic = [] }) {
             if (response.data.success && response.data.url) {
                 setData('music_url', response.data.url);
                 setPreviewKey(k => k + 1);
+                if (response.data.size) {
+                    setUploadSize(response.data.size);
+                }
                 showNotif('success', 'Link YouTube berhasil dikonversi ke MP3!');
             }
         } catch (e) {
@@ -100,7 +113,9 @@ export default function Musik({ invitation, platformMusic = [] }) {
             });
             setData('music_url', response.data.url);
             setPreviewKey(k => k + 1);
-            showNotif('success', `File "${file.name}" berhasil diupload!`);
+            const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+            setUploadSize(`${sizeMB} MB`);
+            showNotif('success', `File "${file.name}" (${sizeMB} MB) berhasil diupload!`);
         } catch (e) {
             console.error(e);
             const msg = e.response?.data?.errors
@@ -109,6 +124,63 @@ export default function Musik({ invitation, platformMusic = [] }) {
             showNotif('error', `Upload gagal: ${msg}`);
         }
         setUploading(false);
+    };
+
+    const handleCrop = async () => {
+        if (!data.music_url) return;
+        setCropping(true);
+        setUploadNotif(null);
+        try {
+            const response = await axios.post(route('settings.musik.crop'), {
+                url: data.music_url,
+                start: cropStart,
+                end: cropEnd
+            });
+            if (response.data.success && response.data.url) {
+                setData('music_url', response.data.url);
+                setPreviewKey(k => k + 1);
+                setUploadSize(null); // Will be reloaded
+                showNotif('success', 'Musik berhasil dipotong!');
+                setCropOpen(false);
+            }
+        } catch (e) {
+            console.error(e);
+            const msg = e.response?.data?.message || e.message || 'Gagal memotong musik';
+            showNotif('error', msg);
+        } finally {
+            setCropping(false);
+        }
+    };
+
+    const handleCompress = async () => {
+        if (!data.music_url) return;
+        setCompressing(true);
+        setUploadNotif(null);
+        try {
+            const response = await axios.post(route('settings.musik.compress'), {
+                url: data.music_url
+            });
+            if (response.data.success && response.data.url) {
+                setData('music_url', response.data.url);
+                setPreviewKey(k => k + 1);
+                
+                if (response.data.stats) {
+                    const { before, after, savings_pct } = response.data.stats;
+                    const bMB = (before / 1024 / 1024).toFixed(1);
+                    const aMB = (after / 1024 / 1024).toFixed(1);
+                    setUploadSize(`${aMB} MB`);
+                    showNotif('success', `Musik berhasil dikompres dari ${bMB} MB menjadi ${aMB} MB (Hemat ${savings_pct}%!)`);
+                } else {
+                    showNotif('success', 'Musik berhasil dikompres!');
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            const msg = e.response?.data?.message || e.message || 'Gagal mengompres musik';
+            showNotif('error', msg);
+        } finally {
+            setCompressing(false);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -331,9 +403,53 @@ export default function Musik({ invitation, platformMusic = [] }) {
                         </div>
 
                         {data.music_url && (
-                            <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                                <h4 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-1.5"><Volume2 size={14} /> Preview</h4>
-                                <audio controls className="w-full" key={`custom-${previewKey}-${data.music_url}`} src={data.music_url}></audio>
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+                                <div className="flex items-center justify-between border-b border-gray-50 pb-2">
+                                    <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                                        <Volume2 size={14} /> Preview {uploadSize && <span className="text-xs font-normal text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full ml-1">Ukuran: {uploadSize}</span>}
+                                    </h4>
+                                    <div className="flex gap-2">
+                                        <button type="button" onClick={() => setCropOpen(!cropOpen)}
+                                            className="text-xs bg-purple-50 text-purple-600 px-2.5 py-1.5 rounded-lg hover:bg-purple-100 transition-all font-semibold">
+                                            {cropOpen ? 'Tutup Potong' : 'Potong Musik'}
+                                        </button>
+                                        <button type="button" onClick={handleCompress} disabled={compressing}
+                                            className="text-xs bg-emerald-50 text-emerald-600 px-2.5 py-1.5 rounded-lg hover:bg-emerald-100 transition-all font-semibold disabled:opacity-50">
+                                            {compressing ? 'Mengompres...' : 'Kompres File'}
+                                        </button>
+                                    </div>
+                                </div>
+                                <audio controls className="w-full" key={`custom-${previewKey}-${data.music_url}`} src={data.music_url}
+                                    onLoadedMetadata={(e) => {
+                                        const dur = Math.round(e.target.duration);
+                                        setAudioDuration(dur);
+                                        setCropEnd(prev => prev > dur || prev === 60 ? dur : prev);
+                                    }}></audio>
+
+                                {cropOpen && (
+                                    <div className="bg-[#faf9f6] rounded-xl p-4 border border-[#e8e5e0] space-y-3 animate-[fadeIn_0.2s_ease-out]">
+                                        <div className="text-xs font-bold text-gray-700">Tentukan Rentang Potong (Total: {audioDuration} detik)</div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Mulai (Detik)</label>
+                                                <input type="number" min="0" max={cropEnd - 1} value={cropStart}
+                                                    onChange={e => setCropStart(Math.max(0, parseInt(e.target.value) || 0))}
+                                                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Selesai (Detik)</label>
+                                                <input type="number" min={cropStart + 1} max={audioDuration} value={cropEnd}
+                                                    onChange={e => setCropEnd(Math.min(audioDuration, parseInt(e.target.value) || audioDuration))}
+                                                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs" />
+                                            </div>
+                                        </div>
+                                        <div className="text-[10px] text-gray-400">Pilih durasi musik yang diinginkan (misal detik ke 10 hingga 80). Ini akan memotong berkas fisik di server dan memperkecil ukurannya secara signifikan.</div>
+                                        <button type="button" onClick={handleCrop} disabled={cropping}
+                                            className="w-full py-2 bg-purple-600 text-white rounded-lg text-xs font-semibold hover:bg-purple-700 disabled:opacity-50">
+                                            {cropping ? 'Memproses Potong...' : 'Terapkan Potongan'}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
