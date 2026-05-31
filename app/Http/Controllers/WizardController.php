@@ -265,16 +265,28 @@ class WizardController extends Controller
 
         // Assign Free plan if no subscription
         if (!$invitation->activeSubscription) {
-            $freePlan = SubscriptionPlan::where('slug', 'free')->first();
-            if ($freePlan) {
-                Subscription::create([
-                    'user_id' => $user->id,
-                    'plan_id' => $freePlan->id,
-                    'invitation_id' => $invitation->id,
-                    'status' => 'active',
-                    'starts_at' => now(),
-                    'expires_at' => null,
-                ]);
+            // Check if the user has an active direct subscription (invitation_id = null)
+            $directSub = Subscription::where('user_id', $user->id)
+                ->whereNull('invitation_id')
+                ->where('status', 'active')
+                ->latest()
+                ->first();
+
+            if ($directSub) {
+                // Link the user's direct subscription to this new invitation!
+                $directSub->update(['invitation_id' => $invitation->id]);
+            } else {
+                $freePlan = SubscriptionPlan::where('slug', 'free')->first();
+                if ($freePlan) {
+                    Subscription::create([
+                        'user_id' => $user->id,
+                        'plan_id' => $freePlan->id,
+                        'invitation_id' => $invitation->id,
+                        'status' => 'active',
+                        'starts_at' => now(),
+                        'expires_at' => null,
+                    ]);
+                }
             }
         }
 

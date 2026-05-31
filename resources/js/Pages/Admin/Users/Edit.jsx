@@ -62,7 +62,7 @@ export default function Edit({ user, plans }) {
     const handleResetPassword = (e) => {
         e.preventDefault();
         setPwProcessing(true);
-        router.post(route('super-admin.users.resetPassword', user.id), pw, {
+        router.post(`/super-admin/users/${user.id}/reset-password`, pw, {
             preserveScroll: true,
             onSuccess: () => { setPw({ password: '', password_confirmation: '' }); setPwMsg('Password berhasil direset!'); },
             onError: (errs) => { setPwMsg('' + Object.values(errs).flat().join(', ')); },
@@ -77,7 +77,7 @@ export default function Edit({ user, plans }) {
 
     const handleChangePlan = () => {
         setPlanProcessing(true);
-        router.post(route('super-admin.users.changePlan', user.id), { 
+        router.post(`/super-admin/users/${user.id}/change-plan`, { 
             plan_id: selectedPlan,
             invitation_id: selectedInvId
         }, {
@@ -95,7 +95,7 @@ export default function Edit({ user, plans }) {
 
     const handleExtend = () => {
         setExtProcessing(true);
-        router.post(route('super-admin.users.extendSubscription', user.id), { 
+        router.post(`/super-admin/users/${user.id}/extend-subscription`, { 
             expires_at: expiresAt,
             invitation_id: selectedInvId
         }, {
