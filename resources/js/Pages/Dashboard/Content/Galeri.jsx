@@ -490,12 +490,41 @@ export default function Galeri({
         setDragStart({ x: e.clientX, y: e.clientY, posX: posX, posY: posY });
     };
 
+    const handleTouchStart = (e) => {
+        if (e.touches.length !== 1) return;
+        setIsDragging(true);
+        setDragStart({
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY,
+            posX: posX,
+            posY: posY
+        });
+    };
+
     const handleMouseMove = (e) => {
         if (!isDragging) return;
         const dx = e.clientX - dragStart.x;
         const dy = e.clientY - dragStart.y;
         
         // Multiplier controls drag speed sensitivity inside the container
+        let newX = dragStart.posX - Math.round(dx / 2.5);
+        let newY = dragStart.posY - Math.round(dy / 2.5);
+        
+        newX = Math.max(0, Math.min(100, newX));
+        newY = Math.max(0, Math.min(100, newY));
+        
+        setPosX(newX);
+        setPosY(newY);
+    };
+
+    const handleTouchMove = (e) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        if (e.cancelable) {
+            e.preventDefault();
+        }
+        const dx = e.touches[0].clientX - dragStart.x;
+        const dy = e.touches[0].clientY - dragStart.y;
+        
         let newX = dragStart.posX - Math.round(dx / 2.5);
         let newY = dragStart.posY - Math.round(dy / 2.5);
         
@@ -514,10 +543,14 @@ export default function Galeri({
         if (isDragging) {
             window.addEventListener('mousemove', handleMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
+            window.addEventListener('touchmove', handleTouchMove, { passive: false });
+            window.addEventListener('touchend', handleMouseUp);
         }
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', handleMouseUp);
         };
     }, [isDragging, dragStart]);
 
@@ -1218,7 +1251,9 @@ export default function Galeri({
                                             <div 
                                                 ref={previewContainerRef}
                                                 onMouseDown={handleMouseDown}
+                                                onTouchStart={handleTouchStart}
                                                 className="w-36 h-36 rounded-full overflow-hidden border-4 border-orange-100 bg-gray-200 relative shadow-inner cursor-move select-none"
+                                                style={{ touchAction: 'none' }}
                                                 title="Geser langsung gambar di dalam lingkaran untuk reposisi"
                                             >
                                                 <img 
@@ -1240,7 +1275,9 @@ export default function Galeri({
                                             <div 
                                                 ref={previewContainerRef}
                                                 onMouseDown={handleMouseDown}
+                                                onTouchStart={handleTouchStart}
                                                 className="w-48 h-80 rounded-[2.2rem] overflow-hidden border-[8px] border-gray-800 bg-gray-200 relative shadow-2xl cursor-move select-none flex items-center justify-center"
+                                                style={{ touchAction: 'none' }}
                                                 title="Geser langsung gambar di dalam bingkai HP untuk reposisi"
                                             >
                                                 {/* Simulated camera notch / Dynamic Island inside crop mask */}
