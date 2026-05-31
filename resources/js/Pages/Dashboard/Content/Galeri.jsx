@@ -64,6 +64,8 @@ export default function Galeri({
     const [savingPosition, setSavingPosition] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0, posX: 50, posY: 50 });
+    const [isPinching, setIsPinching] = useState(false);
+    const [pinchStart, setPinchStart] = useState({ distance: 0, zoom: 1.0 });
     const previewContainerRef = useRef(null);
 
     // Sync state when props change
@@ -491,14 +493,27 @@ export default function Galeri({
     };
 
     const handleTouchStart = (e) => {
-        if (e.touches.length !== 1) return;
-        setIsDragging(true);
-        setDragStart({
-            x: e.touches[0].clientX,
-            y: e.touches[0].clientY,
-            posX: posX,
-            posY: posY
-        });
+        if (e.touches.length === 1) {
+            setIsDragging(true);
+            setIsPinching(false);
+            setDragStart({
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY,
+                posX: posX,
+                posY: posY
+            });
+        } else if (e.touches.length === 2) {
+            setIsDragging(false);
+            setIsPinching(true);
+            const dist = Math.sqrt(
+                Math.pow(e.touches[0].clientX - e.touches[1].clientX, 2) +
+                Math.pow(e.touches[0].clientY - e.touches[1].clientY, 2)
+            );
+            setPinchStart({
+                distance: dist,
+                zoom: zoom
+            });
+        }
     };
 
     const handleMouseMove = (e) => {
@@ -518,41 +533,78 @@ export default function Galeri({
     };
 
     const handleTouchMove = (e) => {
-        if (!isDragging || e.touches.length !== 1) return;
-        if (e.cancelable) {
-            e.preventDefault();
+        if (isPinching && e.touches.length === 2) {
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+            const dist = Math.sqrt(
+                Math.pow(e.touches[0].clientX - e.touches[1].clientX, 2) +
+                Math.pow(e.touches[0].clientY - e.touches[1].clientY, 2)
+            );
+            
+            if (pinchStart.distance > 0) {
+                const factor = dist / pinchStart.distance;
+                let newZoom = pinchStart.zoom * factor;
+                newZoom = Math.max(1.0, Math.min(3.0, newZoom));
+                newZoom = Math.round(newZoom * 100) / 100;
+                setZoom(newZoom);
+            }
+        } else if (isDragging && e.touches.length === 1) {
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+            const dx = e.touches[0].clientX - dragStart.x;
+            const dy = e.touches[0].clientY - dragStart.y;
+            
+            let newX = dragStart.posX - Math.round(dx / 2.5);
+            let newY = dragStart.posY - Math.round(dy / 2.5);
+            
+            newX = Math.max(0, Math.min(100, newX));
+            newY = Math.max(0, Math.min(100, newY));
+            
+            setPosX(newX);
+            setPosY(newY);
         }
-        const dx = e.touches[0].clientX - dragStart.x;
-        const dy = e.touches[0].clientY - dragStart.y;
-        
-        let newX = dragStart.posX - Math.round(dx / 2.5);
-        let newY = dragStart.posY - Math.round(dy / 2.5);
-        
-        newX = Math.max(0, Math.min(100, newX));
-        newY = Math.max(0, Math.min(100, newY));
-        
-        setPosX(newX);
-        setPosY(newY);
     };
 
     const handleMouseUp = () => {
         setIsDragging(false);
+        setIsPinching(false);
+    };
+
+    const handleTouchEnd = (e) => {
+        if (e.touches.length === 0) {
+            setIsDragging(false);
+            setIsPinching(false);
+        } else if (e.touches.length === 1) {
+            // Smoothly switch back to dragging with the remaining finger
+            setIsPinching(false);
+            setIsDragging(true);
+            setDragStart({
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY,
+                posX: posX,
+                posY: posY
+            });
+        }
     };
 
     useEffect(() => {
-        if (isDragging) {
+        if (isDragging || isPinching) {
             window.addEventListener('mousemove', handleMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
             window.addEventListener('touchmove', handleTouchMove, { passive: false });
-            window.addEventListener('touchend', handleMouseUp);
+            window.addEventListener('touchend', handleTouchEnd);
+            window.addEventListener('touchcancel', handleMouseUp);
         }
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
             window.removeEventListener('touchmove', handleTouchMove);
-            window.removeEventListener('touchend', handleMouseUp);
+            window.removeEventListener('touchend', handleTouchEnd);
+            window.removeEventListener('touchcancel', handleMouseUp);
         };
-    }, [isDragging, dragStart]);
+    }, [isDragging, isPinching, dragStart, pinchStart, posX, posY]);
 
     // Handle Asset Deletion
     const handleDeleteAsset = async () => {

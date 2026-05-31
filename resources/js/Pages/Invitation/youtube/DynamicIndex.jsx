@@ -154,13 +154,14 @@ function Reveal({ children, className = '', delay = 0 }) {
 }
 
 /* ─── Countdown Component ─── */
-function CountdownTimer({ targetDate }) {
+function CountdownTimer({ targetDate, startTime }) {
     const { t } = useTranslation();
     const [cd, setCd] = useState({ d: 0, h: 0, m: 0, s: 0 });
     useEffect(() => {
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
-        const target = new Date(`${ds}T08:00:00`);
+        const timeStr = startTime ? String(startTime).substring(0, 5) : '08:00';
+        const target = new Date(`${ds}T${timeStr}:00`);
         if (isNaN(target.getTime())) return;
         const tick = () => {
             const diff = target - new Date();
@@ -173,7 +174,7 @@ function CountdownTimer({ targetDate }) {
             });
         };
         tick(); const iv = setInterval(tick, 1000); return () => clearInterval(iv);
-    }, [targetDate]);
+    }, [targetDate, startTime]);
 
     return (
         <div className="yt-countdown">
@@ -542,7 +543,15 @@ function BrideGroomSection({ invitation, brideGrooms, events, id, galleries }) {
             <Reveal className="yt-shorts-card" delay={150}>
                 {globalShowPhotos && person.photo ? (
                     <div className="yt-shorts-card__media">
-                        <img src={photo} alt={person.full_name} className="yt-shorts-card__img" />
+                        <img 
+                            src={photo} 
+                            alt={person.full_name} 
+                            className="yt-shorts-card__img" 
+                            style={{
+                                objectPosition: `${person.photo_position_x ?? 50}% ${person.photo_position_y ?? 50}%`,
+                                transform: `scale(${person.photo_zoom ?? 1.0})`,
+                            }}
+                        />
                     </div>
                 ) : (
                     <div className="yt-shorts-card__media yt-shorts-card__media--fallback" />
@@ -644,7 +653,7 @@ function BrideGroomSection({ invitation, brideGrooms, events, id, galleries }) {
                                     </div>
                                 );
                             })()}
-                            <CountdownTimer targetDate={primaryEvent.event_date} />
+                            <CountdownTimer targetDate={primaryEvent.event_date} startTime={primaryEvent.start_time} />
                             
                             <button type="button" onClick={() => window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Pernikahan ' + titleText)}&dates=${String(primaryEvent.event_date).replace(/-/g,'')}T080000/${String(primaryEvent.event_date).replace(/-/g,'')}T120000`, '_blank')} className="yt-premiere-reminder-btn" style={{ marginTop: '16px', backgroundColor: 'var(--yt-hover-bg)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--yt-white)', borderRadius: '18px', padding: '8px 16px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>

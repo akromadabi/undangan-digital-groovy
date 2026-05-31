@@ -344,7 +344,14 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, locale
                 
                 <div className="candy-avatar-frame">
                     {celebrant.photo && globalShowPhotos ? (
-                        <img src={getStorageUrl(celebrant.photo)} alt={mainName} />
+                        <img 
+                            src={getStorageUrl(celebrant.photo)} 
+                            alt={mainName} 
+                            style={{
+                                objectPosition: `${celebrant.photo_position_x ?? 50}% ${celebrant.photo_position_y ?? 50}%`,
+                                transform: `scale(${celebrant.photo_zoom ?? 1.0})`,
+                            }}
+                        />
                     ) : (
                         <span className="candy-avatar-fallback">
                             {initials}
@@ -508,7 +515,15 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
             <div className="candy-panel text-center flex-1 max-w-[280px] w-full">
                 <div className="candy-avatar-frame my-6 mx-auto">
                     {globalShowPhotos && person.photo ? (
-                        <img src={getStorageUrl(person.photo)} alt={person.full_name} className="w-full h-full object-cover" />
+                        <img 
+                            src={getStorageUrl(person.photo)} 
+                            alt={person.full_name} 
+                            className="w-full h-full object-cover" 
+                            style={{
+                                objectPosition: `${person.photo_position_x ?? 50}% ${person.photo_position_y ?? 50}%`,
+                                transform: `scale(${person.photo_zoom ?? 1.0})`,
+                            }}
+                        />
                     ) : (
                         <div className="candy-avatar-fallback">{persInitials}</div>
                     )}
@@ -616,14 +631,15 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
 /* ═══════════════════════════════════════
    COUNTDOWN TIMER
    ═══════════════════════════════════════ */
-function CountdownTimer({ targetDate }) {
+function CountdownTimer({ targetDate, startTime }) {
     const { t } = useTranslation();
     const [cd, setCd] = useState({ d: 0, h: 0, m: 0, s: 0 });
     
     useEffect(() => {
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
-        const target = new Date(`${ds}T11:00:00`); // Standard Sweet Party start time
+        const timeStr = startTime ? String(startTime).substring(0, 5) : '11:00';
+        const target = new Date(`${ds}T${timeStr}:00`); // Standard Sweet Party start time
         if (isNaN(target.getTime())) return;
   
         const update = () => {
@@ -643,7 +659,7 @@ function CountdownTimer({ targetDate }) {
         update();
         const intId = setInterval(update, 1000);
         return () => clearInterval(intId);
-    }, [targetDate]);
+    }, [targetDate, startTime]);
 
     return (
         <div className="candy-countdown-grid">
@@ -737,7 +753,7 @@ function EventSection({ events, invitation, id, locale }) {
                 {showCountdownInEvent && (
                     <Reveal className="candy-panel" style={{ padding: '16px 20px', marginBottom: '20px', textAlign: 'center' }}>
                         <span className="text-xs font-bold text-rose-500 uppercase tracking-widest block mb-2">HITUNG MUNDUR ACARA</span>
-                        <CountdownTimer targetDate={primaryEvent.event_date} />
+                        <CountdownTimer targetDate={primaryEvent.event_date} startTime={primaryEvent.start_time} />
                     </Reveal>
                 )}
 
