@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
-import { Eye, Pencil, UserCheck } from 'lucide-react';
+import { Eye, Pencil, UserCheck, Trash2 } from 'lucide-react';
 
 export default function Index({ users, filters }) {
     const { auth, adminRoutePrefix } = usePage().props;
@@ -8,6 +9,20 @@ export default function Index({ users, filters }) {
     const pagination = users?.links;
 
     const isSuperAdmin = auth.user.role === 'super_admin';
+
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const handleDelete = (id) => {
+        if (confirmDeleteId === id) {
+            router.delete(`${adminRoutePrefix}/users/${id}`, {
+                onSuccess: () => { setConfirmDeleteId(null); },
+                onError: (err) => { console.error('Delete error:', err); setConfirmDeleteId(null); },
+            });
+        } else {
+            setConfirmDeleteId(id);
+            setTimeout(() => setConfirmDeleteId(prev => prev === id ? null : prev), 3000);
+        }
+    };
 
     return (
         <DynamicAdminLayout title="Manajemen User">
@@ -23,7 +38,7 @@ export default function Index({ users, filters }) {
                 {/* Table */}
                 <div className="bg-white rounded-2xl border border-[#e8e5e0] overflow-hidden">
                     <div className="overflow-x-auto w-full">
-                        <table className={`w-full text-sm ${isSuperAdmin ? 'min-w-[700px]' : 'min-w-[550px]'} sm:min-w-full`}>
+                        <table className={`w-full text-sm ${isSuperAdmin ? 'min-w-[750px]' : 'min-w-[550px]'} sm:min-w-full`}>
                             <thead className="bg-[#f8f7f4]">
                                 <tr>
                                     <th className="text-left px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide">User</th>
@@ -106,9 +121,20 @@ export default function Index({ users, filters }) {
                                                     <UserCheck size={15} />
                                                 </Link>
                                                 {isSuperAdmin && (
-                                                    <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="p-2 bg-[#fdfdfd] hover:bg-amber-50 text-amber-600 hover:text-amber-700 rounded-xl transition-all inline-flex items-center justify-center border border-amber-100 shadow-sm" title="Edit User">
-                                                        <Pencil size={15} />
-                                                    </Link>
+                                                    <>
+                                                        <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="p-2 bg-[#fdfdfd] hover:bg-amber-50 text-amber-600 hover:text-amber-700 rounded-xl transition-all inline-flex items-center justify-center border border-amber-100 shadow-sm" title="Edit User">
+                                                            <Pencil size={15} />
+                                                        </Link>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => handleDelete(user.id)}
+                                                            className={`p-2 rounded-xl transition-all inline-flex items-center justify-center border shadow-sm ${confirmDeleteId === user.id ? 'bg-red-500 hover:bg-red-600 text-white border-red-500 animate-pulse' : 'bg-[#fdfdfd] hover:bg-red-50 text-red-500 border-red-100'}`}
+                                                            title={confirmDeleteId === user.id ? 'Klik lagi untuk konfirmasi hapus' : 'Hapus User'}
+                                                        >
+                                                            <Trash2 size={15} />
+                                                            {confirmDeleteId === user.id && <span className="text-[10px] font-bold ml-1">Yakin?</span>}
+                                                        </button>
+                                                    </>
                                                 )}
                                             </div>
                                         </td>

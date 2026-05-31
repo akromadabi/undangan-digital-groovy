@@ -881,43 +881,49 @@ export default function MusicPage({ tracks, categories: serverCategories = [], c
                                     {customSongs.map((song, i) => {
                                         const isPlaying = playingId === `custom-${i}`;
                                         return (
-                                            <div key={i} className="px-6 py-4 flex items-center gap-4 hover:bg-[#faf9f6] transition-colors">
-                                                {/* Play preview */}
-                                                <button 
-                                                    onClick={() => togglePlay(`custom-${i}`, song.music_url)}
-                                                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${isPlaying ? 'bg-[#E5654B] text-white scale-110 shadow-md' : 'bg-[#f5f3f0] text-[#999] hover:bg-[#E5654B] hover:text-white'}`}
-                                                >
-                                                    {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
-                                                </button>
-                                                
-                                                {/* Info */}
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="text-sm font-bold text-[#1a1a1a] truncate">
-                                                        {song.music_url.split('/').pop()}
-                                                    </div>
-                                                    <div className="text-xs text-[#999] flex items-center gap-1.5 mt-0.5">
-                                                        <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded font-semibold text-[10px]">
-                                                            {song.music_url.includes('youtube_') ? 'YouTube Convert' : 'Custom Upload'}
-                                                        </span>
-                                                        <span>&bull;</span>
-                                                        <span>Digunakan di: <strong className="text-gray-700">{song.invitation_title}</strong></span>
+                                            <div key={i} className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
+                                                {/* Left Part: Play + Song Info */}
+                                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                    {/* Play preview */}
+                                                    <button 
+                                                        onClick={() => togglePlay(`custom-${i}`, song.music_url)}
+                                                        className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${isPlaying ? 'bg-[#E5654B] text-white scale-110 shadow-md' : 'bg-[#f5f3f0] text-[#999] hover:bg-[#E5654B] hover:text-white'}`}
+                                                    >
+                                                        {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+                                                    </button>
+                                                    
+                                                    {/* Info */}
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="text-sm font-bold text-[#1a1a1a] truncate" title={song.music_url.split('/').pop()}>
+                                                            {song.music_url.split('/').pop()}
+                                                        </div>
+                                                        <div className="text-xs text-[#999] flex flex-wrap items-center gap-1.5 mt-1">
+                                                            <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded font-semibold text-[10px] whitespace-nowrap">
+                                                                {song.music_url.includes('youtube_') ? 'YouTube Convert' : 'Custom Upload'}
+                                                            </span>
+                                                            <span className="hidden xs:inline text-[#ccc]">&bull;</span>
+                                                            <span className="truncate">Digunakan di: <strong className="text-gray-700">{song.invitation_title}</strong></span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 
-                                                {/* Use Count Badge */}
-                                                <div className="text-right flex-shrink-0">
-                                                    <div className="text-xs font-bold text-[#E5654B]">{song.use_count} Pengguna</div>
-                                                    <div className="text-[10px] text-gray-400">Total Undangan</div>
+                                                {/* Right Part: Stats + Action Button */}
+                                                <div className="flex items-center justify-between sm:justify-end gap-4 border-t border-[#f5f3f0] pt-3 sm:border-0 sm:pt-0">
+                                                    {/* Use Count Badge */}
+                                                    <div className="text-left sm:text-right">
+                                                        <div className="text-xs font-bold text-[#E5654B] whitespace-nowrap">{song.use_count} Pengguna</div>
+                                                        <div className="text-[10px] text-gray-400 whitespace-nowrap">Total Undangan</div>
+                                                    </div>
+                                                    
+                                                    {/* Claim trigger */}
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => handleOpenClaim(song)}
+                                                        className="px-4 py-2 bg-[#ecfdf5] text-emerald-600 border border-emerald-200 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all shadow-sm flex items-center gap-1 whitespace-nowrap"
+                                                    >
+                                                        <Plus size={12} /> Tarik ke Koleksi
+                                                    </button>
                                                 </div>
-                                                
-                                                {/* Claim trigger */}
-                                                <button 
-                                                    type="button"
-                                                    onClick={() => handleOpenClaim(song)}
-                                                    className="px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all shadow-sm flex items-center gap-1"
-                                                >
-                                                    <Plus size={12} /> Tarik ke Koleksi
-                                                </button>
                                             </div>
                                         );
                                     })}

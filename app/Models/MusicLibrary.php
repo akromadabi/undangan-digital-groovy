@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\LogsActivity;
+
 class MusicLibrary extends Model
 {
+    use LogsActivity;
+
     protected $table = 'music_library';
 
     protected $fillable = [

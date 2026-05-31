@@ -41,7 +41,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import FreeInvitationBadge from './Components/FreeInvitationBadge';
 
-function GlobalImageCropSynchronizer({ invitation, brideGrooms }) {
+function GlobalImageCropSynchronizer({ invitation, brideGrooms, galleries, events, loveStories }) {
     React.useEffect(() => {
         if (!invitation) return;
 
@@ -90,6 +90,39 @@ function GlobalImageCropSynchronizer({ invitation, brideGrooms }) {
                 zoom: Number(bride.photo_zoom ?? 1.0)
             } : null,
         };
+
+        // Collect all user-uploaded photos to apply auto-centering & cover fitting
+        const userPhotoUrls = new Set();
+        if (Array.isArray(galleries)) {
+            galleries.forEach(g => {
+                const u = normalizeUrl(g.image_url || g.image);
+                if (u) userPhotoUrls.add(u);
+            });
+        }
+        if (Array.isArray(events)) {
+            events.forEach(e => {
+                const u = normalizeUrl(e.image || e.image_url);
+                if (u) userPhotoUrls.add(u);
+            });
+        }
+        if (Array.isArray(loveStories)) {
+            loveStories.forEach(l => {
+                const u = normalizeUrl(l.image || l.image_url);
+                if (u) userPhotoUrls.add(u);
+            });
+        }
+        if (invitation.cover_image) {
+            String(invitation.cover_image).split(',').forEach(imgUrl => {
+                const u = normalizeUrl(imgUrl);
+                if (u) userPhotoUrls.add(u);
+            });
+        }
+        if (invitation.opening_image) {
+            String(invitation.opening_image).split(',').forEach(imgUrl => {
+                const u = normalizeUrl(imgUrl);
+                if (u) userPhotoUrls.add(u);
+            });
+        }
 
         const hasWord = (str, word) => {
             if (!str || !word) return false;
@@ -190,16 +223,23 @@ function GlobalImageCropSynchronizer({ invitation, brideGrooms }) {
 
                 if (settings) {
                     const { posX, posY, zoom } = settings;
-                    if (zoom > 1.0 || posX !== 50 || posY !== 50) {
-                        img.style.objectFit = 'cover';
-                        img.style.objectPosition = `${posX}% ${posY}%`;
-                        img.style.transform = `scale(${zoom}) translate(${(50 - posX) * (1 - 1 / zoom)}%, ${(50 - posY) * (1 - 1 / zoom)}%)`;
-                        img.style.transformOrigin = 'center';
+                    // Force cover and alignment offsets even if zoom is 1.0 and positions are 50%
+                    img.style.objectFit = 'cover';
+                    img.style.objectPosition = `${posX}% ${posY}%`;
+                    img.style.transform = `scale(${zoom}) translate(${(50 - posX) * (1 - 1 / zoom)}%, ${(50 - posY) * (1 - 1 / zoom)}%)`;
+                    img.style.transformOrigin = 'center';
 
-                        const parent = img.parentElement;
-                        if (parent) {
-                            parent.style.overflow = 'hidden';
-                        }
+                    const parent = img.parentElement;
+                    if (parent) {
+                        parent.style.overflow = 'hidden';
+                    }
+                } else if (userPhotoUrls.has(normalized)) {
+                    // For all other user-uploaded photos (galleries, events, love stories, etc.)
+                    img.style.objectFit = 'cover';
+                    img.style.objectPosition = 'center';
+                    const parent = img.parentElement;
+                    if (parent) {
+                        parent.style.overflow = 'hidden';
                     }
                 }
             });
@@ -224,7 +264,7 @@ function GlobalImageCropSynchronizer({ invitation, brideGrooms }) {
             observer.disconnect();
             window.removeEventListener('resize', applyCrops);
         };
-    }, [invitation, brideGrooms]);
+    }, [invitation, brideGrooms, galleries, events, loveStories]);
 
     return null;
 }
@@ -259,6 +299,9 @@ createInertiaApp({
                         <GlobalImageCropSynchronizer 
                             invitation={props.invitation} 
                             brideGrooms={props.brideGrooms} 
+                            galleries={props.galleries}
+                            events={props.events}
+                            loveStories={props.loveStories}
                         />
                     </>
                 );

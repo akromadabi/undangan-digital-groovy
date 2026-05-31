@@ -427,6 +427,10 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::get('/withdrawals', [\App\Http\Controllers\SuperAdmin\WithdrawalManagementController::class, 'index'])->name('withdrawals.index');
     Route::post('/withdrawals/{id}', [\App\Http\Controllers\SuperAdmin\WithdrawalManagementController::class, 'updateStatus'])->name('withdrawals.update');
 
+    // Activity Logs
+    Route::get('/logs', [\App\Http\Controllers\SuperAdmin\SuperAdminActivityLogController::class, 'index'])->name('logs.index');
+    Route::post('/logs/{id}/restore', [\App\Http\Controllers\SuperAdmin\SuperAdminActivityLogController::class, 'restore'])->name('logs.restore');
+
     // Impersonation
     Route::post('/impersonate/user/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateUser'])->name('impersonate.user');
     Route::post('/impersonate/reseller/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateReseller'])->name('impersonate.reseller');

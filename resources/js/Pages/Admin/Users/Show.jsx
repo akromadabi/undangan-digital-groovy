@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 
@@ -29,6 +29,22 @@ export default function Show({ user, invitationsData = [], siteUrl }) {
     const isSuperAdmin = auth.user.role === 'super_admin';
     const activeData = invitationsData.find(item => item.invitation?.id === selectedInvId) || invitationsData[0];
 
+    const [confirmDelete, setConfirmDelete] = useState(false);
+
+    const handleDelete = () => {
+        if (confirmDelete) {
+            router.delete(`${adminRoutePrefix}/users/${user.id}`, {
+                onError: (err) => {
+                    console.error('Delete error:', err);
+                    setConfirmDelete(false);
+                }
+            });
+        } else {
+            setConfirmDelete(true);
+            setTimeout(() => setConfirmDelete(false), 3000);
+        }
+    };
+
     return (
         <DynamicAdminLayout title={`Detail: ${user.name}`}>
             <Head title={`Admin - ${user.name}`} />
@@ -36,9 +52,18 @@ export default function Show({ user, invitationsData = [], siteUrl }) {
                 <div className="flex items-center justify-between">
                     <Link href={`${adminRoutePrefix}/users`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali ke Users</Link>
                     {isSuperAdmin && (
-                        <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="px-4 py-2 bg-[#E5654B] hover:bg-[#c94f3a] text-white text-sm rounded-xl font-medium transition-colors shadow-sm">
-                            Edit User & Undangan
-                        </Link>
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm ${confirmDelete ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-100'}`}
+                            >
+                                {confirmDelete ? 'Klik Lagi untuk Hapus' : 'Hapus User'}
+                            </button>
+                            <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="px-4 py-2 bg-[#E5654B] hover:bg-[#c94f3a] text-white text-sm rounded-xl font-medium transition-colors shadow-sm">
+                                Edit User & Undangan
+                            </Link>
+                        </div>
                     )}
                 </div>
 

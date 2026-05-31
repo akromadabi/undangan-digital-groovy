@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\LogsActivity;
+
 class Theme extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'name',
         'slug',
