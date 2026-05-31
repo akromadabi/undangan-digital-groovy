@@ -460,10 +460,11 @@ export default function Form({ theme, plans = [], categories = [] }) {
             ...data,
             color_scheme: finalColorScheme,
             font_config: finalFontConfig,
+            ...(isEdit ? { _method: 'PUT' } : {})
         }));
         
         if (isEdit) { 
-            put(`${adminRoutePrefix}/themes/${theme.id}`); 
+            post(`${adminRoutePrefix}/themes/${theme.id}`); 
         } else { 
             post(`${adminRoutePrefix}/themes`); 
         }
