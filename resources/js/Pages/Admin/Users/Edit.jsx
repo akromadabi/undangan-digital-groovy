@@ -310,24 +310,23 @@ export default function Edit({ user, plans }) {
                                             <span>Tipe: <strong className="text-gray-700">{card.type}</strong></span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${card.is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-600 border border-red-100'}`}>
+                                    <div className="flex items-center gap-4 bg-[#fcfbfa] border border-[#e8e5e0]/60 px-4 py-2 rounded-xl">
+                                        <span className={`text-xs font-bold transition-colors ${card.is_active ? 'text-emerald-600' : 'text-gray-400'}`}>
                                             {card.is_active ? 'Aktif' : 'Tidak Aktif'}
                                         </span>
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                if (confirm(`Ubah status keaktifan kartu ucapan "${card.title || 'Tanpa Judul'}"?`)) {
-                                                    router.post(`/super-admin/greeting-cards/${card.id}/toggle-active`, {}, {
-                                                        preserveScroll: true
-                                                    });
-                                                }
+                                                router.post(`/super-admin/greeting-cards/${card.id}/toggle-active`, {}, {
+                                                    preserveScroll: true
+                                                });
                                             }}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm border transition-all ${card.is_active 
-                                                ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100' 
-                                                : 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'}`}
+                                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none ${card.is_active ? 'bg-emerald-500' : 'bg-gray-200'}`}
+                                            style={{ padding: '2px' }}
                                         >
-                                            {card.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                                            <span
+                                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${card.is_active ? 'translate-x-5' : 'translate-x-0'}`}
+                                            />
                                         </button>
                                     </div>
                                 </div>
