@@ -48,18 +48,18 @@ const bottomNavItems = [
 
 // Slide-up menu items (inside center Menu button sheet)
 const menuSheetItems = [
-    { label: 'Undangan Saya', href: '/invitations', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Sambutan', href: '/content/teks-sambutan', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Mempelai', href: '/content/mempelai', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v-1', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Acara', href: '/content/acara', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Galeri', href: '/content/galeri', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Kisah', href: '/content/kisah', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Amplop', href: '/content/bank', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Musik', href: '/settings/musik', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Filter IG', href: '/settings/instagram-filter', icon: 'M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316A2.192 2.192 0 0014.512 3.75H9.488c-.69 0-1.328.327-1.748.883l-.823 1.316zM12 9.75a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5zm0 1.5a2.25 2.25 0 110 4.5 2.25 2.25 0 010-4.5z', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Kartu Ucapan', href: '/greeting-card', icon: 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75', color: 'bg-pink-50 text-pink-600' },
-    { label: 'Undangan AR', href: '/settings/ar', icon: 'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12', color: 'bg-orange-50 text-[#E5654B]' },
-    { label: 'Upgrade', href: '/pricing', icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'bg-orange-50 text-[#E5654B]' },
+    { label: 'Undangan Saya', href: '/invitations', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', color: 'bg-orange-50 text-[#E5654B]', feature: null },
+    { label: 'Sambutan', href: '/content/teks-sambutan', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', color: 'bg-orange-50 text-[#E5654B]', feature: 'opening' },
+    { label: 'Mempelai', href: '/content/mempelai', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v-1', color: 'bg-orange-50 text-[#E5654B]', feature: 'bride_groom' },
+    { label: 'Acara', href: '/content/acara', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', color: 'bg-orange-50 text-[#E5654B]', feature: 'event' },
+    { label: 'Galeri', href: '/content/galeri', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', color: 'bg-orange-50 text-[#E5654B]', feature: 'gallery' },
+    { label: 'Kisah', href: '/content/kisah', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z', color: 'bg-orange-50 text-[#E5654B]', feature: 'love_story' },
+    { label: 'Amplop', href: '/content/bank', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', color: 'bg-orange-50 text-[#E5654B]', feature: 'bank' },
+    { label: 'Musik', href: '/settings/musik', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3', color: 'bg-orange-50 text-[#E5654B]', feature: 'music' },
+    { label: 'Filter IG', href: '/settings/instagram-filter', icon: 'M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316A2.192 2.192 0 0014.512 3.75H9.488c-.69 0-1.328.327-1.748.883l-.823 1.316zM12 9.75a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5zm0 1.5a2.25 2.25 0 110 4.5 2.25 2.25 0 010-4.5z', color: 'bg-orange-50 text-[#E5654B]', feature: 'instagram_filter' },
+    { label: 'Kartu Ucapan', href: '/greeting-card', icon: 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75', color: 'bg-pink-50 text-pink-600', feature: null },
+    { label: 'Undangan AR', href: '/settings/ar', icon: 'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12', color: 'bg-orange-50 text-[#E5654B]', feature: 'qr_code' },
+    { label: 'Upgrade', href: '/pricing', icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'bg-orange-50 text-[#E5654B]', feature: null },
 ];
 
 const SvgIcon = ({ d, className = '' }) => (
@@ -463,30 +463,56 @@ export default function DashboardLayout({ children, title }) {
                         )}
 
                         <div className="grid grid-cols-4 gap-2">
-                            {menuSheetItems.map(item => (
-                                <Link key={item.label} href={item.href} onClick={() => setMenuSheetOpen(false)}
-                                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors ${
-                                        currentPath === item.href || currentPath.startsWith(item.href)
-                                            ? 'bg-[#E5654B]/10 ring-1 ring-[#E5654B]/20'
-                                            : 'hover:bg-gray-50'
-                                    }`}>
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.color}`}>
-                                        <SvgIcon d={item.icon} className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-[10px] font-medium text-gray-600 text-center leading-tight">{getDynamicLabel(item.label)}</span>
-                                </Link>
-                            ))}
+                            {menuSheetItems.map(item => {
+                                const locked = isLocked(item.feature);
+                                return (
+                                    <Link key={item.label} href={locked ? '#' : item.href}
+                                        onClick={
+                                            locked
+                                                ? (e) => { setMenuSheetOpen(false); handleLockedClick(e, getDynamicLabel(item.label)); }
+                                                : () => setMenuSheetOpen(false)
+                                        }
+                                        className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors relative ${
+                                            currentPath === item.href || currentPath.startsWith(item.href)
+                                                ? 'bg-[#E5654B]/10 ring-1 ring-[#E5654B]/20'
+                                                : locked
+                                                    ? 'opacity-65 hover:bg-amber-50/50'
+                                                    : 'hover:bg-gray-50'
+                                        }`}>
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center relative ${locked ? 'bg-gray-100 text-gray-400' : item.color}`}>
+                                            <SvgIcon d={item.icon} className="w-5 h-5" />
+                                            {locked && (
+                                                <div className="absolute -top-1 -right-1 bg-amber-400 text-white rounded-full p-0.5 shadow-sm">
+                                                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <span className={`text-[10px] font-medium text-center leading-tight ${locked ? 'text-gray-400' : 'text-gray-600'}`}>{getDynamicLabel(item.label)}</span>
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </div>
                 </>
             )}
+            {/* Backdrop for mobile upgrade popup */}
+            {upgradePopup && typeof window !== 'undefined' && window.innerWidth < 1024 && (
+                <div className="fixed inset-0 bg-black/45 z-[9998] transition-opacity" onClick={() => setUpgradePopup(null)} />
+            )}
+
             {/* ═══ Fixed Upgrade Popup (for locked sidebar items) ═══ */}
             {upgradePopup && (
                 <div ref={upgradePopupRef}
-                    className="fixed z-[9999] w-60 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 animate-in"
-                    style={{ left: upgradePopup.x, top: upgradePopup.y, transform: 'translateY(-50%)' }}>
+                    className="fixed z-[9999] w-64 bg-white rounded-2xl shadow-2xl border border-gray-150 p-5 animate-in"
+                    style={
+                        typeof window !== 'undefined' && window.innerWidth < 1024
+                            ? { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }
+                            : { left: upgradePopup.x, top: upgradePopup.y, transform: 'translateY(-50%)' }
+                    }>
                     {/* Arrow */}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent border-r-[7px] border-r-white drop-shadow-sm" />
+                    <div className="hidden lg:block absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent border-r-[7px] border-r-white drop-shadow-sm" />
                     <div className="flex items-center gap-2 mb-2.5">
                         <span className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center">
                             <svg className="w-4.5 h-4.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">

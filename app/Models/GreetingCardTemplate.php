@@ -46,7 +46,7 @@ class GreetingCardTemplate extends Model
 
     public function greetingCards()
     {
-        return $this->hasMany(GreetingCard::class, 'template_slug', 'slug');
+        return $this->hasMany(GreetingCard::class, 'template', 'slug');
     }
 
     /**
