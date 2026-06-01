@@ -356,13 +356,13 @@
     object-fit: cover !important;
 }
 
-/* Arched couple photo frames - Luxury overhaul */
+/* Rounded rectangle couple photo frames - Luxury overhaul */
 .sp02-avatar-frame {
     position: relative;
     width: 140px;
     height: 195px;
     margin: 0 auto 20px auto;
-    border-radius: 70px 70px 0 0;
+    border-radius: 24px;
     padding: 3px;
     background: linear-gradient(135deg, var(--sp02-secondary) 0%, var(--sp02-primary) 100%);
     box-shadow: 0 10px 25px rgba(152, 106, 82, 0.15);
@@ -371,17 +371,17 @@
 .sp02-avatar-frame-inner {
     width: 100%;
     height: 100%;
-    border-radius: 67px 67px 0 0;
+    border-radius: 21px;
     overflow: hidden;
     position: relative;
     background: var(--sp02-bg-soft);
 }
 
-/* Fallback Arched Monogram for Mempelai */
+/* Fallback Rounded Rectangle Monogram for Mempelai */
 .sp02-avatar-fallback-arch {
     width: 130px;
     height: 180px;
-    border-radius: 65px 65px 0 0;
+    border-radius: 24px;
     border: 1px solid rgba(152, 106, 82, 0.25);
     display: flex;
     align-items: center;
@@ -762,10 +762,10 @@
     background: linear-gradient(135deg, var(--sp02-accent-dark) 0%, var(--sp02-primary) 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 24px;
-    padding: 24px;
+    padding: 20px 24px;
     color: #ffffff;
     width: 100%;
-    max-width: 380px;
+    max-width: 420px;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
@@ -798,7 +798,7 @@
     justify-content: space-between;
     align-items: center;
     z-index: 2;
-    margin-bottom: 25px;
+    margin-bottom: 12px;
 }
 
 .sp02-bank-card__logo {
@@ -817,7 +817,7 @@
 
 .sp02-bank-card__body {
     z-index: 2;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     text-align: left;
 }
 
@@ -885,7 +885,7 @@
     justify-content: center;
     background: linear-gradient(135deg, var(--sp02-secondary) 0%, var(--sp02-primary) 100%);
     border: 2.5px solid #ffffff;
-    border-radius: 50%;
+    border-radius: 16px;
     width: 68px;
     height: 68px;
     box-shadow: 0 8px 22px rgba(152, 106, 82, 0.22);
@@ -896,6 +896,7 @@
     .sp02-countdown-item {
         width: 74px;
         height: 74px;
+        border-radius: 18px;
     }
 }
 

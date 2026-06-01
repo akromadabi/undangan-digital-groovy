@@ -536,7 +536,6 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos }) {
             <div className="space-y-12 mt-6">
                 <Reveal variant="left" className="w-full flex justify-center">
                     <div className="sp02-mempelai-card w-full flex flex-col items-center">
-                        <img src={ORNAMENTS.cardOrnament} className="sp02-mempelai-card-ornament-tl" alt="" />
                         {showPhotos && groom.photo && (
                             <div className="sp02-avatar-frame mb-4 sp02-breathe">
                                 <div className="sp02-avatar-frame-inner">
@@ -902,7 +901,7 @@ function VideoGallerySection({ invitation, locale }) {
     if (videoItems.length === 0) return null;
 
     return (
-        <div className="max-w-lg mx-auto py-16 px-6">
+        <div className="w-full max-w-md mx-auto py-16 px-4">
             <Reveal>
                 <FlowerSwirl title={locale === 'en' ? 'Video Gallery' : 'Galeri Video'} />
             </Reveal>
@@ -992,7 +991,7 @@ function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
     if (list.length === 0) return null;
 
     return (
-        <div className="max-w-lg mx-auto py-16 px-6">
+        <div className="max-w-lg mx-auto py-16 px-4">
             <Reveal>
                 <FlowerSwirl title={t('nav.hadiah')} />
             </Reveal>
@@ -1014,7 +1013,7 @@ function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
                                 )}
                                 <img src={ORNAMENTS.chip} alt="Chip" className="sp02-bank-card__chip w-10 object-contain select-none" />
                             </div>
-                            <div className="sp02-bank-card__body my-4 z-10 relative text-left">
+                            <div className="sp02-bank-card__body my-2 z-10 relative text-left">
                                 <div className="sp02-bank-card__number text-xl font-bold tracking-widest text-white">{account.account_number}</div>
                                 <div className="sp02-bank-card__holder text-[11px] font-medium tracking-wider text-white/80 uppercase mt-1">{account.account_name}</div>
                             </div>
