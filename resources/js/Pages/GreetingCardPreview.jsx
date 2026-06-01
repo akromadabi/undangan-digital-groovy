@@ -1851,6 +1851,7 @@ function EtherealWhispersFull({ card }) {
     const [dragOffset, setDragOffset] = useState(0);
     const [isDraggingRope, setIsDraggingRope] = useState(false);
     const startYRef = useRef(0);
+    const dragOffsetRef = useRef(0);
     const [curtainActive, setCurtainActive] = useState(false);
     const [curtainOpen, setCurtainOpen] = useState(false);
     const [scrollSubScene, setScrollSubScene] = useState('letter'); // 'letter' | 'scrapbook'
@@ -2447,46 +2448,87 @@ function EtherealWhispersFull({ card }) {
 
     // Drag-and-Tie Rope gesture event handlers
     const handleRopeDragStart = (e) => {
-        if (isRibbonTied) return;
-        e.preventDefault(); // Prevents HTML5 dragging and text selection on desktop browsers
-        setIsDraggingRope(true);
-        try {
-            e.currentTarget.setPointerCapture(e.pointerId);
-        } catch (err) {}
-        startYRef.current = e.clientY;
-    };
+        if (isRibbonTied || isDraggingRope) return;
 
-    const handleRopeDragMove = (e) => {
-        if (!isDraggingRope || isRibbonTied) return;
-        const deltaY = e.clientY - startYRef.current;
-        // Limit dragging between 0px and 80px
-        setDragOffset(Math.max(0, Math.min(80, deltaY)));
-    };
-
-    const handleRopeDragEnd = (e) => {
-        if (!isDraggingRope || isRibbonTied) return;
-        setIsDraggingRope(false);
-        try {
-            e.currentTarget.releasePointerCapture(e.pointerId);
-        } catch (err) {}
-
-        if (dragOffset >= 50) {
-            // Success! Trigger knot tying
-            handleTieRibbon();
-        } else {
-            // Smoothly animate back to 0 (Spring back)
-            let current = dragOffset;
-            const step = () => {
-                current -= 6;
-                if (current <= 0) {
-                    setDragOffset(0);
-                } else {
-                    setDragOffset(current);
-                    requestAnimationFrame(step);
-                }
-            };
-            requestAnimationFrame(step);
+        // Prevent text selection and HTML5 image/graphics drag
+        if (e.cancelable) {
+            e.preventDefault();
         }
+
+        // Support both PointerEvent and TouchEvent coordinates
+        let startY = e.clientY;
+        if (e.touches && e.touches.length > 0) {
+            startY = e.touches[0].clientY;
+        } else if (e.nativeEvent && e.nativeEvent.touches && e.nativeEvent.touches.length > 0) {
+            startY = e.nativeEvent.touches[0].clientY;
+        }
+
+        if (startY === undefined || startY === null) return;
+
+        setIsDraggingRope(true);
+        startYRef.current = startY;
+        dragOffsetRef.current = dragOffset;
+
+        const handlePointerMove = (moveEvent) => {
+            let currentY = moveEvent.clientY;
+            if (moveEvent.touches && moveEvent.touches.length > 0) {
+                currentY = moveEvent.touches[0].clientY;
+            } else if (moveEvent.nativeEvent && moveEvent.nativeEvent.touches && moveEvent.nativeEvent.touches.length > 0) {
+                currentY = moveEvent.nativeEvent.touches[0].clientY;
+            }
+
+            if (currentY === undefined || currentY === null) return;
+
+            const deltaY = currentY - startYRef.current;
+            const offset = Math.max(0, Math.min(80, deltaY));
+            setDragOffset(offset);
+            dragOffsetRef.current = offset;
+        };
+
+        const handlePointerUp = () => {
+            setIsDraggingRope(false);
+            
+            // Clean up all bound events from window
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('pointercancel', handlePointerUp);
+            window.removeEventListener('mousemove', handlePointerMove);
+            window.removeEventListener('mouseup', handlePointerUp);
+            window.removeEventListener('touchmove', handlePointerMove);
+            window.removeEventListener('touchend', handlePointerUp);
+            window.removeEventListener('touchcancel', handlePointerUp);
+
+            const finalOffset = dragOffsetRef.current;
+            if (finalOffset >= 50) {
+                // Success! Trigger knot tying
+                handleTieRibbon();
+            } else {
+                // Smoothly animate back to 0 (Spring back)
+                let current = finalOffset;
+                const step = () => {
+                    current -= 6;
+                    if (current <= 0) {
+                        setDragOffset(0);
+                        dragOffsetRef.current = 0;
+                    } else {
+                        setDragOffset(current);
+                        dragOffsetRef.current = current;
+                        requestAnimationFrame(step);
+                    }
+                };
+                requestAnimationFrame(step);
+            }
+        };
+
+        // Bind all event types for maximum cross-device coverage
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointercancel', handlePointerUp);
+        window.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+        window.addEventListener('touchmove', handlePointerMove, { passive: false });
+        window.addEventListener('touchend', handlePointerUp);
+        window.addEventListener('touchcancel', handlePointerUp);
     };
 
     // Interactive Glass Heart Button (Kirim Cinta)
@@ -3020,14 +3062,12 @@ function EtherealWhispersFull({ card }) {
                         {/* Interactive Rope Knot SVG Box */}
                         <div 
                             onPointerDown={handleRopeDragStart}
-                            onPointerMouseMove={handleRopeDragMove}
-                            onPointerUp={handleRopeDragEnd}
-                            onPointerCancel={handleRopeDragEnd}
+                            onTouchStart={handleRopeDragStart}
                             draggable="false"
                             className={`w-64 h-36 relative flex items-center justify-center mb-8 bg-white/40 border border-white/50 rounded-2xl shadow-sm backdrop-blur-xs p-4 select-none cursor-grab active:cursor-grabbing touch-none transition-all duration-300 ${isDraggingRope ? 'scale-102 ring-2 ring-red-300/35 shadow-md' : ''}`}
                             style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                         >
-                            <svg viewBox="0 0 200 100" className="w-full h-full select-none" draggable="false" style={{ pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none' }}>
+                            <svg viewBox="0 0 200 100" className="w-full h-full select-none" draggable="false" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
                                 <defs>
                                     {/* Soft drop shadow filter for 3D depth */}
                                     <filter id="ropeShadow" x="-20%" y="-20%" width="140%" height="140%">
