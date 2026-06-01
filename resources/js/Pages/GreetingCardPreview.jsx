@@ -2790,26 +2790,22 @@ function EtherealWhispersFull({ card }) {
 
                             {/* Conditional Navigation Buttons (appears after typewriter finishes typing) */}
                             {isTypingComplete && (
-                                <div className="flex gap-4 mt-8 w-full max-w-xl justify-center animate-fadeInFast select-none">
-                                    <button
-                                        onClick={() => {
-                                            playChimeNote(-0.1);
-                                            setScene('eternity-knot');
-                                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                                        }}
-                                        className="px-6 py-2.5 rounded-full border border-[#e5654b]/30 bg-white/70 text-[#8c6d62] text-xs font-semibold uppercase tracking-wider shadow-sm hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer border-none"
-                                    >
-                                        Kembali ➔
-                                    </button>
+                                <div className="flex mt-8 w-full max-w-xl justify-center animate-fadeInFast select-none">
                                     <button
                                         onClick={() => {
                                             playChimeNote(0.15);
                                             setScrollSubScene('scrapbook');
                                             window.scrollTo({ top: 0, behavior: 'smooth' });
                                         }}
-                                        className="px-8 py-2.5 rounded-full bg-gradient-to-r from-[#e5654b] to-[#f98b6c] text-white text-xs font-bold uppercase tracking-wider shadow-[0_4px_12px_rgba(229,101,75,0.25)] hover:shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer border-none"
+                                        className="relative group px-8 py-3.5 rounded-full bg-gradient-to-r from-[#e5654b] to-[#f08060] text-white text-sm font-semibold tracking-wide shadow-[0_6px_20px_rgba(229,101,75,0.3)] hover:shadow-[0_10px_25px_rgba(229,101,75,0.45)] hover:scale-105 active:scale-98 transition-all duration-300 cursor-pointer overflow-hidden border-none"
                                     >
-                                        Buka Jurnal Memori ➔
+                                        <div className="btn-shine-effect" />
+                                        <span className="flex items-center gap-2">
+                                            <span>Buka Jurnal Memori</span>
+                                            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current transition-transform duration-300 group-hover:translate-x-1">
+                                                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                                            </svg>
+                                        </span>
                                     </button>
                                 </div>
                             )}
@@ -2958,9 +2954,15 @@ function EtherealWhispersFull({ card }) {
                                         setScrollSubScene('letter');
                                         window.scrollTo({ top: 0, behavior: 'smooth' });
                                     }}
-                                    className="px-6 py-2.5 rounded-full border border-[#e5654b]/30 bg-white/70 text-[#8c6d62] text-xs font-semibold uppercase tracking-wider shadow-sm hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer border-none"
+                                    className="relative group px-6 py-3 rounded-full border border-[#e5654b]/35 bg-white/80 text-[#e5654b] text-sm font-semibold tracking-wide shadow-sm hover:bg-[#faebf0]/40 hover:border-[#e5654b] hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden"
                                 >
-                                    Kembali ke Surat ➔
+                                    <div className="btn-shine-effect" />
+                                    <span className="flex items-center gap-2">
+                                        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current transition-transform duration-300 group-hover:-translate-x-1">
+                                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                                        </svg>
+                                        <span>Kembali ke Surat</span>
+                                    </span>
                                 </button>
                                 <button
                                     onClick={() => {
@@ -2973,9 +2975,15 @@ function EtherealWhispersFull({ card }) {
                                         setScene('envelope');
                                         window.scrollTo({ top: 0, behavior: 'smooth' });
                                     }}
-                                    className="px-6 py-2.5 rounded-full bg-[#faebf0] border border-[#f5dae2] text-[#e5654b] text-xs font-bold uppercase tracking-wider shadow-xs hover:bg-[#faebf0]/80 hover:shadow-md transition-all cursor-pointer border-none"
+                                    className="relative group px-6 py-3 rounded-full bg-[#faebf0] border border-[#f5dae2] text-[#e5654b] text-sm font-semibold tracking-wide shadow-sm hover:bg-[#fbd3e0] hover:shadow-md hover:scale-105 active:scale-98 transition-all duration-300 cursor-pointer overflow-hidden"
                                 >
-                                    Putar Ulang ↺
+                                    <div className="btn-shine-effect" />
+                                    <span className="flex items-center gap-2">
+                                        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current transition-transform duration-500 group-hover:rotate-180">
+                                            <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                                        </svg>
+                                        <span>Putar Ulang</span>
+                                    </span>
                                 </button>
                             </div>
 
@@ -3127,9 +3135,15 @@ function EtherealWhispersFull({ card }) {
                                     
                                     <button
                                         onClick={handleProceedToScroll}
-                                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-white text-xs font-bold tracking-wider uppercase bg-gradient-to-r from-red-500 to-red-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(239,68,68,0.25)] cursor-pointer"
+                                        className="relative group px-8 py-3.5 rounded-full text-white text-sm font-semibold tracking-wide bg-gradient-to-r from-red-500 to-red-600 hover:shadow-[0_6px_20px_rgba(239,68,68,0.4)] hover:scale-105 active:scale-98 transition-all duration-300 cursor-pointer overflow-hidden border-none"
                                     >
-                                        Buka Lembaran Kisah ➔
+                                        <div className="btn-shine-effect" />
+                                        <span className="flex items-center gap-2">
+                                            <span>Buka Lembaran Kisah</span>
+                                            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current transition-transform duration-300 group-hover:translate-x-1">
+                                                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                                            </svg>
+                                        </span>
                                     </button>
                                 </div>
                             )}
@@ -3215,6 +3229,22 @@ function EtherealWhispersFull({ card }) {
                 }
                 .animate-sway {
                     animation: sway 15s ease-in-out infinite;
+                }
+                .btn-shine-effect {
+                    position: absolute;
+                    inset: 0;
+                    width: 50%;
+                    height: 100%;
+                    background: linear-gradient(to right, transparent, rgba(255,255,255,0.25), transparent);
+                    transform: translateX(-150%) skewX(-25deg);
+                    pointer-events: none;
+                }
+                .group:hover .btn-shine-effect {
+                    animation: btnShine 0.85s ease-out;
+                }
+                @keyframes btnShine {
+                    0% { transform: translateX(-150%) skewX(-25deg); }
+                    100% { transform: translateX(250%) skewX(-25deg); }
                 }
             `}</style>
         </div>
