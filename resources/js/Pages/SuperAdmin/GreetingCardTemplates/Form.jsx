@@ -88,7 +88,6 @@ export default function GreetingCardTemplateForm({ template = null }) {
         name:             template?.name || '',
         slug:             template?.slug || '',
         type:             Array.isArray(template?.type) ? template.type : [],
-        features:         (template?.features || []).join(', '),
         bg_gradient:      template?.bg_gradient || 'from-[#0d0915] via-[#1b102b] to-[#09090b]',
         base_likes:       template?.base_likes ?? 0,
         is_active:        template?.is_active ?? true,
@@ -235,10 +234,6 @@ export default function GreetingCardTemplateForm({ template = null }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        transform((data) => ({
-            ...data,
-            features: data.features.split(',').map(f => f.trim()).filter(Boolean),
-        }));
         const opts = { forceFormData: false };
         if (isEditing) {
             post(`/super-admin/greeting-card-templates/${template.id}?_method=PUT`, opts);
@@ -406,28 +401,6 @@ export default function GreetingCardTemplateForm({ template = null }) {
                                     placeholder="Contoh: 150"
                                 />
                                 {errors.base_likes && <p className="text-red-500 text-xs mt-1">{errors.base_likes}</p>}
-                            </div>
-
-                            {/* Fitur/Badge */}
-                            <div className="sm:col-span-2">
-                                <label className={labelClass}>
-                                    Fitur / Badge
-                                    <span className="ml-1.5 text-[#bbb] font-normal normal-case">— pisahkan dengan koma</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={data.features}
-                                    onChange={e => setData('features', e.target.value)}
-                                    placeholder="HSL Fireworks, Interactive, Browser Synth"
-                                    className={inputClass}
-                                />
-                                {data.features && (
-                                    <div className="flex flex-wrap gap-1.5 mt-2">
-                                        {data.features.split(',').map(f => f.trim()).filter(Boolean).map((f, i) => (
-                                            <span key={i} className="text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{f}</span>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
 
                             {/* Publish Toggle */}

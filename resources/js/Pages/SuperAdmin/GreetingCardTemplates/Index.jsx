@@ -202,21 +202,7 @@ export default function GreetingCardTemplatesIndex({ templates = [], typeOptions
                                             ))}
                                         </div>
 
-                                        {/* Features */}
-                                        {tpl.features?.length > 0 && (
-                                            <div className="flex flex-wrap gap-1 mt-2">
-                                                {tpl.features.slice(0, 3).map(f => (
-                                                    <span key={f} className="text-[9px] font-medium text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">
-                                                        {f}
-                                                    </span>
-                                                ))}
-                                                {tpl.features.length > 3 && (
-                                                    <span className="text-[9px] font-medium text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">
-                                                        +{tpl.features.length - 3}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
+
                                     </div>
 
                                     {/* Actions */}
