@@ -75,6 +75,13 @@ class ResellerLandingPageController extends Controller
             $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
             return $theme;
         });
+
+        // Get greeting cards for gallery
+        $greetingCards = \App\Models\GreetingCardTemplate::where('is_active', true)
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'type', 'base_likes', 'sort_order')
+            ->orderBy('sort_order')
+            ->get();
+        $greetingCards = \App\Models\GreetingCardTemplate::applyResellerCustomizations($greetingCards, $reseller->id);
  
         $appUrl = config('app.url');
         $parsed = parse_url($appUrl);
@@ -109,6 +116,8 @@ class ResellerLandingPageController extends Controller
             'plans' => $plansData,
             'features' => $features,
             'themes' => $themes,
+            'greetingCards' => $greetingCards,
+            'greetingCardTypeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
         ]);
     }
  

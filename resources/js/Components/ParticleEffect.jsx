@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 
 const PARTICLE_MAP = {
     snow:     { name: 'Salju' },
@@ -15,24 +15,6 @@ const PARTICLE_MAP = {
 };
 
 const SPEED_MAP = { slow: 22, normal: 15, fast: 9 };
-
-// Simple SVG markup strings for each particle type
-const svgShapes = {
-    snow: (sz, op) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="rgba(164,210,230,${op})" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>`,
-    sakura: (sz, op) => `<svg width="${sz}" height="${sz}" viewBox="0 0 20 20"><ellipse cx="10" cy="7" rx="4" ry="7" fill="rgba(245,171,198,${op})" transform="rotate(0 10 10)"/><ellipse cx="10" cy="7" rx="4" ry="7" fill="rgba(240,150,180,${op})" transform="rotate(72 10 10)"/><ellipse cx="10" cy="7" rx="4" ry="7" fill="rgba(245,171,198,${op})" transform="rotate(144 10 10)"/><ellipse cx="10" cy="7" rx="4" ry="7" fill="rgba(240,150,180,${op})" transform="rotate(216 10 10)"/><ellipse cx="10" cy="7" rx="4" ry="7" fill="rgba(245,171,198,${op})" transform="rotate(288 10 10)"/><circle cx="10" cy="10" r="2" fill="rgba(220,120,150,${op})"/></svg>`,
-    leaves: (sz, op) => `<svg width="${sz}" height="${sz}" viewBox="0 0 20 20"><path d="M3 17S3 7 10 3c7 4 7 14 7 14" fill="none" stroke="rgba(120,180,80,${op})" stroke-width="1.5"/><path d="M3 17S5 10 10 6c5 4 7 11 7 11" fill="rgba(110,170,70,${op * 0.6})"/><line x1="10" y1="6" x2="10" y2="17" stroke="rgba(90,140,60,${op})" stroke-width="1"/></svg>`,
-    rose: (sz, op) => `<svg width="${sz}" height="${sz}" viewBox="0 0 20 20"><circle cx="10" cy="8" r="3" fill="rgba(220,60,60,${op})"/><circle cx="7.5" cy="10" r="2.8" fill="rgba(200,50,50,${op})"/><circle cx="12.5" cy="10" r="2.8" fill="rgba(230,70,70,${op})"/><circle cx="10" cy="12" r="2.5" fill="rgba(210,55,55,${op})"/><path d="M10 14 L9 18 Q10 19 11 18 Z" fill="rgba(80,140,60,${op})"/></svg>`,
-    stars: (sz, op) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M12 2l2.4 7.2H22l-6 4.8 2.4 7.2L12 16.8 5.6 21.2 8 14 2 9.2h7.6z" fill="rgba(250,200,50,${op})"/></svg>`,
-    hearts: (sz, op) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="rgba(230,70,130,${op})"/></svg>`,
-    confetti: (sz, op) => {
-        const colors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff6bcb','#a66cff'];
-        const c = colors[Math.floor(Math.random() * colors.length)];
-        return `<svg width="${sz * 0.6}" height="${sz * 0.4}" viewBox="0 0 12 8"><rect width="12" height="8" rx="1.5" fill="${c}" opacity="${op}"/></svg>`;
-    },
-    butterfly: (sz, op) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M12 12c-2.5-4-7-5.5-8-3.5s1 5 3 7c1 1 3.5 1.5 5 0" fill="rgba(162,155,254,${op})"/><path d="M12 12c2.5-4 7-5.5 8-3.5s-1 5-3 7c-1 1-3.5 1.5-5 0" fill="rgba(130,120,230,${op})"/><line x1="12" y1="6" x2="12" y2="18" stroke="rgba(100,90,180,${op})" stroke-width="0.8"/></svg>`,
-    flower: (sz, op) => `<svg width="${sz}" height="${sz}" viewBox="0 0 20 20"><ellipse cx="10" cy="5" rx="3" ry="5" fill="rgba(250,120,170,${op})"/><ellipse cx="15" cy="10" rx="5" ry="3" fill="rgba(245,130,175,${op})"/><ellipse cx="10" cy="15" rx="3" ry="5" fill="rgba(250,120,170,${op})"/><ellipse cx="5" cy="10" rx="5" ry="3" fill="rgba(245,130,175,${op})"/><circle cx="10" cy="10" r="2.5" fill="rgba(255,200,60,${op})"/></svg>`,
-    sparkle: (sz, op) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M12 2L14 9L21 12L14 15L12 22L10 15L3 12L10 9Z" fill="rgba(255,215,0,${op})"/></svg>`,
-};
 
 export default function ParticleEffect({ type = 'snow', count = 30, speed = 'normal' }) {
     if (!PARTICLE_MAP[type]) return null;
@@ -68,6 +50,242 @@ export default function ParticleEffect({ type = 'snow', count = 30, speed = 'nor
         });
     }, [type, count, baseDur]);
 
+    const canvasRef = useRef(null);
+
+    useEffect(() => {
+        if (type === 'birds') return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const resize = () => {
+            if (!canvas) return;
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', resize);
+
+        const speedFactor = 15 / baseDur;
+
+        const pinks = ['rgba(255, 174, 185, ', 'rgba(255, 192, 203, ', 'rgba(255, 182, 193, ', 'rgba(245, 218, 226, ', 'rgba(255, 209, 225, '];
+        const greens = ['rgba(110, 170, 70, ', 'rgba(120, 180, 80, ', 'rgba(90, 140, 60, ', 'rgba(130, 190, 90, '];
+        const reds = ['rgba(220, 60, 60, ', 'rgba(200, 50, 50, ', 'rgba(230, 70, 70, ', 'rgba(210, 55, 55, '];
+        const golds = ['rgba(250, 200, 50, ', 'rgba(255, 215, 0, ', 'rgba(240, 190, 30, '];
+        const pinksReds = ['rgba(230, 70, 130, ', 'rgba(255, 75, 140, ', 'rgba(220, 50, 100, ', 'rgba(240, 100, 160, '];
+        const confettiColors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff6bcb','#a66cff'];
+        const purples = ['rgba(162, 155, 254, ', 'rgba(130, 120, 230, ', 'rgba(145, 130, 240, '];
+        const flowerPinks = ['rgba(250, 120, 170, ', 'rgba(245, 130, 175, ', 'rgba(255, 140, 190, '];
+        const sparkleGolds = ['rgba(255, 215, 0, ', 'rgba(255, 230, 100, ', 'rgba(250, 200, 50, '];
+
+        class Particle {
+            constructor() { this.reset(true); }
+
+            reset(isInit = false) {
+                this.x = Math.random() * width;
+                this.y = isInit ? Math.random() * height : -30;
+                this.size = Math.round(10 + Math.random() * 10);
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+                this.speedY = (0.6 + Math.random() * 1.0) * speedFactor;
+                this.speedX = (-0.4 + Math.random() * 0.8) * speedFactor;
+                this.swingSpeed = 0.008 + Math.random() * 0.015;
+                this.swingAngle = Math.random() * Math.PI;
+                this.opacity = 0.45 + Math.random() * 0.45;
+
+                if (type === 'sakura') {
+                    this.colorBase = pinks[Math.floor(Math.random() * pinks.length)];
+                    this.radiusX = this.size / 2;
+                    this.radiusY = this.size / 3.5;
+                } else if (type === 'leaves') this.colorBase = greens[Math.floor(Math.random() * greens.length)];
+                else if (type === 'rose') this.colorBase = reds[Math.floor(Math.random() * reds.length)];
+                else if (type === 'stars') this.colorBase = golds[Math.floor(Math.random() * golds.length)];
+                else if (type === 'hearts') this.colorBase = pinksReds[Math.floor(Math.random() * pinksReds.length)];
+                else if (type === 'confetti') this.colorBase = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+                else if (type === 'butterfly') this.colorBase = purples[Math.floor(Math.random() * purples.length)];
+                else if (type === 'flower') this.colorBase = flowerPinks[Math.floor(Math.random() * flowerPinks.length)];
+                else if (type === 'sparkle') this.colorBase = sparkleGolds[Math.floor(Math.random() * sparkleGolds.length)];
+            }
+
+            update(mouseX, mouseY) {
+                this.y += this.speedY;
+                this.swingAngle += this.swingSpeed;
+                this.x += this.speedX + Math.sin(this.swingAngle) * 0.4;
+                this.rotation += this.rotationSpeed;
+
+                if (mouseX !== null && mouseY !== null) {
+                    const dx = this.x - mouseX;
+                    const dy = this.y - mouseY;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 130) {
+                        const force = (130 - dist) / 130;
+                        const angle = Math.atan2(dy, dx);
+                        this.x += Math.cos(angle) * force * 5.0;
+                        this.y += Math.sin(angle) * force * 3.0;
+                    }
+                }
+                if (this.y > height + 30 || this.x < -30 || this.x > width + 30) this.reset(false);
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+
+                if (type === 'snow') {
+                    ctx.strokeStyle = `rgba(164, 210, 230, ${this.opacity})`;
+                    ctx.lineWidth = 1.5;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size/2, 0); ctx.lineTo(this.size/2, 0);
+                    ctx.moveTo(0, -this.size/2); ctx.lineTo(0, this.size/2);
+                    ctx.moveTo(-this.size/2 * 0.7, -this.size/2 * 0.7); ctx.lineTo(this.size/2 * 0.7, this.size/2 * 0.7);
+                    ctx.moveTo(this.size/2 * 0.7, -this.size/2 * 0.7); ctx.lineTo(-this.size/2 * 0.7, this.size/2 * 0.7);
+                    ctx.stroke();
+                } else if (type === 'sakura') {
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.radiusX, this.radiusY, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = this.colorBase + this.opacity + ')';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowColor = 'rgba(255, 182, 193, 0.35)';
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(-this.radiusX, 0);
+                    ctx.quadraticCurveTo(0, -this.radiusY * 0.15, this.radiusX, 0);
+                    ctx.strokeStyle = 'rgba(255, 90, 150, 0.25)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                } else if (type === 'leaves') {
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.size/2);
+                    ctx.quadraticCurveTo(this.size/3, -this.size/6, 0, this.size/2);
+                    ctx.quadraticCurveTo(-this.size/3, -this.size/6, 0, -this.size/2);
+                    ctx.fillStyle = this.colorBase + (this.opacity * 0.6) + ')';
+                    ctx.fill();
+                    ctx.strokeStyle = this.colorBase + this.opacity + ')';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.size/2 + 2);
+                    ctx.lineTo(0, this.size/2 - 2);
+                    ctx.strokeStyle = `rgba(90, 140, 60, ${this.opacity})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                } else if (type === 'rose') {
+                    ctx.fillStyle = `rgba(80, 140, 60, ${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.moveTo(0, this.size*0.2);
+                    ctx.lineTo(-this.size*0.1, this.size*0.4);
+                    ctx.quadraticCurveTo(0, this.size*0.45, this.size*0.1, this.size*0.4);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = this.colorBase + this.opacity + ')';
+                    ctx.beginPath(); ctx.arc(0, -this.size*0.1, this.size*0.15, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = `rgba(200, 50, 50, ${this.opacity})`;
+                    ctx.beginPath(); ctx.arc(-this.size*0.125, 0, this.size*0.14, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = `rgba(230, 70, 70, ${this.opacity})`;
+                    ctx.beginPath(); ctx.arc(this.size*0.125, 0, this.size*0.14, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = `rgba(210, 55, 55, ${this.opacity})`;
+                    ctx.beginPath(); ctx.arc(0, this.size*0.1, this.size*0.125, 0, Math.PI * 2); ctx.fill();
+                } else if (type === 'stars') {
+                    ctx.fillStyle = this.colorBase + this.opacity + ')';
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * this.size/2, -Math.sin((18 + i * 72) * Math.PI / 180) * this.size/2);
+                        ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * this.size/4, -Math.sin((54 + i * 72) * Math.PI / 180) * this.size/4);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (type === 'hearts') {
+                    ctx.fillStyle = this.colorBase + this.opacity + ')';
+                    ctx.beginPath();
+                    const topY = -this.size * 0.25;
+                    ctx.moveTo(0, this.size * 0.4);
+                    ctx.bezierCurveTo(-this.size * 0.5, this.size * 0.05, -this.size * 0.5, -this.size * 0.4, -this.size * 0.22, -this.size * 0.4);
+                    ctx.bezierCurveTo(0, -this.size * 0.4, 0, topY, 0, topY);
+                    ctx.bezierCurveTo(0, topY, 0, -this.size * 0.4, this.size * 0.22, -this.size * 0.4);
+                    ctx.bezierCurveTo(this.size * 0.5, -this.size * 0.4, this.size * 0.5, this.size * 0.05, 0, this.size * 0.4);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (type === 'confetti') {
+                    ctx.fillStyle = this.colorBase;
+                    ctx.globalAlpha = this.opacity;
+                    ctx.fillRect(-this.size*0.3, -this.size*0.2, this.size*0.6, this.size*0.4);
+                } else if (type === 'butterfly') {
+                    ctx.fillStyle = this.colorBase + this.opacity + ')';
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(-this.size*0.3, -this.size*0.5, -this.size*0.8, -this.size*0.4, -this.size*0.6, -this.size*0.1);
+                    ctx.bezierCurveTo(-this.size*0.4, this.size*0.1, -this.size*0.2, this.size*0.2, 0, 0);
+                    ctx.fill();
+                    ctx.fillStyle = `rgba(130, 120, 230, ${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(this.size*0.3, -this.size*0.5, this.size*0.8, -this.size*0.4, this.size*0.6, -this.size*0.1);
+                    ctx.bezierCurveTo(this.size*0.4, this.size*0.1, this.size*0.2, this.size*0.2, 0, 0);
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(100, 90, 180, ${this.opacity})`;
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.size*0.3);
+                    ctx.lineTo(0, this.size*0.3);
+                    ctx.stroke();
+                } else if (type === 'flower') {
+                    ctx.fillStyle = this.colorBase + this.opacity + ')';
+                    ctx.beginPath(); ctx.ellipse(0, -this.size*0.25, this.size*0.15, this.size*0.25, 0, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.ellipse(0, this.size*0.25, this.size*0.15, this.size*0.25, 0, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = `rgba(245, 130, 175, ${this.opacity})`;
+                    ctx.beginPath(); ctx.ellipse(this.size*0.25, 0, this.size*0.25, this.size*0.15, 0, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.ellipse(-this.size*0.25, 0, this.size*0.25, this.size*0.15, 0, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = `rgba(255, 200, 60, ${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size*0.125, 0, Math.PI*2);
+                    ctx.fill();
+                } else if (type === 'sparkle') {
+                    ctx.fillStyle = this.colorBase + this.opacity + ')';
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.size/2);
+                    ctx.quadraticCurveTo(0, 0, this.size/2, 0);
+                    ctx.quadraticCurveTo(0, 0, 0, this.size/2);
+                    ctx.quadraticCurveTo(0, 0, -this.size/2, 0);
+                    ctx.quadraticCurveTo(0, 0, 0, -this.size/2);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        const particles = Array.from({ length: count }, () => new Particle());
+        let mouseX = null, mouseY = null;
+        const handlePointerMove = (e) => { mouseX = e.clientX; mouseY = e.clientY; };
+        const handlePointerEnd = () => { mouseX = null; mouseY = null; };
+
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerleave', handlePointerEnd);
+        window.addEventListener('pointerup', handlePointerEnd);
+        window.addEventListener('pointercancel', handlePointerEnd);
+
+        const loop = () => {
+            animId = requestAnimationFrame(loop);
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => { p.update(mouseX, mouseY); p.draw(); });
+        };
+        loop();
+
+        return () => {
+            cancelAnimationFrame(animId);
+            window.removeEventListener('resize', resize);
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerleave', handlePointerEnd);
+            window.removeEventListener('pointerup', handlePointerEnd);
+            window.removeEventListener('pointercancel', handlePointerEnd);
+        };
+    }, [type, count, speed, baseDur]);
+
     if (type === 'birds') {
         return (
             <div className="sp-birds-container select-none" aria-hidden="true">
@@ -94,45 +312,16 @@ export default function ParticleEffect({ type = 'snow', count = 30, speed = 'nor
                       0% { transform: scaleY(1); }
                       100% { transform: scaleY(-0.35) translateY(15%); }
                     }
-                    .sp-birds-container {
-                      position: fixed;
-                      inset: 0;
-                      width: 100%;
-                      height: 100%;
-                      pointer-events: none;
-                      z-index: 15;
-                      overflow: hidden;
-                    }
-                    .sp-bird {
-                      position: absolute;
-                      opacity: 0;
-                      will-change: transform, left, top;
-                    }
-                    .sp-bird-wings {
-                      transform-origin: 45px 25px;
-                      animation: spFlap var(--fd) ease-in-out infinite alternate;
-                    }
+                    .sp-birds-container { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: hidden; }
+                    .sp-bird { position: absolute; opacity: 0; will-change: transform, left, top; }
+                    .sp-bird-wings { transform-origin: 45px 25px; animation: spFlap var(--fd) ease-in-out infinite alternate; }
                 ` }} />
                 {birdsList.map(b => {
                     let animName = 'spFlyUpRight';
                     if (b.pathType === 1) animName = 'spFlyUpLeft';
                     else if (b.pathType === 2) animName = 'spFlyUpCenter';
-                    
                     return (
-                        <div 
-                            key={b.id} 
-                            className="sp-bird"
-                            style={{
-                                animation: `${animName} ${b.dur}s linear ${b.delay}s infinite`,
-                                '--sc': b.scale,
-                                '--op': b.opacity,
-                                '--ts': String(b.topStart),
-                                '--te': String(b.topEnd),
-                                '--ls': String(b.leftStart),
-                                '--le': String(b.leftEnd),
-                                '--fd': `${b.flapDur}s`
-                            }}
-                        >
+                        <div key={b.id} className="sp-bird" style={{ animation: `${animName} ${b.dur}s linear ${b.delay}s infinite`, '--sc': b.scale, '--op': b.opacity, '--ts': String(b.topStart), '--te': String(b.topEnd), '--ls': String(b.leftStart), '--le': String(b.leftEnd), '--fd': `${b.flapDur}s` }}>
                             <svg viewBox="0 0 100 50" className="w-12 h-6 text-[#2E3F54] dark:text-white" fill="currentColor">
                                 <path className="sp-bird-wings" d="M 5,25 Q 25,5 45,25 Q 65,5 85,25 Q 65,15 45,25 Q 25,15 5,25 Z" />
                             </svg>
@@ -143,58 +332,9 @@ export default function ParticleEffect({ type = 'snow', count = 30, speed = 'nor
         );
     }
 
-    const particles = useMemo(() => {
-        return Array.from({ length: count }, (_, i) => {
-            const left = (Math.random() * 104 - 2).toFixed(1);
-            const delay = (Math.random() * baseDur).toFixed(1);
-            const dur = (baseDur + Math.random() * 8 - 2).toFixed(1);
-            const size = Math.round(10 + Math.random() * 10);
-            const drift = Math.round(-50 + Math.random() * 100);
-            const opacity = (0.35 + Math.random() * 0.45).toFixed(2);
-            const sway = Math.round(15 + Math.random() * 25);
-            const html = svgShapes[type](size, parseFloat(opacity));
-            return { id: i, left, delay, dur, drift, sway, html };
-        });
-    }, [type, count, baseDur]);
-
     return (
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 15, overflow: 'hidden' }} aria-hidden="true">
-            <style dangerouslySetInnerHTML={{ __html: `
-                @keyframes pDrop {
-                    0%   { transform: translateY(0) translateX(0) rotate(0deg); }
-                    25%  { transform: translateY(27.5vh) translateX(calc(var(--sw) * 1px)) rotate(90deg); }
-                    50%  { transform: translateY(55vh) translateX(calc(var(--sw) * -0.5px)) rotate(180deg); }
-                    75%  { transform: translateY(82.5vh) translateX(calc(var(--sw) * 0.8px)) rotate(270deg); }
-                    100% { transform: translateY(110vh) translateX(calc(var(--dr) * 1px)) rotate(360deg); }
-                }
-                @keyframes pFade {
-                    0%   { opacity: 0; }
-                    8%   { opacity: 1; }
-                    88%  { opacity: 1; }
-                    100% { opacity: 0; }
-                }
-                .pdrop {
-                    position: absolute;
-                    top: -30px;
-                    animation:
-                        pDrop var(--d) linear var(--dl) infinite,
-                        pFade var(--d) ease var(--dl) infinite;
-                    will-change: transform;
-                    line-height: 0;
-                }
-            ` }} />
-            {particles.map(p => (
-                <div key={p.id} className="pdrop"
-                    style={{
-                        left: `${p.left}%`,
-                        '--d': `${p.dur}s`,
-                        '--dl': `${p.delay}s`,
-                        '--dr': String(p.drift),
-                        '--sw': String(p.sway),
-                    }}
-                    dangerouslySetInnerHTML={{ __html: p.html }}
-                />
-            ))}
+            <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%', pointerEvents: 'none' }} />
         </div>
     );
 }

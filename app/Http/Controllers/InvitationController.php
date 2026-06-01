@@ -13,6 +13,8 @@ class InvitationController extends Controller
 {
     public function show(Request $request, string $slug)
     {
+        $isDemo = str_starts_with($slug, 'demo-');
+
         $invitation = Invitation::where('slug', $slug)
             ->where('is_active', true)
             ->with([
@@ -88,7 +90,7 @@ class InvitationController extends Controller
             }
         }
 
-        if ($isExpired) {
+        if ($isExpired && !$isDemo) {
             // Deactivate the user when their invitation has expired (so they cannot access the dashboard)
             if ($owner && $owner->is_active && !$owner->isSuperAdmin() && !$owner->isAdmin()) {
                 $owner->update(['is_active' => false]);
@@ -131,7 +133,7 @@ class InvitationController extends Controller
 
         // Keamanan: Validasi otorisasi Paket berlangganan untuk live template & section
         $owner = $invitation->user;
-        if ($owner) {
+        if ($owner && !$isDemo) {
             if (!$owner->hasFeatureAccess('qr_code')) {
                 $invitation->enable_qr = false;
                 $invitation->show_qr_code = false;
@@ -186,10 +188,56 @@ class InvitationController extends Controller
             $invitation->setRelation('sections', $filteredSections);
         }
 
+        $subscriptionPlans = null;
+        if ($isDemo) {
+            $resellerPrices = [];
+            if ($resellerSetting) {
+                $resellerPrices = \App\Models\ResellerPlanPrice::where('reseller_id', $resellerSetting->user_id)
+                    ->pluck('reseller_price', 'plan_id')
+                    ->toArray();
+            }
+
+            $subscriptionPlans = \App\Models\SubscriptionPlan::with(['features' => function($query) {
+                $query->wherePivot('is_enabled', true);
+            }])->orderBy('sort_order')->get()->map(function($plan) use ($resellerSetting, $resellerPrices) {
+                if ($resellerSetting) {
+                    $price = isset($resellerPrices[$plan->id])
+                        ? (float)$resellerPrices[$plan->id]
+                        : 2.0 * (float)$plan->price;
+                } else {
+                    $price = 2.0 * (float)$plan->price;
+                }
+
+                return [
+                    'id' => $plan->id,
+                    'slug' => $plan->slug,
+                    'name' => $plan->name,
+                    'description' => $plan->description,
+                    'price' => $price,
+                    'duration_days' => $plan->duration_days,
+                    'max_guests' => $plan->max_guests,
+                    'max_galleries' => $plan->max_galleries,
+                    'features' => $plan->features->pluck('slug')->toArray(),
+                    'feature_details' => $plan->features->map(function($f) {
+                        return [
+                            'name' => $f->name,
+                            'slug' => $f->slug,
+                            'description' => $f->description,
+                            'icon' => $f->icon,
+                        ];
+                    })->toArray()
+                ];
+            });
+        }
+
         // THEME ADDED BY BHAKTIAJI ILHAM
         $page = 'Invitation/Show';
         if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja'])) {
-            $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
+            if ($isDemo) {
+                $page = 'Invitation/DemoWrapper';
+            } else {
+                $page = 'Invitation/' . $invitation->theme->slug . '/DynamicIndex';
+            }
         }
 
         // Resolve WhatsApp Support Link for the active theme badge
@@ -199,7 +247,7 @@ class InvitationController extends Controller
         $whatsappNumberClean = preg_replace('/[^0-9]/', '', $whatsappNumber);
         $whatsappLink = "https://wa.me/" . $whatsappNumberClean . "?text=" . urlencode("Halo Admin, saya ingin menanyakan tentang aktivasi/upgrade undangan digital saya.");
 
-        return Inertia::render($page, [
+        $props = [
             'invitation' => $invitation,
             'sections' => $invitation->sections,
             'brideGrooms' => $invitation->brideGrooms,
@@ -207,14 +255,23 @@ class InvitationController extends Controller
             'galleries' => $invitation->galleries,
             'loveStories' => $invitation->loveStories,
             'bankAccounts' => $invitation->bankAccounts,
-            'guest' => $guest,
+            'guest' => $guest ?: ($isDemo ? new Guest(['name' => 'Tamu Kehormatan', 'slug' => 'tamu']) : null),
             'wishes' => $wishes,
             'show_free_badge' => $showFreeBadge,
             'trial_expires_at' => $trialExpiresAt,
             'brand_name' => $brandName,
             'brand_url' => $brandUrl,
             'admin_whatsapp_url' => $whatsappLink,
-        ]);
+            'isDemo' => $isDemo,
+            'subscriptionPlans' => $subscriptionPlans,
+        ];
+
+        if ($page === 'Invitation/DemoWrapper') {
+            $props['themeSlug'] = $invitation->theme->slug;
+            $props['allowedPlans'] = $invitation->theme->allowed_plans;
+        }
+
+        return Inertia::render($page, $props);
 
     }
 
@@ -330,15 +387,35 @@ class InvitationController extends Controller
     {
         $theme = \App\Models\Theme::where('slug', $slug)->firstOrFail();
 
+        // Resolve reseller settings
+        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+
+        $resellerPrices = [];
+        if ($resellerSetting) {
+            $resellerPrices = \App\Models\ResellerPlanPrice::where('reseller_id', $resellerSetting->user_id)
+                ->pluck('reseller_price', 'plan_id')
+                ->toArray();
+        }
+
         $subscriptionPlans = \App\Models\SubscriptionPlan::with(['features' => function($query) {
             $query->wherePivot('is_enabled', true);
-        }])->orderBy('sort_order')->get()->map(function($plan) {
+        }])->orderBy('sort_order')->get()->map(function($plan) use ($resellerSetting, $resellerPrices) {
+            if ($resellerSetting) {
+                // If reseller demo, display custom retail price, fallback to 2x base price if not customized
+                $price = isset($resellerPrices[$plan->id])
+                    ? (float)$resellerPrices[$plan->id]
+                    : 2.0 * (float)$plan->price;
+            } else {
+                // If super admin demo, double the price
+                $price = 2.0 * (float)$plan->price;
+            }
+
             return [
                 'id' => $plan->id,
                 'slug' => $plan->slug,
                 'name' => $plan->name,
                 'description' => $plan->description,
-                'price' => (float) $plan->price,
+                'price' => $price,
                 'duration_days' => $plan->duration_days,
                 'max_guests' => $plan->max_guests,
                 'max_galleries' => $plan->max_galleries,
@@ -355,7 +432,6 @@ class InvitationController extends Controller
         });
         
         // ── CUSTOM DEMO FROM RESELLER DEMO USER ──
-        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
         $customDemoInvitation = null;
 
         // Jika user adalah client yang login dan sudah punya undangan, pakai datanya secara dinamis

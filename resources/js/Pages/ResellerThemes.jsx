@@ -1074,6 +1074,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     flex-direction: column;
     gap: 1rem;
     margin-top: 1.5rem;
+    margin-bottom: 2.5rem !important;
     width: 100%;
     max-width: 750px;
     margin-left: auto;

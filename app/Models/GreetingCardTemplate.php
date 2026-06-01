@@ -70,4 +70,41 @@ class GreetingCardTemplate extends Model
         $labels = array_map(fn($t) => self::$typeOptions[$t] ?? $t, $this->type);
         return implode(', ', $labels);
     }
+
+    /**
+     * Apply reseller customizations to greeting card templates.
+     */
+    public static function applyResellerCustomizations($greetingCards, $resellerId)
+    {
+        if (!$resellerId) {
+            return $greetingCards;
+        }
+
+        $customSettings = \App\Models\ResellerGreetingCardSetting::where('reseller_id', $resellerId)
+            ->get()
+            ->keyBy('greeting_card_template_id');
+
+        foreach ($greetingCards as $card) {
+            if (isset($customSettings[$card->id])) {
+                $custom = $customSettings[$card->id];
+                
+                if ($custom->preview_template && $custom->preview_template !== 'default') {
+                    $card->preview_template = $custom->preview_template;
+                }
+                if ($custom->preview_bg_style && $custom->preview_bg_style !== 'default') {
+                    $card->preview_bg_style = $custom->preview_bg_style;
+                }
+                if ($custom->preview_images) {
+                    $card->preview_images = is_string($custom->preview_images) 
+                        ? json_decode($custom->preview_images, true) 
+                        : $custom->preview_images;
+                }
+                if ($custom->thumbnail) {
+                    $card->thumbnail = $custom->thumbnail;
+                }
+            }
+        }
+
+        return $greetingCards;
+    }
 }

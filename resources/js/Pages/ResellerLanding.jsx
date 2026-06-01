@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect, useRef, Fragment, useMemo } from 'react';
 import AnimatedLikeButton from '@/Components/AnimatedLikeButton';
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
+import GreetingCardPreviewCard from '@/Components/GreetingCardPreviewCard';
 
 /* ─────────────────────────────────────────────────────────
    TINY SVG HELPERS
@@ -176,7 +177,7 @@ const THEMES_CFG = {
 /* ─────────────────────────────────────────────────────────
    MAIN COMPONENT
 ───────────────────────────────────────────────────────── */
-export default function ResellerLanding({ reseller, plans = [], themes = [], features = [] }) {
+export default function ResellerLanding({ reseller, plans = [], themes = [], greetingCards = [], greetingCardTypeOptions = {}, features = [] }) {
     const T = THEMES_CFG[reseller?.template] || THEMES_CFG.default;
 
     const [scrolled, setScrolled] = useState(false);
@@ -194,9 +195,20 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
     const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
+    // Tab state
+    const [activeCatalogTab, setActiveCatalogTab] = useState('undangan');
+
     const categoryDropdownRef = useRef(null);
     const typeDropdownRef = useRef(null);
     const sortDropdownRef = useRef(null);
+
+    // Reset filters on tab change
+    useEffect(() => {
+        setSelectedCategories([]);
+        setSelectedTypes([]);
+        setSearchQuery('');
+        setSortThemeKey('terbaru');
+    }, [activeCatalogTab]);
 
     const categories = useMemo(() => {
         const cats = themes?.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean) || [];
@@ -223,6 +235,14 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
         });
     }, [themes]);
 
+    // Greeting card event types with counts
+    const cardTypesWithCount = useMemo(() => {
+        return Object.entries(greetingCardTypeOptions || {}).map(([key, label]) => {
+            const count = greetingCards?.filter(t => (t.type || []).includes(key)).length || 0;
+            return { key, label, count };
+        }).sort((a, b) => a.label.localeCompare(b.label));
+    }, [greetingCards, greetingCardTypeOptions]);
+
     const toggleType = (typeKey) => {
         setSelectedTypes(prev =>
             prev.includes(typeKey) ? prev.filter(t => t !== typeKey) : [...prev, typeKey]
@@ -247,6 +267,29 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
         }
         return list;
     }, [themes, selectedCategories, selectedTypes, searchQuery]);
+
+    const filteredCards = useMemo(() => {
+        let list = [...(greetingCards || [])];
+        if (selectedTypes.length > 0) {
+            list = list.filter(t => (t.type || []).some(type => selectedTypes.includes(type)));
+        }
+        if (searchQuery.trim()) {
+            list = list.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return list;
+    }, [greetingCards, selectedTypes, searchQuery]);
+
+    const sortedCards = useMemo(() => {
+        const arr = [...filteredCards];
+        if (sortThemeKey === 'terbaru') return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
+        if (sortThemeKey === 'populer') return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
+        if (sortThemeKey === 'disukai') return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
+        return arr;
+    }, [filteredCards, sortThemeKey]);
+
+    const handleUseCard = (slug) => {
+        window.location.href = `/buat-kartu/${slug}`;
+    };
 
     const toggleCategory = (cat) => {
         setSelectedCategories(prev => 
@@ -769,12 +812,57 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
             <section id="preview" className="rl-section rl-section--alt">
                 <div className="rl-container">
                     <div className="rl-section__header">
-                        <span className="rl-section__tag">Koleksi Tema</span>
-                        <h2 className="rl-section__title">Pilih Tema yang Sempurna untuk Anda</h2>
-                        <p className="rl-section__desc">Koleksi tema elegan dan modern yang siap digunakan. Klik untuk melihat preview langsung.</p>
+                        <span className="rl-section__tag">Koleksi Desain</span>
+                        <h2 className="rl-section__title">Pilih Desain Sempurna untuk Anda</h2>
+                        <p className="rl-section__desc">Koleksi tema undangan digital dan kartu ucapan elegan premium yang siap digunakan. Klik untuk melihat preview langsung.</p>
                     </div>
+
+                    {/* Tab Switcher */}
+                    {greetingCards.length > 0 && (
+                        <div className="flex justify-center mb-8" style={{ position: 'relative', zIndex: 10 }}>
+                            <div className="inline-flex p-1 rounded-full" style={{ background: 'var(--card-bg)', border: '1.5px solid var(--card-border)' }}>
+                                <button
+                                    onClick={() => setActiveCatalogTab('undangan')}
+                                    className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border-none cursor-pointer`}
+                                    style={
+                                        activeCatalogTab === 'undangan'
+                                            ? {
+                                                  background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))',
+                                                  color: '#fff',
+                                                  boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.25)',
+                                              }
+                                            : {
+                                                  background: 'transparent',
+                                                  color: 'var(--text-secondary)',
+                                              }
+                                    }
+                                >
+                                    Undangan Digital
+                                </button>
+                                <button
+                                    onClick={() => setActiveCatalogTab('kartu')}
+                                    className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border-none cursor-pointer`}
+                                    style={
+                                        activeCatalogTab === 'kartu'
+                                            ? {
+                                                  background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))',
+                                                  color: '#fff',
+                                                  boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.25)',
+                                              }
+                                            : {
+                                                  background: 'transparent',
+                                                  color: 'var(--text-secondary)',
+                                              }
+                                    }
+                                >
+                                    Kartu Ucapan
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Overhauled Filters & Search Bar */}
-                    {themes.length > 0 && (
+                    {((activeCatalogTab === 'undangan' && themes.length > 0) || (activeCatalogTab === 'kartu' && greetingCards.length > 0)) && (
                         <div className="rl-filter-panel">
                             <div className="rl-filter-row">
                                 {/* Search Box */}
@@ -794,87 +882,89 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                         type="text"
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
-                                        placeholder="Cari tema..."
+                                        placeholder={activeCatalogTab === 'undangan' ? 'Cari tema...' : 'Cari kartu...'}
                                         className="rl-filter-search-input"
                                     />
                                 </div>
 
                                 {/* Controls */}
                                 <div className="rl-filter-controls">
-                                    {/* Category Select Dropdown */}
-                                    <div className="rl-filter-dropdown-wrapper" ref={categoryDropdownRef}>
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                                            style={{
-                                                border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
-                                                background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
-                                                color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
-                                            }}
-                                            className="rl-filter-btn"
-                                        >
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
-                                                <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    {/* Category Select Dropdown (Only for themes) */}
+                                    {activeCatalogTab === 'undangan' && (
+                                        <div className="rl-filter-dropdown-wrapper" ref={categoryDropdownRef}>
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                                                style={{
+                                                    border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
+                                                    background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                                    color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
+                                                }}
+                                                className="rl-filter-btn"
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                                                    <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                                    </svg>
+                                                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        {selectedCategories.length === 0 ? 'Kategori' : `Kategori (${selectedCategories.length})`}
+                                                    </span>
+                                                </div>
+                                                <svg style={{
+                                                    width: '12px',
+                                                    height: '12px',
+                                                    flexShrink: 0,
+                                                    transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
+                                                    transition: 'transform 0.2s'
+                                                }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                                 </svg>
-                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                    {selectedCategories.length === 0 ? 'Kategori' : `Kategori (${selectedCategories.length})`}
-                                                </span>
-                                            </div>
-                                            <svg style={{
-                                                width: '12px',
-                                                height: '12px',
-                                                flexShrink: 0,
-                                                transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
-                                                transition: 'transform 0.2s'
-                                            }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </button>
+                                            </button>
 
-                                        {isCategoryDropdownOpen && (
-                                            <div className="rl-filter-dropdown-menu" style={{
-                                                background: T.isDark ? '#1e293b' : '#ffffff',
-                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
-                                            }}>
-                                                <div className="rl-filter-dropdown-menu-header">
-                                                    <span className="rl-filter-dropdown-menu-title">Kategori</span>
-                                                    {selectedCategories.length > 0 && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={clearCategories}
-                                                            className="rl-filter-dropdown-menu-reset"
-                                                        >
-                                                            Reset
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                <div className="rl-filter-dropdown-list">
-                                                    {categories.map(cat => {
-                                                        const isChecked = selectedCategories.includes(cat);
-                                                        return (
-                                                            <label
-                                                                key={cat}
-                                                                className="rl-filter-checkbox-label"
-                                                                style={{
-                                                                    color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
-                                                                    background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
-                                                                }}
+                                            {isCategoryDropdownOpen && (
+                                                <div className="rl-filter-dropdown-menu" style={{
+                                                    background: T.isDark ? '#1e293b' : '#ffffff',
+                                                    border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                                }}>
+                                                    <div className="rl-filter-dropdown-menu-header">
+                                                        <span className="rl-filter-dropdown-menu-title">Kategori</span>
+                                                        {selectedCategories.length > 0 && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={clearCategories}
+                                                                className="rl-filter-dropdown-menu-reset"
                                                             >
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={isChecked}
-                                                                    onChange={() => toggleCategory(cat)}
-                                                                    className="rl-filter-checkbox-input"
-                                                                />
-                                                                <span style={{ textTransform: 'capitalize' }}>{cat}</span>
-                                                            </label>
-                                                        );
-                                                    })}
+                                                                Reset
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    <div className="rl-filter-dropdown-list">
+                                                        {categories.map(cat => {
+                                                            const isChecked = selectedCategories.includes(cat);
+                                                            return (
+                                                                <label
+                                                                    key={cat}
+                                                                    className="rl-filter-checkbox-label"
+                                                                    style={{
+                                                                        color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                        background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
+                                                                    }}
+                                                                >
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={isChecked}
+                                                                        onChange={() => toggleCategory(cat)}
+                                                                        className="rl-filter-checkbox-input"
+                                                                    />
+                                                                    <span style={{ textTransform: 'capitalize' }}>{cat}</span>
+                                                                </label>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {/* Event Types Select Dropdown */}
                                     <div className="rl-filter-dropdown-wrapper" ref={typeDropdownRef}>
@@ -925,7 +1015,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                                     )}
                                                 </div>
                                                 <div className="rl-filter-dropdown-list">
-                                                    {eventTypesWithCount.map(type => {
+                                                    {(activeCatalogTab === 'undangan' ? eventTypesWithCount : cardTypesWithCount).map(type => {
                                                         const isChecked = selectedTypes.includes(type.key);
                                                         return (
                                                             <label
@@ -970,7 +1060,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                                                 transition: 'all 0.2s',
                                                 flexShrink: 0
                                             }}
-                                            title="Urutkan Tema"
+                                            title="Urutkan Desain"
                                         >
                                             <svg style={{ width: '16px', height: '16px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
@@ -1037,38 +1127,70 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], fea
                     )}
                 </div>
 
-                {filteredThemes.length > 0 ? (
-                    <div className="rl-themes-scroll-wrap">
-                        <div className="rl-themes-scroll" id="themes-scroll">
-                            {(() => {
-                                const sorted = [...filteredThemes];
-                                if (sortThemeKey === 'terbaru') sorted.sort((a, b) => (b.id || 0) - (a.id || 0));
-                                else if (sortThemeKey === 'populer') sorted.sort((a, b) => ((b.usage_count || 0) + (b.base_usage || 0)) - ((a.usage_count || 0) + (a.base_usage || 0)));
-                                else if (sortThemeKey === 'disukai') sorted.sort((a, b) => {
-                                    const bL = likes[b.id] ?? ((b.base_likes || 0) + (b.real_likes || 0));
-                                    const aL = likes[a.id] ?? ((a.base_likes || 0) + (a.real_likes || 0));
-                                    return bL - aL;
-                                });
-                                return sorted.map(theme => (
-                                    <div key={theme.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
-                                        <ThemePreviewCard 
-                                            theme={theme}
+                {/* Themes List (Undangan Digital) */}
+                {activeCatalogTab === 'undangan' && (
+                    filteredThemes.length > 0 ? (
+                        <div className="rl-themes-scroll-wrap">
+                            <div className="rl-themes-scroll" id="themes-scroll">
+                                {(() => {
+                                    const sorted = [...filteredThemes];
+                                    if (sortThemeKey === 'terbaru') sorted.sort((a, b) => (b.id || 0) - (a.id || 0));
+                                    else if (sortThemeKey === 'populer') sorted.sort((a, b) => ((b.usage_count || 0) + (b.base_usage || 0)) - ((a.usage_count || 0) + (a.base_usage || 0)));
+                                    else if (sortThemeKey === 'disukai') sorted.sort((a, b) => {
+                                        const bL = likes[b.id] ?? ((b.base_likes || 0) + (b.real_likes || 0));
+                                        const aL = likes[a.id] ?? ((a.base_likes || 0) + (a.real_likes || 0));
+                                        return bL - aL;
+                                    });
+                                    return sorted.map(theme => (
+                                        <div key={theme.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
+                                            <ThemePreviewCard 
+                                                theme={theme}
+                                                reseller={reseller}
+                                            />
+                                        </div>
+                                    ));
+                                })()}
+                            </div>
+                            <div className="rl-themes-scroll-controls">
+                                <button onClick={() => document.getElementById('themes-scroll')?.scrollBy({ left: -280, behavior: 'smooth' })} className="rl-scroll-btn">←</button>
+                                <Link href={getThemesUrl()} className="rl-btn rl-btn--accent-outline">Lihat Semua Tema →</Link>
+                                <button onClick={() => document.getElementById('themes-scroll')?.scrollBy({ left: 280, behavior: 'smooth' })} className="rl-scroll-btn">→</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="rl-container" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                            Belum ada tema dalam kategori ini atau tidak ada hasil pencarian yang cocok.
+                        </div>
+                    )
+                )}
+
+                {/* Greeting Cards List */}
+                {activeCatalogTab === 'kartu' && (
+                    sortedCards.length > 0 ? (
+                        <div className="rl-themes-scroll-wrap">
+                            <div className="rl-themes-scroll" id="cards-scroll">
+                                {sortedCards.map(card => (
+                                    <div key={card.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
+                                        <GreetingCardPreviewCard 
+                                            theme={card}
                                             reseller={reseller}
+                                            onUse={handleUseCard}
+                                            typeOptions={greetingCardTypeOptions}
                                         />
                                     </div>
-                                ));
-                            })()}
+                                ))}
+                            </div>
+                            <div className="rl-themes-scroll-controls">
+                                <button onClick={() => document.getElementById('cards-scroll')?.scrollBy({ left: -280, behavior: 'smooth' })} className="rl-scroll-btn">←</button>
+                                <a href="/katalog-kartu" className="rl-btn rl-btn--accent-outline">Lihat Semua Kartu →</a>
+                                <button onClick={() => document.getElementById('cards-scroll')?.scrollBy({ left: 280, behavior: 'smooth' })} className="rl-scroll-btn">→</button>
+                            </div>
                         </div>
-                        <div className="rl-themes-scroll-controls">
-                            <button onClick={() => document.getElementById('themes-scroll')?.scrollBy({ left: -280, behavior: 'smooth' })} className="rl-scroll-btn">←</button>
-                            <Link href={getThemesUrl()} className="rl-btn rl-btn--accent-outline">Lihat Semua Tema →</Link>
-                            <button onClick={() => document.getElementById('themes-scroll')?.scrollBy({ left: 280, behavior: 'smooth' })} className="rl-scroll-btn">→</button>
+                    ) : (
+                        <div className="rl-container" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                            Belum ada kartu ucapan dalam tipe ini atau tidak ada hasil pencarian yang cocok.
                         </div>
-                    </div>
-                ) : (
-                    <div className="rl-container" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                        Belum ada tema dalam kategori ini.
-                    </div>
+                    )
                 )}
             </section>
 
@@ -2069,6 +2191,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     flex-direction: column;
     gap: 1rem;
     margin-top: 1.5rem;
+    margin-bottom: 2.5rem !important;
     width: 100%;
     max-width: 750px;
     margin-left: auto;
