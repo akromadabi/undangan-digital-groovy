@@ -199,7 +199,7 @@ function LofiLoveFull({ card }) {
     const [snapCount, setSnapCount] = useState(0);
     const [printingPolaroid, setPrintingPolaroid] = useState(false);
     const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
-    const [candleBlowStage, setCandleBlowStage] = useState('lit'); // 'lit' | 'blowing' | 'puff'
+    const [candleBlowStage, setCandleBlowStage] = useState('unlit'); // 'unlit' | 'lighting' | 'lit'
 
     const quotesPool = [
         "Kamu adalah nada terindah dalam lofi hidupku. ✨",
@@ -683,6 +683,20 @@ function LofiLoveFull({ card }) {
                     background: rgba(255, 255, 255, 0.1);
                     border-radius: 99px;
                 }
+                @keyframes candleGlowPulse {
+                    0%, 100% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.15), 0 0 45px rgba(251, 191, 36, 0.04); filter: brightness(0.97); }
+                    50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.32), 0 0 65px rgba(251, 191, 36, 0.15); filter: brightness(1.03); }
+                }
+                .candle-bathed-card {
+                    animation: candleGlowPulse 2.4s ease-in-out infinite;
+                }
+                @keyframes roomGlowPulse {
+                    0%, 100% { opacity: 0.88; }
+                    50% { opacity: 1; }
+                }
+                .candle-room-glow {
+                    animation: roomGlowPulse 2s ease-in-out infinite;
+                }
             `}</style>
 
             {/* String Lights at Top */}
@@ -700,10 +714,21 @@ function LofiLoveFull({ card }) {
 
             {/* ═══ SCENE 0: CANDLE INTRO ═══ */}
             {stage === 'candle_intro' && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-950 p-6 text-center select-none animate-in fade-in duration-700">
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] p-6 text-center select-none animate-in fade-in duration-700 overflow-y-auto">
                     
-                    {/* Floating Instruction */}
-                    <div className="absolute top-16 text-center px-4 max-w-xs">
+                    {/* Realistic candlelight warm room glow overlay */}
+                    {(candleBlowStage === 'lighting' || candleBlowStage === 'lit') && (
+                        <div 
+                            className="absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-out candle-room-glow z-0"
+                            style={{
+                                background: 'radial-gradient(circle at center, rgba(251, 191, 36, 0.22) 0%, rgba(251, 191, 36, 0.06) 50%, transparent 80%)',
+                                opacity: candleBlowStage === 'lighting' ? 0.5 : 1
+                            }}
+                        />
+                    )}
+
+                    {/* Floating Instruction / Header */}
+                    <div className="relative z-10 text-center px-4 max-w-xs mb-8">
                         <span className="text-[10px] font-bold text-amber-500 bg-amber-950/40 border border-amber-900/40 px-3 py-1 rounded-full font-mono tracking-widest uppercase shadow-sm animate-pulse">
                             🕯️ MOMEN SPESIAL 🕯️
                         </span>
@@ -711,49 +736,48 @@ function LofiLoveFull({ card }) {
                             {card.title}
                         </h2>
                         <p className="text-[10px] text-neutral-400 font-mono mt-2.5 tracking-widest uppercase leading-relaxed">
-                            Minta tolong tiup lilin ini untuk memulai momen indah kita...
+                            {candleBlowStage === 'unlit' 
+                                ? "Nyalakan lilin ini untuk memulai momen indah kita..."
+                                : "Lilin telah menyala. Buka surat kasih kita..."
+                            }
                         </p>
                     </div>
 
                     {/* Interactive Candle Centerpiece */}
                     <div 
                         onClick={() => {
-                            if (candleBlowStage !== 'lit') return;
-                            setCandleBlowStage('blowing');
+                            if (candleBlowStage !== 'unlit') return;
+                            setCandleBlowStage('lighting');
                             playSynthesizedSound('lift', false);
                             
                             setTimeout(() => {
-                                setCandleBlowStage('puff');
+                                setCandleBlowStage('lit');
                                 playSynthesizedSound('burst', false);
-                                
-                                setTimeout(() => {
-                                    playSynthesizedSound('click', false);
-                                    setStage('envelope');
-                                }, 1000);
-                            }, 1200);
+                            }, 1000);
                         }}
-                        className="cursor-pointer group flex flex-col items-center justify-center p-8 transition-transform duration-300 hover:scale-105 active:scale-95"
+                        className="relative z-10 cursor-pointer group flex flex-col items-center justify-center p-8 transition-transform duration-300 hover:scale-105 active:scale-95"
                     >
                         {/* Candle Flame */}
-                        {candleBlowStage === 'lit' && (
-                            <div className="relative w-8 h-12 mb-1.5">
-                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5.5 h-9 rounded-full flame-intro" />
+                        {candleBlowStage === 'unlit' && (
+                            <div className="relative w-8 h-12 mb-1.5 flex items-center justify-center">
+                                {/* Small dark unlit wick */}
+                                <div className="w-0.5 h-3 bg-neutral-800 rounded-full" />
                             </div>
                         )}
-                        {candleBlowStage === 'blowing' && (
-                            <div className="relative w-8 h-12 mb-1.5">
+                        {candleBlowStage === 'lighting' && (
+                            <div className="relative w-8 h-12 mb-1.5 transition-all duration-700 animate-pulse">
                                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-11 rounded-full flame-blowing" />
                             </div>
                         )}
-                        {candleBlowStage === 'puff' && (
-                            <div className="h-12 mb-1.5 flex items-center justify-center">
-                                <span className="text-white/40 text-[9px] font-mono animate-ping">💨 *puff*</span>
+                        {candleBlowStage === 'lit' && (
+                            <div className="relative w-8 h-12 mb-1.5 animate-in zoom-in-50 duration-500">
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5.5 h-9 rounded-full flame-intro" />
                             </div>
                         )}
 
                         {/* Candle Body */}
                         <div className="w-5.5 h-20 bg-amber-100/90 rounded-t-md shadow-lg border-b-4 border-amber-200/50 flex flex-col justify-start items-center relative">
-                            {candleBlowStage !== 'puff' && <div className="w-0.5 h-3 bg-neutral-900 absolute -top-3" />}
+                            {candleBlowStage !== 'unlit' && <div className="w-0.5 h-3 bg-neutral-900 absolute -top-3" />}
                             <div className="absolute top-2 left-1 w-1.5 h-5 bg-amber-200/60 rounded-full" />
                             <div className="absolute top-4 right-1 w-1 h-3 bg-amber-200/60 rounded-full" />
                         </div>
@@ -761,44 +785,43 @@ function LofiLoveFull({ card }) {
                         <div className="w-12 h-2 bg-neutral-700 rounded-full shadow border-b border-neutral-850" />
                     </div>
 
-                    <p className="absolute bottom-16 text-[9px] text-white/30 uppercase tracking-widest font-mono animate-bounce">
-                        👆 KETUK LILIN UNTUK MENIUP
-                    </p>
-                </div>
-            )}
-
-            {/* ═══ SCENE 1: ENVELOPE OPENER ═══ */}
-            {stage === 'envelope' && (
-                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center">
-                    
-                    {/* Background Neon Glow */}
-                    <div className="absolute rounded-full w-72 h-72 bg-rose-500/5 blur-3xl pointer-events-none" />
-
-                    <div 
-                        onClick={handleOpenEnvelope}
-                        className={`relative cursor-pointer transition-all duration-500 ${envelopeOpen ? 'scale-95 opacity-0' : 'hover:scale-[1.02]'} flex flex-col items-center justify-center p-8 bg-neutral-900/65 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl max-w-sm w-full envelop-glow`}
-                    >
-                        {/* Lofi Radio Art */}
-                        <div className="w-20 h-20 bg-neutral-800 rounded-2xl flex items-center justify-center border border-white/5 mb-6 text-4xl shadow-inner animate-pulse">
-                            📻
-                        </div>
-
-                        <h2 className="text-xl font-bold tracking-wide text-neutral-100 font-mono mb-2">
-                            {card.title}
-                        </h2>
-                        
-                        <p className="text-xs text-neutral-400 font-mono tracking-widest uppercase mb-6">
-                            Untuk: {card.recipient_name}
+                    {/* Instruction helper text when unlit */}
+                    {candleBlowStage === 'unlit' && (
+                        <p className="relative z-10 mt-4 text-[9px] text-white/35 uppercase tracking-widest font-mono animate-bounce">
+                            👆 KETUK LILIN UNTUK MENYALAKAN
                         </p>
+                    )}
 
-                        <div className="px-6 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold font-mono tracking-widest border border-rose-500/30 transition-all">
-                            💌 BUKA SURAT LOFI
+                    {/* Envelope opener card (appears with sayup-sayup candlelight glow when lit) */}
+                    {candleBlowStage === 'lit' && (
+                        <div className="relative z-10 w-full max-w-xs mt-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                            <div 
+                                onClick={handleOpenEnvelope}
+                                className={`relative cursor-pointer transition-all duration-500 ${envelopeOpen ? 'scale-95 opacity-0' : 'hover:scale-[1.02]'} flex flex-col items-center justify-center p-6 bg-neutral-900/65 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl w-full candle-bathed-card`}
+                            >
+                                {/* Lofi Radio Art Icon */}
+                                <div className="w-14 h-14 bg-neutral-800 rounded-xl flex items-center justify-center border border-white/5 mb-4 text-3xl shadow-inner animate-pulse">
+                                    📻
+                                </div>
+
+                                <h3 className="text-md font-bold tracking-wide text-neutral-100 font-mono mb-1">
+                                    {card.title}
+                                </h3>
+                                
+                                <p className="text-[10px] text-neutral-400 font-mono tracking-widest uppercase mb-5">
+                                    Untuk: {card.recipient_name}
+                                </p>
+
+                                <div className="px-5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[10px] font-bold font-mono tracking-widest border border-amber-500/30 transition-all shadow-md">
+                                    💌 BUKA SURAT LOFI
+                                </div>
+                            </div>
+                            
+                            <p className="mt-3 text-[8px] text-white/20 uppercase tracking-widest font-mono">
+                                Ketuk untuk Memutar Musik & Membaca
+                            </p>
                         </div>
-                    </div>
-                    
-                    <p className="mt-6 text-[10px] text-white/30 uppercase tracking-widest font-mono pointer-events-none">
-                        Ketuk untuk Memutar Musik & Membaca
-                    </p>
+                    )}
                 </div>
             )}
 
@@ -839,7 +862,7 @@ function LofiLoveFull({ card }) {
                     <div className="relative my-auto flex flex-col items-center justify-center scale-[0.93] md:scale-100">
                         
                         {/* Wooden shelf above window holding clock & calendar */}
-                        <div className="absolute top-[-189px] w-[390px] h-2 bg-amber-900/90 border-b border-amber-950 rounded shadow-md -z-10 flex justify-between items-end px-3">
+                        <div className="absolute top-[-129px] md:top-[-179px] w-[320px] md:w-[390px] h-2 bg-amber-900/90 border-b border-amber-950 rounded shadow-md -z-10 flex justify-between items-end px-3">
                             {/* Retro Digital Clock */}
                             <div className="bg-neutral-950 border border-neutral-800 px-1.5 py-0.5 rounded text-[7px] font-mono text-emerald-400 font-bold tracking-widest shadow-inner scale-[0.8] origin-bottom-left flex items-center gap-1 mb-0.5">
                                 <span>⏱️</span>
@@ -862,7 +885,7 @@ function LofiLoveFull({ card }) {
                                 playSynthesizedSound('click', false);
                                 setBlindsClosed(!blindsClosed);
                             }}
-                            className="absolute top-[-180px] w-[390px] h-[260px] border-4 border-neutral-800 bg-neutral-950/70 rounded-t-xl overflow-hidden -z-10 flex cursor-pointer group relative"
+                            className="absolute top-[-120px] md:top-[-170px] w-[320px] md:w-[390px] h-[180px] md:h-[250px] border-4 border-neutral-800 bg-neutral-950/70 rounded-t-xl overflow-hidden -z-10 flex cursor-pointer group relative"
                             style={{ 
                                 boxShadow: `inset 0 0 20px rgba(0,0,0,0.9), 0 4px 10px rgba(0,0,0,0.5)`, 
                                 borderColor: '#171717' 
@@ -924,7 +947,7 @@ function LofiLoveFull({ card }) {
                         </div>
 
                         {/* Left Side Desk Items Stack (Lilin & Kopi Dihapus) */}
-                        <div className="absolute -left-20 top-0 bottom-0 flex flex-col justify-end items-center gap-3">
+                        <div className="absolute left-[-38px] md:-left-24 bottom-1 top-auto flex flex-col justify-end items-center gap-3">
                             
                             {/* Polaroid Camera */}
                             <div 
@@ -962,7 +985,7 @@ function LofiLoveFull({ card }) {
                                         setPrintingPolaroid(false);
                                     }, 800);
                                 }}
-                                className="cursor-pointer flex flex-col items-center group z-35 relative"
+                                className="cursor-pointer flex flex-col items-center group z-35 relative scale-90 md:scale-100"
                                 title="Ambil Foto Polaroid Baru"
                             >
                                 <div className="w-10 h-7 bg-neutral-800 border border-neutral-700 rounded flex flex-col justify-between p-0.5 shadow-md relative group-hover:scale-105 transition-transform">
@@ -975,7 +998,7 @@ function LofiLoveFull({ card }) {
                                 </div>
                                 <span className="text-[6px] text-white/20 tracking-wider font-mono mt-1 group-hover:text-white/40">CAMERA</span>
                                 {/* Instruction Tooltip */}
-                                <div className="absolute left-12 top-1 bg-neutral-900/90 border border-white/10 rounded px-1.5 py-0.5 text-[5px] text-neutral-300 font-mono opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-40">
+                                <div className="absolute left-10 md:left-12 top-1 bg-neutral-900/90 border border-white/10 rounded px-1.5 py-0.5 text-[5px] text-neutral-300 font-mono opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-40">
                                     📸 KETUK UNTUK MENJEPRET FOTO
                                 </div>
                             </div>
@@ -983,7 +1006,7 @@ function LofiLoveFull({ card }) {
 
                         {/* Printed Polaroid Cards container */}
                         {printedPolaroids.length > 0 && (
-                            <div className="absolute left-[-150px] top-4 flex flex-col gap-2 z-40 pointer-events-auto">
+                            <div className="absolute left-[-42px] md:left-[-150px] top-2 flex flex-col gap-2 z-40 pointer-events-auto scale-90 md:scale-100">
                                 {printedPolaroids.map((item, idx) => (
                                     <div 
                                         key={item.id}
@@ -1036,7 +1059,7 @@ function LofiLoveFull({ card }) {
                                     }, 2000);
                                 }, 800);
                             }}
-                            className="absolute -right-22 bottom-1 cursor-pointer transform scale-75 origin-bottom-right z-30 group"
+                            className="absolute right-[-38px] md:-right-22 bottom-1 cursor-pointer transform scale-75 origin-bottom-right z-30 group"
                             title="Elus Kucing Cozy"
                         >
                             {/* Floating Emojis */}

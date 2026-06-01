@@ -50,6 +50,7 @@ class GreetingCardController extends Controller
                     'pending_payment_id' => $pendingPayment ? $pendingPayment->id : null,
                     'pending_payment_status' => $pendingPayment ? $pendingPayment->status : null,
                     'created_at'     => $card->created_at->format('d M Y'),
+                    'can_edit'       => !($card->is_active && $card->updated_at->addDays(3)->isPast()),
                 ];
             });
 
@@ -183,6 +184,11 @@ class GreetingCardController extends Controller
         $user = $request->user();
         $card = GreetingCard::where('user_id', $user->id)->findOrFail($id);
 
+        if ($card->is_active && $card->updated_at->addDays(3)->isPast()) {
+            return redirect()->route('greeting-card.index')
+                ->with('error', 'Masa edit kartu ucapan telah berakhir (maksimal 3 hari setelah aktif). Hubungi reseller/admin untuk bantuan.');
+        }
+
         return Inertia::render('Dashboard/GreetingCard/Form', [
             'card'      => [
                 'id'             => $card->id,
@@ -206,6 +212,11 @@ class GreetingCardController extends Controller
     {
         $user = $request->user();
         $card = GreetingCard::where('user_id', $user->id)->findOrFail($id);
+
+        if ($card->is_active && $card->updated_at->addDays(3)->isPast()) {
+            return redirect()->route('greeting-card.index')
+                ->with('error', 'Masa edit kartu ucapan telah berakhir (maksimal 3 hari setelah aktif).');
+        }
 
         $validated = $request->validate([
             'title'          => 'nullable|string|max:100',

@@ -178,13 +178,26 @@ export default function GreetingCardIndex({ cards }) {
                                                 <Icon d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-3.5 h-3.5" />
                                                 Preview
                                             </a>
-                                            <Link
-                                                href={`/greeting-card/${card.id}/edit`}
-                                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition-all"
-                                            >
-                                                <Icon d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" className="w-3.5 h-3.5" />
-                                                Edit
-                                            </Link>
+                                            {card.can_edit ? (
+                                                <Link
+                                                    href={`/greeting-card/${card.id}/edit`}
+                                                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition-all"
+                                                >
+                                                    <Icon d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" className="w-3.5 h-3.5" />
+                                                    Edit
+                                                </Link>
+                                            ) : (
+                                                <button
+                                                    disabled
+                                                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 text-gray-400 text-xs font-semibold rounded-xl cursor-not-allowed border border-gray-100"
+                                                    title="Masa edit telah berakhir (3 hari sejak diaktifkan). Hubungi reseller/admin jika ingin mengubah."
+                                                >
+                                                    <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                    </svg>
+                                                    Terkunci
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={() => handleDelete(card.id)}
                                                 disabled={deletingId === card.id}
