@@ -2238,7 +2238,7 @@ function EtherealWhispersFull({ card }) {
             clearTimeout(t);
             window.removeEventListener('resize', resizeCanvas);
         };
-    }, [scene, isTypingComplete]);
+    }, [scene, isTypingComplete, scrollSubScene]);
 
     const handleScrapbookPointerDown = (e) => {
         isScrapbookDrawingRef.current = true;
@@ -2404,6 +2404,26 @@ function EtherealWhispersFull({ card }) {
         }, 1300);
     };
     
+    // Proceed to prologue scene manually with cinematic silk curtains transition
+    const handleProceedToPrologue = () => {
+        playChimeNote(0.2);
+        setCurtainActive(true);
+        // Slowly slide curtain closed to cover the screen, swap scene, then open it back up
+        setTimeout(() => {
+            setScene('prologue');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => {
+                setCurtainOpen(true);
+            }, 60);
+        }, 500);
+
+        // Reset curtain state after completion
+        setTimeout(() => {
+            setCurtainActive(false);
+            setCurtainOpen(false);
+        }, 2000);
+    };
+
     // Ribbon tying mechanism (Scene 5)
     const handleTieRibbon = () => {
         if (isRibbonTied) return;
@@ -2428,22 +2448,6 @@ function EtherealWhispersFull({ card }) {
         setTimeout(() => {
             setKnotBurstActive(false);
         }, 1500);
-
-        // FITUR BARU: Transisi Tirai Sutra yang Megah!
-        // Tunggu 1.4 detik agar user menikmati semburan kelopak bunga, lalu buka tirai menuju Prologue!
-        setTimeout(() => {
-            setCurtainActive(true);
-            setScene('prologue'); // Reveal prologue scene underneath!
-            setTimeout(() => {
-                setCurtainOpen(true);
-            }, 60);
-            
-            // Selesai transisi, hilangkan tirai agar tidak mengalangi interaksi halaman berikutnya
-            setTimeout(() => {
-                setCurtainActive(false);
-                setCurtainOpen(false);
-            }, 1500);
-        }, 1400);
     };
 
     // Drag-and-Tie Rope gesture event handlers
@@ -2810,17 +2814,17 @@ function EtherealWhispersFull({ card }) {
                                 </div>
                                 
                                 {/* Writing Parchment Body */}
-                                <div className="min-h-[180px] flex flex-col justify-center py-2">
-                                    <h3 style={{ fontFamily: "'Dancing Script', cursive" }} className="text-2xl font-bold text-[#e5654b] mb-4">
+                                <div className="min-h-[180px] flex flex-col justify-center py-2 text-center">
+                                    <h3 style={{ fontFamily: "'Dancing Script', cursive" }} className="text-2xl font-bold text-[#e5654b] mb-4 text-center">
                                         Teruntuk {card.recipient_name} tercinta,
                                     </h3>
-                                    <p style={{ fontFamily: "'Dancing Script', cursive", lineHeight: '1.8' }} className="text-xl text-[#5c3e35] font-bold whitespace-pre-line leading-relaxed min-h-[120px]">
+                                    <p style={{ fontFamily: "'Dancing Script', cursive", lineHeight: '1.8' }} className="text-xl text-[#5c3e35] font-bold whitespace-pre-line leading-relaxed min-h-[120px] text-center">
                                         {typewriterText}
                                         {!isTypingComplete && (
                                             <span className="inline-block w-[2px] h-[1.1em] bg-[#e5654b] ml-1 align-middle animate-blink" />
                                         )}
                                     </p>
-                                    <p style={{ fontFamily: "'Dancing Script', cursive" }} className="text-right text-lg text-[#e5654b] mt-8 font-semibold">
+                                    <p style={{ fontFamily: "'Dancing Script', cursive" }} className="text-center text-lg text-[#e5654b] mt-8 font-semibold">
                                         Dari: {card.sender_name} 🌸
                                     </p>
                                 </div>
@@ -2901,8 +2905,8 @@ function EtherealWhispersFull({ card }) {
                                         
                                         const scrapStyles = [
                                             {
-                                                left: '12%',
-                                                top: '15%',
+                                                left: '10%',
+                                                top: '24%',
                                                 transform: isActive 
                                                     ? 'rotate(0deg) scale(1.12) translateZ(40px)' 
                                                     : 'rotate(-10deg) scale(0.92) translateZ(0)',
@@ -2910,8 +2914,8 @@ function EtherealWhispersFull({ card }) {
                                                 washi: 'left-1/3 -top-2.5 rotate-[-12deg]'
                                             },
                                             {
-                                                left: '32%',
-                                                top: '10%',
+                                                left: '37%',
+                                                top: '19%',
                                                 transform: isActive 
                                                     ? 'rotate(0deg) scale(1.12) translateZ(40px)' 
                                                     : 'rotate(4deg) scale(0.95) translateZ(0)',
@@ -2919,8 +2923,8 @@ function EtherealWhispersFull({ card }) {
                                                 washi: 'left-1/3 -top-3 rotate-[3deg]'
                                             },
                                             {
-                                                left: '52%',
-                                                top: '15%',
+                                                left: '64%',
+                                                top: '24%',
                                                 transform: isActive 
                                                     ? 'rotate(0deg) scale(1.12) translateZ(40px)' 
                                                     : 'rotate(12deg) scale(0.90) translateZ(0)',
@@ -3067,7 +3071,7 @@ function EtherealWhispersFull({ card }) {
                             className={`w-64 h-36 relative flex items-center justify-center mb-8 bg-white/40 border border-white/50 rounded-2xl shadow-sm backdrop-blur-xs p-4 select-none cursor-grab active:cursor-grabbing touch-none transition-all duration-300 ${isDraggingRope ? 'scale-102 ring-2 ring-red-300/35 shadow-md' : ''}`}
                             style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                         >
-                            <svg viewBox="0 0 200 100" className="w-full h-full select-none" draggable="false" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
+                            <svg viewBox="0 0 200 100" className="w-full h-full select-none" draggable="false" style={{ overflow: 'visible', userSelect: 'none', WebkitUserSelect: 'none' }}>
                                 <defs>
                                     {/* Soft drop shadow filter for 3D depth */}
                                     <filter id="ropeShadow" x="-20%" y="-20%" width="140%" height="140%">
@@ -3173,11 +3177,7 @@ function EtherealWhispersFull({ card }) {
                                     <div className="h-[1px] w-20 bg-red-600/35 mx-auto mt-6 mb-5" />
                                     
                                     <button
-                                        onClick={() => {
-                                            playChimeNote(0.2);
-                                            setScene('prologue'); 
-                                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                                        }}
+                                        onClick={handleProceedToPrologue}
                                         className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-white text-xs font-bold tracking-wider uppercase bg-gradient-to-r from-red-500 to-red-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(239,68,68,0.25)] cursor-pointer"
                                     >
                                         Buka Lembaran Kisah ➔
