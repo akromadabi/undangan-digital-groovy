@@ -1205,44 +1205,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                     {/* ═══ TAB: Pengaturan ═══ */}
                     {activeTab === 'pengaturan' && (
                         <div className="space-y-3">
-                            {/* Model Transisi */}
-                            <div className={`bg-white rounded-2xl border border-gray-200 p-4 transition-opacity ${isLockedByPlan('template') ? 'opacity-60' : ''}`}>
-                                <div className="flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center relative">
-                                            <svg className="w-4 h-4 text-[#c24b33]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                            </svg>
-                                            {isLockedByPlan('template') && (
-                                                <div className="absolute -top-1 -right-1 bg-amber-400 text-white rounded-full p-0.5 shadow-sm">
-                                                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                        </span>
-                                        <div>
-                                            <div className="text-xs font-semibold text-gray-800 flex items-center gap-1.5">
-                                                Model Transisi Halaman
-                                                {isLockedByPlan('template') && (
-                                                    <span className="inline-flex items-center gap-0.5 text-[9px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full font-bold border border-amber-100">
-                                                        Locked
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className="text-[10px] text-gray-400 mt-0.5">Pilih model navigasi perpindahan halaman</div>
-                                        </div>
-                                    </div>
-                                    <select value={layoutMode} 
-                                        disabled={isLockedByPlan('template')}
-                                        onChange={(e) => handleLayoutChange(e.target.value)}
-                                        className="border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:ring-2 focus:ring-orange-300 focus:border-[#e87058] bg-white outline-none disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <option value="scroll">Scroll (Gulir)</option>
-                                        <option value="slide-h">Horizontal</option>
-                                        <option value="slide-v">Vertikal</option>
-                                    </select>
-                                </div>
-                            </div>
+
 
                             {/* Efek Partikel */}
                             <div className={`bg-white rounded-2xl border border-gray-200 p-4 transition-opacity ${isLockedByPlan('partikel') ? 'opacity-60' : ''}`}>
@@ -1887,7 +1850,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
 
             {/* Toast notification */}
             {toast && (
-                <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 text-sm font-medium text-white animate-[slideUp_0.3s_ease] ${
+                <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100000] px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 text-sm font-medium text-white animate-[slideUp_0.3s_ease] ${
                     toast.type === 'success' ? 'bg-[#E5654B]' : 'bg-red-500'
                 }`}>
                     {toast.type === 'success' ? (
@@ -2139,7 +2102,16 @@ function SectionCard({ section, colors, fonts, isJawa, inv, getDynamicLabel }) {
                         <div key={i} className="mb-3">
                             <div className="w-14 h-14 mx-auto rounded-full mb-1 overflow-hidden" style={{ border: `2px solid ${colors.primary}` }}>
                                 {inv?.bride_grooms?.[i]?.photo
-                                    ? <img src={inv.bride_grooms[i].photo} className="w-full h-full object-cover" alt="" />
+                                    ? <img 
+                                        src={inv.bride_grooms[i].photo} 
+                                        className="w-full h-full object-cover transition-all" 
+                                        alt="" 
+                                        style={{
+                                            objectPosition: `${Number(inv.bride_grooms[i].photo_position_x ?? 50)}% ${Number(inv.bride_grooms[i].photo_position_y ?? 50)}%`,
+                                            transform: `scale(${Number(inv.bride_grooms[i].photo_zoom ?? 1.0)}) translate(${(50 - Number(inv.bride_grooms[i].photo_position_x ?? 50)) * (1 - 1 / Number(inv.bride_grooms[i].photo_zoom ?? 1.0))}%, ${(50 - Number(inv.bride_grooms[i].photo_position_y ?? 50)) * (1 - 1 / Number(inv.bride_grooms[i].photo_zoom ?? 1.0))}%)`,
+                                            transformOrigin: 'center',
+                                        }}
+                                    />
                                     : <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: colors.primary + '20' }}>
                                         <svg className="w-6 h-6" style={{ color: colors.primary }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                     </div>
