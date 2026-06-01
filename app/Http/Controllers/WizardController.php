@@ -165,7 +165,7 @@ class WizardController extends Controller
     {
         $request->validate([
             'events' => 'required|array|min:1',
-            'events.*.event_type' => 'required|string|max:50',
+            'events.*.event_type' => 'required|string',
             'events.*.event_name' => 'required|string|max:100',
             'events.*.event_date' => 'required|date',
             'events.*.start_time' => 'required',
@@ -173,10 +173,16 @@ class WizardController extends Controller
             'events.*.timezone' => 'required|in:WIB,WITA,WIT',
             'events.*.venue_name' => 'nullable|string|max:200',
             'events.*.venue_address' => 'nullable|string',
-            'events.*.gmaps_link' => 'nullable|url|max:500',
+            'events.*.gmaps_link' => 'nullable|string|max:500',
             'events.*.is_primary' => 'nullable|boolean',
             'events.*.streaming_platform' => 'nullable|string|max:50',
             'events.*.streaming_url' => 'nullable|string|max:500',
+            'events.*.streamings' => 'nullable|array',
+            'events.*.streamings.*.platform' => 'required_with:events.*.streamings|string|max:50',
+            'events.*.streamings.*.url' => 'required_with:events.*.streamings|string|max:500',
+            'events.*.show_dress_code' => 'sometimes|boolean',
+            'events.*.dress_code_text' => 'nullable|string|max:1000',
+            'events.*.dress_code_colors' => 'nullable|array',
         ]);
 
         $user = $request->user();
@@ -189,11 +195,17 @@ class WizardController extends Controller
         $hasPrimary = collect($request->events)->contains(fn($e) => !empty($e['is_primary']));
 
         foreach ($request->events as $index => $data) {
+            // Filter out empty streamings
+            $streamings = collect($data['streamings'] ?? [])->filter(fn($s) => !empty($s['platform']) && !empty($s['url']))->values()->toArray();
+
             Event::create(array_merge($data, [
                 'invitation_id' => $invitation->id,
                 'sort_order' => $index,
-                // If no event is explicitly marked primary, default first event as primary
                 'is_primary' => !empty($data['is_primary']) || (!$hasPrimary && $index === 0),
+                'streamings' => !empty($streamings) ? $streamings : null,
+                // Keep backward compat: first streaming goes to old fields
+                'streaming_platform' => $streamings[0]['platform'] ?? ($data['streaming_platform'] ?? null),
+                'streaming_url' => $streamings[0]['url'] ?? ($data['streaming_url'] ?? null),
             ]));
         }
 

@@ -20,7 +20,8 @@ import {
     ChevronDown,
     Info,
     Image,
-    Check
+    Check,
+    Music
 } from 'lucide-react';
 
 /* ─── Step bar ─── */
@@ -43,6 +44,7 @@ const templateGradients = {
     cosmicdrift:      'from-[#0b0c10] via-[#1f2833] to-[#0b0c10]',
     etherealwhispers: 'from-[#fdf8f5] via-[#faebf0] to-[#f5dae2]',
     balloonpop:       'from-[#e0f2fe] via-[#bae6fd] to-[#7dd3fc]',
+    lofilove:         'from-[#1b1517] via-[#352528] to-[#1b1517]',
 };
 
 const templateIcons = {
@@ -51,6 +53,7 @@ const templateIcons = {
     cosmicdrift:      Sparkles,
     etherealwhispers: Heart,
     balloonpop:       Sparkles,
+    lofilove:         Music,
 };
 
 const DRAFT_KEY = 'buat_kartu_draft';

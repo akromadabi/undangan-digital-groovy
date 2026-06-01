@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
+import GreetingCardPreviewCard from '@/Components/GreetingCardPreviewCard';
 
 
 // Brand Partnership Logos (10 Distinct Premium Brands for Infinite Scrolling Ticker)
@@ -203,7 +204,7 @@ const SORT_OPTIONS = [
     { key: 'disukai', label: 'Terfavorit' },
 ];
 
-export default function Welcome({ auth, canLogin, canRegister, appName, themes = [], recentInvitations = [], resellerCount = 15, invitationCount = 40, adminWhatsapp = '6283132211830', adminEmail = 'admin@groovy.com', minModalCost = 15000, subscriptionPlans = [] }) {
+export default function Welcome({ auth, canLogin, canRegister, appName, themes = [], recentInvitations = [], resellerCount = 15, invitationCount = 40, adminWhatsapp = '6283132211830', adminEmail = 'admin@groovy.com', minModalCost = 15000, subscriptionPlans = [], greetingCards = [], greetingCardTypeOptions = {} }) {
     const { flash } = usePage().props;
     const [scrolled, setScrolled] = useState(false);
     const [showFlash, setShowFlash] = useState(true);
@@ -217,9 +218,18 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
     const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
+    // Cards filtering states
+    const [cardSortKey, setCardSortKey] = useState('terbaru');
+    const [cardSelectedTypes, setCardSelectedTypes] = useState([]);
+    const [cardSearchQuery, setCardSearchQuery] = useState('');
+    const [isCardTypeDropdownOpen, setIsCardTypeDropdownOpen] = useState(false);
+    const [isCardSortDropdownOpen, setIsCardSortDropdownOpen] = useState(false);
+
     const categoryDropdownRef = useRef(null);
     const typeDropdownRef = useRef(null);
     const sortDropdownRef = useRef(null);
+    const cardTypeDropdownRef = useRef(null);
+    const cardSortDropdownRef = useRef(null);
 
     const categories = useMemo(() => {
         const cats = themes?.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean) || [];
@@ -246,6 +256,22 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
         });
     }, [themes]);
 
+    // Card event types with counts
+    const cardTypesWithCount = useMemo(() => {
+        return Object.entries(greetingCardTypeOptions || {}).map(([key, label]) => {
+            const count = greetingCards?.filter(t => (t.type || []).includes(key)).length || 0;
+            return { key, label, count };
+        }).sort((a, b) => a.label.localeCompare(b.label));
+    }, [greetingCards, greetingCardTypeOptions]);
+
+    const toggleCardType = (typeKey) => {
+        setCardSelectedTypes(prev =>
+            prev.includes(typeKey) ? prev.filter(t => t !== typeKey) : [...prev, typeKey]
+        );
+    };
+
+    const clearCardTypes = () => setCardSelectedTypes([]);
+
     const filteredThemes = useMemo(() => {
         let list = [...(themes || [])];
         if (selectedCategories.length > 0) {
@@ -262,6 +288,25 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
         }
         return list;
     }, [themes, selectedCategories, selectedTypes, searchQuery]);
+
+    const filteredCards = useMemo(() => {
+        let list = [...(greetingCards || [])];
+        if (cardSelectedTypes.length > 0) {
+            list = list.filter(t => (t.type || []).some(type => cardSelectedTypes.includes(type)));
+        }
+        if (cardSearchQuery.trim()) {
+            list = list.filter(t => t.name.toLowerCase().includes(cardSearchQuery.toLowerCase()));
+        }
+        return list;
+    }, [greetingCards, cardSelectedTypes, cardSearchQuery]);
+
+    const sortedCards = useMemo(() => {
+        const arr = [...filteredCards];
+        if (cardSortKey === 'terbaru') return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
+        if (cardSortKey === 'populer') return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
+        if (cardSortKey === 'disukai') return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
+        return arr;
+    }, [filteredCards, cardSortKey]);
 
     const toggleCategory = (cat) => {
         setSelectedCategories(prev => 
@@ -289,6 +334,12 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
             }
             if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
                 setIsSortDropdownOpen(false);
+            }
+            if (cardTypeDropdownRef.current && !cardTypeDropdownRef.current.contains(event.target)) {
+                setIsCardTypeDropdownOpen(false);
+            }
+            if (cardSortDropdownRef.current && !cardSortDropdownRef.current.contains(event.target)) {
+                setIsCardSortDropdownOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -1049,47 +1100,214 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                 </div>
             </section>
 
-            {/* ═══ KARTU UCAPAN BANNER ═══ */}
-            <section className="bg-gradient-to-r from-[#1a0928] via-[#2d1042] to-[#1a0928] py-16 border-y border-white/5">
-                <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div>
-                        <div className="inline-flex items-center gap-2 bg-pink-500/10 text-pink-400 text-xs font-bold px-3 py-1.5 rounded-full mb-4 border border-pink-500/20">
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                            </svg>
-                            <span>Fitur Baru — Kartu Ucapan Interaktif</span>
+            {/* ═══ KARTU UCAPAN SHOWCASE ═══ */}
+            {greetingCards.length > 0 && (
+                <section id="kartu-ucapan" className="bg-gradient-to-b from-[#11071c] via-[#1a082b] to-[#0f071a] py-24 border-y border-white/5 relative">
+                    <div className="absolute top-1/3 left-1/4 w-80 h-80 bg-pink-500/5 rounded-full blur-[100px]" />
+                    <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px]" />
+
+                    <div className="max-w-6xl mx-auto px-6">
+                        {/* Header */}
+                        <div className="text-center mb-12">
+                            <span className="text-xs font-bold text-pink-400 tracking-widest uppercase bg-pink-500/10 px-4 py-2 rounded-full border border-pink-500/20">
+                                Fitur Baru — Kartu Ucapan Interaktif
+                            </span>
+                            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mt-5">
+                                Koleksi Kartu Ucapan Premium
+                            </h2>
+                            <p className="text-white/50 mt-3 max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
+                                Kirimkan ucapan spesial dengan animasi, musik, dan efek interaktif memukau untuk berbagai momen penting Anda.
+                            </p>
                         </div>
-                        <h2 className="text-2xl sm:text-3xl font-black text-white">
-                            Lebih dari sekadar undangan —<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Kartu Ucapan Premium</span>
-                        </h2>
-                        <p className="text-white/50 mt-3 max-w-md text-sm leading-relaxed">
-                            Kirimkan ucapan spesial dengan animasi, musik, dan efek interaktif yang memukau. Tersedia 8+ template untuk anniversary, ulang tahun, wisuda, dan pernikahan.
-                        </p>
-                        <div className="flex flex-wrap gap-2 mt-4">
-                            {['Fireworks', 'Cosmic', 'Ocean', 'Mystic', 'Cyberpunk'].map(badge => (
-                                <span key={badge} className="text-[10px] font-bold text-white/40 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
-                                    {badge}
-                                </span>
-                            ))}
+
+                        {/* Search & Filters */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 w-full">
+                            {/* Search Box */}
+                            <div className="relative w-full sm:max-w-md">
+                                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                                <input
+                                    type="text"
+                                    value={cardSearchQuery}
+                                    onChange={e => setCardSearchQuery(e.target.value)}
+                                    placeholder="Cari kartu ucapan..."
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-white/10 text-sm focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none bg-white/5 hover:bg-white/10 focus:bg-[#221033] transition-all text-white placeholder-white/30"
+                                />
+                            </div>
+
+                            {/* Dropdowns Group */}
+                            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                                {/* Event Types Dropdown */}
+                                <div className="relative flex-1 sm:flex-initial" ref={cardTypeDropdownRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCardTypeDropdownOpen(!isCardTypeDropdownOpen)}
+                                        className={`w-full px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-between sm:justify-start gap-2 select-none min-h-[42px] ${
+                                            cardSelectedTypes.length > 0
+                                                ? 'bg-pink-500/10 text-pink-400 border-pink-500/30'
+                                                : 'bg-white/5 text-white/80 border-white/10 hover:border-white/20'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2 truncate">
+                                            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span className="truncate">
+                                                {cardSelectedTypes.length === 0
+                                                    ? 'Acara'
+                                                    : `Acara (${cardSelectedTypes.length})`
+                                                }
+                                            </span>
+                                        </div>
+                                        <svg className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${isCardTypeDropdownOpen ? 'rotate-180 text-pink-400' : 'text-white/40'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    {isCardTypeDropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-56 bg-[#1a082b] border border-white/10 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="px-3 py-2 border-b border-white/5 flex items-center justify-between">
+                                                <span className="text-[10px] font-extrabold text-white/40 uppercase tracking-wider font-semibold">TIPE ACARA</span>
+                                                {cardSelectedTypes.length > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={clearCardTypes}
+                                                        className="text-[10px] font-bold text-pink-400 hover:underline"
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
+                                                {cardTypesWithCount.map((type) => {
+                                                    const isChecked = cardSelectedTypes.includes(type.key);
+                                                    return (
+                                                        <label
+                                                            key={type.key}
+                                                            className={`flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-white/5 transition-colors select-none text-xs font-semibold ${
+                                                                isChecked ? 'bg-pink-500/5 text-pink-400' : 'text-white/80'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={() => toggleCardType(type.key)}
+                                                                    className="rounded text-pink-500 focus:ring-pink-500 border-white/10 w-3.5 h-3.5 cursor-pointer accent-pink-500"
+                                                                />
+                                                                <span>{type.label}</span>
+                                                            </div>
+                                                            <span className="text-[9px] font-bold text-white/40 bg-white/5 border border-white/10 px-1.5 py-0.5 rounded-md">
+                                                                {type.count}
+                                                            </span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Sort Dropdown */}
+                                <div className="relative" ref={cardSortDropdownRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCardSortDropdownOpen(!isCardSortDropdownOpen)}
+                                        title="Urutkan Kartu"
+                                        className={`p-0 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-center select-none min-h-[42px] w-[42px] ${
+                                            isCardSortDropdownOpen
+                                                ? 'bg-pink-500/10 text-pink-400 border-pink-500/30'
+                                                : 'bg-white/5 text-white/80 border-white/10 hover:border-white/20'
+                                        }`}
+                                    >
+                                        <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                        </svg>
+                                    </button>
+
+                                    {isCardSortDropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-[#1a082b] border border-white/10 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="px-3 py-1.5 border-b border-white/5 mb-1">
+                                                <span className="text-[10px] font-extrabold text-white/40 uppercase tracking-wider font-semibold">URUTKAN BERDASARKAN</span>
+                                            </div>
+                                            {[
+                                                { key: 'terbaru', label: 'Terbaru' },
+                                                { key: 'populer', label: 'Terpopuler' },
+                                                { key: 'disukai', label: 'Terfavorit' }
+                                            ].map(opt => {
+                                                const isActive = cardSortKey === opt.key;
+                                                return (
+                                                    <button
+                                                        key={opt.key}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setCardSortKey(opt.key);
+                                                            setIsCardSortDropdownOpen(false);
+                                                        }}
+                                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-bold transition-all ${
+                                                            isActive
+                                                                ? 'bg-pink-500/10 text-pink-400'
+                                                                : 'text-white/80 hover:bg-white/5'
+                                                        }`}
+                                                    >
+                                                        <span>{opt.label}</span>
+                                                        {isActive && (
+                                                            <svg className="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cards Grid */}
+                        {sortedCards.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                                {sortedCards.map((card) => (
+                                    <div key={card.id} className="flex-shrink-0">
+                                        <GreetingCardPreviewCard 
+                                            theme={card}
+                                            typeOptions={greetingCardTypeOptions}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 text-white/40 border border-dashed border-white/10 rounded-3xl bg-white/5">
+                                <p className="text-sm font-medium">Tidak ada kartu ucapan dalam kategori ini.</p>
+                            </div>
+                        )}
+
+                        {/* Banner bottom details / actions */}
+                        <div className="mt-16 flex flex-col md:flex-row items-center justify-between bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 gap-8">
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Ingin membuat kartu ucapan Anda sendiri?</h3>
+                                <p className="text-white/50 text-xs sm:text-sm mt-1">Gunakan editor interaktif kami untuk mengirim ucapan dalam hitungan menit.</p>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                <Link
+                                    href="/buat-kartu"
+                                    className="px-7 py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-2xl text-sm hover:shadow-xl hover:shadow-pink-500/30 transition-all hover:scale-105 duration-300 text-center"
+                                >
+                                    Buat Kartu Sekarang
+                                </Link>
+                                <Link
+                                    href="/katalog-kartu"
+                                    className="px-7 py-3.5 bg-white/5 text-white font-semibold rounded-2xl text-sm hover:bg-white/10 transition-all border border-white/10 text-center"
+                                >
+                                    Katalog Lengkap Kartu →
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
-                        <a
-                            href="/katalog-kartu"
-                            className="px-7 py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-2xl text-sm hover:shadow-xl hover:shadow-pink-500/30 transition-all hover:scale-105 duration-300 text-center"
-                        >
-                            Lihat Katalog Kartu →
-                        </a>
-                        <a
-                            href="/buat-kartu"
-                            className="px-7 py-3.5 bg-white/5 text-white font-semibold rounded-2xl text-sm hover:bg-white/10 transition-all border border-white/10 text-center"
-                        >
-                            Buat Kartu Sekarang
-                        </a>
-                    </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             {/* ═══ FAQ SECTION (Reseller focus Accordion with Neon lights) ═══ */}
             <section id="faq" className="bg-[#faf9f6] py-24">

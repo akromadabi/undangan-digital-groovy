@@ -6,6 +6,9 @@ const defaultEvent = {
     start_time: '', end_time: '', timezone: 'WIB',
     venue_name: '', venue_address: '', gmaps_link: '',
     is_primary: false,
+    show_dress_code: false,
+    dress_code_text: '',
+    dress_code_colors: [],
 };
 
 const getDefaultsForType = (type) => {
@@ -45,6 +48,9 @@ export default function Events({ step, events, eventType = 'wedding' }) {
     const initial = events?.length > 0 ? events.map((e, i) => ({
         ...e,
         is_primary: e.is_primary ?? (i === 0),
+        show_dress_code: e.show_dress_code ?? false,
+        dress_code_text: e.dress_code_text || '',
+        dress_code_colors: e.dress_code_colors || [],
         streamings: e.streamings?.length > 0
             ? e.streamings
             : (e.streaming_platform ? [{ platform: e.streaming_platform, url: e.streaming_url || '' }] : []),
@@ -296,6 +302,154 @@ export default function Events({ step, events, eventType = 'wedding' }) {
                                 className="mt-4 w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-orange-400 hover:text-[#E5654B] transition-colors text-sm font-semibold flex items-center justify-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                 + Tambah Live Streaming
+                            </button>
+                        )}
+
+                        {/* Dress Code Section */}
+                        {event.show_dress_code ? (
+                            <div className="mt-4 p-4 border border-blue-100 bg-blue-50/10 rounded-xl space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                                        <h4 className="text-xs font-bold text-gray-700">Dress Code (Panduan Busana)</h4>
+                                    </div>
+                                    <button type="button" onClick={() => {
+                                        const updated = [...data.events];
+                                        updated[index] = { ...updated[index], show_dress_code: false, dress_code_text: '', dress_code_colors: [] };
+                                        setData('events', updated);
+                                    }} className="text-gray-400 hover:text-red-500 text-xs font-semibold">Hapus</button>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Petunjuk / Rekomendasi Dress Code</label>
+                                    <textarea
+                                        value={event.dress_code_text || ''}
+                                        onChange={(e) => updateEvent(index, 'dress_code_text', e.target.value)}
+                                        placeholder="Contoh: Tamu undangan disarankan mengenakan pakaian bernuansa pastel / bumi (earthy)."
+                                        className="w-full border border-gray-200 bg-white rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-blue-300 resize-none"
+                                        rows={2}
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="block text-xs font-medium text-gray-500">Rekomendasi Palet Warna</label>
+                                    
+                                    {event.dress_code_colors?.map((group, gIdx) => (
+                                        <div key={gIdx} className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex-1 max-w-[200px] sm:max-w-xs">
+                                                    <input
+                                                        type="text"
+                                                        value={group.label || ''}
+                                                        onChange={(e) => {
+                                                            const updated = [...data.events];
+                                                            const groups = [...updated[index].dress_code_colors];
+                                                            groups[gIdx] = { ...groups[gIdx], label: e.target.value };
+                                                            updated[index] = { ...updated[index], dress_code_colors: groups };
+                                                            setData('events', updated);
+                                                        }}
+                                                        placeholder="Nama Palet (Contoh: Pria / Atasan)"
+                                                        className="w-full border border-gray-250 bg-gray-50/50 rounded-lg px-2.5 py-1 text-xs font-bold focus:ring-2 focus:ring-blue-300"
+                                                    />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const updated = [...data.events];
+                                                        const groups = [...updated[index].dress_code_colors];
+                                                        groups.splice(gIdx, 1);
+                                                        updated[index] = { ...updated[index], dress_code_colors: groups };
+                                                        setData('events', updated);
+                                                    }}
+                                                    className="text-gray-400 hover:text-red-500 text-xs font-medium"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </div>
+
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                {group.colors?.map((color, cIdx) => (
+                                                    <div key={cIdx} className="flex items-center gap-1.5 bg-gray-50 border border-gray-150 rounded-full pl-1.5 pr-2 py-1 shadow-sm">
+                                                        <input
+                                                            type="color"
+                                                            value={color}
+                                                            onChange={(e) => {
+                                                                const updated = [...data.events];
+                                                                const groups = [...updated[index].dress_code_colors];
+                                                                const colorsList = [...groups[gIdx].colors];
+                                                                colorsList[cIdx] = e.target.value;
+                                                                groups[gIdx] = { ...groups[gIdx], colors: colorsList };
+                                                                updated[index] = { ...updated[index], dress_code_colors: groups };
+                                                                setData('events', updated);
+                                                            }}
+                                                            className="w-5 h-5 rounded-full border-0 cursor-pointer overflow-hidden p-0 bg-transparent flex-shrink-0"
+                                                        />
+                                                        <span className="text-[9px] font-mono uppercase text-gray-500">
+                                                            {color}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const updated = [...data.events];
+                                                                const groups = [...updated[index].dress_code_colors];
+                                                                const colorsList = [...groups[gIdx].colors];
+                                                                colorsList.splice(cIdx, 1);
+                                                                groups[gIdx] = { ...groups[gIdx], colors: colorsList };
+                                                                updated[index] = { ...updated[index], dress_code_colors: groups };
+                                                                setData('events', updated);
+                                                            }}
+                                                            className="text-gray-400 hover:text-red-500 font-bold text-xs"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                ))}
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const updated = [...data.events];
+                                                        const groups = [...updated[index].dress_code_colors];
+                                                        const colorsList = [...(groups[gIdx].colors || []), '#d1d5db'];
+                                                        groups[gIdx] = { ...groups[gIdx], colors: colorsList };
+                                                        updated[index] = { ...updated[index], dress_code_colors: groups };
+                                                        setData('events', updated);
+                                                    }}
+                                                    className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-dashed border-gray-300 bg-white text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-colors text-xs font-bold"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const updated = [...data.events];
+                                            const groups = [...(updated[index].dress_code_colors || []), { label: 'Dress Code', colors: ['#ffffff'] }];
+                                            updated[index] = { ...updated[index], dress_code_colors: groups };
+                                            setData('events', updated);
+                                        }}
+                                        className="w-full py-2 border border-dashed border-blue-200 bg-white hover:bg-blue-50/10 text-blue-500 hover:border-blue-400 rounded-xl transition-colors text-xs font-medium flex items-center justify-center gap-1 shadow-sm"
+                                    >
+                                        + Tambah Palet Warna Baru
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <button type="button" onClick={() => {
+                                const updated = [...data.events];
+                                updated[index] = { 
+                                    ...updated[index], 
+                                    show_dress_code: true, 
+                                    dress_code_colors: [{ label: 'Pria/Wanita', colors: ['#a3563f', '#e87058'] }] 
+                                };
+                                setData('events', updated);
+                            }}
+                                className="mt-4 w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-blue-400 hover:text-[#E5654B] transition-colors text-sm font-semibold flex items-center justify-center gap-2">
+                                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                                + Tambah Dress Code (Panduan Busana)
                             </button>
                         )}
                     </div>

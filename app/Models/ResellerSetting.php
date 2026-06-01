@@ -29,6 +29,7 @@ class ResellerSetting extends Model
         'footer_description',
         'bank_accounts',
         'social_links',
+        'greeting_card_price',
     ];
 
     protected function casts(): array

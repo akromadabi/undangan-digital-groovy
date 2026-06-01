@@ -14,6 +14,7 @@ class Payment extends Model
         'user_id',
         'plan_id',
         'invitation_id',
+        'greeting_card_id',
         'amount',
         'payment_method',
         'payment_gateway',
@@ -51,6 +52,11 @@ class Payment extends Model
     public function plan()
     {
         return $this->belongsTo(SubscriptionPlan::class, 'plan_id');
+    }
+
+    public function greetingCard()
+    {
+        return $this->belongsTo(GreetingCard::class, 'greeting_card_id');
     }
 
     public function subscription()

@@ -50,6 +50,7 @@ class AdminGreetingCardTemplateController extends Controller
             'features.*'       => 'nullable|string|max:50',
             'bg_gradient'      => 'nullable|string|max:200',
             'base_likes'       => 'nullable|integer|min:0',
+            'price'            => 'nullable|numeric|min:0',
             'is_active'        => 'boolean',
             'thumbnail'        => 'nullable|string|max:500',
             'preview_template' => 'nullable|string|in:full-mockup,single-phone,double-phone,triple-phone',
@@ -62,6 +63,7 @@ class AdminGreetingCardTemplateController extends Controller
             'features'       => array_values(array_filter($validated['features'] ?? [])),
             'preview_images' => array_values(array_filter($validated['preview_images'] ?? [])),
             'base_likes'     => $validated['base_likes'] ?? 0,
+            'price'          => $validated['price'] ?? 49000.00,
         ]);
 
         GreetingCardTemplate::create($data);
@@ -89,6 +91,7 @@ class AdminGreetingCardTemplateController extends Controller
             'features.*'       => 'nullable|string|max:50',
             'bg_gradient'      => 'nullable|string|max:200',
             'base_likes'       => 'nullable|integer|min:0',
+            'price'            => 'nullable|numeric|min:0',
             'is_active'        => 'boolean',
             'thumbnail'        => 'nullable|string|max:500',
             'preview_template' => 'nullable|string|in:full-mockup,single-phone,double-phone,triple-phone',
@@ -101,6 +104,7 @@ class AdminGreetingCardTemplateController extends Controller
             'features'       => array_values(array_filter($validated['features'] ?? [])),
             'preview_images' => array_values(array_filter($validated['preview_images'] ?? [])),
             'base_likes'     => $validated['base_likes'] ?? 0,
+            'price'          => $validated['price'] ?? 49000.00,
         ]);
 
         $greetingCardTemplate->update($updateData);
@@ -164,6 +168,10 @@ class AdminGreetingCardTemplateController extends Controller
             'cosmic-drift'             => 'cosmicdrift',
             'etherealwhispers'         => 'etherealwhispers',
             'ethereal-whispers'        => 'etherealwhispers',
+            'balloonpop'               => 'balloonpop',
+            'dreamyballoons'           => 'balloonpop',
+            'lofilove'                 => 'lofilove',
+            'lofi-love'                => 'lofilove',
         ];
         $templateKey = $keyMap[$slug] ?? $slug;
 

@@ -195,20 +195,18 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
     const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
-    // Tab state
-    const [activeCatalogTab, setActiveCatalogTab] = useState('undangan');
+    // Cards filtering states
+    const [cardSortKey, setCardSortKey] = useState('terbaru');
+    const [cardSelectedTypes, setCardSelectedTypes] = useState([]);
+    const [cardSearchQuery, setCardSearchQuery] = useState('');
+    const [isCardTypeDropdownOpen, setIsCardTypeDropdownOpen] = useState(false);
+    const [isCardSortDropdownOpen, setIsCardSortDropdownOpen] = useState(false);
 
     const categoryDropdownRef = useRef(null);
     const typeDropdownRef = useRef(null);
     const sortDropdownRef = useRef(null);
-
-    // Reset filters on tab change
-    useEffect(() => {
-        setSelectedCategories([]);
-        setSelectedTypes([]);
-        setSearchQuery('');
-        setSortThemeKey('terbaru');
-    }, [activeCatalogTab]);
+    const cardTypeDropdownRef = useRef(null);
+    const cardSortDropdownRef = useRef(null);
 
     const categories = useMemo(() => {
         const cats = themes?.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean) || [];
@@ -251,6 +249,14 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
 
     const clearTypes = () => setSelectedTypes([]);
 
+    const toggleCardType = (typeKey) => {
+        setCardSelectedTypes(prev =>
+            prev.includes(typeKey) ? prev.filter(t => t !== typeKey) : [...prev, typeKey]
+        );
+    };
+
+    const clearCardTypes = () => setCardSelectedTypes([]);
+
     const filteredThemes = useMemo(() => {
         let list = [...(themes || [])];
         if (selectedCategories.length > 0) {
@@ -270,22 +276,22 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
 
     const filteredCards = useMemo(() => {
         let list = [...(greetingCards || [])];
-        if (selectedTypes.length > 0) {
-            list = list.filter(t => (t.type || []).some(type => selectedTypes.includes(type)));
+        if (cardSelectedTypes.length > 0) {
+            list = list.filter(t => (t.type || []).some(type => cardSelectedTypes.includes(type)));
         }
-        if (searchQuery.trim()) {
-            list = list.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        if (cardSearchQuery.trim()) {
+            list = list.filter(t => t.name.toLowerCase().includes(cardSearchQuery.toLowerCase()));
         }
         return list;
-    }, [greetingCards, selectedTypes, searchQuery]);
+    }, [greetingCards, cardSelectedTypes, cardSearchQuery]);
 
     const sortedCards = useMemo(() => {
         const arr = [...filteredCards];
-        if (sortThemeKey === 'terbaru') return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
-        if (sortThemeKey === 'populer') return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
-        if (sortThemeKey === 'disukai') return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
+        if (cardSortKey === 'terbaru') return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
+        if (cardSortKey === 'populer') return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
+        if (cardSortKey === 'disukai') return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
         return arr;
-    }, [filteredCards, sortThemeKey]);
+    }, [filteredCards, cardSortKey]);
 
     const handleUseCard = (slug) => {
         window.location.href = `/buat-kartu/${slug}`;
@@ -309,6 +315,12 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
             }
             if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
                 setIsSortDropdownOpen(false);
+            }
+            if (cardTypeDropdownRef.current && !cardTypeDropdownRef.current.contains(event.target)) {
+                setIsCardTypeDropdownOpen(false);
+            }
+            if (cardSortDropdownRef.current && !cardSortDropdownRef.current.contains(event.target)) {
+                setIsCardSortDropdownOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -819,55 +831,11 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                     <div className="rl-section__header">
                         <span className="rl-section__tag">Koleksi Desain</span>
                         <h2 className="rl-section__title">Pilih Desain Sempurna untuk Anda</h2>
-                        <p className="rl-section__desc">Koleksi tema undangan digital dan kartu ucapan elegan premium yang siap digunakan. Klik untuk melihat preview langsung.</p>
+                        <p className="rl-section__desc">Koleksi tema undangan digital elegan premium yang siap digunakan. Klik untuk melihat preview langsung.</p>
                     </div>
 
-                    {/* Tab Switcher */}
-                    {greetingCards.length > 0 && (
-                        <div className="flex justify-center mb-8" style={{ position: 'relative', zIndex: 10 }}>
-                            <div className="inline-flex p-1 rounded-full" style={{ background: 'var(--card-bg)', border: '1.5px solid var(--card-border)' }}>
-                                <button
-                                    onClick={() => setActiveCatalogTab('undangan')}
-                                    className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border-none cursor-pointer`}
-                                    style={
-                                        activeCatalogTab === 'undangan'
-                                            ? {
-                                                  background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))',
-                                                  color: '#fff',
-                                                  boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.25)',
-                                              }
-                                            : {
-                                                  background: 'transparent',
-                                                  color: 'var(--text-secondary)',
-                                              }
-                                    }
-                                >
-                                    Undangan Digital
-                                </button>
-                                <button
-                                    onClick={() => setActiveCatalogTab('kartu')}
-                                    className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border-none cursor-pointer`}
-                                    style={
-                                        activeCatalogTab === 'kartu'
-                                            ? {
-                                                  background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))',
-                                                  color: '#fff',
-                                                  boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.25)',
-                                              }
-                                            : {
-                                                  background: 'transparent',
-                                                  color: 'var(--text-secondary)',
-                                              }
-                                    }
-                                >
-                                    Kartu Ucapan
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Overhauled Filters & Search Bar */}
-                    {((activeCatalogTab === 'undangan' && themes.length > 0) || (activeCatalogTab === 'kartu' && greetingCards.length > 0)) && (
+                    {themes.length > 0 && (
                         <div className="rl-filter-panel">
                             <div className="rl-filter-row">
                                 {/* Search Box */}
@@ -887,89 +855,87 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                         type="text"
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
-                                        placeholder={activeCatalogTab === 'undangan' ? 'Cari tema...' : 'Cari kartu...'}
+                                        placeholder="Cari tema..."
                                         className="rl-filter-search-input"
                                     />
                                 </div>
 
                                 {/* Controls */}
                                 <div className="rl-filter-controls">
-                                    {/* Category Select Dropdown (Only for themes) */}
-                                    {activeCatalogTab === 'undangan' && (
-                                        <div className="rl-filter-dropdown-wrapper" ref={categoryDropdownRef}>
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                                                style={{
-                                                    border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
-                                                    background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
-                                                    color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
-                                                }}
-                                                className="rl-filter-btn"
-                                            >
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
-                                                    <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                                    </svg>
-                                                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                        {selectedCategories.length === 0 ? 'Kategori' : `Kategori (${selectedCategories.length})`}
-                                                    </span>
-                                                </div>
-                                                <svg style={{
-                                                    width: '12px',
-                                                    height: '12px',
-                                                    flexShrink: 0,
-                                                    transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
-                                                    transition: 'transform 0.2s'
-                                                }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                    {/* Category Select Dropdown */}
+                                    <div className="rl-filter-dropdown-wrapper" ref={categoryDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                                            style={{
+                                                border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
+                                                background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                                color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
+                                            }}
+                                            className="rl-filter-btn"
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                                                <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                                                 </svg>
-                                            </button>
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {selectedCategories.length === 0 ? 'Kategori' : `Kategori (${selectedCategories.length})`}
+                                                </span>
+                                            </div>
+                                            <svg style={{
+                                                width: '12px',
+                                                height: '12px',
+                                                flexShrink: 0,
+                                                transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
+                                                transition: 'transform 0.2s'
+                                            }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
 
-                                            {isCategoryDropdownOpen && (
-                                                <div className="rl-filter-dropdown-menu" style={{
-                                                    background: T.isDark ? '#1e293b' : '#ffffff',
-                                                    border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
-                                                }}>
-                                                    <div className="rl-filter-dropdown-menu-header">
-                                                        <span className="rl-filter-dropdown-menu-title">Kategori</span>
-                                                        {selectedCategories.length > 0 && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={clearCategories}
-                                                                className="rl-filter-dropdown-menu-reset"
-                                                            >
-                                                                Reset
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                    <div className="rl-filter-dropdown-list">
-                                                        {categories.map(cat => {
-                                                            const isChecked = selectedCategories.includes(cat);
-                                                            return (
-                                                                <label
-                                                                    key={cat}
-                                                                    className="rl-filter-checkbox-label"
-                                                                    style={{
-                                                                        color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
-                                                                        background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
-                                                                    }}
-                                                                >
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={isChecked}
-                                                                        onChange={() => toggleCategory(cat)}
-                                                                        className="rl-filter-checkbox-input"
-                                                                    />
-                                                                    <span style={{ textTransform: 'capitalize' }}>{cat}</span>
-                                                                </label>
-                                                            );
-                                                        })}
-                                                    </div>
+                                        {isCategoryDropdownOpen && (
+                                            <div className="rl-filter-dropdown-menu" style={{
+                                                background: T.isDark ? '#1e293b' : '#ffffff',
+                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                            }}>
+                                                <div className="rl-filter-dropdown-menu-header">
+                                                    <span className="rl-filter-dropdown-menu-title">Kategori</span>
+                                                    {selectedCategories.length > 0 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={clearCategories}
+                                                            className="rl-filter-dropdown-menu-reset"
+                                                        >
+                                                            Reset
+                                                        </button>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                    )}
+                                                <div className="rl-filter-dropdown-list">
+                                                    {categories.map(cat => {
+                                                        const isChecked = selectedCategories.includes(cat);
+                                                        return (
+                                                            <label
+                                                                key={cat}
+                                                                className="rl-filter-checkbox-label"
+                                                                style={{
+                                                                    color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                    background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
+                                                                }}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={() => toggleCategory(cat)}
+                                                                    className="rl-filter-checkbox-input"
+                                                                />
+                                                                <span style={{ textTransform: 'capitalize' }}>{cat}</span>
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {/* Event Types Select Dropdown */}
                                     <div className="rl-filter-dropdown-wrapper" ref={typeDropdownRef}>
@@ -1020,7 +986,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                                     )}
                                                 </div>
                                                 <div className="rl-filter-dropdown-list">
-                                                    {(activeCatalogTab === 'undangan' ? eventTypesWithCount : cardTypesWithCount).map(type => {
+                                                    {eventTypesWithCount.map(type => {
                                                         const isChecked = selectedTypes.includes(type.key);
                                                         return (
                                                             <label
@@ -1133,45 +1099,239 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                 </div>
 
                 {/* Themes List (Undangan Digital) */}
-                {activeCatalogTab === 'undangan' && (
-                    filteredThemes.length > 0 ? (
-                        <div className="rl-themes-scroll-wrap">
-                            <div className="rl-themes-scroll" id="themes-scroll">
-                                {(() => {
-                                    const sorted = [...filteredThemes];
-                                    if (sortThemeKey === 'terbaru') sorted.sort((a, b) => (b.id || 0) - (a.id || 0));
-                                    else if (sortThemeKey === 'populer') sorted.sort((a, b) => ((b.usage_count || 0) + (b.base_usage || 0)) - ((a.usage_count || 0) + (a.base_usage || 0)));
-                                    else if (sortThemeKey === 'disukai') sorted.sort((a, b) => {
-                                        const bL = likes[b.id] ?? ((b.base_likes || 0) + (b.real_likes || 0));
-                                        const aL = likes[a.id] ?? ((a.base_likes || 0) + (a.real_likes || 0));
-                                        return bL - aL;
-                                    });
-                                    return sorted.map(theme => (
-                                        <div key={theme.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
-                                            <ThemePreviewCard 
-                                                theme={theme}
-                                                reseller={reseller}
-                                            />
-                                        </div>
-                                    ));
-                                })()}
-                            </div>
-                            <div className="rl-themes-scroll-controls">
-                                <button onClick={() => document.getElementById('themes-scroll')?.scrollBy({ left: -280, behavior: 'smooth' })} className="rl-scroll-btn">←</button>
-                                <Link href={getThemesUrl()} className="rl-btn rl-btn--accent-outline">Lihat Semua Tema →</Link>
-                                <button onClick={() => document.getElementById('themes-scroll')?.scrollBy({ left: 280, behavior: 'smooth' })} className="rl-scroll-btn">→</button>
-                            </div>
+                {filteredThemes.length > 0 ? (
+                    <div className="rl-themes-scroll-wrap">
+                        <div className="rl-themes-scroll" id="themes-scroll">
+                            {(() => {
+                                const sorted = [...filteredThemes];
+                                if (sortThemeKey === 'terbaru') sorted.sort((a, b) => (b.id || 0) - (a.id || 0));
+                                else if (sortThemeKey === 'populer') sorted.sort((a, b) => ((b.usage_count || 0) + (b.base_usage || 0)) - ((a.usage_count || 0) + (a.base_usage || 0)));
+                                else if (sortThemeKey === 'disukai') sorted.sort((a, b) => {
+                                    const bL = likes[b.id] ?? ((b.base_likes || 0) + (b.real_likes || 0));
+                                    const aL = likes[a.id] ?? ((a.base_likes || 0) + (a.real_likes || 0));
+                                    return bL - aL;
+                                });
+                                return sorted.map(theme => (
+                                    <div key={theme.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
+                                        <ThemePreviewCard 
+                                            theme={theme}
+                                            reseller={reseller}
+                                        />
+                                    </div>
+                                ));
+                            })()}
                         </div>
-                    ) : (
-                        <div className="rl-container" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                            Belum ada tema dalam kategori ini atau tidak ada hasil pencarian yang cocok.
+                        <div className="rl-themes-scroll-controls">
+                            <button onClick={() => document.getElementById('themes-scroll')?.scrollBy({ left: -280, behavior: 'smooth' })} className="rl-scroll-btn">←</button>
+                            <Link href={getThemesUrl()} className="rl-btn rl-btn--accent-outline">Lihat Semua Tema →</Link>
+                            <button onClick={() => document.getElementById('themes-scroll')?.scrollBy({ left: 280, behavior: 'smooth' })} className="rl-scroll-btn">→</button>
                         </div>
-                    )
+                    </div>
+                ) : (
+                    <div className="rl-container" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                        Belum ada tema dalam kategori ini atau tidak ada hasil pencarian yang cocok.
+                    </div>
                 )}
+            </section>
 
-                {/* Greeting Cards List */}
-                {activeCatalogTab === 'kartu' && (
-                    sortedCards.length > 0 ? (
+            {/* ══════════════ GREETING CARD SHOWCASE ══════════════ */}
+            {greetingCards.length > 0 && (
+                <section id="preview-kartu" className="rl-section">
+                    <div className="rl-container">
+                        <div className="rl-section__header">
+                            <span className="rl-section__tag" style={{ background: 'var(--accent)', color: '#fff' }}>Koleksi Kartu</span>
+                            <h2 className="rl-section__title">Koleksi Kartu Ucapan Premium</h2>
+                            <p className="rl-section__desc">Kirimkan ucapan spesial dengan animasi, musik, dan efek interaktif memukau untuk berbagai momen penting Anda. Klik untuk melihat preview.</p>
+                        </div>
+
+                        {/* Filters & Search Bar for Cards */}
+                        <div className="rl-filter-panel">
+                            <div className="rl-filter-row">
+                                {/* Search Box */}
+                                <div className="rl-filter-search-container">
+                                    <svg style={{
+                                        position: 'absolute',
+                                        left: '0.85rem',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        width: '16px',
+                                        height: '16px',
+                                        color: 'var(--text-muted)'
+                                    }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        value={cardSearchQuery}
+                                        onChange={e => setCardSearchQuery(e.target.value)}
+                                        placeholder="Cari kartu..."
+                                        className="rl-filter-search-input"
+                                    />
+                                </div>
+
+                                {/* Controls */}
+                                <div className="rl-filter-controls">
+                                    {/* Event Types Select Dropdown */}
+                                    <div className="rl-filter-dropdown-wrapper" ref={cardTypeDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCardTypeDropdownOpen(!isCardTypeDropdownOpen)}
+                                            style={{
+                                                border: '1.5px solid ' + (cardSelectedTypes.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
+                                                background: cardSelectedTypes.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                                color: cardSelectedTypes.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
+                                            }}
+                                            className="rl-filter-btn"
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                                                <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {cardSelectedTypes.length === 0 ? 'Acara' : `Acara (${cardSelectedTypes.length})`}
+                                                </span>
+                                            </div>
+                                            <svg style={{
+                                                width: '12px',
+                                                height: '12px',
+                                                flexShrink: 0,
+                                                transform: isCardTypeDropdownOpen ? 'rotate(180deg)' : 'none',
+                                                transition: 'transform 0.2s'
+                                            }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        {isCardTypeDropdownOpen && (
+                                            <div className="rl-filter-dropdown-menu" style={{
+                                                background: T.isDark ? '#1e293b' : '#ffffff',
+                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                            }}>
+                                                <div className="rl-filter-dropdown-menu-header">
+                                                    <span className="rl-filter-dropdown-menu-title">Tipe Acara</span>
+                                                    {cardSelectedTypes.length > 0 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={clearCardTypes}
+                                                            className="rl-filter-dropdown-menu-reset"
+                                                        >
+                                                            Reset
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="rl-filter-dropdown-list">
+                                                    {cardTypesWithCount.map(type => {
+                                                        const isChecked = cardSelectedTypes.includes(type.key);
+                                                        return (
+                                                            <label
+                                                                key={type.key}
+                                                                className="rl-filter-checkbox-label"
+                                                                style={{
+                                                                    color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                    background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
+                                                                }}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={() => toggleCardType(type.key)}
+                                                                    className="rl-filter-checkbox-input"
+                                                                />
+                                                                <span>{type.label}</span>
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Sort Dropdown */}
+                                    <div className="rl-filter-dropdown-wrapper" ref={cardSortDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCardSortDropdownOpen(!isCardSortDropdownOpen)}
+                                            style={{
+                                                border: '1.5px solid ' + (isCardSortDropdownOpen ? 'var(--accent)' : 'var(--card-border)'),
+                                                background: isCardSortDropdownOpen ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                                color: isCardSortDropdownOpen ? 'var(--accent)' : 'var(--text-secondary)',
+                                                width: '38px',
+                                                height: '38px',
+                                                borderRadius: '100px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                flexShrink: 0
+                                            }}
+                                            title="Urutkan Desain"
+                                        >
+                                            <svg style={{ width: '16px', height: '16px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                            </svg>
+                                        </button>
+
+                                        {isCardSortDropdownOpen && (
+                                            <div className="rl-filter-dropdown-menu" style={{
+                                                background: T.isDark ? '#1e293b' : '#ffffff',
+                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                            }}>
+                                                <div className="rl-filter-dropdown-menu-header" style={{ borderBottom: '1px solid var(--card-border)', paddingBottom: '0.5rem' }}>
+                                                    <span className="rl-filter-dropdown-menu-title">Urutkan</span>
+                                                </div>
+                                                <div className="rl-filter-dropdown-list">
+                                                    {[
+                                                        { key: 'terbaru', label: 'Terbaru' },
+                                                        { key: 'populer', label: 'Terpopuler' },
+                                                        { key: 'disukai', label: 'Terfavorit' }
+                                                    ].map(opt => {
+                                                        const isActive = cardSortKey === opt.key;
+                                                        return (
+                                                            <button
+                                                                key={opt.key}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setCardSortKey(opt.key);
+                                                                    setIsCardSortDropdownOpen(false);
+                                                                }}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'space-between',
+                                                                    padding: '0.4rem 0.5rem',
+                                                                    borderRadius: '8px',
+                                                                    fontSize: '0.75rem',
+                                                                    fontWeight: 600,
+                                                                    cursor: 'pointer',
+                                                                    transition: 'background 0.2s',
+                                                                    border: 'none',
+                                                                    background: isActive ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent',
+                                                                    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                    textAlign: 'left',
+                                                                    margin: '2px 0'
+                                                                }}
+                                                            >
+                                                                <span>{opt.label}</span>
+                                                                {isActive && (
+                                                                    <svg style={{ width: '14px', height: '14px', color: 'var(--accent)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                )}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {sortedCards.length > 0 ? (
                         <div className="rl-themes-scroll-wrap">
                             <div className="rl-themes-scroll" id="cards-scroll">
                                 {sortedCards.map(card => (
@@ -1195,9 +1355,9 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                         <div className="rl-container" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
                             Belum ada kartu ucapan dalam tipe ini atau tidak ada hasil pencarian yang cocok.
                         </div>
-                    )
-                )}
-            </section>
+                    )}
+                </section>
+            )}
 
             {/* ══════════════ TESTIMONIALS ══════════════ */}
             <section className="rl-section">

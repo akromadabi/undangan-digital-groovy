@@ -41,6 +41,7 @@ class GreetingCard extends Model
         'cosmicdrift'      => 'Cosmic Drift',
         'etherealwhispers' => 'Ethereal Whispers',
         'balloonpop'       => 'Dreamy Balloons',
+        'lofilove'         => 'Lofi Love Beats',
     ];
 
     public function user()

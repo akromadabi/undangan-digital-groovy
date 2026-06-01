@@ -11,7 +11,51 @@ class GreetingCardController extends Controller
 {
     public function index(Request $request)
     {
-        return redirect()->route('dashboard.invitations', ['tab' => 'cards']);
+        $user = $request->user();
+        // Fetch unified greeting card price based on reseller/global settings
+        $globalPrice = \App\Models\GlobalSetting::getValue('greeting_card_price', 49000.00);
+        $cardPrice = (float) $globalPrice;
+        if ($user->reseller_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+            if ($resellerSetting && $resellerSetting->greeting_card_price !== null) {
+                $cardPrice = (float) $resellerSetting->greeting_card_price;
+            }
+        }
+
+        $greetingCards = GreetingCard::where('user_id', $user->id)
+            ->latest()
+            ->get()
+            ->map(function ($card) use ($cardPrice) {
+                // Find any pending manual / Xendit payment for this card
+                $pendingPayment = \App\Models\Payment::where('user_id', $card->user_id)
+                    ->where('greeting_card_id', $card->id)
+                    ->whereIn('status', ['pending', 'pending_manual', 'waiting_review'])
+                    ->latest()
+                    ->first();
+
+                return [
+                    'id'             => $card->id,
+                    'title'          => $card->title,
+                    'template'       => $card->template,
+                    'template_label' => $card->template_label,
+                    'template_price' => $cardPrice,
+                    'type'           => $card->type,
+                    'type_label'     => $card->type_label,
+                    'recipient_name' => $card->recipient_name,
+                    'sender_name'    => $card->sender_name,
+                    'photo_url'      => $card->photo_url,
+                    'custom_url'     => $card->custom_url,
+                    'share_url'      => $card->getShareUrl(),
+                    'is_active'      => $card->is_active,
+                    'pending_payment_id' => $pendingPayment ? $pendingPayment->id : null,
+                    'pending_payment_status' => $pendingPayment ? $pendingPayment->status : null,
+                    'created_at'     => $card->created_at->format('d M Y'),
+                ];
+            });
+
+        return Inertia::render('Dashboard/GreetingCard/Index', [
+            'cards' => $greetingCards,
+        ]);
     }
 
     /**
@@ -58,7 +102,13 @@ class GreetingCardController extends Controller
         if (strlen($url) < 3) {
             return response()->json(['available' => false, 'message' => 'Minimal 3 karakter']);
         }
-        $exists = GreetingCard::where('custom_url', $url)->exists();
+        
+        $query = GreetingCard::where('custom_url', $url);
+        if ($request->filled('exclude_id')) {
+            $query->where('id', '!=', $request->query('exclude_id'));
+        }
+        
+        $exists = $query->exists();
         return response()->json(['available' => !$exists]);
     }
 
@@ -89,7 +139,7 @@ class GreetingCardController extends Controller
     {
         $validated = $request->validate([
             'title'          => 'nullable|string|max:100',
-            'template'       => 'required|in:stillwithyou,giftforanita,cosmicdrift,etherealwhispers,balloonpop',
+            'template'       => 'required|in:stillwithyou,giftforanita,cosmicdrift,etherealwhispers,balloonpop,lofilove',
             'type'           => 'required|in:anniversary,birthday,graduation,wedding',
             'recipient_name' => 'required|string|max:100',
             'sender_name'    => 'required|string|max:100',
@@ -101,16 +151,20 @@ class GreetingCardController extends Controller
             'custom_url'     => 'nullable|string|max:100|alpha_dash|unique:greeting_cards,custom_url',
         ]);
 
+        $user = $request->user();
+        $isActive = ($user->role === 'admin' || $user->role === 'super_admin');
+
         $card = GreetingCard::create([
             ...$validated,
-            'user_id'    => $request->user()->id,
+            'user_id'    => $user->id,
             'title'      => $validated['title'] ?: 'Kartu Ucapan',
             'messages'   => array_values(array_filter($validated['messages'] ?? [])),
             'photos'     => array_values(array_filter($validated['photos'] ?? [])),
             'custom_url' => ($validated['custom_url'] ?? null) ?: GreetingCard::generateUniqueSlug(),
+            'is_active'  => $isActive,
         ]);
 
-        $redirectUrl = route('dashboard.invitations', ['tab' => 'cards']);
+        $redirectUrl = route('greeting-card.index');
 
         // Jika request dari wizard (axios JSON), kembalikan JSON
         if ($request->expectsJson()) {
@@ -155,7 +209,7 @@ class GreetingCardController extends Controller
 
         $validated = $request->validate([
             'title'          => 'nullable|string|max:100',
-            'template'       => 'required|in:stillwithyou,giftforanita,cosmicdrift,etherealwhispers,balloonpop',
+            'template'       => 'required|in:stillwithyou,giftforanita,cosmicdrift,etherealwhispers,balloonpop,lofilove',
             'type'           => 'required|in:anniversary,birthday,graduation,wedding',
             'recipient_name' => 'required|string|max:100',
             'sender_name'    => 'required|string|max:100',
@@ -198,9 +252,41 @@ class GreetingCardController extends Controller
      */
     public function preview($slug)
     {
-        $card = GreetingCard::where('custom_url', $slug)
-            ->where('is_active', true)
-            ->firstOrFail();
+        $card = GreetingCard::where('custom_url', $slug)->firstOrFail();
+
+        if (!$card->is_active) {
+            $user = auth()->user();
+            if ($user && $card->user_id === $user->id) {
+                // Pemilik kartu: izinkan pratinjau dengan tanda belum bayar
+                return Inertia::render('GreetingCardPreview', [
+                    'card' => [
+                        'id'             => $card->id,
+                        'title'          => $card->title,
+                        'custom_url'     => $card->custom_url,
+                        'template'       => $card->template,
+                        'type'           => $card->type,
+                        'type_label'     => $card->type_label,
+                        'recipient_name' => $card->recipient_name,
+                        'sender_name'    => $card->sender_name,
+                        'photo_url'      => $card->photo_url,
+                        'photos'         => $card->photos ?? ($card->photo_url ? [$card->photo_url] : []),
+                        'messages'       => $card->messages ?? [],
+                        'og_image_url'   => route('greeting-card.og-image', $card->custom_url),
+                        'is_unpaid'      => true,
+                    ],
+                ]);
+            }
+
+            // Publik: tampilkan halaman estetik belum aktif
+            $template = \App\Models\GreetingCardTemplate::where('slug', $card->template)->first();
+            return Inertia::render('GreetingCardInactive', [
+                'recipient_name' => $card->recipient_name,
+                'sender_name' => $card->sender_name,
+                'type_label' => $card->type_label,
+                'appName' => \App\Models\GlobalSetting::where('setting_key', 'site_name')->value('setting_value') ?: 'Undangan Digital',
+                'bg_gradient' => $template?->bg_gradient ?? 'from-[#0d0915] via-[#1b102b] to-[#09090b]',
+            ]);
+        }
 
         return Inertia::render('GreetingCardPreview', [
             'card' => [
@@ -246,6 +332,8 @@ class GreetingCardController extends Controller
             'etherealwhispers' => 'etherealwhispers',
             'balloonpop'       => 'balloonpop',
             'dreamyballoons'   => 'balloonpop',
+            'lofilove'         => 'lofilove',
+            'lofi-love'        => 'lofilove',
         ];
 
         $templateKey = $templateKeyMap[$slug] ?? $slug;
@@ -408,10 +496,34 @@ class GreetingCardController extends Controller
         // 3. Setup canvas using our generated premium black template image if available
         $templatePath = public_path('images/og_card_template.png');
         if (file_exists($templatePath)) {
-            $im = imagecreatefrompng($templatePath);
-            // Ensure alpha blending is enabled
-            imagealphablending($im, true);
-            imagesavealpha($im, true);
+            // Dynamically detect image type to prevent crash if PNG is actually JPEG under the hood
+            $imageInfo = @getimagesize($templatePath);
+            $mimeType = $imageInfo ? $imageInfo['mime'] : '';
+            
+            if ($mimeType === 'image/jpeg') {
+                $im = @imagecreatefromjpeg($templatePath);
+            } elseif ($mimeType === 'image/png') {
+                $im = @imagecreatefrompng($templatePath);
+            } elseif ($mimeType === 'image/webp') {
+                $im = @imagecreatefromwebp($templatePath);
+            } else {
+                $im = false;
+            }
+            
+            if ($im) {
+                // Ensure alpha blending is enabled
+                imagealphablending($im, true);
+                imagesavealpha($im, true);
+            } else {
+                // Fallback to blank TrueColor Canvas (1200x630) if loading template fails
+                $w = 1200;
+                $h = 630;
+                $im = imagecreatetruecolor($w, $h);
+                imagealphablending($im, true);
+                imagesavealpha($im, true);
+                $bg = imagecolorallocate($im, 10, 10, 10);
+                imagefill($im, 0, 0, $bg);
+            }
         } else {
             // Fallback to blank TrueColor Canvas (1200x630) if template not found
             $w = 1200;

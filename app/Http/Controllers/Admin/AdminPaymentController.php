@@ -103,18 +103,33 @@ class AdminPaymentController extends Controller
             'admin_notes' => $request->notes ?? null,
         ]);
 
-        // Create subscription
-        Subscription::create([
-            'user_id'       => $payment->user_id,
-            'plan_id'       => $payment->plan_id,
-            'invitation_id' => $payment->invitation_id,
-            'payment_id'    => $payment->id,
-            'starts_at'     => now(),
-            'expires_at'    => now()->addDays($payment->plan->duration_days),
-            'status'        => 'active',
-        ]);
+        // Create subscription or activate greeting card
+        if ($payment->greeting_card_id) {
+            $payment->greetingCard()->update(['is_active' => true]);
 
-        return back()->with('success', "Pembayaran disetujui. Langganan {$payment->user->name} telah diaktifkan.");
+            Subscription::create([
+                'user_id'          => $payment->user_id,
+                'greeting_card_id' => $payment->greeting_card_id,
+                'payment_id'       => $payment->id,
+                'starts_at'        => now(),
+                'expires_at'       => null,
+                'status'           => 'active',
+            ]);
+
+            return back()->with('success', "Pembayaran disetujui. Kartu ucapan {$payment->user->name} telah diaktifkan.");
+        } else {
+            Subscription::create([
+                'user_id'       => $payment->user_id,
+                'plan_id'       => $payment->plan_id,
+                'invitation_id' => $payment->invitation_id,
+                'payment_id'    => $payment->id,
+                'starts_at'     => now(),
+                'expires_at'    => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                'status'        => 'active',
+            ]);
+
+            return back()->with('success', "Pembayaran disetujui. Langganan {$payment->user->name} telah diaktifkan.");
+        }
     }
 
     /**

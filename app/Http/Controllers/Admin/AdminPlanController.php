@@ -14,7 +14,14 @@ class AdminPlanController extends Controller
     public function index()
     {
         $plans = SubscriptionPlan::withCount('subscriptions')->orderBy('sort_order')->get();
-        return Inertia::render('Admin/Plans/Index', ['plans' => $plans]);
+        $greetingCardPrice = \App\Models\GlobalSetting::getValue('greeting_card_price', 49000.00);
+        $greetingCardSuggestedPrice = \App\Models\GlobalSetting::getValue('greeting_card_suggested_price', 49000.00);
+
+        return Inertia::render('Admin/Plans/Index', [
+            'plans' => $plans,
+            'greetingCardPrice' => (float) $greetingCardPrice,
+            'greetingCardSuggestedPrice' => (float) $greetingCardSuggestedPrice,
+        ]);
     }
 
     public function create()
@@ -111,5 +118,18 @@ class AdminPlanController extends Controller
     {
         $plan->delete();
         return redirect()->back()->with('success', 'Paket berhasil dihapus.');
+    }
+
+    public function updateGreetingCardPrice(Request $request)
+    {
+        $request->validate([
+            'price' => 'required|numeric|min:0',
+            'suggested_price' => 'nullable|numeric|min:0',
+        ]);
+
+        \App\Models\GlobalSetting::setValue('greeting_card_price', $request->price, 'number', 'pricing');
+        \App\Models\GlobalSetting::setValue('greeting_card_suggested_price', $request->suggested_price, 'number', 'pricing');
+
+        return redirect()->back()->with('success', 'Harga Kartu Ucapan berhasil diperbarui! 🎉');
     }
 }

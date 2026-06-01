@@ -10,6 +10,7 @@ class Subscription extends Model
         'user_id',
         'plan_id',
         'invitation_id',
+        'greeting_card_id',
         'status',
         'starts_at',
         'expires_at',
@@ -37,6 +38,11 @@ class Subscription extends Model
     public function plan()
     {
         return $this->belongsTo(SubscriptionPlan::class, 'plan_id');
+    }
+
+    public function greetingCard()
+    {
+        return $this->belongsTo(GreetingCard::class, 'greeting_card_id');
     }
 
     public function payment()

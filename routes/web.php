@@ -57,6 +57,11 @@ Route::get('/', function () {
         ->orderBy('sort_order')
         ->get(['id', 'name', 'slug', 'price', 'suggested_price']);
 
+    $greetingCards = \App\Models\GreetingCardTemplate::where('is_active', true)
+        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'type', 'base_likes', 'sort_order')
+        ->orderBy('sort_order')
+        ->get();
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => false,
@@ -69,6 +74,8 @@ Route::get('/', function () {
         'adminEmail' => $adminEmail,
         'minModalCost' => (float) $minModalCost,
         'subscriptionPlans' => $subscriptionPlans,
+        'greetingCards' => $greetingCards,
+        'greetingCardTypeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
     ]);
 })->name('home');
 
@@ -407,6 +414,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/pencairan/request', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'requestWithdrawal'])->name('pencairan.request');
     Route::post('/pencairan/bank', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'updateBank'])->name('pencairan.bank');
 
+    // Transactions Manual Review
+    Route::get('/transactions', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{payment}', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'show'])->name('transactions.show');
+    Route::post('/transactions/{payment}/approve', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'approve'])->name('transactions.approve');
+    Route::post('/transactions/{payment}/reject', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'reject'])->name('transactions.reject');
+
     // Impersonation
     Route::post('/impersonate/user/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateUser'])->name('impersonate.user');
     Route::post('/impersonate/demo-user', [\App\Http\Controllers\Auth\ImpersonateController::class, 'switchToDemoUser'])->name('impersonate.demo-user');
@@ -436,6 +449,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::post('/resellers/{reseller}/toggle-status', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'toggleStatus'])->name('resellers.toggleStatus');
 
     // Global Management (themes, plans, music, quotes, settings, instagram filters)
+    Route::post('plans/update-greeting-card-price', [AdminPlanController::class, 'updateGreetingCardPrice'])->name('plans.update-greeting-card-price');
     Route::resource('plans', AdminPlanController::class);
     Route::resource('instagram-filters', \App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class);
     Route::post('/instagram-filters/{instagramFilter}/toggle-active', [\App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class, 'toggleActive'])->name('instagram-filters.toggle-active');
@@ -481,6 +495,12 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     // Activity Logs
     Route::get('/logs', [\App\Http\Controllers\SuperAdmin\SuperAdminActivityLogController::class, 'index'])->name('logs.index');
     Route::post('/logs/{id}/restore', [\App\Http\Controllers\SuperAdmin\SuperAdminActivityLogController::class, 'restore'])->name('logs.restore');
+
+    // Transactions Manual Review
+    Route::get('/transactions', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{payment}', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'show'])->name('transactions.show');
+    Route::post('/transactions/{payment}/approve', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'approve'])->name('transactions.approve');
+    Route::post('/transactions/{payment}/reject', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'reject'])->name('transactions.reject');
 
     // Impersonation
     Route::post('/impersonate/user/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateUser'])->name('impersonate.user');

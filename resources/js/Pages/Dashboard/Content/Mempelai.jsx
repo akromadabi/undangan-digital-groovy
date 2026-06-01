@@ -308,7 +308,16 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
                         <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-50 flex-shrink-0 relative shadow-inner">
                                 {data.bride_grooms[idx].photo ? (
-                                    <img src={data.bride_grooms[idx].photo} alt="Foto Profil" className="w-full h-full object-cover" />
+                                    <img 
+                                        src={data.bride_grooms[idx].photo} 
+                                        alt="Foto Profil" 
+                                        className="w-full h-full object-cover transition-all"
+                                        style={{
+                                            objectPosition: `${Number(data.bride_grooms[idx].photo_position_x ?? 50)}% ${Number(data.bride_grooms[idx].photo_position_y ?? 50)}%`,
+                                            transform: `scale(${Number(data.bride_grooms[idx].photo_zoom ?? 1.0)}) translate(${(50 - Number(data.bride_grooms[idx].photo_position_x ?? 50)) * (1 - 1 / Number(data.bride_grooms[idx].photo_zoom ?? 1.0))}%, ${(50 - Number(data.bride_grooms[idx].photo_position_y ?? 50)) * (1 - 1 / Number(data.bride_grooms[idx].photo_zoom ?? 1.0))}%)`,
+                                            transformOrigin: 'center',
+                                        }}
+                                    />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-300 bg-orange-50/20">
                                         <User size={28} />

@@ -41,11 +41,21 @@ class XenditService
         $successUrl = url(GlobalSetting::getValue('xendit_success_url', '/dashboard?payment=success'));
         $failureUrl = url(GlobalSetting::getValue('xendit_failure_url', '/dashboard?payment=failed'));
 
+        $description = 'Upgrade ke paket ' . ($payment->plan->name ?? 'Premium');
+        $itemName = 'Paket ' . ($payment->plan->name ?? 'Premium');
+
+        if ($payment->greeting_card_id) {
+            $card = $payment->greetingCard;
+            $cardName = $card ? $card->title : 'Kartu Ucapan';
+            $description = 'Aktivasi ' . $cardName;
+            $itemName = 'Aktivasi ' . $cardName;
+        }
+
         $payload = [
             'external_id' => $externalId,
             'amount' => (int) $payment->amount,
             'payer_email' => $payment->user->email,
-            'description' => 'Upgrade ke paket ' . ($payment->plan->name ?? 'Premium'),
+            'description' => $description,
             'invoice_duration' => 86400, // 24 hours
             'success_redirect_url' => $successUrl,
             'failure_redirect_url' => $failureUrl,
@@ -57,7 +67,7 @@ class XenditService
             ],
             'items' => [
                 [
-                    'name' => 'Paket ' . ($payment->plan->name ?? 'Premium'),
+                    'name' => $itemName,
                     'quantity' => 1,
                     'price' => (int) $payment->amount,
                 ],
@@ -130,20 +140,34 @@ class XenditService
                 ]),
             ]);
 
-            // Activate subscription
-            Subscription::create([
-                'user_id' => $payment->user_id,
-                'plan_id' => $payment->plan_id,
-                'invitation_id' => $payment->invitation_id,
-                'payment_id' => $payment->id,
-                'starts_at' => now(),
-                'expires_at' => now()->addDays($payment->plan->duration_days),
-                'status' => 'active',
-            ]);
+            if ($payment->greeting_card_id) {
+                // Aktifkan kartu ucapan
+                $payment->greetingCard()->update(['is_active' => true]);
 
-            // Credit reseller wallet if user belongs to a reseller
+                Subscription::create([
+                    'user_id' => $payment->user_id,
+                    'greeting_card_id' => $payment->greeting_card_id,
+                    'payment_id' => $payment->id,
+                    'starts_at' => now(),
+                    'expires_at' => null,
+                    'status' => 'active',
+                ]);
+            } else {
+                // Activate subscription
+                Subscription::create([
+                    'user_id' => $payment->user_id,
+                    'plan_id' => $payment->plan_id,
+                    'invitation_id' => $payment->invitation_id,
+                    'payment_id' => $payment->id,
+                    'starts_at' => now(),
+                    'expires_at' => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                    'status' => 'active',
+                ]);
+            }
+
+            // Credit reseller wallet if user belongs to a reseller and it is a plan payment
             $user = $payment->user;
-            if ($user && $user->reseller_id) {
+            if ($user && $user->reseller_id && $payment->plan_id) {
                 $basePrice = (float)$payment->plan->price;
                 $paidAmount = (float)$payment->amount;
                 $profit = $paidAmount - $basePrice;

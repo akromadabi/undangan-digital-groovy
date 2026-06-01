@@ -58,17 +58,69 @@ class PaymentController extends Controller
     public function checkout(Request $request)
     {
         $request->validate([
-            'plan_id' => 'required|exists:subscription_plans,id',
+            'plan_id' => 'required_without:greeting_card_id|exists:subscription_plans,id',
+            'greeting_card_id' => 'required_without:plan_id|exists:greeting_cards,id',
             'invitation_id' => 'nullable|exists:invitations,id',
         ]);
 
+        $user = auth()->user();
+        $greetingCardId = $request->input('greeting_card_id');
+
+        // ── KARTU UCAPAN CHECKOUT ──
+        if ($greetingCardId) {
+            $card = \App\Models\GreetingCard::findOrFail($greetingCardId);
+            if ($card->user_id !== $user->id) {
+                abort(403, 'Akses ditolak.');
+            }
+
+            // Ambil harga dasar global dari settings
+            $price = \App\Models\GlobalSetting::getValue('greeting_card_price', 49000.00);
+
+            // Jika user memiliki reseller, ambil harga kustom reseller jika ada
+            if ($user->reseller_id) {
+                $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+                if ($resellerSetting && $resellerSetting->greeting_card_price !== null) {
+                    $price = (float) $resellerSetting->greeting_card_price;
+                }
+            }
+
+            if ($price <= 0) {
+                // Gratis - langsung aktifkan!
+                $card->update(['is_active' => true]);
+                return redirect()->route('greeting-card.index')->with('success', 'Kartu ucapan gratis berhasil diaktifkan! 🎉');
+            }
+
+            // Transfer Bank Manual (untuk semua user, baik reseller maupun direct)
+            $existingPendingManual = Payment::where('user_id', $user->id)
+                ->where('greeting_card_id', $card->id)
+                ->whereIn('status', ['pending_manual', 'waiting_review'])
+                ->where('payment_gateway', 'manual')
+                ->where('created_at', '>', now()->subHours(24))
+                ->first();
+
+            if ($existingPendingManual) {
+                return redirect()->route('payment.manual.show', $existingPendingManual->id);
+            }
+
+            $payment = Payment::create([
+                'user_id' => $user->id,
+                'greeting_card_id' => $card->id,
+                'amount' => $price,
+                'payment_method' => 'transfer',
+                'payment_gateway' => 'manual',
+                'status' => 'pending_manual',
+            ]);
+
+            return redirect()->route('payment.manual.show', $payment->id);
+        }
+
+        // ── UNDANGAN PLAN CHECKOUT (EXISTING) ──
         $invitationId = $request->input('invitation_id') ?: session('active_invitation_id');
         if (!$invitationId) {
             return back()->with('error', 'Undangan tidak ditemukan untuk pemesanan ini.');
         }
 
         $plan = SubscriptionPlan::findOrFail($request->plan_id);
-        $user = auth()->user();
 
         // Determine actual price: reseller price or base price
         $price = (float)$plan->price;
@@ -201,7 +253,7 @@ class PaymentController extends Controller
         $payment->load('plan');
 
         $resellerSetting = \App\Models\ResellerSetting::where('user_id', $payment->user->reseller_id)->first();
-        
+
         $bankAccounts = [];
         if ($resellerSetting) {
             if (!empty($resellerSetting->bank_accounts) && is_array($resellerSetting->bank_accounts)) {
@@ -218,6 +270,18 @@ class PaymentController extends Controller
                     'account_number' => $resellerSetting->bank_account,
                     'account_name' => $resellerSetting->bank_holder,
                 ];
+            }
+        } else {
+            // Fallback ke rekening bank milik Super Admin (Global Setting)
+            $globalBankAccounts = \App\Models\GlobalSetting::getValue('bank_accounts', []);
+            if (!empty($globalBankAccounts) && is_array($globalBankAccounts)) {
+                foreach ($globalBankAccounts as $acc) {
+                    $bankAccounts[] = [
+                        'bank_name' => $acc['bank_name'] ?? '',
+                        'account_number' => $acc['account_number'] ?? '',
+                        'account_name' => $acc['account_name'] ?? '',
+                    ];
+                }
             }
         }
 

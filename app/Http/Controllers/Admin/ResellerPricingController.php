@@ -51,9 +51,20 @@ class ResellerPricingController extends Controller
         // Fetch global features for comparison details
         $features = \App\Models\Feature::orderBy('category')->orderBy('name')->get();
 
+        $greetingCardBasePrice = \App\Models\GlobalSetting::getValue('greeting_card_price', 49000.00);
+        $greetingCardSuggestedPrice = \App\Models\GlobalSetting::getValue('greeting_card_suggested_price', 49000.00);
+        
+        $resellerSetting = \App\Models\ResellerSetting::where('user_id', $reseller->id)->first();
+        $resellerGreetingCardPrice = $resellerSetting?->greeting_card_price !== null 
+            ? (float) $resellerSetting->greeting_card_price 
+            : (float) $greetingCardBasePrice;
+
         return Inertia::render('Admin/Pricing', [
             'planPricing' => $planPricing,
             'features' => $features,
+            'resellerGreetingCardPrice' => $resellerGreetingCardPrice,
+            'greetingCardBasePrice' => (float) $greetingCardBasePrice,
+            'greetingCardSuggestedPrice' => (float) $greetingCardSuggestedPrice,
         ]);
     }
 
@@ -65,7 +76,16 @@ class ResellerPricingController extends Controller
             'prices' => 'required|array',
             'prices.*.plan_id' => 'required|exists:subscription_plans,id',
             'prices.*.reseller_price' => 'required|numeric|min:0',
+            'greeting_card_price' => 'required|numeric|min:0',
         ]);
+
+        // Validate greeting card price
+        $greetingCardBasePrice = \App\Models\GlobalSetting::getValue('greeting_card_price', 49000.00);
+        if ($request->greeting_card_price < $greetingCardBasePrice) {
+            return back()->withErrors([
+                'greeting_card_price' => "Harga jual kartu ucapan tidak boleh lebih rendah dari harga dasar (Rp " . number_format($greetingCardBasePrice, 0, ',', '.') . ").",
+            ]);
+        }
 
         foreach ($request->prices as $priceData) {
             // Ensure reseller_price >= base_price
@@ -87,6 +107,14 @@ class ResellerPricingController extends Controller
             );
         }
 
-        return back()->with('success', 'Harga paket berhasil diperbarui.');
+        // Save reseller greeting card price
+        $resellerSetting = \App\Models\ResellerSetting::where('user_id', $reseller->id)->first();
+        if ($resellerSetting) {
+            $resellerSetting->update([
+                'greeting_card_price' => $request->greeting_card_price
+            ]);
+        }
+
+        return back()->with('success', 'Harga paket dan kartu ucapan berhasil diperbarui.');
     }
 }

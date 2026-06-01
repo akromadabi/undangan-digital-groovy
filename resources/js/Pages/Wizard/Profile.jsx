@@ -40,6 +40,14 @@ export default function Profile({ step, brideGrooms, eventType = 'wedding' }) {
     const updateField = (index, field, value) => {
         const updated = [...data.bride_grooms];
         updated[index] = { ...updated[index], [field]: value };
+
+        // Enforce opposite gender for wedding/anniversary
+        if (field === 'gender' && !isSingleSubject) {
+            const otherIndex = 1 - index;
+            const otherGender = value === 'pria' ? 'wanita' : 'pria';
+            updated[otherIndex] = { ...updated[otherIndex], gender: otherGender };
+        }
+
         setData('bride_grooms', updated);
     };
 
@@ -129,28 +137,30 @@ export default function Profile({ step, brideGrooms, eventType = 'wedding' }) {
                                     onChange={(v) => updateField(index, 'nickname', v)}
                                     error={errors[`bride_grooms.${index}.nickname`]}
                                 />
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="space-y-3">
                                     <InputField 
                                         label="Putra/Putri ke-" 
                                         value={data.bride_grooms[index].child_order}
-                                        placeholder="Pertama" 
+                                        placeholder="Contoh: Pertama, Kedua" 
                                         onChange={(v) => updateField(index, 'child_order', v)}
                                         error={errors[`bride_grooms.${index}.child_order`]}
                                     />
-                                    <InputField 
-                                        label="Nama Ayah" 
-                                        value={data.bride_grooms[index].father_name}
-                                        placeholder="Nama Ayah" 
-                                        onChange={(v) => updateField(index, 'father_name', v)}
-                                        error={errors[`bride_grooms.${index}.father_name`]}
-                                    />
-                                    <InputField 
-                                        label="Nama Ibu" 
-                                        value={data.bride_grooms[index].mother_name}
-                                        placeholder="Nama Ibu" 
-                                        onChange={(v) => updateField(index, 'mother_name', v)}
-                                        error={errors[`bride_grooms.${index}.mother_name`]}
-                                    />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <InputField 
+                                            label="Nama Ayah" 
+                                            value={data.bride_grooms[index].father_name}
+                                            placeholder="Nama Ayah" 
+                                            onChange={(v) => updateField(index, 'father_name', v)}
+                                            error={errors[`bride_grooms.${index}.father_name`]}
+                                        />
+                                        <InputField 
+                                            label="Nama Ibu" 
+                                            value={data.bride_grooms[index].mother_name}
+                                            placeholder="Nama Ibu" 
+                                            onChange={(v) => updateField(index, 'mother_name', v)}
+                                            error={errors[`bride_grooms.${index}.mother_name`]}
+                                        />
+                                    </div>
                                 </div>
 
                                 {!isSingleSubject && (

@@ -192,7 +192,12 @@ export default function GreetingCardTemplatesIndex({ templates = [], typeOptions
                                 {/* Body */}
                                 <div className="p-4 flex-1 flex flex-col justify-between">
                                     <div>
-                                        <h3 className="text-sm font-bold text-gray-800 truncate">{tpl.name}</h3>
+                                        <div className="flex items-start justify-between gap-1">
+                                            <h3 className="text-sm font-bold text-gray-800 truncate flex-1">{tpl.name}</h3>
+                                            <span className="text-[11px] font-black text-[#E5654B] bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-lg shrink-0">
+                                                {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(tpl.price ?? 49000)}
+                                            </span>
+                                        </div>
                                         <p className="text-[11px] text-gray-400 mt-0.5 font-mono">{tpl.slug}</p>
 
                                         {/* Types */}

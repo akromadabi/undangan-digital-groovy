@@ -1542,7 +1542,7 @@ export default function Galeri({
 
             {/* Elegant Toast Notification */}
             {toast && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] max-w-md w-full px-4 sm:px-0 pointer-events-none animate-[toastSlideUp_0.4s_cubic-bezier(0.16,1,0.3,1)]">
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100000] max-w-md w-full px-4 sm:px-0 pointer-events-none animate-[toastSlideUp_0.4s_cubic-bezier(0.16,1,0.3,1)]">
                     <div className={`mx-auto pointer-events-auto flex items-center justify-between gap-3.5 px-4.5 py-3 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border backdrop-blur-md transition-all duration-300 ${
                         toast.type === 'success' 
                             ? 'bg-emerald-950/90 border-emerald-500/30 text-emerald-100 shadow-emerald-950/10' 

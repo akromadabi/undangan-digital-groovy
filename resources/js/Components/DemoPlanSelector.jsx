@@ -141,7 +141,7 @@ export default function DemoPlanSelector({ plans = [], selectedPlanSlug = 'plati
         <>
             {/* Floating Trigger Pill */}
             {!isDismissed && (
-                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[99999] w-full max-w-[440px] px-4 select-none">
+                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[999999] w-full max-w-[440px] px-4 select-none">
                     <div className="relative flex items-center w-full">
                         <button
                             type="button"
@@ -183,7 +183,7 @@ export default function DemoPlanSelector({ plans = [], selectedPlanSlug = 'plati
                 <button
                     type="button"
                     onClick={() => setIsDismissed(false)}
-                    className="fixed top-4 right-4 z-[99999] w-9 h-9 rounded-full bg-white/95 hover:bg-white text-emerald-600 hover:text-emerald-700 flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95 border border-gray-200/80 backdrop-blur-md cursor-pointer"
+                    className="fixed top-4 right-4 z-[999999] w-9 h-9 rounded-full bg-white/95 hover:bg-white text-emerald-600 hover:text-emerald-700 flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95 border border-gray-200/80 backdrop-blur-md cursor-pointer"
                     title="Tampilkan Simulasi Paket"
                 >
                     <i className="fas fa-sliders-h text-sm animate-pulse" />
@@ -192,7 +192,7 @@ export default function DemoPlanSelector({ plans = [], selectedPlanSlug = 'plati
 
             {/* Bottom Sheet Backdrop */}
             <div 
-                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] transition-all duration-300 max-w-[480px] mx-auto ${
+                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000000] transition-all duration-300 max-w-[480px] mx-auto ${
                     isOpen ? 'opacity-100 pointer-events-auto visible' : 'opacity-0 pointer-events-none invisible'
                 }`}
                 onClick={() => setIsOpen(false)}
@@ -305,7 +305,7 @@ export default function DemoPlanSelector({ plans = [], selectedPlanSlug = 'plati
             {/* Full Feature Comparison Modal */}
             {showComparison && (
                 <div 
-                    className="fixed inset-0 bg-black/75 z-[100000] flex items-center justify-center p-3 animate-in fade-in duration-300"
+                    className="fixed inset-0 bg-black/75 z-[1000001] flex items-center justify-center p-3 animate-in fade-in duration-300"
                     onClick={() => setShowComparison(false)}
                 >
                     <div 
@@ -477,7 +477,7 @@ export default function DemoPlanSelector({ plans = [], selectedPlanSlug = 'plati
             {/* Notification of plan differences */}
             {planChangeNotification && (
                 <div 
-                    className="fixed inset-0 bg-black/75 z-[100001] flex items-center justify-center p-4 animate-in fade-in duration-300"
+                    className="fixed inset-0 bg-black/75 z-[1000002] flex items-center justify-center p-4 animate-in fade-in duration-300"
                     onClick={() => setPlanChangeNotification(null)}
                 >
                     <div 

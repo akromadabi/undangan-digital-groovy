@@ -90,6 +90,7 @@ export default function GreetingCardTemplateForm({ template = null }) {
         type:             Array.isArray(template?.type) ? template.type : [],
         bg_gradient:      template?.bg_gradient || 'from-[#0d0915] via-[#1b102b] to-[#09090b]',
         base_likes:       template?.base_likes ?? 0,
+        price:            template?.price ?? 49000,
         is_active:        template?.is_active ?? true,
         thumbnail:        template?.thumbnail || '',
         preview_template: template?.preview_template || 'full-mockup',
@@ -401,6 +402,21 @@ export default function GreetingCardTemplateForm({ template = null }) {
                                     placeholder="Contoh: 150"
                                 />
                                 {errors.base_likes && <p className="text-red-500 text-xs mt-1">{errors.base_likes}</p>}
+                            </div>
+
+                            {/* Harga Kartu */}
+                            <div>
+                                <label className={labelClass}>Harga Kartu Ucapan (IDR) *</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={data.price}
+                                    onChange={e => setData('price', parseFloat(e.target.value) || 0)}
+                                    className={inputClass}
+                                    placeholder="Contoh: 49000"
+                                    required
+                                />
+                                {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
                             </div>
 
                             {/* Publish Toggle */}

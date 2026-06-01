@@ -655,6 +655,42 @@ export default function GreetingCardForm({ card, types, templates, defaultTempla
     const [uploadProgress, setUploadProgress] = useState('');
     const [isDragOver, setIsDragOver] = useState(false);
 
+    // States for custom url availability check
+    const [checkingUrl, setCheckingUrl] = useState(false);
+    const [urlAvailable, setUrlAvailable] = useState(null);
+
+    // Debounce check for custom URL availability
+    useEffect(() => {
+        const cleanUrl = data.custom_url ? data.custom_url.trim().toLowerCase().replace(/[^a-zA-Z0-9-_]/g, '') : '';
+        if (cleanUrl.length < 3) {
+            setUrlAvailable(null);
+            return;
+        }
+
+        // If in edit mode and the custom url is identical to original card URL, it's available
+        if (isEdit && cleanUrl === card.custom_url?.trim().toLowerCase()) {
+            setUrlAvailable(true);
+            return;
+        }
+
+        const t = setTimeout(async () => {
+            setCheckingUrl(true);
+            try {
+                const params = new URLSearchParams({ url: cleanUrl });
+                if (isEdit && card?.id) {
+                    params.append('exclude_id', card.id);
+                }
+                const res = await axios.get(`/api/check-card-url?${params.toString()}`);
+                setUrlAvailable(res.data.available);
+            } catch {
+                setUrlAvailable(null);
+            } finally {
+                setCheckingUrl(false);
+            }
+        }, 500);
+        return () => clearTimeout(t);
+    }, [data.custom_url, isEdit, card]);
+
     const { data, setData, post, put, processing, errors } = useForm({
         title:          card?.title ?? 'Kartu Ucapan',
         template:       card?.template ?? defaultTemplate,
@@ -820,8 +856,9 @@ export default function GreetingCardForm({ card, types, templates, defaultTempla
                                             mysticforest:     'from-[#030a05] to-[#0d1c10]',
                                             etherealwhispers: 'from-[#fdf8f5] to-[#f5dae2]',
                                             balloonpop:       'from-[#e0f2fe] to-[#bae6fd]',
+                                            lofilove:         'from-[#1b1517] to-[#352528]',
                                         };
-                                        const icons = { stillwithyou: '🎆', giftforanita: '🎁', oceanbreeze: '🌊', cosmicdrift: '🌌', retroarcade: '👾', cyberpunk: '🤖', bioluminescent: '🪼', mysticforest: '🌲', etherealwhispers: '🌸', balloonpop: '🎈' };
+                                        const icons = { stillwithyou: '🎆', giftforanita: '🎁', oceanbreeze: '🌊', cosmicdrift: '🌌', retroarcade: '👾', cyberpunk: '🤖', bioluminescent: '🪼', mysticforest: '🌲', etherealwhispers: '🌸', balloonpop: '🎈', lofilove: '📻' };
                                         const selected = data.template === key;
                                         return (
                                             <button
@@ -1056,8 +1093,41 @@ export default function GreetingCardForm({ card, types, templates, defaultTempla
                                         onChange={e => setData('custom_url', e.target.value.replace(/[^a-zA-Z0-9-_]/g, ''))}
                                         placeholder={isEdit ? "Masukkan URL kustom" : "cth: ulang-tahun-rachel (kosongkan untuk acak)"}
                                         required={isEdit}
-                                        className={`flex-1 min-w-0 block w-full px-3.5 py-2.5 rounded-r-xl border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#E5654B]/30 ${errors.custom_url ? 'border-red-300 bg-red-50 focus:border-red-500' : 'border-gray-200 bg-white focus:border-[#E5654B]/50'}`}
+                                        className={`flex-1 min-w-0 block w-full px-3.5 py-2.5 rounded-r-xl border text-sm transition-colors focus:outline-none focus:ring-2 ${
+                                            errors.custom_url 
+                                                ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/30' 
+                                                : checkingUrl
+                                                    ? 'border-gray-200 bg-white focus:border-[#E5654B]/50 focus:ring-[#E5654B]/30'
+                                                    : urlAvailable === true
+                                                        ? 'border-emerald-300 bg-emerald-50/10 focus:border-emerald-500 focus:ring-emerald-500/30 text-emerald-900'
+                                                        : urlAvailable === false
+                                                            ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/30'
+                                                            : 'border-gray-200 bg-white focus:border-[#E5654B]/50 focus:ring-[#E5654B]/30'
+                                        }`}
                                     />
+                                </div>
+                                <div className="min-h-[20px] mt-1.5 px-1 text-[11px]">
+                                    {checkingUrl && (
+                                        <span className="text-gray-400 flex items-center gap-1.5">
+                                            <span className="w-3 h-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin inline-block" />
+                                            Memeriksa ketersediaan...
+                                        </span>
+                                    )}
+                                    {!checkingUrl && urlAvailable === true && (
+                                        <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                                            ✓ Link tersedia!
+                                        </span>
+                                    )}
+                                    {!checkingUrl && urlAvailable === false && (
+                                        <span className="text-red-500 font-semibold flex items-center gap-1">
+                                            ✗ Link sudah digunakan oleh kartu lain, silakan gunakan link lain.
+                                        </span>
+                                    )}
+                                    {!checkingUrl && data.custom_url && data.custom_url.length > 0 && data.custom_url.length < 3 && (
+                                        <span className="text-amber-500 flex items-center gap-1">
+                                            ⚠ Minimal 3 karakter
+                                        </span>
+                                    )}
                                 </div>
                                 {errors.custom_url && <p className="text-red-500 text-xs mt-1">{errors.custom_url}</p>}
                                 <p className="text-[10px] text-gray-400 mt-1.5 leading-normal">
@@ -1075,7 +1145,7 @@ export default function GreetingCardForm({ card, types, templates, defaultTempla
                                 </Link>
                                 <button
                                     type="submit"
-                                    disabled={processing || uploading}
+                                    disabled={processing || uploading || checkingUrl || (data.custom_url && urlAvailable === false) || (isEdit && (!data.custom_url || urlAvailable !== true))}
                                     className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-[#E5654B] hover:bg-[#c24b33] text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-60"
                                 >
                                     {processing ? (
