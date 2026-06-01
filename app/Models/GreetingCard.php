@@ -35,12 +35,12 @@ class GreetingCard extends Model
         'wedding'     => 'Pernikahan',
     ];
 
-    // Template labels
     public static array $templates = [
         'stillwithyou'     => 'Still With You',
         'giftforanita'     => 'Love Code Storybook',
         'cosmicdrift'      => 'Cosmic Drift',
         'etherealwhispers' => 'Ethereal Whispers',
+        'balloonpop'       => 'Dreamy Balloons',
     ];
 
     public function user()

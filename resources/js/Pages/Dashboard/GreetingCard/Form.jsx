@@ -819,8 +819,9 @@ export default function GreetingCardForm({ card, types, templates, defaultTempla
                                             bioluminescent:   'from-[#021526] to-[#033043]',
                                             mysticforest:     'from-[#030a05] to-[#0d1c10]',
                                             etherealwhispers: 'from-[#fdf8f5] to-[#f5dae2]',
+                                            balloonpop:       'from-[#e0f2fe] to-[#bae6fd]',
                                         };
-                                        const icons = { stillwithyou: '🎆', giftforanita: '🎁', oceanbreeze: '🌊', cosmicdrift: '🌌', retroarcade: '👾', cyberpunk: '🤖', bioluminescent: '🪼', mysticforest: '🌲', etherealwhispers: '🌸' };
+                                        const icons = { stillwithyou: '🎆', giftforanita: '🎁', oceanbreeze: '🌊', cosmicdrift: '🌌', retroarcade: '👾', cyberpunk: '🤖', bioluminescent: '🪼', mysticforest: '🌲', etherealwhispers: '🌸', balloonpop: '🎈' };
                                         const selected = data.template === key;
                                         return (
                                             <button

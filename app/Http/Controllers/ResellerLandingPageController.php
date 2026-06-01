@@ -125,7 +125,7 @@ class ResellerLandingPageController extends Controller
      * Show all themes with reseller context.
      * URL: /r/{subdomain}/themes
      */
-    public function themes(string $subdomain)
+    public function themes(string $subdomain, string $defaultTab = 'undangan')
     {
         $setting = ResellerSetting::where('subdomain', $subdomain)
             ->where('is_active', true)
@@ -146,6 +146,14 @@ class ResellerLandingPageController extends Controller
             $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
             return $theme;
         });
+
+        // Query greeting card templates with reseller customizations
+        $greetingCards = \App\Models\GreetingCardTemplate::where('is_active', true)
+            ->withCount('greetingCards')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+        $greetingCards = \App\Models\GreetingCardTemplate::applyResellerCustomizations($greetingCards, $reseller->id);
  
         $appUrl = config('app.url');
         $parsed = parse_url($appUrl);
@@ -178,6 +186,9 @@ class ResellerLandingPageController extends Controller
                 'social_links' => $setting->social_links ?: [],
             ],
             'themes' => $themes,
+            'greetingCards' => $greetingCards,
+            'greetingCardTypeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
+            'defaultTab' => $defaultTab,
         ]);
     }
 

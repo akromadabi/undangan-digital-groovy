@@ -583,6 +583,11 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
         return '/katalog-tema';
     };
 
+    const getCardsUrl = () => {
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/r/')) return `/r/${reseller.ref}/themes?tab=kartu`;
+        return '/katalog-kartu';
+    };
+
     const getFaqUrl = () => {
         if (typeof window !== 'undefined' && window.location.pathname.startsWith('/r/')) return `/r/${reseller.ref}/faq`;
         return '/faq';
@@ -1182,7 +1187,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                             </div>
                             <div className="rl-themes-scroll-controls">
                                 <button onClick={() => document.getElementById('cards-scroll')?.scrollBy({ left: -280, behavior: 'smooth' })} className="rl-scroll-btn">←</button>
-                                <a href="/katalog-kartu" className="rl-btn rl-btn--accent-outline">Lihat Semua Kartu →</a>
+                                <Link href={getCardsUrl()} className="rl-btn rl-btn--accent-outline">Lihat Semua Kartu →</Link>
                                 <button onClick={() => document.getElementById('cards-scroll')?.scrollBy({ left: 280, behavior: 'smooth' })} className="rl-scroll-btn">→</button>
                             </div>
                         </div>

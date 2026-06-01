@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import AnimatedLikeButton from '@/Components/AnimatedLikeButton';
 
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
+import GreetingCardPreviewCard from '@/Components/GreetingCardPreviewCard';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -85,7 +86,7 @@ const THEMES_CFG = {
     },
 };
 
-export default function ResellerThemes({ reseller, themes = [] }) {
+export default function ResellerThemes({ reseller, themes = [], greetingCards = [], greetingCardTypeOptions = {}, defaultTab = 'undangan' }) {
     const T = THEMES_CFG[reseller.template] || THEMES_CFG.default;
 
     const getLikesCount = (theme) => {
@@ -102,11 +103,24 @@ export default function ResellerThemes({ reseller, themes = [] }) {
         return `/storage/${path}`;
     };
 
+    // Tab state (activeTab: undangan / kartu)
+    const [activeTab, setActiveTab] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+            if (tabParam === 'kartu' || tabParam === 'undangan') {
+                return tabParam;
+            }
+        }
+        return defaultTab;
+    });
+
     const [scrolled, setScrolled] = useState(false);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortThemeKey, setSortThemeKey] = useState('terbaru');
+    const [sortCardKey, setSortCardKey] = useState('terbaru');
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
     const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -209,6 +223,15 @@ export default function ResellerThemes({ reseller, themes = [] }) {
         return () => window.removeEventListener('scroll', h);
     }, []);
 
+    // Reset filters on tab change
+    useEffect(() => {
+        setSearchQuery('');
+        setSelectedCategories([]);
+        setSelectedTypes([]);
+        setSortThemeKey('terbaru');
+        setSortCardKey('terbaru');
+    }, [activeTab]);
+
     // Extract unique categories
     const categories = useMemo(() => {
         const cats = themes.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean);
@@ -234,6 +257,14 @@ export default function ResellerThemes({ reseller, themes = [] }) {
             return { ...opt, count };
         });
     }, [themes]);
+
+    // Memoize greeting card types with counts
+    const cardTypesWithCount = useMemo(() => {
+        return Object.entries(greetingCardTypeOptions).map(([key, label]) => {
+            const count = greetingCards.filter(t => (t.type || []).includes(key)).length;
+            return { key, label, count };
+        }).sort((a, b) => a.label.localeCompare(b.label));
+    }, [greetingCards, greetingCardTypeOptions]);
 
     const toggleType = (typeKey) => {
         setSelectedTypes(prev =>
@@ -281,6 +312,34 @@ export default function ResellerThemes({ reseller, themes = [] }) {
 
     const clearCategories = () => setSelectedCategories([]);
 
+    // Filter greeting cards
+    const filteredCards = useMemo(() => {
+        let list = [...(greetingCards || [])];
+        if (selectedTypes.length > 0) {
+            list = list.filter(t => (t.type || []).some(type => selectedTypes.includes(type)));
+        }
+        if (searchQuery.trim()) {
+            list = list.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return list;
+    }, [greetingCards, selectedTypes, searchQuery]);
+
+    const sortedCards = useMemo(() => {
+        const arr = [...filteredCards];
+        if (sortCardKey === 'terbaru') return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
+        if (sortCardKey === 'populer') {
+            return arr.sort((a, b) => ((b.greeting_cards_count || 0) + (b.base_likes || 0)) - ((a.greeting_cards_count || 0) + (a.base_likes || 0)));
+        }
+        if (sortCardKey === 'disukai') {
+            return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
+        }
+        return arr;
+    }, [filteredCards, sortCardKey]);
+
+    const handleUseCard = (slug) => {
+        window.location.href = `/buat-kartu/${slug}`;
+    };
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
@@ -297,8 +356,12 @@ export default function ResellerThemes({ reseller, themes = [] }) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const siteTitle = `Semua Tema — ${reseller.brand_name}`;
-    const siteMotto = reseller.site_motto || 'Pilih dari berbagai desain premium yang disesuaikan dengan kebutuhan acara Anda.';
+    const siteTitle = activeTab === 'undangan' 
+        ? `Semua Tema — ${reseller.brand_name}` 
+        : `Katalog Kartu Ucapan — ${reseller.brand_name}`;
+    const siteMotto = activeTab === 'undangan'
+        ? (reseller.site_motto || 'Pilih dari berbagai desain premium yang disesuaikan dengan kebutuhan acara Anda.')
+        : 'Pilih template kartu ucapan interaktif premium dengan animasi dan musik yang memukau.';
 
     const registerUrl = `${reseller.reseller_url || ''}/register?ref=${reseller.ref}`;
     const loginUrl = `${reseller.reseller_url || ''}/login`;
@@ -387,12 +450,62 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                     <Link href={`/r/${reseller.ref}`} className="inline-flex items-center gap-1.5 text-sm font-semibold mb-4 transition-colors" style={{ color: 'var(--accent)' }}>
                         <Icon d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" className="w-4 h-4" /> Kembali
                     </Link>
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ color: 'var(--text-primary)', fontFamily: "'Playfair Display', Georgia, serif" }}>Koleksi Tema</h1>
-                    <p className="mt-3 max-w-2xl text-sm" style={{ color: 'var(--text-secondary)' }}>Pilih dari berbagai desain premium yang disesuaikan dengan kebutuhan acara Anda.</p>
+                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ color: 'var(--text-primary)', fontFamily: "'Playfair Display', Georgia, serif" }}>
+                        {activeTab === 'undangan' ? 'Koleksi Tema' : 'Katalog Kartu Ucapan'}
+                    </h1>
+                    <p className="mt-3 max-w-2xl text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        {activeTab === 'undangan' 
+                            ? 'Pilih dari berbagai desain premium yang disesuaikan dengan kebutuhan acara Anda.'
+                            : 'Pilih template kartu ucapan interaktif premium dengan animasi dan musik yang memukau.'}
+                    </p>
                 </div>
 
+                {/* Tab Switcher */}
+                {greetingCards.length > 0 && (
+                    <div className="flex justify-center sm:justify-start mb-8" style={{ position: 'relative', zIndex: 10 }}>
+                        <div className="inline-flex p-1 rounded-full" style={{ background: 'var(--card-bg)', border: '1.5px solid var(--card-border)' }}>
+                            <button
+                                onClick={() => setActiveTab('undangan')}
+                                className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border-none cursor-pointer`}
+                                style={
+                                    activeTab === 'undangan'
+                                        ? {
+                                              background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))',
+                                              color: '#fff',
+                                              boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.25)',
+                                          }
+                                        : {
+                                              background: 'transparent',
+                                              color: 'var(--text-secondary)',
+                                          }
+                                }
+                            >
+                                Undangan Digital
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('kartu')}
+                                className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border-none cursor-pointer`}
+                                style={
+                                    activeTab === 'kartu'
+                                        ? {
+                                              background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))',
+                                              color: '#fff',
+                                              boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.25)',
+                                          }
+                                        : {
+                                              background: 'transparent',
+                                              color: 'var(--text-secondary)',
+                                          }
+                                }
+                            >
+                                Kartu Ucapan
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Overhauled Filters & Search Bar */}
-                {themes.length > 0 && (
+                {((activeTab === 'undangan' && themes.length > 0) || (activeTab === 'kartu' && greetingCards.length > 0)) && (
                     <div className="rl-filter-panel">
                         <div className="rl-filter-row">
                             {/* Search Box */}
@@ -412,87 +525,89 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                                     type="text"
                                     value={searchQuery}
                                     onChange={e => setSearchQuery(e.target.value)}
-                                    placeholder="Cari tema..."
+                                    placeholder={activeTab === 'undangan' ? 'Cari tema...' : 'Cari kartu...'}
                                     className="rl-filter-search-input"
                                 />
                             </div>
 
                             {/* Controls */}
                             <div className="rl-filter-controls">
-                                {/* Category Select Dropdown */}
-                                <div className="rl-filter-dropdown-wrapper" ref={categoryDropdownRef}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                                        style={{
-                                            border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
-                                            background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
-                                            color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
-                                        }}
-                                        className="rl-filter-btn"
-                                    >
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
-                                            <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                {/* Category Select Dropdown (Themes Only) */}
+                                {activeTab === 'undangan' && (
+                                    <div className="rl-filter-dropdown-wrapper" ref={categoryDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                                            style={{
+                                                border: '1.5px solid ' + (selectedCategories.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
+                                                background: selectedCategories.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                                color: selectedCategories.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
+                                            }}
+                                            className="rl-filter-btn"
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                                                <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                                </svg>
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {selectedCategories.length === 0 ? 'Kategori' : `Kategori (${selectedCategories.length})`}
+                                                </span>
+                                            </div>
+                                            <svg style={{
+                                                width: '12px',
+                                                height: '12px',
+                                                flexShrink: 0,
+                                                transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
+                                                transition: 'transform 0.2s'
+                                            }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                             </svg>
-                                            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {selectedCategories.length === 0 ? 'Kategori' : `Kategori (${selectedCategories.length})`}
-                                            </span>
-                                        </div>
-                                        <svg style={{
-                                            width: '12px',
-                                            height: '12px',
-                                            flexShrink: 0,
-                                            transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none',
-                                            transition: 'transform 0.2s'
-                                        }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
+                                        </button>
 
-                                    {isCategoryDropdownOpen && (
-                                        <div className="rl-filter-dropdown-menu" style={{
-                                            background: T.isDark ? '#1e293b' : '#ffffff',
-                                            border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
-                                        }}>
-                                            <div className="rl-filter-dropdown-menu-header">
-                                                <span className="rl-filter-dropdown-menu-title">Kategori</span>
-                                                {selectedCategories.length > 0 && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={clearCategories}
-                                                        className="rl-filter-dropdown-menu-reset"
-                                                    >
-                                                        Reset
-                                                    </button>
-                                                )}
-                                            </div>
-                                            <div className="rl-filter-dropdown-list">
-                                                {categories.map(cat => {
-                                                    const isChecked = selectedCategories.includes(cat);
-                                                    return (
-                                                        <label
-                                                            key={cat}
-                                                            className="rl-filter-checkbox-label"
-                                                            style={{
-                                                                color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
-                                                                background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
-                                                            }}
+                                        {isCategoryDropdownOpen && (
+                                            <div className="rl-filter-dropdown-menu" style={{
+                                                background: T.isDark ? '#1e293b' : '#ffffff',
+                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                            }}>
+                                                <div className="rl-filter-dropdown-menu-header">
+                                                    <span className="rl-filter-dropdown-menu-title">Kategori</span>
+                                                    {selectedCategories.length > 0 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={clearCategories}
+                                                            className="rl-filter-dropdown-menu-reset"
                                                         >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={isChecked}
-                                                                onChange={() => toggleCategory(cat)}
-                                                                className="rl-filter-checkbox-input"
-                                                            />
-                                                            <span style={{ textTransform: 'capitalize' }}>{cat}</span>
-                                                        </label>
-                                                    );
-                                                })}
+                                                            Reset
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="rl-filter-dropdown-list">
+                                                    {categories.map(cat => {
+                                                        const isChecked = selectedCategories.includes(cat);
+                                                        return (
+                                                            <label
+                                                                key={cat}
+                                                                className="rl-filter-checkbox-label"
+                                                                style={{
+                                                                    color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                    background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
+                                                                }}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={() => toggleCategory(cat)}
+                                                                    className="rl-filter-checkbox-input"
+                                                                />
+                                                                <span style={{ textTransform: 'capitalize' }}>{cat}</span>
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Event Types Select Dropdown */}
                                 <div className="rl-filter-dropdown-wrapper" ref={typeDropdownRef}>
@@ -543,7 +658,7 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                                                 )}
                                             </div>
                                             <div className="rl-filter-dropdown-list">
-                                                {eventTypesWithCount.map(type => {
+                                                {(activeTab === 'undangan' ? eventTypesWithCount : cardTypesWithCount).map(type => {
                                                     const isChecked = selectedTypes.includes(type.key);
                                                     return (
                                                         <label
@@ -588,7 +703,7 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                                             transition: 'all 0.2s',
                                             flexShrink: 0
                                         }}
-                                        title="Urutkan Tema"
+                                        title={activeTab === 'undangan' ? 'Urutkan Tema' : 'Urutkan Kartu'}
                                     >
                                         <svg style={{ width: '16px', height: '16px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
@@ -609,13 +724,18 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                                                     { key: 'populer', label: 'Terpopuler' },
                                                     { key: 'disukai', label: 'Terfavorit' }
                                                 ].map(opt => {
-                                                    const isActive = sortThemeKey === opt.key;
+                                                    const currentSortKey = activeTab === 'undangan' ? sortThemeKey : sortCardKey;
+                                                    const isActive = currentSortKey === opt.key;
                                                     return (
                                                         <button
                                                             key={opt.key}
                                                             type="button"
                                                             onClick={() => {
-                                                                setSortThemeKey(opt.key);
+                                                                if (activeTab === 'undangan') {
+                                                                    setSortThemeKey(opt.key);
+                                                                } else {
+                                                                    setSortCardKey(opt.key);
+                                                                }
                                                                 setIsSortDropdownOpen(false);
                                                             }}
                                                             style={{
@@ -654,22 +774,42 @@ export default function ResellerThemes({ reseller, themes = [] }) {
                     </div>
                 )}
 
-                {/* Themes Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    {sortedThemes.map((theme) => (
-                        <ThemePreviewCard 
-                            key={theme.id} 
-                            theme={theme}
-                            reseller={reseller}
-                        />
-                    ))}
+                {/* Grid Content */}
+                {activeTab === 'undangan' ? (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                        {sortedThemes.map((theme) => (
+                            <ThemePreviewCard 
+                                key={theme.id} 
+                                theme={theme}
+                                reseller={reseller}
+                            />
+                        ))}
 
-                    {sortedThemes.length === 0 && (
-                        <div className="col-span-full py-20 text-center" style={{ color: 'var(--text-secondary)' }}>
-                            Belum ada tema dalam kategori ini atau tidak ada hasil pencarian yang cocok.
-                        </div>
-                    )}
-                </div>
+                        {sortedThemes.length === 0 && (
+                            <div className="col-span-full py-20 text-center" style={{ color: 'var(--text-secondary)' }}>
+                                Belum ada tema dalam kategori ini atau tidak ada hasil pencarian yang cocok.
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                        {sortedCards.map((card) => (
+                            <GreetingCardPreviewCard 
+                                key={card.id} 
+                                theme={card}
+                                reseller={reseller}
+                                onUse={handleUseCard}
+                                typeOptions={greetingCardTypeOptions}
+                            />
+                        ))}
+
+                        {sortedCards.length === 0 && (
+                            <div className="col-span-full py-20 text-center" style={{ color: 'var(--text-secondary)' }}>
+                                Belum ada kartu ucapan dalam kategori ini atau tidak ada hasil pencarian yang cocok.
+                            </div>
+                        )}
+                    </div>
+                )}
             </main>
 
             {/* ═══ FOOTER ═══ */}

@@ -25,6 +25,7 @@ const templateGradients = {
     cyberpunk:     'from-[#030712] via-[#0f172a] to-[#020617]',
     bioluminescent: 'from-[#021526] via-[#033043] to-[#020e17]',
     mysticforest:  'from-[#06130b] via-[#0d1c10] to-[#020704]',
+    balloonpop:    'from-[#e0f2fe] via-[#bae6fd] to-[#7dd3fc]',
 };
 
 const templateIcons = {
@@ -36,6 +37,7 @@ const templateIcons = {
     cyberpunk:      Cpu,
     bioluminescent: Lightbulb,
     mysticforest:   TreePine,
+    balloonpop:     Sparkles,
 };
 
 export default function InvitationsList({ invitations, activeInvitationId, greetingCards = [], initialTab = 'invitations' }) {

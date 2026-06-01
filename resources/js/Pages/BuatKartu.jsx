@@ -42,6 +42,7 @@ const templateGradients = {
     giftforanita:     'from-[#1e050d] via-[#4c1125] to-[#07060a]',
     cosmicdrift:      'from-[#0b0c10] via-[#1f2833] to-[#0b0c10]',
     etherealwhispers: 'from-[#fdf8f5] via-[#faebf0] to-[#f5dae2]',
+    balloonpop:       'from-[#e0f2fe] via-[#bae6fd] to-[#7dd3fc]',
 };
 
 const templateIcons = {
@@ -49,6 +50,7 @@ const templateIcons = {
     giftforanita:     Gift,
     cosmicdrift:      Sparkles,
     etherealwhispers: Heart,
+    balloonpop:       Sparkles,
 };
 
 const DRAFT_KEY = 'buat_kartu_draft';

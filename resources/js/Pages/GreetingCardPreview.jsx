@@ -7179,6 +7179,798 @@ function MysticForestFull({ card }) {
 }
 
 
+function BalloonPopFull({ card }) {
+    const canvasRef = useRef(null);
+    const audioCtxRef = useRef(null);
+    
+    const [stage, setStage] = useState('cover'); // 'cover' | 'opened'
+    const [isMuted, setIsMuted] = useState(true);
+    const [activePhoto, setActivePhoto] = useState(null);
+    const [revealedPhotos, setRevealedPhotos] = useState([]);
+    
+    // Form balon harapan kustom
+    const [wishText, setWishText] = useState('');
+    const [wishColor, setWishColor] = useState('pink'); // 'pink' | 'blue' | 'yellow' | 'green' | 'purple'
+    const [wishBalloonActive, setWishBalloonActive] = useState(false);
+    
+    // Efek mengetik pesan ucapan
+    const [displayText, setDisplayText] = useState('');
+    const [typingDone, setTypingDone] = useState(false);
+    
+    const mainMessage = card.messages?.[0] || 'Semoga hari-harimu selalu dipenuhi keindahan, kebahagiaan, tawa, dan semua impian indahmu menjadi kenyataan!';
+
+    // Sintesis Suara Web Audio API
+    const initAudio = () => {
+        if (!audioCtxRef.current) {
+            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+            audioCtxRef.current.resume();
+        }
+        return audioCtxRef.current;
+    };
+
+    const playPopSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(60, now + 0.08);
+            
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } catch(e){}
+    };
+
+    const playChimeSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            
+            // Arpeggio C-major kristal
+            const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+            freqs.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+                
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.06, now + idx * 0.05 + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.05 + 0.4);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + idx * 0.05);
+                osc.stop(now + idx * 0.05 + 0.4);
+            });
+        } catch(e){}
+    };
+
+    const playLaunchSound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(450, now + 0.25);
+            
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.08, now + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        } catch(e){}
+    };
+
+    const handleHatchPop = () => {
+        playPopSound();
+        playChimeSound();
+        setStage('opened');
+        setIsMuted(false);
+    };
+
+    // Efek mengetik ucapan
+    useEffect(() => {
+        if (stage !== 'opened') return;
+        let idx = 0;
+        setDisplayText('');
+        setTypingDone(false);
+        const interval = setInterval(() => {
+            if (idx < mainMessage.length) {
+                setDisplayText(prev => prev + mainMessage.charAt(idx));
+                idx++;
+            } else {
+                clearInterval(interval);
+                setTypingDone(true);
+            }
+        }, 35);
+        return () => clearInterval(interval);
+    }, [stage]);
+
+    // Engine Fisika & Partikel Canvas
+    const balloonsRef = useRef([]);
+    const particlesRef = useRef([]);
+    const cloudsRef = useRef([]);
+    const floatingTextsRef = useRef([]);
+
+    useEffect(() => {
+        if (stage !== 'opened') return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+
+        const handleResize = () => {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+
+        // Skema warna balon pastel
+        const colors = {
+            pink:   { fill: 'rgba(244, 180, 196, 0.85)', stroke: 'rgba(235, 140, 160, 0.95)', highlight: 'rgba(255, 255, 255, 0.4)' },
+            blue:   { fill: 'rgba(186, 230, 253, 0.85)', stroke: 'rgba(125, 211, 252, 0.95)', highlight: 'rgba(255, 255, 255, 0.4)' },
+            yellow: { fill: 'rgba(254, 240, 138, 0.85)', stroke: 'rgba(253, 224, 71, 0.95)', highlight: 'rgba(255, 255, 255, 0.4)' },
+            green:  { fill: 'rgba(187, 247, 208, 0.85)', stroke: 'rgba(134, 239, 172, 0.95)', highlight: 'rgba(255, 255, 255, 0.4)' },
+            purple: { fill: 'rgba(233, 213, 255, 0.85)', stroke: 'rgba(216, 180, 254, 0.95)', highlight: 'rgba(255, 255, 255, 0.4)' },
+            gold:   { fill: 'rgba(251, 191, 36, 0.88)', stroke: 'rgba(245, 158, 11, 0.98)', highlight: 'rgba(255, 255, 255, 0.55)' }
+        };
+
+        const colorKeys = Object.keys(colors);
+
+        // Setup Awan (Awan bergerak lambat di langit)
+        cloudsRef.current = Array.from({ length: 5 }, (_, i) => ({
+            x: Math.random() * W,
+            y: 40 + Math.random() * (H * 0.4),
+            scale: 0.6 + Math.random() * 0.8,
+            speed: 0.12 + Math.random() * 0.15
+        }));
+
+        // Inisialisasi Balon
+        const photosList = card.photos || [];
+        const initialBalloons = [];
+
+        // 1. Balon Foto (Khusus - Warna Emas)
+        photosList.forEach((photoUrl, idx) => {
+            initialBalloons.push({
+                id: `photo-${idx}`,
+                photoUrl: photoUrl,
+                x: W * 0.15 + Math.random() * (W * 0.7),
+                y: H + 100 + idx * 220,
+                baseX: 0,
+                amplitude: 15 + Math.random() * 20,
+                phase: Math.random() * Math.PI * 2,
+                wobble: 0.007 + Math.random() * 0.008,
+                vy: 0.75 + Math.random() * 0.45,
+                radiusX: 25,
+                radiusY: 34,
+                colorKey: 'gold',
+                isPhoto: true,
+                photoIndex: idx,
+                popped: false
+            });
+        });
+
+        // 2. Balon Hiasan Biasa
+        const regularCount = Math.max(5, 12 - photosList.length);
+        for (let i = 0; i < regularCount; i++) {
+            initialBalloons.push({
+                id: `reg-${i}`,
+                x: Math.random() * W,
+                y: H + 100 + Math.random() * (H + 200),
+                baseX: 0,
+                amplitude: 12 + Math.random() * 15,
+                phase: Math.random() * Math.PI * 2,
+                wobble: 0.006 + Math.random() * 0.007,
+                vy: 0.9 + Math.random() * 0.7,
+                radiusX: 20 + Math.random() * 6,
+                radiusY: 27 + Math.random() * 8,
+                colorKey: colorKeys[i % (colorKeys.length - 1)], // kecualikan emas untuk dekoratif biasa
+                isPhoto: false,
+                popped: false
+            });
+        }
+
+        balloonsRef.current = initialBalloons;
+        particlesRef.current = [];
+        floatingTextsRef.current = [];
+
+        const loop = () => {
+            // Gambar warna gradasi langit pastel
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+            skyGrad.addColorStop(0, '#e0f2fe');
+            skyGrad.addColorStop(0.5, '#bae6fd');
+            skyGrad.addColorStop(1, '#f3e8ff');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Render Awan
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+            cloudsRef.current.forEach(c => {
+                c.x += c.speed;
+                if (c.x > W + 200) {
+                    c.x = -200;
+                    c.y = 40 + Math.random() * (H * 0.4);
+                }
+
+                ctx.save();
+                ctx.translate(c.x, c.y);
+                ctx.scale(c.scale, c.scale);
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, Math.PI * 2);
+                ctx.arc(25, -10, 35, 0, Math.PI * 2);
+                ctx.arc(55, 0, 30, 0, Math.PI * 2);
+                ctx.arc(25, 15, 25, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Update & Render Balon
+            balloonsRef.current.forEach(b => {
+                if (b.popped) return;
+
+                // Naik ke atas
+                b.y -= b.vy;
+                b.phase += b.wobble;
+                
+                // Goyangan meliuk menyamping
+                if (b.baseX === 0) b.baseX = b.x;
+                b.x = b.baseX + Math.sin(b.phase) * b.amplitude;
+
+                // Respawn di bawah jika melewati batas atas layar
+                if (b.y < -100) {
+                    b.y = H + 100;
+                    b.baseX = Math.random() * W;
+                    b.x = b.baseX;
+                    b.vy = 0.8 + Math.random() * 0.7;
+                    b.phase = Math.random() * Math.PI * 2;
+                }
+
+                // Gambar Tali Balon
+                ctx.beginPath();
+                ctx.moveTo(b.x, b.y + b.radiusY);
+                ctx.bezierCurveTo(
+                    b.x - 5 * Math.sin(b.phase), b.y + b.radiusY + 15,
+                    b.x + 5 * Math.sin(b.phase), b.y + b.radiusY + 35,
+                    b.x, b.y + b.radiusY + 55
+                );
+                ctx.strokeStyle = 'rgba(100, 116, 139, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Gambar Badan Balon
+                const c = colors[b.colorKey] || colors.pink;
+                ctx.save();
+                ctx.translate(b.x, b.y);
+
+                // Efek Cahaya / Glow
+                if (b.isPhoto) {
+                    ctx.shadowColor = 'rgba(245, 158, 11, 0.6)';
+                    ctx.shadowBlur = 15;
+                } else if (b.isWish) {
+                    ctx.shadowColor = 'rgba(236, 72, 153, 0.45)';
+                    ctx.shadowBlur = 12;
+                }
+
+                // Bentuk Balon Oval
+                ctx.beginPath();
+                ctx.ellipse(0, 0, b.radiusX, b.radiusY, 0, 0, Math.PI * 2);
+                ctx.fillStyle = c.fill;
+                ctx.fill();
+
+                // Hapus shadow untuk border
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = c.stroke;
+                ctx.lineWidth = 1.8;
+                ctx.stroke();
+
+                // Simpul tali segitiga di bagian bawah balon
+                ctx.beginPath();
+                ctx.moveTo(-4, b.radiusY - 2);
+                ctx.lineTo(4, b.radiusY - 2);
+                ctx.lineTo(0, b.radiusY + 4);
+                ctx.closePath();
+                ctx.fillStyle = c.stroke;
+                ctx.fill();
+
+                // Kilau pantulan cahaya 3D
+                ctx.beginPath();
+                ctx.ellipse(-b.radiusX * 0.35, -b.radiusY * 0.35, b.radiusX * 0.25, b.radiusY * 0.25, -Math.PI / 4, 0, Math.PI * 2);
+                ctx.fillStyle = c.highlight;
+                ctx.fill();
+
+                // Indikator Emojis
+                if (b.isPhoto) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('📷', 0, 2);
+                } else if (b.isWish) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('✨', 0, 2);
+                }
+
+                ctx.restore();
+            });
+
+            // Update & Render Partikel Ledakan Balon (Konfeti / Love)
+            particlesRef.current.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.vx *= 0.98;
+                p.angle += p.rotationSpeed;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particlesRef.current.splice(idx, 1);
+                    return;
+                }
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.angle);
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+
+                if (p.shape === 'heart') {
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(-p.size, -p.size, -p.size * 2, p.size / 3, 0, p.size * 1.5);
+                    ctx.bezierCurveTo(p.size * 2, p.size / 3, p.size, -p.size, 0, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                }
+                ctx.restore();
+            });
+            ctx.globalAlpha = 1.0;
+
+            // Update & Render Ucapan Teks yang Melayang (Popped Wish Text)
+            floatingTextsRef.current.forEach((t, idx) => {
+                t.y -= t.speed;
+                t.alpha -= t.decay;
+
+                if (t.alpha <= 0) {
+                    floatingTextsRef.current.splice(idx, 1);
+                    return;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = t.alpha;
+                ctx.shadowColor = 'rgba(255,255,255,0.85)';
+                ctx.shadowBlur = 10;
+                
+                ctx.font = 'bold 12px monospace';
+                const textWidth = ctx.measureText(t.text).width;
+                
+                // Gambar Box Tag teks transparan
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.strokeStyle = t.strokeColor;
+                ctx.lineWidth = 1.2;
+                
+                if (ctx.roundRect) {
+                    ctx.beginPath();
+                    ctx.roundRect(t.x - textWidth/2 - 10, t.y - 14, textWidth + 20, 24, 8);
+                    ctx.fill();
+                    ctx.stroke();
+                } else {
+                    ctx.beginPath();
+                    ctx.rect(t.x - textWidth/2 - 10, t.y - 14, textWidth + 20, 24);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = '#0f172a';
+                ctx.textAlign = 'center';
+                ctx.fillText(t.text, t.x, t.y + 2);
+                ctx.restore();
+            });
+            ctx.globalAlpha = 1.0;
+
+            animId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        return () => {
+            cancelAnimationFrame(animId);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [stage]);
+
+    // Handle klik/sentuh layar untuk meletuskan balon
+    const handleCanvasClick = (e) => {
+        if (stage !== 'opened') return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        // Klik balon teratas dulu
+        for (let i = balloonsRef.current.length - 1; i >= 0; i--) {
+            const b = balloonsRef.current[i];
+            if (b.popped) continue;
+
+            const dx = clickX - b.x;
+            const dy = clickY - b.y;
+            // Deteksi tabrakan oval
+            if ((dx * dx) / (b.radiusX * b.radiusX) + (dy * dy) / (b.radiusY * b.radiusY) <= 1.35) {
+                b.popped = true;
+                playPopSound();
+
+                // Spawns partikel ledakan konfeti
+                const colorsList = ['#ff8fa3', '#f472b6', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#f59e0b'];
+                const count = 30 + Math.floor(Math.random() * 15);
+                for (let k = 0; k < count; k++) {
+                    particlesRef.current.push({
+                        x: b.x,
+                        y: b.y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6 - 2,
+                        gravity: 0.08 + Math.random() * 0.05,
+                        size: 4 + Math.random() * 6,
+                        color: colorsList[Math.floor(Math.random() * colorsList.length)],
+                        angle: Math.random() * Math.PI * 2,
+                        rotationSpeed: (Math.random() - 0.5) * 0.15,
+                        shape: Math.random() < 0.35 ? 'heart' : 'rectangle',
+                        alpha: 1.0,
+                        decay: 0.015 + Math.random() * 0.01
+                    });
+                }
+
+                if (b.isPhoto) {
+                    playChimeSound();
+                    setActivePhoto(b.photoUrl);
+                    if (!revealedPhotos.includes(b.photoUrl)) {
+                        setRevealedPhotos(prev => [...prev, b.photoUrl]);
+                    }
+                    // Munculkan kembali balon foto setelah beberapa detik
+                    setTimeout(() => {
+                        b.popped = false;
+                        b.y = window.innerHeight + 100;
+                        b.baseX = Math.random() * window.innerWidth;
+                        b.x = b.baseX;
+                    }, 6000);
+                } else if (b.isWish) {
+                    playChimeSound();
+                    // Terbangkan teks balon harapan kustom ke atas
+                    floatingTextsRef.current.push({
+                        x: b.x,
+                        y: b.y,
+                        text: `🎈 ${b.text}`,
+                        speed: 0.8 + Math.random() * 0.4,
+                        alpha: 1.0,
+                        decay: 0.008,
+                        strokeColor: '#f472b6'
+                    });
+                } else {
+                    const generalWishes = ['🌈 Kebahagiaan', '💖 Cinta', '🌸 Damai', '🎂 HBD!', '🎓 Sukses!', '🎉 Selamat!', '🍀 Keberuntungan'];
+                    floatingTextsRef.current.push({
+                        x: b.x,
+                        y: b.y,
+                        text: generalWishes[Math.floor(Math.random() * generalWishes.length)],
+                        speed: 0.7 + Math.random() * 0.4,
+                        alpha: 1.0,
+                        decay: 0.012,
+                        strokeColor: '#38bdf8'
+                    });
+                    
+                    setTimeout(() => {
+                        b.popped = false;
+                        b.y = window.innerHeight + 100;
+                        b.baseX = Math.random() * window.innerWidth;
+                        b.x = b.baseX;
+                    }, 4000);
+                }
+                break; // Letuskan 1 balon saja per klik
+            }
+        }
+    };
+
+    // Menerbangkan balon harapan baru
+    const handleLaunchWish = (e) => {
+        e.preventDefault();
+        if (!wishText.trim()) return;
+
+        playLaunchSound();
+        
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        
+        balloonsRef.current.push({
+            id: `wish-${Date.now()}`,
+            text: wishText,
+            x: w * 0.2 + Math.random() * (w * 0.6),
+            y: h + 50,
+            baseX: 0,
+            amplitude: 15 + Math.random() * 15,
+            phase: Math.random() * Math.PI * 2,
+            wobble: 0.007 + Math.random() * 0.007,
+            vy: 1.0 + Math.random() * 0.5,
+            radiusX: 23,
+            radiusY: 31,
+            colorKey: wishColor,
+            isPhoto: false,
+            isWish: true,
+            popped: false
+        });
+
+        setWishText('');
+        setWishBalloonActive(true);
+        setTimeout(() => setWishBalloonActive(false), 4000);
+    };
+
+    return (
+        <div className="fixed inset-0 overflow-hidden flex flex-col items-center justify-center bg-[#e0f2fe] text-slate-800 select-none">
+            {/* Active Physics Canvas */}
+            {stage === 'opened' && (
+                <canvas 
+                    ref={canvasRef} 
+                    onClick={handleCanvasClick} 
+                    style={{ position: 'absolute', inset: 0, zIndex: 1, cursor: 'pointer' }} 
+                />
+            )}
+
+            {/* Mute/Unmute */}
+            <button 
+                onClick={() => setIsMuted(!isMuted)} 
+                className="absolute top-4 right-4 z-50 px-3 py-1.5 rounded-xl border border-sky-400/20 bg-sky-100/50 backdrop-blur-md text-xs font-semibold tracking-wider text-sky-800 shadow-md hover:bg-sky-200/50 active:scale-95 transition-all"
+            >
+                {isMuted ? '🔇 MUTE' : '🔊 UNMUTE'}
+            </button>
+
+            {/* COVER SCENE: Balon Udara Raksasa */}
+            {stage === 'cover' && (
+                <div className="relative inset-0 w-full h-full flex flex-col items-center justify-center text-center p-8 z-10"
+                    style={{ background: 'radial-gradient(circle, #f0f9ff 0%, #e0f2fe 100%)' }}>
+                    
+                    {/* Awan melayang pelengkap */}
+                    <div className="absolute top-20 left-10 w-24 h-12 bg-white rounded-full opacity-60 filter blur-xs animate-pulse" />
+                    <div className="absolute top-40 right-16 w-32 h-16 bg-white rounded-full opacity-50 filter blur-xs" />
+                    <div className="absolute bottom-20 left-20 w-40 h-20 bg-white rounded-full opacity-50 filter blur-xs" />
+
+                    <div 
+                        onClick={handleHatchPop}
+                        className="cursor-pointer group flex flex-col items-center"
+                        style={{ animation: 'floatHotAir 5s ease-in-out infinite' }}
+                    >
+                        {/* SVG Balon Udara */}
+                        <svg className="w-40 h-56 drop-shadow-[0_15px_30px_rgba(125,211,252,0.5)] transform group-hover:scale-105 transition-all" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M50 5C25 5 5 25 5 50C5 68 18 84 32 94C38 98 42 105 44 110H56C58 105 62 98 68 94C82 84 95 68 95 50C95 25 75 5 50 5Z" fill="url(#envelopeGrad)" />
+                            <path d="M50 5C40 5 32 25 32 50C32 68 38 84 44 110H56C62 84 68 68 68 50C68 25 60 5 50 5Z" fill="url(#stripeGrad)" />
+                            
+                            <line x1="43" y1="110" x2="43" y2="128" stroke="#64748b" strokeWidth="1.2" />
+                            <line x1="57" y1="110" x2="57" y2="128" stroke="#64748b" strokeWidth="1.2" />
+                            <line x1="50" y1="110" x2="50" y2="128" stroke="#64748b" strokeWidth="0.8" />
+                            
+                            <rect x="40" y="128" width="20" height="10" rx="2" fill="#b45309" stroke="#78350f" strokeWidth="1" />
+                            <line x1="40" y1="133" x2="60" y2="133" stroke="#78350f" strokeWidth="0.8" />
+
+                            <defs>
+                                <linearGradient id="envelopeGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#f472b6" />
+                                    <stop offset="50%" stopColor="#ec4899" />
+                                    <stop offset="100%" stopColor="#db2777" />
+                                </linearGradient>
+                                <linearGradient id="stripeGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#fed7aa" />
+                                    <stop offset="50%" stopColor="#f97316" />
+                                    <stop offset="100%" stopColor="#ea580c" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+
+                        <div className="mt-8 px-5 py-2.5 bg-amber-50 border-2 border-amber-800 text-amber-900 rounded-xl font-bold text-xs tracking-wider shadow-md flex items-center gap-1.5 transition-all group-hover:bg-amber-100 group-hover:border-amber-600 active:scale-95">
+                            ✉️ BUKA PESAN KEBAHAGIAAN
+                        </div>
+                    </div>
+
+                    <div className="mt-12 max-w-sm">
+                        <h1 className="text-2xl font-black text-sky-900 tracking-wide font-outfit" style={{ textShadow: '0 2px 4px rgba(255,255,255,0.8)' }}>
+                            {card.title}
+                        </h1>
+                        <p className="mt-2 text-xs font-medium text-sky-700/80 font-mono tracking-widest">
+                            Untuk: {card.recipient_name}
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* OPENED SCENE: Langit & Papan Ucapan */}
+            {stage === 'opened' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-between p-5 z-10 pointer-events-none">
+                    
+                    <div className="text-center w-full mt-4 flex flex-col items-center">
+                        <div className="px-3 py-1 bg-white/70 backdrop-blur-md border border-sky-300/30 text-sky-900 font-bold text-[10px] tracking-widest uppercase rounded-full shadow-sm" style={{ fontFamily: 'monospace' }}>
+                            🎈 Ketuk Balon untuk Meletuskannya! 🎈
+                        </div>
+                        {card.photos && card.photos.length > 0 && (
+                            <p className="text-[10px] text-sky-800/60 mt-1 font-semibold">
+                                Petunjuk: Balon 📷 menyimpan foto kenangan khusus!
+                            </p>
+                        )}
+                    </div>
+
+                    {/* PAPAN UCAPAN (GLASSMORPHISM BOARD) */}
+                    <div className="w-full max-w-sm flex flex-col items-center pointer-events-auto mb-16 mt-auto">
+                        <div className="w-full bg-white/60 backdrop-blur-lg border border-white/50 p-5 rounded-2xl shadow-xl flex flex-col space-y-4 text-center">
+                            
+                            <div>
+                                <div className="text-xs uppercase font-extrabold tracking-widest text-sky-700 font-mono">
+                                    ✦ {card.type_label} ✦
+                                </div>
+                                <h2 className="text-xl font-black text-slate-800 mt-1 font-outfit">
+                                    {card.title}
+                                </h2>
+                                <div className="h-0.5 w-16 bg-sky-400 mx-auto mt-2.5 rounded-full" />
+                            </div>
+
+                            <div className="text-xs font-bold text-sky-800/80 bg-sky-100/50 py-1 px-3 rounded-full inline-block mx-auto font-mono">
+                                Kepada: {card.recipient_name}
+                            </div>
+
+                            {/* Teks Pesan Efek Mengetik */}
+                            <div className="w-full p-4 bg-white/40 border border-white/30 rounded-xl font-mono text-xs leading-relaxed text-slate-700 text-left min-h-[96px] max-h-[140px] overflow-y-auto shadow-inner">
+                                {displayText}
+                                {!typingDone && <span className="animate-pulse font-bold text-sky-600">|</span>}
+                            </div>
+
+                            {/* Galeri Thumbnail Foto yang Berhasil Diletuskan */}
+                            {revealedPhotos.length > 0 && (
+                                <div className="space-y-1.5 border-t border-slate-200/50 pt-3">
+                                    <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400 text-left">
+                                        Foto Kenangan Terbuka ({revealedPhotos.length}/{card.photos.length})
+                                    </div>
+                                    <div className="flex gap-2.5 overflow-x-auto py-1 pr-1">
+                                        {revealedPhotos.map((url, idx) => (
+                                            <div 
+                                                key={idx}
+                                                onClick={() => setActivePhoto(url)}
+                                                className="w-12 h-14 bg-white p-0.5 border border-slate-200 shadow-sm rounded flex-shrink-0 cursor-pointer transform hover:scale-105 transition-transform"
+                                                style={{ transform: `rotate(${(idx % 2 === 0 ? -2 : 2)}deg)` }}
+                                            >
+                                                <img src={url} alt="" className="w-full h-10 object-cover rounded-xs" />
+                                                <div className="text-[5px] text-center text-slate-400 font-mono mt-0.5">PIC_0{idx+1}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Pengirim */}
+                            <div className="text-xs font-bold text-slate-500 text-right w-full border-t border-slate-200/50 pt-2.5">
+                                — Dari: <span className="text-sky-700 font-outfit">{card.sender_name}</span>
+                            </div>
+
+                            {/* Form Terbangkan Balon Baru */}
+                            <form onSubmit={handleLaunchWish} className="border-t border-slate-200/50 pt-3 flex flex-col space-y-2">
+                                <div className="text-[10px] font-bold text-slate-500 flex items-center justify-between">
+                                    <span>Tulis Harapan & Terbangkan Balon:</span>
+                                    {wishBalloonActive && <span className="text-emerald-600 animate-pulse text-[9px]">🎈 Balon Mengudara!</span>}
+                                </div>
+                                <div className="flex gap-1.5">
+                                    <input 
+                                        type="text" 
+                                        maxLength={40}
+                                        value={wishText}
+                                        onChange={e => setWishText(e.target.value)}
+                                        placeholder="cth: Semoga bahagia selalu..."
+                                        className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white/80 focus:outline-none focus:ring-1 focus:ring-sky-400 focus:border-sky-400 text-xs transition-colors"
+                                    />
+                                    <button 
+                                        type="submit"
+                                        disabled={!wishText.trim()}
+                                        className="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:hover:bg-sky-500 text-white font-bold text-xs active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1"
+                                    >
+                                        <span>Terbangkan</span>
+                                        <span>🎈</span>
+                                    </button>
+                                </div>
+                                <div className="flex justify-center gap-2 pt-1">
+                                    {['pink', 'blue', 'yellow', 'green', 'purple'].map(color => (
+                                        <button
+                                            key={color}
+                                            type="button"
+                                            onClick={() => setWishColor(color)}
+                                            className={`w-3.5 h-3.5 rounded-full border-2 transition-all ${
+                                                wishColor === color ? 'border-slate-800 scale-110 shadow-sm' : 'border-transparent opacity-75'
+                                            }`}
+                                            style={{
+                                                background: {
+                                                    pink:   '#f4b4c4',
+                                                    blue:   '#bae6fd',
+                                                    yellow: '#fef08a',
+                                                    green:  '#bbf7d0',
+                                                    purple: '#e9d5ff'
+                                                }[color]
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL POLAROID */}
+            {activePhoto && (
+                <div 
+                    onClick={() => setActivePhoto(null)} 
+                    className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-6 animate-in fade-in duration-300"
+                >
+                    <div 
+                        onClick={e => e.stopPropagation()} 
+                        className="relative max-w-sm w-full bg-[#fcfbf9] border border-amber-800/10 p-4 rounded-xl shadow-2xl flex flex-col items-center animate-in zoom-in-95 duration-500"
+                        style={{
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(251,191,36,0.15)',
+                            transform: 'rotate(-1.5deg)'
+                        }}
+                    >
+                        <div className="relative w-full aspect-square bg-[#0f172a] rounded-lg overflow-hidden border border-slate-200/30">
+                            <img src={activePhoto} alt="Captured memory" className="w-full h-full object-cover" />
+                        </div>
+                        
+                        <div className="pt-5 pb-1 text-center w-full font-serif text-amber-900 tracking-wider">
+                            <div className="text-xl font-bold" style={{ fontFamily: '"Dancing Script", cursive' }}>
+                                Kenangan Indah
+                            </div>
+                            <div className="text-[10px] font-mono mt-1 text-amber-800/60 uppercase tracking-widest">
+                                * CAPTURED MOMENT *
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={() => setActivePhoto(null)} 
+                            className="mt-4 px-4 py-1.5 rounded-lg border border-amber-800/20 bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold text-[10px] tracking-wider transition-all"
+                        >
+                            TUTUP FOTO [X]
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                @keyframes floatHotAir {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-16px); }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+
 /* ─────────────────────────────────────────────────────────
    ROOT PREVIEW PAGE (Safe React Error Boundary Wrapper)
    ───────────────────────────────────────────────────────── */
@@ -7284,6 +8076,8 @@ function GreetingCardPreviewContent({ card }) {
                 <EtherealWhispersFull card={normalizedCard} />
             ) : normalizedCard.template === 'cosmicdrift' ? (
                 <CosmicDriftFull card={normalizedCard} />
+            ) : normalizedCard.template === 'balloonpop' ? (
+                <BalloonPopFull card={normalizedCard} />
             ) : (
                 <StillWithYouFull card={normalizedCard} />
             )}

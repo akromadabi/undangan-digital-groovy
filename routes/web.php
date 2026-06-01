@@ -101,6 +101,11 @@ Route::get('/katalog-tema', function () {
 
 // Katalog Kartu Ucapan (public)
 Route::get('/katalog-kartu', function () {
+    $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
+    if ($resellerSetting) {
+        return app(\App\Http\Controllers\ResellerLandingPageController::class)->themes($resellerSetting->subdomain, 'kartu');
+    }
+
     $templates = \App\Models\GreetingCardTemplate::where('is_active', true)
         ->withCount('greetingCards')
         ->orderBy('sort_order')
