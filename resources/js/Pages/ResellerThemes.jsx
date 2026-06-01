@@ -1201,12 +1201,16 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     .rl-filter-controls {
         width: 100%;
     }
-    .rl-filter-dropdown-wrapper {
+    .rl-filter-dropdown-wrapper:not(:last-child) {
         flex: 1;
     }
     .rl-filter-btn {
         width: 100%;
         justify-content: space-between;
+    }
+    .rl-filter-dropdown-wrapper:first-of-type .rl-filter-dropdown-menu {
+        left: 0;
+        right: auto;
     }
 }
 

@@ -862,7 +862,7 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                             </button>
 
                                             {isCategoryDropdownOpen && (
-                                                <div className="absolute right-0 mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                                <div className="absolute left-0 sm:right-0 mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
                                                     <div className="px-2 py-1 border-b border-gray-100 flex items-center justify-between">
                                                         <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider font-semibold">Kategori</span>
                                                         {selectedCategories.length > 0 && (
@@ -905,105 +905,21 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                             )}
                                         </div>
 
-                                        {/* Event Types Dropdown */}
-                                        <div className="relative flex-1 sm:flex-initial" ref={typeDropdownRef}>
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
-                                                className={`w-full px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 border flex items-center justify-between sm:justify-center gap-1.5 select-none h-[32px] ${
-                                                    selectedTypes.length > 0
-                                                        ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
-                                                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                                                }`}
-                                            >
-                                                <div className="flex items-center gap-1.5">
-                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    <span className="hidden sm:inline">
-                                                        {selectedTypes.length === 0
-                                                            ? 'Semua Acara'
-                                                            : `Acara (${selectedTypes.length})`
-                                                        }
-                                                    </span>
-                                                    <span className="sm:hidden">
-                                                        {selectedTypes.length === 0
-                                                            ? 'Acara'
-                                                            : `Acara (${selectedTypes.length})`
-                                                        }
-                                                    </span>
-                                                </div>
-                                                <svg className={`w-3 h-3 transition-transform duration-200 ${isTypeDropdownOpen ? 'rotate-180 text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                            </button>
-
-                                            {isTypeDropdownOpen && (
-                                                <div className="absolute right-0 mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
-                                                    <div className="px-2 py-1 border-b border-gray-100 flex items-center justify-between">
-                                                        <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider font-semibold">Tipe Acara</span>
-                                                        {selectedTypes.length > 0 && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={clearTypes}
-                                                                className="text-[9px] font-bold text-red-500 hover:underline"
-                                                            >
-                                                                Reset
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                    <div className="max-h-40 overflow-y-auto py-0.5 scrollbar-thin">
-                                                        {eventTypesWithCount.map((type) => {
-                                                            const isChecked = selectedTypes.includes(type.key);
-                                                            return (
-                                                                <label
-                                                                    key={type.key}
-                                                                    className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors select-none text-[10px] font-semibold ${
-                                                                        isChecked ? 'bg-[#E5654B]/5 text-[#E5654B]' : 'text-gray-700'
-                                                                    }`}
-                                                                >
-                                                                    <div className="flex items-center gap-2">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={isChecked}
-                                                                            onChange={() => toggleType(type.key)}
-                                                                            className="rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 w-3 h-3 cursor-pointer accent-[#E5654B]"
-                                                                        />
-                                                                        <span>{type.label}</span>
-                                                                    </div>
-                                                                    <span className="text-[9px] font-bold text-gray-400 bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded-md">
-                                                                        {type.count}
-                                                                    </span>
-                                                                </label>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
 
                                         {/* Sort Dropdown */}
-                                        <div className="relative flex-1 sm:flex-initial" ref={sortDropdownRef}>
+                                        <div className="relative flex-shrink-0" ref={sortDropdownRef}>
                                             <button
                                                 type="button"
                                                 onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
                                                 title="Urutkan Tema"
-                                                className={`w-full px-3 py-1.5 rounded-xl transition-all duration-200 border flex items-center justify-between sm:justify-center gap-1.5 select-none h-[32px] sm:w-[32px] ${
+                                                className={`px-0 py-0 rounded-xl transition-all duration-200 border flex items-center justify-center select-none h-[32px] w-[32px] ${
                                                     isSortDropdownOpen
                                                         ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
                                                         : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                                                 }`}
                                             >
-                                                <div className="flex items-center gap-1.5">
-                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                                                    </svg>
-                                                    <span className="sm:hidden">
-                                                        {sortThemeKey === 'terbaru' ? 'Terbaru' : sortThemeKey === 'populer' ? 'Populer' : 'Favorit'}
-                                                    </span>
-                                                </div>
-                                                <svg className={`w-3 h-3 sm:hidden transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180 text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
                                                 </svg>
                                             </button>
 
@@ -1051,10 +967,10 @@ export default function ThemeSettings({ invitation, currentTheme, themes, sectio
                                     if (selectedCategories.length > 0) {
                                         base = base.filter(t => t.category && selectedCategories.includes(t.category.trim().toLowerCase()));
                                     }
-                                    if (selectedTypes.length > 0) {
+                                    if (invitationType) {
                                         base = base.filter(t => {
                                             const types = Array.isArray(t.type) ? t.type : [];
-                                            return types.some(type => selectedTypes.includes(type)) || types.includes('general');
+                                            return types.includes(invitationType) || types.includes('general');
                                         });
                                     }
                                     if (searchQuery.trim()) {

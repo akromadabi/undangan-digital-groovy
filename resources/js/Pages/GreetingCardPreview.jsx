@@ -5238,7 +5238,34 @@ function GreetingCardPreviewContent({ card }) {
     );
 }
 
-export default function GreetingCardPreview({ card }) {
+export default function GreetingCardPreview({ card: initialCard }) {
+    const [card, setCard] = useState(initialCard);
+
+    useEffect(() => {
+        const handleMessage = (e) => {
+            if (e.data && e.data.type === 'UPDATE_GREETING_CARD_PREVIEW') {
+                const d = e.data.card;
+                setCard(prev => ({
+                    ...prev,
+                    title: d.title || prev?.title || 'Kartu Ucapan',
+                    template: d.template || prev?.template || 'stillwithyou',
+                    type: d.type || prev?.type || 'anniversary',
+                    recipient_name: d.recipient_name !== undefined ? d.recipient_name : (d.recipientName !== undefined ? d.recipientName : prev?.recipient_name),
+                    sender_name: d.sender_name !== undefined ? d.sender_name : (d.senderName !== undefined ? d.senderName : prev?.sender_name),
+                    photo_url: d.photo_url !== undefined ? d.photo_url : (d.photoUrl !== undefined ? d.photoUrl : prev?.photo_url),
+                    photos: d.photos || prev?.photos || [],
+                    messages: d.messages || prev?.messages || []
+                }));
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
+
+    useEffect(() => {
+        setCard(initialCard);
+    }, [initialCard]);
+
     return (
         <ErrorBoundary>
             <GreetingCardPreviewContent card={card} />

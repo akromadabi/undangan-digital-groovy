@@ -5,6 +5,7 @@ import { useTranslation } from '@/i18n';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
 import DressCodeBlock from '@/Components/DressCodeBlock';
+import InstagramFilterSection from '@/Components/InstagramFilterSection';
 
 
 // ═══ Scroll-triggered animation component (re-triggers on every viewport entry) ═══
@@ -928,6 +929,17 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                         })}
 
                                                     </div>
+                                                </div>
+                                                {isDecorated && <WayangBottom />}
+                                            </div>
+                                        )}
+
+                                        {/* ──── INSTAGRAM FILTER ──── */}
+                                        {section.section_key === 'instagram_filter' && (
+                                            <div className={`text-center ${isDecorated ? 'min-h-screen flex flex-col' : ''}`}>
+                                                {isDecorated && <BungaTop />}
+                                                <div className="flex-1 flex items-center justify-center px-4 py-6 w-full">
+                                                    <InstagramFilterSection section={section} invitation={invitation} brideGrooms={brideGrooms} />
                                                 </div>
                                                 {isDecorated && <WayangBottom />}
                                             </div>

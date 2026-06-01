@@ -14,12 +14,74 @@ class GreetingCardController extends Controller
         return redirect()->route('dashboard.invitations', ['tab' => 'cards']);
     }
 
-    public function create()
+    /**
+     * Wizard buat kartu ucapan — butuh login.
+     */
+    public function wizard(Request $request, ?string $templateSlug = null)
     {
+        if (!auth()->check()) {
+            return redirect()->route('register', ['redirect' => $request->getRequestUri()]);
+        }
+        $templates = \App\Models\GreetingCardTemplate::where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->map(fn($t) => [
+                'id'        => $t->id,
+                'name'      => $t->name,
+                'slug'      => $t->slug,
+                'thumbnail' => $t->thumbnail,
+                'bg_gradient' => $t->bg_gradient,
+                'icon'      => $t->icon,
+                'type'      => $t->type ?? [],
+                'features'  => $t->features ?? [],
+            ]);
+
+        // Validasi template slug
+        $validSlugs = $templates->pluck('slug')->toArray();
+        $defaultTemplate = in_array($templateSlug, $validSlugs) ? $templateSlug : ($validSlugs[0] ?? '');
+
+        return Inertia::render('BuatKartu', [
+            'templates'       => $templates,
+            'typeOptions'     => \App\Models\GreetingCardTemplate::$typeOptions,
+            'appName'         => \App\Models\GlobalSetting::where('setting_key', 'site_name')->value('setting_value') ?: 'Groovy',
+            'defaultTemplate' => $defaultTemplate,
+        ]);
+    }
+
+    /**
+     * Cek apakah custom_url tersedia untuk kartu baru.
+     */
+    public function checkUrl(Request $request)
+    {
+        $url = strtolower(trim($request->query('url', '')));
+        if (strlen($url) < 3) {
+            return response()->json(['available' => false, 'message' => 'Minimal 3 karakter']);
+        }
+        $exists = GreetingCard::where('custom_url', $url)->exists();
+        return response()->json(['available' => !$exists]);
+    }
+
+    public function create(Request $request)
+    {
+        // Baca pre-selected template dari katalog (?template=slug)
+        $validTemplates = array_keys(GreetingCard::$templates);
+        $validTypes     = array_keys(GreetingCard::$types);
+
+        $defaultTemplate = in_array($request->query('template'), $validTemplates)
+            ? $request->query('template')
+            : 'stillwithyou';
+
+        $defaultType = in_array($request->query('type'), $validTypes)
+            ? $request->query('type')
+            : 'anniversary';
+
         return Inertia::render('Dashboard/GreetingCard/Form', [
-            'card'      => null,
-            'types'     => GreetingCard::$types,
-            'templates' => GreetingCard::$templates,
+            'card'            => null,
+            'types'           => GreetingCard::$types,
+            'templates'       => GreetingCard::$templates,
+            'defaultTemplate' => $defaultTemplate,
+            'defaultType'     => $defaultType,
         ]);
     }
 
@@ -48,8 +110,18 @@ class GreetingCardController extends Controller
             'custom_url' => ($validated['custom_url'] ?? null) ?: GreetingCard::generateUniqueSlug(),
         ]);
 
-        return redirect()->route('greeting-card.index')
-            ->with('success', 'Kartu ucapan berhasil dibuat! 🎉');
+        $redirectUrl = route('dashboard.invitations', ['tab' => 'cards']);
+
+        // Jika request dari wizard (axios JSON), kembalikan JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success'  => true,
+                'redirect' => $redirectUrl,
+                'card_url' => url('/card/' . $card->custom_url),
+            ]);
+        }
+
+        return redirect($redirectUrl)->with('success', 'Kartu ucapan berhasil dibuat! 🎉');
     }
 
     public function edit(Request $request, $id)
@@ -146,6 +218,155 @@ class GreetingCardController extends Controller
                 'og_image_url'   => route('greeting-card.og-image', $card->custom_url),
             ],
         ]);
+    }
+
+    /**
+     * Demo kartu ucapan berdasarkan slug template.
+     * Prioritas: 1) kartu reseller aktif dengan template ini, 
+     *            2) kartu demo super admin,
+     *            3) data dummy built-in.
+     */
+    public function demo($slug)
+    {
+        // Cari template berdasarkan slug
+        $template = \App\Models\GreetingCardTemplate::where('slug', $slug)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$template) {
+            abort(404, 'Template kartu ucapan tidak ditemukan.');
+        }
+
+        // Map slug template ke key renderer GreetingCardPreview
+        $templateKeyMap = [
+            'stillwithyou'    => 'stillwithyou',
+            'giftforanita'    => 'giftforanita',
+            'love-code'       => 'giftforanita',
+            'oceanbreeze'     => 'oceanbreeze',
+            'ocean-breeze'    => 'oceanbreeze',
+            'cosmicdrift'     => 'cosmicdrift',
+            'cosmic-drift'    => 'cosmicdrift',
+            'retroarcade'     => 'retroarcade',
+            'retro-arcade'    => 'retroarcade',
+            'cyberpunk'       => 'cyberpunk',
+            'cyberpunkdecryptor' => 'cyberpunk',
+            'cyberpunk-decryptor' => 'cyberpunk',
+            'bioluminescent'  => 'bioluminescent',
+            'bioluminescent-deep-dive' => 'bioluminescent',
+            'mysticforest'    => 'mysticforest',
+            'mystic-forest'   => 'mysticforest',
+            'mystic-forest-lantern' => 'mysticforest',
+        ];
+
+        $templateKey = $templateKeyMap[$slug] ?? $slug;
+
+        // 1) Coba cari kartu aktif reseller yang login (jika ada sesi)
+        $user = auth()->user();
+        if ($user && ($user->isAdmin() || $user->isSuperAdmin())) {
+            $resellerCard = GreetingCard::where('user_id', $user->id)
+                ->where('template', $templateKey)
+                ->where('is_active', true)
+                ->first();
+
+            if ($resellerCard) {
+                return Inertia::render('GreetingCardPreview', [
+                    'card' => $this->formatCardData($resellerCard),
+                ]);
+            }
+        }
+
+        // 2) Coba cari kartu demo super admin
+        $superAdminCard = GreetingCard::where('template', $templateKey)
+            ->where('is_active', true)
+            ->whereHas('user', fn($q) => $q->where('role', 'super_admin'))
+            ->first();
+
+        if ($superAdminCard) {
+            return Inertia::render('GreetingCardPreview', [
+                'card' => $this->formatCardData($superAdminCard),
+            ]);
+        }
+
+        // 3) Fallback: data dummy built-in sesuai tipe template
+        $typeMap = [
+            'anniversary' => 'anniversary',
+            'birthday'    => 'birthday',
+            'graduation'  => 'graduation',
+            'wedding'     => 'wedding',
+        ];
+
+        $templateTypes = is_array($template->type) ? $template->type : [];
+        $defaultType   = $templateTypes[0] ?? 'anniversary';
+
+        $dummyMessages = [
+            'anniversary' => [
+                'Setiap hari bersamamu adalah hadiah yang paling indah 💕',
+                'Terima kasih sudah menjadi bagian dari hidupku',
+                'Cintaku untukmu tak pernah pudar, justru semakin dalam setiap harinya ❤️',
+                'Semoga kita selalu bersama hingga akhir waktu',
+                'Kamu adalah alasan terbaikku untuk tersenyum setiap pagi 🌅',
+            ],
+            'birthday'    => [
+                'Semoga hari ulang tahunmu dipenuhi kebahagiaan dan tawa 🎉',
+                'Selamat bertambah bijak dan dewasa ya!',
+                'Semua doaku tercurah untukmu di hari yang spesial ini 🎂',
+                'Semoga semua impianmu tercapai tahun ini 🌟',
+                'Kamu layak mendapatkan semua hal-hal indah di dunia ini ✨',
+            ],
+            'graduation'  => [
+                'Selamat! Kerja kerasmu akhirnya terbayar 🎓',
+                'Kini saatnya menaklukkan dunia dengan ilmu yang kau miliki',
+                'Bangga sekali melihatmu berhasil melewati semua tantangan ini 💪',
+                'Masa depan cerahmu sudah menunggumu di luar sana 🌟',
+                'Terus bermimpi besar dan jangan pernah berhenti belajar 📚',
+            ],
+            'wedding'     => [
+                'Selamat menempuh hidup baru, semoga selalu bahagia 💍',
+                'Semoga rumah tangga kalian penuh dengan cinta dan berkah',
+                'Doa terbaik kami untuk perjalanan hidup bersama kalian ❤️',
+                'Semoga menjadi keluarga yang sakinah, mawaddah, warahmah 🕊️',
+                'Selamat! Akhirnya kalian bersatu, sungguh pasangan yang serasi 🌹',
+            ],
+        ];
+
+        return Inertia::render('GreetingCardPreview', [
+            'card' => [
+                'id'             => 0,
+                'title'          => $template->name,
+                'custom_url'     => 'demo-' . $slug,
+                'template'       => $templateKey,
+                'type'           => $defaultType,
+                'type_label'     => GreetingCard::$types[$defaultType] ?? $defaultType,
+                'recipient_name' => 'Sahabat Tercinta',
+                'sender_name'    => 'Dari Kami dengan Cinta',
+                'photo_url'      => null,
+                'photos'         => [],
+                'messages'       => $dummyMessages[$defaultType] ?? $dummyMessages['anniversary'],
+                'og_image_url'   => null,
+                'is_demo'        => true,
+            ],
+        ]);
+    }
+
+    /**
+     * Format card data for rendering.
+     */
+    private function formatCardData(GreetingCard $card): array
+    {
+        return [
+            'id'             => $card->id,
+            'title'          => $card->title,
+            'custom_url'     => $card->custom_url,
+            'template'       => $card->template,
+            'type'           => $card->type,
+            'type_label'     => $card->type_label,
+            'recipient_name' => $card->recipient_name,
+            'sender_name'    => $card->sender_name,
+            'photo_url'      => $card->photo_url,
+            'photos'         => $card->photos ?? ($card->photo_url ? [$card->photo_url] : []),
+            'messages'       => $card->messages ?? [],
+            'og_image_url'   => route('greeting-card.og-image', $card->custom_url),
+        ];
     }
 
     /**

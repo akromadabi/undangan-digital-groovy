@@ -127,8 +127,9 @@ class DatabaseSeeder extends Seeder
             ['name' => 'RSVP', 'slug' => 'rsvp', 'category' => 'settings', 'icon' => 'MdFactCheck'],
             ['name' => 'Musik', 'slug' => 'music', 'category' => 'settings', 'icon' => 'MdMusicNote'],
             ['name' => 'Hadiah', 'slug' => 'gift', 'category' => 'settings', 'icon' => 'MdCardGiftcard'],
-            ['name' => 'Kirim WhatsApp', 'slug' => 'whatsapp', 'category' => 'settings', 'icon' => 'MdWhatsapp'],
+            ['name' => 'Kirim WhatsApp', 'slug' => 'whatsapp', 'category' => 'settings', 'icon' => 'MdOutlineWhatsapp'],
             ['name' => 'Template', 'slug' => 'template', 'category' => 'settings', 'icon' => 'MdPalette'],
+            ['name' => 'Instagram Filter', 'slug' => 'instagram_filter', 'category' => 'other', 'icon' => 'MdCameraAlt', 'description' => 'Akses katalog filter Instagram untuk undangan'],
         ];
 
         $featureModels = [];

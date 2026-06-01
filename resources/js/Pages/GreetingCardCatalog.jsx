@@ -1,63 +1,26 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useMemo, useEffect, useRef } from 'react';
-import ThemePreviewCard from '@/Components/ThemePreviewCard';
+import { Mail, Sparkles } from 'lucide-react';
+import GreetingCardPreviewCard from '@/Components/GreetingCardPreviewCard';
 
-
-const getThumbnailUrl = (path) => {
-    if (!path) return '';
-    if (path.startsWith('http') || path.startsWith('/') || path.startsWith('data:')) return path;
-    return `/storage/${path}`;
-};
-
-export default function Themes({ themes = [], appName = 'Groovy' }) {
+export default function GreetingCardCatalog({ templates = [], appName = 'Groovy', typeOptions = {} }) {
     const { auth } = usePage().props;
-    const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [search, setSearch] = useState('');
-    const [themeSortKey, setThemeSortKey] = useState('terbaru');
-    const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+    const [sortKey, setSortKey] = useState('terbaru');
     const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
-    const categoryDropdownRef = useRef(null);
     const typeDropdownRef = useRef(null);
     const sortDropdownRef = useRef(null);
 
-    // Unique normalized categories list with counts
-    const categories = useMemo(() => {
-        const counts = {};
-        themes.forEach(t => {
-            const cat = t.category ? t.category.trim().toLowerCase() : '';
-            if (cat) {
-                counts[cat] = (counts[cat] || 0) + 1;
-            }
-        });
-        const uniqueCats = [...new Set(themes.map(t => t.category ? t.category.trim().toLowerCase() : '').filter(Boolean))];
-        return uniqueCats.map(cat => ({
-            name: cat,
-            count: counts[cat] || 0
-        })).sort((a, b) => a.name.localeCompare(b.name));
-    }, [themes]);
-
-    // Memoize event types with theme counts
+    // Event types with count for categories dropdown
     const eventTypesWithCount = useMemo(() => {
-        const list = [
-            { key: 'wedding', label: 'Pernikahan' },
-            { key: 'birthday', label: 'Ulang Tahun' },
-            { key: 'graduation', label: 'Wisuda' },
-            { key: 'aqiqah', label: 'Aqiqah' },
-            { key: 'circumcision', label: 'Khitanan' },
-            { key: 'anniversary', label: 'Anniversary' },
-            { key: 'general', label: 'Umum / Semua Acara' }
-        ];
-        return list.map(opt => {
-            const count = themes?.filter(t => {
-                const types = Array.isArray(t.type) ? t.type : [];
-                return types.includes(opt.key) || (opt.key !== 'general' && types.includes('general'));
-            }).length || 0;
-            return { ...opt, count };
-        });
-    }, [themes]);
+        return Object.entries(typeOptions).map(([key, label]) => {
+            const count = templates.filter(t => (t.type || []).includes(key)).length;
+            return { key, label, count };
+        }).sort((a, b) => a.label.localeCompare(b.label));
+    }, [templates, typeOptions]);
 
     const toggleType = (typeKey) => {
         setSelectedTypes(prev =>
@@ -67,44 +30,36 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
 
     const clearTypes = () => setSelectedTypes([]);
 
-    const filteredThemes = useMemo(() => {
-        let list = [...(themes || [])];
-        if (selectedCategories.length > 0) {
-            list = list.filter(t => t.category && selectedCategories.includes(t.category.trim().toLowerCase()));
-        }
+    const filteredTemplates = useMemo(() => {
+        let list = [...(templates || [])];
         if (selectedTypes.length > 0) {
-            list = list.filter(t => {
-                const types = Array.isArray(t.type) ? t.type : [];
-                return types.some(type => selectedTypes.includes(type)) || types.includes('general');
-            });
+            list = list.filter(t => (t.type || []).some(type => selectedTypes.includes(type)));
         }
         if (search.trim()) {
             list = list.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
         }
         return list;
-    }, [themes, selectedCategories, selectedTypes, search]);
+    }, [templates, selectedTypes, search]);
 
-    const sortedThemes = useMemo(() => {
-        const arr = [...filteredThemes];
-        if (themeSortKey === 'terbaru') return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
-        if (themeSortKey === 'populer') return arr.sort((a, b) => ((b.usage_count || 0) + (b.base_usage || 0)) - ((a.usage_count || 0) + (a.base_usage || 0)));
-        if (themeSortKey === 'disukai') return arr.sort((a, b) => ((b.base_likes || 0) + (b.real_likes || 0)) - ((a.base_likes || 0) + (a.real_likes || 0)));
+    const sortedTemplates = useMemo(() => {
+        const arr = [...filteredTemplates];
+        if (sortKey === 'terbaru') return arr.sort((a, b) => (b.id || 0) - (a.id || 0));
+        if (sortKey === 'populer') {
+            // Sort by actual greeting cards created (loaded via withCount) + base_likes
+            return arr.sort((a, b) => ((b.greeting_cards_count || 0) + (b.base_likes || 0)) - ((a.greeting_cards_count || 0) + (a.base_likes || 0)));
+        }
+        if (sortKey === 'disukai') {
+            return arr.sort((a, b) => (b.base_likes || 0) - (a.base_likes || 0));
+        }
         return arr;
-    }, [filteredThemes, themeSortKey]);
+    }, [filteredTemplates, sortKey]);
 
-    const toggleCategory = (catName) => {
-        setSelectedCategories(prev => 
-            prev.includes(catName) ? prev.filter(c => c !== catName) : [...prev, catName]
-        );
+    const handleUse = (slug) => {
+        window.location.href = `/buat-kartu/${slug}`;
     };
-
-    const clearCategories = () => setSelectedCategories([]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
-                setIsCategoryDropdownOpen(false);
-            }
             if (typeDropdownRef.current && !typeDropdownRef.current.contains(event.target)) {
                 setIsTypeDropdownOpen(false);
             }
@@ -118,8 +73,8 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
 
     return (
         <>
-            <Head title={`Koleksi Tema Undangan — ${appName}`}>
-                <meta name="description" content="Jelajahi koleksi tema undangan digital premium. Filter berdasarkan kategori dan temukan desain yang sesuai dengan impian Anda." />
+            <Head title={`Katalog Kartu Ucapan — ${appName}`}>
+                <meta name="description" content="Pilih template kartu ucapan interaktif premium — anniversary, ulang tahun, wisuda, pernikahan — dengan animasi dan musik yang memukau." />
             </Head>
 
             {/* ═══ NAVBAR ═══ */}
@@ -134,16 +89,17 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                         <span className="text-lg font-bold tracking-tight text-[#1a1a1a]">{appName}</span>
                     </Link>
                     <div className="flex items-center gap-3">
+                        <Link href="/katalog-tema" className="px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-[#E5654B] transition-colors">
+                            Tema Undangan
+                        </Link>
                         {auth?.user ? (
                             <Link href={route('dashboard')} className="px-5 py-2.5 bg-[#E5654B] text-white rounded-full text-sm font-semibold hover:bg-[#d4523a] transition-colors shadow-lg shadow-[#E5654B]/25">
                                 Dashboard
                             </Link>
                         ) : (
-                            <>
-                                <Link href={route('login')} className="px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:text-[#E5654B] transition-colors">
-                                    Masuk
-                                </Link>
-                            </>
+                            <Link href={route('login')} className="px-5 py-2.5 bg-[#E5654B] text-white rounded-full text-sm font-semibold hover:bg-[#d4523a] transition-colors shadow-lg shadow-[#E5654B]/25">
+                                Masuk
+                            </Link>
                         )}
                     </div>
                 </div>
@@ -160,11 +116,14 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                     </Link>
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div>
+                            <div className="inline-flex items-center gap-1.5 bg-pink-50 text-pink-700 text-xs font-bold px-3 py-1.5 rounded-full mb-4 border border-pink-100">
+                                <Mail className="w-3.5 h-3.5 text-pink-600" /> Kartu Ucapan Interaktif
+                            </div>
                             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#1a1a1a]">
-                                Koleksi Tema Undangan
+                                Katalog Kartu Ucapan
                             </h1>
                             <p className="mt-3 text-gray-500 max-w-xl text-base">
-                                {themes.length} tema tersedia — elegan, modern, dan siap digunakan untuk momen spesial Anda.
+                                {templates.length} template premium tersedia — dengan animasi, musik, dan efek interaktif yang memukau untuk momen spesial.
                             </p>
                         </div>
                         
@@ -179,7 +138,7 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                                     type="text"
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    placeholder="Cari tema..."
+                                    placeholder="Cari template..."
                                     style={{ paddingLeft: '2.5rem' }}
                                     className="w-full pr-4 py-2.5 rounded-2xl border border-gray-200 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none bg-white hover:bg-gray-50/50 transition-all text-gray-800"
                                 />
@@ -188,77 +147,6 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                             {/* Filters Dropdowns */}
                             <div className="flex items-center gap-2.5 w-full sm:w-auto flex-shrink-0">
                                 {/* Categories Dropdown */}
-                                <div className="relative flex-1 sm:flex-initial" ref={categoryDropdownRef}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                                        className={`w-full px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-between sm:justify-start gap-2 select-none min-h-[42px] ${
-                                            selectedCategories.length > 0
-                                                ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
-                                                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-2 truncate">
-                                            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                            </svg>
-                                            <span className="truncate">
-                                                {selectedCategories.length === 0
-                                                    ? <><span className="hidden sm:inline">Semua </span>Kategori</>
-                                                    : `Kategori (${selectedCategories.length})`
-                                                }
-                                            </span>
-                                        </div>
-                                        <svg className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180 text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-
-                                    {isCategoryDropdownOpen && (
-                                        <div className="absolute left-0 sm:right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
-                                                <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">KATEGORI</span>
-                                                {selectedCategories.length > 0 && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={clearCategories}
-                                                        className="text-[10px] font-bold text-red-500 hover:underline"
-                                                    >
-                                                        Reset
-                                                    </button>
-                                                )}
-                                            </div>
-                                            <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
-                                                {categories.map((cat) => {
-                                                    const isChecked = selectedCategories.includes(cat.name);
-                                                    return (
-                                                        <label
-                                                            key={cat.name}
-                                                            className={`flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors select-none text-xs font-semibold ${
-                                                                isChecked ? 'bg-[#E5654B]/5 text-[#E5654B]' : 'text-gray-700'
-                                                            }`}
-                                                        >
-                                                            <div className="flex items-center gap-2">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={isChecked}
-                                                                    onChange={() => toggleCategory(cat.name)}
-                                                                    className="rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 w-3.5 h-3.5 cursor-pointer accent-[#E5654B]"
-                                                                />
-                                                                <span className="capitalize">{cat.name}</span>
-                                                            </div>
-                                                            <span className="text-[9px] font-bold text-gray-400 bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded-md">
-                                                                {cat.count}
-                                                            </span>
-                                                        </label>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Event Types Dropdown */}
                                 <div className="relative flex-1 sm:flex-initial" ref={typeDropdownRef}>
                                     <button
                                         type="button"
@@ -271,12 +159,12 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                                     >
                                         <div className="flex items-center gap-2 truncate">
                                             <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                                             </svg>
                                             <span className="truncate">
                                                 {selectedTypes.length === 0
-                                                    ? <><span className="hidden sm:inline">Semua </span>Acara</>
-                                                    : `Acara (${selectedTypes.length})`
+                                                    ? 'Kategori'
+                                                    : `Kategori (${selectedTypes.length})`
                                                 }
                                             </span>
                                         </div>
@@ -286,9 +174,9 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                                     </button>
 
                                     {isTypeDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="absolute left-0 sm:right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
                                             <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
-                                                <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">TIPE ACARA</span>
+                                                <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">KATEGORI</span>
                                                 {selectedTypes.length > 0 && (
                                                     <button
                                                         type="button"
@@ -334,7 +222,7 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                                     <button
                                         type="button"
                                         onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                                        title="Urutkan Tema"
+                                        title="Urutkan Katalog"
                                         className={`p-0 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-center select-none min-h-[42px] w-[42px] ${
                                             isSortDropdownOpen
                                                 ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
@@ -356,13 +244,13 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                                                 { key: 'populer', label: 'Terpopuler' },
                                                 { key: 'disukai', label: 'Terfavorit' }
                                             ].map(opt => {
-                                                const isActive = themeSortKey === opt.key;
+                                                const isActive = sortKey === opt.key;
                                                 return (
                                                     <button
                                                         key={opt.key}
                                                         type="button"
                                                         onClick={() => {
-                                                            setThemeSortKey(opt.key);
+                                                            setSortKey(opt.key);
                                                             setIsSortDropdownOpen(false);
                                                         }}
                                                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-bold transition-all ${
@@ -389,27 +277,29 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                 </div>
             </section>
 
-            {/* ═══ GRID TEMA ═══ */}
-            <main className="bg-[#faf9f6] min-h-[60vh] py-12">
+            {/* ═══ GRID ═══ */}
+            <main className="bg-[#faf9f6] min-h-[50vh] py-12">
                 <div className="max-w-6xl mx-auto px-6">
-                    {sortedThemes.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
-                            {sortedThemes.map((theme) => (
-                                <ThemePreviewCard 
-                                    key={theme.id} 
-                                    theme={theme}
+                    {sortedTemplates.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+                            {sortedTemplates.map(tpl => (
+                                <GreetingCardPreviewCard
+                                    key={tpl.id}
+                                    theme={tpl}
+                                    onUse={handleUse}
+                                    typeOptions={typeOptions}
                                 />
                             ))}
                         </div>
                     ) : (
                         <div className="text-center py-20">
-                            <svg className="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                            </svg>
-                            <p className="text-gray-500 font-medium">Tidak ada tema yang ditemukan</p>
-                            <p className="text-gray-400 text-sm mt-1">Coba ubah filter atau kata kunci pencarian</p>
+                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                                <Mail className="w-6 h-6" />
+                            </div>
+                            <p className="text-gray-500 font-medium">Tidak ada template ditemukan</p>
+                            <p className="text-gray-400 text-sm mt-1">Coba ubah filter atau kata kunci</p>
                             <button
-                                onClick={() => { setSelectedCategories([]); setSearch(''); setThemeSortKey('terbaru'); }}
+                                onClick={() => { setSelectedTypes([]); setSearch(''); setSortKey('terbaru'); }}
                                 className="mt-4 text-[#E5654B] text-sm font-medium hover:underline"
                             >
                                 Reset Filter
@@ -418,6 +308,37 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                     )}
                 </div>
             </main>
+
+            {/* ═══ CTA BANNER ═══ */}
+            {!auth?.user && (
+                <section className="bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] py-16">
+                    <div className="max-w-4xl mx-auto px-6 text-center">
+                        <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#E5654B]">
+                            <Sparkles className="w-6 h-6" />
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                            Siap membuat kartu ucapan yang berkesan?
+                        </h2>
+                        <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+                            Daftar atau masuk untuk mulai membuat kartu ucapan interaktif dari template pilihan kamu.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <Link
+                                href={route('login')}
+                                className="px-8 py-3.5 bg-[#E5654B] text-white font-bold rounded-2xl hover:bg-[#d4523a] transition-all shadow-lg shadow-[#E5654B]/30"
+                            >
+                                Masuk & Buat Kartu
+                            </Link>
+                            <Link
+                                href="/katalog-tema"
+                                className="px-8 py-3.5 bg-white/10 text-white font-semibold rounded-2xl hover:bg-white/20 transition-all border border-white/10"
+                            >
+                                Lihat Tema Undangan
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* ═══ FOOTER ═══ */}
             <footer className="bg-[#0d0d0d] text-white/40 py-10">

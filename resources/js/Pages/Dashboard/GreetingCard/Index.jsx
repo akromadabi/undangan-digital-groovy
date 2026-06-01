@@ -1,5 +1,15 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { 
+    Mail, 
+    Sparkles, 
+    Gift, 
+    Waves, 
+    Gamepad2, 
+    Cpu, 
+    Lightbulb, 
+    TreePine 
+} from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
 const Icon = ({ d, className = 'w-5 h-5', strokeWidth = 1.8 }) => (
@@ -16,13 +26,25 @@ const typeColors = {
 };
 
 const templateGradients = {
-    stillwithyou: 'from-[#0d0915] via-[#1b102b] to-[#09090b]',
-    giftforanita:  'from-[#1e050d] via-[#4c1125] to-[#07060a]',
+    stillwithyou:   'from-[#0d0915] via-[#1b102b] to-[#09090b]',
+    giftforanita:   'from-[#1e050d] via-[#4c1125] to-[#07060a]',
+    oceanbreeze:    'from-[#05161e] via-[#0b2b3c] to-[#040a0f]',
+    cosmicdrift:    'from-[#0b0c10] via-[#1f2833] to-[#0b0c10]',
+    retroarcade:    'from-[#0f0726] via-[#1a0f3d] to-[#04020d]',
+    cyberpunk:      'from-[#030712] via-[#0f172a] to-[#020617]',
+    bioluminescent: 'from-[#021526] via-[#033043] to-[#020e17]',
+    mysticforest:   'from-[#06130b] via-[#0d1c10] to-[#020704]',
 };
 
 const templateIcons = {
-    stillwithyou: '🎆',
-    giftforanita:  '🎁',
+    stillwithyou:   Sparkles,
+    giftforanita:   Gift,
+    oceanbreeze:    Waves,
+    cosmicdrift:    Sparkles,
+    retroarcade:    Gamepad2,
+    cyberpunk:      Cpu,
+    bioluminescent: Lightbulb,
+    mysticforest:   TreePine,
 };
 
 export default function GreetingCardIndex({ cards }) {
@@ -52,7 +74,7 @@ export default function GreetingCardIndex({ cards }) {
                 {/* ── Header ── */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <h2 className="text-xl font-bold text-[#1a1a1a]">Kartu Ucapan 💌</h2>
+                        <h2 className="text-xl font-bold text-[#1a1a1a]">Kartu Ucapan</h2>
                         <p className="text-sm text-gray-500 mt-0.5">Buat dan kelola kartu ucapan interaktif dengan tampilan premium.</p>
                     </div>
                     <Link
@@ -67,8 +89,8 @@ export default function GreetingCardIndex({ cards }) {
                 {/* ── Empty State ── */}
                 {cards.length === 0 && (
                     <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center shadow-sm">
-                        <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <span className="text-3xl">💌</span>
+                        <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#E5654B]">
+                            <Mail className="w-6 h-6" />
                         </div>
                         <h3 className="text-base font-semibold text-gray-700 mb-1">Belum ada kartu ucapan</h3>
                         <p className="text-sm text-gray-400 mb-5 max-w-xs mx-auto">
@@ -98,7 +120,12 @@ export default function GreetingCardIndex({ cards }) {
                                         backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,101,163,0.4) 0%, transparent 60%), radial-gradient(circle at 70% 20%, rgba(180,60,120,0.3) 0%, transparent 50%)'
                                     }} />
                                     <div className="relative text-center">
-                                        <div className="text-4xl mb-1">{templateIcons[card.template] || '💌'}</div>
+                                        <div className="mb-2 text-white/70">
+                                            {(() => {
+                                                const IconComp = templateIcons[card.template] || Mail;
+                                                return <IconComp className="w-8 h-8 mx-auto" />;
+                                            })()}
+                                        </div>
                                         <div className="text-[10px] font-semibold text-white/50 uppercase tracking-[0.2em]">
                                             {card.template_label}
                                         </div>

@@ -174,6 +174,7 @@ class InvitationController extends Controller
                     'wishes' => 'guestbook',
                     'bank' => 'bank',
                     'livestream' => 'event',
+                    'instagram_filter' => 'instagram_filter',
                 ];
                 $featureSlug = $map[$section->section_key] ?? null;
                 if ($featureSlug) {
@@ -356,7 +357,16 @@ class InvitationController extends Controller
         // ── CUSTOM DEMO FROM RESELLER DEMO USER ──
         $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
         $customDemoInvitation = null;
-        if ($resellerSetting && $resellerSetting->demo_user_id) {
+
+        // Jika user adalah client yang login dan sudah punya undangan, pakai datanya secara dinamis
+        $clientUser = auth()->user();
+        if ($clientUser && $clientUser->role === 'user' && $clientUser->invitation) {
+            $customDemoInvitation = $clientUser->invitation()
+                ->with(['brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
+                ->first();
+        }
+
+        if (!$customDemoInvitation && $resellerSetting && $resellerSetting->demo_user_id) {
             $customDemoInvitation = Invitation::where('user_id', $resellerSetting->demo_user_id)
                 ->with(['brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
                 ->first();

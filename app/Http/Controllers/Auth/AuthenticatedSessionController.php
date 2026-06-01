@@ -18,6 +18,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(Request $request): Response
     {
+        if ($request->has('redirect')) {
+            session(['url.intended' => $request->query('redirect')]);
+        }
+
         $autoLoginUsers = [];
 
         // Detect reseller branding from subdomain / custom domain

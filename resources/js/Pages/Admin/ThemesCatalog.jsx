@@ -3,6 +3,67 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
+import AnimatedLikeButton from '@/Components/AnimatedLikeButton';
+
+// ── Like button per kartu dengan state lokal ──────────────────────────────────
+function LikeButton({ id, baseLikes = 0, realLikes = 0, storageKey = 'likedThemes', likeEndpoint }) {
+    const [liked, setLiked] = useState(() => {
+        try {
+            const val = localStorage.getItem(storageKey);
+            if (!val) return false;
+            const stored = JSON.parse(val);
+            if (Array.isArray(stored)) {
+                return stored.includes(id) || stored.includes(String(id));
+            }
+            if (stored && typeof stored === 'object') {
+                return !!stored[id];
+            }
+            return false;
+        } catch { return false; }
+    });
+    const [count, setCount] = useState(Number(baseLikes) + Number(realLikes));
+
+    const handleClick = async (e) => {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        const nextLiked = !liked;
+        setLiked(nextLiked);
+        setCount(prev => nextLiked ? prev + 1 : Math.max(0, prev - 1));
+        try {
+            const val = localStorage.getItem(storageKey);
+            let stored = {};
+            if (val) {
+                try {
+                    const parsed = JSON.parse(val);
+                    if (parsed && typeof parsed === 'object') {
+                        stored = parsed;
+                    }
+                } catch {}
+            }
+            if (Array.isArray(stored)) {
+                if (nextLiked) {
+                    if (!stored.includes(id)) stored.push(id);
+                } else {
+                    stored = stored.filter(x => x !== id && x !== String(id));
+                }
+            } else {
+                if (nextLiked) stored[id] = true; else delete stored[id];
+            }
+            localStorage.setItem(storageKey, JSON.stringify(stored));
+        } catch {}
+        try {
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+            const res = await fetch(likeEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                body: JSON.stringify({ liked: nextLiked }),
+            });
+            const result = await res.json();
+            if (result.success) setCount(result.likes);
+        } catch {}
+    };
+
+    return <AnimatedLikeButton count={count} liked={liked} onClick={handleClick} />;
+}
 
 // Pilihan template mockup visual
 const templateOptions = [
@@ -491,7 +552,7 @@ export default function ThemesCatalog({ themes }) {
                                 </button>
 
                                 {isCategoryDropdownOpen && (
-                                    <div className="absolute right-0 mt-1.5 w-52 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                    <div className="absolute left-0 sm:right-0 mt-1.5 w-52 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
                                         <div className="px-2.5 py-1.5 border-b border-gray-100 flex items-center justify-between">
                                             <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider font-semibold">Kategori</span>
                                             {selectedCategories.length > 0 && (
@@ -612,27 +673,19 @@ export default function ThemesCatalog({ themes }) {
                             </div>
 
                             {/* Sort Dropdown */}
-                            <div className="relative flex-1 sm:flex-initial" ref={sortDropdownRef}>
+                            <div className="relative flex-shrink-0" ref={sortDropdownRef}>
                                 <button
                                     type="button"
                                     onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
                                     title="Urutkan Tema"
-                                    className={`w-full px-3 py-2 rounded-xl transition-all duration-200 border flex items-center justify-between sm:justify-center gap-1.5 select-none h-[34px] sm:w-[34px] ${
+                                    className={`px-0 py-0 rounded-xl transition-all duration-200 border flex items-center justify-center select-none h-[34px] w-[34px] ${
                                         isSortDropdownOpen
                                             ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
                                             : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                                     }`}
                                 >
-                                    <div className="flex items-center gap-1.5">
-                                        <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                                        </svg>
-                                        <span className="sm:hidden text-xs">
-                                            {sortKey === 'terbaru' ? 'Terbaru' : sortKey === 'populer' ? 'Populer' : 'Favorit'}
-                                        </span>
-                                    </div>
-                                    <svg className={`w-3 h-3 sm:hidden transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180 text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
                                     </svg>
                                 </button>
 
@@ -704,11 +757,14 @@ export default function ThemesCatalog({ themes }) {
                                     <h4 className="font-bold text-[#1a1a1a] text-[13px] group-hover:text-[#E5654B] transition-colors truncate tracking-tight" title={theme.name}>{theme.name}</h4>
                                     <div className="flex items-center justify-between mt-0.5">
                                         <span className="text-[9px] text-gray-400 uppercase font-extrabold tracking-wide block">{theme.category || 'Umum'}</span>
-                                        <div className="flex items-center gap-0.5 text-rose-500 font-extrabold text-[9px]" title="Total Likes">
-                                            <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24">
-                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                            </svg>
-                                            <span>{Number(theme.base_likes || 0) + Number(theme.real_likes || 0)}</span>
+                                        <div className="relative z-30 select-none">
+                                            <LikeButton
+                                                id={theme.id}
+                                                baseLikes={theme.base_likes}
+                                                realLikes={theme.real_likes}
+                                                storageKey="likedThemes"
+                                                likeEndpoint={`/theme/${theme.id}/like`}
+                                            />
                                         </div>
                                     </div>
                                 </div>

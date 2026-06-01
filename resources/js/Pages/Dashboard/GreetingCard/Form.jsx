@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import axios from 'axios';
 
@@ -648,7 +648,7 @@ function CosmicDriftPreview({ data }) {
 /* ─────────────────────────────────────
    MAIN FORM PAGE
 ───────────────────────────────────── */
-export default function GreetingCardForm({ card, types, templates }) {
+export default function GreetingCardForm({ card, types, templates, defaultTemplate = 'stillwithyou', defaultType = 'anniversary' }) {
     const isEdit = !!card;
     const fileRef = useRef(null);
     const [uploading, setUploading] = useState(false);
@@ -657,8 +657,8 @@ export default function GreetingCardForm({ card, types, templates }) {
 
     const { data, setData, post, put, processing, errors } = useForm({
         title:          card?.title ?? 'Kartu Ucapan',
-        template:       card?.template ?? 'stillwithyou',
-        type:           card?.type ?? 'anniversary',
+        template:       card?.template ?? defaultTemplate,
+        type:           card?.type ?? defaultType,
         recipient_name: card?.recipient_name ?? '',
         sender_name:    card?.sender_name ?? '',
         photo_url:      card?.photo_url ?? '',
@@ -666,6 +666,7 @@ export default function GreetingCardForm({ card, types, templates }) {
         messages:       card?.messages?.length ? card.messages : [''],
         custom_url:     card?.custom_url ?? '',
     });
+
 
     // Messages helpers
     const addMessage = () => setData('messages', [...data.messages, '']);
@@ -757,14 +758,30 @@ export default function GreetingCardForm({ card, types, templates }) {
         }
     };
 
-    // Live preview data
-    const previewData = {
-        recipientName: data.recipient_name,
-        senderName:    data.sender_name,
-        type:          data.type,
-        messages:      data.messages.filter(Boolean),
-        photoUrl:      data.photo_url,
-    };
+    const [previewKey, setPreviewKey] = useState(0);
+
+    const sendDataToIframe = useCallback(() => {
+        const iframe = document.getElementById('preview-iframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+                type: 'UPDATE_GREETING_CARD_PREVIEW',
+                card: {
+                    title:          data.title,
+                    template:       data.template,
+                    type:           data.type,
+                    recipient_name: data.recipient_name,
+                    sender_name:    data.sender_name,
+                    photo_url:      data.photo_url,
+                    photos:         data.photos,
+                    messages:       data.messages.filter(Boolean),
+                }
+            }, '*');
+        }
+    }, [data.title, data.template, data.type, data.recipient_name, data.sender_name, data.photo_url, data.photos, data.messages]);
+
+    useEffect(() => {
+        sendDataToIframe();
+    }, [sendDataToIframe]);
 
     return (
         <DashboardLayout title={isEdit ? 'Edit Kartu Ucapan' : 'Buat Kartu Ucapan'}>
@@ -1069,35 +1086,61 @@ export default function GreetingCardForm({ card, types, templates }) {
                             </div>
                         </div>
 
-                        {/* ─── RIGHT PANEL: Live Preview ─── */}
+                        {/* ─── RIGHT PANEL: Live Preview (Smartphone Mockup with real interactive iframe) ─── */}
                         <div className="lg:sticky lg:top-20 self-start">
                             <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                                     <h3 className="text-sm font-bold text-gray-800">Live Preview</h3>
                                     <span className="text-[10px] text-gray-400 ml-auto">Diperbarui otomatis</span>
                                 </div>
-                                <div className="rounded-xl overflow-hidden ring-1 ring-gray-100 shadow-inner">
-                                    {data.template === 'stillwithyou' ? (
-                                        <StillWithYouPreview data={previewData} />
-                                    ) : data.template === 'giftforanita' ? (
-                                        <GiftForAnitaPreview data={previewData} />
-                                    ) : data.template === 'cosmicdrift' ? (
-                                        <CosmicDriftPreview data={previewData} />
-                                    ) : data.template === 'retroarcade' ? (
-                                        <RetroArcadePreview data={previewData} />
-                                    ) : data.template === 'cyberpunk' ? (
-                                        <CyberpunkPreview data={previewData} />
-                                    ) : data.template === 'bioluminescent' ? (
-                                        <BioluminescentPreview data={previewData} />
-                                    ) : data.template === 'mysticforest' ? (
-                                        <MysticForestPreview data={previewData} />
-                                    ) : (
-                                        <GiftForAnitaPreview data={previewData} />
-                                    )}
+                                
+                                <div className="flex justify-center items-center py-2">
+                                    <div className="w-[310px] h-[656px] bg-zinc-950 rounded-[2.2rem] shadow-2xl border-[6px] border-gray-800 overflow-hidden relative">
+                                        {/* Premium Dynamic Island */}
+                                        <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-[80px] h-5 bg-black rounded-full z-20 flex items-center justify-between px-2 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),_0_1px_2px_rgba(0,0,0,0.4)] pointer-events-none border border-black/40">
+                                            {/* Left camera lens dot */}
+                                            <div className="w-2 h-2 rounded-full bg-[#0d0d12] flex items-center justify-center border border-gray-900/30">
+                                                <div className="w-0.5 h-0.5 rounded-full bg-[#1c1c3c] opacity-60" />
+                                            </div>
+                                            {/* Right sensor indicator */}
+                                            <div className="w-1 h-1 rounded-full bg-[#0d0d12] opacity-40" />
+                                        </div>
+                                        <div className="w-full h-full overflow-hidden relative">
+                                            <iframe
+                                                id="preview-iframe"
+                                                key={`${data.template}-${previewKey}`}
+                                                src={`/demo-kartu/${data.template}`}
+                                                onLoad={sendDataToIframe}
+                                                className="absolute top-0 left-0 border-0"
+                                                style={{
+                                                    width: '430px',
+                                                    height: '932px',
+                                                    transform: 'scale(0.693)',
+                                                    transformOrigin: 'top left',
+                                                }}
+                                                title="Live Preview Kartu Ucapan"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <p className="text-[10px] text-gray-400 text-center mt-3">
-                                    Preview ini adalah gambaran. Tampilan final lebih interaktif dengan animasi penuh.
+                                
+                                <div className="text-center mt-3 flex items-center justify-center gap-2">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setPreviewKey(k => k + 1)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold shadow-sm hover:shadow-md transition-all"
+                                        title="Refresh Preview"
+                                    >
+                                        <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeWidth={2.5} />
+                                        </svg>
+                                        <span>Refresh Preview</span>
+                                    </button>
+                                </div>
+                                
+                                <p className="text-[10px] text-gray-400 text-center mt-3 leading-relaxed">
+                                    Preview ini adalah simulasi tampilan hp interaktif. Kamu dapat mengeklik tombol/fitur di dalam mockup untuk mencoba animasi secara langsung.
                                 </p>
                             </div>
                         </div>

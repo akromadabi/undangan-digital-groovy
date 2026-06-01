@@ -21,6 +21,10 @@ class RegisteredUserController extends Controller
      */
     public function create(Request $request)
     {
+        if ($request->has('redirect')) {
+            session(['url.intended' => $request->query('redirect')]);
+        }
+
         $resellerData = null;
         $ref = $request->ref;
 
@@ -120,7 +124,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('wizard.link');
+        return redirect()->intended(route('wizard.link'));
     }
 }
 

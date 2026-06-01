@@ -8,13 +8,13 @@ const getImageUrl = (path) => {
     return `/storage/${path}`;
 };
 
-export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = true, onlyMockup = false, aspectClass = 'aspect-[3/4]' }) {
+export default function GreetingCardPreviewCard({ theme, reseller = null, onlyMockup = false, aspectClass = 'aspect-[3/4]', onUse, typeOptions = {} }) {
     const isDynamic = theme.preview_template && theme.preview_template !== 'full-mockup' && theme.preview_images && theme.preview_images.length > 0;
     
-    // Likes internal state
+    // Likes internal state for greeting card templates
     const [liked, setLiked] = useState(() => {
         try {
-            const key1 = localStorage.getItem('likedThemes');
+            const key1 = localStorage.getItem('likedGreetingCards');
             if (key1) {
                 const parsed = JSON.parse(key1);
                 if (Array.isArray(parsed)) {
@@ -23,7 +23,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                     if (parsed[theme.id]) return true;
                 }
             }
-            const key2 = localStorage.getItem('liked_themes');
+            const key2 = localStorage.getItem('liked_greeting_cards');
             if (key2) {
                 const parsed = JSON.parse(key2);
                 if (Array.isArray(parsed) && (parsed.includes(theme.id) || parsed.includes(String(theme.id)))) return true;
@@ -33,9 +33,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
     });
 
     const [count, setCount] = useState(() => {
-        const base = Number(theme.base_likes || 0);
-        const real = Number(theme.real_likes || 0);
-        return base + real;
+        return Number(theme.base_likes || 0);
     });
 
     const handleLikeClick = async (e) => {
@@ -50,7 +48,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         
         try {
             let key1Val = {};
-            const key1Raw = localStorage.getItem('likedThemes');
+            const key1Raw = localStorage.getItem('likedGreetingCards');
             if (key1Raw) {
                 try {
                     const parsed = JSON.parse(key1Raw);
@@ -67,10 +65,10 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                 if (nextLiked) key1Val[theme.id] = true;
                 else delete key1Val[theme.id];
             }
-            localStorage.setItem('likedThemes', JSON.stringify(key1Val));
+            localStorage.setItem('likedGreetingCards', JSON.stringify(key1Val));
             
             let key2Val = [];
-            const key2Raw = localStorage.getItem('liked_themes');
+            const key2Raw = localStorage.getItem('liked_greeting_cards');
             if (key2Raw) {
                 try {
                     const parsed = JSON.parse(key2Raw);
@@ -82,12 +80,12 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
             } else {
                 key2Val = key2Val.filter(x => x !== theme.id && x !== String(theme.id));
             }
-            localStorage.setItem('liked_themes', JSON.stringify(key2Val));
+            localStorage.setItem('liked_greeting_cards', JSON.stringify(key2Val));
         } catch {}
         
         try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-            const response = await fetch(`/theme/${theme.id}/like`, {
+            const response = await fetch(`/greeting-card-template/${theme.id}/like`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -123,9 +121,8 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
 
     const activeBg = bgStyles[theme.preview_bg_style || 'gradient-indigo'] || bgStyles['gradient-indigo'];
 
-    // Render single phone mockup with natural 3D drop-shadows and premium styling
+    // Render single phone mockup
     const renderPhone = (imageSrc, isScaledDown = false, additionalClass = '', isLeftSkew = false, isRightSkew = false, widthClass = 'w-full') => {
-        // Build 3D perspective classes based on role
         let perspectiveClass = 'phone-rotate-default';
         if (isLeftSkew) {
             perspectiveClass = 'phone-rotate-left';
@@ -147,9 +144,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
             >
                 {/* Speaker/Camera Bar */}
                 <div className="absolute top-[2.5px] sm:top-[6px] left-1/2 -translate-x-1/2 w-6 sm:w-9 h-1 sm:h-2 bg-black rounded-full z-30 flex items-center justify-center">
-                    {/* Camera */}
                     <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-[#111] rounded-full mr-0.5 sm:mr-1.5" />
-                    {/* Speaker */}
                     <div className="w-2 sm:w-4 h-0.5 bg-[#222] rounded-full" />
                 </div>
                 
@@ -160,16 +155,14 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                         alt="Screen Preview"
                         className="w-full h-full object-cover object-top transition-[object-position] duration-[5s] ease-in-out group-hover:object-bottom"
                     />
-                    {/* Glass glare overlay */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-10" />
-                    {/* Bezel inner highlight */}
                     <div className="absolute inset-0 border border-white/10 rounded-[9px] sm:rounded-[19px] pointer-events-none z-10" />
                 </div>
             </div>
         );
     };
 
-    // Render natural ambient occlusion / ground shadows underneath mockups
+    // Render ground shadows
     const renderGroundShadow = (offsetClass = '', widthClass = 'w-[50%] max-w-[135px]', opacity = 'opacity-55', bottomClass = 'bottom-[12%]') => {
         return (
             <div 
@@ -178,7 +171,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         );
     };
 
-    // Render premium dynamic background decorations (professional studio theme backdrops)
+    // Render background decorations
     const renderBackgroundDecorations = (bgStyle) => {
         const selectedStyle = bgStyle || 'gradient-indigo';
         
@@ -186,106 +179,70 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
             case 'gradient-indigo':
                 return (
                     <div className="absolute inset-0 z-0 select-none pointer-events-none bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#020617]">
-                        {/* Subtle professional grid pattern */}
                         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:18px_18px]" />
-                        {/* Smooth radial glow spotlight directly behind the mockups */}
                         <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-indigo-500/10 blur-[75px]" />
-                        {/* Studio floor shadow gradient */}
                         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent" />
                     </div>
                 );
             case 'gradient-emerald':
                 return (
                     <div className="absolute inset-0 z-0 select-none pointer-events-none bg-gradient-to-br from-[#064e3b] via-[#022c22] to-[#011c15]">
-                        {/* Abstract organic plant shadow overlays */}
                         <div className="absolute -top-12 -left-12 w-56 h-56 rounded-full bg-emerald-500/5 blur-2xl" />
-                        {/* Subtle dot matrix pattern */}
                         <div className="absolute inset-0 bg-[radial-gradient(rgba(16,185,129,0.03)_1.5px,transparent_1.5px)] bg-[size:24px_24px]" />
-                        {/* Soft emerald studio backlighting */}
                         <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-emerald-500/10 blur-[80px]" />
-                        {/* Studio floor shadow gradient */}
                         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/45 to-transparent" />
                     </div>
                 );
             case 'gradient-rose':
                 return (
-                    // Terracotta studio clay backdrop from reference image
                     <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#bf6c54]">
-                        {/* Soft circular studio ambient lighting */}
                         <div className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-white/10 blur-[80px]" />
-                        {/* Smooth floor depth shadow transition */}
                         <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/25 via-black/10 to-transparent" />
                     </div>
                 );
             case 'luxury-gold':
                 return (
                     <div className="absolute inset-0 z-0 select-none pointer-events-none bg-gradient-to-b from-[#111111] via-[#1c1917] to-[#0c0a09] border border-amber-500/15">
-                        {/* Elegant premium gold diagonal stripes */}
                         <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(217,119,6,0.012)_25%,transparent_25%,transparent_50%,rgba(217,119,6,0.012)_50%,rgba(217,119,6,0.012)_75%,transparent_75%,transparent)] bg-[size:48px_48px]" />
-                        {/* Soft golden spotlight behind mockups */}
                         <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-amber-500/8 blur-[70px]" />
-                        {/* Luxury glowing stars */}
                         <div className="absolute top-[25%] left-[20%] text-amber-500/20 text-xs animate-pulse">✦</div>
                         <div className="absolute bottom-[35%] right-[22%] text-amber-500/20 text-[10px] animate-pulse" style={{ animationDelay: '1s' }}>✦</div>
-                        {/* Dark ground depth shadow */}
                         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
                     </div>
                 );
             case 'studio-split':
                 return (
                     <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#bf6c54] overflow-hidden">
-                        {/* Diagonal Left Split Panel (Deep Charcoal Green/Grey) */}
-                        <div 
-                            className="absolute inset-y-0 -left-[15%] w-[68%] bg-[#1b2421] transform skew-x-[-15deg] origin-top shadow-[15px_0_45px_rgba(0,0,0,0.45)] border-r border-white/5"
-                        />
-                        {/* Soft white spotlights for depth */}
-                        {/* Light source on left panel */}
+                        <div className="absolute inset-y-0 -left-[15%] w-[68%] bg-[#1b2421] transform skew-x-[-15deg] origin-top shadow-[15px_0_45px_rgba(0,0,0,0.45)] border-r border-white/5" />
                         <div className="absolute top-[20%] left-[15%] w-64 h-64 rounded-full bg-white/5 blur-[65px]" />
-                        {/* Light source on right panel */}
                         <div className="absolute top-[40%] right-[10%] w-72 h-72 rounded-full bg-white/10 blur-[80px]" />
-                        {/* Ambient room shadow bottom overlay */}
                         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
                     </div>
                 );
             case 'studio-clay-sand':
                 return (
                     <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#e8dcd3] overflow-hidden">
-                        {/* Skewed Left Panel: Organic Terracotta Clay */}
-                        <div 
-                            className="absolute inset-y-0 -left-[20%] w-[70%] bg-[#a3563f] transform skew-x-[-12deg] origin-top shadow-[12px_0_35px_rgba(0,0,0,0.3)] border-r border-white/5"
-                        />
-                        {/* Spotlights */}
+                        <div className="absolute inset-y-0 -left-[20%] w-[70%] bg-[#a3563f] transform skew-x-[-12deg] origin-top shadow-[12px_0_35px_rgba(0,0,0,0.3)] border-r border-white/5" />
                         <div className="absolute top-[15%] left-[20%] w-60 h-60 rounded-full bg-white/5 blur-[70px]" />
                         <div className="absolute top-[35%] right-[10%] w-64 h-64 rounded-full bg-white/20 blur-[60px]" />
-                        {/* Ground Ambient shadow */}
                         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/25 via-black/5 to-transparent" />
                     </div>
                 );
             case 'studio-velvet-rose':
                 return (
                     <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#dcb3a6] overflow-hidden">
-                        {/* Skewed Left Panel: Deep Velvet Slate */}
-                        <div 
-                            className="absolute inset-y-0 -left-[18%] w-[68%] bg-[#231f30] transform skew-x-[-18deg] origin-top shadow-[20px_0_50px_rgba(0,0,0,0.45)] border-r border-white/5"
-                        />
-                        {/* Spotlights */}
+                        <div className="absolute inset-y-0 -left-[18%] w-[68%] bg-[#231f30] transform skew-x-[-18deg] origin-top shadow-[20px_0_50px_rgba(0,0,0,0.45)] border-r border-white/5" />
                         <div className="absolute top-[20%] left-[25%] w-72 h-72 rounded-full bg-[#dcb3a6]/10 blur-[85px]" />
                         <div className="absolute top-[30%] right-[15%] w-60 h-60 rounded-full bg-white/15 blur-[65px]" />
-                        {/* Ground Ambient shadow */}
                         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
                     </div>
                 );
             case 'studio-sage-cream':
                 return (
                     <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#ece7df] overflow-hidden">
-                        {/* Skewed Left Panel: Nordic Sage Green */}
-                        <div 
-                            className="absolute inset-y-0 -left-[15%] w-[65%] bg-[#5f7065] transform skew-x-[-15deg] origin-top shadow-[15px_0_40px_rgba(0,0,0,0.25)] border-r border-white/5"
-                        />
-                        {/* Spotlights */}
+                        <div className="absolute inset-y-0 -left-[15%] w-[65%] bg-[#5f7065] transform skew-x-[-15deg] origin-top shadow-[15px_0_40px_rgba(0,0,0,0.25)] border-r border-white/5" />
                         <div className="absolute top-[25%] left-[20%] w-60 h-60 rounded-full bg-white/5 blur-[70px]" />
                         <div className="absolute top-[35%] right-[15%] w-64 h-64 rounded-full bg-white/25 blur-[75px]" />
-                        {/* Ground Ambient shadow */}
                         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
                     </div>
                 );
@@ -315,21 +272,17 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
             case 'glassmorphism':
             default:
                 return (
-                    // Minimal professional studio grey/beige backdrop from reference image
                     <div className="absolute inset-0 z-0 select-none pointer-events-none bg-[#9e9590]">
-                        {/* Soft studio light ring */}
                         <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-white/15 blur-[70px]" />
-                        {/* Clean studio base divider */}
                         <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
                     </div>
                 );
         }
     };
 
-    // Render theme content based on layout
+    // Render mockup preview
     const renderPreviewContent = () => {
         if (!isDynamic) {
-            // Full Mockup Mode (Fallback)
             return (
                 <div className="absolute inset-0 bg-gray-100 overflow-hidden">
                     {theme.thumbnail ? (
@@ -339,10 +292,16 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                             className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50">
-                            <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 003.75 21z" />
-                            </svg>
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-700 relative">
+                            <div className="absolute inset-0 opacity-20" style={{
+                                backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,101,163,0.5) 0%, transparent 60%), radial-gradient(circle at 70% 20%, rgba(100,60,200,0.4) 0%, transparent 50%)'
+                            }} />
+                            <div className="relative flex flex-col items-center justify-center text-center">
+                                <svg className="w-10 h-10 text-white/50 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                                </svg>
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.25em]">{theme.slug}</span>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -356,10 +315,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
             return (
                 <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4 overflow-hidden" style={{ perspective: '800px' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
-                    
-                    {/* Natural ambient ground shadow */}
                     {renderGroundShadow('translate-y-[80%]', 'w-[54%] max-w-[145px]', 'opacity-65')}
-                    
                     <div className="relative z-10 animate-in fade-in zoom-in duration-300 w-[82%] sm:w-[70%] max-w-[185px]">
                         {renderPhone(images[0])}
                     </div>
@@ -371,18 +327,12 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
             return (
                 <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-1 sm:p-3" style={{ perspective: '800px' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
-                    
-                    {/* Left phone ground shadow */}
                     {renderGroundShadow('-translate-x-[35%] rotate-[-5deg]', 'w-[55%] max-w-[150px]', 'opacity-50', 'bottom-[11%]')}
-                    
-                    {/* Right phone ground shadow */}
                     {renderGroundShadow('translate-x-[19%] rotate-[4deg]', 'w-[55%] max-w-[150px]', 'opacity-60', 'bottom-[7%]')}
                     
-                    {/* Back Left Phone */}
                     <div className="absolute w-[62%] sm:w-[55%] max-w-[150px] -translate-x-[32%] -translate-y-[2%] transform transition-transform duration-500 group-hover:-translate-x-[36%] z-10">
                         {renderPhone(images[1] || images[0], true, '', true, false)}
                     </div>
-                    {/* Front Right Phone */}
                     <div className="absolute w-[62%] sm:w-[55%] max-w-[150px] translate-x-[16%] translate-y-[6%] transform transition-transform duration-500 group-hover:translate-x-[20%] z-20">
                         {renderPhone(images[0], false, '', false, true)}
                     </div>
@@ -394,25 +344,16 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
             return (
                 <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-1 sm:p-2 triple-phone-layout" style={{ perspective: '800px' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
-                    
-                    {/* Left phone shadow */}
                     {renderGroundShadow('-translate-x-[46%] rotate-[0deg]', 'w-[46%] max-w-[130px]', 'opacity-25', 'bottom-[10%]')}
-                    
-                    {/* Right phone shadow */}
                     {renderGroundShadow('translate-x-[46%] rotate-[0deg]', 'w-[46%] max-w-[130px]', 'opacity-25', 'bottom-[10%]')}
-                    
-                    {/* Center phone shadow */}
                     {renderGroundShadow('translate-x-[0%] rotate-[0deg]', 'w-[46%] max-w-[130px]', 'opacity-50', 'bottom-[7%]')}
                     
-                    {/* Left Back Phone */}
                     <div className="absolute w-[52%] sm:w-[46%] max-w-[130px] -translate-x-[42%] -translate-y-[4%] transform transition-transform duration-500 group-hover:-translate-x-[48%] z-10">
                         {renderPhone(images[1] || images[0], true, '', true, false)}
                     </div>
-                    {/* Right Back Phone */}
                     <div className="absolute w-[52%] sm:w-[46%] max-w-[130px] translate-x-[42%] -translate-y-[4%] transform transition-transform duration-500 group-hover:translate-x-[48%] z-10">
                         {renderPhone(images[2] || images[0], true, '', false, true)}
                     </div>
-                    {/* Center Front Phone */}
                     <div className="absolute w-[52%] sm:w-[46%] max-w-[130px] translate-y-[5%] z-20 transform transition-transform duration-500 group-hover:scale-[1.03] group-hover:translate-y-[3%]">
                         {renderPhone(images[0], false, '', false, false)}
                     </div>
@@ -423,31 +364,18 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         return null;
     };
 
-    // Render dynamic reseller watermark (both diagonal texture behind and clean bottom-left branding)
+    // Render watermark branding for resellers
     const renderWatermark = () => {
         if (!reseller) return null;
 
         const isLuxury = theme.preview_bg_style === 'luxury-gold';
-        
-        // 1. Styling for diagonal background watermark
-        const diagonalTextClass = isLuxury 
-            ? 'text-amber-500/15 font-serif' 
-            : 'text-white/10 font-sans';
-            
-        // 2. Styling for bottom-left branding watermark
-        const cornerTextClass = isLuxury 
-            ? 'text-amber-500/35 font-serif' 
-            : 'text-white/25 font-sans';
-
-        const logoFilter = isLuxury
-            ? 'brightness(0) sepia(1) hue-rotate(15deg) saturate(3)'
-            : 'brightness(0) invert(1)';
-            
+        const diagonalTextClass = isLuxury ? 'text-amber-500/15 font-serif' : 'text-white/10 font-sans';
+        const cornerTextClass = isLuxury ? 'text-amber-500/35 font-serif' : 'text-white/25 font-sans';
+        const logoFilter = isLuxury ? 'brightness(0) sepia(1) hue-rotate(15deg) saturate(3)' : 'brightness(0) invert(1)';
         const logoOpacity = isLuxury ? 0.35 : 0.25;
 
         return (
             <>
-                {/* Diagonal Multi-line Watermark Texture behind mockups */}
                 <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none z-0">
                     <div className="flex flex-col gap-3 sm:gap-5 rotate-[-25deg] opacity-60">
                         <span className={`text-[14px] sm:text-[16px] uppercase font-black tracking-[0.2em] whitespace-nowrap translate-x-[-15%] ${diagonalTextClass}`}>
@@ -461,8 +389,6 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                         </span>
                     </div>
                 </div>
-
-                {/* Bottom-left clean branding watermark */}
                 <div className="absolute bottom-3.5 left-3.5 z-20 pointer-events-none select-none flex items-center gap-1.5">
                     {reseller.brand_logo && (
                         <img 
@@ -490,32 +416,32 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         );
     }
 
-    const actionUrl = theme.preview_url || route('demo.theme', { slug: theme.slug });
+    const actionUrl = `/demo-kartu/${theme.slug}`;
 
     return (
         <div className="group theme-card relative bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
-            
             {/* Aspect container for the main preview area */}
             <div className="relative aspect-[3/4] w-full overflow-hidden bg-gray-50 flex items-center justify-center">
                 {renderPreviewContent()}
                 {isDynamic && renderWatermark()}
                 
                 {/* Overlay Action Buttons on Hover */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto">
-                    {isDemoLink ? (
-                        <a
-                            href={actionUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="px-4 py-2 bg-[#E5654B] text-white rounded-full text-xs font-bold hover:bg-[#d4523a] transition-all transform scale-90 group-hover:scale-100 shadow-lg shadow-[#E5654B]/20"
-                        >
-                            Lihat Demo
-                        </a>
-                    ) : (
-                        <span className="px-4 py-2 bg-white/95 text-gray-800 rounded-full text-xs font-bold shadow-md">
-                            Live Preview
-                        </span>
-                    )}
+                <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex flex-col gap-2.5 items-center justify-center pointer-events-none group-hover:pointer-events-auto">
+                    <button
+                        type="button"
+                        onClick={() => onUse?.(theme.slug)}
+                        className="px-5 py-2 bg-[#E5654B] text-white rounded-full text-xs font-bold hover:bg-[#d4523a] transition-all transform scale-90 group-hover:scale-100 shadow-lg shadow-[#E5654B]/25"
+                    >
+                        Buat Kartu
+                    </button>
+                    <a
+                        href={actionUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-5 py-2 bg-white/20 backdrop-blur-md text-white border border-white/25 rounded-full text-xs font-bold hover:bg-white hover:text-gray-800 transition-all transform scale-90 group-hover:scale-100"
+                    >
+                        Lihat Demo
+                    </a>
                 </div>
             </div>
 
@@ -526,13 +452,12 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                         {theme.name}
                     </h4>
                     <div className="flex items-center justify-between mt-1.5">
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] text-gray-400 capitalize">{theme.category || 'Umum'}</span>
-                            {theme.is_premium ? (
-                                <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full tracking-wider">PREMIUM</span>
-                            ) : (
-                                <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full tracking-wider">GRATIS</span>
-                            )}
+                        <div className="flex flex-wrap gap-1 max-w-[70%]">
+                            {(theme.type || []).slice(0, 2).map(t => (
+                                <span key={t} className="text-[9.5px] font-bold bg-[#E5654B]/5 text-[#E5654B] border border-[#E5654B]/10 px-2 py-0.5 rounded-full tracking-wider truncate max-w-[90px]">
+                                    {typeOptions[t] || t}
+                                </span>
+                            ))}
                         </div>
 
                         {/* Like Button in bottom right */}

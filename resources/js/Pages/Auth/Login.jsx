@@ -192,6 +192,25 @@ export default function Login({ status, canResetPassword, autoLoginUsers, resell
                         'Masuk ke Akun'
                     )}
                 </button>
+
+                {reseller && (
+                    <div className="text-center mt-4 pt-2">
+                        <span className="text-xs text-gray-500">Belum punya akun? </span>
+                        <Link
+                            href={(() => {
+                                const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+                                const redirect = urlParams.get('redirect');
+                                return route('register', {
+                                    ref: reseller.subdomain,
+                                    ...(redirect ? { redirect } : {})
+                                });
+                            })()}
+                            className="text-xs font-semibold text-[#E5654B] hover:text-[#c24b33] transition-colors"
+                        >
+                            Daftar Sekarang
+                        </Link>
+                    </div>
+                )}
             </form>
         </GuestLayout>
     );

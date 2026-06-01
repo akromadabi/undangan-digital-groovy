@@ -59,6 +59,7 @@ function getYoutubeId(url) {
 }
 
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
+import InstagramFilterSection from '@/Components/InstagramFilterSection';
 
 function formatTime(t) {
     if (!t || t === 'Selesai') return t || '';
@@ -426,7 +427,7 @@ export default function DynamicIndex({
     // Resolve Sections and Order
     const resolvedSections = useMemo(() => {
         const safeSections = safeArr(sections);
-        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'video', 'bank', 'rsvp', 'wishes', 'closing', 'livestream'];
+        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'video', 'bank', 'rsvp', 'wishes', 'closing', 'livestream', 'instagram_filter'];
         const resolved = [];
 
         // Prepend virtual hero/slideshow section
@@ -1611,6 +1612,8 @@ export default function DynamicIndex({
                 return wrapSection('video', renderVideoGallery());
             case 'bank':
                 return wrapSection('bank', renderBank());
+            case 'instagram_filter':
+                return wrapSection('instagram_filter', <InstagramFilterSection section={secItem} invitation={invitation} brideGrooms={brideGrooms} />);
             case 'rsvp':
                 return wrapSection('rsvp', renderRsvpWishes());
             case 'wishes':

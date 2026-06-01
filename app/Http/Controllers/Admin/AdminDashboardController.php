@@ -118,6 +118,74 @@ class AdminDashboardController extends Controller
         return redirect()->back()->with('success', 'Preview tema berhasil diperbarui!');
     }
 
+    public function greetingCardCatalog()
+    {
+        $user = auth()->user();
+
+        $templates = \App\Models\GreetingCardTemplate::where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        $customSettings = \App\Models\ResellerGreetingCardSetting::where('reseller_id', $user->id)
+            ->get()
+            ->keyBy('greeting_card_template_id');
+
+        $templatesData = $templates->map(function ($tpl) use ($customSettings) {
+            $custom = $customSettings->get($tpl->id);
+            return [
+                'id'               => $tpl->id,
+                'name'             => $tpl->name,
+                'slug'             => $tpl->slug,
+                'thumbnail'        => $tpl->thumbnail,
+                'preview_images'   => $tpl->preview_images ?: [],
+                'preview_template' => $tpl->preview_template,
+                'preview_bg_style' => $tpl->preview_bg_style,
+                'type'             => is_array($tpl->type) ? $tpl->type : ($tpl->type ? [$tpl->type] : []),
+                'features'         => $tpl->features ?: [],
+                'base_likes'       => $tpl->base_likes,
+                'custom_setting'   => $custom ? [
+                    'preview_template' => $custom->preview_template ?: 'default',
+                    'preview_bg_style' => $custom->preview_bg_style ?: 'default',
+                    'preview_images'   => $custom->preview_images ?: [],
+                    'thumbnail'        => $custom->thumbnail ?: '',
+                ] : null,
+            ];
+        });
+
+        return Inertia::render('Admin/GreetingCardCatalog', [
+            'templates'   => $templatesData,
+            'typeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
+        ]);
+    }
+
+    public function updateGreetingCardCustomPreview(\Illuminate\Http\Request $request, \App\Models\GreetingCardTemplate $greetingCardTemplate)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'preview_template' => 'nullable|string',
+            'preview_bg_style' => 'nullable|string',
+            'preview_images'   => 'nullable|array',
+            'thumbnail'        => 'nullable|string',
+        ]);
+
+        \App\Models\ResellerGreetingCardSetting::updateOrCreate(
+            [
+                'reseller_id'               => $user->id,
+                'greeting_card_template_id' => $greetingCardTemplate->id,
+            ],
+            [
+                'preview_template' => $validated['preview_template'] ?? null,
+                'preview_bg_style' => $validated['preview_bg_style'] ?? null,
+                'preview_images'   => $validated['preview_images'] ?? null,
+                'thumbnail'        => $validated['thumbnail'] ?? null,
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Preview kartu berhasil diperbarui!');
+    }
+
     public function faq()
     {
         return Inertia::render('Admin/Faq');

@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Info } from 'lucide-react';
 import WizardLayout from '@/Layouts/WizardLayout';
 
 export default function LinkStep({ step, currentSlug }) {
@@ -152,7 +153,7 @@ export default function LinkStep({ step, currentSlug }) {
                     </button>
 
                     <div className="mt-5 p-3.5 bg-orange-50/60 rounded-xl border border-orange-100/60 text-left text-xs text-[#b03a24] leading-relaxed">
-                        <p className="font-semibold flex items-center gap-1.5 mb-1">💡 Info</p>
+                        <p className="font-semibold flex items-center gap-1.5 mb-1"><Info className="w-3.5 h-3.5" /> Info</p>
                         <p>Anda bisa mengubah nama link ini nanti di dashboard. Anda juga bisa mengubah dengan domain nama Anda sendiri.</p>
                     </div>
                 </form>

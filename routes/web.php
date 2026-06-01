@@ -99,6 +99,21 @@ Route::get('/katalog-tema', function () {
     ]);
 })->name('themes');
 
+// Katalog Kartu Ucapan (public)
+Route::get('/katalog-kartu', function () {
+    $templates = \App\Models\GreetingCardTemplate::where('is_active', true)
+        ->withCount('greetingCards')
+        ->orderBy('sort_order')
+        ->orderBy('id')
+        ->get();
+
+    return Inertia::render('GreetingCardCatalog', [
+        'templates' => $templates,
+        'appName'   => \App\Models\GlobalSetting::where('setting_key', 'site_name')->value('setting_value') ?: 'Undangan Digital',
+        'typeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
+    ]);
+})->name('greeting-card-catalog');
+
 Route::get('/faq', function () {
     $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
     if ($resellerSetting) {
@@ -108,6 +123,8 @@ Route::get('/faq', function () {
 })->name('faq');
 
 Route::post('/theme/{theme}/like', [ThemeSettingsController::class, 'toggleLike'])->name('theme.like');
+Route::post('/greeting-card-template/{greetingCardTemplate}/like', [\App\Http\Controllers\Admin\AdminGreetingCardTemplateController::class, 'toggleLike'])->name('greeting-card-template.like');
+
 
 // ═══════════════════════════════════════
 // Public Invitation (no auth needed)
@@ -123,6 +140,15 @@ Route::get('/demo/{slug}', [InvitationController::class, 'demo'])->name('demo.th
 // Public Greeting Card Preview (no auth)
 Route::get('/card/{slug}', [GreetingCardController::class, 'preview'])->name('greeting-card.preview');
 Route::get('/card/{slug}/og-image', [GreetingCardController::class, 'ogImage'])->name('greeting-card.og-image');
+Route::get('/demo-kartu/{slug}', [GreetingCardController::class, 'demo'])->name('greeting-card.demo');
+
+// Wizard publik buat kartu ucapan (no auth required to VIEW)
+Route::get('/buat-kartu', [GreetingCardController::class, 'wizard'])->name('greeting-card.wizard');
+Route::get('/buat-kartu/{templateSlug}', [GreetingCardController::class, 'wizard'])->name('greeting-card.wizard.template');
+
+// API: cek ketersediaan custom URL kartu
+Route::get('/api/check-card-url', [GreetingCardController::class, 'checkUrl'])->name('greeting-card.check-url');
+
 
 // Demo tema — hanya untuk user yang login (mencegah ekspos template ke publik)
 Route::middleware(['auth'])->group(function () {
@@ -283,6 +309,10 @@ Route::middleware(['auth', 'onboarding', 'invitation.lock'])->group(function () 
         Route::get('/ar/nft/status', [\App\Http\Controllers\Dashboard\ArNftController::class, 'status'])->name('ar.nft.status');
         Route::post('/ar/nft/store', [\App\Http\Controllers\Dashboard\ArNftController::class, 'store'])->name('ar.nft.store');
         Route::delete('/ar/nft', [\App\Http\Controllers\Dashboard\ArNftController::class, 'destroy'])->name('ar.nft.destroy');
+        
+        // Instagram Filter settings
+        Route::get('/instagram-filter', [\App\Http\Controllers\Dashboard\InstagramFilterController::class, 'index'])->middleware('feature:instagram_filter')->name('instagram-filter');
+        Route::post('/instagram-filter/apply', [\App\Http\Controllers\Dashboard\InstagramFilterController::class, 'apply'])->middleware('feature:instagram_filter')->name('instagram-filter.apply');
     });
 
     // Theme Settings (Dynamic)
@@ -301,15 +331,7 @@ Route::middleware(['auth', 'onboarding', 'invitation.lock'])->group(function () 
     Route::post('/theme/media/save-position', [\App\Http\Controllers\Dashboard\MediaAssetController::class, 'savePosition'])->name('theme.media.save-position');
     Route::post('/theme/media/sync-gallery', [\App\Http\Controllers\Dashboard\MediaAssetController::class, 'syncGallery'])->name('theme.media.sync-gallery');
 
-    // Greeting Card (Kartu Ucapan)
-    Route::prefix('greeting-card')->name('greeting-card.')->group(function () {
-        Route::get('/', [GreetingCardController::class, 'index'])->name('index');
-        Route::get('/create', [GreetingCardController::class, 'create'])->name('create');
-        Route::post('/', [GreetingCardController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [GreetingCardController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [GreetingCardController::class, 'update'])->name('update');
-        Route::delete('/{id}', [GreetingCardController::class, 'destroy'])->name('destroy');
-    });
+
 
     // File Upload
     Route::post('/upload', [DashboardController::class, 'upload'])->name('upload');
@@ -330,12 +352,28 @@ Route::middleware(['auth', 'onboarding', 'invitation.lock'])->group(function () 
 });
 
 // ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// Greeting Card (Kartu Ucapan) — auth only, no onboarding/invitation required
+// ═══════════════════════════════════════
+Route::middleware(['auth'])->prefix('greeting-card')->name('greeting-card.')->group(function () {
+    Route::get('/', [GreetingCardController::class, 'index'])->name('index');
+    Route::get('/create', [GreetingCardController::class, 'create'])->name('create');
+    Route::post('/', [GreetingCardController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [GreetingCardController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [GreetingCardController::class, 'update'])->name('update');
+    Route::delete('/{id}', [GreetingCardController::class, 'destroy'])->name('destroy');
+});
+
+// ═══════════════════════════════════════
 // Admin Panel (Reseller + Super Admin)
 // ═══════════════════════════════════════
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/themes', [AdminDashboardController::class, 'themes'])->name('themes');
+    Route::get('/greeting-card-catalog', [AdminDashboardController::class, 'greetingCardCatalog'])->name('greeting-card-catalog');
     Route::post('/themes/{theme}/custom-preview', [AdminDashboardController::class, 'updateThemeCustomPreview'])->name('themes.custom-preview.update');
+    Route::post('/greeting-card-catalog/{greetingCardTemplate}/custom-preview', [AdminDashboardController::class, 'updateGreetingCardCustomPreview'])->name('greeting-card-catalog.custom-preview.update');
+
     Route::get('/faq', [AdminDashboardController::class, 'faq'])->name('faq');
     Route::resource('users', AdminUserController::class)->only(['index', 'show']);
     Route::get('/live-tamu', [AdminLiveTamuController::class, 'index'])->name('live-tamu');
@@ -375,6 +413,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
     Route::get('/', [\App\Http\Controllers\SuperAdmin\SuperAdminDashboardController::class, 'index'])->name('dashboard');
 
+    // Greeting Card Templates
+    Route::post('/greeting-card-templates/make-demo', [\App\Http\Controllers\Admin\AdminGreetingCardTemplateController::class, 'makeDemo'])->name('greeting-card-templates.make-demo');
+    Route::post('/greeting-card-templates/upload', [\App\Http\Controllers\Admin\AdminGreetingCardTemplateController::class, 'upload'])->name('greeting-card-templates.upload');
+    Route::resource('greeting-card-templates', \App\Http\Controllers\Admin\AdminGreetingCardTemplateController::class);
+    Route::post('/greeting-card-templates/{greetingCardTemplate}/toggle-active', [\App\Http\Controllers\Admin\AdminGreetingCardTemplateController::class, 'toggleActive'])->name('greeting-card-templates.toggle-active');
+
     // Static Previews
     Route::get('/static-previews', function () {
         return Inertia::render('SuperAdmin/StaticPreviews');
@@ -386,8 +430,10 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::post('/resellers/{reseller}/reset-password', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'resetPassword'])->name('resellers.resetPassword');
     Route::post('/resellers/{reseller}/toggle-status', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'toggleStatus'])->name('resellers.toggleStatus');
 
-    // Global Management (themes, plans, music, quotes, settings)
+    // Global Management (themes, plans, music, quotes, settings, instagram filters)
     Route::resource('plans', AdminPlanController::class);
+    Route::resource('instagram-filters', \App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class);
+    Route::post('/instagram-filters/{instagramFilter}/toggle-active', [\App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class, 'toggleActive'])->name('instagram-filters.toggle-active');
     Route::post('themes/{theme}/toggle-active', [AdminThemeController::class, 'toggleActive'])->name('themes.toggle-active');
     Route::post('themes/categories/store', [AdminThemeController::class, 'storeCategory'])->name('themes.categories.store');
     Route::post('themes/categories/update', [AdminThemeController::class, 'updateCategory'])->name('themes.categories.update');

@@ -5,7 +5,8 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import { 
     Heart, Cake, Award, Baby, Shield, Calendar, Plus, 
     ExternalLink, Settings, CheckCircle, Mail, Copy, 
-    Check, Trash2, Eye, Edit3 
+    Check, Trash2, Eye, Edit3, Sparkles, Gift, Waves, 
+    Gamepad2, Cpu, Lightbulb, TreePine
 } from 'lucide-react';
 
 const typeColors = {
@@ -27,14 +28,14 @@ const templateGradients = {
 };
 
 const templateIcons = {
-    stillwithyou: '🎆',
-    giftforanita:  '🎁',
-    oceanbreeze:   '🌊',
-    cosmicdrift:   '🌌',
-    retroarcade:   '🎮',
-    cyberpunk:     '🔌',
-    bioluminescent: '🪼',
-    mysticforest:  '🌲',
+    stillwithyou:   Sparkles,
+    giftforanita:   Gift,
+    oceanbreeze:    Waves,
+    cosmicdrift:    Sparkles,
+    retroarcade:    Gamepad2,
+    cyberpunk:      Cpu,
+    bioluminescent: Lightbulb,
+    mysticforest:   TreePine,
 };
 
 export default function InvitationsList({ invitations, activeInvitationId, greetingCards = [], initialTab = 'invitations' }) {
@@ -258,8 +259,8 @@ export default function InvitationsList({ invitations, activeInvitationId, greet
                     <div className="space-y-6 animate-in fade-in duration-200">
                         {greetingCards.length === 0 ? (
                             <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center shadow-sm">
-                                <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                    <span className="text-3xl">💌</span>
+                                <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#E5654B]">
+                                    <Mail className="w-6 h-6" />
                                 </div>
                                 <h3 className="text-base font-semibold text-gray-700 mb-1 font-outfit">Belum ada kartu ucapan</h3>
                                 <p className="text-sm text-gray-400 mb-5 max-w-xs mx-auto">
@@ -286,7 +287,12 @@ export default function InvitationsList({ invitations, activeInvitationId, greet
                                                 backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,101,163,0.4) 0%, transparent 60%), radial-gradient(circle at 70% 20%, rgba(180,60,120,0.3) 0%, transparent 50%)'
                                             }} />
                                             <div className="relative text-center">
-                                                <div className="text-4xl mb-1">{templateIcons[card.template] || '💌'}</div>
+                                                <div className="mb-2 text-white/70">
+                                                    {(() => {
+                                                        const IconComp = templateIcons[card.template] || Mail;
+                                                        return <IconComp className="w-8 h-8 mx-auto" />;
+                                                    })()}
+                                                </div>
                                                 <div className="text-[10px] font-semibold text-white/50 uppercase tracking-[0.2em] font-mono">
                                                     {card.template_label}
                                                 </div>

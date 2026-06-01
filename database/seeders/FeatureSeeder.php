@@ -10,9 +10,10 @@ class FeatureSeeder extends Seeder
     public function run(): void
     {
         $features = [
-            ['name' => 'Animasi',     'slug' => 'animasi',       'category' => 'settings', 'description' => 'Akses ke pengaturan animasi dan transisi tema'],
-            ['name' => 'QR Code',     'slug' => 'qr_code',       'category' => 'other',    'description' => 'Fitur QR code untuk tamu undangan'],
-            ['name' => 'Layar Sapa',  'slug' => 'layar_sapa',    'category' => 'settings', 'description' => 'Layar sambutan sebelum masuk ke undangan'],
+            ['name' => 'Animasi',          'slug' => 'animasi',          'category' => 'settings', 'description' => 'Akses ke pengaturan animasi dan transisi tema'],
+            ['name' => 'QR Code',          'slug' => 'qr_code',          'category' => 'other',    'description' => 'Fitur QR code untuk tamu undangan'],
+            ['name' => 'Layar Sapa',       'slug' => 'layar_sapa',       'category' => 'settings', 'description' => 'Layar sambutan sebelum masuk ke undangan'],
+            ['name' => 'Instagram Filter', 'slug' => 'instagram_filter', 'category' => 'other',    'description' => 'Akses katalog filter Instagram untuk undangan'],
         ];
 
         foreach ($features as $f) {

@@ -374,7 +374,7 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                     </div>
 
                     <h3 className="text-xl font-bold text-gray-800 mb-2">
-                        Selamat! Akun Anda Telah Aktif 🎉
+                        Selamat! Akun Anda Telah Aktif
                     </h3>
                     
                     <p className="text-sm text-gray-600 mb-6 leading-relaxed">

@@ -349,5 +349,95 @@ html {
     100% { height: 100%; }
 }
 
+/* ═══════════════════════════════════════
+   PREMIUM RANGE SLIDER CUSTOM STYLES
+   ═══════════════════════════════════════ */
+input[type="range"].premium-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    width: 100%;
+}
+
+input[type="range"].premium-slider:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    --tw-ring-color: transparent !important;
+    --tw-ring-shadow: none !important;
+}
+
+/* Track WebKit */
+input[type="range"].premium-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    border: none !important;
+}
+
+/* Track Firefox */
+input[type="range"].premium-slider::-moz-range-track {
+    width: 100%;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    border: none !important;
+}
+
+/* Thumb WebKit */
+input[type="range"].premium-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 15px;
+    width: 15px;
+    border-radius: 9999px;
+    background: #E5654B; /* fallback */
+    border: 2px solid #1e293b;
+    margin-top: -5px; /* Center thumb on a 5px track */
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+/* Thumb Firefox */
+input[type="range"].premium-slider::-moz-range-thumb {
+    height: 15px;
+    width: 15px;
+    border-radius: 9999px;
+    background: #E5654B; /* fallback */
+    border: 2px solid #1e293b;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+/* Thumb Hover effect */
+input[type="range"].premium-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+input[type="range"].premium-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* Thumb Colors */
+input[type="range"].premium-slider.slider-orange::-webkit-slider-thumb {
+    background: #E5654B !important;
+}
+input[type="range"].premium-slider.slider-orange::-moz-range-thumb {
+    background: #E5654B !important;
+}
+
+input[type="range"].premium-slider.slider-amber::-webkit-slider-thumb {
+    background: #ffb347 !important;
+}
+input[type="range"].premium-slider.slider-amber::-moz-range-thumb {
+    background: #ffb347 !important;
+}
+
 
 
