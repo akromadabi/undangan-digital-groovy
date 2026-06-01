@@ -2404,13 +2404,13 @@ function EtherealWhispersFull({ card }) {
         }, 1300);
     };
     
-    // Proceed to prologue scene manually with cinematic silk curtains transition
-    const handleProceedToPrologue = () => {
+    // Proceed to scroll letter scene manually with cinematic silk curtains transition
+    const handleProceedToScroll = () => {
         playChimeNote(0.2);
         setCurtainActive(true);
-        // Slowly slide curtain closed to cover the screen, swap scene, then open it back up
+        // Slowly slide curtain closed to cover the screen, swap scene to scroll, then open it back up
         setTimeout(() => {
-            setScene('prologue');
+            setScene('scroll');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setTimeout(() => {
                 setCurtainOpen(true);
@@ -2484,7 +2484,7 @@ function EtherealWhispersFull({ card }) {
             if (currentY === undefined || currentY === null) return;
 
             const deltaY = currentY - startYRef.current;
-            const offset = Math.max(0, Math.min(80, deltaY));
+            const offset = Math.max(0, Math.min(130, deltaY));
             setDragOffset(offset);
             dragOffsetRef.current = offset;
         };
@@ -2503,7 +2503,7 @@ function EtherealWhispersFull({ card }) {
             window.removeEventListener('touchcancel', handlePointerUp);
 
             const finalOffset = dragOffsetRef.current;
-            if (finalOffset >= 50) {
+            if (finalOffset >= 90) {
                 // Success! Trigger knot tying
                 handleTieRibbon();
             } else {
@@ -2659,18 +2659,19 @@ function EtherealWhispersFull({ card }) {
                 </div>
             )}
             
-            {/* ── SCENE 1: ENVELOPE GATE SCREEN (With 3D Parallax Mouse Tilt) ── */}
+            {/* ── SCENE 1: ENVELOPE GATE SCREEN (With 3D Parallax Mouse Tilt & Entrance Scale Animation) ── */}
             {(scene === 'envelope' || scene === 'envelope-opening') && (
                 <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#fdf8f5] transition-all duration-1000 ${scene === 'envelope-opening' ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
-                    <div 
-                        onMouseMove={handleEnvelopeMouseMove}
-                        onMouseLeave={handleEnvelopeMouseLeave}
-                        className="relative w-full max-w-md h-[460px] flex flex-col justify-between items-center text-center p-8 bg-white/60 border border-white/85 rounded-3xl shadow-2xl backdrop-blur-md overflow-hidden transition-transform duration-200"
-                        style={{
-                            transform: `perspective(1000px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
-                            transformStyle: 'preserve-3d'
-                        }}
-                    >
+                    <div className="w-full max-w-md animate-scaleIn select-none">
+                        <div 
+                            onMouseMove={handleEnvelopeMouseMove}
+                            onMouseLeave={handleEnvelopeMouseLeave}
+                            className="relative w-full h-[460px] flex flex-col justify-between items-center text-center p-8 bg-white/60 border border-white/85 rounded-3xl shadow-2xl backdrop-blur-md overflow-hidden transition-transform duration-200"
+                            style={{
+                                transform: `perspective(1000px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
+                                transformStyle: 'preserve-3d'
+                            }}
+                        >
                         {/* Soft gold stamped border decor */}
                         <div className="absolute inset-3 border border-[#faebf0] rounded-[22px] pointer-events-none" />
                         
@@ -2720,74 +2721,17 @@ function EtherealWhispersFull({ card }) {
                         </div>
                     </div>
                 </div>
-            )}
-            
-            {/* ── SCENE 3: LUXURIOUS EDITORIAL VELLUM PROLOGUE ── */}
-            {scene === 'prologue' && (
-                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-[#fdf8f5] overflow-y-auto animate-fadeIn select-none">
-                    {/* Soft Ambient Rose Gold Vignette */}
-                    <div className="absolute inset-0 pointer-events-none z-0" style={{
-                        background: 'radial-gradient(circle, rgba(250, 235, 240, 0.75) 0%, rgba(245, 218, 226, 0.6) 60%, rgba(253, 248, 245, 0.95) 100%)',
-                    }} />
-
-                    {/* Waving leafy shadows */}
-                    <svg className="absolute -left-16 -top-16 w-80 h-80 opacity-[0.07] text-[#e5654b] animate-sway pointer-events-none z-10" viewBox="0 0 100 100" fill="currentColor">
-                        <path d="M50 0 C60 20 80 30 100 50 C80 70 60 80 50 100 C40 80 20 70 0 50 C20 30 40 20 50 0 Z" />
-                    </svg>
-                    <svg className="absolute -right-20 -bottom-20 w-80 h-80 opacity-[0.05] text-[#e5654b] animate-sway pointer-events-none z-10" viewBox="0 0 100 100" fill="currentColor" style={{ animationDirection: 'reverse' }}>
-                        <path d="M50 0 C60 20 80 30 100 50 C80 70 60 80 50 100 C40 80 20 70 0 50 C20 30 40 20 50 0 Z" />
-                    </svg>
-
-                    {/* Luxurious Gold Foil Vellum Card */}
-                    <div 
-                        className="relative z-20 w-full max-w-lg bg-white/70 border rounded-3xl p-8 sm:p-12 shadow-2xl backdrop-blur-md overflow-hidden text-center flex flex-col items-center animate-scaleIn"
-                        style={{ 
-                            border: '3px double rgba(212, 175, 55, 0.42)', 
-                            boxShadow: '0 20px 50px rgba(229,101,75,0.06), inset 0 0 35px rgba(250,235,240,0.55)'
-                        }}
-                    >
-                        {/* Golden corner leaf decorations */}
-                        <div className="absolute top-4 left-4 w-5 h-5 border-t-2 border-l-2 border-[#d4af37]/30 rounded-tl-lg" />
-                        <div className="absolute top-4 right-4 w-5 h-5 border-t-2 border-r-2 border-[#d4af37]/30 rounded-tr-lg" />
-                        <div className="absolute bottom-4 left-4 w-5 h-5 border-b-2 border-l-2 border-[#d4af37]/30 rounded-bl-lg" />
-                        <div className="absolute bottom-4 right-4 w-5 h-5 border-b-2 border-r-2 border-[#d4af37]/30 rounded-br-lg" />
-
-                        <div className="mt-4">
-                            <span style={{ fontFamily: "'Parisienne', cursive" }} className="block text-4xl text-[#e5654b] mb-1 font-semibold">The Prologue</span>
-                            <div className="h-[1px] w-24 bg-gradient-to-r from-transparent via-[#e5654b]/30 to-transparent mx-auto my-3" />
-                        </div>
-
-                        {/* Elegant Central Cursive Quote */}
-                        <blockquote style={{ fontFamily: "'Playfair Display', serif", lineHeight: '1.9' }} className="text-xl sm:text-2xl italic text-[#5c3e35] font-light max-w-md my-6 px-4">
-                            "Cinta melingkupi segalanya, ia percaya segalanya, ia berharap segalanya, ia sabar menanggung segalanya..."
-                        </blockquote>
-
-                        {/* Glowing and Rotating Gold Rings Monogram */}
-                        <div className="relative w-36 h-36 flex items-center justify-center my-4 select-none">
-                            <div className="absolute inset-0 rounded-full border border-dashed border-[#e5654b]/20 animate-spin" style={{ animationDuration: '35s' }} />
-                            <div className="absolute inset-2.5 rounded-full border border-double border-[#d4af37]/30 animate-spin" style={{ animationDuration: '18s', animationDirection: 'reverse' }} />
-                            <div style={{ fontFamily: "'Parisienne', cursive" }} className="text-5xl text-[#e5654b] drop-shadow-[0_2px_8px_rgba(229,101,75,0.22)] font-bold animate-pulseBeat">
-                                {card.recipient_name ? card.recipient_name.substring(0, 1) : "U"}
-                            </div>
-                        </div>
-
-                        {/* Capsule Glowing Glassmorphic Button */}
-                        <div className="mt-6 flex flex-col items-center">
-                            <span className="text-[9px] text-[#8c6d62]/80 uppercase tracking-[0.25em] mb-4 font-semibold">Buka Kartu Selengkapnya</span>
-                            <button
-                                onClick={() => { playChimeNote(); setScene('scroll'); }}
-                                className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-white text-xs font-semibold tracking-wider uppercase bg-gradient-to-r from-[#e5654b] to-[#f98b6c] hover:shadow-lg hover:scale-105 active:scale-95 transition-all shadow-[0_4px_15px_rgba(229,101,75,0.32)] cursor-pointer border-none"
-                            >
-                                Buka Pesan Cinta ➔
-                            </button>
-                        </div>
-                    </div>
                 </div>
             )}
             
+
+            
             {/* ── SCENE 4: MAIN SCROLL FLOW (SCROLL LETTER & SCRAPBOOK WITH SCRATCH-OFF) ── */}
             {scene === 'scroll' && (
-                <div className="relative w-full flex flex-col items-center justify-start px-4 pt-10 z-30 pb-28">
+                <div className={scrollSubScene === 'letter'
+                    ? "fixed inset-0 z-30 flex flex-col items-center justify-center p-4 overflow-y-auto"
+                    : "relative w-full flex flex-col items-center justify-start px-4 pt-10 z-30 pb-28"
+                }>
                     
                     {/* ── SUB-SCENE 4.1: SCROLL LETTER ── */}
                     {scrollSubScene === 'letter' && (
@@ -2850,7 +2794,7 @@ function EtherealWhispersFull({ card }) {
                                     <button
                                         onClick={() => {
                                             playChimeNote(-0.1);
-                                            setScene('prologue');
+                                            setScene('eternity-knot');
                                             window.scrollTo({ top: 0, behavior: 'smooth' });
                                         }}
                                         className="px-6 py-2.5 rounded-full border border-[#e5654b]/30 bg-white/70 text-[#8c6d62] text-xs font-semibold uppercase tracking-wider shadow-sm hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer border-none"
@@ -3068,8 +3012,13 @@ function EtherealWhispersFull({ card }) {
                             onPointerDown={handleRopeDragStart}
                             onTouchStart={handleRopeDragStart}
                             draggable="false"
-                            className={`w-64 h-36 relative flex items-center justify-center mb-8 bg-white/40 border border-white/50 rounded-2xl shadow-sm backdrop-blur-xs p-4 select-none cursor-grab active:cursor-grabbing touch-none transition-all duration-300 ${isDraggingRope ? 'scale-102 ring-2 ring-red-300/35 shadow-md' : ''}`}
-                            style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                            className={`w-64 h-36 relative flex items-center justify-center mb-8 bg-white/40 border border-white/50 rounded-2xl shadow-sm backdrop-blur-xs p-4 select-none cursor-grab active:cursor-grabbing touch-none ${isDraggingRope ? 'scale-102 ring-2 ring-red-300/35 shadow-md' : ''}`}
+                            style={{ 
+                                userSelect: 'none', 
+                                WebkitUserSelect: 'none',
+                                transform: `translateY(${dragOffset * 0.25}px)`,
+                                transition: isDraggingRope ? 'none' : 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.15), scale 0.3s, box-shadow 0.3s'
+                            }}
                         >
                             <svg viewBox="0 0 200 100" className="w-full h-full select-none" draggable="false" style={{ overflow: 'visible', userSelect: 'none', WebkitUserSelect: 'none' }}>
                                 <defs>
@@ -3177,7 +3126,7 @@ function EtherealWhispersFull({ card }) {
                                     <div className="h-[1px] w-20 bg-red-600/35 mx-auto mt-6 mb-5" />
                                     
                                     <button
-                                        onClick={handleProceedToPrologue}
+                                        onClick={handleProceedToScroll}
                                         className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-white text-xs font-bold tracking-wider uppercase bg-gradient-to-r from-red-500 to-red-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(239,68,68,0.25)] cursor-pointer"
                                     >
                                         Buka Lembaran Kisah ➔
