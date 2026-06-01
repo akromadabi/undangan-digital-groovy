@@ -37,14 +37,10 @@ class GreetingCard extends Model
 
     // Template labels
     public static array $templates = [
-        'stillwithyou' => 'Still With You',
-        'giftforanita'  => 'Love Code Storybook',
-        'oceanbreeze'   => 'Ocean Breeze',
-        'cosmicdrift'   => 'Cosmic Drift',
-        'retroarcade'   => 'Retro Arcade',
-        'cyberpunk'     => 'Cyberpunk Decryptor',
-        'bioluminescent' => 'Bioluminescent Deep Dive',
-        'mysticforest'  => 'Mystic Forest & Lantern Wishes',
+        'stillwithyou'     => 'Still With You',
+        'giftforanita'     => 'Love Code Storybook',
+        'cosmicdrift'      => 'Cosmic Drift',
+        'etherealwhispers' => 'Ethereal Whispers',
     ];
 
     public function user()

@@ -8,18 +8,20 @@ import {
     Gamepad2, 
     Cpu, 
     Lightbulb, 
-    TreePine 
+    TreePine,
+    Flower2
 } from 'lucide-react';
 
 const templateIcons = {
-    stillwithyou:   Sparkles,
-    giftforanita:   Gift,
-    oceanbreeze:    Waves,
-    cosmicdrift:    Sparkles,
-    retroarcade:    Gamepad2,
-    cyberpunk:      Cpu,
-    bioluminescent: Lightbulb,
-    mysticforest:   TreePine,
+    stillwithyou:     Sparkles,
+    giftforanita:     Gift,
+    oceanbreeze:      Waves,
+    cosmicdrift:      Sparkles,
+    retroarcade:      Gamepad2,
+    cyberpunk:        Cpu,
+    bioluminescent:   Lightbulb,
+    mysticforest:     TreePine,
+    etherealwhispers: Flower2,
 };
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
 

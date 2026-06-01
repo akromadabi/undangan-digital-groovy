@@ -810,16 +810,17 @@ export default function GreetingCardForm({ card, types, templates, defaultTempla
                                 <div className="grid grid-cols-2 gap-3">
                                     {Object.entries(templates).map(([key, label]) => {
                                         const gradients = {
-                                            stillwithyou: 'from-[#0d0915] to-[#1b102b]',
-                                            giftforanita:  'from-[#1e050d] to-[#4c1125]',
-                                            oceanbreeze:   'from-[#082f49] to-[#0369a1]',
-                                            cosmicdrift:   'from-[#020817] to-[#0a1628]',
-                                            retroarcade:   'from-[#0d0726] to-[#04020d]',
-                                            cyberpunk:     'from-[#030712] to-[#0f172a]',
-                                            bioluminescent: 'from-[#021526] to-[#033043]',
-                                            mysticforest:  'from-[#030a05] to-[#0d1c10]',
+                                            stillwithyou:     'from-[#0d0915] to-[#1b102b]',
+                                            giftforanita:     'from-[#1e050d] to-[#4c1125]',
+                                            oceanbreeze:      'from-[#082f49] to-[#0369a1]',
+                                            cosmicdrift:      'from-[#020817] to-[#0a1628]',
+                                            retroarcade:      'from-[#0d0726] to-[#04020d]',
+                                            cyberpunk:        'from-[#030712] to-[#0f172a]',
+                                            bioluminescent:   'from-[#021526] to-[#033043]',
+                                            mysticforest:     'from-[#030a05] to-[#0d1c10]',
+                                            etherealwhispers: 'from-[#fdf8f5] to-[#f5dae2]',
                                         };
-                                        const icons = { stillwithyou: '🎆', giftforanita: '🎁', oceanbreeze: '🌊', cosmicdrift: '🌌', retroarcade: '👾', cyberpunk: '🤖', bioluminescent: '🪼', mysticforest: '🌲' };
+                                        const icons = { stillwithyou: '🎆', giftforanita: '🎁', oceanbreeze: '🌊', cosmicdrift: '🌌', retroarcade: '👾', cyberpunk: '🤖', bioluminescent: '🪼', mysticforest: '🌲', etherealwhispers: '🌸' };
                                         const selected = data.template === key;
                                         return (
                                             <button

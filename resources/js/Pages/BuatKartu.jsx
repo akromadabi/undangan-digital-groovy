@@ -38,25 +38,17 @@ const typeColors = {
 };
 
 const templateGradients = {
-    stillwithyou:   'from-[#0d0915] via-[#1b102b] to-[#09090b]',
-    giftforanita:   'from-[#1e050d] via-[#4c1125] to-[#07060a]',
-    oceanbreeze:    'from-[#05161e] via-[#0b2b3c] to-[#040a0f]',
-    cosmicdrift:    'from-[#0b0c10] via-[#1f2833] to-[#0b0c10]',
-    retroarcade:    'from-[#0f0726] via-[#1a0f3d] to-[#04020d]',
-    cyberpunk:      'from-[#030712] via-[#0f172a] to-[#020617]',
-    bioluminescent: 'from-[#021526] via-[#033043] to-[#020e17]',
-    mysticforest:   'from-[#06130b] via-[#0d1c10] to-[#020704]',
+    stillwithyou:     'from-[#0d0915] via-[#1b102b] to-[#09090b]',
+    giftforanita:     'from-[#1e050d] via-[#4c1125] to-[#07060a]',
+    cosmicdrift:      'from-[#0b0c10] via-[#1f2833] to-[#0b0c10]',
+    etherealwhispers: 'from-[#fdf8f5] via-[#faebf0] to-[#f5dae2]',
 };
 
 const templateIcons = {
-    stillwithyou:   Sparkles,
-    giftforanita:   Gift,
-    oceanbreeze:    Waves,
-    cosmicdrift:    Sparkles,
-    retroarcade:    Gamepad2,
-    cyberpunk:      Cpu,
-    bioluminescent: Lightbulb,
-    mysticforest:   TreePine,
+    stillwithyou:     Sparkles,
+    giftforanita:     Gift,
+    cosmicdrift:      Sparkles,
+    etherealwhispers: Heart,
 };
 
 const DRAFT_KEY = 'buat_kartu_draft';

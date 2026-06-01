@@ -160,19 +160,10 @@ class AdminGreetingCardTemplateController extends Controller
             'stillwithyou'             => 'stillwithyou',
             'giftforanita'             => 'giftforanita',
             'love-code'                => 'giftforanita',
-            'oceanbreeze'              => 'oceanbreeze',
-            'ocean-breeze'             => 'oceanbreeze',
             'cosmicdrift'              => 'cosmicdrift',
             'cosmic-drift'             => 'cosmicdrift',
-            'retroarcade'              => 'retroarcade',
-            'retro-arcade'             => 'retroarcade',
-            'cyberpunk'                => 'cyberpunk',
-            'cyberpunk-decryptor'      => 'cyberpunk',
-            'bioluminescent'           => 'bioluminescent',
-            'bioluminescent-deep-dive' => 'bioluminescent',
-            'mysticforest'             => 'mysticforest',
-            'mystic-forest'            => 'mysticforest',
-            'mystic-forest-lantern'    => 'mysticforest',
+            'etherealwhispers'         => 'etherealwhispers',
+            'ethereal-whispers'        => 'etherealwhispers',
         ];
         $templateKey = $keyMap[$slug] ?? $slug;
 

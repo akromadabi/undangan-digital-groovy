@@ -89,7 +89,7 @@ class GreetingCardController extends Controller
     {
         $validated = $request->validate([
             'title'          => 'nullable|string|max:100',
-            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze,cosmicdrift,retroarcade,cyberpunk,bioluminescent,mysticforest',
+            'template'       => 'required|in:stillwithyou,giftforanita,cosmicdrift,etherealwhispers',
             'type'           => 'required|in:anniversary,birthday,graduation,wedding',
             'recipient_name' => 'required|string|max:100',
             'sender_name'    => 'required|string|max:100',
@@ -155,7 +155,7 @@ class GreetingCardController extends Controller
 
         $validated = $request->validate([
             'title'          => 'nullable|string|max:100',
-            'template'       => 'required|in:stillwithyou,giftforanita,oceanbreeze,cosmicdrift,retroarcade,cyberpunk,bioluminescent,mysticforest',
+            'template'       => 'required|in:stillwithyou,giftforanita,cosmicdrift,etherealwhispers',
             'type'           => 'required|in:anniversary,birthday,graduation,wedding',
             'recipient_name' => 'required|string|max:100',
             'sender_name'    => 'required|string|max:100',
@@ -242,20 +242,9 @@ class GreetingCardController extends Controller
             'stillwithyou'    => 'stillwithyou',
             'giftforanita'    => 'giftforanita',
             'love-code'       => 'giftforanita',
-            'oceanbreeze'     => 'oceanbreeze',
-            'ocean-breeze'    => 'oceanbreeze',
             'cosmicdrift'     => 'cosmicdrift',
             'cosmic-drift'    => 'cosmicdrift',
-            'retroarcade'     => 'retroarcade',
-            'retro-arcade'    => 'retroarcade',
-            'cyberpunk'       => 'cyberpunk',
-            'cyberpunkdecryptor' => 'cyberpunk',
-            'cyberpunk-decryptor' => 'cyberpunk',
-            'bioluminescent'  => 'bioluminescent',
-            'bioluminescent-deep-dive' => 'bioluminescent',
-            'mysticforest'    => 'mysticforest',
-            'mystic-forest'   => 'mysticforest',
-            'mystic-forest-lantern' => 'mysticforest',
+            'etherealwhispers' => 'etherealwhispers',
         ];
 
         $templateKey = $templateKeyMap[$slug] ?? $slug;

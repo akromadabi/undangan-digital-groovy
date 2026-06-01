@@ -1533,6 +1533,1707 @@ function GiftForAnitaFull({ card }) {
 
 
 
+/* ─────────────────────────────────────────────────────────
+   SCRATCH-OFF POLAROID IMAGE COMPONENT (Usap-usap Sakura)
+   ───────────────────────────────────────────────────────── */
+function ScratchPolaroidImage({ src, onScratch }) {
+    const canvasRef = useRef(null);
+    const [isCleared, setIsCleared] = useState(false);
+    const leavesRef = useRef([]);
+    const isDrawingRef = useRef(false);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+
+        const resizeCanvas = () => {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width || 140;
+            canvas.height = rect.height || 140;
+
+            // Re-initialize 32 leaves structured beautifully in grids
+            const tempLeaves = [];
+            const leafCount = 32;
+            for (let i = 0; i < leafCount; i++) {
+                const col = i % 4;
+                const row = Math.floor(i / 4);
+                // Grid positioning with randomized natural offsets
+                const px = col * (canvas.width / 3.5) + 12 + (Math.random() - 0.5) * 15;
+                const py = row * (canvas.height / 7.5) + 12 + (Math.random() - 0.5) * 15;
+                const sizeX = 14 + Math.random() * 12;
+                const sizeY = 8 + Math.random() * 8;
+                const rot = Math.random() * Math.PI * 2;
+
+                tempLeaves.push({
+                    id: i,
+                    x: px,
+                    y: py,
+                    startX: px,
+                    startY: py,
+                    rX: sizeX,
+                    rY: sizeY,
+                    rotation: rot,
+                    vx: 0,
+                    vy: 0,
+                    rotSpeed: 0,
+                    isFalling: false,
+                    opacity: 1
+                });
+            }
+            leavesRef.current = tempLeaves;
+        };
+
+        const drawSakuraPetal = (x, y, rX, rY, rotation) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-rX, -rY * 1.5, -rX * 1.5, rY * 0.5, 0, rY * 1.5);
+            ctx.bezierCurveTo(rX * 1.5, rY * 0.5, rX, -rY * 1.5, 0, 0);
+            
+            const petalGrad = ctx.createRadialGradient(-rX * 0.2, -rY * 0.2, 0, 0, 0, rY * 1.5);
+            petalGrad.addColorStop(0, '#ffffff'); // pure light core
+            petalGrad.addColorStop(0.3, '#fbcfe8'); // pink-200
+            petalGrad.addColorStop(1, '#f472b6'); // pink-400
+            
+            ctx.fillStyle = petalGrad;
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(219, 39, 119, 0.5)'; // pink-600 outline
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Vein details
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, rY * 0.9);
+            ctx.strokeStyle = 'rgba(219, 39, 119, 0.25)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            ctx.restore();
+        };
+
+        resizeCanvas();
+        const t = setTimeout(resizeCanvas, 150);
+
+        const loop = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const leaves = leavesRef.current;
+            if (leaves.length === 0) {
+                animId = requestAnimationFrame(loop);
+                return;
+            }
+
+            // Draw background mist (decays as leaves fall)
+            const leafCount = leaves.length;
+            const activeLeaves = leaves.filter(l => !l.isFalling).length;
+            const mistOpacity = (activeLeaves / leafCount) * 0.45;
+            ctx.fillStyle = `rgba(253, 242, 245, ${mistOpacity})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            leaves.forEach(leaf => {
+                if (leaf.isFalling) {
+                    leaf.y += leaf.vy;
+                    leaf.x += leaf.vx;
+                    leaf.vy += 0.14; // gravity!
+                    leaf.rotation += leaf.rotSpeed;
+
+                    if (leaf.y > canvas.height + 25) {
+                        leaf.opacity = 0;
+                    } else if (leaf.y > canvas.height - 40) {
+                        leaf.opacity = Math.max(0, leaf.opacity - 0.05); // fade out at bottom edge
+                    }
+                }
+
+                if (leaf.opacity > 0) {
+                    ctx.save();
+                    ctx.globalAlpha = leaf.opacity;
+                    drawSakuraPetal(leaf.x, leaf.y, leaf.rX, leaf.rY, leaf.rotation);
+                    ctx.restore();
+                }
+            });
+
+            // Draw rounded instruction label overlay in the middle of leaf cover
+            const clearedCount = leaves.filter(l => l.isFalling).length;
+            const clearedPercent = (clearedCount / leafCount) * 100;
+
+            if (clearedPercent < 60) {
+                ctx.save();
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, 0.92 - (clearedPercent / 60) * 0.92)})`;
+                ctx.shadowColor = 'rgba(219, 39, 119, 0.15)';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.roundRect(canvas.width / 2 - 50, canvas.height / 2 - 18, 100, 36, 8);
+                ctx.fill();
+
+                ctx.fillStyle = `rgba(219, 39, 119, ${Math.max(0, 1 - (clearedPercent / 60))})`;
+                ctx.font = 'bold 9px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Sapu Daun Sakura 🌸', canvas.width / 2, canvas.height / 2 - 6);
+                ctx.font = '7px sans-serif';
+                ctx.fillStyle = `rgba(140, 109, 98, ${Math.max(0, 1 - (clearedPercent / 60))})`;
+                ctx.fillText('Buka Foto Kenangan ✨', canvas.width / 2, canvas.height / 2 + 8);
+                ctx.restore();
+            } else {
+                // Auto trigger remaining leaves to fall! Staggered waterfall effect!
+                leaves.forEach((l, idx) => {
+                    if (!l.isFalling) {
+                        setTimeout(() => {
+                            l.isFalling = true;
+                            l.vy = 1.2 + Math.random() * 2;
+                            l.vx = (Math.random() - 0.5) * 1.5;
+                            l.rotSpeed = (Math.random() - 0.5) * 0.05;
+                        }, (idx % 8) * 45);
+                    }
+                });
+            }
+
+            // Check if all leaves have fully faded out
+            const anyVisible = leaves.some(l => l.opacity > 0);
+            if (!anyVisible && leaves.length > 0) {
+                setIsCleared(true);
+                return; // stop loop
+            }
+
+            animId = requestAnimationFrame(loop);
+        };
+
+        loop();
+        window.addEventListener('resize', resizeCanvas);
+
+        return () => {
+            cancelAnimationFrame(animId);
+            clearTimeout(t);
+            window.removeEventListener('resize', resizeCanvas);
+        };
+    }, [src]);
+
+    const handlePointerDown = (e) => {
+        isDrawingRef.current = true;
+        handlePointerMove(e);
+    };
+
+    const handlePointerMove = (e) => {
+        if (!isDrawingRef.current) return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+
+        const mouseX = clientX - rect.left;
+        const mouseY = clientY - rect.top;
+
+        // Check distance to all static leaves and trigger fall!
+        let swipedAny = false;
+        const leaves = leavesRef.current;
+        leaves.forEach(leaf => {
+            if (!leaf.isFalling) {
+                const dist = Math.hypot(leaf.x - mouseX, leaf.y - mouseY);
+                if (dist < 32) { // 32px swipe brush
+                    leaf.isFalling = true;
+                    leaf.vy = 1.5 + Math.random() * 2;
+                    leaf.vx = (Math.random() - 0.5) * 1.6;
+                    leaf.rotSpeed = (Math.random() - 0.5) * 0.07;
+                    swipedAny = true;
+                }
+            }
+        });
+
+        if (swipedAny && onScratch) {
+            onScratch();
+        }
+    };
+
+    const handlePointerUp = () => {
+        isDrawingRef.current = false;
+    };
+
+    return (
+        <div className="relative w-full h-full select-none" style={{ touchAction: 'none' }}>
+            <img src={src} alt="" className="w-full h-full object-cover block pointer-events-none" />
+            
+            {!isCleared && (
+                <canvas
+                    ref={canvasRef}
+                    onMouseDown={handlePointerDown}
+                    onMouseMove={handlePointerMove}
+                    onMouseUp={handlePointerUp}
+                    onMouseLeave={handlePointerUp}
+                    onTouchStart={handlePointerDown}
+                    onTouchMove={handlePointerMove}
+                    onTouchEnd={handlePointerUp}
+                    className="absolute inset-0 w-full h-full z-10 cursor-crosshair transition-opacity duration-500 rounded-sm"
+                />
+            )}
+        </div>
+    );
+}
+
+// Helper to render high-fidelity 3D red braided satin rope
+const renderRope = (d, className = "", extraStyle = {}) => {
+    if (!d) return null;
+    return (
+        <g className={className} style={extraStyle}>
+            {/* 1. Drop Shadow Layer */}
+            <path d={d} fill="none" stroke="rgba(61, 34, 24, 0.22)" strokeWidth="6.5" strokeLinecap="round" filter="url(#ropeShadow)" />
+            {/* 2. Deep Crimson Border */}
+            <path d={d} fill="none" stroke="#7f1d1d" strokeWidth="4.8" strokeLinecap="round" />
+            {/* 3. Vibrant Crimson Core */}
+            <path d={d} fill="none" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" />
+            {/* 4. Pink Twisted Fiber Strand */}
+            <path d={d} fill="none" stroke="#fca5a5" strokeWidth="0.8" strokeDasharray="3 3" strokeLinecap="round" opacity="0.85" />
+            {/* 5. Specular Silk Highlight */}
+            <path d={d} fill="none" stroke="#ffffff" strokeWidth="0.4" strokeDasharray="1 5" strokeLinecap="round" opacity="0.9" />
+        </g>
+    );
+};
+
+// Predefined default placeholder images matching the elegant rose gold / vintage aesthetic
+const fallbackPhotos = [
+    'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=600', // Romantic roses
+    'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=600', // Hands holding
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=600', // Warm golden sunset
+];
+
+/* ─────────────────────────────────────────────────────────
+   ETHEREAL WHISPERS — Premium 5-Scene Sinematik Romantic Render
+   ───────────────────────────────────────────────────────── */
+function EtherealWhispersFull({ card }) {
+    const canvasRef = useRef(null);
+    const containerRef = useRef(null);
+    
+    // Scenes: 'envelope' | 'envelope-opening' | 'prologue' | 'scroll' | 'eternity-knot'
+    const [scene, setScene] = useState('envelope');
+    const [isMuted, setIsMuted] = useState(true);
+    const [activePhoto, setActivePhoto] = useState(null);
+    
+    // 3D Envelope Tilt State
+    const [tilt, setTilt] = useState({ x: 0, y: 0 });
+    const handleEnvelopeMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        setTilt({ x: x * 20, y: -y * 20 }); // up to 20deg tilt
+    };
+    const handleEnvelopeMouseLeave = () => {
+        setTilt({ x: 0, y: 0 });
+    };
+    
+    // Typewriter State
+    const [typewriterText, setTypewriterText] = useState('');
+    const [currentMsgIdx, setCurrentMsgIdx] = useState(0);
+    const [charIdx, setCharIdx] = useState(0);
+    const [isTypingComplete, setIsTypingComplete] = useState(false);
+    
+    // Particle bursts
+    const [sealSplashes, setSealSplashes] = useState([]);
+    
+    // Scrapbook Leaf Sweep Canvas State & Refs
+    const scrapbookCanvasRef = useRef(null);
+    const [isScrapbookCleared, setIsScrapbookCleared] = useState(false);
+    const scrapbookLeavesRef = useRef([]);
+    const isScrapbookDrawingRef = useRef(false);
+    const lastPointerRef = useRef({ x: null, y: null, t: 0 });
+    
+    // Drag-and-Tie Rope State & Cinematic Curtain Refs/States
+    const [dragOffset, setDragOffset] = useState(0);
+    const [isDraggingRope, setIsDraggingRope] = useState(false);
+    const startYRef = useRef(0);
+    const [curtainActive, setCurtainActive] = useState(false);
+    const [curtainOpen, setCurtainOpen] = useState(false);
+    const [scrollSubScene, setScrollSubScene] = useState('letter'); // 'letter' | 'scrapbook'
+    // Scrapbook Polaroid State
+    const [activePolaroidIdx, setActivePolaroidIdx] = useState(1); // Middle one initially at top
+    
+    // Scene 5 Love Ribbon State
+    const [isRibbonTied, setIsRibbonTied] = useState(false);
+    const [knotBurstActive, setKnotBurstActive] = useState(false);
+    const [floatingCelebrationItems, setFloatingCelebrationItems] = useState([]);
+    
+    // Orientation check
+    const [isLandscapeLocked, setIsLandscapeLocked] = useState(false);
+    const [dismissWarning, setDismissWarning] = useState(false);
+    
+    // Draggable Rope Coordinates calculations (Memoized to strictly secure against TDZ/Minification reference issues)
+    const leftEndX = useMemo(() => isRibbonTied ? 100 : Math.min(100, 85 + (dragOffset * 0.3)), [isRibbonTied, dragOffset]);
+    const leftEndY = useMemo(() => isRibbonTied ? 50 : 68 + dragOffset * 0.7, [isRibbonTied, dragOffset]);
+    const rightEndX = useMemo(() => isRibbonTied ? 100 : Math.max(100, 115 - (dragOffset * 0.3)), [isRibbonTied, dragOffset]);
+    const rightEndY = useMemo(() => isRibbonTied ? 50 : 68 + dragOffset * 0.7, [isRibbonTied, dragOffset]);
+    const beadY = useMemo(() => isRibbonTied ? 50 : 68 + dragOffset * 0.7, [isRibbonTied, dragOffset]);
+    
+    const messages = useMemo(() => (card.messages || []).filter(Boolean), [card.messages]);
+    const photos = useMemo(() => (card.photos || []).filter(Boolean), [card.photos]);
+    
+    const displayPhotos = useMemo(() => {
+        const result = [...photos];
+        while (result.length < 3) {
+            result.push(fallbackPhotos[result.length % fallbackPhotos.length]);
+        }
+        return result.slice(0, 3); // exactly 3 photos
+    }, [photos]);
+    
+    // Check orientation on mobile
+    useEffect(() => {
+        const checkOrientation = () => {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            setIsLandscapeLocked(isMobile && window.innerHeight > window.innerWidth);
+        };
+        checkOrientation();
+        window.addEventListener('resize', checkOrientation);
+        return () => window.removeEventListener('resize', checkOrientation);
+    }, []);
+    
+    // Audio chime synthesizer
+    const playChimeNote = (pitchOffset = 0) => {
+        if (isMuted) return;
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+            const ctx = new AudioContextClass();
+            const now = ctx.currentTime;
+            
+            const pentatonic = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50, 1174.66, 1318.51]; // C5 to E6
+            const baseFreq = pentatonic[Math.floor(Math.random() * pentatonic.length)];
+            const freq = baseFreq * (1 + pitchOffset);
+            
+            const osc = ctx.createOscillator();
+            const overtone = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            const filterNode = ctx.createBiquadFilter();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now);
+            
+            overtone.type = 'triangle';
+            overtone.frequency.setValueAtTime(freq * 1.5, now);
+            
+            filterNode.type = 'lowpass';
+            filterNode.frequency.setValueAtTime(2200, now);
+            filterNode.frequency.exponentialRampToValueAtTime(120, now + 1.4);
+            
+            gainNode.gain.setValueAtTime(0.15, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+            
+            osc.connect(gainNode);
+            overtone.connect(gainNode);
+            gainNode.connect(filterNode);
+            filterNode.connect(ctx.destination);
+            
+            osc.start(now);
+            overtone.start(now);
+            osc.stop(now + 1.4);
+            overtone.stop(now + 1.4);
+        } catch (e) {
+            console.warn("Chime failed:", e);
+        }
+    };
+    
+    // Main audio backsound
+    const audioRef = useRef(null);
+    const toggleMute = () => {
+        if (!audioRef.current) return;
+        if (isMuted) {
+            audioRef.current.play().then(() => setIsMuted(false)).catch(() => {});
+        } else {
+            audioRef.current.pause();
+            setIsMuted(true);
+        }
+    };
+    
+    // Canvas Falling Petals
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+        
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+        
+        const resize = () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', resize);
+        
+        class Petal {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * height;
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = -20;
+                this.radiusX = 7 + Math.random() * 7;
+                this.radiusY = 4 + Math.random() * 4;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.015;
+                this.speedY = 0.6 + Math.random() * 1;
+                this.speedX = -0.4 + Math.random() * 0.8;
+                this.swing = Math.random() * 15;
+                this.swingSpeed = 0.008 + Math.random() * 0.015;
+                this.swingAngle = Math.random() * Math.PI;
+                this.opacity = 0.55 + Math.random() * 0.4;
+                
+                const pinks = [
+                    'rgba(255, 174, 185, ',
+                    'rgba(255, 192, 203, ',
+                    'rgba(255, 182, 193, ',
+                    'rgba(245, 218, 226, ',
+                    'rgba(255, 209, 225, '
+                ];
+                this.colorBase = pinks[Math.floor(Math.random() * pinks.length)];
+            }
+            update(mouseX, mouseY) {
+                this.y += this.speedY;
+                this.swingAngle += this.swingSpeed;
+                this.x += this.speedX + Math.sin(this.swingAngle) * 0.4;
+                this.rotation += this.rotationSpeed;
+                
+                if (mouseX !== null && mouseY !== null) {
+                    const dx = this.x - mouseX;
+                    const dy = this.y - mouseY;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 130) {
+                        const force = (130 - dist) / 130;
+                        const angle = Math.atan2(dy, dx);
+                        this.x += Math.cos(angle) * force * 4.5;
+                        this.y += Math.sin(angle) * force * 2.5;
+                    }
+                }
+                
+                if (this.y > height + 20 || this.x < -20 || this.x > width + 20) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                ctx.beginPath();
+                ctx.ellipse(0, 0, this.radiusX, this.radiusY, 0, 0, Math.PI * 2);
+                ctx.fillStyle = this.colorBase + this.opacity + ')';
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = 'rgba(255, 182, 193, 0.35)';
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(-this.radiusX, 0);
+                ctx.quadraticCurveTo(0, -this.radiusY * 0.15, this.radiusX, 0);
+                ctx.strokeStyle = 'rgba(255, 90, 150, 0.25)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                
+                ctx.restore();
+            }
+        }
+        
+        const petals = Array.from({ length: 40 }, () => new Petal());
+        
+        let mouseX = null;
+        let mouseY = null;
+        
+        const handlePointerMove = (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        };
+        const handlePointerLeave = () => {
+            mouseX = null;
+            mouseY = null;
+        };
+        
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerleave', handlePointerLeave);
+        
+        const loop = () => {
+            animId = requestAnimationFrame(loop);
+            ctx.clearRect(0, 0, width, height);
+            petals.forEach(p => {
+                p.update(mouseX, mouseY);
+                p.draw();
+            });
+        };
+        loop();
+        
+        return () => {
+            cancelAnimationFrame(animId);
+            window.removeEventListener('resize', resize);
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerleave', handlePointerLeave);
+        };
+    }, []);
+    
+    // Scrapbook Leaf-Sweep Physics Canvas Layer Effect
+    useEffect(() => {
+        if (scene !== 'scroll' || !isTypingComplete) return;
+        const canvas = scrapbookCanvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animId;
+        let time = 0;
+
+        const resizeCanvas = () => {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width || 576;
+            canvas.height = rect.height || 460;
+
+            // Generate organic pile of 56 leaves overlapping Polaroid positions beautifully
+            const tempLeaves = [];
+            const leafCount = 56;
+            
+            // Coordinates matching Polaroid centers inside the 3D grid
+            const clusters = [
+                { cx: canvas.width * 0.25, cy: canvas.height * 0.40 },
+                { cx: canvas.width * 0.50, cy: canvas.height * 0.35 },
+                { cx: canvas.width * 0.75, cy: canvas.height * 0.40 }
+            ];
+
+            for (let i = 0; i < leafCount; i++) {
+                const cluster = clusters[i % clusters.length];
+                const px = cluster.cx + (Math.random() - 0.5) * (canvas.width * 0.22);
+                const py = cluster.cy + (Math.random() - 0.5) * (canvas.height * 0.45);
+                const sizeX = 14 + Math.random() * 12;
+                const sizeY = 8 + Math.random() * 8;
+                const rot = Math.random() * Math.PI * 2;
+
+                tempLeaves.push({
+                    id: i,
+                    x: Math.max(15, Math.min(canvas.width - 15, px)),
+                    y: Math.max(15, Math.min(canvas.height - 15, py)),
+                    rX: sizeX,
+                    rY: sizeY,
+                    baseRotation: rot,
+                    rotation: rot,
+                    vx: 0,
+                    vy: 0,
+                    rotSpeed: 0,
+                    isFalling: false,
+                    opacity: 1
+                });
+            }
+            scrapbookLeavesRef.current = tempLeaves;
+        };
+
+        const drawSakuraPetal = (x, y, rX, rY, rotation) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-rX, -rY * 1.5, -rX * 1.5, rY * 0.5, 0, rY * 1.5);
+            ctx.bezierCurveTo(rX * 1.5, rY * 0.5, rX, -rY * 1.5, 0, 0);
+            
+            const petalGrad = ctx.createRadialGradient(-rX * 0.2, -rY * 0.2, 0, 0, 0, rY * 1.5);
+            petalGrad.addColorStop(0, '#ffffff'); 
+            petalGrad.addColorStop(0.3, '#fbcfe8'); 
+            petalGrad.addColorStop(1, '#f472b6'); 
+            
+            ctx.fillStyle = petalGrad;
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(219, 39, 119, 0.45)'; 
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, rY * 0.9);
+            ctx.strokeStyle = 'rgba(219, 39, 119, 0.22)';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+            
+            ctx.restore();
+        };
+
+        resizeCanvas();
+        const t = setTimeout(resizeCanvas, 150);
+
+        const loop = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const leaves = scrapbookLeavesRef.current;
+            if (leaves.length === 0) {
+                animId = requestAnimationFrame(loop);
+                return;
+            }
+
+            time++;
+
+            const leafCount = leaves.length;
+            const activeLeaves = leaves.filter(l => !l.isFalling).length;
+            const mistOpacity = (activeLeaves / leafCount) * 0.45;
+            ctx.fillStyle = `rgba(253, 242, 245, ${mistOpacity})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            leaves.forEach(leaf => {
+                if (leaf.isFalling) {
+                    leaf.y += leaf.vy;
+                    leaf.x += leaf.vx;
+                    leaf.vy += 0.14; 
+                    leaf.vx *= 0.98; 
+                    leaf.rotation += leaf.rotSpeed;
+
+                    if (leaf.y > canvas.height + 25) {
+                        leaf.opacity = 0;
+                    } else if (leaf.y > canvas.height - 40) {
+                        leaf.opacity = Math.max(0, leaf.opacity - 0.05); 
+                    }
+                } else {
+                    const swayOffset = Math.sin(time * 0.03 + leaf.id * 1.5) * 0.08;
+                    leaf.rotation = leaf.baseRotation + swayOffset;
+                }
+
+                if (leaf.opacity > 0) {
+                    ctx.save();
+                    ctx.globalAlpha = leaf.opacity;
+                    drawSakuraPetal(leaf.x, leaf.y, leaf.rX, leaf.rY, leaf.rotation);
+                    ctx.restore();
+                }
+            });
+
+            const clearedCount = leaves.filter(l => l.isFalling).length;
+            const clearedPercent = (clearedCount / leafCount) * 100;
+
+            if (clearedPercent >= 60) {
+                leaves.forEach((l, idx) => {
+                    if (!l.isFalling) {
+                        setTimeout(() => {
+                            l.isFalling = true;
+                            l.vy = 1.0 + Math.random() * 2;
+                            l.vx = (Math.random() - 0.5) * 1.5;
+                            l.rotSpeed = (Math.random() - 0.5) * 0.05;
+                        }, (idx % 8) * 45);
+                    }
+                });
+            }
+
+            const anyVisible = leaves.some(l => l.opacity > 0);
+            if (!anyVisible && leaves.length > 0) {
+                setIsScrapbookCleared(true);
+                return; 
+            }
+
+            animId = requestAnimationFrame(loop);
+        };
+
+        loop();
+        window.addEventListener('resize', resizeCanvas);
+
+        return () => {
+            cancelAnimationFrame(animId);
+            clearTimeout(t);
+            window.removeEventListener('resize', resizeCanvas);
+        };
+    }, [scene, isTypingComplete]);
+
+    const handleScrapbookPointerDown = (e) => {
+        isScrapbookDrawingRef.current = true;
+        const canvas = scrapbookCanvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+        
+        const mouseX = clientX - rect.left;
+        const mouseY = clientY - rect.top;
+        
+        lastPointerRef.current = { x: mouseX, y: mouseY, t: performance.now() };
+        handleScrapbookPointerMove(e);
+    };
+
+    const handleScrapbookPointerMove = (e) => {
+        if (!isScrapbookDrawingRef.current) return;
+        const canvas = scrapbookCanvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+
+        const mouseX = clientX - rect.left;
+        const mouseY = clientY - rect.top;
+        const now = performance.now();
+
+        const prev = lastPointerRef.current;
+        const dt = now - prev.t;
+        const dx = mouseX - prev.x;
+        const dy = mouseY - prev.y;
+        
+        const dragVx = dt > 0 ? (dx / dt) * 12 : 0;
+        const dragVy = dt > 0 ? (dy / dt) * 12 : 0;
+
+        lastPointerRef.current = { x: mouseX, y: mouseY, t: now };
+
+        let swipedAny = false;
+        const leaves = scrapbookLeavesRef.current;
+        leaves.forEach(leaf => {
+            if (!leaf.isFalling) {
+                const dist = Math.hypot(leaf.x - mouseX, leaf.y - mouseY);
+                if (dist < 42) { 
+                    leaf.isFalling = true;
+                    const angle = Math.atan2(leaf.y - mouseY, leaf.x - mouseX);
+                    
+                    leaf.vx = dragVx * 0.45 + Math.cos(angle) * 1.5 + (Math.random() - 0.5) * 1.5;
+                    leaf.vy = Math.max(1.5, dragVy * 0.45 + Math.sin(angle) * 1.5 + 1.2 + Math.random() * 2);
+                    leaf.rotSpeed = (Math.random() - 0.5) * 0.12 + (dragVx * 0.02);
+                    
+                    swipedAny = true;
+                }
+            }
+        });
+
+        if (swipedAny) {
+            playChimeNote(0.1);
+        }
+    };
+
+    const handleScrapbookPointerUp = () => {
+        isScrapbookDrawingRef.current = false;
+    };
+
+    // Typewriter
+    useEffect(() => {
+        if (scene !== 'scroll') return;
+        if (messages.length === 0) {
+            setTypewriterText("Dengan segenap ketulusan hati, kusembahkan kartu ucapan penuh kehangatan ini khusus untukmu. Semoga hari-harimu selalu diisi kebahagiaan... ❤️");
+            setIsTypingComplete(true);
+            return;
+        }
+        
+        const currentMsg = messages[currentMsgIdx];
+        if (!currentMsg) return;
+        
+        if (charIdx < currentMsg.length) {
+            const t = setTimeout(() => {
+                setTypewriterText(prev => prev + currentMsg[charIdx]);
+                setCharIdx(prev => prev + 1);
+            }, 45 + Math.random() * 30);
+            return () => clearTimeout(t);
+        } else {
+            if (currentMsgIdx < messages.length - 1) {
+                const t = setTimeout(() => {
+                    setTypewriterText('');
+                    setCharIdx(0);
+                    setCurrentMsgIdx(prev => prev + 1);
+                }, 3300);
+                return () => clearTimeout(t);
+            } else {
+                setIsTypingComplete(true);
+            }
+        }
+    }, [scene, currentMsgIdx, charIdx, messages]);
+    
+    // Break wax seal (Scene 1)
+    const handleBreakSeal = (e) => {
+        e.stopPropagation();
+        const rect = e.currentTarget.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        const symbols = ["🌸", "💖", "✨", "❤️", "💕"];
+        const bursts = Array.from({ length: 22 }, (_, idx) => {
+            const angle = (idx / 22) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+            const speed = 4 + Math.random() * 6;
+            return {
+                id: Math.random().toString(),
+                symbol: symbols[Math.floor(Math.random() * symbols.length)],
+                x: centerX,
+                y: centerY,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 2.5,
+                size: 15 + Math.random() * 12,
+                opacity: 1,
+                rot: Math.random() * 360,
+                rotSpeed: (Math.random() - 0.5) * 12
+            };
+        });
+        
+        setSealSplashes(bursts);
+        
+        if (audioRef.current) {
+            audioRef.current.play().then(() => setIsMuted(false)).catch(() => {});
+        }
+        playChimeNote();
+        setScene('envelope-opening');
+        
+        const startTime = Date.now();
+        const pInterval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            if (elapsed > 3800) {
+                clearInterval(pInterval);
+                setSealSplashes([]);
+            } else {
+                setSealSplashes(prev => prev.map(p => ({
+                    ...p,
+                    x: p.x + p.vx,
+                    y: p.y + p.vy,
+                    vy: p.vy + 0.05, // slower gravity for slow-motion effect
+                    vx: p.vx * 0.985, // less friction to float longer
+                    rot: p.rot + p.rotSpeed,
+                    opacity: Math.max(0, 1 - (elapsed / 3800))
+                })));
+            }
+        }, 16);
+        
+        setTimeout(() => {
+            setScene('eternity-knot'); // Go directly to love knot as Scene 2!
+            setTimeout(playChimeNote, 250);
+        }, 1300);
+    };
+    
+    // Ribbon tying mechanism (Scene 5)
+    const handleTieRibbon = () => {
+        if (isRibbonTied) return;
+        setIsRibbonTied(true);
+        setKnotBurstActive(true);
+        playChimeNote(0.4);
+        playChimeNote(0.6);
+        
+        // Massive burst of 30 flowers, hearts and glitters flying all over the page
+        const symbols = ["🌸", "💖", "🌸", "❤️", "💕", "✨", "🤍", "🕊️"];
+        const bursts = Array.from({ length: 32 }, (_, idx) => {
+            const id = Math.random().toString();
+            const angle = (idx / 32) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+            const left = 30 + Math.random() * 40;
+            const size = 18 + Math.random() * 16;
+            const duration = 2.8 + Math.random() * 1.8;
+            return { id, symbol: symbols[Math.floor(Math.random() * symbols.length)], left, size, duration, angle };
+        });
+        
+        setFloatingCelebrationItems(bursts);
+        
+        setTimeout(() => {
+            setKnotBurstActive(false);
+        }, 1500);
+
+        // FITUR BARU: Transisi Tirai Sutra yang Megah!
+        // Tunggu 1.4 detik agar user menikmati semburan kelopak bunga, lalu buka tirai menuju Prologue!
+        setTimeout(() => {
+            setCurtainActive(true);
+            setScene('prologue'); // Reveal prologue scene underneath!
+            setTimeout(() => {
+                setCurtainOpen(true);
+            }, 60);
+            
+            // Selesai transisi, hilangkan tirai agar tidak mengalangi interaksi halaman berikutnya
+            setTimeout(() => {
+                setCurtainActive(false);
+                setCurtainOpen(false);
+            }, 1500);
+        }, 1400);
+    };
+
+    // Drag-and-Tie Rope gesture event handlers
+    const handleRopeDragStart = (e) => {
+        if (isRibbonTied) return;
+        e.preventDefault(); // Prevents HTML5 dragging and text selection on desktop browsers
+        setIsDraggingRope(true);
+        try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+        } catch (err) {}
+        startYRef.current = e.clientY;
+    };
+
+    const handleRopeDragMove = (e) => {
+        if (!isDraggingRope || isRibbonTied) return;
+        const deltaY = e.clientY - startYRef.current;
+        // Limit dragging between 0px and 80px
+        setDragOffset(Math.max(0, Math.min(80, deltaY)));
+    };
+
+    const handleRopeDragEnd = (e) => {
+        if (!isDraggingRope || isRibbonTied) return;
+        setIsDraggingRope(false);
+        try {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+
+        if (dragOffset >= 50) {
+            // Success! Trigger knot tying
+            handleTieRibbon();
+        } else {
+            // Smoothly animate back to 0 (Spring back)
+            let current = dragOffset;
+            const step = () => {
+                current -= 6;
+                if (current <= 0) {
+                    setDragOffset(0);
+                } else {
+                    setDragOffset(current);
+                    requestAnimationFrame(step);
+                }
+            };
+            requestAnimationFrame(step);
+        }
+    };
+
+    // Interactive Glass Heart Button (Kirim Cinta)
+    const handleTapGlassHeart = () => {
+        playChimeNote(0.3);
+        const symbols = ["💖", "❤️", "💕", "✨", "🌸"];
+        const bursts = Array.from({ length: 16 }, (_, idx) => {
+            const angle = (idx / 16) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+            const speed = 2 + Math.random() * 3.5;
+            return {
+                id: Math.random().toString(),
+                symbol: symbols[Math.floor(Math.random() * symbols.length)],
+                x: window.innerWidth / 2,
+                y: window.innerHeight / 2 - 50,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 1.2, // upward launch
+                size: 15 + Math.random() * 15,
+                opacity: 1,
+                rot: Math.random() * 360,
+                rotSpeed: (Math.random() - 0.5) * 6
+            };
+        });
+        
+        setSealSplashes(bursts);
+        
+        const startTime = Date.now();
+        const pInterval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            if (elapsed > 3800) {
+                clearInterval(pInterval);
+                setSealSplashes([]);
+            } else {
+                setSealSplashes(prev => prev.map(p => ({
+                    ...p,
+                    x: p.x + p.vx,
+                    y: p.y + p.vy,
+                    vy: p.vy - 0.035, // floating slowly upwards against gravity
+                    vx: p.vx * 0.98,  // smooth drift friction
+                    rot: p.rot + p.rotSpeed,
+                    opacity: Math.max(0, 1 - (elapsed / 3800))
+                })));
+            }
+        }, 16);
+    };
+    
+    const typeGreetingTitle = {
+        anniversary: "Happy Anniversary",
+        birthday:    "Happy Birthday",
+        graduation:  "Selamat Wisuda",
+        wedding:     "Selamat Menikah",
+    };
+    
+    return (
+        <div ref={containerRef} className="relative w-full min-h-screen overflow-x-hidden select-none bg-[#fdf8f5] text-[#3d2218] pb-24" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            <audio ref={audioRef} src="/stillwithyou/music/music.mp3" loop />
+            
+            {/* Cinematic Silk Curtain Transition Overlay */}
+            {curtainActive && (
+                <div className="fixed inset-0 z-[999] pointer-events-none flex select-none">
+                    {/* Left Curtain half */}
+                    <div 
+                        className="w-1/2 h-full bg-gradient-to-r from-[#faebf0] via-[#fbcfe8] to-[#f5dae2] shadow-[4px_0_15px_rgba(0,0,0,0.15)] transition-transform duration-[1200ms] ease-in-out origin-left border-r border-[#faebf0]/30"
+                        style={{
+                            transform: curtainOpen ? 'translateX(-100%)' : 'translateX(0%)'
+                        }}
+                    />
+                    {/* Right Curtain half */}
+                    <div 
+                        className="w-1/2 h-full bg-gradient-to-l from-[#faebf0] via-[#fbcfe8] to-[#f5dae2] shadow-[-4px_0_15px_rgba(0,0,0,0.15)] transition-transform duration-[1200ms] ease-in-out origin-right border-l border-[#faebf0]/30"
+                        style={{
+                            transform: curtainOpen ? 'translateX(100%)' : 'translateX(0%)'
+                        }}
+                    />
+                </div>
+            )}
+            
+            {/* Soft Ambient Rose Gold Vignette */}
+            <div className="absolute inset-0 pointer-events-none z-0" style={{
+                background: 'radial-gradient(circle, rgba(250, 235, 240, 0.6) 0%, rgba(245, 218, 226, 0.45) 60%, rgba(253, 248, 245, 0.9) 100%)',
+            }} />
+            
+            {/* Falling sakura/rose petals canvas layer */}
+            <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[60]" />
+            
+            {/* Seal Burst Sparkles overlay */}
+            {sealSplashes.map(p => (
+                <div key={p.id} className="absolute pointer-events-none z-[100] text-center" style={{
+                    left: `${p.x}px`,
+                    top: `${p.y}px`,
+                    fontSize: `${p.size}px`,
+                    opacity: p.opacity,
+                    transform: `translate(-50%, -50%) rotate(${p.rot}deg)`,
+                }}>
+                    {p.symbol}
+                </div>
+            ))}
+            
+            {/* Floating Celebration items from Ribbon Seal */}
+            <div className="fixed inset-0 pointer-events-none z-[80] overflow-hidden">
+                {floatingCelebrationItems.map(item => (
+                    <div key={item.id} className="absolute text-center drop-shadow-[0_2px_8px_rgba(255,182,193,0.55)]" style={{
+                        left: `${item.left}%`,
+                        bottom: '80px',
+                        fontSize: `${item.size}px`,
+                        animation: `ewRiseUp ${item.duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`,
+                    }}>
+                        {item.symbol}
+                    </div>
+                ))}
+            </div>
+            
+            {/* Sound Button */}
+            {scene !== 'envelope' && scene !== 'envelope-opening' && (
+                <div className="fixed top-5 right-5 z-[90] flex gap-3">
+                    <button onClick={toggleMute} className="w-11 h-11 rounded-full flex items-center justify-center transition-all bg-white/70 border border-[#f5dae2] text-[#e5654b] shadow-md hover:scale-105 active:scale-95 backdrop-blur-sm cursor-pointer">
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
+                            {isMuted ? (
+                                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
+                            ) : (
+                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                            )}
+                        </svg>
+                    </button>
+                </div>
+            )}
+            
+            {/* ── SCENE 1: ENVELOPE GATE SCREEN (With 3D Parallax Mouse Tilt) ── */}
+            {(scene === 'envelope' || scene === 'envelope-opening') && (
+                <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#fdf8f5] transition-all duration-1000 ${scene === 'envelope-opening' ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+                    <div 
+                        onMouseMove={handleEnvelopeMouseMove}
+                        onMouseLeave={handleEnvelopeMouseLeave}
+                        className="relative w-full max-w-md h-[460px] flex flex-col justify-between items-center text-center p-8 bg-white/60 border border-white/85 rounded-3xl shadow-2xl backdrop-blur-md overflow-hidden transition-transform duration-200"
+                        style={{
+                            transform: `perspective(1000px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
+                            transformStyle: 'preserve-3d'
+                        }}
+                    >
+                        {/* Soft gold stamped border decor */}
+                        <div className="absolute inset-3 border border-[#faebf0] rounded-[22px] pointer-events-none" />
+                        
+                        <div className="relative z-10 mt-6" style={{ transform: 'translateZ(30px)' }}>
+                            <span style={{ fontFamily: "'Parisienne', cursive" }} className="block text-4xl text-[#e5654b] mb-1 font-semibold">
+                                Ethereal Whispers
+                            </span>
+                            <div className="h-[1px] w-28 bg-gradient-to-r from-transparent via-[#e5654b]/30 to-transparent mx-auto my-3" />
+                            <p className="text-xs text-[#8c6d62] uppercase tracking-[0.25em] font-medium">Special Love Invitation</p>
+                        </div>
+                        
+                        {/* 3D Wax Seal Envelope Button */}
+                        <div className="relative w-[180px] h-[120px] flex items-center justify-center my-6" style={{ transform: 'translateZ(50px)' }}>
+                            <div className="absolute inset-0 bg-[#faebf0] rounded-xl border border-white/60 shadow-lg flex items-center justify-center overflow-hidden">
+                                <div className="absolute top-0 left-0 w-0 h-0 border-l-[90px] border-l-transparent border-r-[90px] border-r-transparent border-t-[60px] border-t-white/40 origin-top transition-transform duration-700" style={{
+                                    transform: scene === 'envelope-opening' ? 'rotateX(180deg)' : 'rotateX(0deg)',
+                                    zIndex: 5
+                                }} />
+                                <div className="absolute bottom-0 left-0 w-0 h-0 border-l-[90px] border-l-white/20 border-r-[90px] border-r-white/20 border-b-[60px] border-b-white/30 z-[3]" />
+                            </div>
+                            
+                            {/* Golden Wax Seal */}
+                            <button
+                                onClick={handleBreakSeal}
+                                disabled={scene === 'envelope-opening'}
+                                className="absolute z-10 w-16 h-16 rounded-full shadow-[0_4px_12px_rgba(229,101,75,0.35)] transition-all hover:scale-108 active:scale-95 flex items-center justify-center cursor-pointer select-none outline-none"
+                                style={{
+                                    background: 'radial-gradient(circle at 35% 35%, #ffe6a3 0%, #d4af37 50%, #aa7c11 90%, #855f05 100%)',
+                                    border: '2px solid rgba(255, 255, 255, 0.4)',
+                                    touchAction: 'none'
+                                }}
+                            >
+                                <div className="absolute -inset-2.5 rounded-full border border-[#d4af37]/35 animate-pulseRing pointer-events-none" />
+                                <div className="w-11 h-11 rounded-full border border-[#aa7c11]/40 flex items-center justify-center bg-black/5">
+                                    <svg viewBox="0 0 24 24" className="w-6 h-6 fill-[#855f05]/60 filter drop-shadow-[0_1px_1px_rgba(255,255,255,0.4)]">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <div className="relative z-10 mb-6 max-w-[260px]" style={{ transform: 'translateZ(30px)' }}>
+                            <p className="text-xs text-[#8c6d62]/80 leading-relaxed font-light">
+                                Ketuk segel lilin emas untuk memecahkan dan membuka persembahan cinta untukmu,
+                            </p>
+                            <span className="block text-sm font-semibold text-[#e5654b] mt-1.5">{card.recipient_name}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* ── SCENE 3: LUXURIOUS EDITORIAL VELLUM PROLOGUE ── */}
+            {scene === 'prologue' && (
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-[#fdf8f5] overflow-y-auto animate-fadeIn select-none">
+                    {/* Soft Ambient Rose Gold Vignette */}
+                    <div className="absolute inset-0 pointer-events-none z-0" style={{
+                        background: 'radial-gradient(circle, rgba(250, 235, 240, 0.75) 0%, rgba(245, 218, 226, 0.6) 60%, rgba(253, 248, 245, 0.95) 100%)',
+                    }} />
+
+                    {/* Waving leafy shadows */}
+                    <svg className="absolute -left-16 -top-16 w-80 h-80 opacity-[0.07] text-[#e5654b] animate-sway pointer-events-none z-10" viewBox="0 0 100 100" fill="currentColor">
+                        <path d="M50 0 C60 20 80 30 100 50 C80 70 60 80 50 100 C40 80 20 70 0 50 C20 30 40 20 50 0 Z" />
+                    </svg>
+                    <svg className="absolute -right-20 -bottom-20 w-80 h-80 opacity-[0.05] text-[#e5654b] animate-sway pointer-events-none z-10" viewBox="0 0 100 100" fill="currentColor" style={{ animationDirection: 'reverse' }}>
+                        <path d="M50 0 C60 20 80 30 100 50 C80 70 60 80 50 100 C40 80 20 70 0 50 C20 30 40 20 50 0 Z" />
+                    </svg>
+
+                    {/* Luxurious Gold Foil Vellum Card */}
+                    <div 
+                        className="relative z-20 w-full max-w-lg bg-white/70 border rounded-3xl p-8 sm:p-12 shadow-2xl backdrop-blur-md overflow-hidden text-center flex flex-col items-center animate-scaleIn"
+                        style={{ 
+                            border: '3px double rgba(212, 175, 55, 0.42)', 
+                            boxShadow: '0 20px 50px rgba(229,101,75,0.06), inset 0 0 35px rgba(250,235,240,0.55)'
+                        }}
+                    >
+                        {/* Golden corner leaf decorations */}
+                        <div className="absolute top-4 left-4 w-5 h-5 border-t-2 border-l-2 border-[#d4af37]/30 rounded-tl-lg" />
+                        <div className="absolute top-4 right-4 w-5 h-5 border-t-2 border-r-2 border-[#d4af37]/30 rounded-tr-lg" />
+                        <div className="absolute bottom-4 left-4 w-5 h-5 border-b-2 border-l-2 border-[#d4af37]/30 rounded-bl-lg" />
+                        <div className="absolute bottom-4 right-4 w-5 h-5 border-b-2 border-r-2 border-[#d4af37]/30 rounded-br-lg" />
+
+                        <div className="mt-4">
+                            <span style={{ fontFamily: "'Parisienne', cursive" }} className="block text-4xl text-[#e5654b] mb-1 font-semibold">The Prologue</span>
+                            <div className="h-[1px] w-24 bg-gradient-to-r from-transparent via-[#e5654b]/30 to-transparent mx-auto my-3" />
+                        </div>
+
+                        {/* Elegant Central Cursive Quote */}
+                        <blockquote style={{ fontFamily: "'Playfair Display', serif", lineHeight: '1.9' }} className="text-xl sm:text-2xl italic text-[#5c3e35] font-light max-w-md my-6 px-4">
+                            "Cinta melingkupi segalanya, ia percaya segalanya, ia berharap segalanya, ia sabar menanggung segalanya..."
+                        </blockquote>
+
+                        {/* Glowing and Rotating Gold Rings Monogram */}
+                        <div className="relative w-36 h-36 flex items-center justify-center my-4 select-none">
+                            <div className="absolute inset-0 rounded-full border border-dashed border-[#e5654b]/20 animate-spin" style={{ animationDuration: '35s' }} />
+                            <div className="absolute inset-2.5 rounded-full border border-double border-[#d4af37]/30 animate-spin" style={{ animationDuration: '18s', animationDirection: 'reverse' }} />
+                            <div style={{ fontFamily: "'Parisienne', cursive" }} className="text-5xl text-[#e5654b] drop-shadow-[0_2px_8px_rgba(229,101,75,0.22)] font-bold animate-pulseBeat">
+                                {card.recipient_name ? card.recipient_name.substring(0, 1) : "U"}
+                            </div>
+                        </div>
+
+                        {/* Capsule Glowing Glassmorphic Button */}
+                        <div className="mt-6 flex flex-col items-center">
+                            <span className="text-[9px] text-[#8c6d62]/80 uppercase tracking-[0.25em] mb-4 font-semibold">Buka Kartu Selengkapnya</span>
+                            <button
+                                onClick={() => { playChimeNote(); setScene('scroll'); }}
+                                className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-white text-xs font-semibold tracking-wider uppercase bg-gradient-to-r from-[#e5654b] to-[#f98b6c] hover:shadow-lg hover:scale-105 active:scale-95 transition-all shadow-[0_4px_15px_rgba(229,101,75,0.32)] cursor-pointer border-none"
+                            >
+                                Buka Pesan Cinta ➔
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* ── SCENE 4: MAIN SCROLL FLOW (SCROLL LETTER & SCRAPBOOK WITH SCRATCH-OFF) ── */}
+            {scene === 'scroll' && (
+                <div className="relative w-full flex flex-col items-center justify-start px-4 pt-10 z-30 pb-28">
+                    
+                    {/* ── SUB-SCENE 4.1: SCROLL LETTER ── */}
+                    {scrollSubScene === 'letter' && (
+                        <div className="w-full flex flex-col items-center animate-fadeInFast">
+                            <div className="relative w-full max-w-xl bg-[#fffcf9] border border-[#f5dae2]/60 rounded-3xl p-8 sm:p-12 shadow-xl overflow-hidden" style={{
+                                backgroundImage: 'radial-gradient(rgba(229,101,75,0.02) 1px, transparent 0)',
+                                backgroundSize: '16px 16px',
+                                boxShadow: '0 20px 45px rgba(229,101,75,0.06), inset 0 0 40px rgba(250,235,240,0.4)',
+                            }}>
+                                {/* Corner Gold decors */}
+                                <div className="absolute top-4 left-4 w-6 h-6 border-t border-l border-[#e5654b]/30 rounded-tl-lg" />
+                                <div className="absolute top-4 right-4 w-6 h-6 border-t border-r border-[#e5654b]/30 rounded-tr-lg" />
+                                <div className="absolute bottom-4 left-4 w-6 h-6 border-b border-l border-[#e5654b]/30 rounded-bl-lg" />
+                                <div className="absolute bottom-4 right-4 w-6 h-6 border-b border-r border-[#e5654b]/30 rounded-br-lg" />
+                                
+                                {/* Letter Header */}
+                                <div className="text-center mb-8">
+                                    <span style={{ fontFamily: "'Parisienne', cursive" }} className="text-3xl text-[#e5654b]">
+                                        {typeGreetingTitle[card.type] || "Happy Anniversary"}
+                                    </span>
+                                    <div className="text-[10px] font-semibold text-[#8c6d62] uppercase tracking-[0.2em] mt-1.5">
+                                        Teruntuk {card.recipient_name}
+                                    </div>
+                                </div>
+                                
+                                {/* Writing Parchment Body */}
+                                <div className="min-h-[180px] flex flex-col justify-center py-2">
+                                    <h3 style={{ fontFamily: "'Dancing Script', cursive" }} className="text-2xl font-bold text-[#e5654b] mb-4">
+                                        Teruntuk {card.recipient_name} tercinta,
+                                    </h3>
+                                    <p style={{ fontFamily: "'Dancing Script', cursive", lineHeight: '1.8' }} className="text-xl text-[#5c3e35] font-bold whitespace-pre-line leading-relaxed min-h-[120px]">
+                                        {typewriterText}
+                                        {!isTypingComplete && (
+                                            <span className="inline-block w-[2px] h-[1.1em] bg-[#e5654b] ml-1 align-middle animate-blink" />
+                                        )}
+                                    </p>
+                                    <p style={{ fontFamily: "'Dancing Script', cursive" }} className="text-right text-lg text-[#e5654b] mt-8 font-semibold">
+                                        Dari: {card.sender_name} 🌸
+                                    </p>
+                                </div>
+                                
+                                {/* Interactive Love Button */}
+                                <div className="flex flex-col items-center justify-center border-t border-[#f5dae2] pt-8 mt-6">
+                                    <button
+                                        onClick={handleTapGlassHeart}
+                                        className="relative w-14 h-14 rounded-full flex items-center justify-center transition-all bg-white/90 border border-[#f5dae2] shadow-[0_4px_12px_rgba(229,101,75,0.15)] hover:scale-110 active:scale-95 duration-200 cursor-pointer"
+                                    >
+                                        <span className="absolute inset-0 rounded-full bg-[#faebf0]/30 animate-ping pointer-events-none" />
+                                        <svg viewBox="0 0 24 24" className="w-7 h-7 fill-[#e5654b] drop-shadow-[0_2px_4px_rgba(229,101,75,0.25)]">
+                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                        </svg>
+                                    </button>
+                                    <span className="text-[10px] text-[#8c6d62] uppercase tracking-wider mt-2.5 font-medium">Kirim Cinta 💗</span>
+                                </div>
+                            </div>
+
+                            {/* Conditional Navigation Buttons (appears after typewriter finishes typing) */}
+                            {isTypingComplete && (
+                                <div className="flex gap-4 mt-8 w-full max-w-xl justify-center animate-fadeInFast select-none">
+                                    <button
+                                        onClick={() => {
+                                            playChimeNote(-0.1);
+                                            setScene('prologue');
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className="px-6 py-2.5 rounded-full border border-[#e5654b]/30 bg-white/70 text-[#8c6d62] text-xs font-semibold uppercase tracking-wider shadow-sm hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer border-none"
+                                    >
+                                        Kembali ➔
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            playChimeNote(0.15);
+                                            setScrollSubScene('scrapbook');
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className="px-8 py-2.5 rounded-full bg-gradient-to-r from-[#e5654b] to-[#f98b6c] text-white text-xs font-bold uppercase tracking-wider shadow-[0_4px_12px_rgba(229,101,75,0.25)] hover:shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer border-none"
+                                    >
+                                        Buka Jurnal Memori ➔
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
+                    {/* ── SUB-SCENE 4.2: REDESIGNED MEMORY SCRAPBOOK ── */}
+                    {scrollSubScene === 'scrapbook' && (
+                        <div className="w-full flex flex-col items-center animate-fadeInFast">
+                            <div className="w-full max-w-xl text-center">
+                                <h2 style={{ fontFamily: "'Parisienne', cursive" }} className="text-4xl text-[#e5654b] mb-1">Our Memory Jurnal</h2>
+                                <p className="text-[10px] tracking-[3px] uppercase text-[#8c6d62] mb-10">Jalinan Scrapbook Memori Fisik</p>
+                                
+                                {/* The Scattered Scrapbook Workspace */}
+                                <div className="relative w-full h-[460px] bg-[#fffaf5] rounded-3xl border border-[#faebf0] shadow-inner overflow-hidden p-6">
+                                    
+                                    {/* Scrapbook texture overlay (vintage grid) */}
+                                    <div className="absolute inset-0 pointer-events-none opacity-5" style={{
+                                        backgroundImage: 'radial-gradient(#3d2218 1px, transparent 1px)',
+                                        backgroundSize: '18px 18px'
+                                    }} />
+                                    
+                                    {/* Scattered dried rose petals & gold pins decor */}
+                                    <div className="absolute top-8 left-[10%] text-2xl rotate-12 opacity-80 select-none">🌸</div>
+                                    <div className="absolute bottom-10 left-[8%] text-xl -rotate-45 opacity-60 select-none">🌸</div>
+                                    <div className="absolute bottom-24 right-[12%] text-2xl rotate-90 opacity-70 select-none">🌸</div>
+                                    <div className="absolute top-10 right-[15%] text-lg -rotate-12 opacity-40 select-none">🌸</div>
+                                    
+                                    {/* Aesthetic Handwritten Note on Scrapbook */}
+                                    <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white/70 border border-[#f5dae2]/40 rounded-lg px-4 py-2 text-[10px] text-[#8c6d62]/80 uppercase tracking-widest font-semibold shadow-sm select-none" style={{ fontFamily: "'Dancing Script', cursive", transform: 'translateX(-50%) rotate(-2deg)' }}>
+                                        "Sapu daun sakura di atas untuk membuka kenangan... 🌸"
+                                    </div>
+                                    
+                                    {/* 3 Layered scattered Polaroid Photos */}
+                                    {displayPhotos.map((url, idx) => {
+                                        const isActive = activePolaroidIdx === idx;
+                                        
+                                        const scrapStyles = [
+                                            {
+                                                left: '12%',
+                                                top: '15%',
+                                                transform: isActive 
+                                                    ? 'rotate(0deg) scale(1.12) translateZ(40px)' 
+                                                    : 'rotate(-10deg) scale(0.92) translateZ(0)',
+                                                zIndex: isActive ? 40 : 10,
+                                                washi: 'left-1/3 -top-2.5 rotate-[-12deg]'
+                                            },
+                                            {
+                                                left: '32%',
+                                                top: '10%',
+                                                transform: isActive 
+                                                    ? 'rotate(0deg) scale(1.12) translateZ(40px)' 
+                                                    : 'rotate(4deg) scale(0.95) translateZ(0)',
+                                                zIndex: isActive ? 40 : 20,
+                                                washi: 'left-1/3 -top-3 rotate-[3deg]'
+                                            },
+                                            {
+                                                left: '52%',
+                                                top: '15%',
+                                                transform: isActive 
+                                                    ? 'rotate(0deg) scale(1.12) translateZ(40px)' 
+                                                    : 'rotate(12deg) scale(0.90) translateZ(0)',
+                                                zIndex: isActive ? 40 : 15,
+                                                washi: 'left-1/3 -top-2.5 rotate-[15deg]'
+                                            }
+                                        ];
+                                        
+                                        const style = scrapStyles[idx];
+                                        
+                                        return (
+                                            <div
+                                                key={idx}
+                                                onClick={() => {
+                                                    playChimeNote();
+                                                    if (isActive) {
+                                                        setActivePhoto(url);
+                                                    } else {
+                                                        setActivePolaroidIdx(idx);
+                                                    }
+                                                }}
+                                                className={`absolute w-[125px] sm:w-[145px] bg-white rounded-lg p-2.5 pb-8 shadow-[0_8px_20px_rgba(0,0,0,0.12)] border border-gray-100 cursor-pointer select-none transition-all duration-500 ease-out transform-style-3d hover:shadow-[0_15px_30px_rgba(229,101,75,0.18)] ${
+                                                    isActive ? 'ring-2 ring-[#e5654b]/30 font-semibold' : 'hover:scale-98 opacity-90'
+                                                }`}
+                                                style={{
+                                                    left: style.left,
+                                                    top: style.top,
+                                                    transform: style.transform,
+                                                    zIndex: style.zIndex,
+                                                }}
+                                            >
+                                                {/* Golden Clip Pin decoration overlay */}
+                                                {idx === 1 && (
+                                                    <div className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 z-30 w-7 h-5 flex items-center justify-center bg-transparent pointer-events-none">
+                                                        <div className="w-1.5 h-6 rounded-full border-2 border-[#d4af37] bg-[#fdf8f5] shadow-xs" />
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Vintage patterned washi tape decor */}
+                                                {idx !== 1 && (
+                                                    <div className={`absolute z-30 w-12 h-3.5 bg-[#f5dae2]/55 border border-white/60 shadow-xs pointer-events-none ${style.washi}`} style={{
+                                                        backgroundImage: 'repeating-linear-gradient(45deg, #faebf0, #faebf0 4px, #fdf8f5 4px, #fdf8f5 8px)'
+                                                    }} />
+                                                )}
+                                                
+                                                {/* Photo Inner container (Daun di luar bingkai, jadi foto bersih) */}
+                                                <div className="w-full aspect-square rounded-sm overflow-hidden bg-gray-50 border border-gray-100 relative group">
+                                                    <img src={url} alt="Memory Jurnal" className="w-full h-full object-cover block pointer-events-none" />
+                                                    
+                                                    {/* Zoom Hover indicator */}
+                                                    <div className="absolute inset-x-0 bottom-0 bg-black/60 flex items-center justify-center py-1 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+                                                        <span className="text-[7px] text-white tracking-wider uppercase font-semibold">Perbesar 🔍</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Retro handwritten caption label */}
+                                                <div style={{ fontFamily: "'Dancing Script', cursive" }} className="text-center text-[10px] text-[#8c6d62] font-bold mt-2 truncate w-full select-none">
+                                                    Memory {idx + 1}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+
+                                    {/* Unified Interactive Leaf-Sweep Canvas Overlay */}
+                                    {!isScrapbookCleared && (
+                                        <canvas
+                                            ref={scrapbookCanvasRef}
+                                            onMouseDown={handleScrapbookPointerDown}
+                                            onMouseMove={handleScrapbookPointerMove}
+                                            onMouseUp={handleScrapbookPointerUp}
+                                            onMouseLeave={handleScrapbookPointerUp}
+                                            onTouchStart={handleScrapbookPointerDown}
+                                            onTouchMove={handleScrapbookPointerMove}
+                                            onTouchEnd={handleScrapbookPointerUp}
+                                            className="absolute inset-0 w-full h-full z-[45] cursor-crosshair transition-opacity duration-700 pointer-events-auto rounded-3xl"
+                                            style={{ touchAction: 'none' }}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Navigation Buttons for Scrapbook */}
+                            <div className="flex gap-4 mt-8 w-full max-w-xl justify-center animate-fadeInFast select-none">
+                                <button
+                                    onClick={() => {
+                                        playChimeNote(-0.05);
+                                        setScrollSubScene('letter');
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    className="px-6 py-2.5 rounded-full border border-[#e5654b]/30 bg-white/70 text-[#8c6d62] text-xs font-semibold uppercase tracking-wider shadow-sm hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer border-none"
+                                >
+                                    Kembali ke Surat ➔
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        playChimeNote(0.1);
+                                        setIsRibbonTied(false);
+                                        setKnotBurstActive(false);
+                                        setFloatingCelebrationItems([]);
+                                        setIsScrapbookCleared(false);
+                                        setScrollSubScene('letter');
+                                        setScene('envelope');
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    className="px-6 py-2.5 rounded-full bg-[#faebf0] border border-[#f5dae2] text-[#e5654b] text-xs font-bold uppercase tracking-wider shadow-xs hover:bg-[#faebf0]/80 hover:shadow-md transition-all cursor-pointer border-none"
+                                >
+                                    Putar Ulang ↺
+                                </button>
+                            </div>
+
+                            {/* ── ROMANTIC SIGNATURE FOOTER ── */}
+                            <div className="w-full max-w-xl mt-20 text-center animate-fadeIn pb-12 border-t border-[#f5dae2] pt-8">
+                                <span style={{ fontFamily: "'Parisienne', cursive" }} className="block text-4xl text-[#e5654b] mb-2">Tied Forever with Love</span>
+                                <p style={{ fontFamily: "'Dancing Script', cursive" }} className="text-xl text-[#8c6d62] font-semibold">
+                                    Dari: {card.sender_name} • Untuk: {card.recipient_name} 🌸
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+            
+            {/* ── SCENE 2: DEDICATED FULLSCREEN LOVE RED THREAD (THE ETERNITY KNOT) ── */}
+            {scene === 'eternity-knot' && (
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-[#fdf8f5] overflow-y-auto animate-fadeIn select-none">
+                    {/* Soft Ambient Rose Gold Vignette */}
+                    <div className="absolute inset-0 pointer-events-none z-0" style={{
+                        background: 'radial-gradient(circle, rgba(250, 235, 240, 0.75) 0%, rgba(245, 218, 226, 0.6) 60%, rgba(253, 248, 245, 0.95) 100%)',
+                    }} />
+
+
+
+                    <div className="relative z-20 w-full max-w-md flex flex-col items-center text-center">
+                        <div className="mb-6">
+                            <span style={{ fontFamily: "'Parisienne', cursive" }} className="block text-4xl text-red-600 mb-1">Eternity Thread</span>
+                            <p className="text-[10px] tracking-[3px] uppercase text-[#8c6d62] font-semibold">Pita Simpul Cinta Abadi</p>
+                        </div>
+                        
+                        {/* Interactive Rope Knot SVG Box */}
+                        <div 
+                            onPointerDown={handleRopeDragStart}
+                            onPointerMouseMove={handleRopeDragMove}
+                            onPointerUp={handleRopeDragEnd}
+                            onPointerCancel={handleRopeDragEnd}
+                            draggable="false"
+                            className={`w-64 h-36 relative flex items-center justify-center mb-8 bg-white/40 border border-white/50 rounded-2xl shadow-sm backdrop-blur-xs p-4 select-none cursor-grab active:cursor-grabbing touch-none transition-all duration-300 ${isDraggingRope ? 'scale-102 ring-2 ring-red-300/35 shadow-md' : ''}`}
+                            style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                        >
+                            <svg viewBox="0 0 200 100" className="w-full h-full select-none" draggable="false" style={{ pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none' }}>
+                                <defs>
+                                    {/* Soft drop shadow filter for 3D depth */}
+                                    <filter id="ropeShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feDropShadow dx="0.5" dy="1.5" stdDeviation="1.2" floodColor="#3d2218" floodOpacity="0.25" />
+                                    </filter>
+                                    {/* Radial gradient for realistic gold bead */}
+                                    <radialGradient id="goldBead" cx="35%" cy="35%" r="65%">
+                                        <stop offset="0%" stopColor="#fff2cc" />
+                                        <stop offset="30%" stopColor="#ffd966" />
+                                        <stop offset="75%" stopColor="#e6b800" />
+                                        <stop offset="100%" stopColor="#b38f00" />
+                                    </radialGradient>
+                                </defs>
+
+                                {/* Left loose dangling / tied thread path */}
+                                {renderRope(
+                                    isRibbonTied 
+                                        ? "M 10 80 Q 60 45, 100 50" 
+                                        : `M 10 80 Q ${40 + dragOffset * 0.3} ${90 + dragOffset * 0.3}, ${leftEndX} ${leftEndY}`,
+                                    isDraggingRope ? "" : "transition-all duration-[600ms] ease-out"
+                                )}
+
+                                {/* Right loose dangling / tied thread path */}
+                                {renderRope(
+                                    isRibbonTied 
+                                        ? "M 190 80 Q 140 45, 100 50" 
+                                        : `M 190 80 Q ${160 - dragOffset * 0.3} ${90 + dragOffset * 0.3}, ${rightEndX} ${rightEndY}`,
+                                    isDraggingRope ? "" : "transition-all duration-[600ms] ease-out"
+                                )}
+
+                                {/* Flowing ribbon ends hanging down (Only visible when tied) */}
+                                {renderRope(
+                                    "M 100 50 Q 80 80, 70 95",
+                                    `transition-all duration-[1500ms] ease-out ${isRibbonTied ? 'opacity-100' : 'opacity-0'}`
+                                )}
+                                {renderRope(
+                                    "M 100 50 Q 120 80, 130 95",
+                                    `transition-all duration-[1500ms] ease-out ${isRibbonTied ? 'opacity-100' : 'opacity-0'}`
+                                )}
+                                
+                                {/* The Elegant Love Knot Bow loops */}
+                                {isRibbonTied && (
+                                    <>
+                                        {renderRope(
+                                            "M 100 50 C 80 20, 50 35, 70 55 C 80 65, 90 55, 100 50",
+                                            "animate-scaleIn origin-center",
+                                            { animationDelay: '100ms' }
+                                        )}
+                                        {renderRope(
+                                            "M 100 50 C 120 20, 150 35, 130 55 C 120 65, 110 55, 100 50",
+                                            "animate-scaleIn origin-center",
+                                            { animationDelay: '200ms' }
+                                        )}
+                                    </>
+                                )}
+                                
+                                {/* Gold Knot Center Core (3D Spherical Bead, follows drag) */}
+                                <circle 
+                                    cx="100" 
+                                    cy={beadY} 
+                                    r={isRibbonTied ? "7.5" : "5.5"} 
+                                    fill={isRibbonTied ? "url(#goldBead)" : "#ffd966"} 
+                                    stroke={isRibbonTied ? "#b38f00" : "#aa7c11"}
+                                    strokeWidth="1.5"
+                                    className={`filter drop-shadow-[0_2px_4px_rgba(61,34,24,0.25)] ${isDraggingRope ? "" : "transition-all duration-[600ms] ease-out"}`}
+                                />
+                            </svg>
+                            
+                            {/* Sparkle ring animation on tie */}
+                            {knotBurstActive && (
+                                <div className="absolute w-16 h-16 rounded-full border-2 border-red-500/40 animate-ping z-20 pointer-events-none" />
+                            )}
+                        </div>
+
+                        {/* Interactive Blessing Card / Book */}
+                        <div className={`w-full bg-[#fffcf9] border border-[#f5dae2]/60 rounded-3xl p-8 shadow-xl overflow-hidden text-center flex flex-col items-center transition-all duration-1000 transform ${
+                            isRibbonTied ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-55 translate-y-4'
+                        }`} style={{
+                            backgroundImage: 'radial-gradient(rgba(229,101,75,0.015) 1px, transparent 0)',
+                            backgroundSize: '14px 14px',
+                            boxShadow: '0 20px 40px rgba(229,101,75,0.05)',
+                        }}>
+                            {!isRibbonTied ? (
+                                <div className="py-4 flex flex-col items-center">
+                                    <p className="text-xs text-[#8c6d62] leading-relaxed font-light mb-6 px-4">
+                                        Sentuh dan seret manik-manik emas ke bawah secara sakral untuk mengikat benang takdir cinta kita berdua selamanya.
+                                    </p>
+                                    
+                                    {/* Draggable indicator arrow/finger animation */}
+                                    <div className="flex flex-col items-center gap-1.5 animate-bounceIllustrate">
+                                        <span className="text-xl">👇</span>
+                                        <span className="text-[8px] uppercase tracking-widest text-red-500 font-semibold">Tarik Ke Bawah</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="animate-scaleIn">
+                                    <span style={{ fontFamily: "'Parisienne', cursive" }} className="block text-3xl text-red-600 mb-4 pointer-events-none">Eternity Love Tied</span>
+                                    
+                                    <p style={{ fontFamily: "'Dancing Script', cursive", lineHeight: '1.8' }} className="text-xl text-[#3d2218] font-bold px-2 whitespace-pre-line leading-relaxed">
+                                        "Semoga ikatan cinta dan benang takdir senantiasa merajut hati kita menjadi satu simpul abadi, melangkah berdua mengarungi waktu hingga ke jannah-Nya... 💗"
+                                    </p>
+                                    
+                                    <div className="h-[1px] w-20 bg-red-600/35 mx-auto mt-6 mb-5" />
+                                    
+                                    <button
+                                        onClick={() => {
+                                            playChimeNote(0.2);
+                                            setScene('prologue'); 
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-white text-xs font-bold tracking-wider uppercase bg-gradient-to-r from-red-500 to-red-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(239,68,68,0.25)] cursor-pointer"
+                                    >
+                                        Buka Lembaran Kisah ➔
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Restart / Reset journey button */}
+                        {isRibbonTied && (
+                            <button
+                                onClick={() => {
+                                    playChimeNote(0.1);
+                                    setIsRibbonTied(false);
+                                    setKnotBurstActive(false);
+                                    setFloatingCelebrationItems([]);
+                                    setScene('envelope');
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="mt-8 text-xs text-[#8c6d62]/70 hover:text-red-500 tracking-widest uppercase transition-colors"
+                            >
+                                Putar Ulang Perjalanan ↺
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+            
+            {/* ── PHOTO ZOOM PREVIEW MODAL ── */}
+            {activePhoto && (
+                <div onClick={() => setActivePhoto(null)} className="fixed inset-0 z-[100] bg-black/92 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeInFast">
+                    <div className="relative max-w-sm w-full bg-white p-3 pb-12 rounded-lg shadow-2xl animate-scaleIn">
+                        <button onClick={() => setActivePhoto(null)} className="absolute -top-12 right-0 text-white border border-white/20 bg-white/10 px-3 py-1 rounded-full text-xs tracking-wider uppercase font-medium cursor-pointer">
+                            Tutup [X]
+                        </button>
+                        <div className="w-full aspect-square overflow-hidden bg-gray-50 border border-gray-150 rounded shadow-inner">
+                            <img src={activePhoto} alt="Scrapbook Capture" className="w-full h-full object-cover block" />
+                        </div>
+                        <div style={{ fontFamily: "'Dancing Script', cursive" }} className="absolute bottom-3 left-1/2 transform -translate-x-1/2 text-center text-xs text-[#8c6d62] font-bold">
+                            "Kenangan Termanis Kita ❤️"
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Screen Portrait locked Alert */}
+            {isLandscapeLocked && !dismissWarning && (
+                <div className="fixed inset-0 z-[9999] bg-[#fdf8f5] flex flex-col items-center justify-center text-center p-6 text-[#3d2218]">
+                    <svg viewBox="0 0 24 24" className="w-16 h-16 fill-[#e5654b] mb-6 animate-rotatePhone">
+                        <path d="M16 1H8C6.34 1 5 2.34 5 4v16c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V4c0-1.66-1.34-3-3-3zm-2 20h-4v-1h4v1zm3-3H7V4h10v14z"/>
+                    </svg>
+                    <h2 className="text-xl font-bold mb-2">Disarankan Putar Layar Anda</h2>
+                    <p className="text-sm text-gray-500 max-w-xs mb-8">Gunakan mode landscape (horizontal) untuk menikmati pertunjukan visual terbaik.</p>
+                    <button onClick={() => setDismissWarning(true)} className="px-6 py-2.5 rounded-full text-white text-xs font-semibold tracking-wider uppercase border-none bg-[#e5654b] hover:bg-[#c24b33] transition-all">
+                        Tetap Lanjutkan ➔
+                    </button>
+                </div>
+            )}
+            
+            <style>{`
+                @keyframes ewRiseUp {
+                    0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+                    10% { opacity: 0.95; }
+                    90% { opacity: 0.95; }
+                    100% { transform: translateY(-110vh) rotate(45deg); opacity: 0; }
+                }
+                @keyframes ewRiseLantern {
+                    0% { transform: translateY(0) translateX(0); opacity: 0; }
+                    8% { opacity: 1; }
+                    90% { opacity: 0.85; }
+                    100% { transform: translateY(-120vh) translateX(var(--sway-offset, 15px)); opacity: 0; }
+                }
+                .animate-fadeInFast {
+                    animation: fadeIn 0.35s ease-out forwards;
+                }
+                .animate-scaleIn {
+                    animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                }
+                @keyframes scaleIn {
+                    0% { transform: scale(0.92); opacity: 0; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+                @keyframes sway {
+                    0%, 100% { transform: rotate(0deg) scale(1); }
+                    50% { transform: rotate(3deg) scale(1.03); }
+                }
+                .animate-sway {
+                    animation: sway 15s ease-in-out infinite;
+                }
+            `}</style>
+        </div>
+    );
+}
+
+
+
 function DetailedRocketSVG({ glowColor = "rgba(34,211,238,0.85)", isIgnited = false }) {
     return (
         <svg viewBox="0 0 64 120" style={{ width: '100%', height: '100%' }}>
@@ -1608,6 +3309,10 @@ function CosmicDriftFull({ card }) {
     const constRef      = useRef(null);
     const audioCtxRef   = useRef(null);
     const masterGainRef = useRef(null);
+    
+    // Web Audio active synthesis tracking refs
+    const audioTimerRef = useRef(null);
+    const droneNodesRef = useRef([]);
 
     const [opened, setOpened]                 = useState(false);
     const [isPlaying, setIsPlaying]           = useState(false);
@@ -2090,89 +3795,181 @@ function CosmicDriftFull({ card }) {
         return () => clearInterval(intv);
     }, []);
 
-    // ── Web Audio ambient (with Warp Sweep Sound Effect) ──
+    // ── Cleanup function for Web Audio ──
+    const cleanupAudioNodes = () => {
+        if (audioTimerRef.current) {
+            clearTimeout(audioTimerRef.current);
+            audioTimerRef.current = null;
+        }
+        if (droneNodesRef.current) {
+            droneNodesRef.current.forEach(node => {
+                try { node.stop(); } catch (e) {}
+                try { node.disconnect(); } catch (e) {}
+            });
+            droneNodesRef.current = [];
+        }
+    };
+
+    // Auto cleanup audio on unmount
+    useEffect(() => {
+        return () => {
+            cleanupAudioNodes();
+            if (audioCtxRef.current) {
+                try { audioCtxRef.current.close(); } catch (e) {}
+            }
+        };
+    }, []);
+
+    // ── Start Audio Engine (Stellar Odyssey Theme only) ──
     const startAudio = (withWarp = false) => {
         if (!window.AudioContext && !window.webkitAudioContext) return;
-        if (audioCtxRef.current) return;
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        audioCtxRef.current = ctx;
-        const master = ctx.createGain();
-        master.gain.setValueAtTime(0, ctx.currentTime);
-        master.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 3);
-        master.connect(ctx.destination);
-        masterGainRef.current = master;
+        if (audioTimerRef.current) return;
 
-        // Base celestial oscillators
-        [[55,0.16,'sine'],[82,0.09,'sine'],[110,0.05,'triangle']].forEach(([freq,g,type]) => {
-            const osc = ctx.createOscillator();
-            const gn  = ctx.createGain();
-            osc.type = type; osc.frequency.value = freq; gn.gain.value = g;
-            osc.connect(gn); gn.connect(master); osc.start();
-        });
-
-        // Space pink noise
-        const bufSz = ctx.sampleRate * 4;
-        const buf   = ctx.createBuffer(1, bufSz, ctx.sampleRate);
-        const data  = buf.getChannelData(0);
-        for (let i = 0; i < bufSz; i++) data[i] = (Math.random() * 2 - 1);
-        const ns = ctx.createBufferSource();
-        ns.buffer = buf; ns.loop = true;
-        const bpf = ctx.createBiquadFilter();
-        bpf.type = 'bandpass'; bpf.frequency.value = 220; bpf.Q.value = 0.4;
-        const ng = ctx.createGain(); ng.gain.value = 0.06;
-        ns.connect(bpf); bpf.connect(ng); ng.connect(master); ns.start();
-
-        // Warp sound sweep
-        if (withWarp) {
-            const warpOsc = ctx.createOscillator();
-            const warpGain = ctx.createGain();
-            const filter = ctx.createBiquadFilter();
-            
-            warpOsc.type = 'sawtooth';
-            filter.type = 'lowpass';
-            
-            filter.frequency.setValueAtTime(40, ctx.currentTime);
-            filter.frequency.exponentialRampToValueAtTime(650, ctx.currentTime + 1.3);
-            filter.frequency.exponentialRampToValueAtTime(75, ctx.currentTime + 2.3);
-
-            warpGain.gain.setValueAtTime(0, ctx.currentTime);
-            warpGain.gain.linearRampToValueAtTime(0.38, ctx.currentTime + 0.4);
-            warpGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
-
-            warpOsc.frequency.setValueAtTime(45, ctx.currentTime);
-            warpOsc.frequency.linearRampToValueAtTime(140, ctx.currentTime + 1.6);
-
-            warpOsc.connect(filter);
-            filter.connect(warpGain);
-            warpGain.connect(master);
-            warpOsc.start(ctx.currentTime);
-            warpOsc.stop(ctx.currentTime + 2.7);
+        let ctx = audioCtxRef.current;
+        if (!ctx) {
+            ctx = new (window.AudioContext || window.webkitAudioContext)();
+            audioCtxRef.current = ctx;
+        }
+        if (ctx.state === 'suspended') {
+            ctx.resume();
         }
 
-        const ping = () => {
-            const po = ctx.createOscillator();
-            const pe = ctx.createGain();
-            po.type = 'sine';
-            po.frequency.value = [528,432,396,639][Math.floor(Math.random()*4)];
-            pe.gain.setValueAtTime(0, ctx.currentTime);
-            pe.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.02);
-            pe.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.5);
-            po.connect(pe); pe.connect(master); po.start(ctx.currentTime); po.stop(ctx.currentTime + 4);
-            setTimeout(ping, 10000 + Math.random() * 8000);
+        // Setup master gain
+        let master = masterGainRef.current;
+        if (!master) {
+            master = ctx.createGain();
+            master.gain.setValueAtTime(0, ctx.currentTime);
+            master.connect(ctx.destination);
+            masterGainRef.current = master;
+        }
+
+        // Fade in master volume
+        master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+        master.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1.5);
+
+        // 1. Warp transition sweep sound effect
+        if (withWarp) {
+            try {
+                const warpOsc = ctx.createOscillator();
+                const warpGain = ctx.createGain();
+                const filter = ctx.createBiquadFilter();
+
+                warpOsc.type = 'sawtooth';
+                filter.type = 'lowpass';
+
+                filter.frequency.setValueAtTime(40, ctx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(650, ctx.currentTime + 1.3);
+                filter.frequency.exponentialRampToValueAtTime(75, ctx.currentTime + 2.3);
+
+                warpGain.gain.setValueAtTime(0, ctx.currentTime);
+                warpGain.gain.linearRampToValueAtTime(0.38, ctx.currentTime + 0.4);
+                warpGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
+
+                warpOsc.frequency.setValueAtTime(45, ctx.currentTime);
+                warpOsc.frequency.linearRampToValueAtTime(140, ctx.currentTime + 1.6);
+
+                warpOsc.connect(filter);
+                filter.connect(warpGain);
+                warpGain.connect(master);
+                warpOsc.start(ctx.currentTime);
+                warpOsc.stop(ctx.currentTime + 2.7);
+            } catch (e) {}
+        }
+
+        // 2. Warm Celestial Space Drone (Loops forever)
+        try {
+            cleanupAudioNodes(); // Safety clear
+            droneNodesRef.current = [];
+            
+            [65.41, 98.00, 130.81].forEach(freq => {
+                const osc = ctx.createOscillator();
+                const gn = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gn.gain.setValueAtTime(0.08, ctx.currentTime);
+                osc.connect(gn);
+                gn.connect(master);
+                osc.start();
+                droneNodesRef.current.push(osc);
+            });
+        } catch (e) {}
+
+        // 3. Space Chimes Sequencer (Inspired by Interstellar theme)
+        // Progression: Am -> F -> C -> G
+        const chords = [
+            [220.00, 261.63, 329.63, 440.00], // Am (A3, C4, E4, A4)
+            [174.61, 261.63, 349.23, 440.00], // F (F3, C4, F4, A4)
+            [261.63, 329.63, 392.00, 523.25], // C (C4, E4, G4, C5)
+            [196.00, 293.66, 392.00, 493.88]  // G (G3, D4, G4, B4)
+        ];
+
+        let chordIdx = 0;
+        let noteIdx = 0;
+
+        const playStep = () => {
+            if (!audioCtxRef.current || audioCtxRef.current.state === 'suspended') return;
+
+            try {
+                const now = ctx.currentTime;
+                const currentChord = chords[chordIdx];
+                const freq = currentChord[noteIdx % currentChord.length];
+
+                const synthOsc = ctx.createOscillator();
+                const synthGain = ctx.createGain();
+
+                synthOsc.type = 'triangle';
+                synthOsc.frequency.setValueAtTime(freq, now);
+
+                synthGain.gain.setValueAtTime(0, now);
+                synthGain.gain.linearRampToValueAtTime(0.08, now + 0.02);
+                synthGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+
+                const delayNode = ctx.createDelay();
+                delayNode.delayTime.setValueAtTime(0.28, now);
+                const feedbackNode = ctx.createGain();
+                feedbackNode.gain.setValueAtTime(0.4, now);
+
+                synthOsc.connect(synthGain);
+                synthGain.connect(master);
+
+                synthGain.connect(delayNode);
+                delayNode.connect(feedbackNode);
+                feedbackNode.connect(master);
+                feedbackNode.connect(delayNode);
+
+                synthOsc.start(now);
+                synthOsc.stop(now + 1.8);
+            } catch (e) {}
+
+            noteIdx++;
+            if (noteIdx % 8 === 0) {
+                chordIdx = (chordIdx + 1) % chords.length;
+            }
+
+            audioTimerRef.current = setTimeout(playStep, 380);
         };
-        ping();
+        playStep();
 
         setIsPlaying(true);
     };
 
     const toggleAudio = () => {
-        if (!audioCtxRef.current) { startAudio(false); return; }
+        let ctx = audioCtxRef.current;
+        if (!ctx) {
+            startAudio(false);
+            return;
+        }
+
         const master = masterGainRef.current;
+        if (!master) return;
+
         if (isPlaying) {
-            master.gain.setValueAtTime(0, audioCtxRef.current.currentTime);
+            master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+            master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
             setIsPlaying(false);
         } else {
-            master.gain.linearRampToValueAtTime(0.5, audioCtxRef.current.currentTime + 1);
+            master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+            master.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1.2);
             setIsPlaying(true);
         }
     };
@@ -2722,7 +4519,7 @@ function CosmicDriftFull({ card }) {
                 </div>
             )}
 
-            {/* Sleek Floating bottom HUD bar for Ambient Audio controls */}
+            {/* Futuristic Mute/Unmute HUD with Visualizer Wave */}
             {opened && contentVisible && (
                 <div style={{
                     position: 'fixed',
@@ -2732,42 +4529,61 @@ function CosmicDriftFull({ card }) {
                     zIndex: 100,
                     pointerEvents: 'auto',
                     animation: 'cdContentFadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    background: 'rgba(5, 12, 33, 0.76)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(34, 211, 238, 0.35)',
+                    borderRadius: '100px',
+                    padding: '0.65rem 1.6rem',
+                    boxShadow: '0 0 25px rgba(34, 211, 238, 0.25)',
                 }}>
                     <button 
                         onClick={toggleAudio} 
                         style={{
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.75rem 1.6rem',
-                            borderRadius: 100,
+                            gap: '0.6rem',
+                            border: 'none',
+                            background: 'transparent',
                             fontFamily: 'Orbitron, monospace',
                             fontSize: '0.65rem',
                             fontWeight: 700,
                             letterSpacing: '2px',
                             textTransform: 'uppercase',
                             cursor: 'pointer',
-                            border: '1px solid rgba(168, 85, 247, 0.35)',
-                            background: 'rgba(13, 7, 38, 0.72)',
-                            backdropFilter: 'blur(16px)',
-                            color: '#c4b5fd',
-                            boxShadow: '0 0 25px rgba(168, 85, 247, 0.25)',
-                            transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s',
+                            color: '#22d3ee',
+                            transition: 'transform 0.2s',
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'scale(1.05)';
-                            e.currentTarget.style.boxShadow = '0 0 35px rgba(168, 85, 247, 0.45)';
-                            e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.6)';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.transform = 'none';
-                            e.currentTarget.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.25)';
-                            e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.35)';
                         }}
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width:14, height:14 }}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
                         {isPlaying ? 'MUTE AUDIO' : 'UNMUTE AUDIO'}
                     </button>
+
+                    {/* Interactive Equalizer Visualizer Waves */}
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '14px', borderLeft: '1px solid rgba(34, 211, 238, 0.25)', paddingLeft: '12px', marginLeft: '4px' }}>
+                        {[...Array(5)].map((_, i) => (
+                            <div 
+                                key={i} 
+                                style={{
+                                    width: '2.5px',
+                                    background: 'linear-gradient(to top, #3b82f6, #22d3ee)',
+                                    borderRadius: '1px',
+                                    height: isPlaying ? '100%' : '3px',
+                                    transformOrigin: 'bottom center',
+                                    animation: isPlaying ? `cdEqPulse 0.5s ease-in-out infinite alternate` : 'none',
+                                    animationDelay: `${i * 0.1}s`,
+                                }} 
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
 
@@ -2821,6 +4637,10 @@ function CosmicDriftFull({ card }) {
             {/* Fonts + keyframes */}
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@700&display=swap');
+                @keyframes cdEqPulse {
+                    0% { transform: scaleY(0.25); }
+                    100% { transform: scaleY(1.0); }
+                }
                 @keyframes cdRing { 0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.04);opacity:1} }
                 @keyframes cdPlanet { 0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(5deg)} }
                 @keyframes cdBtnGlow { 0%,100%{box-shadow:0 0 30px rgba(59,130,246,.5)}50%{box-shadow:0 0 50px rgba(124,58,237,.7)} }
@@ -5434,25 +7254,19 @@ function GreetingCardPreviewContent({ card }) {
 
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Fredoka:wght@400;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet" />
+                <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Fredoka:wght@400;600&family=Outfit:wght@300;400;600&family=Parisienne&display=swap" rel="stylesheet" />
             </Head>
 
             {normalizedCard.template === 'stillwithyou' ? (
                 <StillWithYouFull card={normalizedCard} />
             ) : normalizedCard.template === 'giftforanita' ? (
                 <GiftForAnitaFull card={normalizedCard} />
+            ) : normalizedCard.template === 'etherealwhispers' ? (
+                <EtherealWhispersFull card={normalizedCard} />
             ) : normalizedCard.template === 'cosmicdrift' ? (
                 <CosmicDriftFull card={normalizedCard} />
-            ) : normalizedCard.template === 'retroarcade' ? (
-                <RetroArcadeFull card={normalizedCard} />
-            ) : normalizedCard.template === 'cyberpunk' ? (
-                <CyberpunkFull card={normalizedCard} />
-            ) : normalizedCard.template === 'bioluminescent' ? (
-                <BioluminescentFull card={normalizedCard} />
-            ) : normalizedCard.template === 'mysticforest' ? (
-                <MysticForestFull card={normalizedCard} />
             ) : (
-                <GiftForAnitaFull card={normalizedCard} />
+                <StillWithYouFull card={normalizedCard} />
             )}
         </>
     );
