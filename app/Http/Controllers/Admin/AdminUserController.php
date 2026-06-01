@@ -18,7 +18,7 @@ class AdminUserController extends Controller
         $user = auth()->user();
 
         $query = User::where('role', 'user')
-            ->with(['invitations.activeSubscription.plan', 'reseller.resellerSettings']);
+            ->with(['invitations.activeSubscription.plan', 'greetingCards', 'reseller.resellerSettings']);
 
         // Reseller only sees their own users
         if ($user->isReseller()) {
@@ -90,7 +90,8 @@ class AdminUserController extends Controller
             'invitations.brideGrooms',
             'invitations.events',
             'invitations.activeSubscription.plan',
-            'activeSubscription.plan'
+            'activeSubscription.plan',
+            'greetingCards'
         ]);
 
         return Inertia::render('Admin/Users/Edit', [
@@ -236,5 +237,18 @@ class AdminUserController extends Controller
         }
 
         return back()->with('success', 'Masa aktif berhasil diperpanjang.');
+    }
+
+    public function toggleGreetingCard(Request $request, \App\Models\GreetingCard $greetingCard)
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $greetingCard->update([
+            'is_active' => !$greetingCard->is_active
+        ]);
+
+        return back()->with('success', 'Status kartu ucapan berhasil diubah! 🎉');
     }
 }

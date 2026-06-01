@@ -73,8 +73,10 @@ export default function Index({ users, filters }) {
                                         <td className="px-3 sm:px-5 py-3 text-[#777] hidden sm:table-cell">{user.email}</td>
                                         <td className="px-3 sm:px-5 py-3 text-center">
                                             {(() => {
-                                                const activeSubs = user.invitations?.map(inv => inv.active_subscription || { plan: { slug: 'free', name: 'Free' } }) || [];
-                                                if (activeSubs.length === 0) {
+                                                const activeSubs = user.invitations?.map(inv => inv.active_subscription).filter(Boolean) || [];
+                                                const activeCards = user.greeting_cards?.filter(card => card.is_active) || [];
+                                                
+                                                if (activeSubs.length === 0 && activeCards.length === 0) {
                                                     return (
                                                         <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f0ede8] text-[#999]">
                                                             Free
@@ -99,6 +101,11 @@ export default function Index({ users, filters }) {
                                                                 </span>
                                                             );
                                                         })}
+                                                        {activeCards.length > 0 && (
+                                                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-pink-50 text-pink-600 border border-pink-100 animate-pulse" title="Kartu Ucapan Aktif">
+                                                                Kartu Ucapan
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 );
                                             })()}

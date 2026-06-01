@@ -289,6 +289,53 @@ export default function Edit({ user, plans }) {
                     </div>
                 </div>
 
+                {/* ═══ Kelola Kartu Ucapan ═══ */}
+                {user.greeting_cards && user.greeting_cards.length > 0 && (
+                    <div className={cardClass}>
+                        <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2">
+                            <FileText size={18} className="text-pink-500" /> Kelola Kartu Ucapan
+                        </h3>
+                        <p className="text-xs text-[#999] -mt-2">
+                            Aktifkan atau nonaktifkan kartu ucapan milik user secara manual.
+                        </p>
+                        
+                        <div className="space-y-3">
+                            {user.greeting_cards.map((card) => (
+                                <div key={card.id} className="flex items-center justify-between p-4 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl hover:shadow-sm transition-all">
+                                    <div>
+                                        <div className="font-bold text-gray-800 text-sm">{card.title || 'Tanpa Judul'}</div>
+                                        <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                            <span>Template: <strong className="text-gray-700">{card.template}</strong></span>
+                                            <span>•</span>
+                                            <span>Tipe: <strong className="text-gray-700">{card.type}</strong></span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${card.is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-600 border border-red-100'}`}>
+                                            {card.is_active ? 'Aktif' : 'Tidak Aktif'}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (confirm(`Ubah status keaktifan kartu ucapan "${card.title || 'Tanpa Judul'}"?`)) {
+                                                    router.post(`/super-admin/greeting-cards/${card.id}/toggle-active`, {}, {
+                                                        preserveScroll: true
+                                                    });
+                                                }
+                                            }}
+                                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm border transition-all ${card.is_active 
+                                                ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100' 
+                                                : 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'}`}
+                                        >
+                                            {card.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <hr className="border-[#e8e5e0]" />
 
                 {/* ═══ User Info (existing) ═══ */}

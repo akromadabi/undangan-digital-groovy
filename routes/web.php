@@ -484,6 +484,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::post('/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.resetPassword');
     Route::post('/users/{user}/change-plan', [AdminUserController::class, 'changePlan'])->name('users.changePlan');
     Route::post('/users/{user}/extend-subscription', [AdminUserController::class, 'extendSubscription'])->name('users.extendSubscription');
+    Route::post('/greeting-cards/{greetingCard}/toggle-active', [AdminUserController::class, 'toggleGreetingCard'])->name('users.toggleGreetingCard');
 
     // File Upload
     Route::post('/upload', [\App\Http\Controllers\Dashboard\DashboardController::class, 'upload'])->name('upload');
