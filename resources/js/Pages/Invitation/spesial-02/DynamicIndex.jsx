@@ -902,7 +902,7 @@ function VideoGallerySection({ invitation, locale }) {
     if (videoItems.length === 0) return null;
 
     return (
-        <div className="w-full max-w-md mx-auto py-16 px-4">
+        <div className="w-full max-w-md mx-auto py-6 px-4">
             <Reveal>
                 <FlowerSwirl title={locale === 'en' ? 'Video Gallery' : 'Galeri Video'} />
             </Reveal>
@@ -992,7 +992,7 @@ function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
     if (list.length === 0) return null;
 
     return (
-        <div className="max-w-lg mx-auto py-16 px-4">
+        <div className="w-full mx-auto py-6 px-6">
             <Reveal>
                 <FlowerSwirl title={t('nav.hadiah')} />
             </Reveal>
@@ -1110,7 +1110,7 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
     if (!enableRsvp && !enableWishes) return null;
 
     return (
-        <div className="max-w-lg mx-auto py-16 px-6">
+        <div className="max-w-lg mx-auto py-8 px-6">
             <Reveal>
                 <FlowerSwirl title={sectionTitle} />
                 <p className="text-xs sm:text-sm opacity-80 mb-4 text-center">

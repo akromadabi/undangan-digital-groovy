@@ -125,14 +125,14 @@
     align-items: center;
 }
 
-/* Arched Glassmorphic Card Container for Cover */
+/* Symmetrical Oval Glassmorphic Card Container for Cover */
 .sp02-cover-card {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1.5px solid rgba(152, 106, 82, 0.2);
-    border-radius: 140px 140px 30px 30px; /* Arched top portal shape */
-    padding: 45px 24px 35px 24px;
+    border-radius: 140px; /* Symmetrical oval shape */
+    padding: 50px 24px 50px 24px;
     box-shadow: 0 20px 45px rgba(91, 68, 71, 0.1);
     width: 100%;
     max-width: 340px;
@@ -149,7 +149,7 @@
     position: absolute;
     inset: 6px;
     border: 1px solid rgba(152, 106, 82, 0.12);
-    border-radius: 134px 134px 24px 24px;
+    border-radius: 134px; /* Symmetrical inner line */
     pointer-events: none;
 }
 
@@ -296,7 +296,7 @@
 
 /* Scroll Mode Styles */
 .sp02-section {
-    padding: 70px 24px;
+    padding: 40px 24px;
     position: relative;
     z-index: 2;
     display: flex;
