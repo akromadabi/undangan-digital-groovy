@@ -3104,12 +3104,18 @@ function RetroArcadeFull({ card }) {
     const canvasRef = useRef(null);
     const audioCtxRef = useRef(null);
     const bgmIntervalRef = useRef(null);
-    const heroXRef = useRef(50);
-    const heroYRef = useRef(0);
+    const heroXRef = useRef(80);
+    const heroYRef = useRef(240);
     const heroVyRef = useRef(0);
     const blockBounceRef = useRef(0);
     const isJumpingRef = useRef(false);
     const particlesRef = useRef([]);
+
+    // Scrolling gameplay variables
+    const scrollXRef = useRef(0);
+    const scoreRef = useRef(0);
+    const coinsRef = useRef(0);
+    const walkFrameRef = useRef(0);
 
     const [credit, setCredit] = useState(0);
     const [gameStage, setGameStage] = useState('cover'); // 'cover' | 'playing' | 'revealed'
@@ -3187,35 +3193,83 @@ function RetroArcadeFull({ card }) {
         } catch(e) {}
     };
 
+    const playVictorySound = () => {
+        if (isMuted) return;
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                gain.gain.setValueAtTime(0.06, now + idx * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.35);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + idx * 0.1);
+                osc.stop(now + idx * 0.1 + 0.35);
+            });
+        } catch(e) {}
+    };
+
     const startBgm = () => {
         if (bgmIntervalRef.current) clearInterval(bgmIntervalRef.current);
         const ctx = initAudio();
         let step = 0;
-        // Simple upbeat retro arpeggio melody
+        
+        // Classic upbeat 8-bit Mario-style arpeggio progression with triangle bassline
         const melody = [
-            261.63, 329.63, 392.00, 523.25,
-            293.66, 349.23, 440.00, 587.33,
-            329.63, 392.00, 493.88, 659.25,
-            349.23, 440.00, 523.25, 698.46
+            329.63, 329.63, 0, 329.63, 0, 261.63, 329.63, 0,
+            392.00, 0, 0, 0, 196.00, 0, 0, 0,
+            261.63, 0, 0, 196.00, 0, 0, 164.81, 0,
+            220.00, 0, 246.94, 0, 233.08, 220.00, 0, 0
+        ];
+        
+        const bass = [
+            130.81, 130.81, 130.81, 130.81, 196.00, 196.00, 196.00, 196.00,
+            164.81, 164.81, 164.81, 164.81, 220.00, 220.00, 220.00, 246.94
         ];
         
         bgmIntervalRef.current = setInterval(() => {
             if (isMuted || gameStage === 'cover') return;
             try {
                 const now = ctx.currentTime;
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.value = melody[step % melody.length];
-                gain.gain.setValueAtTime(0.03, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start(now);
-                osc.stop(now + 0.25);
+                
+                // Melody pulse/square channel
+                const freq = melody[step % melody.length];
+                if (freq > 0) {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.02, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+                
+                // Bass triangle channel (every 2 steps)
+                if (step % 2 === 0) {
+                    const bassFreq = bass[Math.floor(step / 2) % bass.length];
+                    const bassOsc = ctx.createOscillator();
+                    const bassGain = ctx.createGain();
+                    bassOsc.type = 'triangle';
+                    bassOsc.frequency.setValueAtTime(bassFreq, now);
+                    bassGain.gain.setValueAtTime(0.03, now);
+                    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    bassOsc.connect(bassGain);
+                    bassGain.connect(ctx.destination);
+                    bassOsc.start(now);
+                    bassOsc.stop(now + 0.4);
+                }
+                
                 step++;
             } catch(e){}
-        }, 250);
+        }, 150); // Faster tempo for arcade hype!
     };
 
     const stopBgm = () => {
@@ -3260,21 +3314,67 @@ function RetroArcadeFull({ card }) {
         canvas.width = 480;
         canvas.height = 320;
 
-        heroXRef.current = 50;
+        heroXRef.current = 80;
         heroYRef.current = 240;
         heroVyRef.current = 0;
         isJumpingRef.current = false;
         particlesRef.current = [];
 
-        const blockX = 240;
+        scrollXRef.current = 0;
+        scoreRef.current = 0;
+        coinsRef.current = 0;
+        walkFrameRef.current = 0;
+
+        const levelEnd = 2200; // Point where scrolling stops
+        const blockX = 2440;   // Block level position
         const blockY = 160;
         const blockW = 32;
         const blockH = 32;
 
         let hasHitBlock = false;
 
+        const coins = [
+            { x: 300, y: 180, collected: false },
+            { x: 340, y: 160, collected: false },
+            { x: 380, y: 180, collected: false },
+            { x: 650, y: 170, collected: false },
+            { x: 690, y: 150, collected: false },
+            { x: 730, y: 170, collected: false },
+            { x: 1000, y: 180, collected: false },
+            { x: 1040, y: 180, collected: false },
+            { x: 1250, y: 150, collected: false },
+            { x: 1290, y: 130, collected: false },
+            { x: 1330, y: 150, collected: false },
+            { x: 1550, y: 180, collected: false },
+            { x: 1600, y: 180, collected: false },
+            { x: 1850, y: 160, collected: false },
+            { x: 1890, y: 140, collected: false },
+            { x: 1930, y: 160, collected: false },
+        ];
+
+        const spikes = [
+            { x: 500, y: 260 },
+            { x: 880, y: 260 },
+            { x: 1150, y: 260 },
+            { x: 1480, y: 260 },
+            { x: 1750, y: 260 },
+            { x: 2100, y: 260 },
+        ];
+
+        const clouds = [
+            { x: 100, y: 50, w: 50, speed: 0.2 },
+            { x: 300, y: 80, w: 70, speed: 0.15 },
+            { x: 600, y: 40, w: 60, speed: 0.25 },
+            { x: 900, y: 70, w: 80, speed: 0.18 },
+            { x: 1200, y: 60, w: 50, speed: 0.2 },
+            { x: 1500, y: 90, w: 75, speed: 0.15 },
+            { x: 1800, y: 50, w: 65, speed: 0.22 },
+            { x: 2100, y: 80, w: 85, speed: 0.17 },
+            { x: 2400, y: 60, w: 55, speed: 0.2 },
+        ];
+
         const update = () => {
-            // Apply gravity
+            // Apply gravity to jump
             if (isJumpingRef.current) {
                 heroYRef.current += heroVyRef.current;
                 heroVyRef.current += 0.8; // gravity
@@ -3285,43 +3385,104 @@ function RetroArcadeFull({ card }) {
                 }
             }
 
-            // Move hero to block
-            if (!hasHitBlock) {
-                if (heroXRef.current < blockX) {
-                    heroXRef.current += 1.8;
-                } else {
-                    // Trigger Jump under the block
-                    if (!isJumpingRef.current) {
+            // Game progress (scrolling or final run to the block)
+            if (scrollXRef.current < levelEnd) {
+                // Scroll level
+                scrollXRef.current += 2.2;
+                walkFrameRef.current += 0.16;
+
+                // Auto-jump spike logic
+                spikes.forEach(spike => {
+                    const screenSpikeX = spike.x - scrollXRef.current;
+                    if (screenSpikeX > 80 && screenSpikeX < 145 && !isJumpingRef.current) {
                         isJumpingRef.current = true;
-                        heroVyRef.current = -11;
+                        heroVyRef.current = -11.5;
                         playJumpSound();
+                    }
+                });
+
+                // Spikes points score bonus
+                spikes.forEach(spike => {
+                    if (!spike.passed) {
+                        const screenSpikeX = spike.x - scrollXRef.current;
+                        if (screenSpikeX < 80) {
+                            spike.passed = true;
+                            scoreRef.current += 200;
+                        }
+                    }
+                });
+
+                // Collect coins logic
+                coins.forEach(coin => {
+                    if (!coin.collected) {
+                        const screenCoinX = coin.x - scrollXRef.current;
+                        const dx = (heroXRef.current + 12) - (screenCoinX + 8);
+                        const dy = (heroYRef.current + 8) - (coin.y + 8);
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 24) {
+                            coin.collected = true;
+                            playCoinSound();
+                            scoreRef.current += 100;
+                            coinsRef.current += 1;
+                            // sparkle particles
+                            for (let i = 0; i < 5; i++) {
+                                particlesRef.current.push({
+                                    x: screenCoinX + 8,
+                                    y: coin.y + 8,
+                                    vx: (Math.random() - 0.5) * 3,
+                                    vy: (Math.random() - 0.5) * 3,
+                                    size: Math.random() * 2 + 1.5,
+                                    color: '#fbbf24',
+                                    life: 1,
+                                    decay: 0.05
+                                });
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Scrolling stopped, hero walks to the Golden Mystery Block
+                const screenBlockX = blockX - scrollXRef.current; // blockX = 2440, scrollX = 2200 => screenBlockX = 240
+                
+                if (!hasHitBlock) {
+                    if (heroXRef.current < screenBlockX) {
+                        heroXRef.current += 2.0;
+                        walkFrameRef.current += 0.16;
+                    } else {
+                        // Under the block! Trigger jump
+                        if (!isJumpingRef.current) {
+                            isJumpingRef.current = true;
+                            heroVyRef.current = -12.0;
+                            playJumpSound();
+                        }
                     }
                 }
             }
 
             // Collision check with block (bottom check)
             if (isJumpingRef.current && heroVyRef.current < 0 && !hasHitBlock) {
+                const screenBlockX = blockX - scrollXRef.current;
                 const headX = heroXRef.current + 12;
                 const headY = heroYRef.current;
-                if (headX >= blockX && headX <= blockX + blockW && headY <= blockY + blockH && headY >= blockY) {
+                if (headX >= screenBlockX && headX <= screenBlockX + blockW && headY <= blockY + blockH && headY >= blockY) {
                     // HIT!
                     hasHitBlock = true;
                     heroVyRef.current = 3; // Bounce back down
                     blockBounceRef.current = -12;
-                    playBumpSound();
+                    playVictorySound();
 
-                    // Spawn pixel particles
-                    const pCols = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444'];
-                    for (let i = 0; i < 35; i++) {
+                    // Massive explosion of retro colored particles!
+                    const pCols = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#ec4899', '#a78bfa'];
+                    for (let i = 0; i < 70; i++) {
                         particlesRef.current.push({
-                            x: blockX + 16,
+                            x: screenBlockX + 16,
                             y: blockY + 16,
-                            vx: (Math.random() - 0.5) * 6,
-                            vy: (Math.random() - 0.8) * 8,
-                            size: Math.random() * 4 + 2,
+                            vx: (Math.random() - 0.5) * 9,
+                            vy: (Math.random() - 0.8) * 11,
+                            size: Math.random() * 5 + 2.5,
                             color: pCols[Math.floor(Math.random() * pCols.length)],
-                            life: 1,
-                            decay: 0.02 + Math.random() * 0.02
+                            life: 1.5,
+                            decay: 0.015 + Math.random() * 0.015
                         });
                     }
 
@@ -3329,7 +3490,7 @@ function RetroArcadeFull({ card }) {
                     setTimeout(() => {
                         setGameStage('revealed');
                         stopBgm();
-                    }, 1500);
+                    }, 2500);
                 }
             }
 
@@ -3355,9 +3516,19 @@ function RetroArcadeFull({ card }) {
         const draw = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Sky
-            ctx.fillStyle = '#0f172a';
+            // Draw Sky (Midnight arcade purple/blue)
+            ctx.fillStyle = '#090715';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw clouds with parallax scrolling speed
+            clouds.forEach(c => {
+                const screenCloudX = (c.x - scrollXRef.current * c.speed) % (canvas.width + 120);
+                const x = (screenCloudX < -60) ? canvas.width + 60 + screenCloudX : screenCloudX - 60;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+                ctx.fillRect(x, c.y, c.w, 16);
+                ctx.fillRect(x + 10, c.y - 8, c.w - 20, 8);
+                ctx.fillRect(x + 5, c.y + 16, c.w - 10, 6);
+            });
 
             // Draw ground (pixelated green line)
             ctx.fillStyle = '#10b981';
@@ -3365,20 +3536,63 @@ function RetroArcadeFull({ card }) {
             ctx.fillStyle = '#047857';
             ctx.fillRect(0, 260, canvas.width, 6);
 
+            // Draw spikes
+            spikes.forEach(spike => {
+                const screenSpikeX = spike.x - scrollXRef.current;
+                if (screenSpikeX > -30 && screenSpikeX < canvas.width + 30) {
+                    ctx.fillStyle = '#94a3b8'; // iron grey
+                    for (let s = 0; s < 3; s++) {
+                        const sx = screenSpikeX + s * 10;
+                        ctx.beginPath();
+                        ctx.moveTo(sx, 260);
+                        ctx.lineTo(sx + 5, 244);
+                        ctx.lineTo(sx + 10, 260);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                }
+            });
+
+            // Draw coins
+            coins.forEach(coin => {
+                if (!coin.collected) {
+                    const screenCoinX = coin.x - scrollXRef.current;
+                    if (screenCoinX > -20 && screenCoinX < canvas.width + 20) {
+                        ctx.fillStyle = '#fbbf24';
+                        const coinWidth = 8 + 4 * Math.sin(Date.now() / 100);
+                        ctx.beginPath();
+                        ctx.ellipse(screenCoinX + 8, coin.y + 8, coinWidth / 2, 8, 0, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.fillStyle = '#d97706';
+                        ctx.beginPath();
+                        ctx.ellipse(screenCoinX + 8, coin.y + 8, Math.max(1, (coinWidth - 4) / 2), 5, 0, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                }
+            });
+
             // Draw Mystery Block
-            ctx.save();
-            ctx.translate(0, blockBounceRef.current);
-            ctx.fillStyle = hasHitBlock ? '#475569' : '#fbbf24';
-            ctx.fillRect(blockX, blockY, blockW, blockH);
-            // Draw Question Mark ?
-            if (!hasHitBlock) {
-                ctx.fillStyle = '#78350f';
-                ctx.font = 'bold 20px monospace';
-                ctx.fillText('?', blockX + 10, blockY + 23);
+            const screenBlockX = blockX - scrollXRef.current;
+            if (screenBlockX > -50 && screenBlockX < canvas.width + 50) {
+                ctx.save();
+                ctx.translate(0, blockBounceRef.current);
+                ctx.fillStyle = hasHitBlock ? '#475569' : '#fbbf24';
+                ctx.fillRect(screenBlockX, blockY, blockW, blockH);
+                if (!hasHitBlock) {
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(screenBlockX, blockY, blockW, blockH);
+                    ctx.fillStyle = '#78350f';
+                    ctx.font = 'bold 20px "Courier New", monospace';
+                    ctx.fillText('?', screenBlockX + 10, blockY + 23);
+                }
+                ctx.restore();
             }
-            ctx.restore();
 
             // Draw Hero (Cute 8-bit character)
+            // walk leg movement offsets
+            const legOffset = (!isJumpingRef.current && Math.floor(walkFrameRef.current) % 2 === 0) ? 2 : -2;
+            
             ctx.fillStyle = '#ef4444'; // Red shirt
             ctx.fillRect(heroXRef.current + 4, heroYRef.current, 16, 20);
             ctx.fillStyle = '#f59e0b'; // Head skin
@@ -3387,10 +3601,10 @@ function RetroArcadeFull({ card }) {
             ctx.fillRect(heroXRef.current + 14, heroYRef.current - 8, 2, 2);
             ctx.fillStyle = '#1e3a8a'; // Pants
             ctx.fillRect(heroXRef.current + 4, heroYRef.current + 20, 16, 4);
-            // Feet
+            // Feet with walking offset
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(heroXRef.current + 3, heroYRef.current + 24, 6, 2);
-            ctx.fillRect(heroXRef.current + 15, heroYRef.current + 24, 6, 2);
+            ctx.fillRect(heroXRef.current + 3 + legOffset, heroYRef.current + 24, 6, 2);
+            ctx.fillRect(heroXRef.current + 13 - legOffset, heroYRef.current + 24, 6, 2);
 
             // Draw particles
             particlesRef.current.forEach(p => {
@@ -3399,6 +3613,12 @@ function RetroArcadeFull({ card }) {
                 ctx.fillRect(p.x, p.y, p.size, p.size);
             });
             ctx.globalAlpha = 1.0;
+
+            // Draw HUD
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px "Courier New", monospace';
+            ctx.fillText(`SCORE: ${String(scoreRef.current).padStart(6, '0')}`, 15, 20);
+            ctx.fillText(`COINS: ${String(coinsRef.current).padStart(2, '0')}`, 380, 20);
         };
 
         const loop = () => {
