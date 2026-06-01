@@ -761,16 +761,18 @@
 .sp02-bank-card {
     background: linear-gradient(135deg, var(--sp02-accent-dark) 0%, var(--sp02-primary) 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 24px;
-    padding: 20px 24px;
+    border-radius: 16px;
+    padding: 16px 22px;
     color: #ffffff;
     width: 100%;
-    max-width: 420px;
+    max-width: 350px;
+    aspect-ratio: 1.586 / 1;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     box-shadow: 0 10px 30px rgba(91, 68, 71, 0.25);
     transition: all 0.3s ease;
 }
@@ -798,11 +800,11 @@
     justify-content: space-between;
     align-items: center;
     z-index: 2;
-    margin-bottom: 12px;
+    margin-bottom: 0;
 }
 
 .sp02-bank-card__logo {
-    max-height: 22px;
+    max-height: 20px;
     width: auto;
     object-fit: contain;
     filter: brightness(0) invert(1);
@@ -810,35 +812,35 @@
 }
 
 .sp02-bank-card__chip {
-    width: 40px;
+    width: 36px;
     height: auto;
     z-index: 2;
 }
 
 .sp02-bank-card__body {
     z-index: 2;
-    margin-bottom: 12px;
+    margin-bottom: 0;
     text-align: left;
 }
 
 .sp02-bank-card__number {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     letter-spacing: 2px;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 2px;
     color: white !important;
 }
 
 .sp02-bank-card__holder {
     font-family: var(--sp02-font-body);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
     opacity: 0.8;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: rgba(255, 255, 255, 0.8) !important;
-    margin-top: 4px;
+    margin-top: 0px;
 }
 
 .sp02-bank-card__footer {

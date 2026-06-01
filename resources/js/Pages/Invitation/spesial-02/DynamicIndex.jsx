@@ -397,11 +397,12 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, events }) {
                         rawOpeningTitle.toUpperCase() === 'THE WEDDING';
 
     const openingImages = useMemo(() => {
-        return (invitation?.opening_image || '')
+        const rawSource = invitation?.opening_image || invitation?.cover_image || '';
+        return rawSource
             .split(',')
             .map(img => getStorageUrl(img.trim()))
             .filter(Boolean);
-    }, [invitation?.opening_image]);
+    }, [invitation?.opening_image, invitation?.cover_image]);
 
     return (
         <div className="max-w-lg mx-auto py-4">
@@ -417,9 +418,9 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, events }) {
                     <div className="mx-auto rounded-2xl overflow-hidden my-6 max-w-[300px] shadow-md border-4 border-white relative aspect-[4/3] sp02-pulse-gold">
                         <PremiumSlideshow
                             images={openingImages}
-                            positionX={invitation.opening_position_x}
-                            positionY={invitation.opening_position_y}
-                            zoom={invitation.opening_zoom}
+                            positionX={invitation.opening_image ? invitation.opening_position_x : invitation.cover_position_x}
+                            positionY={invitation.opening_image ? invitation.opening_position_y : invitation.cover_position_y}
+                            zoom={invitation.opening_image ? invitation.opening_zoom : invitation.cover_zoom}
                         />
                     </div>
                 </Reveal>
@@ -1011,11 +1012,11 @@ function BankSection({ bankAccounts, copiedIdx, handleCopy }) {
                                         {account.bank_name}
                                     </span>
                                 )}
-                                <img src={ORNAMENTS.chip} alt="Chip" className="sp02-bank-card__chip w-10 object-contain select-none" />
+                                <img src={ORNAMENTS.chip} alt="Chip" className="sp02-bank-card__chip object-contain select-none" />
                             </div>
-                            <div className="sp02-bank-card__body my-2 z-10 relative text-left">
-                                <div className="sp02-bank-card__number text-xl font-bold tracking-widest text-white">{account.account_number}</div>
-                                <div className="sp02-bank-card__holder text-[11px] font-medium tracking-wider text-white/80 uppercase mt-1">{account.account_name}</div>
+                            <div className="sp02-bank-card__body z-10 relative text-left">
+                                <div className="sp02-bank-card__number">{account.account_number}</div>
+                                <div className="sp02-bank-card__holder">{account.account_name}</div>
                             </div>
                             <div className="sp02-bank-card__footer z-10 relative flex justify-end">
                                 <button 
