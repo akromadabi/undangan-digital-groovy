@@ -162,8 +162,9 @@ function LofiLoveFull({ card }) {
     const audioRef = useRef(null);
     const rainCanvasRef = useRef(null);
     
-    // Stage: 'candle_intro' -> 'envelope' -> 'opened'
-    const [stage, setStage] = useState('candle_intro'); 
+    // Stage: 'door_intro' -> 'opened'
+    const [stage, setStage] = useState('door_intro'); 
+    const [doorOpened, setDoorOpened] = useState(false);
     const [envelopeOpen, setEnvelopeOpen] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -177,6 +178,51 @@ function LofiLoveFull({ card }) {
     // Interactive vinyl state
     const [vinylMounted, setVinylMounted] = useState(false);
     const [mountingProgress, setMountingProgress] = useState(false);
+    
+    // Interactive vinyl swipe gesture detector
+    const [swipeStart, setSwipeStart] = useState(null);
+    const [swipeDetected, setSwipeDetected] = useState(false);
+
+    const handleSwipeStart = (e) => {
+        if (mountingProgress || candleBlowStage !== 'lit') return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        setSwipeStart({ x: clientX, y: clientY });
+        setSwipeDetected(false);
+    };
+
+    const handleSwipeMove = (e) => {
+        if (!swipeStart || swipeDetected || mountingProgress || candleBlowStage !== 'lit') return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        const dx = clientX - swipeStart.x;
+        const dy = clientY - swipeStart.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance > 25) { // 25px swipe threshold
+            setSwipeDetected(true);
+            setSwipeStart(null);
+            if (!vinylMounted) {
+                handleMountVinyl();
+            } else if (!isPlaying) {
+                handleTogglePlay();
+            }
+        }
+    };
+
+    const handleSwipeEnd = () => {
+        setSwipeStart(null);
+    };
+
+    const handleOpenDoor = () => {
+        if (doorOpened) return;
+        setDoorOpened(true);
+        playSynthesizedSound('lift', false);
+        setTimeout(() => {
+            setStage('opened');
+        }, 1800);
+    };
     
     // Cozy Candle and Room overrides
     const [candleOn, setCandleOn] = useState(true);
@@ -548,9 +594,9 @@ function LofiLoveFull({ card }) {
             {/* Raindrops Canvas */}
             <canvas ref={rainCanvasRef} className="absolute inset-0 pointer-events-none z-10 opacity-70" />
 
-            {/* Candle light ambient mood glow overlay */}
-            <div className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-1000 ${candleOn && stage === 'opened' ? 'opacity-100' : 'opacity-0'}`}
-                style={{ background: 'radial-gradient(circle at 10% 85%, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.02) 45%, transparent 70%)' }}
+            {/* Candle light ambient mood glow overlay (aligned to bottom-right where candle stands) */}
+            <div className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-1000 ${candleOn && stage === 'opened' && candleBlowStage === 'lit' ? 'opacity-100' : 'opacity-0'}`}
+                style={{ background: 'radial-gradient(circle at 85% 85%, rgba(251,191,36,0.09) 0%, rgba(251,191,36,0.03) 45%, transparent 70%)' }}
             />
 
             {/* Custom Interactive Elements Style */}
@@ -697,6 +743,42 @@ function LofiLoveFull({ card }) {
                 .candle-room-glow {
                     animation: roomGlowPulse 2s ease-in-out infinite;
                 }
+                .cafe-door-container {
+                    perspective: 1200px;
+                    overflow: hidden;
+                }
+                .cafe-door {
+                    transition: transform 1.8s cubic-bezier(0.25, 1, 0.3, 1), opacity 1.8s cubic-bezier(0.25, 1, 0.3, 1);
+                    transform-style: preserve-3d;
+                }
+                .cafe-door-left {
+                    transform-origin: left center;
+                }
+                .cafe-door-right {
+                    transform-origin: right center;
+                }
+                .cafe-door-left.open {
+                    transform: rotateY(-115deg) scale(1.05);
+                    opacity: 0;
+                }
+                .cafe-door-right.open {
+                    transform: rotateY(115deg) scale(1.05);
+                    opacity: 0;
+                }
+                .room-view-transition {
+                    transition: filter 1.8s cubic-bezier(0.25, 1, 0.3, 1), transform 1.8s cubic-bezier(0.25, 1, 0.3, 1), opacity 1.8s cubic-bezier(0.25, 1, 0.3, 1);
+                }
+                .room-view-blurred {
+                    filter: blur(6px);
+                    transform: scale(0.96);
+                    opacity: 0.45;
+                    pointer-events: none;
+                }
+                .room-view-clear {
+                    filter: blur(0px);
+                    transform: scale(1);
+                    opacity: 1;
+                }
             `}</style>
 
             {/* String Lights at Top */}
@@ -712,113 +794,115 @@ function LofiLoveFull({ card }) {
                 ))}
             </div>
 
-            {/* ═══ SCENE 0: CANDLE INTRO ═══ */}
-            {stage === 'candle_intro' && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] p-6 text-center select-none animate-in fade-in duration-700 overflow-y-auto">
-                    
-                    {/* Realistic candlelight warm room glow overlay */}
-                    {(candleBlowStage === 'lighting' || candleBlowStage === 'lit') && (
-                        <div 
-                            className="absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-out candle-room-glow z-0"
-                            style={{
-                                background: 'radial-gradient(circle at center, rgba(251, 191, 36, 0.22) 0%, rgba(251, 191, 36, 0.06) 50%, transparent 80%)',
-                                opacity: candleBlowStage === 'lighting' ? 0.5 : 1
-                            }}
-                        />
-                    )}
-
-                    {/* Floating Instruction / Header */}
-                    <div className="relative z-10 text-center px-4 max-w-xs mb-8">
-                        <span className="text-[10px] font-bold text-amber-500 bg-amber-950/40 border border-amber-900/40 px-3 py-1 rounded-full font-mono tracking-widest uppercase shadow-sm animate-pulse">
-                            🕯️ MOMEN SPESIAL 🕯️
-                        </span>
-                        <h2 className="text-lg font-bold text-white mt-4 font-mono tracking-wide leading-snug">
-                            {card.title}
-                        </h2>
-                        <p className="text-[10px] text-neutral-400 font-mono mt-2.5 tracking-widest uppercase leading-relaxed">
-                            {candleBlowStage === 'unlit' 
-                                ? "Nyalakan lilin ini untuk memulai momen indah kita..."
-                                : "Lilin telah menyala. Buka surat kasih kita..."
-                            }
-                        </p>
-                    </div>
-
-                    {/* Interactive Candle Centerpiece */}
+            {/* Double doors overlay for Cafe Entry */}
+            {(stage === 'door_intro' || (stage === 'opened' && !doorOpened)) && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none overflow-hidden cafe-door-container"
+                >
+                    {/* Left Door */}
                     <div 
-                        onClick={() => {
-                            if (candleBlowStage !== 'unlit') return;
-                            setCandleBlowStage('lighting');
-                            playSynthesizedSound('lift', false);
-                            
-                            setTimeout(() => {
-                                setCandleBlowStage('lit');
-                                playSynthesizedSound('burst', false);
-                            }, 1000);
+                        onClick={handleOpenDoor}
+                        className={`absolute top-0 bottom-0 left-0 w-1/2 bg-gradient-to-r from-[#1c0f0b] via-[#2d1b15] to-[#1e100c] border-r-2 border-[#120805] shadow-2xl flex items-center justify-end p-6 cursor-pointer select-none cafe-door cafe-door-left pointer-events-auto ${
+                            doorOpened ? 'open' : ''
+                        }`}
+                        style={{ 
+                            boxShadow: 'inset 0 0 40px rgba(0,0,0,0.85), 5px 0 15px rgba(0,0,0,0.6)'
                         }}
-                        className="relative z-10 cursor-pointer group flex flex-col items-center justify-center p-8 transition-transform duration-300 hover:scale-105 active:scale-95"
                     >
-                        {/* Candle Flame */}
-                        {candleBlowStage === 'unlit' && (
-                            <div className="relative w-8 h-12 mb-1.5 flex items-center justify-center">
-                                {/* Small dark unlit wick */}
-                                <div className="w-0.5 h-3 bg-neutral-800 rounded-full" />
+                        {/* Door Pane Details - Glass Panel */}
+                        <div className="w-[85%] h-[75%] border-4 border-[#120805] bg-black/10 backdrop-blur-[3px] rounded shadow-inner relative flex flex-col items-center justify-center overflow-hidden">
+                            {/* Glass highlights */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
+                            {/* Wooden Grids */}
+                            <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-[#120805]" />
+                            <div className="absolute left-0 right-0 top-1/2 h-1 bg-[#120805]" />
+                            
+                            {/* Welcome Sign Hanging on Left Door Glass */}
+                            <div className="absolute top-[22%] left-1/2 -translate-x-1/2 bg-[#fefbf6] text-[#3a2218] border-2 border-[#543527] px-4 py-2.5 rounded shadow-lg transform rotate-[-3deg] text-center font-mono select-none pointer-events-none border-dashed animate-pulse">
+                                <span className="text-[10px] font-bold tracking-widest block uppercase text-rose-800">☕ COZY CAFE</span>
+                                <span className="text-[12px] font-black tracking-wider block text-neutral-900 mt-0.5">BUKA / OPEN</span>
+                                <span className="text-[7px] text-neutral-500 font-bold block mt-1 uppercase tracking-wide">Ketuk Pintu</span>
                             </div>
-                        )}
-                        {candleBlowStage === 'lighting' && (
-                            <div className="relative w-8 h-12 mb-1.5 transition-all duration-700 animate-pulse">
-                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-11 rounded-full flame-blowing" />
-                            </div>
-                        )}
-                        {candleBlowStage === 'lit' && (
-                            <div className="relative w-8 h-12 mb-1.5 animate-in zoom-in-50 duration-500">
-                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5.5 h-9 rounded-full flame-intro" />
-                            </div>
-                        )}
-
-                        {/* Candle Body */}
-                        <div className="w-5.5 h-20 bg-amber-100/90 rounded-t-md shadow-lg border-b-4 border-amber-200/50 flex flex-col justify-start items-center relative">
-                            {candleBlowStage !== 'unlit' && <div className="w-0.5 h-3 bg-neutral-900 absolute -top-3" />}
-                            <div className="absolute top-2 left-1 w-1.5 h-5 bg-amber-200/60 rounded-full" />
-                            <div className="absolute top-4 right-1 w-1 h-3 bg-amber-200/60 rounded-full" />
                         </div>
-                        {/* Candle Stand */}
-                        <div className="w-12 h-2 bg-neutral-700 rounded-full shadow border-b border-neutral-850" />
+
+                        {/* Door Handle (Brass) */}
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none">
+                            {/* Plate */}
+                            <div className="w-3.5 h-20 bg-gradient-to-b from-amber-600 via-amber-500 to-amber-700 rounded border border-amber-800 shadow-md flex flex-col justify-between py-1.5 px-0.5">
+                                <div className="w-1 h-1 rounded-full bg-amber-900 mx-auto" />
+                                <div className="w-1.5 h-10 bg-gradient-to-r from-amber-500 to-amber-400 rounded-sm border border-amber-600 shadow mx-auto" />
+                                <div className="w-1 h-1 rounded-full bg-amber-900 mx-auto" />
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Instruction helper text when unlit */}
-                    {candleBlowStage === 'unlit' && (
-                        <p className="relative z-10 mt-4 text-[9px] text-white/35 uppercase tracking-widest font-mono animate-bounce">
-                            👆 KETUK LILIN UNTUK MENYALAKAN
-                        </p>
-                    )}
+                    {/* Right Door */}
+                    <div 
+                        onClick={handleOpenDoor}
+                        className={`absolute top-0 bottom-0 right-0 w-1/2 bg-gradient-to-l from-[#1c0f0b] via-[#2d1b15] to-[#1e100c] border-l-2 border-[#120805] shadow-2xl flex items-center justify-start p-6 cursor-pointer select-none cafe-door cafe-door-right pointer-events-auto ${
+                            doorOpened ? 'open' : ''
+                        }`}
+                        style={{ 
+                            boxShadow: 'inset 0 0 40px rgba(0,0,0,0.85), -5px 0 15px rgba(0,0,0,0.6)'
+                        }}
+                    >
+                        {/* Door Pane Details - Glass Panel */}
+                        <div className="w-[85%] h-[75%] border-4 border-[#120805] bg-black/10 backdrop-blur-[3px] rounded shadow-inner relative flex flex-col items-center justify-center overflow-hidden">
+                            {/* Glass highlights */}
+                            <div className="absolute inset-0 bg-gradient-to-tl from-transparent via-white/5 to-white/10 pointer-events-none" />
+                            {/* Wooden Grids */}
+                            <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-[#120805]" />
+                            <div className="absolute left-0 right-0 top-1/2 h-1 bg-[#120805]" />
+                        </div>
 
-                    {/* Envelope opener card (appears with sayup-sayup candlelight glow when lit) */}
-                    {candleBlowStage === 'lit' && (
-                        <div className="relative z-10 w-full max-w-xs mt-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                            <div 
-                                onClick={handleOpenEnvelope}
-                                className={`relative cursor-pointer transition-all duration-500 ${envelopeOpen ? 'scale-95 opacity-0' : 'hover:scale-[1.02]'} flex flex-col items-center justify-center p-6 bg-neutral-900/65 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl w-full candle-bathed-card`}
-                            >
-                                {/* Lofi Radio Art Icon */}
-                                <div className="w-14 h-14 bg-neutral-800 rounded-xl flex items-center justify-center border border-white/5 mb-4 text-3xl shadow-inner animate-pulse">
-                                    📻
-                                </div>
-
-                                <h3 className="text-md font-bold tracking-wide text-neutral-100 font-mono mb-1">
-                                    {card.title}
-                                </h3>
-                                
-                                <p className="text-[10px] text-neutral-400 font-mono tracking-widest uppercase mb-5">
-                                    Untuk: {card.recipient_name}
-                                </p>
-
-                                <div className="px-5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[10px] font-bold font-mono tracking-widest border border-amber-500/30 transition-all shadow-md">
-                                    💌 BUKA SURAT LOFI
-                                </div>
+                        {/* Door Handle (Brass) */}
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none">
+                            {/* Plate */}
+                            <div className="w-3.5 h-20 bg-gradient-to-b from-amber-600 via-amber-500 to-amber-700 rounded border border-amber-800 shadow-md flex flex-col justify-between py-1.5 px-0.5">
+                                <div className="w-1 h-1 rounded-full bg-amber-900 mx-auto" />
+                                <div className="w-1.5 h-10 bg-gradient-to-r from-amber-500 to-amber-400 rounded-sm border border-amber-600 shadow mx-auto" />
+                                <div className="w-1 h-1 rounded-full bg-amber-900 mx-auto" />
                             </div>
-                            
-                            <p className="mt-3 text-[8px] text-white/20 uppercase tracking-widest font-mono">
-                                Ketuk untuk Memutar Musik & Membaca
+                        </div>
+                    </div>
+
+                    {/* Floor Mat / Prompt Sign */}
+                    <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 z-55 text-center pointer-events-none transition-all duration-[1200ms] ${
+                        doorOpened ? 'opacity-0 scale-90 -translate-y-4' : 'opacity-100'
+                    }`}>
+                        <div className="bg-[#120805]/95 border border-amber-900/40 rounded-full px-5 py-2.5 shadow-xl backdrop-blur-sm">
+                            <span className="text-[10px] text-amber-400 font-mono font-bold tracking-widest uppercase animate-pulse">
+                                🚪 KETUK PINTU UNTUK MASUK KAFE
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Dark Room overlay when candle is unlit */}
+            {(stage === 'opened' || stage === 'door_intro') && (
+                <div 
+                    className={`absolute inset-0 transition-opacity duration-1000 z-20 flex flex-col items-center justify-center bg-[#07070a] ${
+                        stage === 'door_intro'
+                            ? (doorOpened ? 'opacity-0 pointer-events-none' : 'opacity-[0.82] pointer-events-none')
+                            : candleBlowStage === 'lit' 
+                                ? 'opacity-0 pointer-events-none' 
+                                : candleBlowStage === 'lighting' 
+                                    ? 'opacity-60' 
+                                    : 'opacity-98'
+                    }`}
+                >
+                    {/* Guidance Text in the dark */}
+                    {candleBlowStage === 'unlit' && stage === 'opened' && (
+                        <div className="text-center px-4 max-w-xs animate-in fade-in duration-1000">
+                            <span className="text-[10px] font-bold text-amber-500 bg-amber-950/40 border border-amber-900/40 px-3 py-1 rounded-full font-mono tracking-widest uppercase shadow-sm animate-pulse">
+                                🕯️ MOMEN SPESIAL 🕯️
+                            </span>
+                            <h2 className="text-lg font-bold text-white mt-4 font-mono tracking-wide leading-snug">
+                                {card.title}
+                            </h2>
+                            <p className="text-[10px] text-neutral-400 font-mono mt-2.5 tracking-widest uppercase leading-relaxed animate-bounce">
+                                👇 NYALAKAN LILIN DI SEBELAH KANAN UNTUK MEMULAI
                             </p>
                         </div>
                     )}
@@ -826,8 +910,10 @@ function LofiLoveFull({ card }) {
             )}
 
             {/* ═══ SCENE 2: COZY LOFI ROOM & TURNTABLE ═══ */}
-            {stage === 'opened' && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-between p-6 animate-in fade-in duration-1000">
+            {(stage === 'opened' || stage === 'door_intro') && (
+                <div className={`absolute inset-0 z-10 flex flex-col items-center justify-between p-6 room-view-transition ${
+                    stage === 'door_intro' && !doorOpened ? 'room-view-blurred' : 'room-view-clear'
+                }`}>
                     
                     {/* Camera flash overlay */}
                     <div id="camera-flash-overlay" className="absolute inset-0 bg-white pointer-events-none z-50 opacity-0" />
@@ -946,8 +1032,8 @@ function LofiLoveFull({ card }) {
                             </div>
                         </div>
 
-                        {/* Left Side Desk Items Stack (Lilin & Kopi Dihapus) */}
-                        <div className="absolute left-[-38px] md:-left-24 bottom-1 top-auto flex flex-col justify-end items-center gap-3">
+                        {/* Left Side Desk Items Stack (Sleeping Cat & Polaroid Camera) */}
+                        <div className={`absolute left-[-42px] md:-left-24 bottom-1 top-auto flex flex-col justify-end items-center gap-3 transition-opacity duration-1000 ${candleBlowStage === 'unlit' || candleBlowStage === 'lighting' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                             
                             {/* Polaroid Camera */}
                             <div 
@@ -1002,11 +1088,82 @@ function LofiLoveFull({ card }) {
                                     📸 KETUK UNTUK MENJEPRET FOTO
                                 </div>
                             </div>
+
+                            {/* Interactive Sleeping Cat (Shifted to Left Side Stack) */}
+                            <div 
+                                onClick={() => {
+                                    playSynthesizedSound('meow', false);
+                                    setCatMood('wake');
+                                    
+                                    const newEmojis = [...Array(3)].map((_, i) => ({
+                                        id: Math.random(),
+                                        char: ['🐾', '💖', '✨', '🐾'][Math.floor(Math.random() * 4)],
+                                        x: (Math.random() * 40 - 20)
+                                    }));
+                                    setCatEmojiBursts(prev => [...prev, ...newEmojis]);
+                                    
+                                    setTimeout(() => {
+                                        setCatMood('purr');
+                                        playSynthesizedSound('purr', false);
+                                        
+                                        setTimeout(() => {
+                                            setCatMood('sleep');
+                                        }, 2000);
+                                    }, 800);
+                                }}
+                                className="relative cursor-pointer transform scale-[0.68] origin-bottom z-30 group transition-all duration-300 active:scale-95"
+                                title="Elus Kucing Cozy"
+                            >
+                                {/* Floating Emojis */}
+                                <div className="absolute inset-x-0 bottom-12 h-16 pointer-events-none overflow-visible">
+                                    {catEmojiBursts.map(e => (
+                                        <span 
+                                            key={e.id}
+                                            className="absolute emoji-floater text-xs"
+                                            style={{ 
+                                                left: '40%', 
+                                                '--emoji-x': `${e.x}px` 
+                                            }}
+                                        >
+                                            {e.char}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <div className="relative w-20 h-12">
+                                    <div className={`absolute bottom-0 right-0 w-15 h-9 bg-neutral-800 rounded-full shadow-md transition-all duration-500 ${
+                                        catMood === 'purr' 
+                                            ? 'animate-[catPurrBreathe_1.5s_ease-in-out_infinite] bg-neutral-750' 
+                                            : 'animate-[catBreathe_3.2s_ease-in-out_infinite]'
+                                    }`} />
+                                    <div className="absolute bottom-4 right-8 w-7.5 h-7.5 bg-neutral-800 rounded-full border-b border-black/10">
+                                        <div className="absolute -top-1 left-0.5 w-2 h-2.5 bg-neutral-800 rounded-tl-full rotate-[-12deg] origin-bottom animate-[wiggleEar_2.5s_ease-in-out_infinite]" />
+                                        <div className="absolute -top-1 right-2 w-2 h-2.5 bg-neutral-800 rounded-tr-full rotate-[12deg] origin-bottom animate-[wiggleEar_2.5s_ease-in-out_infinite]" style={{ animationDelay: '0.4s' }} />
+                                        {catMood === 'sleep' ? (
+                                            <>
+                                                <div className="absolute top-3.5 left-1.5 w-1.5 h-0.5 bg-neutral-950/60 rounded-full" />
+                                                <div className="absolute top-3.5 right-2.5 w-1.5 h-0.5 bg-neutral-950/60 rounded-full" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="absolute top-3 left-1.5 w-2 h-1 bg-rose-400 rounded-full shadow-sm animate-pulse" />
+                                                <div className="absolute top-3 right-2 w-2 h-1 bg-rose-400 rounded-full shadow-sm animate-pulse" />
+                                            </>
+                                        )}
+                                        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-0.5 bg-neutral-950 rounded-full" />
+                                    </div>
+                                    <div className={`absolute bottom-1 right-[-4px] w-7 h-3 bg-neutral-800 rounded-full origin-left ${
+                                        catMood === 'wake' 
+                                            ? 'animate-[swingTailFast_0.8s_ease-in-out_infinite]' 
+                                            : 'animate-[swingTail_2.2s_ease-in-out_infinite]'
+                                    }`} />
+                                </div>
+                            </div>
                         </div>
 
                         {/* Printed Polaroid Cards container */}
                         {printedPolaroids.length > 0 && (
-                            <div className="absolute left-[-42px] md:left-[-150px] top-2 flex flex-col gap-2 z-40 pointer-events-auto scale-90 md:scale-100">
+                            <div className={`absolute left-[-45px] md:left-[-160px] top-2 flex flex-col gap-2 z-40 pointer-events-auto scale-90 md:scale-100 transition-opacity duration-1000 ${candleBlowStage === 'unlit' || candleBlowStage === 'lighting' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                                 {printedPolaroids.map((item, idx) => (
                                     <div 
                                         key={item.id}
@@ -1037,79 +1194,8 @@ function LofiLoveFull({ card }) {
                             </div>
                         )}
 
-                        {/* Interactive Sleeping Cat (Right side decorative item) */}
-                        <div 
-                            onClick={() => {
-                                playSynthesizedSound('meow', false);
-                                setCatMood('wake');
-                                
-                                const newEmojis = [...Array(3)].map((_, i) => ({
-                                    id: Math.random(),
-                                    char: ['🐾', '💖', '✨', '🐾'][Math.floor(Math.random() * 4)],
-                                    x: (Math.random() * 40 - 20)
-                                }));
-                                setCatEmojiBursts(prev => [...prev, ...newEmojis]);
-                                
-                                setTimeout(() => {
-                                    setCatMood('purr');
-                                    playSynthesizedSound('purr', false);
-                                    
-                                    setTimeout(() => {
-                                        setCatMood('sleep');
-                                    }, 2000);
-                                }, 800);
-                            }}
-                            className="absolute right-[-38px] md:-right-22 bottom-1 cursor-pointer transform scale-75 origin-bottom-right z-30 group"
-                            title="Elus Kucing Cozy"
-                        >
-                            {/* Floating Emojis */}
-                            <div className="absolute inset-x-0 bottom-12 h-16 pointer-events-none overflow-visible">
-                                {catEmojiBursts.map(e => (
-                                    <span 
-                                        key={e.id}
-                                        className="absolute emoji-floater text-xs"
-                                        style={{ 
-                                            left: '40%', 
-                                            '--emoji-x': `${e.x}px` 
-                                        }}
-                                    >
-                                        {e.char}
-                                    </span>
-                                ))}
-                            </div>
-
-                            <div className="relative w-20 h-12">
-                                <div className={`absolute bottom-0 right-0 w-15 h-9 bg-neutral-800 rounded-full shadow-md transition-all duration-500 ${
-                                    catMood === 'purr' 
-                                        ? 'animate-[catPurrBreathe_1.5s_ease-in-out_infinite] bg-neutral-750' 
-                                        : 'animate-[catBreathe_3.2s_ease-in-out_infinite]'
-                                }`} />
-                                <div className="absolute bottom-4 right-8 w-7.5 h-7.5 bg-neutral-800 rounded-full border-b border-black/10">
-                                    <div className="absolute -top-1 left-0.5 w-2 h-2.5 bg-neutral-800 rounded-tl-full rotate-[-12deg] origin-bottom animate-[wiggleEar_2.5s_ease-in-out_infinite]" />
-                                    <div className="absolute -top-1 right-2 w-2 h-2.5 bg-neutral-800 rounded-tr-full rotate-[12deg] origin-bottom animate-[wiggleEar_2.5s_ease-in-out_infinite]" style={{ animationDelay: '0.4s' }} />
-                                    {catMood === 'sleep' ? (
-                                        <>
-                                            <div className="absolute top-3.5 left-1.5 w-1.5 h-0.5 bg-neutral-950/60 rounded-full" />
-                                            <div className="absolute top-3.5 right-2.5 w-1.5 h-0.5 bg-neutral-950/60 rounded-full" />
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="absolute top-3 left-1.5 w-2 h-1 bg-rose-400 rounded-full shadow-sm animate-pulse" />
-                                            <div className="absolute top-3 right-2 w-2 h-1 bg-rose-400 rounded-full shadow-sm animate-pulse" />
-                                        </>
-                                    )}
-                                    <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-0.5 bg-neutral-950 rounded-full" />
-                                </div>
-                                <div className={`absolute bottom-1 right-[-4px] w-7 h-3 bg-neutral-800 rounded-full origin-left ${
-                                    catMood === 'wake' 
-                                        ? 'animate-[swingTailFast_0.8s_ease-in-out_infinite]' 
-                                        : 'animate-[swingTail_2.2s_ease-in-out_infinite]'
-                                }`} />
-                            </div>
-                        </div>
-
                         {/* Turntable Base Body */}
-                        <div className={`relative p-5 bg-neutral-900 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col items-center justify-center ${themeStyles.neonGlow} transition-all duration-700`} style={{ width: '250px', height: '250px' }}>
+                        <div className={`relative p-5 bg-neutral-900 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col items-center justify-center ${themeStyles.neonGlow} transition-all duration-1000 ${candleBlowStage === 'unlit' || candleBlowStage === 'lighting' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ width: '250px', height: '250px' }}>
                             
                             {/* Glowing LED Status Indicator */}
                             <div 
@@ -1139,7 +1225,22 @@ function LofiLoveFull({ card }) {
                             </div>
 
                             {/* Platter (Empty when vinyl not mounted) */}
-                            <div className="relative rounded-full aspect-square border-2 border-neutral-850 bg-neutral-950 flex items-center justify-center shadow-inner" style={{ width: '210px' }}>
+                            <div 
+                                onMouseDown={handleSwipeStart}
+                                onMouseMove={handleSwipeMove}
+                                onMouseUp={handleSwipeEnd}
+                                onMouseLeave={handleSwipeEnd}
+                                onTouchStart={handleSwipeStart}
+                                onTouchMove={handleSwipeMove}
+                                onTouchEnd={handleSwipeEnd}
+                                className={`relative rounded-full aspect-square border-2 border-neutral-850 bg-neutral-950 flex items-center justify-center shadow-inner transition-colors ${
+                                    !vinylMounted && candleBlowStage === 'lit' 
+                                        ? 'cursor-grab active:cursor-grabbing hover:bg-neutral-900' 
+                                        : ''
+                                }`} 
+                                style={{ width: '210px' }}
+                                title={!vinylMounted && candleBlowStage === 'lit' ? 'Geser/putar piringan dengan mouse/jari untuk menyalakan radio' : ''}
+                            >
                                 
                                 {/* Metal details inside the platter */}
                                 <div className="absolute inset-8 rounded-full border border-neutral-900 pointer-events-none" />
@@ -1263,38 +1364,56 @@ function LofiLoveFull({ card }) {
                             </div>
                         </div>
 
-                        {/* Slide-out record mounting overlay instruction */}
-                        {!vinylMounted && (
-                            <div className="absolute inset-0 bg-neutral-950/80 border border-white/10 rounded-[2.5rem] flex flex-col justify-center items-center p-4 z-40 text-center animate-in fade-in zoom-in-95">
-                                {/* Sleeve record cover visual */}
-                                <div className="w-18 h-18 bg-neutral-800 rounded-lg relative flex items-center justify-center border border-white/10 shadow-lg mb-4">
-                                    <span className="text-2xl">Jacket</span>
-                                    {/* Record sticking out */}
-                                    <div className="absolute right-[-14px] w-12 h-12 rounded-full bg-neutral-950 border border-neutral-900 shadow flex items-center justify-center z-[-1] animate-pulse">
-                                        <div className="w-3 h-3 rounded-full bg-rose-500" />
-                                    </div>
+                        {/* Interactive Candle Centerpiece (Right side centerpiece) */}
+                        <div 
+                            onClick={() => {
+                                if (candleBlowStage !== 'unlit') return;
+                                setCandleBlowStage('lighting');
+                                playSynthesizedSound('lift', false);
+                                
+                                setTimeout(() => {
+                                    setCandleBlowStage('lit');
+                                    playSynthesizedSound('burst', false);
+                                }, 1000);
+                            }}
+                            className="absolute right-[-45px] md:-right-26 bottom-1 cursor-pointer group flex flex-col items-center justify-center p-8 z-40"
+                            style={{
+                                pointerEvents: candleBlowStage === 'unlit' ? 'auto' : 'none'
+                            }}
+                        >
+                            {/* Candle Flame */}
+                            {candleBlowStage === 'lighting' && (
+                                <div className="relative w-8 h-12 mb-1.5 transition-all duration-700 animate-pulse">
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-11 rounded-full flame-blowing" />
                                 </div>
-                                <button 
-                                    onClick={handleMountVinyl}
-                                    disabled={mountingProgress}
-                                    type="button"
-                                    className="px-4 py-2 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white font-mono font-bold text-[10px] tracking-wider uppercase rounded-xl border border-rose-400/20 shadow-lg active:scale-95 transition-all"
-                                >
-                                    {mountingProgress ? '📀 Memasang...' : '📀 Masukkan Piringan'}
-                                </button>
+                            )}
+                            {candleBlowStage === 'lit' && (
+                                <div className="relative w-8 h-12 mb-1.5 animate-in zoom-in-50 duration-500">
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-9 rounded-full flame-intro" />
+                                </div>
+                            )}
+
+                            {/* Candle Body */}
+                            <div className="w-5 h-20 bg-amber-100/90 rounded-t-md shadow-lg border-b-4 border-amber-200/50 flex flex-col justify-start items-center relative">
+                                {candleBlowStage !== 'unlit' && <div className="w-0.5 h-3 bg-neutral-900 absolute -top-3" />}
+                                <div className="absolute top-2 left-1 w-1.5 h-5 bg-amber-200/60 rounded-full" />
+                                <div className="absolute top-4 right-1 w-1 h-3 bg-amber-200/60 rounded-full" />
                             </div>
-                        )}
+                            
+                            {/* Candle Stand */}
+                            <div className="w-12 h-2 bg-neutral-700 rounded-full shadow border-b border-neutral-850" />
+                        </div>
                         
                         {/* Playback instruction hint */}
                         {vinylMounted && (
-                            <p className="mt-4 text-[9px] text-white/35 font-mono uppercase tracking-wider text-center">
+                            <p className="mt-4 text-[9px] text-white/35 font-mono uppercase tracking-wider text-center animate-in fade-in">
                                 {isPlaying ? '💿 Piringan Hitam Berputar...' : '💿 Sentuh Piringan/Jarum untuk Memutar'}
                             </p>
                         )}
                     </div>
 
                     {/* BOTTOM PANEL: MESSAGE BOARD & MUSIC CONTROL */}
-                    <div className="w-full max-w-sm flex flex-col space-y-4">
+                    <div className={`w-full max-w-sm flex flex-col space-y-4 transition-opacity duration-1000 ${candleBlowStage === 'unlit' || candleBlowStage === 'lighting' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                         
                         {/* Typewriter message sheet */}
                         <div className={`p-5 rounded-2xl border backdrop-blur-xl shadow-xl transition-all duration-700 flex flex-col space-y-3 text-left ${themeStyles.cardBg} ${vinylMounted ? 'opacity-100 translate-y-0' : 'opacity-30 translate-y-2 pointer-events-none'}`}>
@@ -1312,7 +1431,7 @@ function LofiLoveFull({ card }) {
                                         {!typingDone && <span className="animate-pulse font-bold text-rose-400">_</span>}
                                     </>
                                 ) : (
-                                    <span className="text-white/30 italic">Masukkan piringan hitam terlebih dahulu untuk membaca pesan...</span>
+                                    <span className="text-white/30 italic font-mono text-[9px] leading-relaxed block">👋 Geser/putar piringan hitam di atas dengan mouse/jari untuk menyalakan radio & membaca pesan...</span>
                                 )}
                             </div>
 

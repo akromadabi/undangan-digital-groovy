@@ -32,6 +32,8 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
         return false;
     });
 
+    const [imgErr, setImgErr] = useState(false);
+
     const [count, setCount] = useState(() => {
         const base = Number(theme.base_likes || 0);
         const real = Number(theme.real_likes || 0);
@@ -328,21 +330,28 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
 
     // Render theme content based on layout
     const renderPreviewContent = () => {
-        if (!isDynamic) {
+        if (!isDynamic || imgErr) {
             // Full Mockup Mode (Fallback)
             return (
                 <div className="absolute inset-0 bg-gray-100 overflow-hidden">
-                    {theme.thumbnail ? (
+                    {theme.thumbnail && !imgErr ? (
                         <img
                             src={getImageUrl(theme.thumbnail)}
                             alt={theme.name}
+                            onError={() => setImgErr(true)}
                             className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50">
-                            <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 003.75 21z" />
-                            </svg>
+                        <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white relative">
+                            {/* Premium abstract card design */}
+                            <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,rgba(255,255,255,0.05)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.05)_50%,rgba(255,255,255,0.05)_75%,transparent_75%,transparent)] bg-[size:24px_24px] pointer-events-none" />
+                            <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-3 shadow-lg relative z-10">
+                                <svg className="w-7 h-7 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 11.518 1.358L12 12.75v3m-3-12.75l.041-.02a.75.75 0 11.518 1.358L9 4.25v3M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3" />
+                                </svg>
+                            </div>
+                            <span className="text-[9px] uppercase tracking-[0.25em] text-rose-400 font-bold mb-1.5 relative z-10">Premium Template</span>
+                            <span className="font-semibold text-center text-xs px-2 text-slate-200 relative z-10">{theme.name}</span>
                         </div>
                     )}
                 </div>

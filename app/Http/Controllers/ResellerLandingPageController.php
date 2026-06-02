@@ -95,13 +95,28 @@ class ResellerLandingPageController extends Controller
             $resellerUrl = $scheme . '://' . $subdomain . '.' . $host . $port;
         }
  
-        return Inertia::render('ResellerLanding', [
+        $theme = $setting->getLandingTheme();
+        $view = 'ResellerLanding';
+        
+        $themeComponents = [
+            'galaxy'       => 'Galaxy',
+            'luxury'       => 'Luxury',
+            'bloom'        => 'Bloom',
+            'forest'       => 'Forest',
+            'modern-split' => 'ModernSplit',
+        ];
+
+        if (array_key_exists($theme, $themeComponents)) {
+            $view = 'Reseller/Templates/' . $themeComponents[$theme];
+        }
+
+        return Inertia::render($view, [
             'reseller' => [
                 'brand_name' => $setting->brand_name ?: $reseller->name,
                 'brand_logo' => $setting->brand_logo ? '/storage/' . $setting->brand_logo : null,
                 'ref' => $subdomain,
                 'reseller_url' => $resellerUrl,
-                'template' => $setting->landing_page_template ?: 'default',
+                'template' => $setting->getLandingTheme(),
                 'site_title' => $setting->site_title,
                 'site_motto' => $setting->site_motto,
                 'footer_whatsapp' => $setting->footer_whatsapp,
@@ -118,6 +133,8 @@ class ResellerLandingPageController extends Controller
             'themes' => $themes,
             'greetingCards' => $greetingCards,
             'greetingCardTypeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
+            'sections' => $setting->getOrderedSections(),
+            'heroImage' => $setting->landing_page_hero_image ? '/storage/' . $setting->landing_page_hero_image : null,
         ]);
     }
  

@@ -149,17 +149,182 @@ class ResellerSettingsController extends Controller
 
     public function landingPage()
     {
-        // Available templates — for now hardcoded, later super admin can manage
-        $templates = [
-            ['id' => 'default', 'name' => 'Default', 'description' => 'Template standar dengan layout modern'],
-            ['id' => 'elegant', 'name' => 'Elegant', 'description' => 'Template elegan dengan warna gelap'],
-            ['id' => 'minimal', 'name' => 'Minimal', 'description' => 'Template minimalis dan bersih'],
-            ['id' => 'colorful', 'name' => 'Colorful', 'description' => 'Template penuh warna dan ceria'],
+        $settings = $this->getSettings();
+
+        $themes = [
+            [
+                'id'          => 'modern-split',
+                'name'        => 'Modern Split (Layout Baru)',
+                'description' => 'Tata letak split-screen modern, tombol gradasi bersinar, card glassmorphism',
+                'preview_bg'  => 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%)',
+                'accent'      => '#6366f1',
+                'char'        => '⚡',
+            ],
+            [
+                'id'          => 'galaxy',
+                'name'        => 'Galaxy Dark',
+                'description' => 'Modern dark dengan nuansa luar angkasa, grid lines, tipografi bold',
+                'preview_bg'  => 'linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%)',
+                'accent'      => '#f59e0b',
+                'char'        => '🌌',
+            ],
+            [
+                'id'          => 'luxury',
+                'name'        => 'Luxury Gold',
+                'description' => 'Mewah dan elegan, cokelat gelap dengan aksen emas, serif formal',
+                'preview_bg'  => 'linear-gradient(135deg,#1c0f05 0%,#2d1a08 50%,#1c0f05 100%)',
+                'accent'      => '#d4a843',
+                'char'        => '👑',
+            ],
+            [
+                'id'          => 'bloom',
+                'name'        => 'Bloom Rose',
+                'description' => 'Romantis dan feminin, pink/krem lembut, elemen bunga, font elegan',
+                'preview_bg'  => 'linear-gradient(135deg,#fdf2f8 0%,#fce7f3 50%,#fdf2f8 100%)',
+                'accent'      => '#db2777',
+                'char'        => '🌸',
+            ],
+            [
+                'id'          => 'forest',
+                'name'        => 'Forest Emerald',
+                'description' => 'Segar dan natural, hijau emerald dalam, pola daun, organik',
+                'preview_bg'  => 'linear-gradient(135deg,#064e3b 0%,#065f46 50%,#064e3b 100%)',
+                'accent'      => '#34d399',
+                'char'        => '🌿',
+            ],
         ];
 
         return Inertia::render('Admin/LandingPage', [
-            'settings' => $this->getSettings(),
-            'templates' => $templates,
+            'settings'        => $settings,
+            'themes'          => $themes,
+            'defaultSections' => \App\Models\ResellerSetting::defaultSections(),
+            'savedSections'   => $settings->getOrderedSections(),
+            'currentTheme'    => $settings->getLandingTheme(),
+            'heroImage'       => $settings->landing_page_hero_image
+                                    ? '/storage/' . $settings->landing_page_hero_image
+                                    : null,
+            'features'        => \App\Models\Feature::orderBy('category')->orderBy('name')->get(),
+        ]);
+    }
+
+    /**
+     * Preview action for reseller's landing page (subdomain-independent).
+     */
+    public function landingPagePreview()
+    {
+        $settings = $this->getSettings();
+        $reseller = $settings->reseller;
+
+        // Get plans with reseller pricing and feature access
+        $plans = \App\Models\SubscriptionPlan::with('featureAccess.feature')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        $resellerPrices = \App\Models\ResellerPlanPrice::where('reseller_id', $reseller->id)
+            ->pluck('reseller_price', 'plan_id');
+
+        $plansData = $plans->map(function ($plan) use ($resellerPrices) {
+            return [
+                'id' => $plan->id,
+                'name' => $plan->name,
+                'slug' => $plan->slug,
+                'price' => isset($resellerPrices[$plan->id])
+                    ? (float)$resellerPrices[$plan->id]
+                    : (float)$plan->price,
+                'duration_days' => $plan->duration_days,
+                'max_guests' => $plan->max_guests,
+                'max_galleries' => $plan->max_galleries,
+                'description' => $plan->description,
+                'feature_access' => $plan->featureAccess->map(function ($fa) {
+                    return [
+                        'feature_id' => $fa->feature_id,
+                        'is_enabled' => (bool)$fa->is_enabled,
+                        'feature' => $fa->feature ? [
+                            'id' => $fa->feature->id,
+                            'name' => $fa->feature->name,
+                            'slug' => $fa->feature->slug,
+                            'category' => $fa->feature->category,
+                        ] : null,
+                    ];
+                })->toArray(),
+            ];
+        });
+
+        // Get all global features for dynamic feature comparison
+        $features = \App\Models\Feature::orderBy('category')->orderBy('name')->get();
+
+        // Get themes for gallery
+        $themes = \App\Models\Theme::where('is_active', true)
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
+            ->latest()
+            ->take(8)
+            ->get();
+        $themes = \App\Models\Theme::applyResellerCustomizations($themes, $reseller->id);
+        $themes = $themes->map(function ($theme) {
+            $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
+            return $theme;
+        });
+
+        // Get greeting cards for gallery
+        $greetingCards = \App\Models\GreetingCardTemplate::where('is_active', true)
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'type', 'base_likes', 'sort_order')
+            ->orderBy('sort_order')
+            ->get();
+        $greetingCards = \App\Models\GreetingCardTemplate::applyResellerCustomizations($greetingCards, $reseller->id);
+
+        $appUrl = config('app.url');
+        $parsed = parse_url($appUrl);
+        $scheme = $parsed['scheme'] ?? 'http';
+        $host = $parsed['host'] ?? 'undangan-digital.test';
+        $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
+
+        if ($settings->custom_domain) {
+            $resellerUrl = $scheme . '://' . $settings->custom_domain . $port;
+        } else {
+            $resellerUrl = $scheme . '://' . ($settings->subdomain ?: 'reseller') . '.' . $host . $port;
+        }
+
+        $theme = request('theme') ?: $settings->getLandingTheme();
+        $view = 'ResellerLanding';
+        
+        $themeComponents = [
+            'galaxy'       => 'Galaxy',
+            'luxury'       => 'Luxury',
+            'bloom'        => 'Bloom',
+            'forest'       => 'Forest',
+            'modern-split' => 'ModernSplit',
+        ];
+
+        if (array_key_exists($theme, $themeComponents)) {
+            $view = 'Reseller/Templates/' . $themeComponents[$theme];
+        }
+
+        return Inertia::render($view, [
+            'reseller' => [
+                'brand_name' => $settings->brand_name ?: $reseller->name,
+                'brand_logo' => $settings->brand_logo ? '/storage/' . $settings->brand_logo : null,
+                'ref' => $settings->subdomain ?: 'reseller',
+                'reseller_url' => $resellerUrl,
+                'template' => $settings->getLandingTheme(),
+                'site_title' => $settings->site_title,
+                'site_motto' => $settings->site_motto,
+                'footer_whatsapp' => $settings->footer_whatsapp,
+                'footer_phone' => $settings->footer_phone,
+                'footer_email' => $settings->footer_email,
+                'footer_instagram' => $settings->footer_instagram,
+                'footer_tiktok' => $settings->footer_tiktok,
+                'footer_address' => $settings->footer_address,
+                'footer_description' => $settings->footer_description,
+                'social_links' => $settings->social_links ?: [],
+            ],
+            'plans' => $plansData,
+            'features' => $features,
+            'themes' => $themes,
+            'greetingCards' => $greetingCards,
+            'greetingCardTypeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
+            'sections' => $settings->getOrderedSections(),
+            'heroImage' => $settings->landing_page_hero_image ? '/storage/' . $settings->landing_page_hero_image : null,
         ]);
     }
 
@@ -171,9 +336,104 @@ class ResellerSettingsController extends Controller
 
         $settings = $this->getSettings();
         $settings->landing_page_template = $request->landing_page_template;
+        // Also sync into config
+        $config = $settings->landing_page_config ?? [];
+        $config['theme'] = $request->landing_page_template;
+        $settings->landing_page_config = $config;
         $settings->save();
 
-        return back()->with('success', 'Landing page template berhasil disimpan.');
+        return back()->with('success', 'Template berhasil disimpan.');
+    }
+
+    /**
+     * Save full landing page builder config (sections + theme).
+     */
+    public function updateLandingPageConfig(Request $request)
+    {
+        $request->validate([
+            'theme'    => 'nullable|string|max:50',
+            'sections' => 'nullable|array',
+        ]);
+
+        $settings = $this->getSettings();
+        $existing = $settings->landing_page_config ?? [];
+
+        if ($request->has('theme')) {
+            $existing['theme'] = $request->theme;
+            $settings->landing_page_template = $request->theme;
+        }
+        if ($request->has('sections')) {
+            $existing['sections'] = $request->sections;
+        }
+        $settings->landing_page_config = $existing;
+        $settings->save();
+
+        return response()->json(['success' => true, 'message' => 'Konfigurasi landing page berhasil disimpan.']);
+    }
+
+    /**
+     * Upload hero background image.
+     */
+    public function uploadHeroImage(Request $request)
+    {
+        $request->validate([
+            'hero_image' => 'required|image|mimes:png,jpg,jpeg,webp|max:4096',
+        ]);
+
+        $settings = $this->getSettings();
+
+        // Delete old image
+        if ($settings->landing_page_hero_image && Storage::disk('public')->exists($settings->landing_page_hero_image)) {
+            Storage::disk('public')->delete($settings->landing_page_hero_image);
+        }
+
+        $file = $request->file('hero_image');
+        \App\Helpers\ImageCompressor::compress($file);
+        $ext      = $file->guessExtension() ?: 'jpg';
+        $filename = 'hero-' . time() . '-' . rand(100, 999) . '.' . $ext;
+        $path     = $file->storeAs('reseller/hero', $filename, 'public');
+
+        $settings->landing_page_hero_image = $path;
+        // Also store in sections config
+        $config = $settings->landing_page_config ?? [];
+        $sections = collect($config['sections'] ?? \App\Models\ResellerSetting::defaultSections());
+        $sections = $sections->map(function ($s) use ($path) {
+            if ($s['key'] === 'hero') {
+                $s['config']['hero_image'] = '/storage/' . $path;
+            }
+            return $s;
+        });
+        $config['sections'] = $sections->values()->toArray();
+        $settings->landing_page_config = $config;
+        $settings->save();
+
+        return response()->json(['success' => true, 'url' => '/storage/' . $path]);
+    }
+
+    /**
+     * Remove hero background image.
+     */
+    public function removeHeroImage()
+    {
+        $settings = $this->getSettings();
+        if ($settings->landing_page_hero_image && Storage::disk('public')->exists($settings->landing_page_hero_image)) {
+            Storage::disk('public')->delete($settings->landing_page_hero_image);
+        }
+        $settings->landing_page_hero_image = null;
+
+        $config = $settings->landing_page_config ?? [];
+        $sections = collect($config['sections'] ?? []);
+        $sections = $sections->map(function ($s) {
+            if ($s['key'] === 'hero') {
+                $s['config']['hero_image'] = null;
+            }
+            return $s;
+        });
+        $config['sections'] = $sections->values()->toArray();
+        $settings->landing_page_config = $config;
+        $settings->save();
+
+        return response()->json(['success' => true]);
     }
 
     // ═══ Domain ═══

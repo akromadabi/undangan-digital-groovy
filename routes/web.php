@@ -398,7 +398,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/branding', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'branding'])->name('branding');
     Route::post('/branding', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'updateBranding'])->name('branding.update');
     Route::get('/landing-page', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'landingPage'])->name('landing-page');
+    Route::get('/landing-page/preview', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'landingPagePreview'])->name('landing-page.preview');
     Route::post('/landing-page', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'updateLandingPage'])->name('landing-page.update');
+    Route::put('/landing-page/config', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'updateLandingPageConfig'])->name('landing-page.config');
+    Route::post('/landing-page/hero-image', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'uploadHeroImage'])->name('landing-page.hero-image');
+    Route::delete('/landing-page/hero-image', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'removeHeroImage'])->name('landing-page.hero-image.remove');
     Route::get('/domain', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'domain'])->name('domain');
     Route::post('/domain', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'updateDomain'])->name('domain.update');
 
