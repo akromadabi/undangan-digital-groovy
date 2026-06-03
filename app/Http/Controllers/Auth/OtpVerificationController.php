@@ -34,6 +34,10 @@ class OtpVerificationController extends Controller
             return redirect()->intended('/super-admin');
         }
 
+        if ($user->role === 'editor') {
+            return redirect()->intended('/super-admin/three-d-scenes');
+        }
+
         if ($user->role === 'admin') {
             return redirect()->intended('/admin');
         }

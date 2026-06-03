@@ -14,9 +14,12 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        // Redirect if Admin or Super Admin tries to access client dashboard under their original role
+        // Redirect if Admin, Super Admin or Editor tries to access client dashboard under their original role
         if ($user->isSuperAdmin()) {
             return redirect('/super-admin');
+        }
+        if ($user->isEditor()) {
+            return redirect('/super-admin/three-d-scenes');
         }
         if ($user->isAdmin()) {
             return redirect('/admin');

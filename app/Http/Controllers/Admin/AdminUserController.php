@@ -17,12 +17,13 @@ class AdminUserController extends Controller
     {
         $user = auth()->user();
 
-        $query = User::where('role', 'user')
-            ->with(['invitations.activeSubscription.plan', 'greetingCards', 'reseller.resellerSettings']);
+        $query = User::with(['invitations.activeSubscription.plan', 'greetingCards', 'reseller.resellerSettings']);
 
-        // Reseller only sees their own users
-        if ($user->isReseller()) {
-            $query->where('reseller_id', $user->id);
+        if ($user->isSuperAdmin()) {
+            $query->whereIn('role', ['user', 'editor']);
+        } else {
+            // Reseller only sees their own client users
+            $query->where('role', 'user')->where('reseller_id', $user->id);
         }
 
         $users = $query
@@ -34,6 +35,43 @@ class AdminUserController extends Controller
             'users' => $users,
             'filters' => $request->only('search'),
         ]);
+    }
+
+    public function create()
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return Inertia::render('Admin/Users/Create');
+    }
+
+    public function store(Request $request)
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|max:20',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => 'required|string|in:user,editor',
+            'is_active' => 'boolean',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'is_active' => $request->is_active ?? true,
+            'onboarding_step' => $request->role === 'editor' ? 6 : 2,
+        ]);
+
+        return redirect()->route('super-admin.users.index')->with('success', 'User berhasil ditambahkan.');
     }
 
     public function show(User $user)
@@ -111,6 +149,7 @@ class AdminUserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
+            'role' => 'required|string|in:user,editor',
             // Multiple invitations validation
             'invitations' => 'nullable|array',
             'invitations.*.id' => 'required|exists:invitations,id',
@@ -126,7 +165,7 @@ class AdminUserController extends Controller
         ]);
 
         // Update user
-        $user->update($request->only(['name', 'email', 'phone', 'is_active']));
+        $user->update($request->only(['name', 'email', 'phone', 'is_active', 'role']));
 
         // Update invitations
         if ($request->has('invitations')) {

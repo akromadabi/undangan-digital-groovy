@@ -18,7 +18,8 @@ class InvitationController extends Controller
         $invitation = Invitation::where('slug', $slug)
             ->where('is_active', true)
             ->with([
-                'theme',
+                'theme.threeDScene',
+                'threeDScene',
                 'brideGrooms',
                 'events',
                 'galleries',
@@ -438,13 +439,13 @@ class InvitationController extends Controller
         $clientUser = auth()->user();
         if ($clientUser && $clientUser->role === 'user' && $clientUser->invitation) {
             $customDemoInvitation = $clientUser->invitation()
-                ->with(['brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
+                ->with(['theme.threeDScene', 'threeDScene', 'brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
                 ->first();
         }
 
         if (!$customDemoInvitation && $resellerSetting && $resellerSetting->demo_user_id) {
             $customDemoInvitation = Invitation::where('user_id', $resellerSetting->demo_user_id)
-                ->with(['brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
+                ->with(['theme.threeDScene', 'threeDScene', 'brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
                 ->first();
         }
 
@@ -454,7 +455,7 @@ class InvitationController extends Controller
             if ($superAdmin) {
                 $customDemoInvitation = Invitation::where('user_id', $superAdmin->id)
                     ->where('theme_id', $theme->id)
-                    ->with(['brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
+                    ->with(['theme.threeDScene', 'threeDScene', 'brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
                     ->first();
             }
         }

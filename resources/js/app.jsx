@@ -1,6 +1,54 @@
 import '../css/app.css';
 import './bootstrap';
 
+// Global error handlers for debugging blank screen issues
+if (typeof window !== 'undefined') {
+    window.addEventListener('error', (event) => {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '0';
+        errorDiv.style.left = '0';
+        errorDiv.style.width = '100vw';
+        errorDiv.style.height = '100vh';
+        errorDiv.style.backgroundColor = '#991b1b';
+        errorDiv.style.color = '#ffffff';
+        errorDiv.style.zIndex = '9999999';
+        errorDiv.style.padding = '24px';
+        errorDiv.style.fontFamily = 'monospace';
+        errorDiv.style.fontSize = '14px';
+        errorDiv.style.overflow = 'auto';
+        errorDiv.innerHTML = `
+            <h1 style="font-size: 20px; font-weight: bold; margin-bottom: 12px; color: #fecaca;">[JavaScript Runtime Error]</h1>
+            <p style="font-weight: bold; margin-bottom: 16px;">${event.message}</p>
+            <pre style="background-color: #7f1d1d; padding: 16px; border-radius: 8px; border: 1px solid #ef4444; color: #fca5a5; white-space: pre-wrap; word-break: break-all;">Source: ${event.filename}:${event.lineno}:${event.colno}\n\nStack Trace:\n${event.error ? event.error.stack : 'No stack trace available'}</pre>
+        `;
+        document.body.appendChild(errorDiv);
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '0';
+        errorDiv.style.left = '0';
+        errorDiv.style.width = '100vw';
+        errorDiv.style.height = '100vh';
+        errorDiv.style.backgroundColor = '#991b1b';
+        errorDiv.style.color = '#ffffff';
+        errorDiv.style.zIndex = '9999999';
+        errorDiv.style.padding = '24px';
+        errorDiv.style.fontFamily = 'monospace';
+        errorDiv.style.fontSize = '14px';
+        errorDiv.style.overflow = 'auto';
+        errorDiv.innerHTML = `
+            <h1 style="font-size: 20px; font-weight: bold; margin-bottom: 12px; color: #fecaca;">[Unhandled Promise Rejection]</h1>
+            <p style="font-weight: bold; margin-bottom: 16px;">Reason: ${event.reason}</p>
+            <pre style="background-color: #7f1d1d; padding: 16px; border-radius: 8px; border: 1px solid #ef4444; color: #fca5a5; white-space: pre-wrap; word-break: break-all;">${event.reason && event.reason.stack ? event.reason.stack : 'No stack trace available'}</pre>
+        `;
+        document.body.appendChild(errorDiv);
+    });
+}
+
+
 
 // Disable browser fullscreen in dashboard preview mockup (iframes) and hide fullscreen buttons
 if (typeof window !== 'undefined' && window.self !== window.top) {

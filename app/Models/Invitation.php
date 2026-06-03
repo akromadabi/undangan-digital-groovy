@@ -13,6 +13,7 @@ class Invitation extends Model
     protected $fillable = [
         'user_id',
         'theme_id',
+        'three_d_scene_id',
         'slug',
         'title',
         'opening_title',
@@ -147,6 +148,11 @@ class Invitation extends Model
             ->whereHas('feature', fn($q) => $q->where('slug', $featureSlug))
             ->where('is_enabled', true)
             ->exists();
+    }
+
+    public function threeDScene()
+    {
+        return $this->belongsTo(ThreeDScene::class);
     }
 
     public function theme()

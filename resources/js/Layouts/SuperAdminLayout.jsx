@@ -49,6 +49,40 @@ export default function SuperAdminLayout({ children, title }) {
     const [menuSheetOpen, setMenuSheetOpen] = useState(false);
     const avatarRef = useRef(null);
 
+    const isEditor = auth.user?.role === 'editor';
+
+    // Filter Desktop Menu Items
+    const filteredMenuItems = menuItems.filter(item => {
+        if (isEditor) {
+            const allowedLabels = ['Tema', '3D Canvas Builder', 'Musik', 'Preview Statis'];
+            return allowedLabels.includes(item.label);
+        }
+        return true;
+    });
+
+    // Filter Mobile Bottom Nav Items
+    const filteredBottomNavItems = bottomNavItems.filter(item => {
+        if (isEditor) {
+            const allowedLabels = ['Dashboard', 'Tema', 'Menu', '3D Canvas', 'Musik'];
+            return allowedLabels.includes(item.label) || item.isCenter;
+        }
+        return true;
+    }).map(item => {
+        if (isEditor && item.label === 'Dashboard') {
+            return { ...item, href: '/super-admin/three-d-scenes' };
+        }
+        return item;
+    });
+
+    // Filter Mobile Menu Sheet Items (FAB)
+    const filteredMenuSheetItems = menuSheetItems.filter(item => {
+        if (isEditor) {
+            const allowedLabels = ['Tema', '3D Canvas', 'Preview Statis'];
+            return allowedLabels.includes(item.label);
+        }
+        return true;
+    });
+
     // Notification Dropdown state
     const [notifications, setNotifications] = useState([]);
     const [notifCount, setNotifCount] = useState(0);
@@ -135,7 +169,7 @@ export default function SuperAdminLayout({ children, title }) {
                         <div className="w-9 h-9 bg-[#E5654B] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm">G</div>
                         <div>
                             <div className="font-bold text-[#1a1a1a] text-[15px] leading-tight">Groovy</div>
-                            <div className="text-[11px] text-[#999] font-medium tracking-wide">SUPER ADMIN</div>
+                            <div className="text-[11px] text-[#999] font-medium tracking-wide">{isEditor ? 'EDITOR' : 'SUPER ADMIN'}</div>
                         </div>
                     </Link>
                 </div>
@@ -143,7 +177,7 @@ export default function SuperAdminLayout({ children, title }) {
                 {/* Navigation */}
                 <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
                     <div className="px-3 py-2 text-[11px] font-semibold text-[#999] tracking-[0.08em]">MANAJEMEN</div>
-                    {menuItems.map(item => (
+                    {filteredMenuItems.map(item => (
                         <Link key={item.href} href={item.href}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] transition-all duration-150 ${isActive(item.href)
                                 ? 'bg-[#E5654B] text-white font-medium shadow-sm'
@@ -163,7 +197,7 @@ export default function SuperAdminLayout({ children, title }) {
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="text-[13px] font-medium text-[#333] truncate">{auth.user?.name}</div>
-                            <div className="text-[10px] text-[#999]">Super Admin</div>
+                            <div className="text-[10px] text-[#999]">{isEditor ? 'Editor' : 'Super Admin'}</div>
                         </div>
                         <Link href="/logout" method="post" as="button" className="p-1.5 rounded-lg hover:bg-red-50 text-[#bbb] hover:text-red-500 transition-colors" title="Logout">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -191,7 +225,7 @@ export default function SuperAdminLayout({ children, title }) {
                             <RoleSwitcher auth={auth} />
                         </div>
                         <div className="hidden lg:flex items-center gap-2 text-sm text-[#999]">
-                            <span>Super Admin:</span>
+                            <span>{isEditor ? 'Editor' : 'Super Admin'}:</span>
                             <span className="font-medium text-[#555]">{auth.user?.name}</span>
                         </div>
 
@@ -278,7 +312,7 @@ export default function SuperAdminLayout({ children, title }) {
                                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-[#e8e5e0] py-2 z-50 animate-in fade-in slide-in-from-top-2">
                                     <div className="px-4 py-3 border-b border-[#f0ede8]">
                                         <div className="text-sm font-semibold text-[#333]">{auth.user?.name}</div>
-                                        <div className="text-xs text-[#999] mt-0.5">{auth.user?.email || 'Super Admin'}</div>
+                                        <div className="text-xs text-[#999] mt-0.5">{auth.user?.email || (isEditor ? 'Editor' : 'Super Admin')}</div>
                                     </div>
 
                                     {/* Switch role on mobile only */}
@@ -326,7 +360,7 @@ export default function SuperAdminLayout({ children, title }) {
             {/* ═══ Mobile Bottom Navigation (5 icons w/ center Menu FAB) ═══ */}
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e8e5e0] shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
                 <div className="flex items-center justify-around h-16 px-1">
-                    {bottomNavItems.map(item => {
+                    {filteredBottomNavItems.map(item => {
                         const active = isBottomActive(item);
 
                         // Center Menu FAB button
@@ -371,7 +405,7 @@ export default function SuperAdminLayout({ children, title }) {
                     <div className="lg:hidden fixed bottom-[64px] left-0 right-0 z-[38] bg-white rounded-t-2xl shadow-2xl border-t border-gray-200 p-4 pb-2 animate-in slide-in-from-bottom">
                         <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
                         <div className="grid grid-cols-3 gap-2">
-                            {menuSheetItems.map(item => (
+                            {filteredMenuSheetItems.map(item => (
                                 <Link key={item.label} href={item.href} onClick={() => setMenuSheetOpen(false)}
                                     className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors ${
                                         currentPath === item.href || currentPath.startsWith(item.href)

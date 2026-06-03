@@ -1,11 +1,13 @@
 import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import { Head, useForm } from '@inertiajs/react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
 import DressCodeBlock from '@/Components/DressCodeBlock';
 import InstagramFilterSection from '@/Components/InstagramFilterSection';
+import ThreeDScenePlayer from '@/Components/ThreeDScenePlayer';
+
 
 
 // ═══ Scroll-triggered animation component (re-triggers on every viewport entry) ═══
@@ -111,12 +113,20 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
     const [activeSlideIdx, setActiveSlideIdx] = useState(0);
     const [copiedIdx, setCopiedIdx] = useState(null);
     const [showQr, setShowQr] = useState(false);
+    const [showRsvpModal, setShowRsvpModal] = useState(false);
+    const [showWishesModal, setShowWishesModal] = useState(false);
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isFullscreenFallback, setIsFullscreenFallback] = useState(false);
+    const [showScrollPrompt, setShowScrollPrompt] = useState(true);
 
     useEffect(() => {
         const handleFullscreenChange = () => {
-            setIsFullscreen(!!document.fullscreenElement);
+            const nativeFullscreen = !!document.fullscreenElement;
+            setIsFullscreen(nativeFullscreen);
+            if (nativeFullscreen) {
+                setIsFullscreenFallback(false);
+            }
         };
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -124,13 +134,66 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
 
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
+            document.documentElement.requestFullscreen().catch(() => {
+                setIsFullscreenFallback(prev => !prev);
+            });
         } else {
-            document.exitFullscreen();
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+            }
+            setIsFullscreenFallback(false);
         }
     };
+
+    useEffect(() => {
+        const handlePromptScroll = () => {
+            if (window.scrollY > 30) {
+                setShowScrollPrompt(false);
+            }
+        };
+        window.addEventListener('scroll', handlePromptScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handlePromptScroll);
+    }, []);
     const audioRef = useRef(null);
     usePageVisibilityAudio(audioRef, musicPlaying, setMusicPlaying);
+
+    const autoScrollRef = useRef(null);
+    const startAutoScroll = () => {
+        let scrollTarget = 2000;
+        let currentScroll = window.scrollY;
+        const step = () => {
+            currentScroll += 1.5;
+            if (currentScroll < scrollTarget) {
+                window.scrollTo(0, currentScroll);
+                autoScrollRef.current = requestAnimationFrame(step);
+            } else {
+                autoScrollRef.current = null;
+            }
+        };
+        autoScrollRef.current = requestAnimationFrame(step);
+    };
+
+    const stopAutoScroll = () => {
+        if (autoScrollRef.current) {
+            cancelAnimationFrame(autoScrollRef.current);
+            autoScrollRef.current = null;
+        }
+    };
+
+    useEffect(() => {
+        const handleUserInteraction = () => {
+            stopAutoScroll();
+        };
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('keydown', handleUserInteraction, { passive: true });
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('keydown', handleUserInteraction);
+            stopAutoScroll();
+        };
+    }, []);
     const layoutMode = invitation.layout_mode || 'scroll';
     const enableQr = invitation.enable_qr !== false && invitation.show_qr_code !== false;
 
@@ -153,6 +216,8 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
     const isDecorated = isTraditional || isSpesial02;
 
     const visibleSections = sections.filter(s => s.is_visible).sort((a, b) => a.sort_order - b.sort_order);
+    const threeDScene = invitation.three_d_scene || invitation.threeDScene || invitation.theme?.three_d_scene || invitation.theme?.threeDScene;
+    const hasThreeD = !!(threeDScene && threeDScene.config && threeDScene.config.layers && threeDScene.config.layers.length > 0);
 
     // Ornament paths for traditional themes
     const O = isJawa ? {
@@ -190,11 +255,15 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
 
     const handleOpen = () => {
         setIsOpen(true);
-        if (invitation.music_url && musicAutoplay && audioRef.current) {
+        const musicUrl = invitation.music_url || (hasThreeD && threeDScene?.config?.musicUrl);
+        if (musicUrl && musicAutoplay && audioRef.current) {
             audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => { });
         }
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen().catch(() => {});
+        }
+        if (hasThreeD) {
+            startAutoScroll();
         }
     };
 
@@ -243,6 +312,17 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
         tick();
         const timer = setInterval(tick, 1000);
         return () => clearInterval(timer);
+    }, [events]);
+
+    // Handle 3D Hotspot Trigger Actions (RSVP, Wishes, Maps, QR Check-in)
+    const handleThreeDAction = useCallback((actionType) => {
+        if (actionType === 'rsvp') setShowRsvpModal(true);
+        else if (actionType === 'wishes' || actionType === 'guestbook') setShowWishesModal(true);
+        else if (actionType === 'checkin' || actionType === 'qr') setShowQr(true);
+        else if (actionType === 'map' || actionType === 'location') {
+            const mapUrl = events?.[0]?.venue_map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(events?.[0]?.venue_address || '')}`;
+            window.open(mapUrl, '_blank');
+        }
     }, [events]);
 
     // Scroll to section (for scroll mode) or jump to index (for slide/tab)
@@ -475,10 +555,28 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                 @keyframes sp02Breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
                 .sp02-float { animation: sp02Float 5s ease-in-out infinite; }
                 .sp02-breathe { animation: sp02Breathe 6s ease-in-out infinite; }
+                .fullscreen-fallback-mode {
+                    position: fixed !important;
+                    inset: 0 !important;
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    z-index: 99999 !important;
+                    background-color: #000 !important;
+                    overflow: hidden !important;
+                }
             `}} />
-            {invitation.music_url && <audio ref={audioRef} src={invitation.music_url} loop />}
+            {(invitation.music_url || (hasThreeD && threeDScene?.config?.musicUrl)) && (
+                <audio 
+                    ref={audioRef} 
+                    src={invitation.music_url || threeDScene?.config?.musicUrl} 
+                    loop 
+                />
+            )}
 
-            <div style={{ backgroundColor: colors.bg, color: colors.text, fontFamily: fonts.body, minHeight: '100vh' }}>
+            <div 
+                className={isFullscreenFallback ? 'fullscreen-fallback-mode' : ''}
+                style={{ backgroundColor: colors.bg, color: colors.text, fontFamily: fonts.body, minHeight: '100vh' }}
+            >
 
                 {/* ═══════ COVER ═══════ */}
                 {!isOpen && (
@@ -583,7 +681,234 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
 
                 {/* ═══════ MAIN CONTENT ═══════ */}
                 {isOpen && (
-                    <div className="relative" style={{ paddingBottom: (isDecorated || layoutMode === 'tab') ? '3.5rem' : '0' }}>
+                    hasThreeD ? (
+                        <div className="relative w-full min-h-screen">
+                            <ThreeDScenePlayer
+                                config={threeDScene.config}
+                                invitation={invitation}
+                                brideGrooms={brideGrooms}
+                                events={events}
+                                guest={guest}
+                                className="fixed inset-0 w-full h-full z-0 pointer-events-auto"
+                                height="100vh"
+                                onTriggerAction={handleThreeDAction}
+                            />
+
+                            {/* Scrollable Spacer to drive the scroll listener */}
+                            <div className="relative z-10 w-full pointer-events-none" style={{ height: '350vh' }} />
+
+                            {/* Scroll Indicator Prompt */}
+                            {showScrollPrompt && (
+                                <div className="fixed inset-x-0 bottom-24 z-30 pointer-events-none flex flex-col items-center gap-2 animate-bounce">
+                                    <span className="bg-stone-900/80 backdrop-blur-md px-4 py-2 rounded-full text-xs text-stone-200 border border-white/10 font-semibold shadow-xl">
+                                        Gulir ke bawah untuk terbang 🚀
+                                    </span>
+                                    <svg className="w-5 h-5 text-white filter drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 13l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            )}
+
+                            {/* Beautiful Dock Menu at Bottom Center */}
+                            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-stone-900/80 backdrop-blur-xl border border-white/15 px-4 py-2 sm:px-6 sm:py-3 rounded-2xl flex items-center justify-center gap-4 sm:gap-6 shadow-2xl text-white pointer-events-auto transition-all max-w-[90vw] sm:max-w-xl">
+                                {/* Music Toggle */}
+                                {invitation.music_url && (
+                                    <button
+                                        type="button"
+                                        onClick={toggleMusic}
+                                        className="flex flex-col items-center gap-1 transition hover:scale-110 active:scale-95 group focus:outline-none"
+                                    >
+                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${musicPlaying ? 'bg-[#E5654B]' : 'bg-white/10'} transition`}>
+                                            {musicPlaying ? (
+                                                <div className="global-music-waves">
+                                                    <span style={{ backgroundColor: '#fff' }} />
+                                                    <span style={{ backgroundColor: '#fff' }} />
+                                                    <span style={{ backgroundColor: '#fff' }} />
+                                                </div>
+                                            ) : (
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                                </svg>
+                                            )}
+                                        </div>
+                                        <span className="text-[9px] text-stone-300 font-semibold group-hover:text-[#E5654B] transition">Musik</span>
+                                    </button>
+                                )}
+
+                                {/* Fullscreen Toggle */}
+                                <button
+                                    type="button"
+                                    onClick={toggleFullscreen}
+                                    className="flex flex-col items-center gap-1 transition hover:scale-110 active:scale-95 group focus:outline-none"
+                                >
+                                    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${(isFullscreen || isFullscreenFallback) ? 'bg-[#E5654B]' : 'bg-white/10'} transition`}>
+                                        {(isFullscreen || isFullscreenFallback) ? (
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 3v4.5m0 0H4.5M9 7.5L4.5 3m10.5 0v4.5m0 0h4.5M15 7.5l4.5-4.5M9 21v-4.5m0 0H4.5M9 16.5L4.5 21m10.5 0v-4.5m0 0h4.5m-4.5 4.5l4.5-4.5" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9V4.5m0 0H8m-4.25 0L9 9m11.25 0V4.5m0 0H16m4.25 0L15 9m-11.25 6v4.5m0 0H8m-4.25 0L9 15m11.25 0v4.5m0 0H16m4.25 0L15 15" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <span className="text-[9px] text-stone-300 font-semibold group-hover:text-[#E5654B] transition">Layar Penuh</span>
+                                </button>
+
+                                {/* RSVP Button */}
+                                {enableRsvp && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowRsvpModal(true)}
+                                        className="flex flex-col items-center gap-1 transition hover:scale-110 active:scale-95 group focus:outline-none"
+                                    >
+                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${showRsvpModal ? 'bg-[#E5654B]' : 'bg-white/10'} transition`}>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 002-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[9px] text-stone-300 font-semibold group-hover:text-[#E5654B] transition">RSVP</span>
+                                    </button>
+                                )}
+
+                                {/* Wishes/Guestbook Button */}
+                                {enableWishes && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowWishesModal(true)}
+                                        className="flex flex-col items-center gap-1 transition hover:scale-110 active:scale-95 group focus:outline-none"
+                                    >
+                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${showWishesModal ? 'bg-[#E5654B]' : 'bg-white/10'} transition`}>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[9px] text-stone-300 font-semibold group-hover:text-[#E5654B] transition">Buku Tamu</span>
+                                    </button>
+                                )}
+
+                                {/* QR Code Button */}
+                                {enableQr && guest && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowQr(true)}
+                                        className="flex flex-col items-center gap-1 transition hover:scale-110 active:scale-95 group focus:outline-none"
+                                    >
+                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${showQr ? 'bg-[#E5654B]' : 'bg-white/10'} transition`}>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m0 11v1m5-6h-1m-4 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[9px] text-stone-300 font-semibold group-hover:text-[#E5654B] transition">Check-in</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* QR Code Modal */}
+                            {enableQr && showQr && guest && (
+                                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowQr(false)}>
+                                    <div className="bg-white rounded-2xl p-6 max-w-xs w-full mx-4 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
+                                        <h3 className="text-lg font-bold mb-1" style={{ color: colors.primary }}>QR Code Check-in</h3>
+                                        <p className="text-sm mb-4" style={{ color: colors.text, opacity: 0.6 }}>{guest.name}</p>
+                                        <div className="p-4 rounded-xl inline-block bg-gray-50">
+                                            <img
+                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=${colors.primary.replace('#', '')}&data=${encodeURIComponent(window.location.origin + '/u/' + invitation.slug + '/checkin?to=' + guest.slug)}`}
+                                                alt="QR Code"
+                                                className="w-48 h-48 mx-auto"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-gray-400 mt-3">Scan untuk konfirmasi kehadiran</p>
+                                        <button onClick={() => setShowQr(false)}
+                                            className="mt-4 px-6 py-2 rounded-full text-sm font-medium text-white transition-all"
+                                            style={{ backgroundColor: colors.primary }}>
+                                            Tutup
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* RSVP Modal Overlay */}
+                            {showRsvpModal && (
+                                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={() => setShowRsvpModal(false)}>
+                                    <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative text-white" onClick={e => e.stopPropagation()}>
+                                        <button onClick={() => setShowRsvpModal(false)} className="absolute top-4 right-4 text-white/70 hover:text-white text-2xl">&times;</button>
+                                        <h3 className="text-xl font-bold mb-4 text-center" style={{ color: colors.primary }}>{t('invitation.rsvp_title')}</h3>
+                                        
+                                        <form onSubmit={(e) => { handleRsvp(e); setShowRsvpModal(false); }} className="space-y-4">
+                                            <div className="flex gap-2">
+                                                {['hadir', 'tidak_hadir', 'ragu'].map(opt => (
+                                                    <button key={opt} type="button" onClick={() => rsvpForm.setData('attendance', opt)}
+                                                        className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${rsvpForm.data.attendance === opt ? 'text-white font-bold' : 'opacity-60'}`}
+                                                        style={{ backgroundColor: rsvpForm.data.attendance === opt ? colors.primary : colors.primary + '15', color: rsvpForm.data.attendance === opt ? '#fff' : '#fff' }}>
+                                                        {opt === 'hadir' ? t('invitation.rsvp_hadir') : opt === 'tidak_hadir' ? t('invitation.rsvp_tidak_hadir') : t('invitation.rsvp_belum_pasti')}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            {rsvpForm.data.attendance === 'hadir' && (
+                                                <div className="space-y-1">
+                                                    <label className="text-sm font-medium">{t('invitation.rsvp_count')}</label>
+                                                    <input type="number" value={rsvpForm.data.number_of_guests} min={1} max={5}
+                                                        onChange={(e) => rsvpForm.setData('number_of_guests', parseInt(e.target.value))}
+                                                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white outline-none focus:border-white text-black" />
+                                                </div>
+                                            )}
+                                            <button type="submit" disabled={rsvpForm.processing}
+                                                className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all hover:scale-105 active:scale-95" style={{ backgroundColor: colors.primary }}>
+                                                {rsvpForm.processing ? t('common.saving') : t('invitation.send_rsvp')}
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Wishes/Guestbook Modal Overlay */}
+                            {showWishesModal && (
+                                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={() => setShowWishesModal(false)}>
+                                    <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-6 max-w-md w-full shadow-2xl relative text-white flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
+                                        <button onClick={() => setShowWishesModal(false)} className="absolute top-4 right-4 text-white/70 hover:text-white text-2xl">&times;</button>
+                                        <h3 className="text-xl font-bold mb-4 text-center" style={{ color: colors.primary }}>{t('invitation.wishes_title')}</h3>
+                                        
+                                        <form onSubmit={handleWish} className="space-y-4 flex-shrink-0">
+                                            <input type="text" value={wishForm.data.sender_name}
+                                                onChange={(e) => wishForm.setData('sender_name', e.target.value)}
+                                                placeholder={t('invitation.wishes_name')} required
+                                                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white outline-none focus:border-white placeholder-white/50" />
+                                            
+                                            <WishesEmojiPicker
+                                                value={wishForm.data.message}
+                                                onChange={(newValue) => wishForm.setData('message', newValue)}
+                                                inputRef={wishesInputRef}
+                                                isDark={true}
+                                            >
+                                                <textarea
+                                                    ref={wishesInputRef} value={wishForm.data.message}
+                                                    onChange={(e) => wishForm.setData('message', e.target.value)}
+                                                    placeholder={t('invitation.wishes_msg')} required rows={3}
+                                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white resize-none outline-none focus:border-white placeholder-white/50" />
+                                            </WishesEmojiPicker>
+
+                                            <button type="submit" disabled={wishForm.processing}
+                                                className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all hover:scale-105 active:scale-95" style={{ backgroundColor: colors.primary }}>
+                                                {wishForm.processing ? t('common.saving') : t('invitation.send_wish')}
+                                            </button>
+                                        </form>
+
+                                        {wishes?.length > 0 && (
+                                            <div className="mt-6 space-y-2 overflow-y-auto pr-1 flex-1">
+                                                {wishes.map((w, i) => (
+                                                    <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-3 text-left">
+                                                        <div className="font-semibold text-sm" style={{ color: colors.primary }}>{w.sender_name}</div>
+                                                        <p className="text-sm text-white/80 mt-1">{w.message}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="relative" style={{ paddingBottom: (isDecorated || layoutMode === 'tab') ? '3.5rem' : '0' }}>
                         {/* QR Code button removed from here — now in left sidebar */}
                         {/* Music toggle removed from here — now in left sidebar */}
 
@@ -1114,7 +1439,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                         )}
 
                         {/* ═══ Left Sidebar: Nav + QR + Music ═══ */}
-                        {(layoutMode === 'tab' || isDecorated || invitation.show_side_menu) && (
+                        {!hasThreeD && (layoutMode === 'tab' || isDecorated || invitation.show_side_menu) && (
                             <div className="fixed left-3 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2">
                                 {/* Section navigation */}
                                 <nav className="flex flex-col items-center gap-1 px-1.5 py-2 rounded-full"
@@ -1243,6 +1568,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                             </div>
                         )}
                     </div>
+                    )
                 )}
             </div>
         </>

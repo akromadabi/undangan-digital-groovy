@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'super_admin' => \App\Http\Middleware\SuperAdminMiddleware::class,
+            'editor_or_super_admin' => \App\Http\Middleware\EditorOrSuperAdminMiddleware::class,
             'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
             'onboarding' => \App\Http\Middleware\CheckOnboarding::class,
             'invitation.lock' => \App\Http\Middleware\CheckInvitationLock::class,

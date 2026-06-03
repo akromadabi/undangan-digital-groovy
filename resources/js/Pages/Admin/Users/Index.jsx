@@ -28,11 +28,19 @@ export default function Index({ users, filters }) {
         <DynamicAdminLayout title="Manajemen User">
             <Head title="Admin - Users" />
             <div className="space-y-6">
-                {/* Search */}
-                <div className="flex items-center gap-3">
+                {/* Search & Actions */}
+                <div className="flex flex-col sm:flex-row items-center gap-3">
                     <input type="text" defaultValue={filters?.search || ''} placeholder="Cari nama / email..."
                         onKeyDown={(e) => e.key === 'Enter' && router.get(`${adminRoutePrefix}/users`, { search: e.target.value }, { preserveState: true })}
-                        className="flex-1 bg-white border border-[#e8e5e0] rounded-xl px-4 py-2.5 text-sm text-[#333] placeholder-[#bbb] focus:ring-1 focus:ring-[#E5654B] focus:border-[#E5654B]" />
+                        className="flex-1 bg-white border border-[#e8e5e0] rounded-xl px-4 py-2.5 text-sm text-[#333] placeholder-[#bbb] focus:ring-1 focus:ring-[#E5654B] focus:border-[#E5654B] w-full" />
+                    {isSuperAdmin && (
+                        <Link href={`${adminRoutePrefix}/users/create`} className="w-full sm:w-auto px-5 py-2.5 bg-[#E5654B] hover:bg-[#c94f3a] text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-sm shrink-0">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            <span>Tambah User</span>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Table */}
@@ -60,8 +68,15 @@ export default function Index({ users, filters }) {
                                                     {user.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <div className="font-medium text-[#333]">{user.name}</div>
-                                                    <div className="text-xs text-[#999] sm:hidden">{user.email}</div>
+                                                     <div className="font-medium text-[#333] flex items-center gap-2">
+                                                         <span>{user.name}</span>
+                                                         {user.role === 'editor' && (
+                                                             <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                                                                 Editor
+                                                             </span>
+                                                         )}
+                                                     </div>
+                                                     <div className="text-xs text-[#999] sm:hidden">{user.email}</div>
                                                 </div>
                                             </div>
                                         </td>

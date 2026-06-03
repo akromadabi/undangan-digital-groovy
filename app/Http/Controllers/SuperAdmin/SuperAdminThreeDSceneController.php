@@ -34,9 +34,21 @@ class SuperAdminThreeDSceneController extends Controller
             'config' => 'nullable|array',
             'thumbnail' => 'nullable|string|max:500',
             'is_active' => 'boolean',
+            'redirect_to' => 'nullable|string',
         ]);
 
-        ThreeDScene::create($validated);
+        // Remove redirect_to from validated data before database insertion
+        $dbData = collect($validated)->except('redirect_to')->toArray();
+        $scene = ThreeDScene::create($dbData);
+
+        if ($request->filled('redirect_to')) {
+            $redirectTo = $request->input('redirect_to');
+            if ($redirectTo === 'edit') {
+                return redirect()->route('super-admin.three-d-scenes.edit', $scene)
+                    ->with('success', 'Scene 3D berhasil dibuat! 🎨');
+            }
+            return redirect($redirectTo)->with('success', 'Scene 3D berhasil dibuat! 🎨');
+        }
 
         return redirect()->route('super-admin.three-d-scenes.index')
             ->with('success', 'Scene 3D berhasil dibuat! 🎨');
@@ -57,9 +69,20 @@ class SuperAdminThreeDSceneController extends Controller
             'config' => 'nullable|array',
             'thumbnail' => 'nullable|string|max:500',
             'is_active' => 'boolean',
+            'redirect_to' => 'nullable|string',
         ]);
 
-        $threeDScene->update($validated);
+        $dbData = collect($validated)->except('redirect_to')->toArray();
+        $threeDScene->update($dbData);
+
+        if ($request->filled('redirect_to')) {
+            $redirectTo = $request->input('redirect_to');
+            if ($redirectTo === 'edit') {
+                return redirect()->route('super-admin.three-d-scenes.edit', $threeDScene)
+                    ->with('success', 'Scene 3D berhasil diperbarui! ✨');
+            }
+            return redirect($redirectTo)->with('success', 'Scene 3D berhasil diperbarui! ✨');
+        }
 
         return redirect()->route('super-admin.three-d-scenes.index')
             ->with('success', 'Scene 3D berhasil diperbarui! ✨');
@@ -82,6 +105,7 @@ class SuperAdminThreeDSceneController extends Controller
         $request->validate([
             'file' => 'nullable|file|image|mimes:png,jpg,jpeg,webp|max:5120',
             'base64' => 'nullable|string',
+            'url' => 'nullable|string|url',
         ]);
 
         if ($request->hasFile('file')) {
@@ -114,6 +138,36 @@ class SuperAdminThreeDSceneController extends Controller
                     'success' => true,
                     'url' => '/storage/' . $path,
                 ]);
+            }
+        } elseif ($request->filled('url')) {
+            $imageUrl = $request->input('url');
+            try {
+                $opts = [
+                    "http" => [
+                        "method" => "GET",
+                        "header" => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36\r\n"
+                    ]
+                ];
+                $context = stream_context_create($opts);
+                $imageData = @file_get_contents($imageUrl, false, $context);
+                if ($imageData) {
+                    $cleanPath = parse_url($imageUrl, PHP_URL_PATH);
+                    $ext = pathinfo($cleanPath, PATHINFO_EXTENSION) ?: 'png';
+                    if (!in_array(strtolower($ext), ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'])) {
+                        $ext = 'png';
+                    }
+
+                    $fileName = uniqid() . '.' . $ext;
+                    $path = 'three_d_scenes/assets/' . $fileName;
+                    Storage::disk('public')->put($path, $imageData);
+
+                    return response()->json([
+                        'success' => true,
+                        'url' => '/storage/' . $path,
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                // Return fallback error log
             }
         }
 

@@ -164,6 +164,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'admin';
     }
 
+    public function isEditor(): bool
+    {
+        return $this->role === 'editor';
+    }
+
     public function currentPlan()
     {
         return $this->activeSubscription?->plan;

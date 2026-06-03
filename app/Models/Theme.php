@@ -33,6 +33,7 @@ class Theme extends Model
         'sort_order',
         'base_likes',
         'real_likes',
+        'three_d_scene_id',
     ];
 
     protected function casts(): array
@@ -60,6 +61,11 @@ class Theme extends Model
     public function invitations()
     {
         return $this->hasMany(Invitation::class);
+    }
+
+    public function threeDScene()
+    {
+        return $this->belongsTo(ThreeDScene::class);
     }
 
     public function scopeActive($query)

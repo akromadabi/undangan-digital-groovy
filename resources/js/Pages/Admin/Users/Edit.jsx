@@ -31,6 +31,7 @@ export default function Edit({ user, plans }) {
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
+        role: user.role || 'user',
         is_active: user.is_active ?? true,
         invitations: user.invitations?.map(inv => ({
             id: inv.id,
@@ -356,6 +357,20 @@ export default function Edit({ user, plans }) {
                                 <label className={labelClass}>Phone</label>
                                 <input type="text" value={data.phone} onChange={e => setData('phone', e.target.value)} className={inputClass} />
                             </div>
+                            {auth.user.role === 'super_admin' && (
+                                <div>
+                                    <label className={labelClass}>Role / Hak Akses</label>
+                                    <select
+                                        value={data.role}
+                                        onChange={e => setData('role', e.target.value)}
+                                        className={inputClass}
+                                    >
+                                        <option value="user">User Klien biasa</option>
+                                        <option value="editor">Editor (Staf)</option>
+                                    </select>
+                                    {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
+                                </div>
+                            )}
                             <div className="flex items-center gap-3 pt-5">
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" checked={data.is_active} onChange={e => setData('is_active', e.target.checked)} className="sr-only peer" />

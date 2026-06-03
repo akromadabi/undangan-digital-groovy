@@ -441,49 +441,20 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::resource('greeting-card-templates', \App\Http\Controllers\Admin\AdminGreetingCardTemplateController::class);
     Route::post('/greeting-card-templates/{greetingCardTemplate}/toggle-active', [\App\Http\Controllers\Admin\AdminGreetingCardTemplateController::class, 'toggleActive'])->name('greeting-card-templates.toggle-active');
 
-    // Static Previews
-    Route::get('/static-previews', function () {
-        return Inertia::render('SuperAdmin/StaticPreviews');
-    })->name('static-previews.index');
-
     // Reseller Management
     Route::resource('resellers', \App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class);
     Route::post('/resellers/{reseller}/prices', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'updatePrices'])->name('resellers.prices');
     Route::post('/resellers/{reseller}/reset-password', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'resetPassword'])->name('resellers.resetPassword');
     Route::post('/resellers/{reseller}/toggle-status', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'toggleStatus'])->name('resellers.toggleStatus');
 
-    // Global Management (themes, plans, music, quotes, settings, instagram filters)
+    // Global Management (plans, quotes, settings, instagram filters)
     Route::post('plans/update-greeting-card-price', [AdminPlanController::class, 'updateGreetingCardPrice'])->name('plans.update-greeting-card-price');
     Route::resource('plans', AdminPlanController::class);
     Route::resource('instagram-filters', \App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class);
     Route::post('/instagram-filters/{instagramFilter}/toggle-active', [\App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class, 'toggleActive'])->name('instagram-filters.toggle-active');
 
-    // 3D Parallax Canvas Scenes
-    Route::post('three-d-scenes/upload-asset', [\App\Http\Controllers\SuperAdmin\SuperAdminThreeDSceneController::class, 'uploadAsset'])->name('three-d-scenes.upload-asset');
-    Route::post('three-d-scenes/{three_d_scene}/toggle-active', [\App\Http\Controllers\SuperAdmin\SuperAdminThreeDSceneController::class, 'toggleActive'])->name('three-d-scenes.toggle-active');
-    Route::resource('three-d-scenes', \App\Http\Controllers\SuperAdmin\SuperAdminThreeDSceneController::class)->parameters([
-        'three-d-scenes' => 'three_d_scene'
-    ]);
-
-    Route::post('themes/{theme}/toggle-active', [AdminThemeController::class, 'toggleActive'])->name('themes.toggle-active');
-    Route::post('themes/categories/store', [AdminThemeController::class, 'storeCategory'])->name('themes.categories.store');
-    Route::post('themes/categories/update', [AdminThemeController::class, 'updateCategory'])->name('themes.categories.update');
-    Route::post('themes/categories/delete', [AdminThemeController::class, 'deleteCategory'])->name('themes.categories.delete');
-    Route::resource('themes', AdminThemeController::class);
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
-
-    // Music Library
-    Route::get('/music', [AdminMusicController::class, 'index'])->name('music.index');
-    Route::post('/music', [AdminMusicController::class, 'store'])->name('music.store');
-    Route::put('/music/{id}', [AdminMusicController::class, 'update'])->name('music.update');
-    Route::delete('/music/{id}', [AdminMusicController::class, 'destroy'])->name('music.destroy');
-    Route::post('/music/{id}/toggle', [AdminMusicController::class, 'toggleActive'])->name('music.toggle');
-    Route::post('/music/categories', [AdminMusicController::class, 'saveCategories'])->name('music.saveCategories');
-    Route::post('/music/claim', [AdminMusicController::class, 'claimUserMusic'])->name('music.claim');
-    Route::post('/music/convert-youtube', [AdminMusicController::class, 'convertYoutube'])->name('music.convert');
-    Route::post('/music/crop', [AdminMusicController::class, 'cropMusic'])->name('music.crop');
-    Route::post('/music/compress', [AdminMusicController::class, 'compressMusic'])->name('music.compress');
 
     // Quote Templates
     Route::get('/quotes', [\App\Http\Controllers\Admin\AdminQuoteController::class, 'index'])->name('quotes.index');
@@ -497,9 +468,6 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::post('/users/{user}/change-plan', [AdminUserController::class, 'changePlan'])->name('users.changePlan');
     Route::post('/users/{user}/extend-subscription', [AdminUserController::class, 'extendSubscription'])->name('users.extendSubscription');
     Route::post('/greeting-cards/{greetingCard}/toggle-active', [AdminUserController::class, 'toggleGreetingCard'])->name('users.toggleGreetingCard');
-
-    // File Upload
-    Route::post('/upload', [\App\Http\Controllers\Dashboard\DashboardController::class, 'upload'])->name('upload');
 
     // Withdrawal Management
     Route::get('/withdrawals', [\App\Http\Controllers\SuperAdmin\WithdrawalManagementController::class, 'index'])->name('withdrawals.index');
@@ -518,6 +486,45 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     // Impersonation
     Route::post('/impersonate/user/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateUser'])->name('impersonate.user');
     Route::post('/impersonate/reseller/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateReseller'])->name('impersonate.reseller');
+});
+
+// ═══════════════════════════════════════
+// Super Admin & Editor Shared Panel (Themes, 3D Canvas, Music)
+// ═══════════════════════════════════════
+Route::middleware(['auth', 'editor_or_super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
+    // Static Previews
+    Route::get('/static-previews', function () {
+        return Inertia::render('SuperAdmin/StaticPreviews');
+    })->name('static-previews.index');
+
+    // 3D Parallax Canvas Scenes
+    Route::post('three-d-scenes/upload-asset', [\App\Http\Controllers\SuperAdmin\SuperAdminThreeDSceneController::class, 'uploadAsset'])->name('three-d-scenes.upload-asset');
+    Route::post('three-d-scenes/{three_d_scene}/toggle-active', [\App\Http\Controllers\SuperAdmin\SuperAdminThreeDSceneController::class, 'toggleActive'])->name('three-d-scenes.toggle-active');
+    Route::resource('three-d-scenes', \App\Http\Controllers\SuperAdmin\SuperAdminThreeDSceneController::class)->parameters([
+        'three-d-scenes' => 'three_d_scene'
+    ]);
+
+    // Themes Management
+    Route::post('themes/{theme}/toggle-active', [AdminThemeController::class, 'toggleActive'])->name('themes.toggle-active');
+    Route::post('themes/categories/store', [AdminThemeController::class, 'storeCategory'])->name('themes.categories.store');
+    Route::post('themes/categories/update', [AdminThemeController::class, 'updateCategory'])->name('themes.categories.update');
+    Route::post('themes/categories/delete', [AdminThemeController::class, 'deleteCategory'])->name('themes.categories.delete');
+    Route::resource('themes', AdminThemeController::class);
+
+    // Music Library
+    Route::get('/music', [AdminMusicController::class, 'index'])->name('music.index');
+    Route::post('/music', [AdminMusicController::class, 'store'])->name('music.store');
+    Route::put('/music/{id}', [AdminMusicController::class, 'update'])->name('music.update');
+    Route::delete('/music/{id}', [AdminMusicController::class, 'destroy'])->name('music.destroy');
+    Route::post('/music/{id}/toggle', [AdminMusicController::class, 'toggleActive'])->name('music.toggle');
+    Route::post('/music/categories', [AdminMusicController::class, 'saveCategories'])->name('music.saveCategories');
+    Route::post('/music/claim', [AdminMusicController::class, 'claimUserMusic'])->name('music.claim');
+    Route::post('/music/convert-youtube', [AdminMusicController::class, 'convertYoutube'])->name('music.convert');
+    Route::post('/music/crop', [AdminMusicController::class, 'cropMusic'])->name('music.crop');
+    Route::post('/music/compress', [AdminMusicController::class, 'compressMusic'])->name('music.compress');
+
+    // File Upload
+    Route::post('/upload', [\App\Http\Controllers\Dashboard\DashboardController::class, 'upload'])->name('upload');
 });
 
 // ═══════════════════════════════════════
