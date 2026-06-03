@@ -23,3 +23,10 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /scratch
+
+# Temporary/reference files — jangan di-commit
+/BAHAN
+diff.txt
+diff_player.txt
+diff_utf8.txt
+orig_editor.jsx
