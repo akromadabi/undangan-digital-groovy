@@ -96,15 +96,21 @@ export default function Template({ step, themes, selectedThemeId }) {
                 })}
             </div>
 
-            <div className="flex gap-4 mt-8">
-                <button type="button" onClick={() => router.visit(route('wizard.events', undefined, false))}
-                    className="flex-1 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-lg transition-all text-center">
-                    ← Kembali
-                </button>
-                <button onClick={handleSubmit} disabled={!selected || submitting}
-                    className="flex-[2] py-4 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
-                    {submitting ? 'Memproses...' : 'Buat Undangan Saya'}
-                </button>
+            {/* Spacer to prevent content overlapping with the fixed footer */}
+            <div className="h-28"></div>
+
+            {/* Floating action bar at the bottom */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 py-4 px-4 z-40 shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
+                <div className="max-w-3xl mx-auto flex gap-4">
+                    <button type="button" onClick={() => router.visit(route('wizard.events', undefined, false))}
+                        className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-base transition-all text-center">
+                        ← Kembali
+                    </button>
+                    <button onClick={handleSubmit} disabled={!selected || submitting}
+                        className="flex-[2] py-3.5 bg-gradient-to-r from-[#E5654B] to-[#c24b33] text-white rounded-xl font-bold text-base hover:shadow-lg transition-all disabled:opacity-50">
+                        {submitting ? 'Memproses...' : 'Buat Undangan Saya'}
+                    </button>
+                </div>
             </div>
         </WizardLayout>
     );

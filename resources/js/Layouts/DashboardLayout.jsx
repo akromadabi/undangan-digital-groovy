@@ -123,6 +123,51 @@ export default function DashboardLayout({ children, title }) {
 
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
 
+    // Notification Dropdown state
+    const [notifications, setNotifications] = useState([]);
+    const [notifCount, setNotifCount] = useState(0);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const notifRef = useRef(null);
+
+    // Fetch notifications from the backend
+    const fetchNotifications = async () => {
+        try {
+            const lastViewed = localStorage.getItem('notifications_viewed_at') || '';
+            const response = await fetch(`/admin/notifications-data?last_viewed_at=${encodeURIComponent(lastViewed)}`);
+            if (response.ok) {
+                const data = await response.json();
+                setNotifications(data.notifications || []);
+                setNotifCount(data.count || 0);
+            }
+        } catch (e) {
+            console.error('Failed to fetch notifications:', e);
+        }
+    };
+
+    const handleOpenNotif = () => {
+        setNotifOpen(!notifOpen);
+        if (!notifOpen) {
+            setNotifCount(0);
+            localStorage.setItem('notifications_viewed_at', new Date().toISOString());
+        }
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+        // Poll every 30 seconds for dynamic updates
+        const interval = setInterval(fetchNotifications, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Close notification dropdown when clicking outside
+    useEffect(() => {
+        const handleClick = (e) => {
+            if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
     // Close avatar dropdown when clicking outside
     useEffect(() => {
         const handleClick = (e) => {
@@ -303,25 +348,86 @@ export default function DashboardLayout({ children, title }) {
                         <div className="hidden sm:block">
                             <RoleSwitcher auth={auth} />
                         </div>
-                        {/* Desktop buttons */}
-                        <a
-                            href={`/u/${auth.user?.invitation_slug || ''}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#E5654B] bg-[#E5654B]/5 hover:bg-[#E5654B]/10 transition-colors"
-                        >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                            Preview
-                        </a>
-                        <Link href="/profile" className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-[#777] hover:bg-[#f5f3f0] transition-colors">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Account
-                        </Link>
+                        {/* Preview Invitation Link (Eye Icon) - Visible on both desktop & mobile */}
+                        {auth.user?.invitation_slug && (
+                            <a
+                                href={`/u/${auth.user.invitation_slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 rounded-xl hover:bg-[#fef2f0] text-[#999] hover:text-[#E5654B] transition-colors"
+                                title="Preview Undangan"
+                            >
+                                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </a>
+                        )}
+
+                        {/* ═══ Notification Bell Dropdown (Visible on both desktop & mobile) ═══ */}
+                        <div className="relative" ref={notifRef}>
+                            <button
+                                onClick={handleOpenNotif}
+                                className="relative p-2 rounded-xl text-gray-500 hover:text-[#E5654B] hover:bg-gray-50 transition-colors focus:outline-none"
+                            >
+                                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                </svg>
+                                {notifCount > 0 && (
+                                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-white">
+                                        {notifCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {notifOpen && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#e8e5e0] py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                                    <div className="px-4 py-2.5 border-b border-[#f0ede8] flex items-center justify-between">
+                                        <span className="font-bold text-sm text-[#1a1a1a]">Notifikasi</span>
+                                        {notifCount > 0 && (
+                                            <span className="text-xs bg-[#E5654B]/10 text-[#E5654B] font-bold px-2 py-0.5 rounded-full">
+                                                {notifCount} baru
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="max-h-64 overflow-y-auto divide-y divide-[#f0ede8]">
+                                        {notifications.length > 0 ? (
+                                            notifications.map((notif) => (
+                                                <Link
+                                                    key={notif.id}
+                                                    href={notif.action_url}
+                                                    className={`block p-4 hover:bg-gray-50/80 transition-colors text-left ${
+                                                        notif.is_unread ? 'bg-orange-50/10' : ''
+                                                    }`}
+                                                    onClick={() => setNotifOpen(false)}
+                                                >
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                                                            {notif.badge}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400 font-medium">{notif.time}</span>
+                                                    </div>
+                                                    <div className="text-xs font-semibold text-gray-800 mt-1.5 leading-snug">
+                                                        {notif.title}
+                                                    </div>
+                                                    <div className="text-[11px] text-gray-500 mt-1 leading-normal">
+                                                        {notif.message}
+                                                    </div>
+                                                    <div className="text-[10px] text-[#E5654B] font-bold mt-2 flex items-center gap-1">
+                                                        Tindak Lanjut →
+                                                    </div>
+                                                </Link>
+                                            ))
+                                        ) : (
+                                            <div className="p-8 text-center text-gray-400 text-xs">
+                                                Tidak ada notifikasi baru
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Avatar dropdown */}
                         <div className="relative" ref={avatarRef}>

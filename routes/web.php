@@ -457,6 +457,14 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::resource('plans', AdminPlanController::class);
     Route::resource('instagram-filters', \App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class);
     Route::post('/instagram-filters/{instagramFilter}/toggle-active', [\App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class, 'toggleActive'])->name('instagram-filters.toggle-active');
+
+    // 3D Parallax Canvas Scenes
+    Route::post('three-d-scenes/upload-asset', [\App\Http\Controllers\SuperAdmin\SuperAdminThreeDSceneController::class, 'uploadAsset'])->name('three-d-scenes.upload-asset');
+    Route::post('three-d-scenes/{three_d_scene}/toggle-active', [\App\Http\Controllers\SuperAdmin\SuperAdminThreeDSceneController::class, 'toggleActive'])->name('three-d-scenes.toggle-active');
+    Route::resource('three-d-scenes', \App\Http\Controllers\SuperAdmin\SuperAdminThreeDSceneController::class)->parameters([
+        'three-d-scenes' => 'three_d_scene'
+    ]);
+
     Route::post('themes/{theme}/toggle-active', [AdminThemeController::class, 'toggleActive'])->name('themes.toggle-active');
     Route::post('themes/categories/store', [AdminThemeController::class, 'storeCategory'])->name('themes.categories.store');
     Route::post('themes/categories/update', [AdminThemeController::class, 'updateCategory'])->name('themes.categories.update');
@@ -620,6 +628,72 @@ Route::middleware(['auth'])->group(function () {
                     'action_url' => '/admin/users',
                     'is_unread' => $isUnread,
                     'badge' => 'User Baru'
+                ];
+                if ($isUnread) $count++;
+            }
+        } else {
+            // Normal Client User
+            $invitation = $user->invitation;
+            if ($invitation) {
+                // Fetch recent RSVPs
+                $recentRsvps = $invitation->rsvps()
+                    ->with('guest')
+                    ->latest()
+                    ->take(10)
+                    ->get();
+                
+                foreach ($recentRsvps as $rsvp) {
+                    $guestName = $rsvp->guest ? $rsvp->guest->name : 'Tamu';
+                    $statusText = $rsvp->attendance === 'hadir' ? 'Hadir' : 'Tidak Hadir';
+                    $badgeColor = $rsvp->attendance === 'hadir' ? 'Hadir' : 'Absen';
+                    
+                    $isUnread = $lastViewed ? ($rsvp->created_at ? $rsvp->created_at->gt($lastViewed) : true) : true;
+                    
+                    $notifications[] = [
+                        'id' => 'rsvp-' . $rsvp->id,
+                        'type' => 'rsvp_response',
+                        'title' => "RSVP Baru: {$guestName}",
+                        'message' => "{$guestName} mengonfirmasi {$statusText}" . ($rsvp->number_of_guests > 1 ? " bersama {$rsvp->number_of_guests} orang." : "."),
+                        'time' => $rsvp->created_at ? $rsvp->created_at->diffForHumans() : 'baru saja',
+                        'action_url' => '/settings/tamu',
+                        'is_unread' => $isUnread,
+                        'badge' => $badgeColor
+                    ];
+                    if ($isUnread) $count++;
+                }
+
+                // Fetch recent wishes
+                $recentWishes = $invitation->wishes()
+                    ->latest()
+                    ->take(10)
+                    ->get();
+                
+                foreach ($recentWishes as $wish) {
+                    $isUnread = $lastViewed ? ($wish->created_at ? $wish->created_at->gt($lastViewed) : true) : true;
+                    
+                    $notifications[] = [
+                        'id' => 'wish-' . $wish->id,
+                        'type' => 'wish_response',
+                        'title' => "Ucapan & Doa: {$wish->sender_name}",
+                        'message' => "\"{$wish->message}\"",
+                        'time' => $wish->created_at ? $wish->created_at->diffForHumans() : 'baru saja',
+                        'action_url' => '/dashboard',
+                        'is_unread' => $isUnread,
+                        'badge' => 'Ucapan & Doa'
+                    ];
+                    if ($isUnread) $count++;
+                }
+            } else {
+                $isUnread = $lastViewed ? false : true;
+                $notifications[] = [
+                    'id' => 'welcome-onboarding',
+                    'type' => 'onboarding',
+                    'title' => 'Mulai Undangan Anda',
+                    'message' => 'Selamat datang! Silakan klik tombol buat undangan untuk memulai membuat undangan pertama Anda.',
+                    'time' => 'Baru saja',
+                    'action_url' => '/dashboard',
+                    'is_unread' => $isUnread,
+                    'badge' => 'Onboarding'
                 ];
                 if ($isUnread) $count++;
             }
