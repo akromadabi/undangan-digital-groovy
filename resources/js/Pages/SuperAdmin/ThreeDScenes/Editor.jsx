@@ -8621,8 +8621,6 @@ export default function ThreeDSceneEditor({ scene = null }) {
                             </div>
                         )}
 
-                        )}
-
                         {/* Left Docked Sidebar Drawer Panel for 3D Space & Depth Manager */}
                         {immersiveActivePanel === 'depth' && (
                             <div className="w-80 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full z-30 select-none animate-in fade-in slide-in-from-left-4 duration-150 flex-shrink-0 text-white overflow-hidden">
