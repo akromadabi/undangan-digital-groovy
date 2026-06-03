@@ -4,7 +4,7 @@ import {
     Layers, ArrowLeft, Plus, Trash2, Save, Play, Pause, Camera, 
     Upload, Brush, Edit3, Move, Eye, EyeOff, RotateCw, ZoomIn, 
     ChevronRight, Undo2, Redo2, RotateCcw, Check, Sparkles, Scissors, Eraser,
-    HelpCircle, Type
+    HelpCircle, Type, Maximize2, Minimize2, SlidersHorizontal, X
 } from 'lucide-react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
 import * as THREE from 'three';
@@ -140,6 +140,10 @@ export default function ThreeDSceneEditor({ scene = null }) {
     const [showShortcutsModal, setShowShortcutsModal] = useState(false);
     const [showDrawingPad, setShowDrawingPad] = useState(false);
     const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+    
+    // Immersive fullscreen creative mode states
+    const [isImmersive, setIsImmersive] = useState(false);
+    const [immersiveActivePanel, setImmersiveActivePanel] = useState(null); // null | 'layers' | 'keyframes' | 'settings' | 'inspector'
 
     // Background Remover State & Refs
     const bgCanvasRef = useRef(null);
@@ -436,6 +440,50 @@ export default function ThreeDSceneEditor({ scene = null }) {
             initParticleSystem(sceneRef.current, data.config.particleType || 'none');
         }
     }, [data.config.particleType]);
+
+    const toggleImmersiveMode = () => {
+        const nextImmersive = !isImmersive;
+        setIsImmersive(nextImmersive);
+        
+        if (nextImmersive) {
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen().catch(() => {});
+            }
+        } else {
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+        }, 150);
+    };
+
+    // Keep isImmersive in sync with native browser fullscreen changes (e.g. Esc key)
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            const isCurrentlyFullscreen = !!document.fullscreenElement;
+            if (!isCurrentlyFullscreen && isImmersive) {
+                setIsImmersive(false);
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 150);
+            }
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        };
+    }, [isImmersive]);
+
+    // Automatically open immersive inspector when a layer is selected in fullscreen mode
+    useEffect(() => {
+        if (isImmersive && selectedLayerId) {
+            setImmersiveActivePanel('inspector');
+        }
+    }, [selectedLayerId, isImmersive]);
 
     // Initialize config history
     useEffect(() => {
@@ -2468,6 +2516,15 @@ export default function ThreeDSceneEditor({ scene = null }) {
 
                         <button
                             type="button"
+                            onClick={toggleImmersiveMode}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-850 text-white text-xs font-bold rounded-xl transition shadow-sm"
+                        >
+                            <Maximize2 className="w-4 h-4" />
+                            Mode Imersif (Full Screen)
+                        </button>
+
+                        <button
+                            type="button"
                             onClick={handleSubmit}
                             disabled={processing}
                             className="inline-flex items-center gap-2 px-5 py-2 bg-[#E5654B] hover:bg-[#c24b33] text-white text-sm font-semibold rounded-xl transition shadow-sm"
@@ -2479,21 +2536,659 @@ export default function ThreeDSceneEditor({ scene = null }) {
                 </div>
 
                 {/* Editor Content Area */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div className={`grid gap-5 ${isImmersive ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
                     {/* Viewport 3D (Left/Center) */}
-                    <div className="lg:col-span-2 flex flex-col bg-[#151518] rounded-2xl overflow-hidden border border-stone-800 relative group">
+                    <div className={`flex flex-col bg-[#151518] relative group transition-all duration-300 ${
+                        isImmersive 
+                            ? 'fixed inset-0 w-screen h-screen z-40 rounded-none border-none overflow-hidden' 
+                            : 'lg:col-span-2 rounded-2xl overflow-hidden border border-stone-800'
+                    }`}>
                         <div 
                             ref={containerRef} 
-                            className="w-full h-[500px] cursor-grab active:cursor-grabbing relative"
+                            className={`w-full cursor-grab active:cursor-grabbing relative transition-all duration-300 ${
+                                isImmersive ? 'h-screen' : 'h-[500px]'
+                            }`}
                         />
 
                         {/* Viewport Controls Overlays */}
-                        <div className="absolute top-4 left-4 pointer-events-none flex flex-col gap-2">
-                            <div className="bg-black/75 backdrop-filter backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-white text-[10px] flex items-center gap-1.5">
-                                <Sparkles className="w-3.5 h-3.5 text-[#E5654B]" />
-                                <span>Gunakan klik-kiri + drag untuk rotasi kamera, klik-kanan + drag untuk menggeser.</span>
+                        {!isImmersive && (
+                            <div className="absolute top-4 left-4 pointer-events-none flex flex-col gap-2">
+                                <div className="bg-black/75 backdrop-filter backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-white text-[10px] flex items-center gap-1.5">
+                                    <Sparkles className="w-3.5 h-3.5 text-[#E5654B]" />
+                                    <span>Gunakan klik-kiri + drag untuk rotasi kamera, klik-kanan + drag untuk menggeser.</span>
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {/* Immersive Float Toolbar (Mental Canvas layout) */}
+                        {isImmersive && (
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-50 select-none">
+                                <div className="bg-[#18181b]/95 backdrop-blur-md border border-white/10 rounded-2xl p-2.5 flex flex-col gap-2.5 shadow-2xl">
+                                    {/* Exit Immersive Button */}
+                                    <button
+                                        type="button"
+                                        onClick={toggleImmersiveMode}
+                                        className="p-2.5 bg-stone-950 hover:bg-[#E5654B] text-white rounded-xl transition-all shadow flex items-center justify-center border border-white/5"
+                                        title="Keluar Mode Imersif"
+                                    >
+                                        <Minimize2 className="w-5 h-5" />
+                                    </button>
+
+                                    <div className="h-px bg-white/10 my-0.5" />
+
+                                    {/* Layers Panel Toggle */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setImmersiveActivePanel(immersiveActivePanel === 'layers' ? null : 'layers')}
+                                        className={`p-2.5 rounded-xl transition-all shadow flex items-center justify-center border ${
+                                            immersiveActivePanel === 'layers'
+                                                ? 'bg-[#E5654B] border-[#E5654B] text-white font-bold'
+                                                : 'bg-stone-950 border-white/5 hover:bg-stone-900 text-white/80 hover:text-white'
+                                        }`}
+                                        title="Manajer Layer"
+                                    >
+                                        <Layers className="w-5 h-5" />
+                                    </button>
+
+                                    {/* Keyframes Panel Toggle */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setImmersiveActivePanel(immersiveActivePanel === 'keyframes' ? null : 'keyframes')}
+                                        className={`p-2.5 rounded-xl transition-all shadow flex items-center justify-center border ${
+                                            immersiveActivePanel === 'keyframes'
+                                                ? 'bg-[#E5654B] border-[#E5654B] text-white font-bold'
+                                                : 'bg-stone-950 border-white/5 hover:bg-stone-900 text-white/80 hover:text-white'
+                                        }`}
+                                        title="Keyframe Kamera"
+                                    >
+                                        <Camera className="w-5 h-5" />
+                                    </button>
+
+                                    {/* Settings Panel Toggle */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setImmersiveActivePanel(immersiveActivePanel === 'settings' ? null : 'settings')}
+                                        className={`p-2.5 rounded-xl transition-all shadow flex items-center justify-center border ${
+                                            immersiveActivePanel === 'settings'
+                                                ? 'bg-[#E5654B] border-[#E5654B] text-white font-bold'
+                                                : 'bg-stone-950 border-white/5 hover:bg-stone-900 text-white/80 hover:text-white'
+                                        }`}
+                                        title="Pengaturan Lingkungan"
+                                    >
+                                        <SlidersHorizontal className="w-5 h-5" />
+                                    </button>
+
+                                    {/* Layer Inspector Toggle - only active when a layer is selected */}
+                                    {selectedLayer && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setImmersiveActivePanel(immersiveActivePanel === 'inspector' ? null : 'inspector')}
+                                            className={`p-2.5 rounded-xl transition-all shadow flex items-center justify-center border ${
+                                                immersiveActivePanel === 'inspector'
+                                                    ? 'bg-[#E5654B] border-[#E5654B] text-white font-bold'
+                                                    : 'bg-stone-950 border-white/5 hover:bg-stone-900 text-white/80 hover:text-white'
+                                            }`}
+                                            title={`Inspector Layer: ${selectedLayer.name}`}
+                                        >
+                                            <Edit3 className="w-5 h-5" />
+                                        </button>
+                                    )}
+
+                                    <div className="h-px bg-white/10 my-0.5" />
+
+                                    {/* Undo / Redo triggers */}
+                                    <button
+                                        type="button"
+                                        onClick={handleEditorUndo}
+                                        className="p-2.5 bg-stone-950 hover:bg-stone-900 text-white/80 hover:text-white rounded-xl transition-all shadow flex items-center justify-center border border-white/5"
+                                        title="Undo (Ctrl+Z)"
+                                    >
+                                        <Undo2 className="w-5 h-5" />
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleEditorRedo}
+                                        className="p-2.5 bg-stone-950 hover:bg-stone-900 text-white/80 hover:text-white rounded-xl transition-all shadow flex items-center justify-center border border-white/5"
+                                        title="Redo (Ctrl+Y)"
+                                    >
+                                        <Redo2 className="w-5 h-5" />
+                                    </button>
+
+                                    <div className="h-px bg-white/10 my-0.5" />
+
+                                    {/* Save Button */}
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmit}
+                                        disabled={processing}
+                                        className="p-2.5 bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white rounded-xl transition-all shadow flex items-center justify-center border border-green-700"
+                                        title="Simpan Scene"
+                                    >
+                                        <Save className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Immersive Floating Panels */}
+                        {isImmersive && immersiveActivePanel === 'layers' && (
+                            <div className="absolute left-24 top-1/2 -translate-y-1/2 w-80 bg-stone-950/90 backdrop-blur-xl border border-white/15 rounded-2xl p-4 shadow-2xl z-50 text-white max-h-[85vh] overflow-y-auto flex flex-col gap-3 select-none animate-in fade-in slide-in-from-left-4 duration-150">
+                                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                                    <span className="text-xs font-bold">Layer Manager ({data.config.layers.length})</span>
+                                    <button onClick={() => setImmersiveActivePanel(null)} className="text-white/60 hover:text-white">
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                
+                                <div className="flex items-center gap-2 mb-1 justify-end">
+                                    {/* File Upload Input */}
+                                    <label className="p-2 bg-stone-900 border border-white/10 text-white rounded-xl hover:bg-stone-850 transition cursor-pointer flex items-center gap-1.5 text-[10px] font-bold" title="Upload PNG Transparan">
+                                        <Upload className="w-3.5 h-3.5" />
+                                        <span>Unggah PNG</span>
+                                        <input 
+                                            type="file" 
+                                            accept="image/png" 
+                                            className="hidden" 
+                                            onChange={handleFileUpload} 
+                                        />
+                                    </label>
+                                    
+                                    {/* Open Drawing pad */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowDrawingPad(true)}
+                                        className="p-2 bg-stone-900 border border-white/10 text-white rounded-xl hover:bg-stone-850 transition flex items-center gap-1.5 text-[10px] font-bold"
+                                        title="Gambar Langsung"
+                                    >
+                                        <Brush className="w-3.5 h-3.5" />
+                                        <span>Lukis</span>
+                                    </button>
+
+                                    {/* Add Text Layer */}
+                                    <button
+                                        type="button"
+                                        onClick={handleAddTextLayer}
+                                        className="p-2 bg-stone-900 border border-white/10 text-white rounded-xl hover:bg-stone-850 transition flex items-center gap-1.5 text-[10px] font-bold"
+                                        title="Tambah Teks"
+                                    >
+                                        <Type className="w-3.5 h-3.5" />
+                                        <span>Teks</span>
+                                    </button>
+                                </div>
+
+                                {data.config.layers.length === 0 ? (
+                                    <div className="bg-stone-900/50 border border-white/5 rounded-xl p-4 text-center">
+                                        <p className="text-[11px] text-stone-400">Belum ada layer. Tambahkan gambar PNG, lukis, atau buat teks melayang.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-1.5 max-h-[40vh] overflow-y-auto pr-1">
+                                        {data.config.layers.map(layer => (
+                                            <div 
+                                                key={layer.id}
+                                                onClick={() => setSelectedLayerId(layer.id)}
+                                                className={`flex items-center justify-between p-2 rounded-xl border text-[11px] transition cursor-pointer ${
+                                                    selectedLayerId === layer.id
+                                                        ? 'bg-[#E5654B]/15 border-[#E5654B] text-[#E5654B]'
+                                                        : 'bg-stone-950/40 hover:bg-stone-900/60 border-white/10 text-stone-200'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-2 truncate">
+                                                    {layer.type === 'text' ? (
+                                                        <div className="w-8 h-8 rounded-lg bg-stone-900 border border-white/10 flex items-center justify-center text-stone-300 font-bold font-serif text-sm">
+                                                            T
+                                                        </div>
+                                                    ) : (
+                                                        <img 
+                                                            src={layer.url} 
+                                                            alt={layer.name} 
+                                                            className="w-8 h-8 rounded-lg object-contain bg-stone-900 border border-white/10" 
+                                                        />
+                                                    )}
+                                                    <div className="truncate">
+                                                        <p className="font-bold truncate">{layer.name}</p>
+                                                        <p className="text-[9px] text-stone-400 capitalize">{layer.type}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            updateLayerProperty(layer.id, 'visible', !layer.visible);
+                                                            saveHistoryState(data.config);
+                                                        }}
+                                                        className="p-1 hover:bg-stone-850 rounded text-stone-400 hover:text-white"
+                                                    >
+                                                        {layer.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if(confirm('Hapus layer ini?')) {
+                                                                deleteLayer(layer.id);
+                                                            }
+                                                        }}
+                                                        className="p-1 hover:bg-red-950/40 rounded text-stone-400 hover:text-red-400"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Immersive Inspector Panel */}
+                        {isImmersive && immersiveActivePanel === 'inspector' && selectedLayer && (
+                            <div className="absolute left-24 top-1/2 -translate-y-1/2 w-80 bg-stone-950/90 backdrop-blur-xl border border-white/15 rounded-2xl p-4 shadow-2xl z-50 text-white max-h-[85vh] overflow-y-auto flex flex-col gap-3 select-none animate-in fade-in slide-in-from-left-4 duration-150">
+                                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                                    <div className="truncate pr-4">
+                                        <p className="text-xs font-bold truncate">Inspector: {selectedLayer.name}</p>
+                                        <p className="text-[9px] text-stone-400 capitalize">{selectedLayer.type} Layer</p>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        {selectedLayer.type === 'upload' && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setBgRemoverLayer(selectedLayer);
+                                                    setShowBgRemover(true);
+                                                }}
+                                                className="inline-flex items-center gap-1 px-2 py-1 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-lg text-[9px] font-bold transition shadow-sm border border-[#E5654B]"
+                                            >
+                                                <Scissors className="w-3 h-3" />
+                                                <span>Hapus Latar</span>
+                                            </button>
+                                        )}
+                                        <button onClick={() => setImmersiveActivePanel(null)} className="text-white/60 hover:text-white">
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Text Options if type === text */}
+                                {selectedLayer.type === 'text' && (
+                                    <div className="space-y-2.5 p-2.5 bg-white/5 rounded-xl border border-white/5 text-[9px] text-stone-300">
+                                        <div className="space-y-1">
+                                            <span className="font-bold text-stone-400">Konten Teks</span>
+                                            <textarea
+                                                rows={2}
+                                                value={selectedLayer.text || ''}
+                                                onChange={e => updateLayerProperty(selectedLayer.id, 'text', e.target.value)}
+                                                onBlur={() => saveHistoryState(data.config)}
+                                                className="w-full text-xs p-2 bg-stone-900 border border-white/10 rounded-xl focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none text-white transition"
+                                                placeholder="Tulis teks..."
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="space-y-1">
+                                                <span className="font-bold text-stone-400">Jenis Font</span>
+                                                <select
+                                                    value={selectedLayer.fontFamily || 'Playfair Display'}
+                                                    onChange={e => {
+                                                        updateLayerProperty(selectedLayer.id, 'fontFamily', e.target.value);
+                                                        saveHistoryState(data.config);
+                                                    }}
+                                                    className="w-full text-[9px] p-1 bg-stone-900 border border-white/10 text-white rounded-lg outline-none"
+                                                >
+                                                    <option value="Playfair Display">Playfair Display</option>
+                                                    <option value="Great Vibes">Great Vibes</option>
+                                                    <option value="Alex Brush">Alex Brush</option>
+                                                    <option value="Dancing Script">Dancing Script</option>
+                                                    <option value="Cinzel">Cinzel</option>
+                                                    <option value="Montserrat">Montserrat</option>
+                                                    <option value="Arial">Arial</option>
+                                                </select>
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                <span className="font-bold text-stone-400">Warna Teks</span>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <input
+                                                        type="color"
+                                                        value={selectedLayer.color || '#E5654B'}
+                                                        onChange={e => updateLayerProperty(selectedLayer.id, 'color', e.target.value)}
+                                                        onBlur={() => saveHistoryState(data.config)}
+                                                        className="w-5 h-5 p-0 border border-white/10 rounded cursor-pointer bg-transparent"
+                                                    />
+                                                    <span className="font-mono text-[8px] text-stone-400">{selectedLayer.color}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="space-y-1">
+                                                <span className="font-bold text-stone-400">Resolusi ({selectedLayer.fontSize || 64}px)</span>
+                                                <input
+                                                    type="range"
+                                                    min="32"
+                                                    max="128"
+                                                    step="4"
+                                                    value={selectedLayer.fontSize || 64}
+                                                    onChange={e => updateLayerProperty(selectedLayer.id, 'fontSize', parseInt(e.target.value))}
+                                                    onMouseUp={() => saveHistoryState(data.config)}
+                                                    onTouchEnd={() => saveHistoryState(data.config)}
+                                                    className="w-full accent-[#E5654B]"
+                                                />
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                <span className="font-bold text-stone-400">Gaya & Tebal</span>
+                                                <div className="flex gap-1 mt-0.5">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const nextVal = selectedLayer.fontWeight === 'bold' ? 'normal' : 'bold';
+                                                            updateLayerProperty(selectedLayer.id, 'fontWeight', nextVal);
+                                                            saveHistoryState(data.config);
+                                                        }}
+                                                        className={`flex-1 py-0.5 rounded text-[9px] font-bold border transition ${
+                                                            selectedLayer.fontWeight === 'bold'
+                                                                ? 'bg-white text-stone-900 border-white'
+                                                                : 'bg-stone-900 text-stone-300 border-white/10 hover:bg-stone-850'
+                                                        }`}
+                                                    >
+                                                        B
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const nextVal = selectedLayer.fontStyle === 'italic' ? 'normal' : 'italic';
+                                                            updateLayerProperty(selectedLayer.id, 'fontStyle', nextVal);
+                                                            saveHistoryState(data.config);
+                                                        }}
+                                                        className={`flex-1 py-0.5 rounded text-[9px] italic border transition ${
+                                                            selectedLayer.fontStyle === 'italic'
+                                                                ? 'bg-white text-stone-900 border-white'
+                                                                : 'bg-stone-900 text-stone-300 border-white/10 hover:bg-stone-850'
+                                                        }`}
+                                                    >
+                                                        I
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Positions & Transformation Controls */}
+                                <div className="space-y-3 text-[10px]">
+                                    {/* Z-Position */}
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between font-bold text-stone-400">
+                                            <span>Kedalaman (Z-axis / Parallax)</span>
+                                            <span className="text-[#E5654B]">{selectedLayer.position.z}</span>
+                                        </div>
+                                        <input 
+                                            type="range"
+                                            min="-15"
+                                            max="5"
+                                            step="0.5"
+                                            value={selectedLayer.position.z}
+                                            onChange={e => updateLayerProperty(selectedLayer.id, 'position', { ...selectedLayer.position, z: parseFloat(e.target.value) })}
+                                            onMouseUp={() => saveHistoryState(data.config)}
+                                            onTouchEnd={() => saveHistoryState(data.config)}
+                                            className="w-full accent-[#E5654B]"
+                                        />
+                                    </div>
+
+                                    {/* X-Position */}
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between font-bold text-stone-400">
+                                            <span>Geser X (Horizontal)</span>
+                                            <span className="text-[#E5654B]">{selectedLayer.position.x}</span>
+                                        </div>
+                                        <input 
+                                            type="range"
+                                            min="-8"
+                                            max="8"
+                                            step="0.2"
+                                            value={selectedLayer.position.x}
+                                            onChange={e => updateLayerProperty(selectedLayer.id, 'position', { ...selectedLayer.position, x: parseFloat(e.target.value) })}
+                                            onMouseUp={() => saveHistoryState(data.config)}
+                                            onTouchEnd={() => saveHistoryState(data.config)}
+                                            className="w-full accent-[#E5654B]"
+                                        />
+                                    </div>
+
+                                    {/* Y-Position */}
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between font-bold text-stone-400">
+                                            <span>Geser Y (Vertikal)</span>
+                                            <span className="text-[#E5654B]">{selectedLayer.position.y}</span>
+                                        </div>
+                                        <input 
+                                            type="range"
+                                            min="-8"
+                                            max="8"
+                                            step="0.2"
+                                            value={selectedLayer.position.y}
+                                            onChange={e => updateLayerProperty(selectedLayer.id, 'position', { ...selectedLayer.position, y: parseFloat(e.target.value) })}
+                                            onMouseUp={() => saveHistoryState(data.config)}
+                                            onTouchEnd={() => saveHistoryState(data.config)}
+                                            className="w-full accent-[#E5654B]"
+                                        />
+                                    </div>
+
+                                    {/* Width Scale */}
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between font-bold text-stone-400">
+                                            <span>Skala Lebar</span>
+                                            <span className="text-[#E5654B]">{selectedLayer.scale.x}</span>
+                                        </div>
+                                        <input 
+                                            type="range"
+                                            min="0.1"
+                                            max="10"
+                                            step="0.1"
+                                            value={selectedLayer.scale.x}
+                                            onChange={e => updateLayerProperty(selectedLayer.id, 'scale', { ...selectedLayer.scale, x: parseFloat(e.target.value) })}
+                                            onMouseUp={() => saveHistoryState(data.config)}
+                                            onTouchEnd={() => saveHistoryState(data.config)}
+                                            className="w-full accent-[#E5654B]"
+                                        />
+                                    </div>
+
+                                    {/* Height Scale */}
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between font-bold text-stone-400">
+                                            <span>Skala Tinggi</span>
+                                            <span className="text-[#E5654B]">{selectedLayer.scale.y}</span>
+                                        </div>
+                                        <input 
+                                            type="range"
+                                            min="0.1"
+                                            max="10"
+                                            step="0.1"
+                                            value={selectedLayer.scale.y}
+                                            onChange={e => updateLayerProperty(selectedLayer.id, 'scale', { ...selectedLayer.scale, y: parseFloat(e.target.value) })}
+                                            onMouseUp={() => saveHistoryState(data.config)}
+                                            onTouchEnd={() => saveHistoryState(data.config)}
+                                            className="w-full accent-[#E5654B]"
+                                        />
+                                    </div>
+
+                                    {/* Z Rotation */}
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between font-bold text-stone-400">
+                                            <span>Rotasi Z (Derajat)</span>
+                                            <span className="text-[#E5654B]">{selectedLayer.rotation.z}°</span>
+                                        </div>
+                                        <input 
+                                            type="range"
+                                            min="-180"
+                                            max="180"
+                                            step="5"
+                                            value={selectedLayer.rotation.z}
+                                            onChange={e => updateLayerProperty(selectedLayer.id, 'rotation', { ...selectedLayer.rotation, z: parseFloat(e.target.value) })}
+                                            onMouseUp={() => saveHistoryState(data.config)}
+                                            onTouchEnd={() => saveHistoryState(data.config)}
+                                            className="w-full accent-[#E5654B]"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Immersive Keyframes Panel */}
+                        {isImmersive && immersiveActivePanel === 'keyframes' && (
+                            <div className="absolute left-24 top-1/2 -translate-y-1/2 w-80 bg-stone-950/90 backdrop-blur-xl border border-white/15 rounded-2xl p-4 shadow-2xl z-50 text-white max-h-[85vh] overflow-y-auto flex flex-col gap-3 select-none animate-in fade-in slide-in-from-left-4 duration-150">
+                                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                                    <span className="text-xs font-bold">Titik Gerak Kamera ({data.config.keyframes.length})</span>
+                                    <button onClick={() => setImmersiveActivePanel(null)} className="text-white/60 hover:text-white">
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+
+                                <div className="flex justify-end mb-1">
+                                    <button
+                                        type="button"
+                                        onClick={captureCameraKeyframe}
+                                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-xl text-[10px] font-bold transition shadow-sm border border-[#E5654B]"
+                                    >
+                                        <Camera className="w-3.5 h-3.5" />
+                                        <span>Rekam Titik Baru</span>
+                                    </button>
+                                </div>
+
+                                {data.config.keyframes.length === 0 ? (
+                                    <div className="bg-stone-900/50 border border-white/5 rounded-xl p-6 text-center">
+                                        <p className="text-[11px] text-stone-400">Belum ada keyframe. Putar atau geser kamera di viewport, lalu klik <strong>Rekam Titik Baru</strong>.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
+                                        {data.config.keyframes.map((kf, idx) => (
+                                            <div 
+                                                key={kf.id}
+                                                className="flex items-center justify-between bg-stone-900/40 hover:bg-stone-900/80 border border-white/10 rounded-xl p-2.5 transition cursor-pointer"
+                                                onClick={() => previewKeyframePosition(kf)}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <span className="w-5 h-5 bg-[#E5654B] text-white text-[10px] font-bold flex items-center justify-center rounded-full">
+                                                        {idx + 1}
+                                                    </span>
+                                                    <div>
+                                                        <p className="text-[11px] font-bold text-stone-200">Posisi #{idx + 1}</p>
+                                                        <p className="text-[9px] text-stone-400 font-mono">
+                                                            X: {kf.position.x.toFixed(1)} | Y: {kf.position.y.toFixed(1)} | Z: {kf.position.z.toFixed(1)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        deleteKeyframe(kf.id);
+                                                    }}
+                                                    className="p-1 text-stone-400 hover:text-red-400 rounded transition"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Immersive Settings Panel */}
+                        {isImmersive && immersiveActivePanel === 'settings' && (
+                            <div className="absolute left-24 top-1/2 -translate-y-1/2 w-80 bg-stone-950/90 backdrop-blur-xl border border-white/15 rounded-2xl p-4 shadow-2xl z-50 text-white max-h-[85vh] overflow-y-auto flex flex-col gap-3 select-none animate-in fade-in slide-in-from-left-4 duration-150">
+                                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                                    <span className="text-xs font-bold">Pengaturan Global</span>
+                                    <button onClick={() => setImmersiveActivePanel(null)} className="text-white/60 hover:text-white">
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-3.5 text-xs">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-stone-400">Nama Scene 3D</label>
+                                        <input
+                                            type="text"
+                                            value={data.name}
+                                            onChange={handleNameChange}
+                                            placeholder="Contoh: Room Jogja Intimate"
+                                            className="w-full px-3 py-2 text-xs bg-stone-900 border border-white/10 rounded-xl focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none text-white transition"
+                                        />
+                                        {errors.name && <p className="text-[9px] text-red-400">{errors.name}</p>}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-stone-400">Slug</label>
+                                        <input
+                                            type="text"
+                                            value={data.slug}
+                                            onChange={e => setData('slug', e.target.value)}
+                                            placeholder="room-jogja-intimate"
+                                            className="w-full px-3 py-2 text-xs bg-stone-900 border border-white/10 rounded-xl focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none text-white transition"
+                                        />
+                                        {errors.slug && <p className="text-[9px] text-red-400">{errors.slug}</p>}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-stone-400">Tema Latar Belakang</label>
+                                        <select
+                                            value={data.config.backgroundGradient || 'midnight'}
+                                            onChange={e => {
+                                                const newConfig = {
+                                                    ...data.config,
+                                                    backgroundGradient: e.target.value
+                                                };
+                                                setData('config', newConfig);
+                                                saveHistoryState(newConfig);
+                                            }}
+                                            className="w-full px-3 py-2 text-xs bg-stone-900 border border-white/10 rounded-xl focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none text-white bg-transparent"
+                                        >
+                                            <option value="midnight">Midnight Navy (Malam Biru Pekat)</option>
+                                            <option value="romance">Romantic Plum (Ungu Romantis)</option>
+                                            <option value="emerald">Emerald Forest (Hijau Emerald)</option>
+                                            <option value="luxury_gold">Luxury Gold (Emas Mewah)</option>
+                                            <option value="ivory_cream">Ivory Cream (Krem Klasik)</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-stone-400">Efek Partikel Lingkungan</label>
+                                        <select
+                                            value={data.config.particleType || 'none'}
+                                            onChange={e => {
+                                                const newConfig = {
+                                                    ...data.config,
+                                                    particleType: e.target.value
+                                                };
+                                                setData('config', newConfig);
+                                                saveHistoryState(newConfig);
+                                            }}
+                                            className="w-full px-3 py-2 text-xs bg-stone-900 border border-white/10 rounded-xl focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none text-white bg-transparent"
+                                        >
+                                            <option value="none">Tanpa Efek Partikel</option>
+                                            <option value="gold_dust">Gold Dust (Butiran Emas Melayang)</option>
+                                            <option value="sakura">Sakura Falling (Guguran Sakura)</option>
+                                            <option value="snow">Drifting Snow (Salju Turun Lembut)</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pt-1">
+                                        <span className="text-[10px] font-bold text-stone-400">Status Aktif</span>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.is_active}
+                                                onChange={e => setData('is_active', e.target.checked)}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-9 h-5 bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-stone-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-500 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E5654B]" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Keyframe control triggers */}
                         {data.config.keyframes.length > 0 && (
@@ -2522,7 +3217,8 @@ export default function ThreeDSceneEditor({ scene = null }) {
                     </div>
 
                     {/* Editor Control Sidebar (Right) */}
-                    <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col space-y-4 shadow-sm h-[500px] overflow-y-auto">
+                    {!isImmersive && (
+                        <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col space-y-4 shadow-sm h-[500px] overflow-y-auto">
                         {/* Tabs */}
                         <div className="flex border-b border-stone-100 pb-2">
                             {['layers', 'keyframes', 'settings'].map(tab => (
@@ -3013,6 +3709,7 @@ export default function ThreeDSceneEditor({ scene = null }) {
                             </div>
                         )}
                     </div>
+                    )}
                 </div>
             </div>
 
