@@ -8714,32 +8714,64 @@ export default function ThreeDSceneEditor({ scene = null }) {
                                                     </div>
                                                     
                                                     {/* Inline duration controls */}
-                                                    <div className="mt-1 flex items-center gap-2 text-[9px] text-stone-300 border-t border-white/5 pt-1.5" onClick={(e) => e.stopPropagation()}>
-                                                        <div className="flex items-center gap-1">
-                                                            <span>Transisi:</span>
+                                                    <div className="mt-2 flex flex-col gap-2 border-t border-white/5 pt-2 text-[10px] text-stone-300" onClick={(e) => e.stopPropagation()}>
+                                                        {/* Transisi */}
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-14 text-stone-400">Transisi:</span>
+                                                            <input 
+                                                                type="range"
+                                                                min="0.1"
+                                                                max="10.0"
+                                                                step="0.1"
+                                                                value={kf.transitionDuration ?? 2.0}
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value);
+                                                                    updateKeyframeProperty(kf.id, 'transitionDuration', isNaN(val) ? 2.0 : val);
+                                                                }}
+                                                                className="flex-1 accent-[#E5654B] h-1 bg-stone-800 rounded-lg appearance-none cursor-pointer"
+                                                            />
                                                             <input 
                                                                 type="number"
                                                                 min="0.1"
                                                                 max="20"
-                                                                step="0.5"
+                                                                step="0.1"
                                                                 value={kf.transitionDuration ?? 2.0}
-                                                                onChange={(e) => updateKeyframeProperty(kf.id, 'transitionDuration', parseFloat(e.target.value) || 2.0)}
-                                                                className="w-10 bg-stone-850 border border-white/10 rounded px-1 py-0.5 text-center font-mono text-white text-[9px]"
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value);
+                                                                    updateKeyframeProperty(kf.id, 'transitionDuration', isNaN(val) ? 2.0 : val);
+                                                                }}
+                                                                className="w-12 bg-stone-850 border border-white/10 rounded-lg px-1.5 py-0.5 text-center font-mono text-white text-[9px]"
                                                             />
-                                                            <span>s</span>
+                                                            <span className="text-stone-400">s</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1 ml-auto">
-                                                            <span>Jeda:</span>
+                                                        {/* Jeda */}
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-14 text-stone-400">Jeda:</span>
+                                                            <input 
+                                                                type="range"
+                                                                min="0.0"
+                                                                max="10.0"
+                                                                step="0.1"
+                                                                value={kf.pauseDuration ?? 2.0}
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value);
+                                                                    updateKeyframeProperty(kf.id, 'pauseDuration', isNaN(val) ? 2.0 : val);
+                                                                }}
+                                                                className="flex-1 accent-[#E5654B] h-1 bg-stone-800 rounded-lg appearance-none cursor-pointer"
+                                                            />
                                                             <input 
                                                                 type="number"
                                                                 min="0.0"
                                                                 max="20"
-                                                                step="0.5"
+                                                                step="0.1"
                                                                 value={kf.pauseDuration ?? 2.0}
-                                                                onChange={(e) => updateKeyframeProperty(kf.id, 'pauseDuration', parseFloat(e.target.value) || 0.0)}
-                                                                className="w-10 bg-stone-850 border border-white/10 rounded px-1 py-0.5 text-center font-mono text-white text-[9px]"
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value);
+                                                                    updateKeyframeProperty(kf.id, 'pauseDuration', isNaN(val) ? 2.0 : val);
+                                                                }}
+                                                                className="w-12 bg-stone-850 border border-white/10 rounded-lg px-1.5 py-0.5 text-center font-mono text-white text-[9px]"
                                                             />
-                                                            <span>s</span>
+                                                            <span className="text-stone-400">s</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -10072,32 +10104,64 @@ export default function ThreeDSceneEditor({ scene = null }) {
                                                     </div>
 
                                                     {/* Inline duration controls */}
-                                                    <div className="mt-1 flex items-center gap-2 text-[9px] text-stone-600 border-t border-stone-200/50 pt-1.5" onClick={(e) => e.stopPropagation()}>
-                                                        <div className="flex items-center gap-1">
-                                                            <span>Transisi:</span>
+                                                    <div className="mt-2 flex flex-col gap-2 border-t border-stone-200/50 pt-2 text-[10px] text-stone-600" onClick={(e) => e.stopPropagation()}>
+                                                        {/* Transisi */}
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-14 text-stone-500 font-medium">Transisi:</span>
+                                                            <input 
+                                                                type="range"
+                                                                min="0.1"
+                                                                max="10.0"
+                                                                step="0.1"
+                                                                value={kf.transitionDuration ?? 2.0}
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value);
+                                                                    updateKeyframeProperty(kf.id, 'transitionDuration', isNaN(val) ? 2.0 : val);
+                                                                }}
+                                                                className="flex-1 accent-[#E5654B] h-1 bg-stone-200 rounded-lg appearance-none cursor-pointer"
+                                                            />
                                                             <input 
                                                                 type="number"
                                                                 min="0.1"
                                                                 max="20"
-                                                                step="0.5"
+                                                                step="0.1"
                                                                 value={kf.transitionDuration ?? 2.0}
-                                                                onChange={(e) => updateKeyframeProperty(kf.id, 'transitionDuration', parseFloat(e.target.value) || 2.0)}
-                                                                className="w-10 bg-white border border-stone-200 rounded px-1 py-0.5 text-center font-mono text-stone-800 text-[9px]"
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value);
+                                                                    updateKeyframeProperty(kf.id, 'transitionDuration', isNaN(val) ? 2.0 : val);
+                                                                }}
+                                                                className="w-12 bg-white border border-stone-200 rounded-lg px-1.5 py-0.5 text-center font-mono text-stone-850 text-[9px]"
                                                             />
-                                                            <span>s</span>
+                                                            <span className="text-stone-400">s</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1 ml-auto">
-                                                            <span>Jeda:</span>
+                                                        {/* Jeda */}
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-14 text-stone-500 font-medium">Jeda:</span>
+                                                            <input 
+                                                                type="range"
+                                                                min="0.0"
+                                                                max="10.0"
+                                                                step="0.1"
+                                                                value={kf.pauseDuration ?? 2.0}
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value);
+                                                                    updateKeyframeProperty(kf.id, 'pauseDuration', isNaN(val) ? 2.0 : val);
+                                                                }}
+                                                                className="flex-1 accent-[#E5654B] h-1 bg-stone-200 rounded-lg appearance-none cursor-pointer"
+                                                            />
                                                             <input 
                                                                 type="number"
                                                                 min="0.0"
                                                                 max="20"
-                                                                step="0.5"
+                                                                step="0.1"
                                                                 value={kf.pauseDuration ?? 2.0}
-                                                                onChange={(e) => updateKeyframeProperty(kf.id, 'pauseDuration', parseFloat(e.target.value) || 0.0)}
-                                                                className="w-10 bg-white border border-stone-200 rounded px-1 py-0.5 text-center font-mono text-stone-800 text-[9px]"
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value);
+                                                                    updateKeyframeProperty(kf.id, 'pauseDuration', isNaN(val) ? 2.0 : val);
+                                                                }}
+                                                                className="w-12 bg-white border border-stone-200 rounded-lg px-1.5 py-0.5 text-center font-mono text-stone-850 text-[9px]"
                                                             />
-                                                            <span>s</span>
+                                                            <span className="text-stone-400">s</span>
                                                         </div>
                                                     </div>
                                                 </div>
