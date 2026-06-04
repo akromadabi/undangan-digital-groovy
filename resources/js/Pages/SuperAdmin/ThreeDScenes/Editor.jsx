@@ -2945,6 +2945,7 @@ export default function ThreeDSceneEditor({ scene = null }) {
         // Init Camera Frustum Helper
         const cameraHelper = new THREE.CameraHelper(camera);
         cameraHelper.layers.set(1); // Only render helper in minimap
+        cameraHelper.traverse(child => child.layers.set(1));
         threeScene.add(cameraHelper);
         cameraHelperRef.current = cameraHelper;
 
@@ -9674,7 +9675,7 @@ export default function ThreeDSceneEditor({ scene = null }) {
                                                 }
                                             }}
                                             className="p-1 hover:bg-white/10 text-stone-400 hover:text-stone-200 rounded transition cursor-pointer"
-                                            title="Reset Sudut Pandang"
+                                            aria-label="Reset Sudut Pandang"
                                         >
                                             <RotateCcw className="w-3 h-3" />
                                         </button>
@@ -9690,7 +9691,7 @@ export default function ThreeDSceneEditor({ scene = null }) {
                                                 });
                                             }}
                                             className="p-1 hover:bg-white/10 text-stone-400 hover:text-stone-200 rounded transition cursor-pointer"
-                                            title="Ubah Ukuran"
+                                            aria-label="Ubah Ukuran"
                                         >
                                             {minimapSize === 'lg' ? (
                                                 <Minimize2 className="w-3 h-3" />
@@ -9706,7 +9707,7 @@ export default function ThreeDSceneEditor({ scene = null }) {
                                                 setShowMinimap(false);
                                             }}
                                             className="p-1 hover:bg-white/10 text-stone-400 hover:text-stone-200 rounded transition cursor-pointer"
-                                            title="Tutup Peta"
+                                            aria-label="Tutup Peta"
                                         >
                                             <X className="w-3 h-3" />
                                         </button>
@@ -9733,7 +9734,7 @@ export default function ThreeDSceneEditor({ scene = null }) {
                                     type="button"
                                     onClick={() => setShowMinimap(true)}
                                     className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-950/90 border border-white/10 hover:border-[#E5654B]/50 hover:bg-zinc-900/90 shadow-lg text-stone-300 hover:text-[#E5654B] transition cursor-pointer animate-in fade-in duration-200"
-                                    title="Tampilkan Peta Spasial"
+                                    aria-label="Tampilkan Peta Spasial"
                                 >
                                     <Compass className="w-5 h-5" />
                                 </button>
