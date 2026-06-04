@@ -109,10 +109,10 @@ export default function Login({ status, canResetPassword, autoLoginUsers, resell
 
             <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">Email</label>
+                    <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">Email / Username / No. HP</label>
                     <input
                         id="email"
-                        type="email"
+                        type="text"
                         name="email"
                         value={data.email}
                         className="mt-1.5 block w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#E5654B] focus:ring-[#E5654B] focus:ring-opacity-50 transition-all bg-gray-50/50 focus:bg-white text-sm shadow-sm"

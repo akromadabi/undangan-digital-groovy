@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -46,15 +46,19 @@ class LoginRequest extends FormRequest
 
         $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
 
-        // Find candidate users
-        $query = \App\Models\User::where('email', $email);
+        // Find candidate users by email, name (username), or phone
+        $query = \App\Models\User::where(function ($q) use ($email) {
+            $q->where('email', $email)
+              ->orWhere('name', $email)
+              ->orWhere('phone', $email);
+        });
 
         if ($resellerSetting) {
             // Either a user client under this reseller, or the reseller admin account itself
             $query->where(function ($q) use ($resellerSetting) {
                 $q->where(function ($sub) use ($resellerSetting) {
                     $sub->where('reseller_id', $resellerSetting->user_id)
-                        ->where('role', 'user');
+                        ->whereIn('role', ['user', 'editor']);
                 })->orWhere(function ($sub) use ($resellerSetting) {
                     $sub->where('id', $resellerSetting->user_id)
                         ->where('role', 'admin');
@@ -65,7 +69,7 @@ class LoginRequest extends FormRequest
             $query->where(function ($q) {
                 $q->where(function ($sub) {
                     $sub->whereNull('reseller_id')
-                        ->where('role', 'user');
+                        ->whereIn('role', ['user', 'editor']);
                 })->orWhere('role', 'super_admin');
             });
         }
