@@ -6,7 +6,7 @@ import {
     ChevronRight, Undo2, Redo2, RotateCcw, Check, Sparkles, Scissors, Eraser,
     HelpCircle, Type, Maximize2, Minimize2, SlidersHorizontal, X,
     Copy, ArrowUp, ArrowDown, Home, Lock, Unlock, Settings, ImageIcon,
-    Search, ChevronDown, Loader2, Download, Focus, Box, Compass, Map
+    Search, ChevronDown, Loader2, Download, Focus, Box, Compass, Map, RefreshCw
 } from 'lucide-react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
 import * as THREE from 'three';
@@ -957,6 +957,59 @@ const AVAILABLE_FONTS = [
     { name: 'Arial', style: 'Arial, sans-serif' }
 ].sort((a, b) => a.name.localeCompare(b.name));
 
+const isPixelOpaque = (intersect) => {
+    const mesh = intersect.object;
+    if (!mesh.material || !mesh.material.map) return true;
+    
+    const texture = mesh.material.map;
+    const img = texture.image;
+    if (!img) return true;
+    
+    try {
+        const uv = intersect.uv;
+        if (!uv) return true;
+        
+        let canvas = texture.userData.canvas;
+        let ctx = texture.userData.ctx;
+        
+        if (!canvas) {
+            if (typeof HTMLCanvasElement !== 'undefined' && img instanceof HTMLCanvasElement) {
+                canvas = img;
+                ctx = canvas.getContext('2d');
+            } else if (typeof HTMLImageElement !== 'undefined' && img instanceof HTMLImageElement) {
+                if (img.width === 0 || img.height === 0) return true;
+                canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0);
+                }
+            } else {
+                return true;
+            }
+            texture.userData.canvas = canvas;
+            texture.userData.ctx = ctx;
+        }
+        
+        if (!ctx) return true;
+        
+        const x = Math.floor(uv.x * canvas.width);
+        const y = Math.floor((1 - uv.y) * canvas.height);
+        
+        const clampedX = Math.max(0, Math.min(canvas.width - 1, x));
+        const clampedY = Math.max(0, Math.min(canvas.height - 1, y));
+        
+        const pixel = ctx.getImageData(clampedX, clampedY, 1, 1).data;
+        const alpha = pixel[3];
+        
+        return alpha > 10;
+    } catch (err) {
+        console.warn("Could not check pixel transparency:", err);
+        return true;
+    }
+};
+
 export default function ThreeDSceneEditor({ scene = null }) {
     const isEdit = !!scene;
     
@@ -1024,25 +1077,31 @@ export default function ThreeDSceneEditor({ scene = null }) {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     };
 
+    const radToDeg = (rad) => Math.round(rad * (180 / Math.PI));
+
     const getEstimatedDuration = () => {
         const kfs = data.config.keyframes || [];
         if (kfs.length < 2) return '0 detik';
-        const D_move = 2000;
-        const pauseSec = data.config.keyframePauseDuration ?? 2.0;
-        const D_segment = D_move + (pauseSec * 1000);
-        const durationSec = ((kfs.length - 1) * D_segment) / 1000;
-        return `${durationSec.toFixed(1)} detik`;
+        let durationMs = 0;
+        for (let i = 1; i < kfs.length; i++) {
+            const dMove = (kfs[i].transitionDuration ?? 2.0) * 1000;
+            const dPause = (kfs[i].pauseDuration ?? 2.0) * 1000;
+            durationMs += dMove + dPause;
+        }
+        return `${(durationMs / 1000).toFixed(1)} detik`;
     };
 
     const getEstimatedFileSize = (settings) => {
         const kfs = data.config.keyframes || [];
         if (kfs.length < 2) return '0 KB';
         
-        const D_move = 2000;
-        const pauseSec = data.config.keyframePauseDuration ?? 2.0;
-        const D_segment = D_move + (pauseSec * 1000);
-        const totalSegments = kfs.length - 1;
-        const durationSec = (totalSegments * D_segment) / 1000;
+        let durationMs = 0;
+        for (let i = 1; i < kfs.length; i++) {
+            const dMove = (kfs[i].transitionDuration ?? 2.0) * 1000;
+            const dPause = (kfs[i].pauseDuration ?? 2.0) * 1000;
+            durationMs += dMove + dPause;
+        }
+        const durationSec = durationMs / 1000;
         
         const bitrate = settings?.bitrate || 8000000;
         const audioBitrate = data.config.musicUrl ? 128000 : 0;
@@ -1455,6 +1514,7 @@ export default function ThreeDSceneEditor({ scene = null }) {
 
     // 3D Minimap State & Refs
     const [showMinimap, setShowMinimap] = useState(true);
+    const [minimapSize, setMinimapSize] = useState('md'); // 'sm' | 'md' | 'lg'
     const minimapCanvasRef = useRef(null);
     const minimapRendererRef = useRef(null);
     const minimapCameraRef = useRef(null);
@@ -1505,6 +1565,9 @@ export default function ThreeDSceneEditor({ scene = null }) {
     useEffect(() => {
         isolatedLayerIdRef.current = isolatedLayerId;
     }, [isolatedLayerId]);
+    const lastTapTimeRef = useRef(0);
+    const lastTapObjectRef = useRef(null);
+    const activeTouchCountRef = useRef(0);
 
     const depthSvgRef = useRef(null);
     const [draggingLayerId, setDraggingLayerId] = useState(null);
@@ -2141,10 +2204,18 @@ export default function ThreeDSceneEditor({ scene = null }) {
                         childMesh.scale.set(content.scale.x * aspect * cScaleX, content.scale.y * cScaleY, 1);
                     }
 
-                    const combinedAlpha = alpha * cAlpha * cFlickerAlpha;
+                    const baseOpacity = content.opacity ?? 1.0;
+                    const combinedAlpha = alpha * cAlpha * cFlickerAlpha * baseOpacity;
                     if (childMesh.material) {
                         childMesh.material.opacity = combinedAlpha;
                         childMesh.material.transparent = true;
+                    } else {
+                        childMesh.traverse(child => {
+                            if (child.isMesh && child.material) {
+                                child.material.opacity = combinedAlpha;
+                                child.material.transparent = true;
+                            }
+                        });
                     }
                 });
             } else {
@@ -2163,6 +2234,31 @@ export default function ThreeDSceneEditor({ scene = null }) {
     useEffect(() => {
         showMinimapRef.current = showMinimap;
     }, [showMinimap]);
+
+    useEffect(() => {
+        if (!minimapRendererRef.current || !minimapCanvasRef.current || !minimapCameraRef.current) return;
+        
+        const resize = () => {
+            const canvas = minimapCanvasRef.current;
+            if (!canvas) return;
+            const w = canvas.parentElement.clientWidth;
+            const h = canvas.parentElement.clientHeight;
+            
+            if (w > 10 && h > 10) {
+                minimapCameraRef.current.aspect = w / h;
+                minimapCameraRef.current.updateProjectionMatrix();
+                minimapRendererRef.current.setSize(w, h);
+            }
+        };
+
+        const timer1 = setTimeout(resize, 80);
+        const timer2 = setTimeout(resize, 320); // Sync after outer layout transition ends
+        
+        return () => {
+            clearTimeout(timer1);
+            clearTimeout(timer2);
+        };
+    }, [minimapSize, showMinimap]);
 
     const renderBothViewports = () => {
         if (rendererRef.current && sceneRef.current && cameraRef.current) {
@@ -2911,7 +3007,6 @@ export default function ThreeDSceneEditor({ scene = null }) {
         const initialPosition = new THREE.Vector3();
         const initialIntersection = new THREE.Vector3();
         const initialMatrixWorld = new THREE.Matrix4();
-
         const onPointerDown = (e) => {
             if (isPlayingPreviewRef.current) return;
             if (spacePressedRef.current) return; // Prevent element selection/dragging during space-pan mode
@@ -2980,9 +3075,10 @@ export default function ThreeDSceneEditor({ scene = null }) {
                 })
                 .map(([, mesh]) => mesh);
             const intersects = raycaster.intersectObjects(meshes, true);
+            const firstOpaqueIntersect = intersects.find(intersect => isPixelOpaque(intersect));
 
-            if (intersects.length > 0) {
-                const hitObj = intersects[0].object;
+            if (firstOpaqueIntersect) {
+                const hitObj = firstOpaqueIntersect.object;
                 let group = hitObj;
                 while (group && group.parent !== threeScene) {
                     group = group.parent;
@@ -2996,6 +3092,21 @@ export default function ThreeDSceneEditor({ scene = null }) {
                     if (content && content.locked) {
                         return; // Disable drag/selection if component is locked
                     }
+
+                    // Check if it's already selected
+                    const isAlreadySelected = (selectedLayerIdRef.current === layerId);
+
+                    // Check for double click / double tap
+                    const now = performance.now();
+                    const isDoubleClick = (now - lastTapTimeRef.current < 300) && (lastTapObjectRef.current === hitObj);
+                    lastTapTimeRef.current = now;
+                    lastTapObjectRef.current = hitObj;
+
+                    if (!isAlreadySelected && !isDoubleClick) {
+                        // Single click/tap on unselected ornament -> do nothing, let OrbitControls handle it!
+                        return;
+                    }
+
                     e.preventDefault();
                     isDraggingMesh = true;
                     isDraggingMeshRef.current = true;
@@ -3084,7 +3195,8 @@ export default function ThreeDSceneEditor({ scene = null }) {
                     });
                     
                     const intersectsMeshes = raycaster.intersectObjects(sceneMeshes);
-                    if (intersectsMeshes.length > 0) {
+                    const firstOpaqueIntersect = intersectsMeshes.find(intersect => isPixelOpaque(intersect));
+                    if (firstOpaqueIntersect) {
                         containerRef.current.style.cursor = 'pointer';
                     } else {
                         containerRef.current.style.cursor = 'default';
@@ -3125,8 +3237,8 @@ export default function ThreeDSceneEditor({ scene = null }) {
                     let newScaleX = newWidth / (3 * aspect);
                     let newScaleY = newHeight / 3;
                     
-                    // Maintain aspect ratio if Shift is pressed
-                    if (e.shiftKey) {
+                    // Maintain aspect ratio if Shift is pressed or if another finger is added anywhere on screen
+                    if (e.shiftKey || activeTouchCountRef.current > 1) {
                         const origScaleX = initialScale.x / aspect;
                         const origScaleY = initialScale.y;
                         
@@ -3334,8 +3446,9 @@ export default function ThreeDSceneEditor({ scene = null }) {
             });
 
             const intersects = raycaster.intersectObjects(sceneMeshes);
-            if (intersects.length > 0) {
-                const layerId = meshToLayerMap[intersects[0].object.uuid];
+            const firstOpaqueIntersect = intersects.find(intersect => isPixelOpaque(intersect));
+            if (firstOpaqueIntersect) {
+                const layerId = meshToLayerMap[firstOpaqueIntersect.object.uuid];
                 const layers = configRef.current.layers;
                 const layer = layers.find(l => l.id === layerId);
                 
@@ -3434,6 +3547,13 @@ export default function ThreeDSceneEditor({ scene = null }) {
         renderer.domElement.addEventListener('dblclick', onDoubleClick);
         renderer.domElement.addEventListener('contextmenu', onContextMenu);
 
+        const updateTouchCount = (e) => {
+            activeTouchCountRef.current = e.touches ? e.touches.length : 0;
+        };
+        window.addEventListener('touchstart', updateTouchCount, { passive: true });
+        window.addEventListener('touchend', updateTouchCount, { passive: true });
+        window.addEventListener('touchcancel', updateTouchCount, { passive: true });
+
         // Animation Loop
         runStandardAnimationLoop();
 
@@ -3460,6 +3580,9 @@ export default function ThreeDSceneEditor({ scene = null }) {
         render3DLayers(data.config.layers);
 
         return () => {
+            window.removeEventListener('touchstart', updateTouchCount);
+            window.removeEventListener('touchend', updateTouchCount);
+            window.removeEventListener('touchcancel', updateTouchCount);
             resizeObserver.disconnect();
             window.removeEventListener('resize', handleResize);
             if (animationFrameIdRef.current) {
@@ -5528,7 +5651,9 @@ export default function ThreeDSceneEditor({ scene = null }) {
             position: { x: cam.position.x, y: cam.position.y, z: cam.position.z },
             rotation: { x: cam.rotation.x, y: cam.rotation.y, z: cam.rotation.z },
             fov: cam.fov,
-            target: ctr ? { x: ctr.target.x, y: ctr.target.y, z: ctr.target.z } : null
+            target: ctr ? { x: ctr.target.x, y: ctr.target.y, z: ctr.target.z } : null,
+            transitionDuration: 2.0,
+            pauseDuration: 2.0
         };
 
         const newKeyframes = [...data.config.keyframes, newKeyframe];
@@ -5537,6 +5662,47 @@ export default function ThreeDSceneEditor({ scene = null }) {
             ...d,
             config: { ...d.config, keyframes: newKeyframes }
         }));
+    };
+
+    const updateKeyframeProperty = (id, property, value) => {
+        const newKeyframes = data.config.keyframes.map(kf => {
+            if (kf.id === id) {
+                return { ...kf, [property]: value };
+            }
+            return kf;
+        });
+        saveHistoryState({ ...data.config, keyframes: newKeyframes });
+        setData(d => ({
+            ...d,
+            config: { ...d.config, keyframes: newKeyframes }
+        }));
+    };
+
+    const updateKeyframeFromCamera = (id) => {
+        if (!cameraRef.current) return;
+        const cam = cameraRef.current;
+        const ctr = controlsRef.current;
+
+        const newKeyframes = data.config.keyframes.map(kf => {
+            if (kf.id === id) {
+                return {
+                    ...kf,
+                    position: { x: cam.position.x, y: cam.position.y, z: cam.position.z },
+                    rotation: { x: cam.rotation.x, y: cam.rotation.y, z: cam.rotation.z },
+                    fov: cam.fov,
+                    target: ctr ? { x: ctr.target.x, y: ctr.target.y, z: ctr.target.z } : null
+                };
+            }
+            return kf;
+        });
+
+        saveHistoryState({ ...data.config, keyframes: newKeyframes });
+        setData(d => ({
+            ...d,
+            config: { ...d.config, keyframes: newKeyframes }
+        }));
+
+        alert('Keyframe berhasil diperbarui dengan koordinat kamera saat ini! 📸');
     };
 
     const applyCameraPreset = () => {
@@ -5597,7 +5763,9 @@ export default function ThreeDSceneEditor({ scene = null }) {
                 position: pos,
                 rotation: rot,
                 fov: fov,
-                target: target
+                target: target,
+                transitionDuration: 2.0,
+                pauseDuration: 2.0
             };
         });
 
@@ -5707,25 +5875,51 @@ export default function ThreeDSceneEditor({ scene = null }) {
 
         let start = null;
 
-        // Pause and movement duration config
-        const D_move = 2000; // 2 seconds movement per segment
-        const pauseSec = data.config.keyframePauseDuration ?? 2.0;
-        const D_pause = pauseSec * 1000; // pause duration in ms
-        const D_segment = D_move + D_pause;
-
+        // Precompute segments for variable durations
+        const segments = [];
+        let cumulativeTime = 0;
+        for (let i = 0; i < kfs.length - 1; i++) {
+            const nextKf = kfs[i + 1];
+            const dMove = (nextKf.transitionDuration ?? 2.0) * 1000;
+            const dPause = (nextKf.pauseDuration ?? 2.0) * 1000;
+            segments.push({
+                startIndex: i,
+                endIndex: i + 1,
+                dMove,
+                dPause,
+                startTime: cumulativeTime,
+                endTime: cumulativeTime + dMove + dPause
+            });
+            cumulativeTime += dMove + dPause;
+        }
+        const duration = cumulativeTime;
         const totalSegments = kfs.length - 1;
-        const duration = totalSegments * D_segment; // total timeline duration
 
         const animateCamera = (timestamp) => {
             if (!start) start = timestamp;
             const elapsed = timestamp - start;
             const progress = Math.min(elapsed / duration, 1);
 
-            // Calculate segment index and segment progress
-            const segmentIndex = Math.min(Math.floor(elapsed / D_segment), totalSegments - 1);
-            const elapsedInSegment = elapsed % D_segment;
+            // Find the active segment
+            let activeSegment = null;
+            let segmentIndex = 0;
+            for (let i = 0; i < segments.length; i++) {
+                if (elapsed >= segments[i].startTime && elapsed <= segments[i].endTime) {
+                    activeSegment = segments[i];
+                    segmentIndex = i;
+                    break;
+                }
+            }
+            if (!activeSegment) {
+                activeSegment = segments[segments.length - 1];
+                segmentIndex = segments.length - 1;
+            }
 
-            let segmentProgress = elapsedInSegment < D_move ? (elapsedInSegment / D_move) : 1;
+            const elapsedInSegment = elapsed - activeSegment.startTime;
+            let segmentProgress = elapsedInSegment < activeSegment.dMove 
+                ? (elapsedInSegment / activeSegment.dMove) 
+                : 1;
+
             // Apply smoothstep easing (ease-in-out)
             segmentProgress = segmentProgress * segmentProgress * (3 - 2 * segmentProgress);
 
@@ -5743,7 +5937,7 @@ export default function ThreeDSceneEditor({ scene = null }) {
 
             // Interpolate rotation using Quaternions
             const startKf = kfs[segmentIndex];
-            const endKf = kfs[Math.min(segmentIndex + 1, totalSegments)];
+            const endKf = kfs[Math.min(segmentIndex + 1, kfs.length - 1)];
 
             if (startKf && endKf) {
                 const qStart = new THREE.Quaternion().setFromEuler(new THREE.Euler(startKf.rotation.x, startKf.rotation.y, startKf.rotation.z));
@@ -5754,6 +5948,22 @@ export default function ThreeDSceneEditor({ scene = null }) {
                 cameraRef.current.fov = THREE.MathUtils.lerp(startKf.fov, endKf.fov, segmentProgress);
                 cameraRef.current.updateProjectionMatrix();
             }
+
+            // Apply handheld idle/sway camera offset
+            const timeSec = elapsed / 1000;
+            const swayX = Math.sin(timeSec * 1.5) * 0.03 + Math.cos(timeSec * 0.7) * 0.015;
+            const swayY = Math.cos(timeSec * 1.2) * 0.03 + Math.sin(timeSec * 0.9) * 0.015;
+            const swayZ = Math.sin(timeSec * 1.0) * 0.02;
+
+            cameraRef.current.position.x += swayX;
+            cameraRef.current.position.y += swayY;
+            cameraRef.current.position.z += swayZ;
+
+            const swayRotX = Math.sin(timeSec * 1.1) * 0.004;
+            const swayRotY = Math.cos(timeSec * 1.4) * 0.004;
+            const swayRotZ = Math.sin(timeSec * 0.8) * 0.002;
+            const qSway = new THREE.Quaternion().setFromEuler(new THREE.Euler(swayRotX, swayRotY, swayRotZ));
+            cameraRef.current.quaternion.multiply(qSway);
 
             currentCameraProgressRef.current = globalProgress;
             // Render visual updates during preview animation
@@ -5818,12 +6028,25 @@ export default function ThreeDSceneEditor({ scene = null }) {
         const FPS = settings?.fps || 60;
         const videoBitsPerSecond = settings?.bitrate || 8000000;
         
-        const D_move = 2000; // 2 seconds movement per segment
-        const pauseSec = data.config.keyframePauseDuration ?? 2.0;
-        const D_pause = pauseSec * 1000;
-        const D_segment = D_move + D_pause;
+        // Precompute segments for variable durations
+        const segments = [];
+        let cumulativeTime = 0;
+        for (let i = 0; i < kfs.length - 1; i++) {
+            const nextKf = kfs[i + 1];
+            const dMove = (nextKf.transitionDuration ?? 2.0) * 1000;
+            const dPause = (nextKf.pauseDuration ?? 2.0) * 1000;
+            segments.push({
+                startIndex: i,
+                endIndex: i + 1,
+                dMove,
+                dPause,
+                startTime: cumulativeTime,
+                endTime: cumulativeTime + dMove + dPause
+            });
+            cumulativeTime += dMove + dPause;
+        }
+        const duration = cumulativeTime;
         const totalSegments = kfs.length - 1;
-        const duration = totalSegments * D_segment; // total duration in ms
 
         // Splines
         const cameraPoints = kfs.map(kf => new THREE.Vector3(kf.position.x, kf.position.y, kf.position.z));
@@ -5977,10 +6200,26 @@ export default function ThreeDSceneEditor({ scene = null }) {
             const elapsed = timestamp - startTime;
             const progress = Math.min(elapsed / duration, 1);
 
-            const segmentIndex = Math.min(Math.floor(elapsed / D_segment), totalSegments - 1);
-            const elapsedInSegment = elapsed % D_segment;
+            // Find the active segment
+            let activeSegment = null;
+            let segmentIndex = 0;
+            for (let i = 0; i < segments.length; i++) {
+                if (elapsed >= segments[i].startTime && elapsed <= segments[i].endTime) {
+                    activeSegment = segments[i];
+                    segmentIndex = i;
+                    break;
+                }
+            }
+            if (!activeSegment) {
+                activeSegment = segments[segments.length - 1];
+                segmentIndex = segments.length - 1;
+            }
 
-            let segmentProgress = elapsedInSegment < D_move ? (elapsedInSegment / D_move) : 1;
+            const elapsedInSegment = elapsed - activeSegment.startTime;
+            let segmentProgress = elapsedInSegment < activeSegment.dMove 
+                ? (elapsedInSegment / activeSegment.dMove) 
+                : 1;
+
             // Apply smoothstep easing (ease-in-out)
             segmentProgress = segmentProgress * segmentProgress * (3 - 2 * segmentProgress);
 
@@ -5998,7 +6237,7 @@ export default function ThreeDSceneEditor({ scene = null }) {
 
             // Update camera rotation (quaternion slerp)
             const startKf = kfs[segmentIndex];
-            const endKf = kfs[Math.min(segmentIndex + 1, totalSegments)];
+            const endKf = kfs[Math.min(segmentIndex + 1, kfs.length - 1)];
 
             if (startKf && endKf) {
                 const qStart = new THREE.Quaternion().setFromEuler(new THREE.Euler(startKf.rotation.x, startKf.rotation.y, startKf.rotation.z));
@@ -6009,6 +6248,22 @@ export default function ThreeDSceneEditor({ scene = null }) {
                 cameraRef.current.fov = THREE.MathUtils.lerp(startKf.fov, endKf.fov, segmentProgress);
                 cameraRef.current.updateProjectionMatrix();
             }
+
+            // Apply handheld idle/sway camera offset (matching preview perfectly)
+            const timeSec = elapsed / 1000;
+            const swayX = Math.sin(timeSec * 1.5) * 0.03 + Math.cos(timeSec * 0.7) * 0.015;
+            const swayY = Math.cos(timeSec * 1.2) * 0.03 + Math.sin(timeSec * 0.9) * 0.015;
+            const swayZ = Math.sin(timeSec * 1.0) * 0.02;
+
+            cameraRef.current.position.x += swayX;
+            cameraRef.current.position.y += swayY;
+            cameraRef.current.position.z += swayZ;
+
+            const swayRotX = Math.sin(timeSec * 1.1) * 0.004;
+            const swayRotY = Math.cos(timeSec * 1.4) * 0.004;
+            const swayRotZ = Math.sin(timeSec * 0.8) * 0.002;
+            const qSway = new THREE.Quaternion().setFromEuler(new THREE.Euler(swayRotX, swayRotY, swayRotZ));
+            cameraRef.current.quaternion.multiply(qSway);
 
             // Update particles and layers deterministically
             currentCameraProgressRef.current = globalProgress;
@@ -6762,6 +7017,22 @@ export default function ThreeDSceneEditor({ scene = null }) {
                                         className="w-full accent-[#E5654B]"
                                     />
                                 </div>
+                            </div>
+
+                            {/* Transparansi / Opacity */}
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-bold text-stone-400 text-[10px]">
+                                    <span>Transparansi (Opacity)</span>
+                                    <span className="text-[#E5654B]">{Math.round((content.opacity ?? 1.0) * 100)}%</span>
+                                </div>
+                                <input 
+                                    type="range" min="0.0" max="1.0" step="0.05"
+                                    value={content.opacity ?? 1.0}
+                                    onChange={e => updateContentProperty(layer.id, content.id, 'opacity', parseFloat(e.target.value))}
+                                    onMouseUp={() => saveHistoryState(data.config)}
+                                    onTouchEnd={() => saveHistoryState(data.config)}
+                                    className="w-full accent-[#E5654B]"
+                                />
                             </div>
                         </div>
                     )}
@@ -8397,30 +8668,78 @@ export default function ThreeDSceneEditor({ scene = null }) {
                                             {data.config.keyframes.map((kf, idx) => (
                                                 <div 
                                                     key={kf.id}
-                                                    className="flex items-center justify-between bg-stone-900/40 hover:bg-stone-900/80 border border-white/10 rounded-xl p-2.5 transition cursor-pointer"
+                                                    className="flex flex-col gap-1.5 bg-stone-900/40 hover:bg-stone-900/80 border border-white/10 rounded-xl p-2.5 transition cursor-pointer"
                                                     onClick={() => previewKeyframePosition(kf)}
                                                 >
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="w-5 h-5 bg-[#E5654B] text-white text-[10px] font-bold flex items-center justify-center rounded-full">
-                                                            {idx + 1}
-                                                        </span>
-                                                        <div>
-                                                            <p className="text-[11px] font-bold text-stone-200">Posisi #{idx + 1}</p>
-                                                            <p className="text-[9px] text-stone-400 font-mono">
-                                                                X: {kf.position.x.toFixed(1)} | Y: {kf.position.y.toFixed(1)} | Z: {kf.position.z.toFixed(1)}
-                                                            </p>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-5 h-5 bg-[#E5654B] text-white text-[10px] font-bold flex items-center justify-center rounded-full flex-shrink-0">
+                                                                {idx + 1}
+                                                            </span>
+                                                            <div>
+                                                                <p className="text-[11px] font-bold text-stone-200">Posisi #{idx + 1}</p>
+                                                                <p className="text-[9px] text-stone-400 font-mono">
+                                                                    X: {kf.position.x.toFixed(1)} | Y: {kf.position.y.toFixed(1)} | Z: {kf.position.z.toFixed(1)}
+                                                                </p>
+                                                                <p className="text-[9px] text-stone-400 font-mono">
+                                                                    Rotasi: X: {radToDeg(kf.rotation?.x || 0)}° | Y: {radToDeg(kf.rotation?.y || 0)}° | Z: {radToDeg(kf.rotation?.z || 0)}°
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    updateKeyframeFromCamera(kf.id);
+                                                                }}
+                                                                className="p-1 text-stone-400 hover:text-sky-400 rounded transition"
+                                                                title="Perbarui koordinat dari kamera saat ini"
+                                                            >
+                                                                <RefreshCw className="w-3.5 h-3.5" />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    deleteKeyframe(kf.id);
+                                                                }}
+                                                                className="p-1 text-stone-400 hover:text-red-400 rounded transition"
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            deleteKeyframe(kf.id);
-                                                        }}
-                                                        className="p-1 text-stone-400 hover:text-red-400 rounded transition"
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </button>
+                                                    
+                                                    {/* Inline duration controls */}
+                                                    <div className="mt-1 flex items-center gap-2 text-[9px] text-stone-300 border-t border-white/5 pt-1.5" onClick={(e) => e.stopPropagation()}>
+                                                        <div className="flex items-center gap-1">
+                                                            <span>Transisi:</span>
+                                                            <input 
+                                                                type="number"
+                                                                min="0.1"
+                                                                max="20"
+                                                                step="0.5"
+                                                                value={kf.transitionDuration ?? 2.0}
+                                                                onChange={(e) => updateKeyframeProperty(kf.id, 'transitionDuration', parseFloat(e.target.value) || 2.0)}
+                                                                className="w-10 bg-stone-850 border border-white/10 rounded px-1 py-0.5 text-center font-mono text-white text-[9px]"
+                                                            />
+                                                            <span>s</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 ml-auto">
+                                                            <span>Jeda:</span>
+                                                            <input 
+                                                                type="number"
+                                                                min="0.0"
+                                                                max="20"
+                                                                step="0.5"
+                                                                value={kf.pauseDuration ?? 2.0}
+                                                                onChange={(e) => updateKeyframeProperty(kf.id, 'pauseDuration', parseFloat(e.target.value) || 0.0)}
+                                                                className="w-10 bg-stone-850 border border-white/10 rounded px-1 py-0.5 text-center font-mono text-white text-[9px]"
+                                                            />
+                                                            <span>s</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -9323,78 +9642,102 @@ export default function ThreeDSceneEditor({ scene = null }) {
 
                             {/* 3D Spatial Minimap Widget */}
                             <div 
-                                className={`absolute bottom-4 right-4 z-20 flex flex-col items-stretch overflow-hidden rounded-2xl border transition-all duration-300 ${
+                                className={`absolute top-4 right-4 z-20 flex flex-col items-stretch overflow-hidden rounded-2xl border bg-zinc-950/85 backdrop-blur-md border-white/10 shadow-2xl transition-all duration-300 ${
                                     showMinimap 
-                                        ? 'w-[200px] h-[240px] bg-zinc-950/85 backdrop-blur-md border-white/10 shadow-2xl animate-in zoom-in-95 duration-200' 
-                                        : 'w-10 h-10 rounded-full bg-zinc-950/90 border-white/10 hover:border-[#E5654B]/50 hover:bg-zinc-900/90 shadow-lg justify-center items-center cursor-pointer flex'
+                                        ? (minimapSize === 'sm' ? 'w-[160px] h-[200px] opacity-100 pointer-events-auto scale-100' :
+                                           minimapSize === 'lg' ? 'w-[320px] h-[360px] opacity-100 pointer-events-auto scale-100' :
+                                           'w-[220px] h-[260px] opacity-100 pointer-events-auto scale-100')
+                                        : 'w-0 h-0 opacity-0 pointer-events-none scale-95 border-none'
                                 }`}
-                                onClick={() => {
-                                    if (!showMinimap) {
-                                        setShowMinimap(true);
-                                    }
-                                }}
-                                title={!showMinimap ? "Tampilkan Peta Spasial 3D" : undefined}
                             >
-                                {showMinimap ? (
-                                    <>
-                                        {/* Minimap Header */}
-                                        <div className="flex items-center justify-between px-3 py-2 bg-white/5 border-b border-white/10 select-none">
-                                            <div className="flex items-center gap-1.5 text-stone-300">
-                                                <Compass 
-                                                    className="w-3.5 h-3.5 text-[#E5654B]" 
-                                                    style={{ animation: 'spin 8s linear infinite' }}
-                                                />
-                                                <span className="text-[10px] font-bold tracking-wide uppercase text-stone-300">Peta Spasial</span>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                {/* Reset view camera button */}
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        if (minimapCameraRef.current && minimapControlsRef.current) {
-                                                            minimapCameraRef.current.position.set(10, 10, 15);
-                                                            minimapControlsRef.current.target.set(0, 0, 0);
-                                                            minimapControlsRef.current.update();
-                                                        }
-                                                    }}
-                                                    className="p-1 hover:bg-white/10 text-stone-400 hover:text-stone-200 rounded transition cursor-pointer"
-                                                    title="Reset Sudut Pandang Map"
-                                                >
-                                                    <RotateCcw className="w-3 h-3" />
-                                                </button>
-                                                {/* Minimize button */}
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setShowMinimap(false);
-                                                    }}
-                                                    className="p-1 hover:bg-white/10 text-stone-400 hover:text-stone-200 rounded transition cursor-pointer"
-                                                    title="Sembunyikan Map"
-                                                >
-                                                    <X className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                        {/* Minimap Canvas */}
-                                        <div className="relative w-full h-[190px] bg-stone-950/20 overflow-hidden">
-                                            <canvas 
-                                                ref={minimapCanvasRef} 
-                                                className="w-full h-full cursor-grab active:cursor-grabbing outline-none"
-                                            />
-                                            {/* Compass Overlay HUD */}
-                                            <div className="absolute bottom-1.5 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-900/60 border border-white/5 pointer-events-none select-none">
-                                                <span className="text-[8px] text-stone-400 font-semibold tracking-tighter">3D PERSPECTIVE</span>
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="flex items-center justify-center w-full h-full text-stone-400 hover:text-[#E5654B] transition-colors duration-200">
-                                        <Compass className="w-5 h-5" />
+                                {/* Minimap Header */}
+                                <div className="flex items-center justify-between px-3 py-2 bg-white/5 border-b border-white/10 select-none">
+                                    <div className="flex items-center gap-1.5 text-stone-300 min-w-0">
+                                        <Compass 
+                                            className="w-3.5 h-3.5 text-[#E5654B] flex-shrink-0" 
+                                            style={{ animation: 'spin 8s linear infinite' }}
+                                        />
+                                        {minimapSize !== 'sm' && (
+                                            <span className="text-[10px] font-bold tracking-wide uppercase text-stone-300 truncate">Peta Spasial</span>
+                                        )}
                                     </div>
-                                )}
+                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                        {/* Reset view camera button */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (minimapCameraRef.current && minimapControlsRef.current) {
+                                                    minimapCameraRef.current.position.set(10, 10, 15);
+                                                    minimapControlsRef.current.target.set(0, 0, 0);
+                                                    minimapControlsRef.current.update();
+                                                }
+                                            }}
+                                            className="p-1 hover:bg-white/10 text-stone-400 hover:text-stone-200 rounded transition cursor-pointer"
+                                            title="Reset Sudut Pandang"
+                                        >
+                                            <RotateCcw className="w-3 h-3" />
+                                        </button>
+                                        {/* Size toggle button */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setMinimapSize(prev => {
+                                                    if (prev === 'sm') return 'md';
+                                                    if (prev === 'md') return 'lg';
+                                                    return 'sm';
+                                                });
+                                            }}
+                                            className="p-1 hover:bg-white/10 text-stone-400 hover:text-stone-200 rounded transition cursor-pointer"
+                                            title="Ubah Ukuran"
+                                        >
+                                            {minimapSize === 'lg' ? (
+                                                <Minimize2 className="w-3 h-3" />
+                                            ) : (
+                                                <Maximize2 className="w-3 h-3" />
+                                            )}
+                                        </button>
+                                        {/* Close button */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowMinimap(false);
+                                            }}
+                                            className="p-1 hover:bg-white/10 text-stone-400 hover:text-stone-200 rounded transition cursor-pointer"
+                                            title="Tutup Peta"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                </div>
+                                {/* Minimap Canvas Container */}
+                                <div className="relative flex-1 bg-stone-950/20 overflow-hidden">
+                                    <canvas 
+                                        ref={minimapCanvasRef} 
+                                        className="w-full h-full cursor-grab active:cursor-grabbing outline-none"
+                                    />
+                                    {/* Compass Overlay HUD */}
+                                    {minimapSize !== 'sm' && (
+                                        <div className="absolute bottom-1.5 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-900/60 border border-white/5 pointer-events-none select-none">
+                                            <span className="text-[8px] text-stone-400 font-semibold tracking-tighter">3D PERSPECTIVE</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+
+                            {/* Show Minimap Button (Floating when closed) */}
+                            {!showMinimap && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowMinimap(true)}
+                                    className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-950/90 border border-white/10 hover:border-[#E5654B]/50 hover:bg-zinc-900/90 shadow-lg text-stone-300 hover:text-[#E5654B] transition cursor-pointer animate-in fade-in duration-200"
+                                    title="Tampilkan Peta Spasial"
+                                >
+                                    <Compass className="w-5 h-5" />
+                                </button>
+                            )}
                             
 
                     {/* Editor Control Sidebar (Right) */}
@@ -9683,30 +10026,78 @@ export default function ThreeDSceneEditor({ scene = null }) {
                                             {data.config.keyframes.map((kf, idx) => (
                                                 <div 
                                                     key={kf.id}
-                                                    className="flex items-center justify-between bg-stone-50 hover:bg-stone-100 border border-stone-100 rounded-xl p-2 transition cursor-pointer"
+                                                    className="flex flex-col gap-1.5 bg-stone-50 hover:bg-stone-100 border border-stone-100 rounded-xl p-2.5 transition cursor-pointer"
                                                     onClick={() => previewKeyframePosition(kf)}
                                                 >
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="w-5 h-5 bg-[#E5654B] text-white text-[10px] font-bold flex items-center justify-center rounded-full">
-                                                            {idx + 1}
-                                                        </span>
-                                                        <div>
-                                                            <p className="text-xs font-bold text-stone-700">Posisi #{idx + 1}</p>
-                                                            <p className="text-[9px] text-stone-400 font-mono">
-                                                                X: {kf.position.x.toFixed(1)} | Y: {kf.position.y.toFixed(1)} | Z: {kf.position.z.toFixed(1)}
-                                                            </p>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-5 h-5 bg-[#E5654B] text-white text-[10px] font-bold flex items-center justify-center rounded-full flex-shrink-0">
+                                                                {idx + 1}
+                                                            </span>
+                                                            <div>
+                                                                <p className="text-xs font-bold text-stone-700">Posisi #{idx + 1}</p>
+                                                                <p className="text-[9px] text-stone-500 font-mono">
+                                                                    X: {kf.position.x.toFixed(1)} | Y: {kf.position.y.toFixed(1)} | Z: {kf.position.z.toFixed(1)}
+                                                                </p>
+                                                                <p className="text-[9px] text-stone-500 font-mono">
+                                                                    Rotasi: X: {radToDeg(kf.rotation?.x || 0)}° | Y: {radToDeg(kf.rotation?.y || 0)}° | Z: {radToDeg(kf.rotation?.z || 0)}°
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    updateKeyframeFromCamera(kf.id);
+                                                                }}
+                                                                className="p-1 text-stone-400 hover:text-sky-600 rounded transition"
+                                                                title="Perbarui koordinat dari kamera saat ini"
+                                                            >
+                                                                <RefreshCw className="w-3.5 h-3.5" />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    deleteKeyframe(kf.id);
+                                                                }}
+                                                                className="p-1 text-stone-400 hover:text-red-500 rounded transition"
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            deleteKeyframe(kf.id);
-                                                        }}
-                                                        className="p-1 text-stone-400 hover:text-red-500 rounded transition"
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </button>
+
+                                                    {/* Inline duration controls */}
+                                                    <div className="mt-1 flex items-center gap-2 text-[9px] text-stone-600 border-t border-stone-200/50 pt-1.5" onClick={(e) => e.stopPropagation()}>
+                                                        <div className="flex items-center gap-1">
+                                                            <span>Transisi:</span>
+                                                            <input 
+                                                                type="number"
+                                                                min="0.1"
+                                                                max="20"
+                                                                step="0.5"
+                                                                value={kf.transitionDuration ?? 2.0}
+                                                                onChange={(e) => updateKeyframeProperty(kf.id, 'transitionDuration', parseFloat(e.target.value) || 2.0)}
+                                                                className="w-10 bg-white border border-stone-200 rounded px-1 py-0.5 text-center font-mono text-stone-800 text-[9px]"
+                                                            />
+                                                            <span>s</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 ml-auto">
+                                                            <span>Jeda:</span>
+                                                            <input 
+                                                                type="number"
+                                                                min="0.0"
+                                                                max="20"
+                                                                step="0.5"
+                                                                value={kf.pauseDuration ?? 2.0}
+                                                                onChange={(e) => updateKeyframeProperty(kf.id, 'pauseDuration', parseFloat(e.target.value) || 0.0)}
+                                                                className="w-10 bg-white border border-stone-200 rounded px-1 py-0.5 text-center font-mono text-stone-800 text-[9px]"
+                                                            />
+                                                            <span>s</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
