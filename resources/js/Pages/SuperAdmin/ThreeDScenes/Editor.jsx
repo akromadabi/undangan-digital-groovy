@@ -3454,7 +3454,8 @@ export default function ThreeDSceneEditor({ scene = null }) {
                 const layer = layers.find(l => l.id === layerId);
                 
                 if (layer && layer.contents) {
-                    const textContent = layer.contents.find(c => c.type === 'text');
+                    const clickedContentId = firstOpaqueIntersect.object.name;
+                    const textContent = layer.contents.find(c => c.id === clickedContentId && c.type === 'text');
                     if (textContent) {
                         const newText = prompt("Ubah Teks Layer:", textContent.text);
                         if (newText !== null && newText !== textContent.text) {
