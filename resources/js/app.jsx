@@ -3,6 +3,23 @@ import './bootstrap';
 
 // Global error handlers for debugging blank screen issues
 if (typeof window !== 'undefined') {
+    // Prevent Google Translate and extension modifications from crashing React
+    const originalInsertBefore = Node.prototype.insertBefore;
+    Node.prototype.insertBefore = function (newNode, referenceNode) {
+        if (referenceNode && referenceNode.parentNode !== this) {
+            return newNode;
+        }
+        return originalInsertBefore.apply(this, arguments);
+    };
+
+    const originalRemoveChild = Node.prototype.removeChild;
+    Node.prototype.removeChild = function (child) {
+        if (child && child.parentNode !== this) {
+            return child;
+        }
+        return originalRemoveChild.apply(this, arguments);
+    };
+
     window.addEventListener('error', (event) => {
         const errorDiv = document.createElement('div');
         errorDiv.style.position = 'fixed';

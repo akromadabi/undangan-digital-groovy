@@ -160,7 +160,7 @@ export default function SuperAdminLayout({ children, title }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8f7f4] flex">
+        <div className="min-h-screen bg-[#f8f7f4] flex" translate="no">
             {/* ═══ Desktop Sidebar ═══ */}
             <aside className="hidden lg:flex sticky top-0 h-screen w-[240px] bg-white flex-col shadow-[1px_0_0_0_#e8e5e0]">
                 {/* Logo */}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ $invitation && $invitation->language ? $invitation->language : 'id' }}">
 
 @php
     use App\Helpers\DomainHelper;
