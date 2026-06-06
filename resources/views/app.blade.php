@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html lang="{{ $invitation && $invitation->language ? $invitation->language : 'id' }}">
-
 @php
     use App\Helpers\DomainHelper;
     use App\Models\Invitation;
@@ -156,6 +153,8 @@
         $metaImage = asset($metaImage);
     }
 @endphp
+<!DOCTYPE html>
+<html lang="{{ $invitation && $invitation->language ? $invitation->language : 'id' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
