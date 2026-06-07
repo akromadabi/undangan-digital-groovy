@@ -32,15 +32,19 @@ class ResellerSetting extends Model
         'bank_accounts',
         'social_links',
         'greeting_card_price',
+        'hide_demo_plan_selector',
+        'bio_link_config',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_active'           => 'boolean',
-            'bank_accounts'       => 'array',
-            'social_links'        => 'array',
-            'landing_page_config' => 'array',
+            'is_active'               => 'boolean',
+            'hide_demo_plan_selector' => 'boolean',
+            'bank_accounts'           => 'array',
+            'social_links'            => 'array',
+            'landing_page_config'     => 'array',
+            'bio_link_config'         => 'array',
         ];
     }
 
@@ -200,6 +204,54 @@ class ResellerSetting extends Model
                 ],
             ],
         ];
+    }
+
+    /**
+     * Default bio link configuration.
+     */
+    public static function defaultBioLinkConfig(): array
+    {
+        return [
+            'template'         => 'modern-glow',
+            'title'            => 'Undangan Digital',
+            'description'      => 'Buat undangan digital elegan & berkesan untuk momen spesialmu 💌',
+            'sections'         => [
+                ['id' => 'header',  'type' => 'header',  'active' => true,  'order' => 0, 'variant' => 'centered'],
+                ['id' => 'bio',     'type' => 'bio',     'active' => true,  'order' => 1, 'variant' => 'simple'],
+                ['id' => 'buttons', 'type' => 'buttons', 'active' => true,  'order' => 2, 'variant' => 'default'],
+                ['id' => 'sosmed',  'type' => 'sosmed',  'active' => true,  'order' => 3, 'variant' => 'icon-row'],
+                ['id' => 'footer',  'type' => 'footer',  'active' => false, 'order' => 4, 'variant' => 'minimal'],
+            ],
+            'buttons'          => [
+                ['id' => '1', 'label' => 'Buat Undangan Gratis', 'url' => '#', 'icon' => 'link', 'active' => true, 'animation' => 'glow'],
+                ['id' => '2', 'label' => 'Katalog Tema', 'url' => '#', 'icon' => 'grid', 'active' => true, 'animation' => 'pulse'],
+                ['id' => '3', 'label' => 'Harga Paket', 'url' => '#', 'icon' => 'tag', 'active' => true, 'animation' => 'none'],
+            ],
+            'social'           => [
+                'whatsapp'  => '',
+                'instagram' => '',
+                'tiktok'    => '',
+                'facebook'  => '',
+                'youtube'   => '',
+                'telegram'  => '',
+                'email'     => '',
+                'website'   => '',
+            ],
+        ];
+    }
+
+    /**
+     * Get merged bio link config with defaults.
+     */
+    public function getBioLinkConfig(): array
+    {
+        $defaults = self::defaultBioLinkConfig();
+        $saved    = $this->bio_link_config ?? [];
+        return array_merge($defaults, $saved, [
+            'buttons'  => $saved['buttons'] ?? $defaults['buttons'],
+            'social'   => array_merge($defaults['social'], $saved['social'] ?? []),
+            'sections' => $saved['sections'] ?? $defaults['sections'],
+        ]);
     }
 
     /**

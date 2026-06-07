@@ -83,6 +83,16 @@ Route::get('/', function () {
 Route::get('/r/{subdomain}', [\App\Http\Controllers\ResellerLandingPageController::class, 'show'])->name('reseller.landing');
 Route::get('/r/{subdomain}/themes', [\App\Http\Controllers\ResellerLandingPageController::class, 'themes'])->name('reseller.themes');
 Route::get('/r/{subdomain}/faq', [\App\Http\Controllers\ResellerLandingPageController::class, 'faq'])->name('reseller.faq');
+Route::get('/r/{subdomain}/bio', [\App\Http\Controllers\ResellerBioLinkController::class, 'show'])->name('reseller.bio');
+
+// Bio link via subdomain resolution
+Route::get('/bio', function () {
+    $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
+    if ($resellerSetting) {
+        return app(\App\Http\Controllers\ResellerBioLinkController::class)->show($resellerSetting->subdomain);
+    }
+    abort(404);
+})->name('bio');
 
 Route::get('/katalog-tema', function () {
     $resellerSetting = \App\Helpers\DomainHelper::resolveReseller(request()->getHost());
@@ -405,6 +415,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/landing-page/hero-image', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'removeHeroImage'])->name('landing-page.hero-image.remove');
     Route::get('/domain', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'domain'])->name('domain');
     Route::post('/domain', [\App\Http\Controllers\Admin\ResellerSettingsController::class, 'updateDomain'])->name('domain.update');
+
+    // Reseller Bio Link
+    Route::get('/bio', [\App\Http\Controllers\ResellerBioLinkController::class, 'edit'])->name('bio');
+    Route::post('/bio', [\App\Http\Controllers\ResellerBioLinkController::class, 'update'])->name('bio.update');
+    Route::post('/bio/upload', [\App\Http\Controllers\ResellerBioLinkController::class, 'uploadAsset'])->name('bio.upload');
+    Route::delete('/bio/asset', [\App\Http\Controllers\ResellerBioLinkController::class, 'removeAsset'])->name('bio.asset.remove');
 
     // Reseller Revenue
     Route::get('/pendapatan', [\App\Http\Controllers\Admin\ResellerRevenueController::class, 'index'])->name('pendapatan');

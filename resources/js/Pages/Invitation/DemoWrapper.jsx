@@ -21,7 +21,8 @@ export default function DemoWrapper({
     wishes, 
     guest, 
     isDemo, 
-    subscriptionPlans 
+    subscriptionPlans,
+    hideDemoPlanSelector = false
 }) {
     // State to hide the demo plan selector for clean screen recording (video preview)
     const [hideDemoSelector, setHideDemoSelector] = useState(() => {
@@ -215,7 +216,7 @@ export default function DemoWrapper({
             </Suspense>
 
             {/* Simulated Plan Selector Floating Widget */}
-            {isDemo && subscriptionPlans && !hideDemoSelector && (
+            {isDemo && subscriptionPlans && !hideDemoSelector && !hideDemoPlanSelector && (
                 <DemoPlanSelector 
                     plans={subscriptionPlans}
                     selectedPlanSlug={simulatedPlanSlug}

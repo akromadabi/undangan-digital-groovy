@@ -11,8 +11,20 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
 );
 
 export default function Branding({ settings, centralHost = 'undangan.com' }) {
-    const { flash } = usePage().props;
+    const { url, props: { flash } } = usePage();
     const [activeTab, setActiveTab] = useState('brand');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+            if (tabParam && ['brand', 'payment', 'social', 'demo'].includes(tabParam)) {
+                setActiveTab(tabParam);
+            } else {
+                setActiveTab('brand');
+            }
+        }
+    }, [url]);
     const [isTutorialOpen, setIsTutorialOpen] = useState(false);
     const [checkingSubdomain, setCheckingSubdomain] = useState(false);
     const [subdomainStatus, setSubdomainStatus] = useState(null);
@@ -65,6 +77,7 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
         social_links: getInitialSocialLinks(),
         subdomain: settings?.subdomain || '',
         custom_domain: settings?.custom_domain || '',
+        hide_demo_plan_selector: settings?.hide_demo_plan_selector || false,
     });
 
     const [preview, setPreview] = useState(null);
@@ -167,12 +180,12 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
     const logoUrl = preview || (settings?.brand_logo ? `/storage/${settings.brand_logo}` : null);
 
     return (
-        <AdminLayout title="Branding">
-            <Head title="Branding" />
-            <div className="max-w-2xl mx-auto space-y-6">
-                <div>
-                    <h2 className="text-xl font-bold text-[#1a1a1a]">Pengaturan Branding & Kontak</h2>
-                    <p className="text-[#999] text-sm mt-1">Atur identitas brand, rekening pembayaran pelanggan, dan tautan sosial media reseller Anda</p>
+        <AdminLayout title="Pengaturan Reseller">
+            <Head title="Pengaturan Reseller" />
+            <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
+                <div className="px-1 sm:px-0">
+                    <h2 className="text-lg sm:text-xl font-bold text-[#1a1a1a]">Pengaturan Reseller</h2>
+                    <p className="text-[#999] text-xs sm:text-sm mt-1">Atur identitas brand, rekening pembayaran pelanggan, tautan sosial media, dan fitur undangan demo reseller Anda</p>
                 </div>
 
                 {flash?.success && (
@@ -182,34 +195,38 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                 )}
 
                 {/* Tab Navigation */}
-                <div className="flex border-b border-[#e8e5e0] gap-2">
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('brand')}
-                        className={`px-4 py-2.5 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'brand' ? 'border-[#E5654B] text-[#E5654B]' : 'border-transparent text-[#999] hover:text-[#555]'}`}
+                <div className="flex lg:hidden border-b border-[#e8e5e0] w-full bg-white rounded-xl p-1 shadow-sm border border-gray-100">
+                    <Link
+                        href="/admin/branding?tab=brand"
+                        className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${activeTab === 'brand' ? 'bg-[#E5654B]/5 text-[#E5654B] font-extrabold' : 'text-[#999] hover:text-[#555]'}`}
                     >
-                        <Icon d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62" className="w-4 h-4" />
-                        Identitas Brand
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('payment')}
-                        className={`px-4 py-2.5 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'payment' ? 'border-[#E5654B] text-[#E5654B]' : 'border-transparent text-[#999] hover:text-[#555]'}`}
+                        <Icon d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62" className="w-3.5 h-3.5 shrink-0" />
+                        Brand
+                    </Link>
+                    <Link
+                        href="/admin/branding?tab=payment"
+                        className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${activeTab === 'payment' ? 'bg-[#E5654B]/5 text-[#E5654B] font-extrabold' : 'text-[#999] hover:text-[#555]'}`}
                     >
-                        <Icon d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" className="w-4 h-4" />
-                        Rekening Pembayaran
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('social')}
-                        className={`px-4 py-2.5 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'social' ? 'border-[#E5654B] text-[#E5654B]' : 'border-transparent text-[#999] hover:text-[#555]'}`}
+                        <Icon d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" className="w-3.5 h-3.5 shrink-0" />
+                        Rekening
+                    </Link>
+                    <Link
+                        href="/admin/branding?tab=social"
+                        className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${activeTab === 'social' ? 'bg-[#E5654B]/5 text-[#E5654B] font-extrabold' : 'text-[#999] hover:text-[#555]'}`}
                     >
-                        <Icon d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97" className="w-4 h-4" />
-                        Kontak & Media Sosial
-                    </button>
+                        <Icon d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97" className="w-3.5 h-3.5 shrink-0" />
+                        Sosmed
+                    </Link>
+                    <Link
+                        href="/admin/branding?tab=demo"
+                        className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${activeTab === 'demo' ? 'bg-[#E5654B]/5 text-[#E5654B] font-extrabold' : 'text-[#999] hover:text-[#555]'}`}
+                    >
+                        <Icon d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .252c-.008.379.137.751.43.992l1.003.828a1.125 1.125 0 01.26 1.43l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.216-.456c-.356-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.02-.397-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.003-.827c.293-.242.438-.614.43-.993a7.72 7.72 0 010-.251c.007-.38-.138-.751-.43-.993l-1.003-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.49l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.645-.869l.213-1.28zM15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-3.5 h-3.5 shrink-0" />
+                        Demo
+                    </Link>
                 </div>
 
-                <form onSubmit={submit} className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-6">
+                <form onSubmit={submit} className="bg-white rounded-2xl border border-[#e8e5e0] p-4 sm:p-6 space-y-4 sm:space-y-6">
                     
                     {/* ═══ TAB 1: IDENTITAS BRAND ═══ */}
                     {activeTab === 'brand' && (
@@ -217,7 +234,7 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                             {/* Logo */}
                             <div>
                                 <label className="block text-sm font-bold text-[#333] mb-3">Logo Brand</label>
-                                <div className="flex items-start gap-6">
+                                <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                                     <div className={`w-24 h-24 rounded-2xl border-2 border-dashed border-[#e8e5e0] flex items-center justify-center overflow-hidden flex-shrink-0 ${logoUrl ? 'bg-transparent' : 'bg-[#faf9f6]'}`}>
                                         {logoUrl ? (
                                             <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
@@ -387,7 +404,7 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                             ) : (
                                 <div className="space-y-4">
                                     {data.bank_accounts.map((account, index) => (
-                                        <div key={index} className="p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] relative space-y-4">
+                                        <div key={index} className="p-3 sm:p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] relative space-y-3 sm:space-y-4">
                                             <div className="flex items-center justify-between border-b border-[#e8e5e0] pb-2">
                                                 <span className="text-xs font-extrabold text-[#E5654B]">REKENING KESATU #{index + 1}</span>
                                                 <button
@@ -400,7 +417,7 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                                                 </button>
                                             </div>
                                             
-                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                                                 <div>
                                                     <label className="block text-xs font-semibold text-[#555] mb-1.5">Nama Bank / E-Wallet</label>
                                                     <input
@@ -616,6 +633,68 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                         </div>
                     )}
 
+                    {/* ═══ TAB 4: UNDANGAN DEMO ═══ */}
+                    {activeTab === 'demo' && (
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="text-base font-bold text-[#1a1a1a]">Pengaturan Undangan Demo</h3>
+                                <p className="text-xs text-[#999] mt-0.5">Kelola tampilan dan fungsionalitas undangan demo yang Anda tunjukkan kepada calon pelanggan.</p>
+                            </div>
+
+                            {/* Toggle Hide Plan Selector */}
+                            <div className="p-3 sm:p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] flex items-center justify-between gap-4">
+                                <div className="space-y-1">
+                                    <div className="text-sm font-bold text-[#333]">Sembunyikan Ganti Paket</div>
+                                    <p className="text-xs text-[#999] leading-relaxed">
+                                        Sembunyikan tombol ganti paket pada halaman undangan demo.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setData('hide_demo_plan_selector', !data.hide_demo_plan_selector)}
+                                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ${data.hide_demo_plan_selector ? 'bg-[#E5654B]' : 'bg-gray-300'}`}
+                                >
+                                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${data.hide_demo_plan_selector ? 'translate-x-5' : ''}`} />
+                                </button>
+                            </div>
+
+                            {/* Akun Demo Card */}
+                            <div className="border-t border-[#f0ede8] pt-6 space-y-4">
+                                <div>
+                                    <h4 className="text-sm font-bold text-[#1a1a1a]">Akun Demo Undangan</h4>
+                                    <p className="text-[#999] text-xs mt-1">
+                                        Preview tema di Landing Page Anda akan menampilkan data undangan dari akun demo khusus Anda. Anda bisa mengedit nama pengantin, foto galeri, musik latar, dll.
+                                    </p>
+                                </div>
+                                
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 sm:p-4 bg-[#faf9f6] rounded-xl border border-[#e8e5e0]">
+                                    <div className="min-w-0 flex-1">
+                                        <div className="font-semibold text-sm text-[#333] truncate">
+                                            {settings?.demo_user ? `Terhubung: ${settings.demo_user.name}` : 'Belum diatur (Menggunakan data default Korea)'}
+                                        </div>
+                                        <div className="text-xs text-[#999] mt-0.5 truncate">
+                                            {settings?.demo_user 
+                                                ? `Email: ${settings.demo_user.email}`
+                                                : 'Klik tombol di samping untuk membuat akun demo reseller Anda secara otomatis.'}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex gap-2 shrink-0">
+                                        <Link 
+                                            href="/admin/impersonate/demo-user" 
+                                            method="post" 
+                                            as="button" 
+                                            className="px-4 py-2 bg-[#E5654B] text-white text-xs font-bold rounded-xl hover:bg-[#d55a42] transition-colors shadow-sm inline-flex items-center gap-1.5"
+                                        >
+                                            <Icon d="M11.25 9l-3 3m0 0l3 3m-3-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-4 h-4" />
+                                            {settings?.demo_user ? 'Masuk & Kelola Undangan Demo' : 'Buat & Kelola Akun Demo'}
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Submit Button */}
                     <div className="flex justify-end pt-4 border-t border-[#f0ede8]">
                         <button
@@ -627,41 +706,6 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                         </button>
                     </div>
                 </form>
-
-                {/* Demo Account Section (Always at the bottom as secondary card) */}
-                <div className="bg-white rounded-2xl border border-[#e8e5e0] p-6 space-y-6">
-                    <div>
-                        <h3 className="text-base font-bold text-[#1a1a1a]">Akun Demo Undangan</h3>
-                        <p className="text-[#999] text-xs mt-1">
-                            Preview tema di Landing Page Anda akan menampilkan data undangan dari akun demo khusus Anda. Anda bisa mengedit nama pengantin, foto galeri, musik latar, dll.
-                        </p>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[#faf9f6] rounded-xl border border-[#e8e5e0]">
-                        <div>
-                            <div className="font-semibold text-sm text-[#333]">
-                                {settings?.demo_user ? `Terhubung: ${settings.demo_user.name}` : 'Belum diatur (Menggunakan data default Korea)'}
-                            </div>
-                            <div className="text-xs text-[#999] mt-0.5">
-                                {settings?.demo_user 
-                                    ? `Email: ${settings.demo_user.email}`
-                                    : 'Klik tombol di samping untuk membuat akun demo reseller Anda secara otomatis.'}
-                            </div>
-                        </div>
-                        
-                        <div className="flex gap-2">
-                            <Link 
-                                href="/admin/impersonate/demo-user" 
-                                method="post" 
-                                as="button" 
-                                className="px-4 py-2 bg-[#E5654B] text-white text-xs font-bold rounded-xl hover:bg-[#d55a42] transition-colors shadow-sm inline-flex items-center gap-1.5"
-                            >
-                                <Icon d="M11.25 9l-3 3m0 0l3 3m-3-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-4 h-4" />
-                                {settings?.demo_user ? 'Masuk & Kelola Undangan Demo' : 'Buat & Kelola Akun Demo'}
-                            </Link>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <CustomDomainTutorialModal 

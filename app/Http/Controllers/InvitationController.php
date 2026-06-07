@@ -265,6 +265,7 @@ class InvitationController extends Controller
             'admin_whatsapp_url' => $whatsappLink,
             'isDemo' => $isDemo,
             'subscriptionPlans' => $subscriptionPlans,
+            'hideDemoPlanSelector' => $resellerSetting ? (bool)$resellerSetting->hide_demo_plan_selector : false,
         ];
 
         if ($page === 'Invitation/DemoWrapper') {
@@ -515,6 +516,7 @@ class InvitationController extends Controller
                 'wishes' => $wishes,
                 'isDemo' => true,
                 'subscriptionPlans' => $subscriptionPlans,
+                'hideDemoPlanSelector' => $resellerSetting ? (bool)$resellerSetting->hide_demo_plan_selector : false,
             ];
 
             if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja'])) {
@@ -702,6 +704,7 @@ class InvitationController extends Controller
             'wishes' => $wishes,
             'isDemo' => true,
             'subscriptionPlans' => $subscriptionPlans,
+            'hideDemoPlanSelector' => $resellerSetting ? (bool)$resellerSetting->hide_demo_plan_selector : false,
         ];
 
         if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja'])) {

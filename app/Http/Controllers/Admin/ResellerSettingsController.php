@@ -54,6 +54,7 @@ class ResellerSettingsController extends Controller
             'social_links' => 'nullable|array',
             'subdomain' => 'nullable|string|max:50|alpha_dash|unique:reseller_settings,subdomain,' . $this->getSettings()->id,
             'custom_domain' => 'nullable|string|max:255|unique:reseller_settings,custom_domain,' . $this->getSettings()->id,
+            'hide_demo_plan_selector' => 'nullable|boolean',
         ]);
 
         $settings = $this->getSettings();
@@ -69,6 +70,7 @@ class ResellerSettingsController extends Controller
         $settings->footer_description = $request->footer_description;
         $settings->subdomain = $request->subdomain;
         $settings->custom_domain = $request->custom_domain;
+        $settings->hide_demo_plan_selector = $request->boolean('hide_demo_plan_selector');
         
         // Save multiple bank accounts and auto-sync primary to legacy columns
         $settings->bank_accounts = $request->bank_accounts;
