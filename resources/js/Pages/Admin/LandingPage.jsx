@@ -78,29 +78,81 @@ const DEFAULT_DESCRIPTIONS = {
     album_video: 'Akses ke fitur tempel link video YouTube/Google Drive di galeri.',
 };
 
-export default function LandingPage({ settings, themes, defaultSections, savedSections, currentTheme, heroImage, features = [] }) {
+export default function LandingPage({ settings, themes, defaultSections, savedSections, currentTheme, currentPalette, heroImage, features = [] }) {
     const { flash, adminRoutePrefix } = usePage().props;
 
     const getSectionLabel = (key) => {
-        if (key === 'banner') return 'Promo';
+        if (key === 'banner') return 'Promo & Popup';
         return key.replace(/_/g, ' ');
     };
 
+    // Palette definitions (mirrors PALETTE_MAP in ModernSplit)
+    const PALETTES = [
+        { id: 'crimson',  name: 'Crimson',   accent: '#d31124', bg: 'linear-gradient(135deg,#d31124,#e11d48)' },
+        { id: 'rose',     name: 'Rose',      accent: '#e11d48', bg: 'linear-gradient(135deg,#be123c,#f43f5e)' },
+        { id: 'coral',    name: 'Coral',     accent: '#f97316', bg: 'linear-gradient(135deg,#ea580c,#f97316)' },
+        { id: 'amber',    name: 'Amber',     accent: '#d97706', bg: 'linear-gradient(135deg,#b45309,#f59e0b)' },
+        { id: 'emerald',  name: 'Emerald',   accent: '#059669', bg: 'linear-gradient(135deg,#047857,#10b981)' },
+        { id: 'teal',     name: 'Teal',      accent: '#0d9488', bg: 'linear-gradient(135deg,#0f766e,#14b8a6)' },
+        { id: 'sky',      name: 'Sky',       accent: '#0284c7', bg: 'linear-gradient(135deg,#0369a1,#0ea5e9)' },
+        { id: 'indigo',   name: 'Indigo',    accent: '#4f46e5', bg: 'linear-gradient(135deg,#4338ca,#6366f1)' },
+        { id: 'violet',   name: 'Violet',    accent: '#7c3aed', bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
+        { id: 'purple',   name: 'Purple',    accent: '#9333ea', bg: 'linear-gradient(135deg,#7e22ce,#a855f7)' },
+        { id: 'fuchsia',  name: 'Fuchsia',   accent: '#c026d3', bg: 'linear-gradient(135deg,#a21caf,#d946ef)' },
+        { id: 'slate',    name: 'Slate',     accent: '#475569', bg: 'linear-gradient(135deg,#334155,#64748b)' },
+        { id: 'dark',     name: 'Dark Mode', accent: '#e5654b', bg: 'linear-gradient(135deg,#0f172a,#1e293b)' },
+        { id: 'forest',   name: 'Forest',    accent: '#15803d', bg: 'linear-gradient(135deg,#166534,#16a34a)' },
+        { id: 'burgundy', name: 'Burgundy',  accent: '#9f1239', bg: 'linear-gradient(135deg,#881337,#be123c)' },
+    ];
+
+    // Section variant options per section key
+    const SECTION_VARIANTS = {
+        banner:       [
+            { id: 'top_header', label: 'Floating Atas Header', icon: '▬' },
+            { id: 'bottom_right', label: 'Floating Kanan Bawah', icon: '◰' },
+            { id: 'popup', label: 'Popup Sekali', icon: '⧇' }
+        ],
+        hero:         [
+            { id: 'centered', label: 'Centered', icon: '⬛' },
+            { id: 'split', label: 'Split', icon: '◧' },
+            { id: 'fullscreen', label: 'Fullscreen', icon: '⬜' },
+            { id: 'minimal', label: 'Minimal', icon: '▭' }
+        ],
+        main_banner:  [
+            { id: 'banner_card', label: 'Banner - Box Card', icon: '📦' },
+            { id: 'banner_bg', label: 'Banner - Background', icon: '🖼️' },
+            { id: 'banner_split', label: 'Banner - Samping', icon: '🎴' }
+        ],
+        stats:        [{ id: 'strip', label: 'Strip', icon: '▬' }, { id: 'cards', label: 'Cards', icon: '⊞' }, { id: 'bento', label: 'Bento', icon: '⊟' }],
+        how_it_works: [{ id: 'horizontal', label: 'Horizontal', icon: '▷▷▷' }, { id: 'timeline', label: 'Timeline', icon: '┇' }, { id: 'numbered', label: 'Numbered', icon: '①②' }],
+        features:     [{ id: 'scroll', label: 'Scroll', icon: '➔' }, { id: 'grid', label: 'Grid Cards', icon: '⊞' }, { id: 'list', label: 'Detailed List', icon: '≡' }, { id: 'spotlight', label: 'Spotlight', icon: '⭐' }],
+        preview:      [{ id: 'carousel', label: 'Carousel Slider', icon: '↔' }, { id: 'grid', label: 'Grid Layout', icon: '⊞' }, { id: 'featured', label: 'Featured Focus', icon: '⭐' }],
+        greeting_cards: [{ id: 'grid', label: 'Grid Layout', icon: '⊞' }, { id: 'carousel', label: 'Carousel Slider', icon: '↔' }, { id: 'list', label: 'Simple List', icon: '≡' }],
+        testimonials: [{ id: 'marquee', label: 'Marquee', icon: '↔' }, { id: 'grid', label: 'Grid', icon: '⊞' }, { id: 'quote', label: 'Quote', icon: '❝' }],
+        plans:        [{ id: 'cards', label: 'Pricing Cards', icon: '⊞' }, { id: 'stacked', label: 'Row Stacked', icon: '☰' }, { id: 'highlight', label: 'Featured Focus', icon: '⭐' }],
+        faq:          [{ id: 'accordion', label: 'Accordion', icon: '≡' }, { id: 'twocol', label: '2 Kolom', icon: '⊟' }, { id: 'grouped', label: 'Grouped', icon: '⊞' }],
+        cta:          [{ id: 'dark', label: 'Dark', icon: '■' }, { id: 'split', label: 'Split', icon: '◧' }, { id: 'minimal', label: 'Minimal', icon: '○' }],
+    };
+
+
     // State definitions
-    const [activeTab, setActiveTab] = useState('sections'); // sections, themes
-    const [selectedTheme, setSelectedTheme] = useState(currentTheme || 'galaxy');
+    const [activeTab, setActiveTab] = useState('sections'); // sections, palette
+    const [selectedPalette, setSelectedPalette] = useState(currentPalette || 'crimson');
     const [sections, setSections] = useState(savedSections || defaultSections);
     const [selectedSectionKey, setSelectedSectionKey] = useState(null);
     const [heroImgUrl, setHeroImgUrl] = useState(heroImage || null);
+    const [uploadingBanner, setUploadingBanner] = useState(false);
     
     // States for icon picker and collapsible accordion content items
     const [activeIconPickerIdx, setActiveIconPickerIdx] = useState(null);
     const [expandedItemIdx, setExpandedItemIdx] = useState(0);
+    const [isVariantDropdownOpen, setIsVariantDropdownOpen] = useState(false);
 
     // Reset editor popup collapsible indices when changing edited section
     useEffect(() => {
         setExpandedItemIdx(0);
         setActiveIconPickerIdx(null);
+        setIsVariantDropdownOpen(false);
     }, [selectedSectionKey]);
     
     const [previewMode, setPreviewMode] = useState('mobile'); // mobile, desktop
@@ -119,14 +171,15 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
     // Effect to handle real-time postMessage to iframe when state changes
     useEffect(() => {
         updatePreview();
-    }, [sections, selectedTheme, heroImgUrl]);
+    }, [sections, selectedPalette, heroImgUrl]);
 
     const updatePreview = () => {
         if (iframeRef.current && iframeRef.current.contentWindow) {
             iframeRef.current.contentWindow.postMessage({
                 type: 'landing_page_preview',
                 config: {
-                    theme: selectedTheme,
+                    theme: 'modern-split',
+                    palette: selectedPalette,
                     sections: sections,
                     heroImage: heroImgUrl
                 }
@@ -272,7 +325,8 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
         setSaving(true);
         try {
             const res = await axios.put(`${adminRoutePrefix}/landing-page/config`, {
-                theme: selectedTheme,
+                theme: 'modern-split',
+                palette: selectedPalette,
                 sections: sections
             });
             if (res.data?.success) {
@@ -323,6 +377,47 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
             }
         } catch (err) {
             showToast('Error', 'Gagal menghapus gambar background.');
+        }
+    };
+
+    const handleBannerImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('hero_image', file);
+        formData.append('section', 'main_banner');
+
+        setUploadingBanner(true);
+        try {
+            const res = await axios.post(`${adminRoutePrefix}/landing-page/hero-image`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            if (res.data?.success) {
+                updateSectionConfigField('main_banner', 'banner_image', res.data.url);
+                showToast('Sukses', 'Gambar banner utama berhasil diunggah!');
+            }
+        } catch (err) {
+            console.error('Upload error details:', err);
+            const serverMsg = err.response?.data?.message || 
+                              (err.response?.data?.errors && Object.values(err.response.data.errors).flat()[0]) || 
+                              err.message;
+            showToast('Error', `Gagal mengunggah gambar banner. (${serverMsg})`);
+        } finally {
+            setUploadingBanner(false);
+        }
+    };
+
+    const handleBannerImageRemove = async () => {
+        if (!confirm('Hapus gambar banner utama?')) return;
+        try {
+            const res = await axios.delete(`${adminRoutePrefix}/landing-page/hero-image?section=main_banner`);
+            if (res.data?.success) {
+                updateSectionConfigField('main_banner', 'banner_image', null);
+                showToast('Sukses', 'Gambar banner utama dihapus.');
+            }
+        } catch (err) {
+            showToast('Error', 'Gagal menghapus gambar banner.');
         }
     };
 
@@ -385,10 +480,10 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                             Struktur Halaman
                         </button>
                         <button
-                            onClick={() => { setActiveTab('themes'); setSelectedSectionKey(null); }}
-                            className={`flex-1 py-3 text-xs font-black tracking-wider uppercase border-b-2 text-center transition-all ${activeTab === 'themes' ? 'border-[#E5654B] text-[#E5654B]' : 'border-transparent text-[#999] hover:text-[#555]'}`}
+                            onClick={() => { setActiveTab('palette'); setSelectedSectionKey(null); }}
+                            className={`flex-1 py-3 text-xs font-black tracking-wider uppercase border-b-2 text-center transition-all ${activeTab === 'palette' ? 'border-[#E5654B] text-[#E5654B]' : 'border-transparent text-[#999] hover:text-[#555]'}`}
                         >
-                            Pilih Tema
+                            🎨 Palet Warna
                         </button>
                     </div>
                     
@@ -473,40 +568,50 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                             </div>
                         )}
                         
-                        {/* ═══ TAB: Themes list ═══ */}
-                        {activeTab === 'themes' && (
+
+                        {/* ═══ TAB: Palette Picker ═══ */}
+                        {activeTab === 'palette' && (
                             <div className="space-y-4">
                                 <span className="text-[10px] font-black tracking-wider uppercase text-slate-400 block mb-2">
-                                    Pilih Gaya & Warna Template
+                                    Pilih Warna Tema
                                 </span>
-                                
-                                {themes.map((t) => {
-                                    const isSelected = selectedTheme === t.id;
-                                    return (
-                                        <button
-                                            key={t.id}
-                                            onClick={() => setSelectedTheme(t.id)}
-                                            className={`w-full text-left p-4 bg-white border rounded-2xl flex items-center justify-between gap-4 transition-all hover:border-[#E5654B]/60 ${
-                                                isSelected ? 'border-[#E5654B] ring-1 ring-[#E5654B] shadow-sm' : 'border-[#e8e5e0]'
-                                            }`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-2xl flex-shrink-0">{t.char}</span>
-                                                <div>
-                                                    <div className="text-xs font-extrabold text-[#333]">{t.name}</div>
-                                                    <div className="text-[10px] text-[#999] mt-0.5 leading-relaxed">
-                                                        {t.description}
+                                <div className="grid grid-cols-5 gap-2">
+                                    {PALETTES.map(pal => {
+                                        const isSelected = selectedPalette === pal.id;
+                                        return (
+                                            <button
+                                                key={pal.id}
+                                                title={pal.name}
+                                                onClick={() => setSelectedPalette(pal.id)}
+                                                className={`relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-105 ${
+                                                    isSelected ? 'ring-2 ring-offset-2 ring-[#E5654B] scale-105' : ''
+                                                }`}
+                                                style={{ background: pal.bg }}
+                                            >
+                                                {isSelected && (
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shadow">
+                                                            <svg className="w-2.5 h-2.5" fill="none" stroke="#333" viewBox="0 0 24 24" strokeWidth={3}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="w-10 h-10 rounded-xl overflow-hidden border border-[#e8e5e0] flex flex-shrink-0">
-                                                <div className="w-2/3 h-full" style={{ background: t.preview_bg }} />
-                                                <div className="w-1/3 h-full opacity-60" style={{ background: t.accent }} />
-                                            </div>
-                                        </button>
-                                    );
-                                })}
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {/* Selected palette info */}
+                                <div className="mt-3 p-3 bg-white border border-[#e8e5e0] rounded-xl flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg flex-shrink-0" style={{ background: PALETTES.find(p=>p.id===selectedPalette)?.bg || '' }} />
+                                    <div>
+                                        <div className="text-xs font-extrabold text-[#333]">{PALETTES.find(p=>p.id===selectedPalette)?.name}</div>
+                                        <div className="text-[10px] text-[#999] mt-0.5">Warna aktif</div>
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
+                                    💡 Warna diterapkan ke seluruh halaman landing. Klik Simpan untuk menyimpan.
+                                </p>
                             </div>
                         )}
                     </div>
@@ -529,9 +634,9 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                                     </div>
                                     <div className="w-full h-full overflow-hidden relative">
                                         <iframe
-                                            key={`${selectedTheme}-${previewKey}`}
+                                            key={`${selectedPalette}-${previewKey}`}
                                             ref={iframeRef}
-                                            src={`${adminRoutePrefix}/landing-page/preview?preview=1&theme=${selectedTheme}&k=${previewKey}`}
+                                            src={`${adminRoutePrefix}/landing-page/preview?preview=1&palette=${selectedPalette}&k=${previewKey}`}
                                             className="absolute top-0 left-0 border-0 border-none select-none"
                                             style={{
                                                 width: '430px',
@@ -582,8 +687,90 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                         {/* Scrollable Form Body */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-6">
                             
+                            {/* ══ VARIANT PICKER DROPDOWN ══ */}
+                            {SECTION_VARIANTS[selectedSection.key] && (
+                                <div className="relative z-30">
+                                    <label className="block text-[10px] font-black tracking-wider uppercase text-slate-500 mb-2">
+                                        🎨 Layout / Variant Tampilan
+                                    </label>
+                                    
+                                    {(() => {
+                                        const variants = SECTION_VARIANTS[selectedSection.key];
+                                        const currentVal = selectedSection.config?.variant || variants[0].id;
+                                        const activeVar = variants.find(v => v.id === currentVal) || variants[0];
+                                        
+                                        return (
+                                            <div className="relative">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsVariantDropdownOpen(!isVariantDropdownOpen)}
+                                                    className="w-full flex items-center justify-between px-4 py-3 bg-white border border-[#e8e5e0] hover:border-[#E5654B] rounded-2xl transition-all shadow-sm group text-left"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-xl bg-orange-50 text-[#E5654B] w-8 h-8 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                            {activeVar.icon}
+                                                        </span>
+                                                        <div>
+                                                            <div className="text-xs font-bold text-slate-800">{activeVar.label}</div>
+                                                            <div className="text-[9px] text-slate-400 font-medium uppercase tracking-wider">Aktif</div>
+                                                        </div>
+                                                    </div>
+                                                    <span className={`text-slate-400 transition-transform duration-200 ${isVariantDropdownOpen ? 'rotate-180' : ''}`}>
+                                                        <Icon d="M19.5 8.25l-7.5 7.5-7.5-7.5" className="w-4 h-4" />
+                                                    </span>
+                                                </button>
+
+                                                {/* Dropdown Menu Overlay */}
+                                                {isVariantDropdownOpen && (
+                                                    <>
+                                                        {/* Invisible backdrop to close on click outside */}
+                                                        <div 
+                                                            className="fixed inset-0 z-40 bg-transparent" 
+                                                            onClick={() => setIsVariantDropdownOpen(false)} 
+                                                        />
+                                                        <div className="absolute left-0 right-0 mt-2 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl z-50 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                                                            {variants.map(v => {
+                                                                const isSelected = v.id === currentVal;
+                                                                return (
+                                                                    <button
+                                                                        key={v.id}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            updateSectionConfigField(selectedSection.key, 'variant', v.id);
+                                                                            setIsVariantDropdownOpen(false);
+                                                                        }}
+                                                                        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all ${
+                                                                            isSelected 
+                                                                                ? 'bg-orange-50/50 text-[#E5654B] font-extrabold' 
+                                                                                : 'hover:bg-slate-50 text-slate-655'
+                                                                        }`}
+                                                                    >
+                                                                        <div className="flex items-center gap-3">
+                                                                            <span className={`text-lg w-7 h-7 rounded-lg flex items-center justify-center ${isSelected ? 'bg-orange-100 text-[#E5654B]' : 'bg-slate-100 text-slate-500'}`}>
+                                                                                {v.icon}
+                                                                            </span>
+                                                                            <span className="text-xs font-semibold">{v.label}</span>
+                                                                        </div>
+                                                                        {isSelected && (
+                                                                            <span className="text-[#E5654B]">
+                                                                                <Icon d="M4.5 12.75l6 6 9-13.5" className="w-4 h-4 stroke-[3]" />
+                                                                            </span>
+                                                                        )}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            )}
+
                             {/* ══ SECTION: BANNER ══ */}
                             {selectedSection.key === 'banner' && (
+
                                 <div className="space-y-5">
                                     <div>
                                         <label className="block text-xs font-extrabold text-[#333] mb-1.5 uppercase tracking-wide">Teks Promo</label>
@@ -869,6 +1056,78 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                                                 </div>
                                             ))}
                                         </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ══ SECTION: MAIN BANNER ══ */}
+                            {selectedSection.key === 'main_banner' && (
+                                <div className="space-y-5">
+                                    <div>
+                                        <label className="block text-xs font-extrabold text-[#333] mb-2 uppercase tracking-wide">Gambar Banner Utama</label>
+                                        <div className="flex items-center gap-4">
+                                            {selectedSection.config.banner_image && (
+                                                <div className="w-24 h-16 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0">
+                                                    <img src={selectedSection.config.banner_image} alt="Banner" className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+                                            <div className="space-y-2">
+                                                <label className="px-4 py-2 bg-[#f5f3f0] text-slate-600 hover:bg-[#e8e5e0] text-xs font-bold rounded-xl cursor-pointer transition-colors inline-block">
+                                                    {uploadingBanner ? 'Mengunggah...' : 'Upload Banner'}
+                                                    <input type="file" accept="image/*" onChange={handleBannerImageUpload} className="hidden" disabled={uploadingBanner} />
+                                                </label>
+                                                {selectedSection.config.banner_image && (
+                                                    <button type="button" onClick={handleBannerImageRemove} className="text-xs text-red-500 hover:text-red-700 block font-semibold">
+                                                        Hapus Gambar Banner
+                                                    </button>
+                                                )}
+                                                <p className="text-[10px] text-[#bbb]">Format: JPG, PNG, WebP. Maksimal 4MB.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Judul Overlay (Opsional)</label>
+                                        <input
+                                            type="text"
+                                            value={selectedSection.config.title || ''}
+                                            onChange={e => updateSectionConfigField('main_banner', 'title', e.target.value)}
+                                            className="w-full px-3 py-2 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-xs outline-none focus:border-[#E5654B]"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Subjudul Overlay (Opsional)</label>
+                                        <input
+                                            type="text"
+                                            value={selectedSection.config.subtitle || ''}
+                                            onChange={e => updateSectionConfigField('main_banner', 'subtitle', e.target.value)}
+                                            className="w-full px-3 py-2 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-xs outline-none focus:border-[#E5654B]"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Link Klik Banner (URL / Section Hash)</label>
+                                        <input
+                                            type="text"
+                                            value={selectedSection.config.cta_link || ''}
+                                            onChange={e => updateSectionConfigField('main_banner', 'cta_link', e.target.value)}
+                                            placeholder="contoh: #plans"
+                                            className="w-full px-3 py-2 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-xs outline-none focus:border-[#E5654B]"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Tinggi Banner</label>
+                                        <select
+                                            value={selectedSection.config.height || 'medium'}
+                                            onChange={e => updateSectionConfigField('main_banner', 'height', e.target.value)}
+                                            className="w-full px-3 py-2 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-xs outline-none focus:border-[#E5654B]"
+                                        >
+                                            <option value="small">Kecil (250px)</option>
+                                            <option value="medium">Sedang (380px)</option>
+                                            <option value="large">Besar (500px)</option>
+                                        </select>
                                     </div>
                                 </div>
                             )}

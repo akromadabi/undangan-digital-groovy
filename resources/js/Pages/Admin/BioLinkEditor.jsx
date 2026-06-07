@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -126,70 +126,381 @@ const DEFAULT_SECTIONS = [
     { id: 'footer',  type: 'footer',  active: false, order: 4, variant: 'minimal' },
 ];
 
-// ─── Inline preview helpers ────────────────────────────────────────────────────
-function getPreviewBg(template) {
-    const map = {
-        'clean-elegant': 'linear-gradient(145deg,#fdf6ec,#f5e9d7)',
-        'cyberpunk':     'linear-gradient(160deg,#0d0d0d,#1a0033)',
-        'organic-leaf':  'linear-gradient(160deg,#1a3c34,#2d5a4b)',
-        'minimal-card':  'linear-gradient(135deg,#667eea,#764ba2)',
-    };
-    return map[template] || 'linear-gradient(160deg,#0f0c29,#302b63,#24243e)';
+// ─── Template mapping resolver ────────────────────────────────────────────────
+// ─── Template mapping resolver ────────────────────────────────────────────────
+const resolveTemplate = (template, landingPageTheme) => {
+    if (template === 'follow-landing' || !template) {
+        const mapping = {
+            'galaxy': 'modern-glow',
+            'luxury': 'clean-elegant',
+            'forest': 'organic-leaf',
+            'bloom': 'soft-bloom',
+            'modern-split': 'modern-split'
+        };
+        return mapping[landingPageTheme] || 'modern-glow';
+    }
+    return template;
+};
+
+// ─── SVG Brand Social Icons ──────────────────────────────────────────────────
+const SOCIAL_ICONS = {
+    whatsapp: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864.002-2.637-1.03-5.114-2.905-6.99C16.258 1.875 13.785 1.057 11.14 1.055 5.705 1.055 1.284 5.474 1.282 10.91c-.001 1.708.452 3.375 1.312 4.86l-.86 3.128 3.202-.844zM16.5 13.5c-.3-.15-1.765-.87-2.035-.97-.27-.1-.465-.15-.66.15-.2.3-.765.97-.94 1.17-.175.2-.35.225-.65.075-.3-.15-1.265-.465-2.41-1.485-.89-.795-1.49-1.78-1.665-2.08-.175-.3-.02-.46.13-.61.135-.135.3-.35.45-.525.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.525-.075-.15-.66-1.59-.9-2.175-.24-.575-.48-.5-.66-.51h-.56c-.2 0-.525.075-.8.375-.275.3-1.05 1.025-1.05 2.5s1.075 2.9 1.225 3.1c.15.2 2.11 3.225 5.115 4.525.715.31 1.275.495 1.71.635.72.23 1.375.2 1.89.12.575-.085 1.765-.72 2.015-1.415.25-.7.25-1.3 0-1.425-.05-.125-.2-.2-.5-.35z" />
+        </svg>
+    ),
+    instagram: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+        </svg>
+    ),
+    tiktok: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.86-.74-3.99-1.72-.08-.07-.17-.17-.25-.25v6.07c-.1 1.71-.57 3.45-1.56 4.85-1.54 2.22-4.14 3.73-6.89 3.82-2.58.1-5.22-.88-6.97-2.79-1.92-2.04-2.67-5.06-1.95-7.79.67-2.62 2.76-4.8 5.41-5.32 1.34-.28 2.76-.13 4 .37V8.55c-1.63-.49-3.4-.49-5 .09-2.02.72-3.72 2.28-4.47 4.26-.78 2.01-.64 4.39.39 6.25 1.05 1.9 3.03 3.26 5.2 3.52 2.14.28 4.41-.39 5.86-2.04 1.34-1.48 1.9-3.56 1.77-5.58V.02h.01z" />
+        </svg>
+    ),
+    facebook: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+    ),
+    youtube: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M23.498 6.163a3.003 3.003 0 00-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.508a3.003 3.003 0 00-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 002.11 2.11c1.87.508 9.388.508 9.388.508s7.518 0 9.388-.508a3.003 3.003 0 002.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+        </svg>
+    ),
+    telegram: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.18l-1.91 9c-.14.65-.53.81-1.08.5L9.7 15.42l-1.4 1.35c-.15.15-.28.27-.58.27l.21-2.97 5.4-4.88c.23-.21-.05-.32-.36-.12L6.3 13.3 3.42 12.4c-.63-.2-0.64-.63.13-.93l11.24-4.33c.52-.19.98.12.77.94z" />
+        </svg>
+    ),
+    email: (className) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+    ),
+    website: (className) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+        </svg>
+    ),
+};
+
+const SocialIconSvg = ({ platform, className }) => {
+    const fn = SOCIAL_ICONS[platform];
+    if (!fn) return <span className="text-[10px]">🔗</span>;
+    return fn(className);
+};
+
+// ─── Themes & Styles System ───────────────────────────────────────────────────
+const THEMES = {
+    'modern-glow': {
+        bg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+        font: 'font-sans',
+        textTitle: 'text-white font-extrabold tracking-tight drop-shadow-[0_0_15px_rgba(167,139,250,0.5)]',
+        textBody: 'text-violet-200/80',
+        avatarBorder: 'border border-violet-400/60 shadow-[0_0_20px_rgba(167,139,250,0.3)] ring-2 ring-violet-500/20',
+        cardBg: 'bg-white/5 border border-violet-400/20 backdrop-blur-md rounded-2xl',
+        btnBase: 'bg-white/10 text-white border border-violet-400/30 backdrop-blur-sm rounded-2xl',
+        btnPrimary: 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-none rounded-2xl',
+        socialIcon: 'bg-white/5 border border-violet-400/25 text-violet-200 rounded-full',
+        accentBorder: 'border-violet-400',
+    },
+    'clean-elegant': {
+        bg: 'linear-gradient(135deg, #07090b 0%, #15181c 50%, #07090b 100%)',
+        font: 'font-serif',
+        textTitle: 'text-amber-100 font-bold tracking-tight drop-shadow-md',
+        textBody: 'text-stone-400 font-sans',
+        avatarBorder: 'border-2 border-amber-500/80 shadow-xl ring-2 ring-amber-500/10',
+        cardBg: 'bg-stone-900/60 border border-stone-800/80 shadow-md rounded-2xl',
+        btnBase: 'bg-stone-900 text-stone-200 border border-stone-700/80 rounded-xl',
+        btnPrimary: 'bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 text-stone-900 font-bold border-none rounded-xl',
+        socialIcon: 'bg-stone-900 border border-stone-800 text-stone-400 rounded-xl',
+        accentBorder: 'border-amber-500',
+    },
+    'cyberpunk': {
+        bg: 'linear-gradient(160deg, #0d0d0d 0%, #1a0033 50%, #0d0d0d 100%)',
+        font: 'font-mono uppercase tracking-wide',
+        textTitle: 'text-fuchsia-400 font-black tracking-widest neon-text',
+        textBody: 'text-cyan-300/80 tracking-normal normal-case font-mono',
+        avatarBorder: 'border border-fuchsia-500 shadow-[0_0_10px_rgba(217,70,239,0.5)]',
+        cardBg: 'bg-black/60 border border-cyan-500/30 backdrop-blur-md rounded-none',
+        btnBase: 'bg-transparent border border-cyan-400 text-cyan-300 rounded-none',
+        btnPrimary: 'bg-transparent border border-fuchsia-500 text-fuchsia-400 rounded-none',
+        socialIcon: 'bg-cyan-950/20 border border-cyan-400/40 text-cyan-300 rounded-none',
+        accentBorder: 'border-fuchsia-500',
+    },
+    'organic-leaf': {
+        bg: 'linear-gradient(135deg, #051a11 0%, #0c3624 50%, #051a11 100%)',
+        font: 'font-sans',
+        textTitle: 'text-emerald-100 font-bold tracking-tight',
+        textBody: 'text-emerald-200/70',
+        avatarBorder: 'border-2 border-emerald-400/40 shadow-xl ring-2 ring-emerald-800/30',
+        cardBg: 'bg-emerald-950/30 border border-emerald-500/20 backdrop-blur-md rounded-2xl',
+        btnBase: 'bg-white/10 text-emerald-100 border border-emerald-500/30 backdrop-blur-sm rounded-full',
+        btnPrimary: 'bg-emerald-400 text-emerald-950 border border-emerald-300/50 rounded-full',
+        socialIcon: 'bg-white/10 border border-emerald-500/30 text-emerald-200 rounded-full',
+        accentBorder: 'border-emerald-400',
+    },
+    'minimal-card': {
+        bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+        font: 'font-sans',
+        textTitle: 'text-white font-extrabold tracking-tight drop-shadow-md',
+        textBody: 'text-white/80',
+        avatarBorder: 'border border-white/60 shadow-xl',
+        cardBg: 'bg-white/15 border border-white/30 backdrop-blur-md rounded-3xl shadow-2xl',
+        btnBase: 'bg-white/15 text-white border border-white/40 backdrop-blur-sm rounded-xl',
+        btnPrimary: 'bg-white text-violet-700 shadow-lg border-none rounded-xl',
+        socialIcon: 'bg-white/20 border border-white/40 text-white rounded-xl',
+        accentBorder: 'border-white',
+    },
+    'soft-bloom': {
+        bg: 'linear-gradient(135deg, #fff0f2 0%, #fffcfc 50%, #fff0f2 100%)',
+        font: 'font-serif',
+        textTitle: 'text-stone-800 font-bold tracking-tight',
+        textBody: 'text-stone-500 font-sans',
+        avatarBorder: 'border-2 border-rose-200/80 shadow-lg ring-2 ring-rose-100/30',
+        cardBg: 'bg-white/60 border border-rose-200/30 shadow-sm rounded-2xl',
+        btnBase: 'bg-white text-rose-700 border border-rose-200/80 shadow-sm rounded-full',
+        btnPrimary: 'bg-gradient-to-r from-rose-400 to-pink-500 text-white border-none rounded-full',
+        socialIcon: 'bg-white border border-rose-100/80 text-rose-500 shadow-sm rounded-full',
+        accentBorder: 'border-rose-400',
+    },
+    'modern-split': {
+        bg: 'linear-gradient(135deg, #d31124 0%, #e11d48 100%)',
+        font: 'font-sans',
+        textTitle: 'text-white font-extrabold tracking-tight drop-shadow-md',
+        textBody: 'text-white/90',
+        avatarBorder: 'border-2 border-white/80 shadow-xl ring-2 ring-white/10',
+        cardBg: 'bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl',
+        btnBase: 'bg-white/10 text-white border border-white/20 rounded-xl',
+        btnPrimary: 'bg-white text-rose-700 font-bold border-none rounded-xl',
+        socialIcon: 'bg-white/15 border border-white/20 text-white rounded-xl',
+        accentBorder: 'border-white',
+    },
+};
+
+function getLinkSubtitle(url, label) {
+    const lowerUrl = (url || '').toLowerCase();
+    const lowerLabel = (label || '').toLowerCase();
+    if (lowerUrl.includes('register') || lowerLabel.includes('buat') || lowerLabel.includes('daftar')) {
+        return 'Buat undangan digital dalam 5 menit, gratis!';
+    }
+    if (lowerUrl.includes('themes') || lowerLabel.includes('tema') || lowerLabel.includes('desain') || lowerLabel.includes('katalog')) {
+        return 'Lihat koleksi desain premium terpopuler';
+    }
+    if (lowerUrl.includes('plans') || lowerLabel.includes('harga') || lowerLabel.includes('paket')) {
+        return 'Pilihan paket fitur lengkap & terjangkau';
+    }
+    if (lowerUrl.includes('faq') || lowerLabel.includes('tanya') || lowerLabel.includes('bantuan')) {
+        return 'Pertanyaan yang sering ditanyakan reseller';
+    }
+    if (lowerUrl.includes('buat-kartu') || lowerLabel.includes('kartu') || lowerLabel.includes('ucapan')) {
+        return 'Kirim kartu ucapan digital ke kerabat';
+    }
+    if (lowerUrl.includes('login') || lowerLabel.includes('masuk')) {
+        return 'Masuk ke dashboard reseller Anda';
+    }
+    return null;
 }
 
-function getPreviewHeading(template) {
-    const map = {
-        'clean-elegant': 'text-stone-800 font-serif',
-        'cyberpunk':     'text-fuchsia-400 font-mono uppercase tracking-wide',
-        'organic-leaf':  'text-emerald-100',
-        'minimal-card':  'text-white font-extrabold',
-    };
-    return map[template] || 'text-white font-extrabold';
+function BtnIcon({ name, className = 'w-4 h-4' }) {
+    const d = ICONS[name];
+    if (!d) return null;
+    return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d={d} />
+        </svg>
+    );
 }
 
-function getPreviewDesc(template) {
-    const map = {
-        'clean-elegant': 'text-stone-500',
-        'cyberpunk':     'text-cyan-300 font-mono',
-        'organic-leaf':  'text-emerald-200/80',
-        'minimal-card':  'text-white/80',
-    };
-    return map[template] || 'text-violet-200/80';
+// ─── Dropdown Icon Picker ─────────────────────────────────────────────────────
+function IconPickerDropdown({ value, onChange }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+    useEffect(() => {
+        if (!open) return;
+        const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [open]);
+    return (
+        <div ref={ref} className="relative">
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                className="w-full flex items-center gap-2 border border-[#e0ddd8] bg-white rounded-lg px-2.5 py-1.5 text-[10px] text-[#1a1a1a] hover:border-[#E5654B]/50 transition-colors"
+            >
+                <svg className="w-4 h-4 text-[#E5654B] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={ICONS[value] || ICONS.link} />
+                </svg>
+                <span className="flex-1 text-left capitalize">{value}</span>
+                <svg className={`w-3 h-3 text-[#aaa] transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={ICONS.chevronDn} />
+                </svg>
+            </button>
+            {open && (
+                <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-[#e0ddd8] rounded-xl shadow-xl p-2 w-48">
+                    <div className="grid grid-cols-5 gap-1">
+                        {ICON_LIST.map(ic => (
+                            <button
+                                key={ic}
+                                type="button"
+                                title={ic}
+                                onClick={() => { onChange(ic); setOpen(false); }}
+                                className={`w-full aspect-square flex items-center justify-center rounded-md transition-all ${
+                                    value === ic
+                                        ? 'bg-[#E5654B] text-white shadow-sm'
+                                        : 'text-[#666] hover:bg-[#f5f3f0] hover:text-[#E5654B]'
+                                }`}
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d={ICONS[ic]} />
+                                </svg>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 
-function getPreviewBtn(template) {
-    const map = {
-        'clean-elegant': 'bg-white text-stone-700 border border-stone-200',
-        'cyberpunk':     'bg-transparent border-2 border-fuchsia-500 text-fuchsia-300 font-mono uppercase text-[9px]',
-        'organic-leaf':  'bg-emerald-700/60 text-emerald-100 border border-emerald-400/40 rounded-full',
-        'minimal-card':  'bg-white/20 text-white border border-white/30 backdrop-blur',
-    };
-    return (map[template] || 'bg-white/10 text-white border border-violet-400/30') + ' flex items-center justify-center text-[10px] font-semibold rounded-xl py-2 px-3 w-full';
+// ─── Decorative background templates ───────────────────────────────────────────
+function BackgroundDecorations({ template }) {
+    if (template === 'modern-glow') {
+        return (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                {[...Array(6)].map((_, i) => (
+                    <div key={i} className="absolute rounded-full opacity-20 animate-pulse"
+                        style={{
+                            width: `${30 + i * 20}px`, height: `${30 + i * 20}px`,
+                            background: i % 2 === 0 ? 'radial-gradient(circle, #7c3aed, transparent 70%)' : 'radial-gradient(circle, #4f46e5, transparent 70%)',
+                            top: `${10 + i * 15}%`, left: `${5 + i * 16}%`,
+                            animationDelay: `${i * 0.4}s`, animationDuration: `${3 + i}s`,
+                        }}
+                    />
+                ))}
+            </div>
+        );
+    }
+    if (template === 'cyberpunk') {
+        return (
+            <>
+                <div className="absolute inset-0 pointer-events-none opacity-[0.08] z-0" style={{
+                    backgroundImage: 'linear-gradient(rgba(0,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.3) 1px, transparent 1px)',
+                    backgroundSize: '15px 15px',
+                }} />
+                <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                    <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent"
+                        style={{ animation: 'scanline 5s linear infinite', position: 'absolute' }} />
+                </div>
+            </>
+        );
+    }
+    if (template === 'organic-leaf') {
+        return (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+                <div className="absolute text-5xl opacity-[0.07] rotate-12" style={{ top: '5%', left: '-10px' }}>🌿</div>
+                <div className="absolute text-5xl opacity-[0.07] -rotate-12" style={{ bottom: '5%', right: '-10px' }}>🌿</div>
+                <div className="absolute opacity-[0.05] text-4xl rotate-45" style={{ top: '45%', right: '-5px' }}>🍃</div>
+                <div className="absolute opacity-[0.04] text-3xl -rotate-45" style={{ top: '65%', left: '-5px' }}>🌱</div>
+            </div>
+        );
+    }
+    if (template === 'minimal-card') {
+        return (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                <div className="absolute w-[100px] h-[100px] rounded-full opacity-35 blur-xl"
+                    style={{ background: 'rgba(139,92,246,0.5)', top: '-5%', left: '-5%' }} />
+                <div className="absolute w-[90px] h-[90px] rounded-full opacity-35 blur-xl"
+                    style={{ background: 'rgba(236,72,153,0.4)', bottom: '-5%', right: '-5%' }} />
+            </div>
+        );
+    }
+    if (template === 'soft-bloom') {
+        return (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+                <div className="absolute text-5xl opacity-[0.05] rotate-12" style={{ top: '5%', left: '-10px' }}>🌸</div>
+                <div className="absolute text-5xl opacity-[0.05] -rotate-12" style={{ bottom: '5%', right: '-10px' }}>🌸</div>
+                <div className="absolute opacity-[0.04] text-4xl rotate-45" style={{ top: '45%', right: '-5px' }}>💮</div>
+                <div className="absolute opacity-[0.04] text-3xl -rotate-45" style={{ top: '65%', left: '-5px' }}>🌺</div>
+            </div>
+        );
+    }
+    if (template === 'modern-split') {
+        return (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                <div className="absolute w-[100px] h-[100px] rounded-full opacity-15 blur-xl"
+                    style={{ background: 'rgba(255,255,255,0.4)', top: '-5%', right: '-5%' }} />
+                <div className="absolute w-[80px] h-[80px] rounded-full opacity-10 blur-xl"
+                    style={{ background: 'rgba(255,255,255,0.3)', bottom: '-5%', left: '-5%' }} />
+            </div>
+        );
+    }
+    return null;
 }
 
-function getPreviewSocial(template) {
-    const map = {
-        'clean-elegant': 'bg-white border border-stone-200 text-stone-600',
-        'cyberpunk':     'bg-fuchsia-900/60 border border-fuchsia-500/50 text-fuchsia-300',
-        'organic-leaf':  'bg-emerald-800/50 border border-emerald-500/30',
-        'minimal-card':  'bg-white/25 border border-white/40',
-    };
-    return (map[template] || 'bg-white/10 border border-violet-400/25') + ' w-7 h-7 rounded-full flex items-center justify-center text-xs';
+// ─── Bio Animation Styles ─────────────────────────────────────────────────────
+const BIO_ANIM_STYLES = `
+@keyframes bio-float {
+  0%,100% { transform: translateY(0px) rotate(0deg); }
+  33%      { transform: translateY(-8px) rotate(1deg); }
+  66%      { transform: translateY(4px) rotate(-1deg); }
 }
+@keyframes bio-orbit {
+  from { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+}
+@keyframes bio-fade-up {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes bio-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes bio-pulse-ring {
+  0%,100% { box-shadow: 0 0 0 0px rgba(167,139,250,0.5); }
+  50%     { box-shadow: 0 0 0 6px rgba(167,139,250,0); }
+}
+@keyframes bio-bounce-in {
+  0%   { opacity:0; transform:scale(0.6); }
+  60%  { transform:scale(1.1); }
+  80%  { transform:scale(0.95); }
+  100% { opacity:1; transform:scale(1); }
+}
+@keyframes bio-spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes bio-gradient-shift {
+  0%,100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}
+@keyframes bio-particle {
+  0%   { opacity:0; transform:translateY(0) scale(0); }
+  20%  { opacity:1; }
+  100% { opacity:0; transform:translateY(-40px) scale(1.2); }
+}
+.bio-fade-up   { animation: bio-fade-up 0.5s ease both; }
+.bio-float     { animation: bio-float 4s ease-in-out infinite; }
+.bio-shimmer-btn {
+  background-size: 200% auto;
+  animation: bio-shimmer 2.5s linear infinite;
+}
+.bio-pulse-ring { animation: bio-pulse-ring 2s ease-in-out infinite; }
+.bio-bounce-in  { animation: bio-bounce-in 0.6s cubic-bezier(.175,.885,.32,1.275) both; }
+`;
 
-function getPreviewAvatarBorder(template) {
-    const map = {
-        'clean-elegant': 'border-amber-200',
-        'cyberpunk':     'border-fuchsia-500',
-        'organic-leaf':  'border-emerald-400',
-        'minimal-card':  'border-white/70',
-    };
-    return map[template] || 'border-violet-400';
-}
 
 // ─── Live mini preview panel ──────────────────────────────────────────────────
 function BioPreview({ config, settings }) {
-    const { template = 'modern-glow', buttons = [], social = {}, sections } = config;
+    const { buttons = [], social = {}, sections, description: configDesc } = config;
+    const landingPageTheme = settings?.landing_page_config?.theme || settings?.landing_page_template || 'galaxy';
+    const resolvedTemplate = resolveTemplate('follow-landing', landingPageTheme);
+    const theme = THEMES[resolvedTemplate] || THEMES['modern-glow'];
+
     const activeSections = [...(sections || DEFAULT_SECTIONS)]
         .filter(s => s.active)
         .sort((a, b) => a.order - b.order);
@@ -197,130 +508,245 @@ function BioPreview({ config, settings }) {
     const socialEntries = Object.entries(social).filter(([, v]) => v);
     const brandLogo = settings?.brand_logo ? `/storage/${settings.brand_logo}` : null;
     const brandName = settings?.brand_name || 'Brand';
-    const brandDesc = settings?.site_motto || settings?.footer_description || '';
+    const brandDesc = configDesc || settings?.site_motto || settings?.footer_description || `Kunjungi halaman bio resmi dari ${brandName}`;
+
+    // Animated floating orbs config per theme
+    const orbs = [
+        { size: 60, x: 10, y: 5,  dur: 5.2, delay: 0,    color: resolvedTemplate === 'cyberpunk' ? 'rgba(0,255,255,0.15)' : resolvedTemplate === 'organic-leaf' ? 'rgba(52,211,153,0.12)' : resolvedTemplate === 'soft-bloom' ? 'rgba(251,113,133,0.12)' : resolvedTemplate === 'clean-elegant' ? 'rgba(245,158,11,0.1)' : 'rgba(139,92,246,0.15)' },
+        { size: 45, x: 70, y: 15, dur: 6.8, delay: 1.5,  color: resolvedTemplate === 'cyberpunk' ? 'rgba(217,70,239,0.1)' : resolvedTemplate === 'organic-leaf' ? 'rgba(16,185,129,0.1)' : resolvedTemplate === 'soft-bloom' ? 'rgba(244,63,94,0.09)' : resolvedTemplate === 'clean-elegant' ? 'rgba(251,191,36,0.09)' : 'rgba(99,102,241,0.12)' },
+        { size: 35, x: 30, y: 70, dur: 4.5, delay: 0.8,  color: resolvedTemplate === 'cyberpunk' ? 'rgba(0,255,255,0.08)' : resolvedTemplate === 'organic-leaf' ? 'rgba(110,231,183,0.08)' : resolvedTemplate === 'soft-bloom' ? 'rgba(253,164,175,0.08)' : resolvedTemplate === 'clean-elegant' ? 'rgba(252,211,77,0.08)' : 'rgba(167,139,250,0.1)' },
+        { size: 25, x: 80, y: 80, dur: 7.1, delay: 2.2,  color: resolvedTemplate === 'cyberpunk' ? 'rgba(217,70,239,0.07)' : 'rgba(196,181,253,0.07)' },
+    ];
 
     return (
-        <div className="w-full h-full overflow-y-auto overflow-x-hidden relative" style={{ background: getPreviewBg(template) }}>
+        <div className={`w-full h-full overflow-y-auto overflow-x-hidden relative ${theme.font} py-5 px-3 flex flex-col justify-start items-center gap-3 transition-all duration-500`} style={{ background: theme.bg }}>
+            {/* Inject animation keyframes */}
+            <style>{BIO_ANIM_STYLES}</style>
+
+            {/* Animated floating orbs */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                {orbs.map((orb, i) => (
+                    <div key={i} className="absolute rounded-full blur-2xl"
+                        style={{
+                            width: orb.size, height: orb.size,
+                            left: `${orb.x}%`, top: `${orb.y}%`,
+                            background: `radial-gradient(circle, ${orb.color}, transparent 70%)`,
+                            animation: `bio-float ${orb.dur}s ease-in-out ${orb.delay}s infinite`,
+                        }}
+                    />
+                ))}
+            </div>
+
+            {/* Background themed elements */}
+            <BackgroundDecorations template={resolvedTemplate} />
+
             {/* Watermark */}
             {brandLogo && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-                    <img src={brandLogo} alt="" style={{ width: '60%', opacity: 0.06, filter: 'grayscale(1) blur(1px)', transform: 'rotate(-10deg)' }} />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden select-none" style={{ zIndex: 0 }}>
+                    <img src={brandLogo} alt="" className="w-[60%] opacity-[0.06] grayscale filter blur-[1px] transform rotate-[-10deg]" />
                 </div>
             )}
-            <div className="relative z-10 flex flex-col items-center w-full px-4 py-5 gap-3">
-                {activeSections.map(sec => {
+            
+            {/* Layout container (Glassmorphism Card Wrapper) */}
+            <div className={`relative z-10 w-full p-4 flex flex-col items-center gap-3.5 shadow-xl transition-all duration-300 ${theme.cardBg}`}>
+                {activeSections.map((sec, secIdx) => {
+                    const animDelay = `${secIdx * 0.12}s`;
                     if (sec.type === 'header') {
                         if (sec.variant === 'minimal') {
                             return (
-                                <div key={sec.id} className="text-center w-full">
-                                    <p className={`font-bold text-sm ${getPreviewHeading(template)}`}>{brandName}</p>
+                                <div key={sec.id} className="text-center w-full py-1 bio-fade-up" style={{ animationDelay: animDelay }}>
+                                    <h1 className={`text-xs font-bold leading-tight ${theme.textTitle}`}>{brandName}</h1>
                                 </div>
                             );
                         }
                         if (sec.variant === 'split') {
                             return (
-                                <div key={sec.id} className="flex items-center gap-3 w-full">
-                                    <div className={`w-10 h-10 rounded-full border-2 flex-shrink-0 overflow-hidden ${getPreviewAvatarBorder(template)}`}>
-                                        {brandLogo
-                                            ? <img src={brandLogo} alt="" className="w-full h-full object-cover" />
-                                            : <div className="w-full h-full bg-violet-600 flex items-center justify-center text-white text-xs font-bold">{brandName[0]}</div>
-                                        }
+                                <div key={sec.id} className="flex items-center gap-2.5 w-full justify-center text-left py-1 bio-fade-up" style={{ animationDelay: animDelay }}>
+                                    <div className={`w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bio-pulse-ring ${theme.avatarBorder}`}>
+                                        {brandLogo ? (
+                                            <img src={brandLogo} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-violet-600 to-indigo-800 flex items-center justify-center text-white font-bold text-xs">
+                                                {brandName.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
                                     </div>
-                                    <p className={`font-bold text-sm ${getPreviewHeading(template)}`}>{brandName}</p>
+                                    <h1 className={`text-xs font-bold leading-tight ${theme.textTitle}`}>{brandName}</h1>
                                 </div>
                             );
                         }
                         if (sec.variant === 'banner') {
                             return (
-                                <div key={sec.id} className="w-full flex flex-col items-center relative mb-4">
-                                    <div className="w-full h-12 rounded-lg bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-cyan-500/20 border border-white/5 relative z-0 flex items-center justify-center">
+                                <div key={sec.id} className="w-full flex flex-col items-center relative mb-2 bio-fade-up" style={{ animationDelay: animDelay }}>
+                                    <div className="w-full h-10 rounded-xl overflow-hidden bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-cyan-500/20 border border-white/5 relative z-0 flex items-center justify-center">
                                         {brandLogo && (
-                                            <img src={brandLogo} alt="" className="w-full h-full object-cover opacity-10 filter blur-xs" />
+                                            <img src={brandLogo} alt="" className="w-full h-full object-cover opacity-15 filter blur-xs" />
                                         )}
                                     </div>
-                                    <div className={`w-10 h-10 rounded-full border-2 overflow-hidden -mt-5 relative z-10 ${getPreviewAvatarBorder(template)}`}>
-                                        {brandLogo
-                                            ? <img src={brandLogo} alt="" className="w-full h-full object-cover" />
-                                            : <div className="w-full h-full bg-violet-600 flex items-center justify-center text-white text-xs font-bold">{brandName[0]}</div>
-                                        }
+                                    <div className={`w-9 h-9 rounded-full overflow-hidden flex-shrink-0 -mt-5 border-2 relative z-10 bio-pulse-ring ${theme.avatarBorder}`}>
+                                        {brandLogo ? (
+                                            <img src={brandLogo} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-violet-600 to-indigo-800 flex items-center justify-center text-white font-bold text-xs">
+                                                {brandName.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
                                     </div>
-                                    <p className={`font-bold text-sm ${getPreviewHeading(template)} mt-1`}>{brandName}</p>
+                                    <h1 className={`text-xs font-bold ${theme.textTitle} mt-1 text-center`}>{brandName}</h1>
                                 </div>
                             );
                         }
                         return (
-                            <div key={sec.id} className="flex flex-col items-center text-center gap-1.5 w-full">
-                                <div className={`w-14 h-14 rounded-full border-2 overflow-hidden ${getPreviewAvatarBorder(template)}`}>
-                                    {brandLogo
-                                        ? <img src={brandLogo} alt="" className="w-full h-full object-cover" />
-                                        : <div className="w-full h-full bg-violet-600 flex items-center justify-center text-white text-lg font-bold">{brandName[0]}</div>
-                                    }
+                            <div key={sec.id} className="flex flex-col items-center text-center gap-2 w-full bio-fade-up" style={{ animationDelay: animDelay }}>
+                                <div className={`w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bio-float bio-pulse-ring ${theme.avatarBorder}`}>
+                                    {brandLogo ? (
+                                        <img src={brandLogo} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-violet-600 to-indigo-800 flex items-center justify-center text-white font-bold text-lg">
+                                            {brandName.charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
                                 </div>
-                                <p className={`font-bold text-sm ${getPreviewHeading(template)}`}>{brandName}</p>
+                                <h1 className={`text-xs font-bold leading-tight ${theme.textTitle}`}>{brandName}</h1>
                             </div>
                         );
                     }
-                    if (sec.type === 'bio' && brandDesc) {
+                    if (sec.type === 'bio') {
+                        const descText = brandDesc;
+                        if (!descText) return null;
                         if (sec.variant === 'card') {
                             return (
-                                <div key={sec.id} className="w-full rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}>
-                                    <p className={`text-[9px] text-center ${getPreviewDesc(template)}`}>{brandDesc.substring(0, 60)}…</p>
+                                <div key={sec.id} className={`w-full p-2.5 rounded-xl text-center bio-fade-up ${theme.cardBg}`} style={{ animationDelay: animDelay }}>
+                                    <p className={`text-[9px] leading-normal ${theme.textBody}`}>{descText.substring(0, 100)}</p>
                                 </div>
                             );
                         }
                         if (sec.variant === 'highlighted') {
                             return (
-                                <div key={sec.id} className="w-full border-l-2 pl-2 border-violet-400">
-                                    <p className={`text-[9px] ${getPreviewDesc(template)}`}>{brandDesc.substring(0, 60)}…</p>
+                                <div key={sec.id} className={`w-full border-l-2 ${theme.accentBorder} pl-2 py-0.5 text-left bio-fade-up`} style={{ animationDelay: animDelay }}>
+                                    <p className={`text-[9px] leading-normal ${theme.textBody}`}>{descText.substring(0, 100)}</p>
                                 </div>
                             );
                         }
                         if (sec.variant === 'quote') {
                             return (
-                                <div key={sec.id} className="w-full text-center relative py-1">
-                                    <p className={`text-[9px] italic ${getPreviewDesc(template)}`}>“{brandDesc.substring(0, 50)}…”</p>
+                                <div key={sec.id} className="w-full text-center py-1 relative bio-fade-up" style={{ animationDelay: animDelay }}>
+                                    <p className={`text-[9px] italic leading-normal px-4 ${theme.textBody}`}>“{descText.substring(0, 80)}…”</p>
                                 </div>
                             );
                         }
                         return (
-                            <p key={sec.id} className={`text-[9px] text-center ${getPreviewDesc(template)}`}>{brandDesc.substring(0, 60)}…</p>
+                            <div key={sec.id} className="w-full text-center bio-fade-up" style={{ animationDelay: animDelay }}>
+                                <p className={`text-[9px] leading-normal ${theme.textBody}`}>{descText.substring(0, 100)}</p>
+                            </div>
                         );
                     }
-                    if (sec.type === 'buttons' && activeButtons.length > 0) {
+                    if (sec.type === 'buttons') {
+                        if (activeButtons.length === 0) return null;
                         if (sec.variant === 'grid') {
                             return (
-                                <div key={sec.id} className="grid grid-cols-2 gap-1.5 w-full">
-                                    {activeButtons.slice(0, 4).map(btn => (
-                                        <div key={btn.id} className={getPreviewBtn(template)}>{btn.label?.substring(0, 12)}</div>
+                                <div key={sec.id} className="w-full grid grid-cols-2 gap-2 bio-fade-up" style={{ animationDelay: animDelay }}>
+                                    {activeButtons.slice(0, 4).map((btn, i) => (
+                                        <div key={btn.id}
+                                            className={`flex flex-col items-center justify-center text-center gap-1 py-2 px-1 text-[9px] font-semibold border rounded-xl transition-all hover:scale-105 ${i === 0 ? `bio-shimmer-btn ${theme.btnPrimary}` : theme.btnBase}`}
+                                            style={i === 0 ? { background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%), ${theme.btnPrimary}`, backgroundSize: '200% auto' } : {}}
+                                        >
+                                            {btn.icon && <BtnIcon name={btn.icon} className="w-3.5 h-3.5 mb-0.5" />}
+                                            <span className="truncate w-full">{btn.label}</span>
+                                        </div>
                                     ))}
                                 </div>
                             );
                         }
-                        return (
-                            <div key={sec.id} className="flex flex-col gap-1.5 w-full">
-                                {activeButtons.slice(0, 3).map(btn => (
-                                    <div key={btn.id} className={getPreviewBtn(template)}>{btn.label?.substring(0, 20)}</div>
-                                ))}
-                            </div>
-                        );
-                    }
-                    if (sec.type === 'sosmed' && socialEntries.length > 0) {
-                        if (sec.variant === 'chip') {
+                        if (sec.variant === 'compact') {
                             return (
-                                <div key={sec.id} className="flex flex-wrap justify-center gap-1 w-full">
-                                    {socialEntries.slice(0, 4).map(([p]) => (
-                                        <div key={p} className={getPreviewSocial(template) + ' px-2 rounded-full text-[8px]'}>
-                                            {({ whatsapp:'💬', instagram:'📸', tiktok:'🎵', facebook:'f', youtube:'▶', telegram:'✈', email:'📧', website:'🌐' }[p] || '🔗')} {p}
+                                <div key={sec.id} className="w-full flex flex-col gap-1.5 bio-fade-up" style={{ animationDelay: animDelay }}>
+                                    {activeButtons.slice(0, 4).map((btn, i) => (
+                                        <div key={btn.id}
+                                            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[9px] font-semibold border rounded-xl transition-all hover:scale-[1.02] ${i === 0 ? theme.btnPrimary : theme.btnBase}`}>
+                                            {btn.icon && <BtnIcon name={btn.icon} className="w-3 h-3" />}
+                                            <span className="truncate">{btn.label}</span>
                                         </div>
                                     ))}
                                 </div>
                             );
                         }
                         return (
-                            <div key={sec.id} className="flex flex-wrap justify-center gap-1.5 w-full">
-                                {socialEntries.slice(0, 5).map(([p]) => (
-                                    <div key={p} className={getPreviewSocial(template)}>
-                                        {({ whatsapp:'💬', instagram:'📸', tiktok:'🎵', facebook:'f', youtube:'▶', telegram:'✈', email:'📧', website:'🌐' }[p] || '🔗')}
+                            <div key={sec.id} className="w-full flex flex-col gap-2 bio-fade-up" style={{ animationDelay: animDelay }}>
+                                {activeButtons.slice(0, 3).map((btn, i) => {
+                                    const sub = getLinkSubtitle(btn.url, btn.label);
+                                    const isPrimary = i === 0;
+                                    let iconBg = isPrimary ? 'bg-white/20 text-white' : 'bg-black/5 text-current';
+                                    if (resolvedTemplate === 'modern-split' && isPrimary) {
+                                        iconBg = 'bg-rose-500/10 text-rose-600';
+                                    } else if (resolvedTemplate === 'clean-elegant' && isPrimary) {
+                                        iconBg = 'bg-stone-950/20 text-stone-900';
+                                    } else if (resolvedTemplate === 'organic-leaf' && isPrimary) {
+                                        iconBg = 'bg-emerald-900/10 text-emerald-900';
+                                    } else if (resolvedTemplate === 'soft-bloom' && !isPrimary) {
+                                        iconBg = 'bg-rose-500/5 text-rose-600';
+                                    }
+
+                                    return (
+                                        <div key={btn.id}
+                                            className={`w-full flex items-center gap-2.5 py-2 px-2.5 text-left border rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg ${isPrimary ? theme.btnPrimary : theme.btnBase}`}
+                                            style={{ animationDelay: `${(secIdx * 0.12) + (i * 0.08)}s` }}
+                                        >
+                                            {btn.icon && (
+                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                                                    <BtnIcon name={btn.icon} className="w-3.5 h-3.5" />
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-[10px] font-bold truncate leading-tight">{btn.label}</div>
+                                                {sub && <div className={`text-[8px] truncate mt-0.5 leading-none ${isPrimary ? 'opacity-85' : 'opacity-60'}`}>{sub}</div>}
+                                            </div>
+                                            <svg className="w-3 h-3 opacity-40 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    }
+                    if (sec.type === 'sosmed') {
+                        if (socialEntries.length === 0) return null;
+                        if (sec.variant === 'labeled') {
+                            return (
+                                <div key={sec.id} className="w-full grid grid-cols-2 gap-1.5 py-0.5 bio-fade-up" style={{ animationDelay: animDelay }}>
+                                    {socialEntries.slice(0, 4).map(([platform], si) => (
+                                        <div key={platform}
+                                            className={`flex items-center gap-1.5 py-1.5 px-2 text-[8px] font-medium rounded-lg transition-all hover:scale-[1.03] bio-bounce-in ${theme.socialIcon}`}
+                                            style={{ animationDelay: `${(secIdx * 0.12) + (si * 0.07)}s` }}>
+                                            <SocialIconSvg platform={platform} className="w-3.5 h-3.5 flex-shrink-0" />
+                                            <span className="truncate">{platform}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        }
+                        if (sec.variant === 'chip') {
+                            return (
+                                <div key={sec.id} className="flex flex-wrap justify-center gap-1 py-0.5 bio-fade-up" style={{ animationDelay: animDelay }}>
+                                    {socialEntries.slice(0, 4).map(([platform], si) => (
+                                        <div key={platform}
+                                            className={`flex items-center gap-1 py-1 px-2 text-[8px] font-medium bio-bounce-in ${theme.socialIcon}`}
+                                            style={{ animationDelay: `${(secIdx * 0.12) + (si * 0.07)}s` }}>
+                                            <SocialIconSvg platform={platform} className="w-3.5 h-3.5 flex-shrink-0" />
+                                            <span>{platform}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        }
+                        return (
+                            <div key={sec.id} className="flex flex-wrap justify-center gap-2 py-0.5 bio-fade-up" style={{ animationDelay: animDelay }}>
+                                {socialEntries.slice(0, 5).map(([platform], si) => (
+                                    <div key={platform}
+                                        className={`w-7 h-7 rounded-full flex items-center justify-center bio-bounce-in transition-all hover:scale-110 ${theme.socialIcon}`}
+                                        style={{ animationDelay: `${(secIdx * 0.12) + (si * 0.08)}s` }}>
+                                        <SocialIconSvg platform={platform} className="w-3.5 h-3.5 flex-shrink-0" />
                                     </div>
                                 ))}
                             </div>
@@ -328,7 +754,7 @@ function BioPreview({ config, settings }) {
                     }
                     if (sec.type === 'footer') {
                         return (
-                            <div key={sec.id} className={`text-[8px] text-center opacity-40 ${getPreviewHeading(template)}`}>
+                            <div key={sec.id} className={`text-[8px] text-center opacity-40 ${theme.textBody} mt-auto`}>
                                 — {brandName} —
                             </div>
                         );
@@ -344,11 +770,34 @@ function BioPreview({ config, settings }) {
 export default function BioLinkEditor({ settings, bioConfig }) {
     const [config, setConfig] = useState(bioConfig);
     const [saving, setSaving] = useState(false);
-    const [saved, setSaved] = useState(false);
-    const [activeTab, setActiveTab] = useState('design');
+    const [saved, setSaved] = useState(true);
+    const isFirstRender = useRef(true);
+    const [activeTab, setActiveTab] = useState('sections');
     const [toast, setToast] = useState(null);
     const [activeModalSection, setActiveModalSection] = useState(null);
+    const [activeSocialKeys, setActiveSocialKeys] = useState([]);
     const dragIndex = useRef(null);
+
+    const openModal = (sectionId, sectionType) => {
+        if (sectionType === 'sosmed') {
+            const currentSocial = config.social || {};
+            const keys = Object.keys(currentSocial).filter(k => currentSocial[k] !== undefined && currentSocial[k] !== null && currentSocial[k] !== '');
+            setActiveSocialKeys(keys);
+        }
+        setActiveModalSection(sectionId);
+    };
+
+    const handleAddSocialKey = (key) => {
+        if (!activeSocialKeys.includes(key)) {
+            setActiveSocialKeys(prev => [...prev, key]);
+            updateSocial(key, '');
+        }
+    };
+
+    const handleRemoveSocialKey = (key) => {
+        setActiveSocialKeys(prev => prev.filter(k => k !== key));
+        updateSocial(key, null);
+    };
 
     const showToast = (msg, type = 'success') => {
         setToast({ msg, type });
@@ -382,21 +831,31 @@ export default function BioLinkEditor({ settings, bioConfig }) {
     };
 
     // ── Save ──────────────────────────────────────────────────────────────────
-    const handleSave = async () => {
-        setSaving(true);
-        try {
-            await axios.post('/admin/bio', config, {
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
-            });
-            setSaved(true);
-            showToast('Bio link berhasil disimpan! ✅');
-            setTimeout(() => setSaved(false), 2500);
-        } catch {
-            showToast('Gagal menyimpan. Coba lagi.', 'error');
-        } finally {
-            setSaving(false);
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
         }
-    };
+
+        setSaved(false);
+
+        const delayDebounceFn = setTimeout(async () => {
+            setSaving(true);
+            try {
+                await axios.post('/admin/bio', config, {
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
+                });
+                setSaved(true);
+            } catch (err) {
+                console.error("Autosave error", err);
+                showToast('Gagal menyimpan otomatis. Coba lagi.', 'error');
+            } finally {
+                setSaving(false);
+            }
+        }, 1000);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [config]);
 
     // ── Button helpers ────────────────────────────────────────────────────────
     const addButton = () => {
@@ -432,7 +891,25 @@ export default function BioLinkEditor({ settings, bioConfig }) {
 
     return (
         <AdminLayout title="Bio Link Editor">
-            <Head title="Bio Link Editor" />
+            <Head>
+                <title>Bio Link Editor</title>
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+                <style>{`
+                    /* Cyberpunk theme elements */
+                    @keyframes scanline { 0% { top: -2%; } 100% { top: 102%; } }
+                    @keyframes neon-pulse { 
+                        0%, 100% { text-shadow: 0 0 8px rgba(240, 70, 239, 0.8), 0 0 20px rgba(240, 70, 239, 0.4); } 
+                        50% { text-shadow: 0 0 4px rgba(240, 70, 239, 0.6), 0 0 10px rgba(240, 70, 239, 0.2); } 
+                    }
+                    .neon-text { animation: neon-pulse 2s ease-in-out infinite; }
+                    
+                    /* Font family fallbacks */
+                    .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+                    .font-sans { font-family: 'Outfit', sans-serif; }
+                    .font-mono { font-family: 'Share Tech Mono', monospace; }
+                `}</style>
+            </Head>
 
             {/* Toast */}
             {toast && (
@@ -461,130 +938,110 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                         <span className="hidden sm:inline">Lihat Bio</span>
                                     </a>
                                 )}
-                                <button onClick={handleSave} disabled={saving}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E5654B] text-white text-sm font-semibold hover:bg-[#d4573f] transition-colors disabled:opacity-70 shadow-sm">
-                                    <Icon d={ICONS.save} className="w-4 h-4" />
-                                    {saving ? 'Menyimpan…' : saved ? 'Tersimpan ✓' : 'Simpan'}
-                                </button>
+                                <div className="flex items-center gap-2 text-xs text-[#777] bg-[#f5f3f0] px-3.5 py-2 rounded-xl border border-[#e0ddd8]">
+                                    {saving ? (
+                                        <span className="flex items-center gap-1.5 font-medium text-[#E5654B]">
+                                            <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                            Menyimpan otomatis...
+                                        </span>
+                                    ) : saved ? (
+                                        <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                            Tersimpan otomatis
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-1.5 text-stone-500 font-medium animate-pulse">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                                            </svg>
+                                            Ada perubahan...
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Tabs */}
-                        <div className="flex gap-1 mt-4 bg-[#f5f3f0] rounded-xl p-1">
-                            {TABS.map(t => (
-                                <button key={t.id} onClick={() => setActiveTab(t.id)}
-                                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium transition-all ${activeTab === t.id ? 'bg-white text-[#E5654B] shadow-sm' : 'text-[#888] hover:text-[#555]'}`}>
-                                    <svg className="w-3.5 h-3.5 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d={t.icon} />
-                                    </svg>
-                                    {t.label}
-                                </button>
-                            ))}
-                        </div>
                     </div>
 
-                    {/* Tab Content */}
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#f0ede8]">
+                    {/* Editor Content */}
+                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#f0ede8] flex flex-col gap-5">
 
-                        {/* ── DESAIN tab ─────────────────────────────────────── */}
-                        {activeTab === 'design' && (
-                            <div className="space-y-5">
-                                <div>
-                                    <h3 className="font-semibold text-[#1a1a1a] mb-1">Pilih Template</h3>
-                                    <p className="text-xs text-[#999]">Profil & avatar otomatis mengikuti pengaturan brand kamu.</p>
-                                </div>
+                        {/* Info Sync Tema */}
+                        <div className="rounded-xl bg-[#f5f3f0] border border-[#e0ddd8] p-4 flex gap-3 items-start">
+                            <span className="text-xl flex-shrink-0">🎨</span>
+                            <div>
+                                <p className="text-xs font-bold text-[#444]">Tema Terintegrasi</p>
+                                <p className="text-[11px] text-[#777] mt-0.5 leading-relaxed">
+                                    Desain layout, model tombol, font, warna, dan dekorasi background halaman Bio Link Anda secara otomatis mengikuti tema aktif dari <strong>Landing Page reseller Anda</strong>.
+                                </p>
+                            </div>
+                        </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {TEMPLATES.map(t => (
-                                        <button key={t.id} onClick={() => updateConfig('template', t.id)}
-                                            className={`relative p-3 rounded-xl border-2 text-left transition-all ${config.template === t.id ? 'border-[#E5654B] bg-[#fef2f0]' : 'border-[#e0ddd8] hover:border-[#E5654B]/50 hover:bg-[#fdf9f8]'}`}>
-                                            <div className="w-full h-16 rounded-lg mb-2 shadow-inner" style={{ background: t.preview }} />
-                                            <div className="text-sm font-semibold text-[#1a1a1a]">{t.emoji} {t.name}</div>
-                                            <div className="text-xs text-[#888] mt-0.5">{t.desc}</div>
-                                            {config.template === t.id && (
-                                                <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#E5654B] flex items-center justify-center">
-                                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        {/* ── SECTIONS ───────────────────────────────────── */}
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="font-semibold text-[#1a1a1a]">Struktur & Section</h3>
+                                <p className="text-xs text-[#999] mt-0.5">Tarik ☰ untuk mengurutkan. Pilih variasi per section.</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                {getSections().map((section, idx) => {
+                                    const def = SECTION_DEFS[section.type];
+                                    return (
+                                        <div key={section.id}
+                                            draggable
+                                            onDragStart={() => handleDragStart(idx)}
+                                            onDragOver={handleDragOver}
+                                            onDrop={() => handleDrop(idx)}
+                                            className={`border rounded-xl transition-all ${section.active ? 'border-[#e0ddd8] bg-white' : 'border-dashed border-[#e0ddd8] bg-[#fafaf9] opacity-60'}`}>
+
+                                            {/* Section row */}
+                                            <div className="flex items-center gap-3 p-3.5">
+                                                {/* Drag handle */}
+                                                <button className="text-[#ccc] hover:text-[#888] cursor-grab active:cursor-grabbing flex-shrink-0 p-0.5" title="Tarik untuk memindahkan">
+                                                    <Icon d={ICONS.drag} className="w-4 h-4" />
+                                                </button>
+
+                                                {/* Icon */}
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${section.active ? 'bg-[#fef2f0]' : 'bg-[#f5f3f0]'}`}>
+                                                    <svg className={`w-4 h-4 ${section.active ? 'text-[#E5654B]' : 'text-[#aaa]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d={def?.icon || ICONS.link} />
                                                     </svg>
                                                 </div>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
 
-                                {/* Info box */}
-                                <div className="rounded-xl bg-[#f5f3f0] border border-[#e0ddd8] p-4 flex gap-3 items-start">
-                                    <span className="text-xl flex-shrink-0">🎨</span>
-                                    <div>
-                                        <p className="text-xs font-semibold text-[#444]">Background otomatis dari logo brand</p>
-                                        <p className="text-xs text-[#999] mt-0.5">Logo brand kamu akan tampil sebagai watermark transparan di belakang konten secara otomatis. Tidak perlu upload background terpisah.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* ── SECTIONS tab ───────────────────────────────────── */}
-                        {activeTab === 'sections' && (
-                            <div className="space-y-4">
-                                <div>
-                                    <h3 className="font-semibold text-[#1a1a1a]">Struktur & Section</h3>
-                                    <p className="text-xs text-[#999] mt-0.5">Tarik ☰ untuk mengurutkan. Pilih variasi per section.</p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    {getSections().map((section, idx) => {
-                                        const def = SECTION_DEFS[section.type];
-                                        return (
-                                            <div key={section.id}
-                                                draggable
-                                                onDragStart={() => handleDragStart(idx)}
-                                                onDragOver={handleDragOver}
-                                                onDrop={() => handleDrop(idx)}
-                                                className={`border rounded-xl transition-all ${section.active ? 'border-[#e0ddd8] bg-white' : 'border-dashed border-[#e0ddd8] bg-[#fafaf9] opacity-60'}`}>
-
-                                                {/* Section row */}
-                                                <div className="flex items-center gap-3 p-3.5">
-                                                    {/* Drag handle */}
-                                                    <button className="text-[#ccc] hover:text-[#888] cursor-grab active:cursor-grabbing flex-shrink-0 p-0.5" title="Tarik untuk memindahkan">
-                                                        <Icon d={ICONS.drag} className="w-4 h-4" />
-                                                    </button>
-
-                                                    {/* Icon */}
-                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${section.active ? 'bg-[#fef2f0]' : 'bg-[#f5f3f0]'}`}>
-                                                        <svg className={`w-4 h-4 ${section.active ? 'text-[#E5654B]' : 'text-[#aaa]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d={def?.icon || ICONS.link} />
-                                                        </svg>
+                                                {/* Info */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-xs font-bold text-[#1a1a1a]">{def?.name || section.type}</div>
+                                                    <div className="text-[10px] text-[#999] mt-0.5 capitalize">
+                                                        {def?.variants?.find(v => v.id === section.variant)?.name || section.variant}
                                                     </div>
-
-                                                    {/* Info */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="text-xs font-bold text-[#1a1a1a]">{def?.name || section.type}</div>
-                                                        <div className="text-[10px] text-[#999] mt-0.5 capitalize">
-                                                            {def?.variants?.find(v => v.id === section.variant)?.name || section.variant}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Edit variant button */}
-                                                    <button onClick={() => setActiveModalSection(section.id)}
-                                                        className="p-1.5 rounded-lg text-[#E5654B] hover:bg-[#fef2f0] transition-colors"
-                                                        title="Buka Pengaturan">
-                                                        <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
-                                                    </button>
-
-                                                    {/* Toggle active */}
-                                                    <button onClick={() => updateSection(section.id, 'active', !section.active)}
-                                                        className={`relative w-10 h-5.5 rounded-full transition-colors flex-shrink-0 ${section.active ? 'bg-[#E5654B]' : 'bg-[#ddd]'}`}
-                                                        style={{ width: '40px', height: '22px' }}>
-                                                        <div className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${section.active ? 'translate-x-5' : 'translate-x-0.5'}`}
-                                                            style={{ width: '18px', height: '18px', top: '2px' }} />
-                                                    </button>
                                                 </div>
+
+                                                {/* Edit variant button */}
+                                                <button onClick={() => openModal(section.id, section.type)}
+                                                    className="p-1.5 rounded-lg text-[#E5654B] hover:bg-[#fef2f0] transition-colors"
+                                                    title="Buka Pengaturan">
+                                                    <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
+                                                </button>
+
+                                                {/* Toggle active */}
+                                                <button onClick={() => updateSection(section.id, 'active', !section.active)}
+                                                    className={`relative w-10 h-5.5 rounded-full transition-colors flex-shrink-0 ${section.active ? 'bg-[#E5654B]' : 'bg-[#ddd]'}`}
+                                                    style={{ width: '40px', height: '22px' }}>
+                                                    <div className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${section.active ? 'translate-x-5' : 'translate-x-0.5'}`}
+                                                        style={{ width: '18px', height: '18px', top: '2px' }} />
+                                                </button>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 
@@ -621,7 +1078,7 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                 </div>
                             </div>
 
-                            <p className="text-center text-[10px] text-[#bbb] mt-4">Preview real-time — simpan untuk menerapkan</p>
+                            <p className="text-center text-[10px] text-[#bbb] mt-4">Preview real-time — tersimpan otomatis</p>
                         </div>
                     </div>
                 </div>
@@ -754,21 +1211,12 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                                             );
                                                         })()}
 
-                                                        <div className="flex gap-2">
-                                                            <div className="flex-1">
-                                                                <label className="block text-[9px] font-semibold text-[#888] mb-1">Ikon</label>
-                                                                <select value={btn.icon || 'link'} onChange={e => updateButton(btn.id, 'icon', e.target.value)}
-                                                                    className="w-full border border-[#e0ddd8] bg-white rounded-lg px-2 py-1 text-[10px] text-[#1a1a1a] focus:outline-none">
-                                                                    {ICON_LIST.map(ic => <option key={ic} value={ic}>{ic}</option>)}
-                                                                </select>
-                                                            </div>
-                                                            <div className="flex-1">
-                                                                <label className="block text-[9px] font-semibold text-[#888] mb-1">Animasi</label>
-                                                                <select value={btn.animation || 'none'} onChange={e => updateButton(btn.id, 'animation', e.target.value)}
-                                                                    className="w-full border border-[#e0ddd8] bg-white rounded-lg px-2 py-1 text-[10px] text-[#1a1a1a] focus:outline-none">
-                                                                    {ANIMATIONS.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
-                                                                </select>
-                                                            </div>
+                                                        <div>
+                                                            <label className="block text-[9px] font-semibold text-[#888] mb-1">Ikon</label>
+                                                            <IconPickerDropdown
+                                                                value={btn.icon || 'link'}
+                                                                onChange={ic => updateButton(btn.id, 'icon', ic)}
+                                                            />
                                                         </div>
                                                     </div>
                                                 ))}
@@ -778,36 +1226,79 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                 )}
 
                                 {/* Section-specific manager: Media Sosial */}
-                                {section.type === 'sosmed' && (
-                                    <div className="space-y-4 pt-4 border-t border-[#f0ede8]">
-                                        <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wider">Isi Link Media Sosial</label>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
-                                            {[
-                                                { key: 'whatsapp',  label: 'WhatsApp',  placeholder: '628123456789', emoji: '💬' },
-                                                { key: 'instagram', label: 'Instagram', placeholder: 'username', emoji: '📸' },
-                                                { key: 'tiktok',    label: 'TikTok',    placeholder: '@username', emoji: '🎵' },
-                                                { key: 'facebook',  label: 'Facebook',  placeholder: 'username', emoji: '👤' },
-                                                { key: 'youtube',   label: 'YouTube',   placeholder: '@channel', emoji: '▶️' },
-                                                { key: 'telegram',  label: 'Telegram',  placeholder: 'username', emoji: '✈️' },
-                                                { key: 'email',     label: 'Email',     placeholder: 'email@domain.com', emoji: '📧' },
-                                                { key: 'website',   label: 'Website',   placeholder: 'https://website.com', emoji: '🌐' },
-                                            ].map(s => (
-                                                <div key={s.key} className="flex items-center gap-3 border border-[#f0ede8] p-2.5 rounded-xl bg-[#fafaf9]">
-                                                    <div className="w-8 h-8 rounded-lg bg-[#f5f3f0] flex items-center justify-center text-sm flex-shrink-0">
-                                                        {s.emoji}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <label className="block text-[9px] font-semibold text-[#888] mb-0.5">{s.label}</label>
-                                                        <input type="text" value={(config.social || {})[s.key] || ''}
-                                                            onChange={e => updateSocial(s.key, e.target.value)}
-                                                            placeholder={s.placeholder}
-                                                            className="w-full border border-[#e0ddd8] bg-white rounded-lg px-2.5 py-1 text-xs text-[#1a1a1a] focus:outline-none" />
-                                                    </div>
+                                {section.type === 'sosmed' && (() => {
+                                    const ALL_PLATFORMS = [
+                                        { key: 'whatsapp',  label: 'WhatsApp',  placeholder: '628123456789' },
+                                        { key: 'instagram', label: 'Instagram', placeholder: 'username' },
+                                        { key: 'tiktok',    label: 'TikTok',    placeholder: '@username' },
+                                        { key: 'facebook',  label: 'Facebook',  placeholder: 'username' },
+                                        { key: 'youtube',   label: 'YouTube',   placeholder: '@channel' },
+                                        { key: 'telegram',  label: 'Telegram',  placeholder: 'username' },
+                                        { key: 'email',     label: 'Email',     placeholder: 'email@domain.com' },
+                                        { key: 'website',   label: 'Website',   placeholder: 'https://website.com' },
+                                    ];
+
+                                    const availablePlatforms = ALL_PLATFORMS.filter(p => !activeSocialKeys.includes(p.key));
+
+                                    return (
+                                        <div className="space-y-4 pt-4 border-t border-[#f0ede8]">
+                                            <div className="flex items-center justify-between">
+                                                <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wider">Isi Link Media Sosial</label>
+                                            </div>
+
+                                            {activeSocialKeys.length === 0 ? (
+                                                <div className="py-8 text-center text-[#bbb] text-sm border-2 border-dashed border-[#e0ddd8] rounded-2xl bg-[#fafaf9]">
+                                                    Belum ada media sosial ditambahkan. Pilih di bawah untuk menambah.
                                                 </div>
-                                            ))}
+                                            ) : (
+                                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                                                    {activeSocialKeys.map(key => {
+                                                        const pInfo = ALL_PLATFORMS.find(p => p.key === key) || { key, label: key, placeholder: '' };
+                                                        return (
+                                                            <div key={key} className="flex items-center gap-3 border border-[#f0ede8] p-3 rounded-xl bg-[#fafaf9]">
+                                                                <div className="w-8 h-8 rounded-lg bg-[#f5f3f0] flex items-center justify-center flex-shrink-0 text-slate-600">
+                                                                    <SocialIconSvg platform={key} className="w-4.5 h-4.5" />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <label className="block text-[9px] font-semibold text-[#888] mb-0.5">{pInfo.label}</label>
+                                                                    <input type="text" value={(config.social || {})[key] || ''}
+                                                                        onChange={e => updateSocial(key, e.target.value)}
+                                                                        placeholder={pInfo.placeholder}
+                                                                        className="w-full border border-[#e0ddd8] bg-white rounded-lg px-2.5 py-1 text-xs text-[#1a1a1a] focus:outline-none" />
+                                                                </div>
+                                                                <button onClick={() => handleRemoveSocialKey(key)}
+                                                                    className="p-1.5 rounded-lg text-[#bbb] hover:text-red-500 hover:bg-red-50 transition-colors self-end mb-0.5"
+                                                                    title="Hapus platform">
+                                                                    <Icon d={ICONS.trash} className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+
+                                            {availablePlatforms.length > 0 && (
+                                                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[#f0ede8]">
+                                                    <select
+                                                        value=""
+                                                        onChange={e => {
+                                                            const val = e.target.value;
+                                                            if (val) {
+                                                                handleAddSocialKey(val);
+                                                            }
+                                                        }}
+                                                        className="flex-1 border border-[#e0ddd8] bg-white rounded-xl px-3 py-2.5 text-xs text-[#1a1a1a] focus:outline-none focus:ring-1 focus:ring-[#E5654B]/30 focus:border-[#E5654B]"
+                                                    >
+                                                        <option value="" disabled>+ Tambah Platform Media Sosial</option>
+                                                        {availablePlatforms.map(p => (
+                                                            <option key={p.key} value={p.key}>{p.label}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                )}
+                                    );
+                                })()}
                             </div>
 
                             {/* Modal Footer */}

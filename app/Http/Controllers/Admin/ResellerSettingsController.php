@@ -153,55 +153,13 @@ class ResellerSettingsController extends Controller
     {
         $settings = $this->getSettings();
 
-        $themes = [
-            [
-                'id'          => 'modern-split',
-                'name'        => 'Modern Split (Layout Baru)',
-                'description' => 'Tata letak split-screen modern, tombol gradasi bersinar, card glassmorphism',
-                'preview_bg'  => 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%)',
-                'accent'      => '#6366f1',
-                'char'        => '⚡',
-            ],
-            [
-                'id'          => 'galaxy',
-                'name'        => 'Galaxy Dark',
-                'description' => 'Modern dark dengan nuansa luar angkasa, grid lines, tipografi bold',
-                'preview_bg'  => 'linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%)',
-                'accent'      => '#f59e0b',
-                'char'        => '🌌',
-            ],
-            [
-                'id'          => 'luxury',
-                'name'        => 'Luxury Gold',
-                'description' => 'Mewah dan elegan, cokelat gelap dengan aksen emas, serif formal',
-                'preview_bg'  => 'linear-gradient(135deg,#1c0f05 0%,#2d1a08 50%,#1c0f05 100%)',
-                'accent'      => '#d4a843',
-                'char'        => '👑',
-            ],
-            [
-                'id'          => 'bloom',
-                'name'        => 'Bloom Rose',
-                'description' => 'Romantis dan feminin, pink/krem lembut, elemen bunga, font elegan',
-                'preview_bg'  => 'linear-gradient(135deg,#fdf2f8 0%,#fce7f3 50%,#fdf2f8 100%)',
-                'accent'      => '#db2777',
-                'char'        => '🌸',
-            ],
-            [
-                'id'          => 'forest',
-                'name'        => 'Forest Emerald',
-                'description' => 'Segar dan natural, hijau emerald dalam, pola daun, organik',
-                'preview_bg'  => 'linear-gradient(135deg,#064e3b 0%,#065f46 50%,#064e3b 100%)',
-                'accent'      => '#34d399',
-                'char'        => '🌿',
-            ],
-        ];
-
         return Inertia::render('Admin/LandingPage', [
             'settings'        => $settings,
-            'themes'          => $themes,
+            'themes'          => [], // Deprecated: single template (ModernSplit) with palette
             'defaultSections' => \App\Models\ResellerSetting::defaultSections(),
             'savedSections'   => $settings->getOrderedSections(),
-            'currentTheme'    => $settings->getLandingTheme(),
+            'currentTheme'    => 'modern-split', // always modern-split
+            'currentPalette'  => $settings->landing_page_config['palette'] ?? 'crimson',
             'heroImage'       => $settings->landing_page_hero_image
                                     ? '/storage/' . $settings->landing_page_hero_image
                                     : null,
@@ -287,20 +245,9 @@ class ResellerSettingsController extends Controller
             $resellerUrl = $scheme . '://' . ($settings->subdomain ?: 'reseller') . '.' . $host . $port;
         }
 
-        $theme = request('theme') ?: $settings->getLandingTheme();
-        $view = 'ResellerLanding';
-        
-        $themeComponents = [
-            'galaxy'       => 'Galaxy',
-            'luxury'       => 'Luxury',
-            'bloom'        => 'Bloom',
-            'forest'       => 'Forest',
-            'modern-split' => 'ModernSplit',
-        ];
-
-        if (array_key_exists($theme, $themeComponents)) {
-            $view = 'Reseller/Templates/' . $themeComponents[$theme];
-        }
+        $theme = 'modern-split';
+        $view = 'Reseller/Templates/ModernSplit';
+        $palette = request('palette') ?: ($settings->landing_page_config['palette'] ?? 'crimson');
 
         return Inertia::render($view, [
             'reseller' => [
@@ -308,7 +255,7 @@ class ResellerSettingsController extends Controller
                 'brand_logo' => $settings->brand_logo ? '/storage/' . $settings->brand_logo : null,
                 'ref' => $settings->subdomain ?: 'reseller',
                 'reseller_url' => $resellerUrl,
-                'template' => $settings->getLandingTheme(),
+                'template' => 'modern-split',
                 'site_title' => $settings->site_title,
                 'site_motto' => $settings->site_motto,
                 'footer_whatsapp' => $settings->footer_whatsapp,
@@ -320,6 +267,7 @@ class ResellerSettingsController extends Controller
                 'footer_description' => $settings->footer_description,
                 'social_links' => $settings->social_links ?: [],
             ],
+            'palette' => $palette,
             'plans' => $plansData,
             'features' => $features,
             'themes' => $themes,
@@ -354,15 +302,19 @@ class ResellerSettingsController extends Controller
     {
         $request->validate([
             'theme'    => 'nullable|string|max:50',
+            'palette'  => 'nullable|string|max:50',
             'sections' => 'nullable|array',
         ]);
 
         $settings = $this->getSettings();
         $existing = $settings->landing_page_config ?? [];
 
-        if ($request->has('theme')) {
-            $existing['theme'] = $request->theme;
-            $settings->landing_page_template = $request->theme;
+        // Always keep modern-split
+        $existing['theme'] = 'modern-split';
+        $settings->landing_page_template = 'modern-split';
+
+        if ($request->has('palette')) {
+            $existing['palette'] = $request->palette;
         }
         if ($request->has('sections')) {
             $existing['sections'] = $request->sections;
@@ -383,28 +335,36 @@ class ResellerSettingsController extends Controller
         ]);
 
         $settings = $this->getSettings();
-
-        // Delete old image
-        if ($settings->landing_page_hero_image && Storage::disk('public')->exists($settings->landing_page_hero_image)) {
-            Storage::disk('public')->delete($settings->landing_page_hero_image);
-        }
+        $section  = $request->input('section', 'hero');
 
         $file = $request->file('hero_image');
-        \App\Helpers\ImageCompressor::compress($file);
         $ext      = $file->guessExtension() ?: 'jpg';
         $filename = 'hero-' . time() . '-' . rand(100, 999) . '.' . $ext;
         $path     = $file->storeAs('reseller/hero', $filename, 'public');
 
-        $settings->landing_page_hero_image = $path;
-        // Also store in sections config
+        // Compress image in-place on stored path
+        \App\Helpers\ImageCompressor::compress(Storage::disk('public')->path($path));
+
         $config = $settings->landing_page_config ?? [];
         $sections = collect($config['sections'] ?? \App\Models\ResellerSetting::defaultSections());
-        $sections = $sections->map(function ($s) use ($path) {
-            if ($s['key'] === 'hero') {
-                $s['config']['hero_image'] = '/storage/' . $path;
-            }
-            return $s;
-        });
+
+        if ($section === 'main_banner') {
+            $sections = $sections->map(function ($s) use ($path) {
+                if ($s['key'] === 'main_banner') {
+                    $s['config']['banner_image'] = '/storage/' . $path;
+                }
+                return $s;
+            });
+        } else {
+            $settings->landing_page_hero_image = $path;
+            $sections = $sections->map(function ($s) use ($path) {
+                if ($s['key'] === 'hero') {
+                    $s['config']['hero_image'] = '/storage/' . $path;
+                }
+                return $s;
+            });
+        }
+
         $config['sections'] = $sections->values()->toArray();
         $settings->landing_page_config = $config;
         $settings->save();
@@ -415,22 +375,34 @@ class ResellerSettingsController extends Controller
     /**
      * Remove hero background image.
      */
-    public function removeHeroImage()
+    public function removeHeroImage(Request $request)
     {
         $settings = $this->getSettings();
-        if ($settings->landing_page_hero_image && Storage::disk('public')->exists($settings->landing_page_hero_image)) {
-            Storage::disk('public')->delete($settings->landing_page_hero_image);
-        }
-        $settings->landing_page_hero_image = null;
+        $section  = $request->input('section', 'hero');
 
         $config = $settings->landing_page_config ?? [];
         $sections = collect($config['sections'] ?? []);
-        $sections = $sections->map(function ($s) {
-            if ($s['key'] === 'hero') {
-                $s['config']['hero_image'] = null;
+
+        if ($section === 'main_banner') {
+            $sections = $sections->map(function ($s) {
+                if ($s['key'] === 'main_banner') {
+                    $s['config']['banner_image'] = null;
+                }
+                return $s;
+            });
+        } else {
+            if ($settings->landing_page_hero_image && Storage::disk('public')->exists($settings->landing_page_hero_image)) {
+                Storage::disk('public')->delete($settings->landing_page_hero_image);
             }
-            return $s;
-        });
+            $settings->landing_page_hero_image = null;
+            $sections = $sections->map(function ($s) {
+                if ($s['key'] === 'hero') {
+                    $s['config']['hero_image'] = null;
+                }
+                return $s;
+            });
+        }
+
         $config['sections'] = $sections->values()->toArray();
         $settings->landing_page_config = $config;
         $settings->save();

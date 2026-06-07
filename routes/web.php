@@ -84,6 +84,7 @@ Route::get('/r/{subdomain}', [\App\Http\Controllers\ResellerLandingPageControlle
 Route::get('/r/{subdomain}/themes', [\App\Http\Controllers\ResellerLandingPageController::class, 'themes'])->name('reseller.themes');
 Route::get('/r/{subdomain}/faq', [\App\Http\Controllers\ResellerLandingPageController::class, 'faq'])->name('reseller.faq');
 Route::get('/r/{subdomain}/bio', [\App\Http\Controllers\ResellerBioLinkController::class, 'show'])->name('reseller.bio');
+Route::get('/r/{subdomain}/demo/{slug}', [\App\Http\Controllers\InvitationController::class, 'demoBySubdomain'])->name('reseller.demo.theme');
 
 // Bio link via subdomain resolution
 Route::get('/bio', function () {
@@ -502,6 +503,12 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     // Impersonation
     Route::post('/impersonate/user/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateUser'])->name('impersonate.user');
     Route::post('/impersonate/reseller/{user}', [\App\Http\Controllers\Auth\ImpersonateController::class, 'impersonateReseller'])->name('impersonate.reseller');
+
+    // AI Promotion Agent
+    Route::get('/ai-promo', [\App\Http\Controllers\SuperAdmin\SuperAdminAiPromoController::class, 'index'])->name('ai-promo.index');
+    Route::post('/ai-promo/generate', [\App\Http\Controllers\SuperAdmin\SuperAdminAiPromoController::class, 'generate'])->name('ai-promo.generate');
+    Route::put('/ai-promo/{queue}', [\App\Http\Controllers\SuperAdmin\SuperAdminAiPromoController::class, 'update'])->name('ai-promo.update');
+    Route::delete('/ai-promo/{queue}', [\App\Http\Controllers\SuperAdmin\SuperAdminAiPromoController::class, 'destroy'])->name('ai-promo.destroy');
 });
 
 // ═══════════════════════════════════════
@@ -730,3 +737,14 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+// AI Promotion API routes for n8n (token-secured, no CSRF)
+Route::prefix('api/admin/ai-promo')->group(function () {
+    Route::get('/next', [\App\Http\Controllers\SuperAdmin\SuperAdminAiPromoController::class, 'apiGetNext'])->name('api.ai-promo.next');
+    Route::post('/{id}/success', [\App\Http\Controllers\SuperAdmin\SuperAdminAiPromoController::class, 'apiMarkSuccess'])
+        ->name('api.ai-promo.success')
+        ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+    Route::post('/{id}/fail', [\App\Http\Controllers\SuperAdmin\SuperAdminAiPromoController::class, 'apiMarkFailed'])
+        ->name('api.ai-promo.fail')
+        ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+});

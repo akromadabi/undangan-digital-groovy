@@ -1,0 +1,349 @@
+{
+  "name": "AI Promo Agent - Undangan Digital",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": "interval",
+        "interval": 12,
+        "unit": "hours"
+      },
+      "id": "1d86d5e1-8848-4cb5-827d-93cb20a59a72",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        380,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://siapp.in/api/admin/ai-promo/next",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Promo-Token",
+              "value": "ai_promo_secret_token_123456"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bfd722e0-244e-4f38-a15d-d9b897be4f59",
+      "name": "Fetch Scheduled Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        580,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "success"
+            }
+          ]
+        }
+      },
+      "id": "e5c1d683-2d2c-47cc-a7fe-49b01f9bb955",
+      "name": "Is Post Ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        800,
+        240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "5f13d8d6-68b6-455b-bb66-b3713009becc",
+      "name": "No Pending Post",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems"
+      },
+      "id": "f51cda1e-128a-4933-8a39-ec9ef8ad6c92",
+      "name": "Parallel Publisher",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node[\"Fetch Scheduled Post\"].json.post.platforms }}",
+              "operation": "contains",
+              "value2": "ig"
+            }
+          ]
+        }
+      },
+      "id": "c1f10928-874b-4b2c-8516-eb741289cf29",
+      "name": "To Instagram?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node[\"Fetch Scheduled Post\"].json.post.platforms }}",
+              "operation": "contains",
+              "value2": "fb"
+            }
+          ]
+        }
+      },
+      "id": "b2f1c849-8c6f-402a-9214-41dcd792bc49",
+      "name": "To Facebook?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "instagramAccountId": "your-instagram-business-account-id",
+        "caption": "={{ $node[\"Fetch Scheduled Post\"].json.post.caption }}",
+        "mediaType": "image",
+        "imageUrl": "={{ $node[\"Fetch Scheduled Post\"].json.post.image_url }}"
+      },
+      "id": "d1e67fa8-9e67-4a0b-93ff-f187a5611bc0",
+      "name": "Post to Instagram",
+      "type": "n8n-nodes-base.instagram",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        40
+      ],
+      "credentials": {
+        "instagramOAuth2Api": {
+          "id": "your-credentials-id"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "page": "your-facebook-page-id",
+        "message": "={{ $node[\"Fetch Scheduled Post\"].json.post.caption }}",
+        "additionalFields": {
+          "link": "={{ $node[\"Fetch Scheduled Post\"].json.post.demo_url }}"
+        }
+      },
+      "id": "a1f9e874-bc5a-49f3-8de1-ea820dbca820",
+      "name": "Post to Facebook",
+      "type": "n8n-nodes-base.facebookPage",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        220
+      ],
+      "credentials": {
+        "facebookPageOAuth2Api": {
+          "id": "your-credentials-id"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://siapp.in/api/admin/ai-promo/{{ $node[\"Fetch Scheduled Post\"].json.post.id }}/success",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Promo-Token",
+              "value": "ai_promo_secret_token_123456"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_links",
+              "value": "={ \"ig\": \"{{ $node[\"Post to Instagram\"].json.permalink || 'N/A' }}\", \"fb\": \"{{ $node[\"Post to Facebook\"].json.post_id ? 'https://facebook.com/' + $node[\"Post to Facebook\"].json.post_id : 'N/A' }}\" }"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c716da2d-cf4f-4d92-bf39-4d69be412356",
+      "name": "Report Success",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1820,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://siapp.in/api/admin/ai-promo/{{ $node[\"Fetch Scheduled Post\"].json.post.id }}/fail",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Promo-Token",
+              "value": "ai_promo_secret_token_123456"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "error",
+              "value": "={{ $json.message || 'Error occurred while publishing to social media.' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e2a1b920-ca52-441a-8e2b-2a28b809a250",
+      "name": "Report Failure",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1820,
+        380
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Scheduled Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Scheduled Post": {
+      "main": [
+        [
+          {
+            "node": "Is Post Ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Post Ready?": {
+      "main": [
+        [
+          {
+            "node": "Parallel Publisher",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Pending Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parallel Publisher": {
+      "main": [
+        [
+          {
+            "node": "To Instagram?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "To Facebook?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "To Instagram?": {
+      "main": [
+        [
+          {
+            "node": "Post to Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "To Facebook?": {
+      "main": [
+        [
+          {
+            "node": "Post to Facebook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Post to Instagram": {
+      "main": [
+        [
+          {
+            "node": "Report Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Facebook": {
+      "main": [
+        [
+          {
+            "node": "Report Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -12,7 +12,7 @@ const DEFAULT_SECTIONS = [
 // ─── Themes & Styles System ───────────────────────────────────────────────────
 const THEMES = {
     'modern-glow': {
-        bg: 'linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+        bg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
         font: 'font-sans',
         textTitle: 'text-white font-extrabold tracking-tight drop-shadow-[0_0_15px_rgba(167,139,250,0.5)]',
         textBody: 'text-violet-200/80',
@@ -24,16 +24,16 @@ const THEMES = {
         accentBorder: 'border-violet-400',
     },
     'clean-elegant': {
-        bg: 'linear-gradient(145deg, #fdf6ec 0%, #f5e9d7 50%, #fdf0e8 100%)',
+        bg: 'linear-gradient(135deg, #07090b 0%, #15181c 50%, #07090b 100%)',
         font: 'font-serif',
-        textTitle: 'text-stone-800 font-bold tracking-tight',
-        textBody: 'text-stone-500 font-sans',
-        avatarBorder: 'border-4 border-amber-200/80 shadow-lg',
-        cardBg: 'bg-white/60 border border-stone-200/80 shadow-sm rounded-2xl',
-        btnBase: 'bg-white text-stone-700 border border-stone-200/80 shadow-sm rounded-xl hover:border-amber-300 hover:text-amber-700',
-        btnPrimary: 'bg-gradient-to-r from-amber-100 to-amber-200 text-stone-800 border border-amber-300 shadow-sm rounded-xl hover:shadow hover:border-amber-400',
-        socialIcon: 'bg-white border border-stone-200 text-stone-600 hover:border-amber-400 hover:text-amber-700 shadow-sm',
-        accentBorder: 'border-amber-400',
+        textTitle: 'text-amber-100 font-bold tracking-tight drop-shadow-md',
+        textBody: 'text-stone-400 font-sans',
+        avatarBorder: 'border-4 border-amber-500/80 shadow-xl ring-4 ring-amber-500/10',
+        cardBg: 'bg-stone-900/60 border border-stone-800/80 shadow-md rounded-2xl',
+        btnBase: 'bg-stone-900 text-stone-200 border border-stone-700/80 rounded-xl hover:border-amber-500/50 hover:text-amber-400',
+        btnPrimary: 'bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 text-stone-900 font-bold border-none rounded-xl hover:shadow-[0_0_15px_rgba(212,175,55,0.4)]',
+        socialIcon: 'bg-stone-900 border border-stone-800 text-stone-400 hover:border-amber-500/50 hover:text-amber-400 shadow-sm rounded-xl',
+        accentBorder: 'border-amber-500',
     },
     'cyberpunk': {
         bg: 'linear-gradient(160deg, #0d0d0d 0%, #1a0033 50%, #0d0d0d 100%)',
@@ -48,7 +48,7 @@ const THEMES = {
         accentBorder: 'border-fuchsia-500',
     },
     'organic-leaf': {
-        bg: 'linear-gradient(160deg, #1a3c34 0%, #2d5a4b 50%, #1e4a3f 100%)',
+        bg: 'linear-gradient(135deg, #051a11 0%, #0c3624 50%, #051a11 100%)',
         font: 'font-sans',
         textTitle: 'text-emerald-100 font-bold tracking-tight',
         textBody: 'text-emerald-200/70',
@@ -71,7 +71,119 @@ const THEMES = {
         socialIcon: 'bg-white/20 border border-white/40 text-white hover:bg-white/30 rounded-xl',
         accentBorder: 'border-white',
     },
+    'soft-bloom': {
+        bg: 'linear-gradient(135deg, #fff0f2 0%, #fffcfc 50%, #fff0f2 100%)',
+        font: 'font-serif',
+        textTitle: 'text-stone-800 font-bold tracking-tight',
+        textBody: 'text-stone-500 font-sans',
+        avatarBorder: 'border-4 border-rose-200/80 shadow-lg ring-4 ring-rose-100/30',
+        cardBg: 'bg-white/60 border border-rose-200/30 shadow-sm rounded-2xl',
+        btnBase: 'bg-white text-rose-700 border border-rose-200/80 shadow-sm rounded-full hover:border-rose-400 hover:text-rose-800',
+        btnPrimary: 'bg-gradient-to-r from-rose-400 to-pink-500 text-white border-none rounded-full hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]',
+        socialIcon: 'bg-white border border-rose-100/80 text-rose-500 hover:border-rose-300 hover:text-rose-700 shadow-sm rounded-full',
+        accentBorder: 'border-rose-400',
+    },
+    'modern-split': {
+        bg: 'linear-gradient(135deg, #d31124 0%, #e11d48 100%)',
+        font: 'font-sans',
+        textTitle: 'text-white font-extrabold tracking-tight drop-shadow-md',
+        textBody: 'text-white/90',
+        avatarBorder: 'border-4 border-white/80 shadow-xl ring-4 ring-white/10',
+        cardBg: 'bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl',
+        btnBase: 'bg-white/10 text-white border border-white/20 hover:bg-white/25 rounded-xl',
+        btnPrimary: 'bg-white text-rose-700 font-bold border-none rounded-xl hover:shadow-[0_0_15px_rgba(255,255,255,0.4)]',
+        socialIcon: 'bg-white/15 border border-white/20 text-white hover:bg-white/25 rounded-xl',
+        accentBorder: 'border-white',
+    },
 };
+
+const resolveTemplate = (template, landingPageTheme) => {
+    if (template === 'follow-landing' || !template) {
+        const mapping = {
+            'galaxy': 'modern-glow',
+            'luxury': 'clean-elegant',
+            'forest': 'organic-leaf',
+            'bloom': 'soft-bloom',
+            'modern-split': 'modern-split'
+        };
+        return mapping[landingPageTheme] || 'modern-glow';
+    }
+    return template;
+};
+
+// ─── SVG Brand Social Icons ──────────────────────────────────────────────────
+const SOCIAL_ICONS = {
+    whatsapp: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864.002-2.637-1.03-5.114-2.905-6.99C16.258 1.875 13.785 1.057 11.14 1.055 5.705 1.055 1.284 5.474 1.282 10.91c-.001 1.708.452 3.375 1.312 4.86l-.86 3.128 3.202-.844zM16.5 13.5c-.3-.15-1.765-.87-2.035-.97-.27-.1-.465-.15-.66.15-.2.3-.765.97-.94 1.17-.175.2-.35.225-.65.075-.3-.15-1.265-.465-2.41-1.485-.89-.795-1.49-1.78-1.665-2.08-.175-.3-.02-.46.13-.61.135-.135.3-.35.45-.525.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.525-.075-.15-.66-1.59-.9-2.175-.24-.575-.48-.5-.66-.51h-.56c-.2 0-.525.075-.8.375-.275.3-1.05 1.025-1.05 2.5s1.075 2.9 1.225 3.1c.15.2 2.11 3.225 5.115 4.525.715.31 1.275.495 1.71.635.72.23 1.375.2 1.89.12.575-.085 1.765-.72 2.015-1.415.25-.7.25-1.3 0-1.425-.05-.125-.2-.2-.5-.35z" />
+        </svg>
+    ),
+    instagram: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+        </svg>
+    ),
+    tiktok: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.86-.74-3.99-1.72-.08-.07-.17-.17-.25-.25v6.07c-.1 1.71-.57 3.45-1.56 4.85-1.54 2.22-4.14 3.73-6.89 3.82-2.58.1-5.22-.88-6.97-2.79-1.92-2.04-2.67-5.06-1.95-7.79.67-2.62 2.76-4.8 5.41-5.32 1.34-.28 2.76-.13 4 .37V8.55c-1.63-.49-3.4-.49-5 .09-2.02.72-3.72 2.28-4.47 4.26-.78 2.01-.64 4.39.39 6.25 1.05 1.9 3.03 3.26 5.2 3.52 2.14.28 4.41-.39 5.86-2.04 1.34-1.48 1.9-3.56 1.77-5.58V.02h.01z" />
+        </svg>
+    ),
+    facebook: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+    ),
+    youtube: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M23.498 6.163a3.003 3.003 0 00-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.508a3.003 3.003 0 00-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 002.11 2.11c1.87.508 9.388.508 9.388.508s7.518 0 9.388-.508a3.003 3.003 0 002.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+        </svg>
+    ),
+    telegram: (className) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.18l-1.91 9c-.14.65-.53.81-1.08.5L9.7 15.42l-1.4 1.35c-.15.15-.28.27-.58.27l.21-2.97 5.4-4.88c.23-.21-.05-.32-.36-.12L6.3 13.3 3.42 12.4c-.63-.2-0.64-.63.13-.93l11.24-4.33c.52-.19.98.12.77.94z" />
+        </svg>
+    ),
+    email: (className) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+    ),
+    website: (className) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+        </svg>
+    ),
+};
+
+const SocialIconSvg = ({ platform, className }) => {
+    const fn = SOCIAL_ICONS[platform];
+    if (!fn) return <span className="text-sm">{getSocialEmoji(platform)}</span>;
+    return fn(className);
+};
+
+function getLinkSubtitle(url, label) {
+    const lowerUrl = (url || '').toLowerCase();
+    const lowerLabel = (label || '').toLowerCase();
+    if (lowerUrl.includes('register') || lowerLabel.includes('buat') || lowerLabel.includes('daftar')) {
+        return 'Buat undangan digital dalam 5 menit, gratis!';
+    }
+    if (lowerUrl.includes('themes') || lowerLabel.includes('tema') || lowerLabel.includes('desain') || lowerLabel.includes('katalog')) {
+        return 'Lihat koleksi desain premium terpopuler';
+    }
+    if (lowerUrl.includes('plans') || lowerLabel.includes('harga') || lowerLabel.includes('paket')) {
+        return 'Pilihan paket fitur lengkap & terjangkau';
+    }
+    if (lowerUrl.includes('faq') || lowerLabel.includes('tanya') || lowerLabel.includes('bantuan')) {
+        return 'Pertanyaan yang sering ditanyakan reseller';
+    }
+    if (lowerUrl.includes('buat-kartu') || lowerLabel.includes('kartu') || lowerLabel.includes('ucapan')) {
+        return 'Kirim kartu ucapan digital ke kerabat';
+    }
+    if (lowerUrl.includes('login') || lowerLabel.includes('masuk')) {
+        return 'Masuk ke dashboard reseller Anda';
+    }
+    return null;
+}
 
 // ─── Social platform helpers ──────────────────────────────────────────────────
 function getSocialUrl(platform, value) {
@@ -188,12 +300,32 @@ function BackgroundDecorations({ template }) {
             </div>
         );
     }
+    if (template === 'soft-bloom') {
+        return (
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none">
+                <div className="absolute text-9xl opacity-[0.05] rotate-12" style={{ top: '5%', left: '-50px', fontSize: '180px' }}>🌸</div>
+                <div className="absolute text-9xl opacity-[0.05] -rotate-12" style={{ bottom: '5%', right: '-50px', fontSize: '180px' }}>🌸</div>
+                <div className="absolute opacity-[0.04] text-8xl rotate-45" style={{ top: '45%', right: '-40px', fontSize: '120px' }}>💮</div>
+                <div className="absolute opacity-[0.04] text-7xl -rotate-45" style={{ top: '65%', left: '-30px', fontSize: '100px' }}>🌺</div>
+            </div>
+        );
+    }
+    if (template === 'modern-split') {
+        return (
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+                <div className="absolute w-[300px] h-[300px] rounded-full opacity-15 blur-3xl"
+                    style={{ background: 'rgba(255,255,255,0.4)', top: '-5%', right: '-5%' }} />
+                <div className="absolute w-[250px] h-[250px] rounded-full opacity-10 blur-3xl"
+                    style={{ background: 'rgba(255,255,255,0.3)', bottom: '-5%', left: '-5%' }} />
+            </div>
+        );
+    }
     return null;
 }
 
 // ─── Main Page Export ─────────────────────────────────────────────────────────
-export default function BioLink({ bio, brandName, brandLogo, resellerUrl, ref: subdomain }) {
-    const template = bio?.template || 'modern-glow';
+export default function BioLink({ bio, brandName, brandLogo, resellerUrl, subdomain, landingPageTheme }) {
+    const template = resolveTemplate('follow-landing', landingPageTheme);
     const pageTitle = bio?.title || brandName || 'Bio Link';
     const description = bio?.description || `Kunjungi halaman bio resmi dari ${pageTitle}`;
 
@@ -352,16 +484,42 @@ export default function BioLink({ bio, brandName, brandLogo, resellerUrl, ref: s
                         </div>
                     );
                 }
-                // Default: default (stacked full-width)
+                // Default: default (stacked full-width) with premium layout, subtitles & chevron
                 return (
-                    <div key={sec.id} className="w-full flex flex-col gap-3">
-                        {activeButtons.map((btn, i) => (
-                            <a key={btn.id} href={btn.url} target="_blank" rel="noopener noreferrer"
-                                className={`w-full flex items-center justify-center gap-3 py-3.5 px-5 text-sm font-semibold ${getAnimClass(btn.animation)} ${i === 0 ? theme.btnPrimary : theme.btnBase}`}>
-                                {btn.icon && <BtnIcon name={btn.icon} />}
-                                <span>{btn.label}</span>
-                            </a>
-                        ))}
+                    <div key={sec.id} className="w-full flex flex-col gap-3.5">
+                        {activeButtons.map((btn, i) => {
+                            const sub = getLinkSubtitle(btn.url, btn.label);
+                            const isPrimary = i === 0;
+                            // Dynamic icon bg based on template & primary state for perfect contrast
+                            let iconBg = isPrimary ? 'bg-white/20 text-white' : 'bg-black/5 text-current';
+                            if (template === 'modern-split' && isPrimary) {
+                                iconBg = 'bg-rose-500/10 text-rose-600';
+                            } else if (template === 'clean-elegant' && isPrimary) {
+                                iconBg = 'bg-stone-950/20 text-stone-900';
+                            } else if (template === 'organic-leaf' && isPrimary) {
+                                iconBg = 'bg-emerald-900/10 text-emerald-900';
+                            } else if (template === 'soft-bloom' && !isPrimary) {
+                                iconBg = 'bg-rose-500/5 text-rose-600';
+                            }
+
+                            return (
+                                <a key={btn.id} href={btn.url} target="_blank" rel="noopener noreferrer"
+                                    className={`w-full flex items-center gap-3.5 py-3.5 px-4 text-left transition-all duration-200 shadow-sm border ${getAnimClass(btn.animation)} ${isPrimary ? theme.btnPrimary : theme.btnBase}`}>
+                                    {btn.icon && (
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                                            <BtnIcon name={btn.icon} className="w-5 h-5" />
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-bold truncate leading-tight">{btn.label}</div>
+                                        {sub && <div className={`text-[10px] truncate mt-0.5 leading-none ${isPrimary ? 'opacity-85' : 'opacity-60'}`}>{sub}</div>}
+                                    </div>
+                                    <svg className="w-4 h-4 opacity-40 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </a>
+                            );
+                        })}
                     </div>
                 );
 
@@ -374,7 +532,7 @@ export default function BioLink({ bio, brandName, brandLogo, resellerUrl, ref: s
                                 <a key={platform} href={getSocialUrl(platform, value)} target="_blank" rel="noopener noreferrer"
                                     className={`flex items-center gap-2.5 py-2.5 px-3.5 text-xs font-medium rounded-xl transition-all duration-200 hover:scale-[1.015] ${theme.socialIcon}`}
                                     title={getSocialLabel(platform)}>
-                                    <span className="text-base flex-shrink-0">{getSocialEmoji(platform)}</span>
+                                    <SocialIconSvg platform={platform} className="w-4 h-4 flex-shrink-0" />
                                     <span className="truncate">{getSocialLabel(platform)}</span>
                                 </a>
                             ))}
@@ -388,7 +546,7 @@ export default function BioLink({ bio, brandName, brandLogo, resellerUrl, ref: s
                                 <a key={platform} href={getSocialUrl(platform, value)} target="_blank" rel="noopener noreferrer"
                                     className={`flex items-center gap-1.5 py-1.5 px-3.5 text-xs font-medium transition-all duration-200 hover:scale-105 ${theme.socialIcon}`}
                                     title={getSocialLabel(platform)}>
-                                    <span className="text-sm">{getSocialEmoji(platform)}</span>
+                                    <SocialIconSvg platform={platform} className="w-3.5 h-3.5 flex-shrink-0" />
                                     <span>{getSocialLabel(platform)}</span>
                                 </a>
                             ))}
@@ -402,7 +560,7 @@ export default function BioLink({ bio, brandName, brandLogo, resellerUrl, ref: s
                             <a key={platform} href={getSocialUrl(platform, value)} target="_blank" rel="noopener noreferrer"
                                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 ${theme.socialIcon}`}
                                 title={getSocialLabel(platform)}>
-                                <span className="text-base">{getSocialEmoji(platform)}</span>
+                                <SocialIconSvg platform={platform} className="w-4.5 h-4.5 flex-shrink-0" />
                             </a>
                         ))}
                     </div>
@@ -476,7 +634,7 @@ export default function BioLink({ bio, brandName, brandLogo, resellerUrl, ref: s
                 `}</style>
             </Head>
 
-            <div className={`min-h-screen relative overflow-x-hidden flex items-center justify-center ${theme.font} transition-all duration-500`}
+            <div className={`min-h-screen relative overflow-x-hidden flex items-center justify-center ${theme.font} transition-all duration-500 py-10 px-4`}
                 style={{ background: theme.bg }}>
                 
                 {/* Background themed elements */}
@@ -493,18 +651,10 @@ export default function BioLink({ bio, brandName, brandLogo, resellerUrl, ref: s
                     </div>
                 )}
 
-                {/* Layout container */}
-                {template === 'minimal-card' ? (
-                    <div className="w-full max-w-sm mx-auto px-4 py-8 relative z-10 flex items-center justify-center min-h-screen">
-                        <div className={`w-full flex flex-col items-center gap-5 p-6 md:p-8 ${theme.cardBg}`}>
-                            {activeSections.map(sec => renderSection(sec))}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="w-full max-w-md mx-auto flex flex-col items-center gap-5 relative z-10 px-5 py-8 md:py-12 min-h-screen">
-                        {activeSections.map(sec => renderSection(sec))}
-                    </div>
-                )}
+                {/* Layout container (Glassmorphism Card Wrapper) */}
+                <div className={`w-full max-w-md p-6 md:p-10 flex flex-col items-center gap-6 shadow-2xl z-10 transition-all duration-300 ${theme.cardBg}`}>
+                    {activeSections.map(sec => renderSection(sec))}
+                </div>
             </div>
         </>
     );

@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+    ],
+
+    'screenshot' => [
+        'driver' => env('SCREENSHOT_DRIVER', 'microlink'),
+    ],
+
 ];

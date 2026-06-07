@@ -95,6 +95,19 @@ class ResellerSetting extends Model
                 ],
             ],
             [
+                'key'    => 'main_banner',
+                'active' => false,
+                'order'  => 0.5,
+                'config' => [
+                    'title'        => 'Mulai Bisnis Undangan Digital Sendiri',
+                    'subtitle'     => 'White-Label Platform',
+                    'banner_image' => null,
+                    'cta_link'     => '#plans',
+                    'height'       => 'medium', // small, medium, large
+                    'variant'      => 'banner_card', // banner_bg, banner_split, banner_card
+                ],
+            ],
+            [
                 'key'    => 'stats',
                 'active' => true,
                 'order'  => 2,
@@ -212,7 +225,7 @@ class ResellerSetting extends Model
     public static function defaultBioLinkConfig(): array
     {
         return [
-            'template'         => 'modern-glow',
+            'template'         => 'follow-landing',
             'title'            => 'Undangan Digital',
             'description'      => 'Buat undangan digital elegan & berkesan untuk momen spesialmu 💌',
             'sections'         => [

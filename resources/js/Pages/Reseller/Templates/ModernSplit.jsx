@@ -668,6 +668,317 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
         );
     };
 
+    const renderMainBanner = (c) => {
+        const variant = c?.variant || 'banner_card';
+        const title = c?.title || 'Mulai Bisnis Undangan Digital Sendiri';
+        const subtitle = c?.subtitle || 'White-Label Platform';
+        const bannerImg = c?.banner_image || '/images/wedding_hero.png';
+        const ctaLink = c?.cta_link || '#plans';
+        const height = c?.height || 'medium';
+
+        const getHeightPx = (h) => {
+            switch (h) {
+                case 'small': return '250px';
+                case 'large': return '500px';
+                case 'medium':
+                default:
+                    return '380px';
+            }
+        };
+
+        const heightPx = getHeightPx(height);
+
+        const activeList = activeSections.filter(s => s.active && s.key !== 'banner');
+        const isFirst = activeList[0]?.key === 'main_banner';
+        const topPaddingStyle = isFirst ? { paddingTop: '7.5rem' } : {};
+
+        // Tablet dashboard mockups inside the split variant
+        const DeviceMockups = () => (
+            <div className="rl-device-mockups-container relative w-full max-w-[420px] mx-auto flex items-center justify-center pointer-events-none select-none" style={{ height: '320px' }}>
+                {/* Glowing backdrop blob */}
+                <div 
+                    className="absolute w-[240px] h-[240px] rounded-full filter blur-[50px] opacity-20 animate-pulse" 
+                    style={{ background: `linear-gradient(135deg, ${T.accent}, ${T.accentDark})`, zIndex: 0 }}
+                />
+                
+                {/* Tablet Mockup (Dashboard) */}
+                <div 
+                    className="rl-mockup-tablet absolute w-[82%] h-[190px] left-0 top-[40px] rounded-[20px] bg-[#1e293b] border-[4px] border-[#334155] shadow-2xl overflow-hidden"
+                    style={{ zIndex: 1, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)' }}
+                >
+                    <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#334155]" />
+                    <div className="w-full h-full p-3 pt-5 bg-slate-900 overflow-hidden text-left flex flex-col justify-between">
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                            <div className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
+                                <span className="text-[7px] font-bold text-slate-400 ml-1">Agency Dashboard</span>
+                            </div>
+                            <span className="text-[6px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded-full font-bold">Active</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-1 my-1">
+                            <div className="bg-slate-800/60 p-1 rounded-lg border border-slate-700/50">
+                                <div className="text-[5px] text-slate-400 font-bold">Total Sales</div>
+                                <div className="text-[8px] font-black text-white mt-0.5">Rp 12.8M</div>
+                            </div>
+                            <div className="bg-slate-800/60 p-1 rounded-lg border border-slate-700/50">
+                                <div className="text-[5px] text-slate-400 font-bold">Users</div>
+                                <div className="text-[8px] font-black text-white mt-0.5">342 Clients</div>
+                            </div>
+                            <div className="bg-slate-800/60 p-1 rounded-lg border border-slate-700/50">
+                                <div className="text-[5px] text-slate-400 font-bold">Active Sites</div>
+                                <div className="text-[8px] font-black text-white mt-0.5">186 Sites</div>
+                            </div>
+                        </div>
+                        <div className="text-[6px] text-slate-500 text-center font-bold">
+                            White-Label Invitation Builder
+                        </div>
+                    </div>
+                </div>
+
+                {/* Overlapping Phone Mockup (User Invitation) */}
+                <div 
+                    className="rl-mockup-phone absolute w-[42%] h-[220px] right-0 bottom-[20px] rounded-[24px] bg-[#0f172a] border-[4px] border-[#1e293b] shadow-2xl overflow-hidden"
+                    style={{ zIndex: 2, boxShadow: `0 20px 40px rgba(${T.accentRgb}, 0.25)` }}
+                >
+                    <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-8 h-2.5 rounded-full bg-[#1e293b] z-10" />
+                    <div className="w-full h-full relative">
+                        <img 
+                            src={bannerImg} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover object-center" 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
+                    </div>
+                </div>
+            </div>
+        );
+
+        if (variant === 'banner_bg') {
+            return (
+                <section className="rl-main-banner-section py-8 px-4 md:px-8 max-w-7xl mx-auto" style={topPaddingStyle}>
+                    <div 
+                        className="relative rounded-[32px] overflow-hidden group transition-all duration-500 border border-slate-200/10"
+                        style={{ 
+                            height: heightPx,
+                            boxShadow: `0 30px 65px -12px rgba(${T.accentRgb}, 0.15)`
+                        }}
+                    >
+                        {/* Background Image */}
+                        <img 
+                            src={bannerImg} 
+                            alt={title} 
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-770 group-hover:scale-[1.03]" 
+                        />
+                        {/* Dark Vignette Overlay for maximum text readability */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent z-10" />
+                        
+                        {/* Content */}
+                        <div className="relative w-full h-full flex items-center p-6 md:p-14 z-20">
+                            <div 
+                                className="max-w-xl text-left p-6 md:p-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl space-y-4 md:space-y-6 transform transition-all duration-500 hover:scale-[1.01] hover:bg-white/12"
+                            >
+                                {subtitle && (
+                                    <span 
+                                        className="inline-block px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest uppercase text-white animate-pulse" 
+                                        style={{ background: T.accent, boxShadow: `0 4px 15px rgba(${T.accentRgb}, 0.25)` }}
+                                    >
+                                        {subtitle}
+                                    </span>
+                                )}
+                                <h2 className="text-2xl md:text-4xl font-extrabold text-white leading-tight tracking-tight" style={{ fontFamily: 'var(--heading-font-family)' }}>
+                                    {title}
+                                </h2>
+                                <div className="pt-2 flex flex-wrap gap-3">
+                                    <a 
+                                        href={ctaLink} 
+                                        className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full text-xs font-black uppercase tracking-wider bg-white transition-all hover:scale-105 hover:shadow-xl"
+                                        style={{ color: T.accent, boxShadow: '0 8px 25px rgba(0,0,0,0.1)' }}
+                                    >
+                                        Mulai Sekarang
+                                        <span className="text-base">&rarr;</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        if (variant === 'banner_split') {
+            return (
+                <section className="rl-main-banner-section py-16 px-4 md:px-8 max-w-7xl mx-auto overflow-hidden" style={topPaddingStyle}>
+                    <div className="rl-banner-split-grid items-center gap-12 lg:gap-16">
+                        {/* Text Col */}
+                        <div className="text-left space-y-6">
+                            {subtitle && (
+                                <span className="inline-block px-4 py-1.5 rounded-full text-[10px] md:text-xs font-black tracking-widest uppercase" style={{ background: T.tagBg, color: T.accent }}>
+                                    {subtitle}
+                                </span>
+                            )}
+                            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight" style={{ fontFamily: 'var(--heading-font-family)', color: T.textPrimary }}>
+                                {title}
+                            </h2>
+                            
+                            {/* Feature list pills */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `rgba(${T.accentRgb}, 0.1)`, color: T.accent }}>
+                                        <Svg d="M5 13l4 4L19 7" size={14} color="currentColor" />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-700" style={{ color: T.textSecondary }}>Domain Kustom Sendiri</span>
+                                </div>
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `rgba(${T.accentRgb}, 0.1)`, color: T.accent }}>
+                                        <Svg d="M5 13l4 4L19 7" size={14} color="currentColor" />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-700" style={{ color: T.textSecondary }}>Atur Harga Sesukamu</span>
+                                </div>
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `rgba(${T.accentRgb}, 0.1)`, color: T.accent }}>
+                                        <Svg d="M5 13l4 4L19 7" size={14} color="currentColor" />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-700" style={{ color: T.textSecondary }}>Keuntungan 100% Milikmu</span>
+                                </div>
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `rgba(${T.accentRgb}, 0.1)`, color: T.accent }}>
+                                        <Svg d="M5 13l4 4L19 7" size={14} color="currentColor" />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-700" style={{ color: T.textSecondary }}>Siap Pakai & Instan</span>
+                                </div>
+                            </div>
+
+                            <div className="pt-2">
+                                <a 
+                                    href={ctaLink} 
+                                    className="inline-flex items-center gap-2 px-7 py-4 rounded-full text-xs md:text-sm font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                                    style={{ background: `linear-gradient(135deg, ${T.accent}, ${T.accentDark})`, boxShadow: `0 8px 20px rgba(${T.accentRgb}, 0.25)` }}
+                                >
+                                    Pelajari Selengkapnya
+                                    <span className="text-base">&rarr;</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        {/* Image/Mockup Col */}
+                        <div className="flex justify-center w-full relative">
+                            {c?.banner_image ? (
+                                <>
+                                    {/* Ambient accent light */}
+                                    <div 
+                                        className="absolute -inset-4 rounded-full filter blur-3xl opacity-20 animate-pulse pointer-events-none" 
+                                        style={{ background: `linear-gradient(135deg, ${T.accent}, ${T.accentDark})` }}
+                                    />
+                                    {/* Decorative offset card */}
+                                    <div 
+                                        className="absolute inset-0 translate-x-4 translate-y-4 rounded-3xl opacity-10 border"
+                                        style={{ 
+                                            borderColor: T.accent,
+                                            background: `linear-gradient(135deg, ${T.accent}, transparent)`
+                                        }}
+                                    />
+                                    {/* Premium image container */}
+                                    <div 
+                                        className="relative w-full rounded-3xl overflow-hidden border-4 border-white transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]"
+                                        style={{ 
+                                            height: heightPx, 
+                                            boxShadow: `0 25px 60px -15px rgba(${T.accentRgb}, 0.22)`
+                                        }}
+                                    >
+                                        <img 
+                                            src={bannerImg} 
+                                            alt={title} 
+                                            className="w-full h-full object-cover" 
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                                    </div>
+                                </>
+                            ) : (
+                                <DeviceMockups />
+                            )}
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // Default: banner_card
+        return (
+            <section className="rl-main-banner-section py-12 px-4 md:px-8 max-w-7xl mx-auto" style={topPaddingStyle}>
+                <div 
+                    className="relative rounded-[32px] overflow-hidden group transition-all duration-500 border bg-[#FAF3EC] flex flex-col lg:flex-row justify-between items-center p-8 md:p-14 gap-8" 
+                    style={{ 
+                        minHeight: heightPx, 
+                        boxShadow: `0 30px 65px -12px rgba(${T.accentRgb}, 0.15)`,
+                        borderColor: `rgba(${T.accentRgb}, 0.15)`
+                    }}
+                >
+                    {/* Glowing light decorations */}
+                    <div 
+                        className="absolute w-[200px] h-[200px] rounded-full filter blur-[80px] opacity-20 pointer-events-none"
+                        style={{ background: T.accent, right: '-5%', top: '-5%' }}
+                    />
+
+                    {/* Text Col */}
+                    <div className="max-w-xl text-left space-y-4 md:space-y-6">
+                        {subtitle && (
+                            <span 
+                                className="inline-block px-3.5 py-1.5 rounded-full text-[9px] md:text-[10px] font-black tracking-widest uppercase text-white animate-pulse" 
+                                style={{ background: T.accent, boxShadow: `0 4px 15px rgba(${T.accentRgb}, 0.25)` }}
+                            >
+                                {subtitle}
+                            </span>
+                        )}
+                        <h2 className="text-2xl md:text-4xl font-extrabold text-slate-800 leading-tight tracking-tight" style={{ fontFamily: 'var(--heading-font-family)' }}>
+                            {title}
+                        </h2>
+                        
+                        {/* Bullet checklist for Card layout */}
+                        <div className="space-y-2 pt-2">
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: T.accent }} />
+                                <span className="text-xs font-bold text-slate-700">Integrasi Pembayaran Otomatis</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: T.accent }} />
+                                <span className="text-xs font-bold text-slate-700">Ratusan Pilihan Tema Premium</span>
+                            </div>
+                        </div>
+
+                        <div className="pt-2">
+                            <a 
+                                href={ctaLink} 
+                                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full text-xs font-black uppercase tracking-wider text-white transition-all hover:scale-105 hover:shadow-xl"
+                                style={{ background: `linear-gradient(135deg, ${T.accent}, ${T.accentDark})`, boxShadow: `0 8px 25px rgba(${T.accentRgb}, 0.2)` }}
+                            >
+                                Pelajari Selengkapnya
+                                <span className="text-base">&rarr;</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    {/* Image/Mockup Col */}
+                    <div className="w-full max-w-[340px] flex-shrink-0 relative">
+                        {c?.banner_image ? (
+                            <div 
+                                className="w-full h-[200px] rounded-2xl overflow-hidden border-4 border-white shadow-xl group-hover:scale-[1.02] transition-transform duration-300"
+                                style={{ boxShadow: `0 15px 35px rgba(${T.accentRgb}, 0.15)` }}
+                            >
+                                <img src={bannerImg} alt={title} className="w-full h-full object-cover" />
+                            </div>
+                        ) : (
+                            <div className="scale-[0.8] origin-center md:scale-100">
+                                <DeviceMockups />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
+        );
+    };
+
     const renderHero = (c) => {
         const badgeText = c?.badge_text || 'Platform Undangan Digital Terpercaya';
         const title = c?.title || 'Undangan Digital';
@@ -1323,6 +1634,7 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
         switch (key) {
             case 'banner': return renderBanner(config);
             case 'hero': return renderHero(config);
+            case 'main_banner': return renderMainBanner(config);
             case 'stats': return renderStats(config);
             case 'how_it_works': return renderHowItWorks(config);
             case 'features': return renderFeatures(config);
@@ -1636,6 +1948,46 @@ body { font-family: var(--font-family); background: var(--section-base); color: 
     color: #1f2937 !important;
     background: rgba(0, 0, 0, 0.04) !important;
 }
+
+/* Banner Layout Custom Models */
+.rl-banner-split-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+@media (min-width: 1024px) {
+    .rl-banner-split-grid {
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 5rem;
+    }
+}
+
+/* Device Mockup Float Animations & Overlays */
+@keyframes float-tablet {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-6px) rotate(-1.5deg); }
+}
+@keyframes float-phone {
+    0%, 100% { transform: translateY(0) rotate(1deg); }
+    50% { transform: translateY(-10px) rotate(2.5deg); }
+}
+
+.rl-mockup-tablet {
+    animation: float-tablet 6s ease-in-out infinite;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.rl-mockup-phone {
+    animation: float-phone 5s ease-in-out infinite;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rl-device-mockups-container:hover .rl-mockup-tablet {
+    transform: translateY(-4px) rotate(-0.5deg) scale(1.02);
+}
+.rl-device-mockups-container:hover .rl-mockup-phone {
+    transform: translateY(-8px) rotate(0.5deg) scale(1.04);
+}
+
 @media (max-width: 768px) {
     /* Nav Compact Overrides */
     .rl-nav {
@@ -3346,6 +3698,24 @@ body { font-family: var(--font-family); background: var(--section-base); color: 
     .rl-cta-btn--lg {
         padding: 0.75rem 1.75rem !important;
         font-size: 0.875rem !important;
+    }
+
+    /* Banner overrides for mobile */
+    .rl-main-banner-section {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    .rl-main-banner-section .rl-device-mockups-container {
+        height: 260px !important;
+        transform: scale(0.85);
+        margin-top: -1rem;
+        margin-bottom: -1rem;
+    }
+    .rl-main-banner-section h2 {
+        font-size: 1.5rem !important;
+        line-height: 1.25 !important;
     }
 }
 `;

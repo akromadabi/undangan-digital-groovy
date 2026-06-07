@@ -30,6 +30,101 @@ const THEMES_CFG = {
         tagColor: '#fcd34d',
         isDark: true,
     },
+    // Galaxy = dark space + amber accent
+    galaxy: {
+        heroBg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+        accent: '#f59e0b',
+        accentDark: '#d97706',
+        accentRgb: '245,158,11',
+        navBg: 'rgba(15,23,42,0.85)',
+        sectionAlt: '#0f172a',
+        sectionBase: '#111827',
+        cardBg: 'rgba(255,255,255,0.04)',
+        cardBorder: 'rgba(255,255,255,0.08)',
+        textPrimary: '#f1f5f9',
+        textSecondary: '#94a3b8',
+        textMuted: '#64748b',
+        footerBg: '#080d18',
+        tagBg: 'rgba(245,158,11,0.12)',
+        tagColor: '#fcd34d',
+        isDark: true,
+    },
+    // Luxury = deep black + gold accent
+    luxury: {
+        heroBg: 'linear-gradient(135deg, #07090b 0%, #15181c 50%, #07090b 100%)',
+        accent: '#c5a059',
+        accentDark: '#a37f3a',
+        accentRgb: '197,160,89',
+        navBg: 'rgba(7,9,11,0.9)',
+        sectionAlt: '#0c0e11',
+        sectionBase: '#121519',
+        cardBg: 'rgba(197,160,89,0.03)',
+        cardBorder: 'rgba(197,160,89,0.12)',
+        textPrimary: '#f5f5f7',
+        textSecondary: '#a0a5b0',
+        textMuted: '#6a6f7b',
+        footerBg: '#050608',
+        tagBg: 'rgba(197,160,89,0.1)',
+        tagColor: '#d6b77a',
+        isDark: true,
+    },
+    // Bloom = light rose / pink feminine
+    bloom: {
+        heroBg: 'linear-gradient(135deg, #fff0f2 0%, #fffcfc 50%, #fff0f2 100%)',
+        accent: '#e06b86',
+        accentDark: '#bf4b66',
+        accentRgb: '224,107,134',
+        navBg: 'rgba(255,240,242,0.92)',
+        sectionAlt: '#fff9fa',
+        sectionBase: '#ffffff',
+        cardBg: 'rgba(224,107,134,0.02)',
+        cardBorder: 'rgba(224,107,134,0.15)',
+        textPrimary: '#4a2c3a',
+        textSecondary: '#826270',
+        textMuted: '#ac94a0',
+        footerBg: '#fff0f2',
+        tagBg: 'rgba(224,107,134,0.08)',
+        tagColor: '#bf4b66',
+        isDark: false,
+    },
+    // Forest = deep green / nature
+    forest: {
+        heroBg: 'linear-gradient(135deg, #051a11 0%, #0c3624 50%, #051a11 100%)',
+        accent: '#10b981',
+        accentDark: '#047857',
+        accentRgb: '16,185,129',
+        navBg: 'rgba(5,26,17,0.9)',
+        sectionAlt: '#062015',
+        sectionBase: '#08291b',
+        cardBg: 'rgba(16,185,129,0.03)',
+        cardBorder: 'rgba(16,185,129,0.12)',
+        textPrimary: '#ecfdf5',
+        textSecondary: '#a7f3d0',
+        textMuted: '#6ee7b7',
+        footerBg: '#03140d',
+        tagBg: 'rgba(16,185,129,0.1)',
+        tagColor: '#34d399',
+        isDark: true,
+    },
+    // Modern Split = white/light + red accent
+    'modern-split': {
+        heroBg: 'linear-gradient(135deg, #d31124 0%, #e11d48 100%)',
+        accent: '#d31124',
+        accentDark: '#b91c1c',
+        accentRgb: '211,17,36',
+        navBg: 'rgba(255,255,255,0.95)',
+        sectionAlt: '#f9fafb',
+        sectionBase: '#ffffff',
+        cardBg: '#ffffff',
+        cardBorder: 'rgba(211,17,36,0.1)',
+        textPrimary: '#1f2937',
+        textSecondary: '#4b5563',
+        textMuted: '#9ca3af',
+        footerBg: '#f9fafb',
+        tagBg: 'rgba(211,17,36,0.08)',
+        tagColor: '#d31124',
+        isDark: false,
+    },
     elegant: {
         heroBg: 'linear-gradient(135deg, #1c1917 0%, #292524 50%, #1c1917 100%)',
         accent: '#d97706',
@@ -372,6 +467,12 @@ export default function ResellerThemes({ reseller, themes = [], greetingCards = 
     };
 
     /* CSS variables injected inline */
+    const dividerColor = T.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
+    const overlayBg = T.isDark ? 'rgba(8,13,24,0.75)' : 'rgba(15,23,42,0.55)';
+    const modalBg = T.isDark ? '#0f172a' : '#ffffff';
+    const modalText = T.isDark ? '#f1f5f9' : '#0f172a';
+    const modalBorder = T.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.1)';
+    const modalMuted = T.isDark ? '#94a3b8' : '#64748b';
     const cssVars = `
         :root {
             --accent: ${T.accent};
@@ -389,6 +490,12 @@ export default function ResellerThemes({ reseller, themes = [], greetingCards = 
             --footer-bg: ${T.footerBg};
             --tag-bg: ${T.tagBg};
             --tag-color: ${T.tagColor};
+            --divider: ${dividerColor};
+            --overlay-bg: ${overlayBg};
+            --modal-bg: ${modalBg};
+            --modal-text: ${modalText};
+            --modal-border: ${modalBorder};
+            --modal-muted: ${modalMuted};
         }
     `;
 
@@ -1086,7 +1193,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
 .rl-theme-card__cat { font-size: 0.75rem; color: var(--text-muted); text-transform: capitalize; }
 
 /* ── FOOTER ── */
-.rl-footer { background: var(--footer-bg); padding: 4.5rem 0 2.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+.rl-footer { background: var(--footer-bg); padding: 4.5rem 0 2.5rem; border-top: 1px solid var(--divider); }
 .rl-footer__inner { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
 .rl-footer__grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 4rem; margin-bottom: 3.5rem; }
 .rl-footer__col { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -1117,7 +1224,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
 .rl-footer__contact-item { display: flex; align-items: flex-start; gap: 0.625rem; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; text-align: left; }
 .rl-footer__contact-item svg { flex-shrink: 0; margin-top: 0.15rem; }
 .rl-footer__contact-item:hover { color: var(--text-primary); }
-.rl-footer__bottom { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; }
+.rl-footer__bottom { border-top: 1px solid var(--divider); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; }
 .rl-footer__copy { font-size: 0.8125rem; color: var(--text-muted); }
 
 /* ── NAV HUBUNGI KAMI ── */
@@ -1149,17 +1256,17 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
 
 /* ── MODAL ── */
 .rl-modal-overlay {
-    position: fixed; inset: 0; z-index: 200; background: rgba(8,13,24,0.7);
+    position: fixed; inset: 0; z-index: 200; background: var(--overlay-bg);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     display: flex; align-items: center; justify-content: center; padding: 1.5rem;
     animation: rl-fade-in 0.25s ease-out;
 }
 .rl-modal-card {
-    background: #0f172a; border: 1px solid rgba(255,255,255,0.08);
+    background: var(--modal-bg); border: 1px solid var(--modal-border);
     width: 100%; max-width: 440px; border-radius: 24px; padding: 2.25rem;
     position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     animation: rl-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    color: #f1f5f9;
+    color: var(--modal-text);
 }
 .rl-modal-close {
     position: absolute; top: 1.25rem; right: 1.25rem; width: 32px; height: 32px;
@@ -1176,15 +1283,15 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     display: flex; align-items: center; justify-content: center;
     font-weight: 800; font-size: 24px; color: #fff; margin-bottom: 1rem;
 }
-.rl-modal-title { font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
-.rl-modal-desc { font-size: 0.875rem; color: #94a3b8; line-height: 1.5; }
+.rl-modal-title { font-size: 1.25rem; font-weight: 800; color: var(--modal-text); margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+.rl-modal-desc { font-size: 0.875rem; color: var(--modal-muted); line-height: 1.5; }
 .rl-modal-body { display: flex; flex-direction: column; gap: 0.75rem; }
 .rl-contact-row {
     display: flex; align-items: center; gap: 0.875rem; padding: 0.875rem 1.125rem;
-    border-radius: 16px; text-decoration: none; border: 1px solid rgba(255,255,255,0.05);
-    background: rgba(255,255,255,0.02); transition: all 0.2s ease;
+    border-radius: 16px; text-decoration: none; border: 1px solid var(--modal-border);
+    background: var(--card-bg); transition: all 0.2s ease;
 }
-.rl-contact-row:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
+.rl-contact-row:hover { transform: translateY(-2px); border-color: var(--card-border); background: var(--section-alt); }
 .rl-contact-icon {
     width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
@@ -1198,9 +1305,9 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
 .rl-contact-row--address { background: rgba(255,255,255,0.01); border-style: dashed; }
 .rl-contact-row--address .rl-contact-icon { background: rgba(192,132,252,0.1); color: #c084fc; }
 .rl-contact-info { display: flex; flex-direction: column; }
-.rl-contact-label { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; text-align: left; }
-.rl-contact-value { font-size: 0.9375rem; color: #f1f5f9; font-weight: 700; margin-top: 0.125rem; text-align: left; }
-.rl-modal-footer { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1.75rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.25rem; }
+.rl-contact-label { font-size: 0.75rem; color: var(--modal-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; text-align: left; }
+.rl-contact-value { font-size: 0.9375rem; color: var(--modal-text); font-weight: 700; margin-top: 0.125rem; text-align: left; }
+.rl-modal-footer { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1.75rem; border-top: 1px solid var(--divider); padding-top: 1.25rem; }
 .rl-social-icon {
     width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.04);
     display: flex; align-items: center; justify-content: center; color: #94a3b8;

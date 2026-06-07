@@ -183,11 +183,12 @@ class ResellerBioLinkController extends Controller
         }
 
         return Inertia::render('Reseller/BioLink', [
-            'bio'          => $bio,
-            'brandName'    => $setting->brand_name ?: $reseller->name,
-            'brandLogo'    => $setting->brand_logo ? '/storage/' . $setting->brand_logo : null,
-            'resellerUrl'  => $resellerUrl,
-            'ref'          => $subdomain,
+            'bio'              => $bio,
+            'brandName'        => $setting->brand_name ?: $reseller->name,
+            'brandLogo'        => $setting->brand_logo ? '/storage/' . $setting->brand_logo : null,
+            'resellerUrl'      => $resellerUrl,
+            'subdomain'        => $subdomain,
+            'landingPageTheme' => $setting->getLandingTheme(),
         ]);
     }
 }

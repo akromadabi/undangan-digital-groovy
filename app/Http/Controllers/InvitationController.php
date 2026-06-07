@@ -385,12 +385,36 @@ class InvitationController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function demo(Request $request, string $slug)
+    /**
+     * Demo page accessed via path-based reseller URL: /r/{subdomain}/demo/{slug}
+     * Delegates to demo() with the subdomain resolved from route parameter.
+     */
+    public function demoBySubdomain(Request $request, string $subdomain, string $slug)
     {
+        return $this->demo($request, $subdomain, $slug);
+    }
+
+    public function demo(Request $request, string $param1, string $param2 = null)
+
+    {
+        if ($param2 !== null) {
+            $subdomain = $param1;
+            $slug = $param2;
+        } else {
+            $subdomain = null;
+            $slug = $param1;
+        }
+
         $theme = \App\Models\Theme::where('slug', $slug)->firstOrFail();
 
         // Resolve reseller settings
-        $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+        if ($subdomain) {
+            $resellerSetting = \App\Models\ResellerSetting::where('subdomain', $subdomain)
+                ->where('is_active', true)
+                ->first();
+        } else {
+            $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
+        }
 
         $resellerPrices = [];
         if ($resellerSetting) {

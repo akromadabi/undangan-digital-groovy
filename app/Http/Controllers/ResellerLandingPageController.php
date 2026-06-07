@@ -71,8 +71,8 @@ class ResellerLandingPageController extends Controller
             ->take(8)
             ->get();
         $themes = \App\Models\Theme::applyResellerCustomizations($themes, $reseller->id);
-        $themes = $themes->map(function ($theme) {
-            $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
+        $themes = $themes->map(function ($theme) use ($subdomain) {
+            $theme->preview_url = route('reseller.demo.theme', ['subdomain' => $subdomain, 'slug' => $theme->slug]);
             return $theme;
         });
 
@@ -159,8 +159,8 @@ class ResellerLandingPageController extends Controller
             ->orderBy('sort_order')
             ->get();
         $themes = \App\Models\Theme::applyResellerCustomizations($themes, $reseller->id);
-        $themes = $themes->map(function ($theme) {
-            $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
+        $themes = $themes->map(function ($theme) use ($subdomain) {
+            $theme->preview_url = route('reseller.demo.theme', ['subdomain' => $subdomain, 'slug' => $theme->slug]);
             return $theme;
         });
 

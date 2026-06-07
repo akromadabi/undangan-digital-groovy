@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import ThemePreviewCard from '@/Components/ThemePreviewCard';
 import GreetingCardPreviewCard from '@/Components/GreetingCardPreviewCard';
 
@@ -204,9 +204,414 @@ const SORT_OPTIONS = [
     { key: 'disukai', label: 'Terfavorit' },
 ];
 
+// ─────────────────────────────────────────────────────────────────────
+const APP_SLIDES = [
+    {
+        id: 1,
+        label: 'Undangan Digital',
+        badge: 'Live Preview',
+        content: (
+            <div className="w-full h-full bg-white flex flex-col justify-between" style={{fontFamily:'inherit'}}>
+                {/* Cover Banner */}
+                <div className="h-[180px] bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 flex items-end p-4 relative overflow-hidden shrink-0">
+                    <div className="absolute inset-0 flex items-center justify-center opacity-25">
+                        <svg viewBox="0 0 100 60" className="w-full h-full" fill="none">
+                            <path d="M20 50 Q50 10 80 50" stroke="#E5654B" strokeWidth="3" fill="none"/>
+                            <circle cx="50" cy="20" r="8" fill="#E5654B" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <div className="relative z-10 mt-4">
+                        <p className="text-[9px] text-rose-500 font-extrabold uppercase tracking-widest">Undangan Pernikahan</p>
+                        <p className="text-lg font-black text-gray-900 leading-tight mt-0.5">Rizky & Nadia</p>
+                    </div>
+                    <div className="absolute top-6 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-2 py-0.5 text-[8px] font-black text-rose-500 shadow-sm">
+                        💌 Digital
+                    </div>
+                </div>
+                {/* Body Details */}
+                <div className="p-4 flex-1 flex flex-col justify-between bg-white">
+                    <div className="space-y-2.5">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
+                                <svg className="w-4 h-4 text-rose-450" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Tanggal Resepsi</p>
+                                <p className="text-xs font-extrabold text-gray-800">Sabtu, 14 Juni 2025</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                                <svg className="w-4 h-4 text-orange-450" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Lokasi Acara</p>
+                                <p className="text-xs font-extrabold text-gray-800">Grand Ballroom Jakarta</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button className="w-full py-2.5 bg-[#E5654B] text-white rounded-xl text-xs font-black shadow-md shadow-[#E5654B]/20 hover:bg-[#d4523a] transition-all mt-4">
+                        RSVP Sekarang ✓
+                    </button>
+                </div>
+            </div>
+        )
+    },
+    {
+        id: 2,
+        label: 'Form RSVP',
+        badge: 'Konfirmasi Tamu',
+        content: (
+            <div className="w-full h-full bg-white flex flex-col justify-between" style={{fontFamily:'inherit'}}>
+                {/* Header banner */}
+                <div className="bg-gradient-to-r from-[#E5654B] to-[#f97316] p-4 pt-6 shrink-0 flex items-center justify-between">
+                    <div className="mt-1">
+                        <p className="text-white text-xs font-black">Konfirmasi Kehadiran</p>
+                        <p className="text-white/70 text-[8px] mt-0.5">Silakan isi form RSVP tamu</p>
+                    </div>
+                    <span className="bg-white/20 text-white text-[8px] font-black px-2 py-0.5 rounded-full backdrop-blur-sm mt-1">47 hadir</span>
+                </div>
+                {/* Form fields */}
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                    <div className="space-y-3">
+                        <div>
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-wider">Nama Tamu</label>
+                            <input type="text" readOnly value="Ahmad Fauzi" className="mt-1 w-full border border-gray-150 rounded-xl px-3 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none" />
+                        </div>
+                        <div>
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-wider">Jumlah Hadir</label>
+                            <div className="mt-1 flex gap-1.5">
+                                {[1, 2, 3].map(n => (
+                                    <div key={n} className={`flex-1 border rounded-xl py-1.5 text-center text-xs font-black transition-all ${n === 2 ? 'bg-[#E5654B] text-white border-[#E5654B]' : 'border-gray-255 text-gray-500 bg-white'}`}>{n} Orang</div>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-wider">Ucapan & Doa</label>
+                            <textarea readOnly value="Selamat ya Rizky & Nadia! Semoga menjadi keluarga sakinah..." className="mt-1 w-full border border-gray-150 rounded-xl px-3 py-1.5 text-xs text-gray-450 bg-gray-50 h-14 resize-none focus:outline-none" />
+                        </div>
+                    </div>
+                    <button className="w-full py-2.5 bg-[#E5654B] text-white rounded-xl text-xs font-black shadow-md shadow-[#E5654B]/20 mt-3">
+                        Kirim Konfirmasi →
+                    </button>
+                </div>
+            </div>
+        )
+    },
+    {
+        id: 3,
+        label: 'Galeri & Ucapan',
+        badge: 'Tamu Hadir',
+        content: (
+            <div className="w-full h-full bg-white flex flex-col justify-between" style={{fontFamily:'inherit'}}>
+                {/* Header */}
+                <div className="p-4 border-b border-gray-100 shrink-0">
+                    <p className="text-xs font-black text-gray-900 mt-2">💬 Ucapan Tamu</p>
+                    <p className="text-[8px] text-gray-400 mt-0.5">12 ucapan dikirim</p>
+                </div>
+                {/* Messages feed */}
+                <div className="p-4 flex-1 overflow-hidden space-y-3 bg-gray-50/50">
+                    {[
+                        { name: 'Budi S.', msg: 'Selamat menempuh hidup baru! Semoga selalu bahagia 🎊', color: 'bg-blue-500' },
+                        { name: 'Sari A.', msg: 'Barakallah, semoga menjadi keluarga sakinah mawaddah 💕', color: 'bg-pink-500' },
+                        { name: 'Reza D.', msg: 'Congrats Rizky & Nadia! Wish you a lifetime of love! 🌟', color: 'bg-emerald-500' },
+                    ].map((item, i) => (
+                        <div key={i} className="flex gap-2.5 items-start">
+                            <div className={`w-7 h-7 ${item.color} rounded-full flex items-center justify-center text-white text-[9px] font-black shrink-0 shadow-sm`}>
+                                {item.name.charAt(0)}
+                            </div>
+                            <div className="bg-white border border-gray-150 rounded-xl rounded-tl-none px-3 py-1.5 flex-1 shadow-sm">
+                                <p className="text-[8px] font-black text-gray-800">{item.name}</p>
+                                <p className="text-[8px] text-gray-550 mt-0.5 leading-relaxed">{item.msg}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                {/* Stat footer */}
+                <div className="p-3 bg-white border-t border-gray-100 shrink-0">
+                    <div className="bg-[#E5654B]/5 rounded-xl p-2.5 flex items-center gap-2.5 border border-[#E5654B]/10">
+                        <div className="w-7 h-7 rounded-lg bg-[#E5654B]/10 flex items-center justify-center text-[#E5654B] text-xs font-black">
+                            ✓
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-black text-gray-800">47 tamu konfirmasi hadir</p>
+                            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider">dari total 60 undangan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    },
+    {
+        id: 4,
+        label: 'Countdown Timer',
+        badge: 'Hitung Mundur',
+        content: (
+            <div className="w-full h-full bg-white flex flex-col justify-between p-4" style={{fontFamily:'inherit'}}>
+                <div className="text-center mt-3 shrink-0">
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Menuju Hari Bahagia</p>
+                    <p className="text-lg font-black text-gray-900 mt-0.5">Rizky & Nadia</p>
+                    <p className="text-[9px] text-[#E5654B] font-bold mt-1 bg-[#E5654B]/5 border border-[#E5654B]/10 px-2 py-0.5 rounded-full inline-block">14 Juni 2025</p>
+                </div>
+                
+                {/* Grid countdown */}
+                <div className="grid grid-cols-4 gap-2 my-auto">
+                    {[
+                        { val: '07', label: 'Hari' },
+                        { val: '14', label: 'Jam' },
+                        { val: '32', label: 'Menit' },
+                        { val: '18', label: 'Detik' },
+                    ].map((item, i) => (
+                        <div key={i} className="text-center">
+                            <div className="bg-gradient-to-br from-[#E5654B] to-[#f97316] rounded-xl py-2 shadow-md shadow-[#E5654B]/20">
+                                <span className="text-sm font-black text-white leading-none block">{item.val}</span>
+                            </div>
+                            <p className="text-[8px] font-black text-gray-400 uppercase tracking-wider mt-1">{item.label}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="space-y-2 mt-4 shrink-0">
+                    <button className="w-full py-2.5 bg-[#E5654B] text-white rounded-xl text-xs font-black shadow-md shadow-[#E5654B]/20">
+                        Simpan Tanggal
+                    </button>
+                    <button className="w-full py-2.5 border border-gray-200 text-gray-650 rounded-xl text-xs font-black">
+                        Bagikan Undangan
+                    </button>
+                </div>
+            </div>
+        )
+    },
+];
+
+function HeroSection({ mounted, resellerCount, invitationCount, themesCount, appName, canRegister }) {
+    const [activeSlide, setActiveSlide] = useState(0);
+    const timerRef = useRef(null);
+
+    const goTo = useCallback((idx) => {
+        setActiveSlide(idx);
+    }, []);
+
+    useEffect(() => {
+        timerRef.current = setInterval(() => {
+            setActiveSlide(prev => (prev + 1) % APP_SLIDES.length);
+        }, 3500);
+        return () => clearInterval(timerRef.current);
+    }, []);
+
+    const handleDotClick = (idx) => {
+        clearInterval(timerRef.current);
+        goTo(idx);
+        timerRef.current = setInterval(() => {
+            setActiveSlide(prev => (prev + 1) % APP_SLIDES.length);
+        }, 3500);
+    };
+
+    return (
+        <section className="relative min-h-screen overflow-hidden pt-20" style={{background: 'linear-gradient(135deg, #FFF5EE 0%, #FFF0E8 40%, #FEE8D6 100%)'}}>
+            {/* Decorative blobs */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-30" style={{background: 'radial-gradient(circle, #ffd4c2 0%, transparent 70%)', transform: 'translate(30%, -30%)'}} />
+            <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full opacity-20" style={{background: 'radial-gradient(circle, #ffb347 0%, transparent 70%)', transform: 'translate(-30%, 30%)'}} />
+
+            <div className="relative z-10 max-w-6xl mx-auto px-6 py-16 lg:py-20 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+                {/* LEFT: Text + CTA */}
+                <div className={`flex-1 transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                    {/* Badge */}
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-xs font-bold text-gray-700 border border-orange-200/60 shadow-sm mb-7">
+                        <svg className="w-3.5 h-3.5 text-[#E5654B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+                        </svg>
+                        Platform Undangan Digital all-in-one
+                    </div>
+
+                    {/* H1 */}
+                    <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-black text-gray-900 leading-[1.1] tracking-tight">
+                        Bangun<br/>
+                        <span className="text-[#E5654B] relative inline-block mr-2 select-none">
+                            undangan
+                            <svg className="absolute left-0 -bottom-1.5 w-full h-2.5 overflow-visible" viewBox="0 0 100 10" preserveAspectRatio="none" fill="none">
+                                <path
+                                    d="M3,5 C35,2.5 70,2.5 97,4 C65,5.5 35,6.5 5,7.5"
+                                    stroke="#E5654B"
+                                    strokeWidth="4.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    style={{
+                                        strokeDasharray: 200,
+                                        strokeDashoffset: mounted ? 0 : 200,
+                                        transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.5s'
+                                    }}
+                                />
+                            </svg>
+                        </span>
+                        <span className="text-[#E5654B] relative inline-block select-none">
+                            digital
+                            <svg className="absolute left-0 -bottom-1.5 w-full h-2.5 overflow-visible" viewBox="0 0 100 10" preserveAspectRatio="none" fill="none">
+                                <path
+                                    d="M3,5 C35,3 65,3 97,4.5 C60,6 30,7 5,8"
+                                    stroke="#E5654B"
+                                    strokeWidth="4.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    style={{
+                                        strokeDasharray: 200,
+                                        strokeDashoffset: mounted ? 0 : 200,
+                                        transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.75s'
+                                    }}
+                                />
+                            </svg>
+                        </span>{' '}
+                        <br className="hidden sm:block"/>
+                        klien kamu
+                    </h1>
+
+                    {/* Desc */}
+                    <p className="text-gray-600 mt-6 max-w-md text-base leading-relaxed">
+                        Template undangan, RSVP tamu, galeri foto, countdown — kami bangun semuanya untuk bisnis undangan digital kamu. Hosting gratis, data 100% milik sendiri.
+                    </p>
+
+                    {/* CTAs */}
+                    <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:gap-4 mt-8">
+                        <Link href="/register/reseller" className="glow-button inline-flex items-center gap-2 sm:gap-4 px-3 sm:px-8 py-3.5 sm:py-4 bg-[#E5654B] text-white rounded-full font-bold shadow-lg shadow-[#E5654B]/35 hover:bg-[#d4523a] transition-all hover:scale-[1.03] active:scale-[0.98] duration-300 w-full sm:min-w-[195px] justify-between">
+                            <div className="text-left leading-tight text-xs sm:text-sm font-extrabold tracking-tight">
+                                <div>Daftar</div>
+                                <div>Agensi</div>
+                            </div>
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                            </svg>
+                        </Link>
+                        <a href="#tema" className="inline-flex items-center gap-2 sm:gap-3.5 px-2.5 sm:px-7 py-3 bg-white text-gray-900 border border-gray-200 rounded-full font-bold shadow-sm hover:border-gray-300 hover:shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] duration-300 w-full sm:min-w-[195px] justify-start">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#E5654B] flex items-center justify-center flex-shrink-0 shadow-sm shadow-[#E5654B]/20">
+                                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white fill-white ml-0.5" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                            <div className="text-left leading-tight text-xs sm:text-sm font-extrabold tracking-tight">
+                                <div>Lihat</div>
+                                <div>Katalog</div>
+                            </div>
+                        </a>
+                    </div>
+
+                    {/* Trust: avatars + rating */}
+                    <div className="flex flex-wrap items-center gap-4 mt-9">
+                        {/* Avatar stack */}
+                        <div className="flex items-center">
+                            {['#E5654B','#a78bfa','#34d399','#60a5fa'].map((c, i) => (
+                                <div key={i} className="w-9 h-9 rounded-full border-2 border-white shadow-sm flex items-center justify-center font-black text-xs text-white flex-shrink-0" style={{background: c, marginLeft: i > 0 ? '-8px' : 0, zIndex: 4 - i, position: 'relative'}}>
+                                    {['A','B','P','S'][i]}
+                                </div>
+                            ))}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-1">
+                                {[1,2,3,4,5].map(s => (
+                                    <svg key={s} className="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                ))}
+                                <span className="text-sm font-black text-gray-800 ml-1">4.9/5</span>
+                            </div>
+                            <p className="text-xs text-gray-550 font-semibold mt-0.5">Dipercaya {resellerCount}+ agensi di Indonesia</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* RIGHT: App Carousel (Boxy Phone Container) */}
+                <div className={`flex-1 w-full max-w-sm lg:max-w-none transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                    <div className="relative">
+                        {/* Slide badge (Floating above the phone) */}
+                        <div className="absolute -top-7 left-4 z-20 transition-all duration-300">
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white rounded-full text-[11px] font-black text-gray-750 shadow-md border border-gray-150">
+                                <span className="w-1.5 h-1.5 bg-[#E5654B] rounded-full animate-pulse"></span>
+                                {APP_SLIDES[activeSlide].badge}
+                            </span>
+                        </div>
+
+                        {/* Physical Phone Frame (sekotak HP) */}
+                        <div className="relative mx-auto max-w-[290px] w-full bg-zinc-950 rounded-[2.5rem] p-2 border-2 border-zinc-800 shadow-2xl overflow-hidden z-10">
+                            {/* Left Side Buttons (Volume keys) */}
+                            <div className="absolute left-[-2px] top-24 w-[2px] h-10 bg-zinc-700 rounded-l-sm z-0" />
+                            <div className="absolute left-[-2px] top-36 w-[2px] h-10 bg-zinc-700 rounded-l-sm z-0" />
+                            {/* Right Side Button (Power key) */}
+                            <div className="absolute right-[-2px] top-28 w-[2px] h-14 bg-zinc-700 rounded-r-sm z-0" />
+
+                            {/* Dynamic Island Notch */}
+                            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-20 h-3.5 bg-black rounded-full z-30 pointer-events-none flex items-center justify-center">
+                                <div className="w-1.5 h-1.5 rounded-full bg-zinc-900 border border-zinc-850" />
+                            </div>
+
+                            {/* Screen Container */}
+                            <div className="w-full h-[470px] rounded-[2rem] overflow-hidden bg-white relative border border-zinc-200">
+                                {/* Glossy Reflection Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-20" />
+                                <div
+                                    className="hero-carousel-track h-full"
+                                    style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+                                >
+                                    {APP_SLIDES.map((slide) => (
+                                        <div key={slide.id} className="hero-carousel-slide w-full h-full flex-shrink-0">
+                                            {slide.content}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Floating accent cards */}
+                        <div className="float-card-1 absolute -left-8 top-12 bg-white rounded-2xl p-3 shadow-xl border border-gray-100 hidden lg:flex items-center gap-2.5 z-10">
+                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shadow-sm">
+                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-gray-850">{invitationCount}+ Undangan</p>
+                                <p className="text-[9px] text-gray-405">Aktif sekarang</p>
+                            </div>
+                        </div>
+
+                        <div className="float-card-2 absolute -right-6 bottom-16 bg-white rounded-2xl p-3 shadow-xl border border-gray-100 hidden lg:flex items-center gap-2.5 z-10">
+                            <div className="w-8 h-8 bg-gradient-to-br from-[#E5654B] to-[#f97316] rounded-xl flex items-center justify-center shadow-sm">
+                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-gray-850">{themesCount}+ Tema</p>
+                                <p className="text-[9px] text-gray-405">Premium tersedia</p>
+                            </div>
+                        </div>
+
+                        {/* Dots + hint */}
+                        <div className="flex flex-col items-center gap-2 mt-5">
+                            <div className="flex items-center gap-2">
+                                {APP_SLIDES.map((_, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handleDotClick(idx)}
+                                        className={`rounded-full transition-all duration-300 ${idx === activeSlide ? 'w-6 h-2.5 bg-[#E5654B]' : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-450'}`}
+                                        aria-label={`Slide ${idx + 1}`}
+                                    />
+                                ))}
+                            </div>
+                            <p className="text-[10px] text-gray-450 font-medium">Klik card atau tunggu auto-slide</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
 export default function Welcome({ auth, canLogin, canRegister, appName, themes = [], recentInvitations = [], resellerCount = 15, invitationCount = 40, adminWhatsapp = '6283132211830', adminEmail = 'admin@groovy.com', minModalCost = 15000, subscriptionPlans = [], greetingCards = [], greetingCardTypeOptions = {} }) {
     const { flash } = usePage().props;
     const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [showFlash, setShowFlash] = useState(true);
     const [activeFaq, setActiveFaq] = useState(null);
     const [mounted, setMounted] = useState(false);
@@ -432,6 +837,17 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    useEffect(() => {
+        if (mobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [mobileMenuOpen]);
+
     const handleWhatsAppRedirect = (message = '') => {
         const formattedMessage = encodeURIComponent(message || 'Halo Admin, saya tertarik untuk mendaftar menjadi partner reseller website undangan digital Anda. Bagaimana cara mulainya?');
         window.open(`https://wa.me/${adminWhatsapp}?text=${formattedMessage}`, '_blank');
@@ -441,7 +857,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
         <>
             <Head title="Mulai Bisnis Undangan Digital Anda Sendiri — Platform Reseller Agensi White-Label" />
 
-            {/* FANCY INFINITE SCROLL KEYFRAMES INLINE STYLE */}
+            {/* FANCY INLINE STYLES */}
             <style>{`
                 @keyframes infinite-ticker-scroll {
                     0% { transform: translateX(0); }
@@ -474,6 +890,43 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                 .glow-button:hover::after {
                     left: 120%;
                     opacity: 1;
+                }
+                /* Hero Carousel */
+                .hero-carousel-track {
+                    display: flex;
+                    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                .hero-carousel-slide {
+                    flex-shrink: 0;
+                    width: 100%;
+                }
+                @keyframes float-card {
+                    0%, 100% { transform: translateY(0px) rotate(-1deg); }
+                    50% { transform: translateY(-10px) rotate(-1deg); }
+                }
+                @keyframes float-card-2 {
+                    0%, 100% { transform: translateY(-5px) rotate(2deg); }
+                    50% { transform: translateY(5px) rotate(2deg); }
+                }
+                .float-card-1 { animation: float-card 4s ease-in-out infinite; }
+                .float-card-2 { animation: float-card-2 5s ease-in-out infinite; }
+                /* Navbar scroll */
+                .nav-scrolled {
+                    background: rgba(255,255,255,0.97);
+                    box-shadow: 0 1px 20px rgba(0,0,0,0.08);
+                }
+                .nav-top {
+                    background: rgba(255,255,255,0.80);
+                    backdrop-filter: blur(16px);
+                }
+                /* Mobile hamburger */
+                .hamburger-line {
+                    display: block;
+                    width: 22px;
+                    height: 2px;
+                    background: #1e293b;
+                    border-radius: 2px;
+                    transition: all 0.3s;
                 }
             `}</style>
 
@@ -508,112 +961,159 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                 </div>
             )}
 
-            {/* ═══ NAVBAR (Ultra Premium glassmorphism) ═══ */}
-            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#0f172a]/95 backdrop-blur-lg shadow-xl border-b border-white/5 py-3' : 'bg-transparent py-5'}`}>
+            {/* ═══ NAVBAR (Light / Cream Style — Melting Reference) ═══ */}
+            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-400 border-b ${scrolled ? 'nav-scrolled border-gray-100 py-3' : 'nav-top border-transparent py-4'}`}>
                 <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2.5 group">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#E5654B] via-[#f97316] to-[#f59e0b] flex items-center justify-center shadow-lg shadow-[#E5654B]/35 group-hover:scale-105 transition-transform duration-300">
+                    {/* Logo */}
+                    <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E5654B] to-[#f97316] flex items-center justify-center shadow-md shadow-[#E5654B]/30 group-hover:scale-105 transition-transform duration-300">
                             <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 9v.906a2.25 2.25 0 01-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 001.183 1.981l6.478 3.488m8.839 2.51l-4.66-2.51m0 0l-1.023-.55a2.25 2.25 0 00-2.134 0l-1.022.55m0 0l-4.661 2.51m16.5 1.615a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V8.844a2.25 2.25 0 011.183-1.98l7.5-4.04a2.25 2.25 0 012.134 0l7.5 4.04a2.25 2.25 0 011.183 1.98V19.5z" />
                             </svg>
                         </div>
-                        <span className="text-2xl font-black tracking-tight text-white">
-                            {appName || 'Groovy'}<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5654B] to-[#f97316]">.agency</span>
+                        <span className="text-xl font-black tracking-tight text-gray-900">
+                            {appName || 'Groovy'}<span className="text-[#E5654B]">.</span>
                         </span>
                     </Link>
 
                     {/* Navigation Desktop Links */}
-                    <div className="hidden md:flex items-center gap-8">
-                        <a href="#keunggulan" className="text-xs font-black tracking-wider uppercase text-white/70 hover:text-[#E5654B] transition-colors">Keunggulan</a>
-                        <a href="#kalkulator" className="text-xs font-black tracking-wider uppercase text-white/70 hover:text-[#E5654B] transition-colors">Simulasi Profit</a>
-                        <a href="#alur-kerja" className="text-xs font-black tracking-wider uppercase text-white/70 hover:text-[#E5654B] transition-colors">Cara Kerja</a>
-                        <a href="#tema" className="text-xs font-black tracking-wider uppercase text-white/70 hover:text-[#E5654B] transition-colors">Katalog Tema</a>
-                        <a href="#faq" className="text-xs font-black tracking-wider uppercase text-white/70 hover:text-[#E5654B] transition-colors">FAQ</a>
+                    <div className="hidden md:flex items-center gap-7">
+                        <a href="#tema" className="text-sm font-semibold text-gray-600 hover:text-[#E5654B] transition-colors">Tema</a>
+                        <a href="#alur-kerja" className="text-sm font-semibold text-gray-600 hover:text-[#E5654B] transition-colors">Cara Kerja</a>
+                        <a href="#keunggulan" className="text-sm font-semibold text-gray-600 hover:text-[#E5654B] transition-colors">Fitur</a>
+                        <a href="#kalkulator" className="text-sm font-semibold text-gray-600 hover:text-[#E5654B] transition-colors">Simulasi</a>
+                        <a href="#faq" className="text-sm font-semibold text-gray-600 hover:text-[#E5654B] transition-colors">FAQ</a>
                     </div>
 
+                    {/* Right CTAs */}
                     <div className="flex items-center gap-3">
                         {auth?.user ? (
-                            <Link href={route('admin.dashboard')} className="px-5 py-2.5 bg-white text-gray-900 rounded-full text-xs font-bold hover:bg-[#E5654B] hover:text-white transition-all duration-300 hover:scale-[1.03] shadow-lg shadow-white/5">
-                                Dashboard Panel
+                            <Link href={route('admin.dashboard')} className="px-5 py-2.5 bg-[#E5654B] text-white rounded-full text-sm font-bold hover:bg-[#d4523a] transition-all duration-300 hover:scale-[1.03] shadow-md shadow-[#E5654B]/25">
+                                Dashboard
                             </Link>
                         ) : (
                             <>
                                 {canLogin && (
-                                    <Link href={route('login')} className="px-4 py-2 rounded-full text-xs font-bold text-white/90 hover:text-white hover:bg-white/5 transition-all">
+                                    <Link href={route('login')} className="hidden sm:block px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#E5654B] transition-colors">
                                         Masuk
                                     </Link>
                                 )}
-                                <Link href="/register/reseller" className="px-5 py-2.5 bg-gradient-to-r from-[#E5654B] to-[#f97316] text-white rounded-full text-xs font-bold hover:shadow-lg hover:shadow-[#E5654B]/30 transition-all hover:scale-[1.03] duration-300 inline-block text-center">
-                                    Daftar Partner
+                                <Link href="/register/reseller" className="px-5 py-2.5 bg-[#E5654B] text-white rounded-full text-sm font-bold hover:bg-[#d4523a] shadow-md shadow-[#E5654B]/25 transition-all hover:scale-[1.03] duration-300 inline-block text-center">
+                                    Mulai Project Sekarang
                                 </Link>
                             </>
                         )}
+                        {/* Mobile hamburger */}
+                        <button 
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="md:hidden flex flex-col gap-[5px] p-2 rounded-xl hover:bg-gray-100 transition-colors z-50 relative" 
+                            aria-label="Menu"
+                        >
+                            <span className={`hamburger-line transform ${mobileMenuOpen ? 'rotate-45 translate-y-[7px]' : ''}`} />
+                            <span className={`hamburger-line transform ${mobileMenuOpen ? 'opacity-0 scale-x-0' : ''}`} />
+                            <span className={`hamburger-line transform ${mobileMenuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`} />
+                        </button>
                     </div>
                 </div>
             </nav>
 
-            {/* ═══ HERO BANNER (Jaw-dropping neon styling) ═══ */}
-            <section className="relative min-h-[100vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a] pt-24">
-                {/* Stunning light shapes */}
-                <div className="absolute top-20 left-10 w-96 h-96 bg-[#E5654B]/15 rounded-full blur-[120px] animate-pulse duration-10000" />
-                <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px]" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-amber-500/5 rounded-full blur-[160px]" />
-
-                <div className={`relative z-10 text-center px-6 max-w-5xl mx-auto transition-all duration-1000 transform ${mounted ? 'opacity-100 blur-0 translate-y-0' : 'opacity-0 blur-md translate-y-10'}`}>
-                    <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-white/5 backdrop-blur-xl rounded-full text-white/90 text-xs font-bold mb-8 border border-white/10 shadow-2xl shadow-black/40">
-                        <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
-                        Peluang Kemitraan Agensi: 100% White-Label Platform
-                    </div>
-                    
-                    <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white leading-none tracking-tight">
-                        Mulai Bisnis Undangan Digital
-                        <span className="block mt-3 bg-gradient-to-r from-[#E5654B] via-[#f97316] to-[#f59e0b] bg-clip-text text-transparent drop-shadow-lg">
-                            Dengan Brand Milik Anda
-                        </span>
-                    </h1>
-                    
-                    <p className="text-base sm:text-xl text-white/60 mt-8 max-w-3xl mx-auto leading-relaxed font-medium">
-                        Bangun platform agensi undangan pernikahan digital secara instan. Tanpa ribet urus server, hosting, atau koding. Bebas tentukan harga jual paket, dan terima profit 100% langsung.
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mt-12">
-                        <Link href="/register/reseller" className="glow-button w-full sm:w-auto px-9 py-4 bg-gradient-to-r from-[#E5654B] via-[#f97316] to-[#f59e0b] text-white rounded-2xl text-sm font-black tracking-wide shadow-2xl shadow-[#E5654B]/35 transition-all hover:scale-[1.05] duration-300 inline-block text-center">
-                            Mulai Kemitraan Sekarang
-                        </Link>
-                        <a href="#kalkulator" className="w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-xl text-white rounded-2xl text-sm font-extrabold tracking-wide hover:bg-white/10 transition-all border border-white/10 text-center hover:scale-[1.05] duration-300">
-                            Simulasi Profit Agensi
-                        </a>
-                    </div>
-
-                    {/* Trust Indicators (Floating Luxury cards) */}
-                    <div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto mt-20 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/30">
-                        <div className="text-center">
-                            <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 block">{resellerCount}+</span>
-                            <span className="text-[10px] sm:text-xs text-white/45 font-black uppercase tracking-wider block mt-1">Agensi Terdaftar</span>
-                        </div>
-                        <div className="border-r border-white/10 h-10 self-center" />
-                        <div className="text-center">
-                            <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#E5654B] to-[#f97316] block">{invitationCount}+</span>
-                            <span className="text-[10px] sm:text-xs text-white/45 font-black uppercase tracking-wider block mt-1">Undangan Aktif</span>
-                        </div>
-                        <div className="border-r border-white/10 h-10 self-center" />
-                        <div className="text-center">
-                            <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-[#f59e0b] block">{themes.length}+</span>
-                            <span className="text-[10px] sm:text-xs text-white/45 font-black uppercase tracking-wider block mt-1">Desain Premium</span>
-                        </div>
-                    </div>
+            {/* Mobile Menu Drawer Overlay */}
+            <div 
+                className={`fixed inset-0 z-40 bg-white/98 backdrop-blur-md transition-all duration-300 md:hidden flex flex-col pt-24 px-6 pb-8 border-b border-orange-100/60 shadow-xl h-screen overflow-y-auto ${
+                    mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
+                }`}
+            >
+                {/* Navigation Links */}
+                <div className="flex flex-col gap-5 text-center my-auto">
+                    <a 
+                        href="#tema" 
+                        onClick={() => setMobileMenuOpen(false)} 
+                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 border-b border-orange-50/50 hover:bg-orange-50/20 rounded-xl"
+                    >
+                        Tema
+                    </a>
+                    <a 
+                        href="#alur-kerja" 
+                        onClick={() => setMobileMenuOpen(false)} 
+                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 border-b border-orange-50/50 hover:bg-orange-50/20 rounded-xl"
+                    >
+                        Cara Kerja
+                    </a>
+                    <a 
+                        href="#keunggulan" 
+                        onClick={() => setMobileMenuOpen(false)} 
+                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 border-b border-orange-50/50 hover:bg-orange-50/20 rounded-xl"
+                    >
+                        Fitur
+                    </a>
+                    <a 
+                        href="#kalkulator" 
+                        onClick={() => setMobileMenuOpen(false)} 
+                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 border-b border-orange-50/50 hover:bg-orange-50/20 rounded-xl"
+                    >
+                        Simulasi
+                    </a>
+                    <a 
+                        href="#faq" 
+                        onClick={() => setMobileMenuOpen(false)} 
+                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 hover:bg-orange-50/20 rounded-xl"
+                    >
+                        FAQ
+                    </a>
                 </div>
-            </section>
+
+                {/* Drawer CTAs */}
+                <div className="flex flex-col gap-3 mt-auto w-full max-w-sm mx-auto">
+                    {auth?.user ? (
+                        <Link 
+                            href={route('admin.dashboard')} 
+                            onClick={() => setMobileMenuOpen(false)} 
+                            className="w-full py-4 bg-[#E5654B] text-white rounded-full text-center font-extrabold hover:bg-[#d4523a] transition-all shadow-md shadow-[#E5654B]/25 text-sm"
+                        >
+                            Dashboard
+                        </Link>
+                    ) : (
+                        <>
+                            {canLogin && (
+                                <Link 
+                                    href={route('login')} 
+                                    onClick={() => setMobileMenuOpen(false)} 
+                                    className="w-full py-3.5 text-center font-extrabold text-gray-700 hover:text-[#E5654B] border border-gray-200 rounded-full transition-colors bg-white text-sm"
+                                >
+                                    Masuk
+                                </Link>
+                            )}
+                            <Link 
+                                href="/register/reseller" 
+                                onClick={() => setMobileMenuOpen(false)} 
+                                className="w-full py-4 bg-[#E5654B] text-white rounded-full text-center font-extrabold hover:bg-[#d4523a] shadow-md shadow-[#E5654B]/25 transition-all text-sm"
+                            >
+                                Mulai Project Sekarang
+                            </Link>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {/* ═══ HERO BANNER (Melting-style light cream — 2-column layout) ═══ */}
+            <HeroSection
+                mounted={mounted}
+                resellerCount={resellerCount}
+                invitationCount={invitationCount}
+                themesCount={themes.length}
+                appName={appName}
+                canRegister={canRegister}
+            />
 
             {/* ═══ INFINITE AUTOSCROLLING PARTNER TICKER (Large, moving and infinite) ═══ */}
-            <section className="bg-[#0b0f19] border-y border-white/5 py-12 overflow-hidden relative">
+            <section className="bg-[#FAF3EC] border-y border-orange-100/60 py-12 overflow-hidden relative">
                 {/* Soft gradient mask for edges */}
-                <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-[#0b0f19] to-transparent z-10 pointer-events-none" />
-                <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#0b0f19] to-transparent z-10 pointer-events-none" />
+                <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-[#FAF3EC] to-transparent z-10 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#FAF3EC] to-transparent z-10 pointer-events-none" />
                 
                 <div className="max-w-6xl mx-auto px-6 mb-6">
-                    <div className="text-center text-xs font-black text-white/30 tracking-widest uppercase">
-                        DIAPRESIASI DAN DIOPERASIKAN OLEH MITRA AGENSII TERKEMUKA
+                    <div className="text-center text-xs font-black text-gray-400 tracking-widest uppercase">
+                        DIAPRESIASI DAN DIOPERASIKAN OLEH MITRA AGENSI TERKEMUKA
                     </div>
                 </div>
 
@@ -621,13 +1121,13 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                 <div className="flex overflow-hidden whitespace-nowrap py-4">
                     <div className="flex gap-10 items-center justify-around min-w-full animate-infinite-ticker-scroll hover:[animation-play-state:paused] cursor-pointer">
                         {PARTNERS.concat(PARTNERS).map((partner, index) => (
-                            <div key={index} className="inline-flex items-center gap-3 bg-white/5 border border-white/5 hover:border-[#E5654B]/30 rounded-2xl px-6 py-4 transition-all duration-300 shadow-xl">
-                                <div className="p-2.5 rounded-xl bg-white/5 text-[#E5654B] shadow-inner">
+                            <div key={index} className="inline-flex items-center gap-3 bg-white/95 border border-orange-100 hover:border-[#E5654B]/30 rounded-2xl px-6 py-4 transition-all duration-300 shadow-sm hover:shadow-md">
+                                <div className="p-2.5 rounded-xl bg-[#E5654B]/5 text-[#E5654B] shadow-inner">
                                     {partner.icon}
                                 </div>
                                 <div className="text-left">
-                                    <div className="text-sm font-extrabold text-white leading-tight">{partner.name}</div>
-                                    <div className="text-[10px] text-white/40 font-bold uppercase tracking-wider mt-0.5">{partner.desc}</div>
+                                    <div className="text-sm font-extrabold text-gray-900 leading-tight">{partner.name}</div>
+                                    <div className="text-[10px] text-gray-505 font-bold uppercase tracking-wider mt-0.5">{partner.desc}</div>
                                 </div>
                             </div>
                         ))}
@@ -635,21 +1135,39 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                 </div>
             </section>
 
-            {/* ═══ INTERACTIVE PROFIT CALCULATOR WIDGET (Sleek Dark Mode Card) ═══ */}
-            <section id="kalkulator" className="bg-[#0f172a] py-24 overflow-hidden relative border-b border-white/5">
+            {/* Custom slider overrides for light mode calculator */}
+            <style>{`
+                .light-calculator .premium-slider::-webkit-slider-runnable-track {
+                    background: rgba(229, 101, 75, 0.15) !important;
+                }
+                .light-calculator .premium-slider::-moz-range-track {
+                    background: rgba(229, 101, 75, 0.15) !important;
+                }
+                .light-calculator .premium-slider::-webkit-slider-thumb {
+                    border: 2px solid #ffffff !important;
+                    box-shadow: 0 3px 8px rgba(229, 101, 75, 0.25) !important;
+                }
+                .light-calculator .premium-slider::-moz-range-thumb {
+                    border: 2px solid #ffffff !important;
+                    box-shadow: 0 3px 8px rgba(229, 101, 75, 0.25) !important;
+                }
+            `}</style>
+
+            {/* ═══ INTERACTIVE PROFIT CALCULATOR WIDGET (Sleek Cream/Terracotta Card) ═══ */}
+            <section id="kalkulator" className="bg-[#FFF8F3] py-24 overflow-hidden relative border-b border-orange-100/60 light-calculator">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="text-center mb-16">
                         <span className="text-xs font-bold text-[#E5654B] tracking-widest uppercase bg-[#E5654B]/10 px-4 py-2 rounded-full border border-[#E5654B]/20">Simulasi Finansial</span>
-                        <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mt-5">Proyeksi Pendapatan Bersih Agensi Anda</h2>
-                        <p className="text-white/50 mt-3 max-w-lg mx-auto text-sm sm:text-base leading-relaxed">Sesuaikan parameter di bawah untuk memvisualisasikan profit bersih yang langsung masuk ke rekening agensi Anda.</p>
+                        <h2 className="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight mt-5">Proyeksi Pendapatan Bersih Agensi Anda</h2>
+                        <p className="text-gray-650 mt-3 max-w-lg mx-auto text-sm sm:text-base leading-relaxed font-semibold">Sesuaikan parameter di bawah untuk memvisualisasikan profit bersih yang langsung masuk ke rekening agensi Anda.</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-5xl mx-auto">
                         {/* Control Panel (Sliders for each plan - Dynamic White-Label Pricing) */}
-                        <div className="lg:col-span-7 bg-[#1e293b]/70 border border-white/10 rounded-3xl p-8 shadow-2xl space-y-6 backdrop-blur-xl flex flex-col justify-between">
-                            <h3 className="text-lg font-black text-white border-b border-white/10 pb-4 flex justify-between items-center">
+                        <div className="lg:col-span-7 bg-white border border-orange-100 rounded-3xl p-8 shadow-xl space-y-6 flex flex-col justify-between">
+                            <h3 className="text-lg font-black text-gray-900 border-b border-gray-150 pb-4 flex justify-between items-center">
                                 <span>Konfigurasi Penjualan</span>
-                                <span className="text-[10px] sm:text-xs font-bold text-white/45">Atur Volume & Harga Jual Paket</span>
+                                <span className="text-[10px] sm:text-xs font-bold text-gray-400">Atur Volume & Harga Jual Paket</span>
                             </h3>
                             
                             <div className="space-y-6 flex-1 py-2">
@@ -659,11 +1177,11 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                     const unitProfit = Math.max(0, price - plan.price);
 
                                     return (
-                                        <div key={plan.id} className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4 transition-all hover:bg-white/10 duration-200">
+                                        <div key={plan.id} className="bg-[#FFFDFB] border border-orange-100/60 rounded-2xl p-5 space-y-4 transition-all hover:bg-[#FFFBF8] duration-200">
                                             {/* Plan Header */}
-                                            <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                                                <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wide">{plan.name} Package</span>
-                                                <span className="text-[9px] sm:text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                                            <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                <span className="text-xs sm:text-sm font-black text-gray-800 uppercase tracking-wide">{plan.name} Package</span>
+                                                <span className="text-[9px] sm:text-[10px] font-black text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
                                                     Margin Rp {unitProfit.toLocaleString('id-ID')} / Pcs
                                                 </span>
                                             </div>
@@ -671,7 +1189,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                             {/* Quantity Slider */}
                                             <div className="space-y-2">
                                                 <div className="flex justify-between text-[11px] font-bold">
-                                                    <span className="text-white/50">Proyeksi Penjualan</span>
+                                                    <span className="text-gray-500">Proyeksi Penjualan</span>
                                                     <span className="text-[#E5654B] font-extrabold">{qty} Undangan / bulan</span>
                                                 </div>
                                                 <input 
@@ -690,7 +1208,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                             {/* Selling Price Slider */}
                                             <div className="space-y-2">
                                                 <div className="flex justify-between text-[11px] font-bold">
-                                                    <span className="text-white/50">Harga Jual Rekomendasi</span>
+                                                    <span className="text-gray-500">Harga Jual Rekomendasi</span>
                                                     <span className="text-[#ffb347] font-extrabold">Rp {price.toLocaleString('id-ID')}</span>
                                                 </div>
                                                 <input 
@@ -705,7 +1223,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                                     }}
                                                     className="w-full premium-slider slider-amber cursor-pointer"
                                                 />
-                                                <div className="flex justify-between text-[9px] text-white/30 font-bold uppercase tracking-wider mt-1">
+                                                <div className="flex justify-between text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-1">
                                                     <span>Modal Sistem: Rp {plan.price.toLocaleString('id-ID')}</span>
                                                     <span>Max: Rp {Math.max(plan.price * 4, plan.defaultPrice * 1.5).toLocaleString('id-ID')}</span>
                                                 </div>
@@ -716,29 +1234,29 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                             </div>
                         </div>
 
-                        {/* Profit Output Panel (Ultra Luxury golden outline) */}
-                        <div className="lg:col-span-5 bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-[#ffb347]/20 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-black/50 flex flex-col justify-between">
+                        {/* Profit Output Panel (Creative Terracotta gradient card) */}
+                        <div className="lg:col-span-5 bg-gradient-to-br from-[#E5654B] to-[#f97316] text-white rounded-3xl p-8 relative overflow-hidden shadow-2xl shadow-[#E5654B]/35 flex flex-col justify-between border-none">
                             {/* Graphic accent */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-[#E5654B]/25 rounded-full blur-2xl" />
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
                             
                             <div>
-                                <h3 className="text-xs font-black tracking-widest text-white/40 uppercase mb-8">ANALISIS PENDAPATAN BULANAN</h3>
+                                <h3 className="text-xs font-black tracking-widest text-white/75 uppercase mb-8">ANALISIS PENDAPATAN BULANAN</h3>
 
                                 <div className="space-y-5">
                                     <div>
-                                        <span className="text-xs text-white/50 block font-semibold">Proyeksi Omset Kotor</span>
+                                        <span className="text-xs text-white/85 block font-semibold">Proyeksi Omset Kotor</span>
                                         <span className="text-2xl font-black text-white mt-1 block">Rp {monthlyRevenue.toLocaleString('id-ID')}</span>
                                     </div>
 
-                                    <div className="border-t border-white/5 pt-4">
-                                        <span className="text-xs text-white/50 block font-semibold">Biaya Pembelian Modal</span>
-                                        <span className="text-sm font-bold text-red-400 mt-1 block">Rp {monthlyCost.toLocaleString('id-ID')}</span>
+                                    <div className="border-t border-white/15 pt-4">
+                                        <span className="text-xs text-white/85 block font-semibold">Biaya Pembelian Modal</span>
+                                        <span className="text-sm font-bold text-orange-200 mt-1 block">Rp {monthlyCost.toLocaleString('id-ID')}</span>
                                     </div>
 
                                     {/* Sales Breakdown inside Output Panel */}
-                                    <div className="border-t border-white/5 pt-4">
-                                        <span className="text-xs text-white/50 block font-semibold">Rincian Volume Penjualan:</span>
-                                        <div className="text-[10px] text-white/45 space-y-1.5 mt-2 font-bold uppercase tracking-wider">
+                                    <div className="border-t border-white/15 pt-4">
+                                        <span className="text-xs text-white/90 block font-semibold">Rincian Volume Penjualan:</span>
+                                        <div className="text-[10px] text-white/75 space-y-1.5 mt-2 font-bold uppercase tracking-wider">
                                             {activePlans.map(plan => {
                                                 const qty = quantities[plan.id] ?? plan.defaultQty;
                                                 return (
@@ -748,26 +1266,26 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                                     </div>
                                                 );
                                             })}
-                                            <div className="flex justify-between border-t border-white/5 pt-1.5 text-white/70">
+                                            <div className="flex justify-between border-t border-white/15 pt-1.5 text-white/90">
                                                 <span>Total Unit Terjual</span>
-                                                <span className="text-[#ffb347] font-black">{totalQty} Pcs</span>
+                                                <span className="text-amber-200 font-black">{totalQty} Pcs</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="border-t border-dashed border-white/10 pt-5">
-                                        <span className="text-xs text-[#ffb347] font-extrabold block uppercase tracking-wide">ESTIMASI LABA BERSIH (PROFIT)</span>
-                                        <div className="text-3xl sm:text-4xl font-black text-emerald-400 mt-1.5 drop-shadow-md">
+                                    <div className="border-t border-dashed border-white/20 pt-5">
+                                        <span className="text-xs text-amber-200 font-extrabold block uppercase tracking-wide">ESTIMASI LABA BERSIH (PROFIT)</span>
+                                        <div className="text-3xl sm:text-4xl font-black text-white mt-1.5 drop-shadow-md">
                                             Rp {netProfit.toLocaleString('id-ID')}
                                         </div>
-                                        <span className="text-[10px] text-white/40 block mt-2.5 leading-relaxed font-semibold">
+                                        <span className="text-[10px] text-white/75 block mt-2.5 leading-relaxed font-semibold">
                                             * Laba bersih dihitung dari selisih harga jual dengan modal. 100% profit langsung masuk ke rekening Anda tanpa potongan platform.
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <button onClick={() => handleWhatsAppRedirect(`Halo Admin, saya melakukan simulasi profit agensi saya dan mendapat Rp ${netProfit.toLocaleString('id-ID')}/bulan. Saya ingin mendaftar menjadi partner reseller.`)} className="glow-button w-full mt-8 py-4 bg-gradient-to-r from-[#E5654B] to-[#f97316] hover:from-[#d4523a] text-white rounded-2xl font-black text-center text-sm shadow-xl shadow-[#E5654B]/30 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300">
+                            <button onClick={() => handleWhatsAppRedirect(`Halo Admin, saya melakukan simulasi profit agensi saya dan mendapat Rp ${netProfit.toLocaleString('id-ID')}/bulan. Saya ingin mendaftar menjadi partner reseller.`)} className="w-full mt-8 py-4 bg-white text-[#E5654B] hover:bg-[#FFF5EE] rounded-2xl font-black text-center text-sm shadow-xl shadow-black/10 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300">
                                 Klaim Lisensi Agensi Anda
                             </button>
                         </div>
@@ -822,23 +1340,23 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
             </section>
 
             {/* ═══ KEY FEATURES (Luxurious Cards with subtle glows) ═══ */}
-            <section id="keunggulan" className="bg-[#0f172a] py-24 border-y border-white/5">
+            <section id="keunggulan" className="bg-[#FAF3EC] py-24 border-y border-orange-100/60">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="text-center mb-16">
                         <span className="text-xs font-bold text-[#E5654B] tracking-widest uppercase bg-[#E5654B]/10 px-4 py-2 rounded-full border border-[#E5654B]/20">Infrastruktur Premium</span>
-                        <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mt-5">Fitur Unggulan Agensi Anda</h2>
-                        <p className="text-white/50 mt-3 max-w-lg mx-auto text-sm sm:text-base leading-relaxed">Platform agensi undangan digital dengan dukungan kustomisasi dan stabilitas terbaik.</p>
+                        <h2 className="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight mt-5">Fitur Unggulan Agensi Anda</h2>
+                        <p className="text-gray-650 mt-3 max-w-lg mx-auto text-sm sm:text-base leading-relaxed font-semibold">Platform agensi undangan digital dengan dukungan kustomisasi dan stabilitas terbaik.</p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {featuresList.map((f, i) => (
-                            <div key={i} className="bg-gradient-to-br from-[#1e293b]/70 to-[#0f172a]/95 border border-white/5 hover:border-[#E5654B]/30 rounded-3xl p-8 hover:shadow-2xl hover:shadow-[#E5654B]/5 hover:-translate-y-1.5 transition-all duration-300 group flex flex-col justify-between">
+                            <div key={i} className="bg-white border border-orange-100 hover:border-[#E5654B]/30 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:shadow-orange-500/5 hover:-translate-y-1.5 transition-all duration-300 group flex flex-col justify-between">
                                 <div>
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#E5654B]/15 to-[#E5654B]/5 flex items-center justify-center mb-6 group-hover:from-[#E5654B] group-hover:to-[#d4523a] transition-all duration-300 shadow-inner group-hover:scale-110">
+                                    <div className="w-14 h-14 rounded-2xl bg-[#E5654B]/10 text-[#E5654B] flex items-center justify-center mb-6 group-hover:bg-[#E5654B] group-hover:text-white transition-all duration-300 shadow-inner group-hover:scale-110">
                                         {f.icon}
                                     </div>
-                                    <h3 className="font-black text-white text-lg mb-3 tracking-tight group-hover:text-[#E5654B] transition-colors duration-300">{f.title}</h3>
-                                    <p className="text-xs sm:text-sm text-white/50 leading-relaxed font-medium">{f.desc}</p>
+                                    <h3 className="font-black text-gray-900 text-lg mb-3 tracking-tight group-hover:text-[#E5654B] transition-colors duration-300">{f.title}</h3>
+                                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-medium">{f.desc}</p>
                                 </div>
                                 <div className="flex items-center gap-1.5 mt-5 text-[11px] font-black tracking-widest text-[#E5654B] uppercase opacity-0 group-hover:opacity-100 group-hover:translate-x-1.5 transition-all duration-300">
                                     Dapatkan Akses
@@ -1102,20 +1620,20 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
 
             {/* ═══ KARTU UCAPAN SHOWCASE ═══ */}
             {greetingCards.length > 0 && (
-                <section id="kartu-ucapan" className="bg-gradient-to-b from-[#11071c] via-[#1a082b] to-[#0f071a] py-24 border-y border-white/5 relative">
-                    <div className="absolute top-1/3 left-1/4 w-80 h-80 bg-pink-500/5 rounded-full blur-[100px]" />
-                    <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px]" />
+                <section id="kartu-ucapan" className="bg-gradient-to-b from-white via-[#FFF8F3] to-[#FAF3EC] py-24 border-y border-orange-100/60 relative">
+                    <div className="absolute top-1/3 left-1/4 w-80 h-80 bg-[#E5654B]/5 rounded-full blur-[100px]" />
+                    <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-amber-500/5 rounded-full blur-[100px]" />
 
                     <div className="max-w-6xl mx-auto px-6">
                         {/* Header */}
                         <div className="text-center mb-12">
-                            <span className="text-xs font-bold text-pink-400 tracking-widest uppercase bg-pink-500/10 px-4 py-2 rounded-full border border-pink-500/20">
+                            <span className="text-xs font-bold text-[#E5654B] tracking-widest uppercase bg-[#E5654B]/10 px-4 py-2 rounded-full border border-[#E5654B]/20">
                                 Fitur Baru — Kartu Ucapan Interaktif
                             </span>
-                            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mt-5">
+                            <h2 className="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight mt-5">
                                 Koleksi Kartu Ucapan Premium
                             </h2>
-                            <p className="text-white/50 mt-3 max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
+                            <p className="text-gray-650 mt-3 max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
                                 Kirimkan ucapan spesial dengan animasi, musik, dan efek interaktif memukau untuk berbagai momen penting Anda.
                             </p>
                         </div>
@@ -1124,7 +1642,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 w-full">
                             {/* Search Box */}
                             <div className="relative w-full sm:max-w-md">
-                                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                                 </svg>
                                 <input
@@ -1132,7 +1650,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                     value={cardSearchQuery}
                                     onChange={e => setCardSearchQuery(e.target.value)}
                                     placeholder="Cari kartu ucapan..."
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-white/10 text-sm focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none bg-white/5 hover:bg-white/10 focus:bg-[#221033] transition-all text-white placeholder-white/30"
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-orange-100 text-sm focus:border-[#E5654B] focus:ring-1 focus:ring-[#E5654B] outline-none bg-white hover:bg-gray-50 focus:bg-white transition-all text-gray-800 placeholder-gray-400"
                                 />
                             </div>
 
@@ -1145,8 +1663,8 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                         onClick={() => setIsCardTypeDropdownOpen(!isCardTypeDropdownOpen)}
                                         className={`w-full px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-between sm:justify-start gap-2 select-none min-h-[42px] ${
                                             cardSelectedTypes.length > 0
-                                                ? 'bg-pink-500/10 text-pink-400 border-pink-500/30'
-                                                : 'bg-white/5 text-white/80 border-white/10 hover:border-white/20'
+                                                ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
+                                                : 'bg-white text-gray-655 border-orange-100 hover:bg-gray-50 hover:border-gray-300'
                                         }`}
                                     >
                                         <div className="flex items-center gap-2 truncate">
@@ -1160,20 +1678,20 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                                 }
                                             </span>
                                         </div>
-                                        <svg className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${isCardTypeDropdownOpen ? 'rotate-180 text-pink-400' : 'text-white/40'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <svg className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${isCardTypeDropdownOpen ? 'rotate-180 text-[#E5654B]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
 
                                     {isCardTypeDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-56 bg-[#1a082b] border border-white/10 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <div className="px-3 py-2 border-b border-white/5 flex items-center justify-between">
-                                                <span className="text-[10px] font-extrabold text-white/40 uppercase tracking-wider font-semibold">TIPE ACARA</span>
+                                        <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
+                                                <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider font-semibold">TIPE ACARA</span>
                                                 {cardSelectedTypes.length > 0 && (
                                                     <button
                                                         type="button"
                                                         onClick={clearCardTypes}
-                                                        className="text-[10px] font-bold text-pink-400 hover:underline"
+                                                        className="text-[10px] font-bold text-[#E5654B] hover:underline"
                                                     >
                                                         Reset
                                                     </button>
@@ -1185,8 +1703,8 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                                     return (
                                                         <label
                                                             key={type.key}
-                                                            className={`flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-white/5 transition-colors select-none text-xs font-semibold ${
-                                                                isChecked ? 'bg-pink-500/5 text-pink-400' : 'text-white/80'
+                                                            className={`flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors select-none text-xs font-semibold ${
+                                                                isChecked ? 'bg-[#E5654B]/5 text-[#E5654B]' : 'text-gray-700'
                                                             }`}
                                                         >
                                                             <div className="flex items-center gap-2">
@@ -1194,11 +1712,11 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                                                     type="checkbox"
                                                                     checked={isChecked}
                                                                     onChange={() => toggleCardType(type.key)}
-                                                                    className="rounded text-pink-500 focus:ring-pink-500 border-white/10 w-3.5 h-3.5 cursor-pointer accent-pink-500"
+                                                                    className="rounded text-[#E5654B] focus:ring-[#E5654B] border-gray-300 w-3.5 h-3.5 cursor-pointer accent-[#E5654B]"
                                                                 />
                                                                 <span>{type.label}</span>
                                                             </div>
-                                                            <span className="text-[9px] font-bold text-white/40 bg-white/5 border border-white/10 px-1.5 py-0.5 rounded-md">
+                                                            <span className="text-[9px] font-bold text-gray-500 bg-gray-50 border border-gray-150 px-1.5 py-0.5 rounded-md">
                                                                 {type.count}
                                                             </span>
                                                         </label>
@@ -1217,8 +1735,8 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                         title="Urutkan Kartu"
                                         className={`p-0 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-center select-none min-h-[42px] w-[42px] ${
                                             isCardSortDropdownOpen
-                                                ? 'bg-pink-500/10 text-pink-400 border-pink-500/30'
-                                                : 'bg-white/5 text-white/80 border-white/10 hover:border-white/20'
+                                                ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
+                                                : 'bg-white text-gray-655 border-orange-100 hover:bg-gray-50 hover:border-gray-300'
                                         }`}
                                     >
                                         <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1227,9 +1745,9 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                     </button>
 
                                     {isCardSortDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-[#1a082b] border border-white/10 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <div className="px-3 py-1.5 border-b border-white/5 mb-1">
-                                                <span className="text-[10px] font-extrabold text-white/40 uppercase tracking-wider font-semibold">URUTKAN BERDASARKAN</span>
+                                        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 p-2 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
+                                                <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider font-semibold">URUTKAN BERDASARKAN</span>
                                             </div>
                                             {[
                                                 { key: 'terbaru', label: 'Terbaru' },
@@ -1247,13 +1765,13 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                                         }}
                                                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-bold transition-all ${
                                                             isActive
-                                                                ? 'bg-pink-500/10 text-pink-400'
-                                                                : 'text-white/80 hover:bg-white/5'
+                                                                ? 'bg-[#E5654B]/10 text-[#E5654B]'
+                                                                : 'text-gray-700 hover:bg-gray-50'
                                                         }`}
                                                     >
                                                         <span>{opt.label}</span>
                                                         {isActive && (
-                                                            <svg className="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                            <svg className="w-4 h-4 text-[#E5654B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                             </svg>
                                                         )}
@@ -1279,27 +1797,27 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-12 text-white/40 border border-dashed border-white/10 rounded-3xl bg-white/5">
+                            <div className="text-center py-12 text-gray-450 border border-dashed border-orange-100 rounded-3xl bg-white">
                                 <p className="text-sm font-medium">Tidak ada kartu ucapan dalam kategori ini.</p>
                             </div>
                         )}
 
                         {/* Banner bottom details / actions */}
-                        <div className="mt-16 flex flex-col md:flex-row items-center justify-between bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 gap-8">
+                        <div className="mt-16 flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-[#E5654B]/10 to-[#f97316]/5 border border-[#E5654B]/10 rounded-3xl p-8 gap-8">
                             <div>
-                                <h3 className="text-xl font-bold text-white">Ingin membuat kartu ucapan Anda sendiri?</h3>
-                                <p className="text-white/50 text-xs sm:text-sm mt-1">Gunakan editor interaktif kami untuk mengirim ucapan dalam hitungan menit.</p>
+                                <h3 className="text-xl font-bold text-gray-900">Ingin membuat kartu ucapan Anda sendiri?</h3>
+                                <p className="text-gray-600 text-xs sm:text-sm mt-1">Gunakan editor interaktif kami untuk mengirim ucapan dalam hitungan menit.</p>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                                 <Link
                                     href="/buat-kartu"
-                                    className="px-7 py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-2xl text-sm hover:shadow-xl hover:shadow-pink-500/30 transition-all hover:scale-105 duration-300 text-center"
+                                    className="px-7 py-3.5 bg-gradient-to-r from-[#E5654B] to-[#f97316] text-white font-bold rounded-2xl text-sm hover:shadow-xl hover:shadow-[#E5654B]/30 transition-all hover:scale-105 duration-300 text-center"
                                 >
                                     Buat Kartu Sekarang
                                 </Link>
                                 <Link
                                     href="/katalog-kartu"
-                                    className="px-7 py-3.5 bg-white/5 text-white font-semibold rounded-2xl text-sm hover:bg-white/10 transition-all border border-white/10 text-center"
+                                    className="px-7 py-3.5 bg-white text-gray-750 font-semibold rounded-2xl text-sm hover:bg-gray-50 transition-all border border-orange-100 text-center"
                                 >
                                     Katalog Lengkap Kartu →
                                 </Link>
@@ -1353,50 +1871,54 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
             </section>
 
             {/* ═══ CTA SECTION (Premium glow panel) ═══ */}
-            <section className="relative bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] py-28 overflow-hidden border-t border-white/5">
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#E5654B]/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px]" />
+            <section className="relative bg-[#FAF3EC] py-28 overflow-hidden border-t border-orange-100/60">
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#E5654B]/5 rounded-full blur-[100px]" />
+                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px]" />
                 
-                <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
-                    <span className="text-xs font-bold text-[#E5654B] tracking-widest uppercase bg-white/5 border border-white/10 px-4 py-2.5 rounded-full mb-6 inline-block">
-                        Lisensi Kemitraan White-Label
-                    </span>
-                    <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mt-4 leading-tight">
-                        Bangun Platform Agensi Anda Sekarang
-                    </h2>
-                    <p className="text-white/60 mt-4 max-w-lg mx-auto text-sm sm:text-base leading-relaxed font-semibold">
-                        Aktivasi lisensi dalam hitungan menit. Hubungi tim kami untuk aktivasi instan dan dapatkan platform reseller profesional Anda hari ini.
-                    </p>
-                    <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
-                        <button onClick={() => handleWhatsAppRedirect()} className="glow-button w-full px-8 py-4 bg-gradient-to-r from-[#E5654B] to-[#f97316] text-white rounded-2xl font-black tracking-wide shadow-2xl shadow-[#E5654B]/35 transition-all hover:scale-[1.03] text-sm">
-                            Hubungi Admin via WhatsApp
-                        </button>
+                <div className="relative z-10 max-w-4xl mx-auto px-6">
+                    <div className="bg-gradient-to-br from-[#E5654B] to-[#f97316] text-white rounded-3xl p-12 text-center shadow-2xl shadow-[#E5654B]/30 relative overflow-hidden border-none">
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+                        
+                        <span className="text-xs font-bold text-white tracking-widest uppercase bg-white/15 border border-white/20 px-4 py-2.5 rounded-full mb-6 inline-block">
+                            Lisensi Kemitraan White-Label
+                        </span>
+                        <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mt-4 leading-tight">
+                            Bangun Platform Agensi Anda Sekarang
+                        </h2>
+                        <p className="text-white/85 mt-4 max-w-lg mx-auto text-sm sm:text-base leading-relaxed font-semibold">
+                            Aktivasi lisensi dalam hitungan menit. Hubungi tim kami untuk aktivasi instan dan dapatkan platform reseller profesional Anda hari ini.
+                        </p>
+                        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+                            <button onClick={() => handleWhatsAppRedirect()} className="w-full px-8 py-4 bg-white text-[#E5654B] hover:bg-[#FFF5EE] rounded-2xl font-black tracking-wide shadow-xl shadow-black/10 transition-all hover:scale-[1.03] text-sm">
+                                Hubungi Admin via WhatsApp
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* ═══ FOOTER ═══ */}
-            <footer className="bg-[#0b0c10] text-white/40 py-14 border-t border-white/5">
+            <footer className="bg-[#FAF3EC] text-gray-500 py-14 border-t border-orange-100/60">
                 <div className="max-w-6xl mx-auto px-6">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-10 border-b border-white/5">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-10 border-b border-orange-100/60">
                         <div className="flex items-center gap-2.5">
                             <div className="w-9 h-9 rounded-xl bg-[#E5654B] flex items-center justify-center shadow-lg shadow-[#E5654B]/30">
                                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3" />
                                 </svg>
                             </div>
-                            <span className="text-lg font-black tracking-tight text-white/80">{appName || 'Groovy'}<span className="text-[#E5654B]">.agency</span></span>
+                            <span className="text-lg font-black tracking-tight text-gray-900">{appName || 'Groovy'}<span className="text-[#E5654B]">.agency</span></span>
                         </div>
-                        <div className="text-xs text-white/45 text-center sm:text-right font-semibold">
-                            Email Dukungan Kemitraan: <a href={`mailto:${adminEmail}`} className="text-[#ff7b5e] hover:underline ml-1 font-bold">{adminEmail}</a>
+                        <div className="text-xs text-gray-500 text-center sm:text-right font-semibold">
+                            Email Dukungan Kemitraan: <a href={`mailto:${adminEmail}`} className="text-[#E5654B] hover:underline ml-1 font-bold">{adminEmail}</a>
                         </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 text-xs font-semibold text-white/30">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 text-xs font-semibold text-gray-400">
                         <div>© {new Date().getFullYear()} {appName || 'Groovy'}. All rights reserved. Platform Kemitraan Agensi White-Label.</div>
                         <div className="flex items-center gap-5">
-                            <a href="#keunggulan" className="hover:text-white/60 transition-colors">Keunggulan</a>
-                            <a href="#kalkulator" className="hover:text-white/60 transition-colors">Simulasi</a>
-                            <a href="#alur-kerja" className="hover:text-white/60 transition-colors">Cara Kerja</a>
+                            <a href="#keunggulan" className="hover:text-[#E5654B] transition-colors">Keunggulan</a>
+                            <a href="#kalkulator" className="hover:text-[#E5654B] transition-colors">Simulasi</a>
+                            <a href="#alur-kerja" className="hover:text-[#E5654B] transition-colors">Cara Kerja</a>
                         </div>
                     </div>
                 </div>
