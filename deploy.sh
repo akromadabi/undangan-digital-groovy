@@ -8,6 +8,20 @@ echo "=========================================="
 # Pindah ke direktori aplikasi
 cd /www/wwwroot/undangan-digital
 
+# Deteksi PHP binary yang sesuai (Laravel 12 / Composer membutuhkan >= 8.2)
+PHP_BIN="php"
+if [ -f "/www/server/php/83/bin/php" ]; then
+    PHP_BIN="/www/server/php/83/bin/php"
+elif [ -f "/www/server/php/82/bin/php" ]; then
+    PHP_BIN="/www/server/php/82/bin/php"
+elif command -v php8.3 &>/dev/null; then
+    PHP_BIN="php8.3"
+elif command -v php8.2 &>/dev/null; then
+    PHP_BIN="php8.2"
+fi
+
+echo "Menggunakan PHP: $($PHP_BIN -v | head -n 1)"
+
 # Daftarkan direktori sebagai safe directory git
 git config --global --add safe.directory /www/wwwroot/undangan-digital || true
 
@@ -21,10 +35,15 @@ git stash
 git pull origin main
 
 # Jalankan perbaikan otomatis typo domain di .env jika ada
-php fix_env.php
+$PHP_BIN fix_env.php
 
 echo "📦 2. Menginstall dependensi PHP (Composer)..."
-composer install --no-interaction --prefer-dist --optimize-autoloader
+if command -v composer &>/dev/null; then
+    COMPOSER_PATH=$(command -v composer)
+    $PHP_BIN $COMPOSER_PATH install --no-interaction --prefer-dist --optimize-autoloader
+else
+    composer install --no-interaction --prefer-dist --optimize-autoloader
+fi
 
 echo "📦 3. Menginstall dependensi Node.js (NPM)..."
 npm install
@@ -34,14 +53,14 @@ export NODE_OPTIONS="--max-old-space-size=2048"
 npm run build
 
 echo "🗄️ 5. Menjalankan migrasi database..."
-php artisan migrate --force
-php artisan db:seed --force
+$PHP_BIN artisan migrate --force
+$PHP_BIN artisan db:seed --force
 
 echo "🧹 6. Membersihkan dan menyusun cache aplikasi..."
-php artisan optimize:clear
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+$PHP_BIN artisan optimize:clear
+$PHP_BIN artisan config:cache
+$PHP_BIN artisan route:cache
+$PHP_BIN artisan view:cache
 
 echo "🔒 7. Mengatur perizinan folder (Permissions)..."
 chown -R www:www /www/wwwroot/undangan-digital
