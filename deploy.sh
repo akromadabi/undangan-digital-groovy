@@ -57,6 +57,10 @@ echo "🛠️ 4. Membangun aset frontend (Vite)..."
 export NODE_OPTIONS="--max-old-space-size=2048"
 npm run build
 
+# Hapus node_modules setelah build selesai untuk menghemat penyimpanan VPS
+echo "🧹 Menghapus node_modules setelah build selesai..."
+rm -rf node_modules
+
 echo "🗄️ 5. Menjalankan migrasi database..."
 $PHP_BIN artisan migrate --force
 $PHP_BIN artisan db:seed --force
