@@ -8,6 +8,11 @@ echo "=========================================="
 # Pindah ke direktori aplikasi
 cd /www/wwwroot/undangan-digital
 
+echo "🔎 DIAGNOSTIK VERSI PHP:"
+echo "- CLI Default: $(which php) ($(php -v | head -n 1))"
+echo "- Direktori PHP Terinstal:"
+ls -d /www/server/php/* 2>/dev/null || echo "  (Tidak ditemukan direktori /www/server/php/*)"
+
 # Deteksi PHP binary yang sesuai (Laravel 12 / Composer membutuhkan >= 8.2)
 PHP_BIN="php"
 if [ -f "/www/server/php/83/bin/php" ]; then
