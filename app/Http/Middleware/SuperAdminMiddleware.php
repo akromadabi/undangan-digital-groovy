@@ -9,6 +9,11 @@ class SuperAdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
+        // Allow authenticated super admin to bypass subdomain check
+        if ($request->user() && $request->user()->isSuperAdmin()) {
+            return $next($request);
+        }
+
         // Block access to super admin routes on reseller subdomains or custom domains
         $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
         if ($resellerSetting) {

@@ -10,11 +10,15 @@ return new class extends Migration
     public function up(): void
     {
         // Alter status column to allow new values for manual bank transfers
-        DB::statement("ALTER TABLE payments MODIFY COLUMN status ENUM('pending', 'paid', 'failed', 'refunded', 'expired', 'pending_manual', 'waiting_review', 'cancelled', 'rejected') DEFAULT 'pending'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE payments MODIFY COLUMN status ENUM('pending', 'paid', 'failed', 'refunded', 'expired', 'pending_manual', 'waiting_review', 'cancelled', 'rejected') DEFAULT 'pending'");
+        }
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE payments MODIFY COLUMN status ENUM('pending', 'paid', 'failed', 'refunded', 'expired') DEFAULT 'pending'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE payments MODIFY COLUMN status ENUM('pending', 'paid', 'failed', 'refunded', 'expired') DEFAULT 'pending'");
+        }
     }
 };

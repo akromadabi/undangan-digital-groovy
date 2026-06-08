@@ -51,4 +51,61 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
         $response->assertRedirect('/');
     }
+
+    public function test_super_admin_can_authenticate_under_reseller_domain(): void
+    {
+        $superAdmin = User::factory()->create([
+            'role' => 'super_admin',
+            'is_active' => true,
+        ]);
+
+        $resellerUser = User::factory()->create([
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $resellerSetting = \App\Models\ResellerSetting::create([
+            'user_id' => $resellerUser->id,
+            'brand_name' => 'Test Brand',
+            'subdomain' => 'testbrand',
+            'custom_domain' => 'reseller.test',
+            'is_active' => true,
+        ]);
+
+        // Access via reseller custom domain
+        $response = $this->withHeaders(['Host' => 'reseller.test'])->post('/login', [
+            'email' => $superAdmin->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticatedAs($superAdmin);
+    }
+
+    public function test_super_admin_can_access_super_admin_routes_under_reseller_domain(): void
+    {
+        $superAdmin = User::factory()->create([
+            'role' => 'super_admin',
+            'is_active' => true,
+        ]);
+
+        $resellerUser = User::factory()->create([
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $resellerSetting = \App\Models\ResellerSetting::create([
+            'user_id' => $resellerUser->id,
+            'brand_name' => 'Test Brand',
+            'subdomain' => 'testbrand',
+            'custom_domain' => 'reseller.test',
+            'is_active' => true,
+        ]);
+
+        // Attempt to access super-admin dashboard with Host reseller.test
+        $response = $this->actingAs($superAdmin)
+            ->withHeaders(['Host' => 'reseller.test'])
+            ->get('/super-admin');
+
+        $response->assertStatus(200);
+    }
 }

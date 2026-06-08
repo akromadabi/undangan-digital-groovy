@@ -35,6 +35,76 @@ class AdminDashboardController extends Controller
         $totalViews = (clone $invitationStatsQuery)->sum('views_count');
         $uniqueViews = (clone $invitationStatsQuery)->sum('unique_views_count');
 
+        $setting = \App\Models\ResellerSetting::firstOrCreate(
+            ['user_id' => $user->id],
+            ['brand_name' => $user->name, 'is_active' => true]
+        );
+
+        $checklist = [
+            [
+                'key' => 'brand',
+                'title' => 'Identitas Brand',
+                'desc' => 'Atur logo, nama brand, dan subdomain website Anda.',
+                'href' => '/admin/branding?tab=brand',
+                'is_completed' => !empty($setting->brand_logo) && !empty($setting->subdomain),
+            ],
+            [
+                'key' => 'payment',
+                'title' => 'Rekening Pembayaran',
+                'desc' => 'Tambahkan rekening bank untuk menerima pembayaran klien.',
+                'href' => '/admin/branding?tab=payment',
+                'is_completed' => !empty($setting->bank_accounts) || !empty($setting->bank_account),
+            ],
+            [
+                'key' => 'social',
+                'title' => 'Kontak & Sosmed',
+                'desc' => 'Lengkapi kontak WhatsApp, email, dan akun sosmed Anda.',
+                'href' => '/admin/branding?tab=social',
+                'is_completed' => !empty($setting->footer_whatsapp) || !empty($setting->footer_email) || !empty($setting->social_links),
+            ],
+            [
+                'key' => 'pricing',
+                'title' => 'Harga Jual Paket',
+                'desc' => 'Tentukan harga paket undangan untuk klien Anda.',
+                'href' => '/admin/pricing',
+                'is_completed' => \App\Models\ResellerPlanPrice::where('reseller_id', $user->id)->exists() || $setting->greeting_card_price !== null,
+            ],
+            [
+                'key' => 'landing_page',
+                'title' => 'Landing Page',
+                'desc' => 'Atur tampilan halaman utama dan tema warna brand Anda.',
+                'href' => '/admin/landing-page',
+                'is_completed' => !empty($setting->landing_page_hero_image) || (!empty($setting->landing_page_config) && isset($setting->landing_page_config['sections'])),
+            ],
+            [
+                'key' => 'bio_link',
+                'title' => 'Bio Link Brand',
+                'desc' => 'Buat halaman bio link sosial media untuk profil Anda.',
+                'href' => '/admin/bio',
+                'is_completed' => !empty($setting->bio_link_config),
+            ],
+            [
+                'key' => 'demo',
+                'title' => 'Undangan Demo',
+                'desc' => 'Aktifkan contoh undangan aktif sebagai preview tema.',
+                'href' => '/admin/branding?tab=demo',
+                'is_completed' => !empty($setting->demo_user_id),
+            ],
+        ];
+
+        $completedCount = collect($checklist)->where('is_completed', true)->count();
+        $totalCount = count($checklist);
+        $percentage = round(($completedCount / $totalCount) * 100);
+
+        $onboarding = [
+            'checklist' => $checklist,
+            'stats' => [
+                'completed_count' => $completedCount,
+                'total_count' => $totalCount,
+                'percentage' => $percentage,
+            ]
+        ];
+
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
                 'total_users' => (clone $userQuery)->count(),
@@ -49,6 +119,7 @@ class AdminDashboardController extends Controller
                 ->latest()
                 ->take(10)
                 ->get(),
+            'onboarding' => $onboarding,
         ]);
     }
 

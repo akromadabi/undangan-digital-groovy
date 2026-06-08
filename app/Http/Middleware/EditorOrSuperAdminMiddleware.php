@@ -9,13 +9,18 @@ class EditorOrSuperAdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
+        $user = $request->user();
+        // Allow authenticated Super Admin or Editor to bypass subdomain check
+        if ($user && ($user->isSuperAdmin() || $user->isEditor())) {
+            return $next($request);
+        }
+
         // Block access to admin routes on reseller subdomains or custom domains
         $resellerSetting = \App\Helpers\DomainHelper::resolveReseller($request->getHost());
         if ($resellerSetting) {
             abort(404);
         }
 
-        $user = $request->user();
         if (!$user || (!$user->isSuperAdmin() && !$user->isEditor())) {
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'Unauthorized'], 403);

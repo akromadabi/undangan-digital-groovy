@@ -1,7 +1,8 @@
 import { Head } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { createPortal } from 'react-dom';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icon = ({ d, className = 'w-5 h-5' }) => (
@@ -777,6 +778,8 @@ export default function BioLinkEditor({ settings, bioConfig }) {
     const [activeModalSection, setActiveModalSection] = useState(null);
     const [activeSocialKeys, setActiveSocialKeys] = useState([]);
     const dragIndex = useRef(null);
+    const saveTimeoutRef = useRef(null);
+    const skipAutosaveRef = useRef(false);
 
     const openModal = (sectionId, sectionType) => {
         if (sectionType === 'sosmed') {
@@ -796,7 +799,7 @@ export default function BioLinkEditor({ settings, bioConfig }) {
 
     const handleRemoveSocialKey = (key) => {
         setActiveSocialKeys(prev => prev.filter(k => k !== key));
-        updateSocial(key, null);
+        updateSocial(key, null, true);
     };
 
     const showToast = (msg, type = 'success') => {
@@ -804,15 +807,41 @@ export default function BioLinkEditor({ settings, bioConfig }) {
         setTimeout(() => setToast(null), 3000);
     };
 
-    const updateConfig = (key, value) => setConfig(prev => ({ ...prev, [key]: value }));
+    const triggerSave = async (configToSave) => {
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+        skipAutosaveRef.current = true;
+        setSaving(true);
+        try {
+            await axios.post('/admin/bio', configToSave, {
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
+            });
+            setSaved(true);
+        } catch (err) {
+            console.error("Save error", err);
+            showToast('Gagal menyimpan. Coba lagi.', 'error');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const updateConfig = (key, value) => {
+        setConfig(prev => ({ ...prev, [key]: value }));
+    };
 
     // ── Sections helpers ──────────────────────────────────────────────────────
     const getSections = () =>
         [...(config.sections || DEFAULT_SECTIONS)].sort((a, b) => a.order - b.order);
 
-    const updateSection = (id, field, value) => {
+    const updateSection = (id, field, value, immediate = false) => {
         const current = config.sections || DEFAULT_SECTIONS;
-        updateConfig('sections', current.map(s => s.id === id ? { ...s, [field]: value } : s));
+        const nextSections = current.map(s => s.id === id ? { ...s, [field]: value } : s);
+        const nextConfig = { ...config, sections: nextSections };
+        setConfig(nextConfig);
+        if (immediate) {
+            triggerSave(nextConfig);
+        }
     };
 
     // Drag & Drop (HTML5)
@@ -826,7 +855,9 @@ export default function BioLinkEditor({ settings, bioConfig }) {
         const sorted = getSections();
         const [moved] = sorted.splice(sourceIndex, 1);
         sorted.splice(targetIndex, 0, moved);
-        updateConfig('sections', sorted.map((s, i) => ({ ...s, order: i })));
+        const nextConfig = { ...config, sections: sorted.map((s, i) => ({ ...s, order: i })) };
+        setConfig(nextConfig);
+        triggerSave(nextConfig);
         dragIndex.current = null;
     };
 
@@ -837,9 +868,18 @@ export default function BioLinkEditor({ settings, bioConfig }) {
             return;
         }
 
+        if (skipAutosaveRef.current) {
+            skipAutosaveRef.current = false;
+            return;
+        }
+
         setSaved(false);
 
-        const delayDebounceFn = setTimeout(async () => {
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+
+        saveTimeoutRef.current = setTimeout(async () => {
             setSaving(true);
             try {
                 await axios.post('/admin/bio', config, {
@@ -854,20 +894,37 @@ export default function BioLinkEditor({ settings, bioConfig }) {
             }
         }, 1000);
 
-        return () => clearTimeout(delayDebounceFn);
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        };
     }, [config]);
 
     // ── Button helpers ────────────────────────────────────────────────────────
     const addButton = () => {
         const newBtn = { id: Date.now().toString(), label: 'Tombol Baru', url: '', icon: 'link', active: true, animation: 'none' };
-        updateConfig('buttons', [...(config.buttons || []), newBtn]);
+        const nextButtons = [...(config.buttons || []), newBtn];
+        const nextConfig = { ...config, buttons: nextButtons };
+        setConfig(nextConfig);
+        triggerSave(nextConfig);
     };
 
-    const updateButton = (id, field, value) =>
-        updateConfig('buttons', (config.buttons || []).map(b => b.id === id ? { ...b, [field]: value } : b));
+    const updateButton = (id, field, value, immediate = false) => {
+        const nextButtons = (config.buttons || []).map(b => b.id === id ? { ...b, [field]: value } : b);
+        const nextConfig = { ...config, buttons: nextButtons };
+        setConfig(nextConfig);
+        if (immediate) {
+            triggerSave(nextConfig);
+        }
+    };
 
-    const removeButton = (id) =>
-        updateConfig('buttons', (config.buttons || []).filter(b => b.id !== id));
+    const removeButton = (id) => {
+        const nextButtons = (config.buttons || []).filter(b => b.id !== id);
+        const nextConfig = { ...config, buttons: nextButtons };
+        setConfig(nextConfig);
+        triggerSave(nextConfig);
+    };
 
     const moveButton = (id, dir) => {
         const btns = [...(config.buttons || [])];
@@ -875,11 +932,26 @@ export default function BioLinkEditor({ settings, bioConfig }) {
         const to   = idx + dir;
         if (to < 0 || to >= btns.length) return;
         [btns[idx], btns[to]] = [btns[to], btns[idx]];
-        updateConfig('buttons', btns);
+        const nextConfig = { ...config, buttons: btns };
+        setConfig(nextConfig);
+        triggerSave(nextConfig);
     };
 
-    const updateSocial = (key, value) =>
-        updateConfig('social', { ...(config.social || {}), [key]: value });
+    const updateSocial = (key, value, immediate = false) => {
+        const nextSocial = { ...(config.social || {}), [key]: value };
+        const nextConfig = { ...config, social: nextSocial };
+        setConfig(nextConfig);
+        if (immediate) {
+            triggerSave(nextConfig);
+        }
+    };
+
+    const closeModal = () => {
+        if (!saved) {
+            triggerSave(config);
+        }
+        setActiveModalSection(null);
+    };
 
     const subdomain = settings?.subdomain;
     const publicUrl = subdomain ? `/r/${subdomain}/bio` : null;
@@ -1030,11 +1102,9 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                                 </button>
 
                                                 {/* Toggle active */}
-                                                <button onClick={() => updateSection(section.id, 'active', !section.active)}
-                                                    className={`relative w-10 h-5.5 rounded-full transition-colors flex-shrink-0 ${section.active ? 'bg-[#E5654B]' : 'bg-[#ddd]'}`}
-                                                    style={{ width: '40px', height: '22px' }}>
-                                                    <div className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${section.active ? 'translate-x-5' : 'translate-x-0.5'}`}
-                                                        style={{ width: '18px', height: '18px', top: '2px' }} />
+                                                <button onClick={() => updateSection(section.id, 'active', !section.active, true)}
+                                                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${section.active ? 'bg-[#E5654B]' : 'bg-gray-300'}`}>
+                                                    <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${section.active ? 'translate-x-5' : 'translate-x-0'}`} />
                                                 </button>
                                             </div>
                                         </div>
@@ -1085,30 +1155,31 @@ export default function BioLinkEditor({ settings, bioConfig }) {
             </div>
 
             {/* ── Modal/Popup Settings ──────────────────────────────────────── */}
-            {activeModalSection && (() => {
-                const section = getSections().find(s => s.id === activeModalSection);
-                if (!section) return null;
-                const def = SECTION_DEFS[section.type];
-                return (
-                    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
-                        <div className="bg-white rounded-3xl w-full max-w-xl max-h-[90vh] overflow-hidden shadow-2xl border border-[#f0ede8] flex flex-col scale-100 transition-all">
-                            {/* Modal Header */}
-                            <div className="flex items-center justify-between px-6 py-5 border-b border-[#f0ede8]">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-[#fef2f0] flex items-center justify-center">
-                                        <svg className="w-5 h-5 text-[#E5654B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d={def?.icon || ICONS.link} />
-                                        </svg>
+            {activeModalSection && typeof document !== 'undefined' && createPortal(
+                (() => {
+                    const section = getSections().find(s => s.id === activeModalSection);
+                    if (!section) return null;
+                    const def = SECTION_DEFS[section.type];
+                    return (
+                        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity animate-in fade-in duration-200">
+                            <div className="bg-white rounded-3xl w-full max-w-xl max-h-[90vh] overflow-hidden shadow-2xl border border-[#f0ede8] flex flex-col scale-100 transition-all animate-in zoom-in-95 duration-200">
+                                {/* Modal Header */}
+                                <div className="flex items-center justify-between px-6 py-5 border-b border-[#f0ede8]">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-[#fef2f0] flex items-center justify-center">
+                                            <svg className="w-5 h-5 text-[#E5654B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d={def?.icon || ICONS.link} />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-[#1a1a1a] text-base">Pengaturan {def?.name || section.type}</h3>
+                                            <p className="text-[10px] text-[#999] mt-0.5">Atur variasi tampilan dan konten untuk section ini</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-[#1a1a1a] text-base">Pengaturan {def?.name || section.type}</h3>
-                                        <p className="text-[10px] text-[#999] mt-0.5">Atur variasi tampilan dan konten untuk section ini</p>
-                                    </div>
+                                    <button onClick={closeModal} className="p-1.5 rounded-xl hover:bg-[#f5f3f0] text-[#888] hover:text-[#555] transition-colors">
+                                        <Icon d={ICONS.x} className="w-5 h-5" />
+                                    </button>
                                 </div>
-                                <button onClick={() => setActiveModalSection(null)} className="p-1.5 rounded-xl hover:bg-[#f5f3f0] text-[#888] hover:text-[#555] transition-colors">
-                                    <Icon d={ICONS.x} className="w-5 h-5" />
-                                </button>
-                            </div>
 
                             {/* Modal Body */}
                             <div className="p-6 space-y-6 overflow-y-auto flex-1">
@@ -1164,7 +1235,7 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                                             <input type="text" value={btn.label} onChange={e => updateButton(btn.id, 'label', e.target.value)}
                                                                 placeholder="Label tombol" maxLength={80}
                                                                 className="flex-1 border border-[#e0ddd8] bg-white rounded-lg px-2.5 py-1.5 text-xs text-[#1a1a1a] focus:outline-none" />
-                                                            <button onClick={() => updateButton(btn.id, 'active', !btn.active)}
+                                                            <button onClick={() => updateButton(btn.id, 'active', !btn.active, true)}
                                                                 className={`p-1.5 rounded-lg ${btn.active ? 'text-[#E5654B] bg-[#fef2f0]' : 'text-[#bbb]'}`}>
                                                                 <Icon d={btn.active ? ICONS.eye : ICONS.eyeOff} className="w-4 h-4" />
                                                             </button>
@@ -1188,7 +1259,7 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                                                                 if (val === 'custom') {
                                                                                     updateButton(btn.id, 'url', 'https://');
                                                                                 } else {
-                                                                                    updateButton(btn.id, 'url', val);
+                                                                                    updateButton(btn.id, 'url', val, true);
                                                                                 }
                                                                             }}
                                                                             className="w-full border border-[#e0ddd8] bg-white rounded-lg px-2 py-1 text-xs text-[#1a1a1a] focus:outline-none"
@@ -1215,7 +1286,7 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                                             <label className="block text-[9px] font-semibold text-[#888] mb-1">Ikon</label>
                                                             <IconPickerDropdown
                                                                 value={btn.icon || 'link'}
-                                                                onChange={ic => updateButton(btn.id, 'icon', ic)}
+                                                                onChange={ic => updateButton(btn.id, 'icon', ic, true)}
                                                             />
                                                         </div>
                                                     </div>
@@ -1301,17 +1372,19 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                 })()}
                             </div>
 
-                            {/* Modal Footer */}
-                            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#f0ede8] bg-[#fafaf9]">
-                                <button onClick={() => setActiveModalSection(null)}
-                                    className="px-5 py-2.5 rounded-xl bg-[#E5654B] text-white text-sm font-semibold hover:bg-[#d4573f] transition-colors shadow-sm">
-                                    Selesai
-                                </button>
+                                {/* Modal Footer */}
+                                <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#f0ede8] bg-[#fafaf9]">
+                                    <button onClick={closeModal}
+                                        className="px-5 py-2.5 rounded-xl bg-[#E5654B] text-white text-sm font-semibold hover:bg-[#d4573f] transition-colors shadow-sm">
+                                        Selesai
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                );
-            })()}
+                    );
+                })(),
+                document.body
+            )}
         </AdminLayout>
     );
 }
