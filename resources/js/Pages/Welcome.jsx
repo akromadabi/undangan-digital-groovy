@@ -610,7 +610,7 @@ function HeroSection({ mounted, resellerCount, invitationCount, themesCount, app
                     {/* CTAs */}
                     <div className="flex flex-col sm:flex-row gap-3.5 mt-8 w-full sm:w-auto reveal-on-scroll reveal-up" style={{ transitionDelay: '450ms' }}>
                         <Link href="/register/reseller" className="glow-button inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-[#E5654B] text-white rounded-2xl font-bold shadow-lg shadow-[#E5654B]/35 hover:bg-[#d4523a] transition-all hover:scale-[1.02] active:scale-[0.98] duration-300 w-full sm:w-auto text-sm sm:text-base">
-                            <span>Daftar Agensi Sekarang</span>
+                            <span>Daftar Partner</span>
                             <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                             </svg>
@@ -798,6 +798,30 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
     const [showFlash, setShowFlash] = useState(true);
     const [activeFaq, setActiveFaq] = useState(null);
     const [mounted, setMounted] = useState(false);
+
+    // Custom logo click states to unlock secret login page (hidden login)
+    const [logoClicks, setLogoClicks] = useState(0);
+
+    const handleLogoClick = (e) => {
+        e.preventDefault();
+        setLogoClicks((prev) => {
+            const next = prev + 1;
+            if (next >= 3) {
+                window.location.href = route('login');
+                return 0;
+            }
+            return next;
+        });
+    };
+
+    useEffect(() => {
+        if (logoClicks > 0) {
+            const timer = setTimeout(() => {
+                setLogoClicks(0);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [logoClicks]);
 
     // Theme slider states (responsive columns 1 row layout)
     const [themeActivePage, setThemeActivePage] = useState(0);
@@ -1186,7 +1210,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b bg-white/95 backdrop-blur-md ${scrolled ? 'shadow-md border-gray-150 py-3' : 'border-transparent py-4'}`}>
                 <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
+                    <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2.5 group flex-shrink-0">
                         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E5654B] to-[#f97316] flex items-center justify-center shadow-md shadow-[#E5654B]/30 group-hover:scale-105 transition-transform duration-300">
                             <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3" />
@@ -1214,13 +1238,9 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                             </Link>
                         ) : (
                             <>
-                                {canLogin && (
-                                    <Link href={route('login')} className="hidden sm:block px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#E5654B] transition-colors">
-                                        Masuk
-                                    </Link>
-                                )}
+                                {/* "Masuk" button hidden and replaced with 3 clicks on logo */}
                                 <Link href="/register/reseller" className="hidden sm:inline-block px-5 py-2.5 bg-[#E5654B] text-white rounded-full text-sm font-bold hover:bg-[#d4523a] shadow-md shadow-[#E5654B]/25 transition-all hover:scale-[1.03] duration-300 text-center">
-                                    Mulai Project Sekarang
+                                    Daftar Partner
                                 </Link>
                             </>
                         )}
@@ -1295,21 +1315,13 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                         </Link>
                     ) : (
                         <>
-                            {canLogin && (
-                                <Link 
-                                    href={route('login')} 
-                                    onClick={() => setMobileMenuOpen(false)} 
-                                    className="w-full py-3.5 text-center font-extrabold text-gray-700 hover:text-[#E5654B] border border-gray-200 rounded-full transition-colors bg-white text-sm"
-                                >
-                                    Masuk
-                                </Link>
-                            )}
+                            {/* "Masuk" button hidden and replaced with 3 clicks on logo */}
                             <Link 
                                 href="/register/reseller" 
                                 onClick={() => setMobileMenuOpen(false)} 
                                 className="w-full py-4 bg-[#E5654B] text-white rounded-full text-center font-extrabold hover:bg-[#d4523a] shadow-md shadow-[#E5654B]/25 transition-all text-sm"
                             >
-                                Mulai Project Sekarang
+                                Daftar Partner
                             </Link>
                         </>
                     )}

@@ -366,7 +366,7 @@ const PlatformHealth = () => {
             <div className="mt-auto relative z-10 border-t border-slate-100 pt-3">
                 <p className="text-[10px] font-semibold text-[#999] uppercase mb-1.5">Throughput Live Pulse (RPS)</p>
                 <div className="bg-slate-950 rounded-lg p-1.5 overflow-hidden border border-slate-800/80">
-                    <PulseWave />
+                    <canvas ref={canvasRef} className="w-full h-10 block" />
                 </div>
                 <div className="flex justify-between items-center text-[9px] text-[#999] mt-2 px-1">
                     <span className="flex items-center gap-1">
