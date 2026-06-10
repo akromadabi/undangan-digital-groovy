@@ -18,8 +18,8 @@ class CheckInvitationLock
     {
         $user = $request->user();
         
-        // Super Admins and Resellers (Admins) bypass the locking mechanism
-        if ($user && ($user->isSuperAdmin() || $user->isAdmin())) {
+        // Super Admins, Resellers (Admins), and Impersonators bypass the locking mechanism
+        if ($user && ($user->isSuperAdmin() || $user->isAdmin() || session()->has('impersonator_id'))) {
             return $next($request);
         }
 
