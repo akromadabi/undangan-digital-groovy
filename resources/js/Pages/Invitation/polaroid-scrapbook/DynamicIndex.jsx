@@ -165,6 +165,62 @@ function ScribbleUnderline({ className = '', style = {} }) {
     );
 }
 
+function ScribbleDoubleHeart({ className = '', style = {} }) {
+    return (
+        <svg viewBox="0 0 100 100" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '36px', height: '36px', ...style }}>
+            <path d="M45 45 C45 28, 70 28, 70 47 C70 63, 45 83, 45 83 C45 83, 20 63, 20 47 C20 28, 45 28, 45 45 Z" stroke="var(--ps-primary)" strokeWidth="2.5" fill="none" />
+            <path d="M68 33 C68 23, 83 23, 83 35 C83 45, 68 57, 68 57 C68 57, 53 45, 53 35 C53 23, 68 23, 68 33 Z" stroke="var(--ps-accent)" strokeWidth="2" fill="none" transform="rotate(15 68 33)" />
+        </svg>
+    );
+}
+
+function ScribbleFlower({ className = '', style = {} }) {
+    return (
+        <svg viewBox="0 0 100 100" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '32px', height: '32px', ...style }}>
+            <circle cx="50" cy="50" r="8" stroke="var(--ps-accent)" strokeWidth="2" fill="none" />
+            <path d="M50 42 C46 25, 54 25, 50 42
+                     M58 50 C75 46, 75 54, 58 50
+                     M50 58 C54 75, 46 75, 50 58
+                     M42 50 C25 54, 25 46, 42 50
+                     M44 44 C30 30, 38 22, 44 44
+                     M56 44 C70 30, 78 38, 56 44
+                     M56 56 C70 70, 62 78, 56 56
+                     M44 56 C30 70, 22 62, 44 56" stroke="var(--ps-accent)" strokeWidth="2" fill="none" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+function ScribbleCrown({ className = '', style = {} }) {
+    return (
+        <svg viewBox="0 0 100 100" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '30px', height: '30px', ...style }}>
+            <path d="M20 70 L15 35 L38 50 L50 25 L62 50 L85 35 L80 70 Z M20 70 Q50 75 80 70" stroke="var(--ps-accent)" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="15" cy="35" r="2.5" fill="var(--ps-accent)" />
+            <circle cx="50" cy="25" r="2.5" fill="var(--ps-accent)" />
+            <circle cx="85" cy="35" r="2.5" fill="var(--ps-accent)" />
+        </svg>
+    );
+}
+
+function ScribbleSpiralArrow({ className = '', style = {} }) {
+    return (
+        <svg viewBox="0 0 100 100" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '45px', height: '45px', ...style }}>
+            <path d="M20 20 C35 15, 60 25, 45 45 C35 60, 65 65, 80 50 M68 45 L80 50 L75 65" stroke="var(--ps-primary)" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
+function ScribbleSmiley({ className = '', style = {} }) {
+    return (
+        <svg viewBox="0 0 100 100" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '30px', height: '30px', ...style }}>
+            <path d="M50 15 C30 15, 15 30, 15 50 C15 70, 30 85, 50 85 C70 85, 85 70, 85 50 C85 30, 70 15, 50 15 Z" stroke="var(--ps-secondary)" strokeWidth="2" fill="none" />
+            <circle cx="38" cy="42" r="2.5" fill="var(--ps-secondary)" />
+            <circle cx="62" cy="42" r="2.5" fill="var(--ps-secondary)" />
+            <path d="M35 58 Q50 72 65 58" stroke="var(--ps-secondary)" strokeWidth="2" fill="none" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+
 function BinderRings() {
     const ringItems = Array.from({ length: 15 }, (_, i) => i);
     return (
@@ -269,6 +325,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverI
                 
                 {showPhotos && coverImages.length > 0 ? (
                     <div className="ps-polaroid ps-tilt-left relative" style={{ zIndex: 10 }}>
+                        <ScribbleCrown style={{ top: '-15px', right: '25px', transform: 'rotate(12deg)', width: '32px', height: '32px' }} />
                         <div className="ps-tape ps-tape-top ps-tape--teal" />
                         <div className="ps-polaroid-inner">
                             <img src={coverImages[0]} alt="cover main" className="ps-toned-photo" />
@@ -276,7 +333,8 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverI
                         <span className="ps-polaroid__caption">{coupleName}</span>
                     </div>
                 ) : (
-                    <div className="ps-polaroid ps-tilt-left" style={{ padding: '40px 20px', zIndex: 10 }}>
+                    <div className="ps-polaroid ps-tilt-left relative" style={{ padding: '40px 20px', zIndex: 10 }}>
+                        <ScribbleCrown style={{ top: '-15px', right: '25px', transform: 'rotate(12deg)', width: '32px', height: '32px' }} />
                         <div className="ps-tape ps-tape-top ps-tape--teal" />
                         <div style={{ fontFamily: 'var(--ps-font-script)', fontSize: '4.5rem', color: 'var(--ps-accent)', fontWeight: 'bold', lineHeight: 1 }}>
                             {(groom.nickname?.charAt(0) || 'G')}&{(bride.nickname?.charAt(0) || 'B')}
@@ -302,6 +360,10 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverI
             
             <ScribbledHeart style={{ top: '10%', left: '8%', transform: 'rotate(-15deg)' }} />
             <ScribbleStar style={{ bottom: '25%', right: '12%', transform: 'rotate(25deg)' }} />
+            <ScribbleSwirl style={{ top: '12%', right: '14%', transform: 'rotate(15deg)', width: '32px', height: '32px' }} />
+            <ScribbleSparkle style={{ bottom: '15%', left: '12%', transform: 'rotate(-10deg)' }} />
+            <ScribbleArrow style={{ bottom: '70px', left: '22%', transform: 'rotate(75deg)' }} />
+            <ScribbleSmiley style={{ bottom: '10%', right: '8%', transform: 'rotate(5deg)' }} />
         </div>
     );
 }
@@ -340,7 +402,11 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown, galler
     return (
         <section id="opening" className="ps-section">
             <Reveal>
-                <h2 className="ps-section-title">{invitation?.opening_title || 'Bismillahirrahmanirrahim'}</h2>
+                <h2 className="ps-section-title" style={{ position: 'relative' }}>
+                    <ScribbleSparkle style={{ top: '-10px', left: '-22px', width: '16px', height: '16px' }} />
+                    {invitation?.opening_title || 'Bismillahirrahmanirrahim'}
+                    <ScribbleStar style={{ top: '-6px', right: '-25px', width: '18px', height: '18px' }} />
+                </h2>
                 <ScribbleUnderline style={{ width: '80px' }} />
                 {showTheWeddingSubtitle && (
                     <p className="ps-section-subtitle" style={{ marginTop: '8px', marginBottom: '20px' }}>The Wedding of</p>
@@ -354,6 +420,8 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown, galler
                     <div className="ps-polaroid ps-tilt-right relative" style={{ marginBottom: '25px' }}>
                         <div className="ps-tape ps-tape-top-left ps-tape--red" />
                         <div className="ps-paperclip" />
+                        <ScribbleStar style={{ top: '-12px', right: '-12px', transform: 'rotate(15deg)', width: '24px', height: '24px' }} />
+                        <ScribbleSparkle style={{ bottom: '-10px', left: '-12px' }} />
                         <div className="ps-opening__slideshow-wrapper">
                             <PremiumSlideshow
                                 images={resolvedOpeningImages}
@@ -366,8 +434,9 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown, galler
                 )}
 
                 {showCountdown && (
-                    <div style={{ marginTop: '15px', marginBottom: '25px' }}>
+                    <div style={{ marginTop: '15px', marginBottom: '25px', position: 'relative' }}>
                         <CountdownBlock events={events} />
+                        <ScribbleSpiralArrow style={{ top: '10px', right: '-15px', transform: 'rotate(45deg) scaleX(-1)', width: '32px', height: '32px' }} />
                     </div>
                 )}
 
@@ -386,6 +455,7 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown, galler
                 <p className="ps-opening__text">
                     {invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami menyampaikan kabar bahagia mengenai hari pernikahan kami.'}
                 </p>
+                <ScribbleFlower style={{ bottom: '10px', left: '15px', transform: 'rotate(-15deg)', width: '28px', height: '28px' }} />
             </Reveal>
         </section>
     );
@@ -459,6 +529,9 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
             {/* Groom (Pria) */}
             <Reveal className="ps-mempelai-card" variant="left">
                 <div className="ps-polaroid ps-tilt-left-more relative">
+                    <ScribbledHeart style={{ bottom: '-15px', right: '15px', transform: 'rotate(15deg)', width: '28px', height: '28px' }} />
+                    <ScribbleStar style={{ top: '-10px', right: '10px', transform: 'rotate(25deg)' }} />
+                    <ScribbleCircle style={{ position: 'absolute', bottom: '-8px', left: '20px', width: '50px', height: '50px', opacity: 0.7 }} />
                     <div className="ps-tape ps-tape-top-left ps-tape--mustard" />
                     <div className="ps-polaroid-inner">
                         {showPhotos && groom.photo ? (
@@ -477,7 +550,10 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
                             </div>
                         )}
                     </div>
-                    <span className="ps-polaroid__caption">{groom.nickname || 'Groom'}</span>
+                    <span className="ps-polaroid__caption" style={{ position: 'relative' }}>
+                        <ScribbleCrown style={{ top: '-12px', left: '-5px', transform: 'rotate(-10deg)', width: '24px', height: '24px' }} />
+                        {groom.nickname || 'Groom'}
+                    </span>
                 </div>
                 
                 <div className="ps-mempelai-details">
@@ -504,13 +580,18 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
             </Reveal>
 
             {/* Ampersand separator */}
-            <Reveal className="ps-and-divider" variant="zoom">
+            <Reveal className="ps-and-divider relative" variant="zoom" style={{ margin: '15px 0' }}>
+                <ScribbleSwirl style={{ top: '-10px', left: '12%', transform: 'rotate(-30deg)', width: '28px', height: '28px' }} />
+                <ScribbleSparkle style={{ bottom: '-5px', right: '18%', width: '16px', height: '16px' }} />
                 <span className="ps-and-divider-text">and</span>
             </Reveal>
 
             {/* Bride (Wanita) */}
             <Reveal className="ps-mempelai-card" variant="right">
                 <div className="ps-polaroid ps-tilt-right-more relative">
+                    <ScribbleFlower style={{ top: '-15px', left: '-5px', transform: 'rotate(-20deg)', width: '28px', height: '28px' }} />
+                    <ScribbleDoubleHeart style={{ bottom: '-18px', left: '15px', transform: 'rotate(-15deg)', width: '35px', height: '35px' }} />
+                    <ScribbleStar style={{ bottom: '20px', right: '-12px', transform: 'rotate(10deg)', width: '18px', height: '18px' }} />
                     <div className="ps-tape ps-tape-top-right ps-tape--teal" />
                     <div className="ps-polaroid-inner">
                         {showPhotos && bride.photo ? (
@@ -668,6 +749,17 @@ function EventSection({ events, showCountdown, invitation }) {
                     const isAkad = evt.event_name?.toLowerCase().includes('akad');
                     return (
                         <Reveal key={evt.id || idx} className="ps-card ps-event-card" variant={idx % 2 === 0 ? 'left' : 'right'}>
+                            {isAkad ? (
+                                <>
+                                    <ScribbleCrown style={{ top: '-12px', right: '55px', transform: 'rotate(5deg)', width: '24px', height: '24px' }} />
+                                    <ScribbleStar style={{ bottom: '-8px', left: '20px', transform: 'rotate(10deg)', width: '20px', height: '20px' }} />
+                                </>
+                            ) : (
+                                <>
+                                    <ScribbleDoubleHeart style={{ top: '-12px', left: '55px', transform: 'rotate(-5deg)', width: '32px', height: '32px' }} />
+                                    <ScribbleSwirl style={{ bottom: '-12px', right: '25px', transform: 'rotate(15deg)', width: '28px', height: '28px' }} />
+                                </>
+                            )}
                             <span className="ps-event-card__badge">{isAkad ? 'Akad' : 'Resepsi'}</span>
                             <h3 className="ps-event-card__name">{evt.event_name || (isAkad ? 'Akad Nikah' : 'Resepsi')}</h3>
                             
@@ -709,7 +801,8 @@ function EventSection({ events, showCountdown, invitation }) {
 
             {/* Compact standalone Dress Code box below event list */}
             {list?.filter(p => p.show_dress_code || p.dresscode_colors).map((p, idx) => (
-                <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2">
+                <div key={`dc-${idx}`} className="w-full max-w-md mx-auto mt-4 px-4 pb-2 relative">
+                    <ScribbleFlower style={{ top: '-10px', right: '15px', transform: 'rotate(10deg)', width: '28px', height: '28px' }} />
                     <DressCodeBlock event={p} />
                 </div>
             ))}
@@ -739,7 +832,18 @@ function LoveStorySection({ loveStories }) {
                     const isEven = idx % 2 === 0;
                     return (
                         <div key={story.id || idx} className="ps-story__node">
-                            <Reveal className="ps-story__card" variant={isEven ? 'left' : 'right'}>
+                            <Reveal className="ps-story__card relative" variant={isEven ? 'left' : 'right'}>
+                                {isEven ? (
+                                    <>
+                                        <ScribbleStar style={{ top: '-8px', right: '15px', transform: 'rotate(15deg)', width: '18px', height: '18px' }} />
+                                        <ScribbleArrow style={{ bottom: '-12px', left: '20px', transform: 'rotate(-45deg)', width: '28px', height: '28px' }} />
+                                    </>
+                                ) : (
+                                    <>
+                                        <ScribbleDoubleHeart style={{ top: '-10px', right: '20px', transform: 'rotate(-10deg)', width: '28px', height: '28px' }} />
+                                        <ScribbleSparkle style={{ bottom: '-6px', left: '25px', transform: 'rotate(10deg)', width: '16px', height: '16px' }} />
+                                    </>
+                                )}
                                 {story.story_date && (
                                     <span className="ps-story__date">
                                         {new Date(String(story.story_date).substring(0, 10) + 'T12:00:00').getFullYear() || story.story_date}
@@ -890,7 +994,12 @@ function GallerySection({ galleries }) {
 
             <Reveal className="ps-gallery-grid" variant="zoom">
                 {list.map((item, idx) => (
-                    <div key={item.id || idx} className={`ps-gallery-item ${idx % 2 === 0 ? 'ps-tilt-left' : 'ps-tilt-right'}`}>
+                    <div key={item.id || idx} className={`ps-gallery-item ${idx % 2 === 0 ? 'ps-tilt-left' : 'ps-tilt-right'} relative`}>
+                        {idx % 2 === 0 ? (
+                            <ScribbleStar style={{ top: '-10px', left: '-5px', transform: 'rotate(-10deg)', width: '20px', height: '20px' }} />
+                        ) : (
+                            <ScribbledHeart style={{ bottom: '-10px', right: '-8px', transform: 'rotate(15deg)', width: '22px', height: '22px' }} />
+                        )}
                         <div className="ps-polaroid-inner">
                             <img src={getStorageUrl(item.image_path || item.image_url)} alt={`Gallery ${idx + 1}`} className="ps-toned-photo" />
                         </div>
@@ -949,8 +1058,21 @@ function BankSection({ bankAccounts, invitation }) {
                     const isDana = String(acc.bank_name).toLowerCase().includes('dana');
                     const isMandiri = String(acc.bank_name).toLowerCase().includes('mandiri');
 
+                    const isEven = idx % 2 === 0;
+
                     return (
-                        <div key={acc.id || idx} className={`ps-bank-card ${idx % 2 === 0 ? 'ps-tilt-left' : 'ps-tilt-right'}`}>
+                        <div key={acc.id || idx} className={`ps-bank-card ${isEven ? 'ps-tilt-left' : 'ps-tilt-right'} relative`}>
+                            {isEven ? (
+                                <>
+                                    <ScribbleStar style={{ top: '-10px', right: '15px', transform: 'rotate(20deg)', width: '22px', height: '22px' }} />
+                                    <ScribbledHeart style={{ bottom: '-10px', left: '20px', transform: 'rotate(-15deg)', width: '28px', height: '28px' }} />
+                                </>
+                            ) : (
+                                <>
+                                    <ScribbleDoubleHeart style={{ top: '-12px', left: '30px', transform: 'rotate(-10deg)', width: '32px', height: '32px' }} />
+                                    <ScribbleSparkle style={{ bottom: '-8px', right: '15px', transform: 'rotate(25deg)', width: '18px', height: '18px' }} />
+                                </>
+                            )}
                             <div className="ps-bank-logo-wrap">
                                 {isBca && <img src={logoBca} alt="BCA" className="ps-bank-logo" />}
                                 {isDana && <img src={logoDana} alt="DANA" className="ps-bank-logo" />}
@@ -1041,7 +1163,9 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                 </p>
             </Reveal>
 
-            <Reveal className="ps-card" variant="zoom">
+            <Reveal className="ps-card relative" variant="zoom">
+                <ScribbledHeart style={{ top: '-10px', left: '15px', transform: 'rotate(-10deg)', width: '24px', height: '24px' }} />
+                <ScribbleStar style={{ top: '8px', right: '12px', transform: 'rotate(20deg)', width: '20px', height: '20px' }} />
                 <form onSubmit={handleSubmit} style={{ margin: 0 }}>
                     <div className="ps-form-group">
                         <label className="ps-form-label">{isEn ? 'Your Name' : 'Nama Lengkap'}</label>
@@ -1102,15 +1226,19 @@ function UnifiedRsvpWishes({ invitation, wishes, guest, enableRsvp, enableWishes
                         </div>
                     )}
 
-                    <button type="submit" disabled={processing} className="ps-btn-submit">
-                        {processing ? (isEn ? 'Sending...' : 'Mengirim...') : (isEn ? 'Submit' : 'Kirim Konfirmasi')}
-                    </button>
+                    <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
+                        <button type="submit" disabled={processing} className="ps-btn-submit">
+                            {processing ? (isEn ? 'Sending...' : 'Mengirim...') : (isEn ? 'Submit' : 'Kirim Konfirmasi')}
+                        </button>
+                        <ScribbleSpiralArrow style={{ bottom: '-15px', right: '15px', transform: 'rotate(110deg)', width: '36px', height: '36px' }} />
+                    </div>
                 </form>
 
                 {enableWishes && wishesList.length > 0 && (
-                    <div className="ps-wishes-list">
+                    <div className="ps-wishes-list" style={{ marginTop: '25px' }}>
                         {wishesList.slice(0, 5).map((w, idx) => (
-                            <div key={w.id || idx} className="ps-wish-item">
+                            <div key={w.id || idx} className="ps-wish-item" style={{ position: 'relative' }}>
+                                <ScribbleSparkle style={{ top: '6px', right: '6px', width: '12px', height: '12px', opacity: 0.6 }} />
                                 <p className="ps-wish-sender">{w.sender_name}</p>
                                 <p className="ps-wish-message">{w.message}</p>
                             </div>
@@ -1145,13 +1273,18 @@ function ClosingSection({ invitation, brideGrooms }) {
     return (
         <section id="closing" className="ps-section" style={{ paddingBottom: '90px' }}>
             <Reveal>
-                <div className="ps-footer-monogram">{initials}</div>
+                <div className="ps-footer-monogram" style={{ position: 'relative', display: 'inline-block' }}>
+                    <ScribbleCrown style={{ top: '-18px', left: '50%', transform: 'translateX(-50%) rotate(-5deg)', width: '28px', height: '28px' }} />
+                    {initials}
+                </div>
                 <h2 className="ps-section-title" style={{ fontSize: '1.4rem', color: 'var(--ps-text)', marginBottom: '15px' }}>
                     {invitation?.closing_title || 'THANK YOU'}
                 </h2>
                 
-                <p style={{ fontFamily: 'var(--ps-font-script)', fontSize: '1.4rem', lineHeight: 1.3, marginBottom: '24px' }}>
+                <p style={{ fontFamily: 'var(--ps-font-script)', fontSize: '1.4rem', lineHeight: 1.3, marginBottom: '24px', position: 'relative' }}>
+                    <ScribbleDoubleHeart style={{ top: '-15px', left: '-15px', transform: 'rotate(-15deg)', width: '28px', height: '28px' }} />
                     {invitation?.closing_text || 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu.'}
+                    <ScribbleFlower style={{ bottom: '-15px', right: '-10px', transform: 'rotate(10deg)', width: '24px', height: '24px' }} />
                 </p>
 
                 <div className="ps-footer-parents">
