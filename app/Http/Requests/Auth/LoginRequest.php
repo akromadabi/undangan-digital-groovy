@@ -54,7 +54,7 @@ class LoginRequest extends FormRequest
         });
 
         if ($resellerSetting) {
-            // Either a user client under this reseller, the reseller admin account itself, or a global super_admin/editor
+            // Either a user client under this reseller, or the reseller admin account itself
             $query->where(function ($q) use ($resellerSetting) {
                 $q->where(function ($sub) use ($resellerSetting) {
                     $sub->where('reseller_id', $resellerSetting->user_id)
@@ -62,11 +62,7 @@ class LoginRequest extends FormRequest
                 })->orWhere(function ($sub) use ($resellerSetting) {
                     $sub->where('id', $resellerSetting->user_id)
                         ->where('role', 'admin');
-                })->orWhere('role', 'super_admin')
-                  ->orWhere(function ($sub) {
-                      $sub->whereNull('reseller_id')
-                          ->where('role', 'editor');
-                  });
+                });
             });
         } else {
             // Central login: Super Admin, or central client (reseller role 'admin' must log in via their own subdomain)

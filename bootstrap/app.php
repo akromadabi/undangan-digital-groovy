@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
             'onboarding' => \App\Http\Middleware\CheckOnboarding::class,
             'invitation.lock' => \App\Http\Middleware\CheckInvitationLock::class,
+            'invitation.reseller' => \App\Http\Middleware\ValidateInvitationReseller::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

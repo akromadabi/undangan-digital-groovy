@@ -152,12 +152,14 @@ Route::post('/greeting-card-template/{greetingCardTemplate}/like', [\App\Http\Co
 // ═══════════════════════════════════════
 // Public Invitation (no auth needed)
 // ═══════════════════════════════════════
-Route::get('/u/{slug}', [InvitationController::class, 'show'])->name('invitation.show');
-Route::get('/u/{slug}/ar', [InvitationController::class, 'showAr'])->name('invitation.ar');
-Route::post('/u/{slug}/rsvp', [InvitationController::class, 'submitRsvp'])->name('invitation.rsvp');
-Route::post('/u/{slug}/wish', [InvitationController::class, 'submitWish'])->name('invitation.wish');
-Route::post('/u/{slug}/opened', [InvitationController::class, 'markOpened'])->name('invitation.opened');
-Route::get('/u/{slug}/checkin', [InvitationController::class, 'checkin'])->name('invitation.checkin');
+Route::middleware(['invitation.reseller'])->group(function () {
+    Route::get('/u/{slug}', [InvitationController::class, 'show'])->name('invitation.show');
+    Route::get('/u/{slug}/ar', [InvitationController::class, 'showAr'])->name('invitation.ar');
+    Route::post('/u/{slug}/rsvp', [InvitationController::class, 'submitRsvp'])->name('invitation.rsvp');
+    Route::post('/u/{slug}/wish', [InvitationController::class, 'submitWish'])->name('invitation.wish');
+    Route::post('/u/{slug}/opened', [InvitationController::class, 'markOpened'])->name('invitation.opened');
+    Route::get('/u/{slug}/checkin', [InvitationController::class, 'checkin'])->name('invitation.checkin');
+});
 Route::get('/demo/{slug}', [InvitationController::class, 'demo'])->name('demo.theme');
 
 // Public Greeting Card Preview (no auth)
@@ -184,8 +186,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Public Live Tamu fullscreen (no auth)
-Route::get('/live/{slug}', [LiveTamuController::class, 'fullscreen'])->name('live.fullscreen');
-Route::get('/live/{slug}/data', [LiveTamuController::class, 'publicData'])->name('live.data');
+Route::middleware(['invitation.reseller'])->group(function () {
+    Route::get('/live/{slug}', [LiveTamuController::class, 'fullscreen'])->name('live.fullscreen');
+    Route::get('/live/{slug}/data', [LiveTamuController::class, 'publicData'])->name('live.data');
+});
 
 // ═══════════════════════════════════════
 // OTP Verification

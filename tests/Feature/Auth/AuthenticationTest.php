@@ -52,7 +52,7 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect('/');
     }
 
-    public function test_super_admin_can_authenticate_under_reseller_domain(): void
+    public function test_super_admin_cannot_authenticate_under_reseller_domain(): void
     {
         $superAdmin = User::factory()->create([
             'role' => 'super_admin',
@@ -73,12 +73,13 @@ class AuthenticationTest extends TestCase
         ]);
 
         // Access via reseller custom domain
-        $response = $this->withHeaders(['Host' => 'reseller.test'])->post('/login', [
+        $response = $this->post('http://reseller.test/login', [
             'email' => $superAdmin->email,
             'password' => 'password',
         ]);
 
-        $this->assertAuthenticatedAs($superAdmin);
+        $this->assertGuest();
+        $response->assertSessionHasErrors('email');
     }
 
     public function test_super_admin_can_access_super_admin_routes_under_reseller_domain(): void
@@ -103,8 +104,7 @@ class AuthenticationTest extends TestCase
 
         // Attempt to access super-admin dashboard with Host reseller.test
         $response = $this->actingAs($superAdmin)
-            ->withHeaders(['Host' => 'reseller.test'])
-            ->get('/super-admin');
+            ->get('http://reseller.test/super-admin');
 
         $response->assertStatus(200);
     }

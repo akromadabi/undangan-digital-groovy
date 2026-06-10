@@ -37,11 +37,13 @@ class InvitationLockTest extends TestCase
     public function test_invitation_is_locked_after_event_date_plus_three_days(): void
     {
         $user = User::factory()->create(['role' => 'user']);
-        $invitation = Invitation::create([
+        $invitation = new Invitation([
             'user_id' => $user->id,
             'slug' => 'test-wedding-slug',
             'opening_title' => 'The Wedding Of',
         ]);
+        $invitation->created_at = now()->subDays(5);
+        $invitation->save();
 
         Event::create([
             'invitation_id' => $invitation->id,
@@ -54,5 +56,45 @@ class InvitationLockTest extends TestCase
         ]);
 
         $this->assertTrue($invitation->fresh()->isLocked());
+    }
+
+    public function test_invitation_cannot_be_accessed_on_another_reseller_domain(): void
+    {
+        $resellerA = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $resellerB = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+
+        $resellerSettingA = \App\Models\ResellerSetting::create([
+            'user_id' => $resellerA->id,
+            'brand_name' => 'Reseller A',
+            'subdomain' => 'reseller-a',
+            'is_active' => true,
+        ]);
+
+        $resellerSettingB = \App\Models\ResellerSetting::create([
+            'user_id' => $resellerB->id,
+            'brand_name' => 'Reseller B',
+            'subdomain' => 'reseller-b',
+            'is_active' => true,
+        ]);
+
+        $clientUser = User::factory()->create([
+            'role' => 'user',
+            'reseller_id' => $resellerA->id,
+        ]);
+
+        $invitation = Invitation::create([
+            'user_id' => $clientUser->id,
+            'slug' => 'test-invitation-slug',
+            'title' => 'Test Invitation',
+            'is_active' => true,
+        ]);
+
+        // Access via correct reseller (Reseller A) - should be 200 OK
+        $response = $this->get('http://reseller-a.undangan-digital.test/u/test-invitation-slug');
+        $response->assertStatus(200);
+
+        // Access via wrong reseller (Reseller B) - should be 404 Not Found
+        $response = $this->get('http://reseller-b.undangan-digital.test/u/test-invitation-slug');
+        $response->assertStatus(404);
     }
 }
