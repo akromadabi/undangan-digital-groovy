@@ -353,7 +353,7 @@ function formatTime(t) {
 function parseEventDate(dateString, locale = 'id') {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
     // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
-    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
+    const d = parseSafeDate(dateString);
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
     const loc = locale === 'en' ? 'en-US' : 'id-ID';
     const dayNum = String(d.getDate()).padStart(2, '0');
@@ -1010,6 +1010,43 @@ const BubbleWrapper = ChatBubble;
 /* ═══════════════════════════════════════
    SAVE THE DATE & COUNTDOWN (ViteGPT Python Code Execution block)
    ═══════════════════════════════════════ */
+
+// Safe date parsing helper for cross-browser local time countdowns
+function parseSafeDate(dateStr, timeStr = '') {
+    if (!dateStr) return null;
+    let datePart = String(dateStr).substring(0, 10);
+    let timePart = '08:00:00';
+    
+    if (timeStr) {
+        timePart = String(timeStr).substring(0, 5) + ':00';
+    } else if (String(dateStr).length > 10) {
+        let parts = String(dateStr).trim().split(/\s+/);
+        if (parts[1]) {
+            timePart = parts[1].substring(0, 5);
+            if (timePart.length === 5) {
+                timePart += ':00';
+            }
+        }
+    }
+    
+    let isoStr = `${datePart}T${timePart}`;
+    let d = new Date(isoStr);
+    if (!isNaN(d.getTime())) {
+        return d;
+    }
+    
+    const dateParts = datePart.split('-');
+    const timeParts = timePart.split(':');
+    return new Date(
+        parseInt(dateParts[0], 10),
+        parseInt(dateParts[1], 10) - 1,
+        parseInt(dateParts[2], 10),
+        parseInt(timeParts[0], 10) || 0,
+        parseInt(timeParts[1], 10) || 0,
+        parseInt(timeParts[2], 10) || 0
+    );
+}
+
 function CountdownSection({ invitation, events, language, guest, isTyping, themeConfig }) {
     const isEn = language === 'en';
     const guestName = guest?.name || 'Tamu Undangan';
@@ -1022,7 +1059,7 @@ function CountdownSection({ invitation, events, language, guest, isTyping, theme
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
         const timeStr = primaryEvent?.start_time ? String(primaryEvent.start_time).substring(0, 5) : '08:00';
-        const target = new Date(`${ds}T${timeStr}:00`);
+        const target = parseSafeDate(targetDate, primaryEvent?.start_time);
         if (isNaN(target.getTime())) return;
 
         const tick = () => {

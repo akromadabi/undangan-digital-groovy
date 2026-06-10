@@ -507,7 +507,7 @@ function CountdownBlock({ events }) {
         if (!targetDate) return;
         const dateStr = String(targetDate).substring(0, 10);
         const timeStr = String(targetTime).substring(0, 5);
-        const target = new Date(`${dateStr}T${timeStr}:00`);
+        const target = parseSafeDate(targetDate, targetTime);
 
         if (isNaN(target.getTime())) return;
 

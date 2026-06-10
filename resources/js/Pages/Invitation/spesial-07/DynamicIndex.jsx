@@ -28,7 +28,7 @@ function formatTime(t) {
 
 function parseEventDate(dateString, locale) {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
+    const d = parseSafeDate(dateString);
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
     
     const dayNum = String(d.getDate()).padStart(2, '0');
@@ -73,7 +73,7 @@ const fallbackCopy = (text) => {
 
 function formatDate(dateString, locale) {
     if (!dateString) return '';
-    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
+    const d = parseSafeDate(dateString);
     if (isNaN(d.getTime())) return dateString;
     return d.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', {
         weekday: 'long',
@@ -83,13 +83,52 @@ function formatDate(dateString, locale) {
     });
 }
 
-function useCountdown(targetDate) {
+
+// Safe date parsing helper for cross-browser local time countdowns
+function parseSafeDate(dateStr, timeStr = '') {
+    if (!dateStr) return null;
+    let datePart = String(dateStr).substring(0, 10);
+    let timePart = '08:00:00';
+    
+    if (timeStr) {
+        timePart = String(timeStr).substring(0, 5) + ':00';
+    } else if (String(dateStr).length > 10) {
+        let parts = String(dateStr).trim().split(/\s+/);
+        if (parts[1]) {
+            timePart = parts[1].substring(0, 5);
+            if (timePart.length === 5) {
+                timePart += ':00';
+            }
+        }
+    }
+    
+    let isoStr = `${datePart}T${timePart}`;
+    let d = new Date(isoStr);
+    if (!isNaN(d.getTime())) {
+        return d;
+    }
+    
+    const dateParts = datePart.split('-');
+    const timeParts = timePart.split(':');
+    return new Date(
+        parseInt(dateParts[0], 10),
+        parseInt(dateParts[1], 10) - 1,
+        parseInt(dateParts[2], 10),
+        parseInt(timeParts[0], 10) || 0,
+        parseInt(timeParts[1], 10) || 0,
+        parseInt(timeParts[2], 10) || 0
+    );
+}
+
+function useCountdown(targetDate, targetTime = '') {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     useEffect(() => {
         if (!targetDate) return;
         const calculate = () => {
-            const difference = +new Date(String(targetDate).substring(0, 10) + 'T12:00:00') - +new Date();
+            const target = parseSafeDate(targetDate, targetTime);
+            if (!target) return;
+            const difference = target.getTime() - Date.now();
             let left = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
             if (difference > 0) {
@@ -105,14 +144,14 @@ function useCountdown(targetDate) {
         calculate();
         const interval = setInterval(calculate, 1000);
         return () => clearInterval(interval);
-    }, [targetDate]);
+    }, [targetDate, targetTime]);
 
     return timeLeft;
 }
 
-function CountdownTimer({ targetDate }) {
+function CountdownTimer({ targetDate, targetTime = '' }) {
     const { t } = useTranslation();
-    const timeLeft = useCountdown(targetDate);
+    const timeLeft = useCountdown(targetDate, targetTime);
     
     return (
         <div className="sp07-countdown-wrapper select-none">
@@ -354,7 +393,7 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, events, locale })
                     </p>
 
                     {targetDate && (
-                        <CountdownTimer targetDate={targetDate} />
+                        <CountdownTimer targetDate={targetDate} targetTime={primaryEvent?.start_time || ''} />
                     )}
 
                     <button 

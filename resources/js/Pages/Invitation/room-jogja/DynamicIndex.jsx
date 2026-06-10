@@ -27,14 +27,14 @@ function getStorageUrl(url) {
 function fmtDate(d) {
     if (!d) return '';
     try {
-        const obj = new Date(String(d).substring(0, 10) + 'T12:00:00');
+        const obj = parseSafeDate(d);
         return isNaN(obj.getTime()) ? d : obj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     } catch { return d; }
 }
 function fmtTime(t) { return !t || t === 'Selesai' ? (t || '') : String(t).substring(0, 5); }
 function fmtStoryDate(d) {
     if (!d) return '';
-    try { const o = new Date(String(d).substring(0, 10) + 'T12:00:00'); return isNaN(o.getTime()) ? d : o.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return d; }
+    try { const o = parseSafeDate(d); return isNaN(o.getTime()) ? d : o.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return d; }
 }
 function translateChildOrder(childOrder, gender) {
     if (!childOrder) return '';
@@ -51,11 +51,48 @@ function translateChildOrder(childOrder, gender) {
 }
 
 /* ─── Countdown ─── */
+
+// Safe date parsing helper for cross-browser local time countdowns
+function parseSafeDate(dateStr, timeStr = '') {
+    if (!dateStr) return null;
+    let datePart = String(dateStr).substring(0, 10);
+    let timePart = '08:00:00';
+    
+    if (timeStr) {
+        timePart = String(timeStr).substring(0, 5) + ':00';
+    } else if (String(dateStr).length > 10) {
+        let parts = String(dateStr).trim().split(/\s+/);
+        if (parts[1]) {
+            timePart = parts[1].substring(0, 5);
+            if (timePart.length === 5) {
+                timePart += ':00';
+            }
+        }
+    }
+    
+    let isoStr = `${datePart}T${timePart}`;
+    let d = new Date(isoStr);
+    if (!isNaN(d.getTime())) {
+        return d;
+    }
+    
+    const dateParts = datePart.split('-');
+    const timeParts = timePart.split(':');
+    return new Date(
+        parseInt(dateParts[0], 10),
+        parseInt(dateParts[1], 10) - 1,
+        parseInt(dateParts[2], 10),
+        parseInt(timeParts[0], 10) || 0,
+        parseInt(timeParts[1], 10) || 0,
+        parseInt(timeParts[2], 10) || 0
+    );
+}
+
 function useCountdown(targetDate, startTime) {
     const [cd, setCd] = useState({ d: 0, h: 0, m: 0, s: 0 });
     useEffect(() => {
         if (!targetDate) return;
-        const target = new Date(`${String(targetDate).substring(0, 10)}T${startTime ? String(startTime).substring(0, 5) : '08:00'}:00`);
+        const target = parseSafeDate(targetDate, startTime);
         if (isNaN(target.getTime())) return;
         const tick = () => {
             const diff = target - new Date();

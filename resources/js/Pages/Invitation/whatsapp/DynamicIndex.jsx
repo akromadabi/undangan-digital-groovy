@@ -76,7 +76,7 @@ const fallbackCopy = (text) => {
 
 function formatDate(dateString, locale) {
     if (!dateString) return '';
-    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
+    const d = parseSafeDate(dateString);
     if (isNaN(d.getTime())) return dateString;
     return d.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', {
         weekday: 'long',
@@ -86,13 +86,52 @@ function formatDate(dateString, locale) {
     });
 }
 
-function useCountdown(targetDate) {
+
+// Safe date parsing helper for cross-browser local time countdowns
+function parseSafeDate(dateStr, timeStr = '') {
+    if (!dateStr) return null;
+    let datePart = String(dateStr).substring(0, 10);
+    let timePart = '08:00:00';
+    
+    if (timeStr) {
+        timePart = String(timeStr).substring(0, 5) + ':00';
+    } else if (String(dateStr).length > 10) {
+        let parts = String(dateStr).trim().split(/\s+/);
+        if (parts[1]) {
+            timePart = parts[1].substring(0, 5);
+            if (timePart.length === 5) {
+                timePart += ':00';
+            }
+        }
+    }
+    
+    let isoStr = `${datePart}T${timePart}`;
+    let d = new Date(isoStr);
+    if (!isNaN(d.getTime())) {
+        return d;
+    }
+    
+    const dateParts = datePart.split('-');
+    const timeParts = timePart.split(':');
+    return new Date(
+        parseInt(dateParts[0], 10),
+        parseInt(dateParts[1], 10) - 1,
+        parseInt(dateParts[2], 10),
+        parseInt(timeParts[0], 10) || 0,
+        parseInt(timeParts[1], 10) || 0,
+        parseInt(timeParts[2], 10) || 0
+    );
+}
+
+function useCountdown(targetDate, targetTime = '') {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     useEffect(() => {
         if (!targetDate) return;
         const calculate = () => {
-            const difference = +new Date(String(targetDate).substring(0, 10) + 'T12:00:00') - +new Date();
+            const target = parseSafeDate(targetDate, targetTime);
+            if (!target) return;
+            const difference = target.getTime() - Date.now();
             let left = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
             if (difference > 0) {
@@ -108,7 +147,7 @@ function useCountdown(targetDate) {
         calculate();
         const interval = setInterval(calculate, 1000);
         return () => clearInterval(interval);
-    }, [targetDate]);
+    }, [targetDate, targetTime]);
 
     return timeLeft;
 }
@@ -850,7 +889,7 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
     }, [sections]);
 
     const showCountdownInEvent = showCountdown && countdownTarget && countdownAllowed;
-    const timeLeft = useCountdown(countdownTarget);
+    const timeLeft = useCountdown(countdownTarget, primaryEvent?.start_time || '');
 
     // Live Streaming platforms
     const streamsList = useMemo(() => {

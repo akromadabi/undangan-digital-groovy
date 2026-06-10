@@ -41,6 +41,43 @@ const AnimateIn = ({ children, type = 'fadeUp', delay = 0, className = '', durat
     );
 };
 
+
+// Safe date parsing helper for cross-browser local time countdowns
+function parseSafeDate(dateStr, timeStr = '') {
+    if (!dateStr) return null;
+    let datePart = String(dateStr).substring(0, 10);
+    let timePart = '08:00:00';
+    
+    if (timeStr) {
+        timePart = String(timeStr).substring(0, 5) + ':00';
+    } else if (String(dateStr).length > 10) {
+        let parts = String(dateStr).trim().split(/\s+/);
+        if (parts[1]) {
+            timePart = parts[1].substring(0, 5);
+            if (timePart.length === 5) {
+                timePart += ':00';
+            }
+        }
+    }
+    
+    let isoStr = `${datePart}T${timePart}`;
+    let d = new Date(isoStr);
+    if (!isNaN(d.getTime())) {
+        return d;
+    }
+    
+    const dateParts = datePart.split('-');
+    const timeParts = timePart.split(':');
+    return new Date(
+        parseInt(dateParts[0], 10),
+        parseInt(dateParts[1], 10) - 1,
+        parseInt(dateParts[2], 10),
+        parseInt(timeParts[0], 10) || 0,
+        parseInt(timeParts[1], 10) || 0,
+        parseInt(timeParts[2], 10) || 0
+    );
+}
+
 export default function Show({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
     const wishesInputRef = React.useRef(null);
     const { t, locale } = useTranslation(invitation?.language || 'id');
@@ -297,7 +334,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
         if (!firstEvent?.event_date) return;
         const dateStr = String(firstEvent.event_date).substring(0, 10);
         const timeStr = firstEvent.start_time ? firstEvent.start_time.substring(0, 5) : '08:00';
-        const target = new Date(`${dateStr}T${timeStr}:00`);
+        const target = parseSafeDate(firstEvent.event_date, firstEvent.start_time);
         if (isNaN(target.getTime())) return;
         const tick = () => {
             const diff = target - new Date();

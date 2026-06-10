@@ -306,19 +306,20 @@
   width: 130px !important;
   height: 165px !important;
   padding: 8px 8px 22px 8px !important;
-  transform: rotate(-1.5deg) translateY(4px) !important;
+  transform: rotate(-1.5deg) translateY(4px);
   box-shadow: 3px 6px 16px rgba(61, 55, 48, 0.18) !important;
   margin: 0 auto;
   transform-origin: top center !important;
-  animation: hwPolaroidSway 4s ease-in-out infinite alternate !important;
+  will-change: transform;
+  animation: hwPolaroidSway 3s ease-in-out infinite alternate !important;
 }
 
 @keyframes hwPolaroidSway {
   0% {
-    transform: rotate(-4.5deg) translateY(4px);
+    transform: rotate(-5deg) translateY(4px);
   }
   100% {
-    transform: rotate(2deg) translateY(4px);
+    transform: rotate(5deg) translateY(4px);
   }
 }
 

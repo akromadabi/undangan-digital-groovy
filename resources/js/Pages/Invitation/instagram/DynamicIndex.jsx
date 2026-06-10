@@ -39,7 +39,7 @@ function formatTime(t) {
 function parseEventDate(dateString, locale = 'id') {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
     // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
-    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
+    const d = parseSafeDate(dateString);
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
     const loc = locale === 'en' ? 'en-US' : 'id-ID';
     const dayNum = String(d.getDate()).padStart(2, '0');
@@ -1027,7 +1027,7 @@ function CountdownTimer({ targetDate, startTime, language }) {
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
         const timeStr = startTime ? String(startTime).substring(0, 5) : '08:00';
-        const target = new Date(`${ds}T${timeStr}:00`);
+        const target = parseSafeDate(targetDate, primaryEvent?.start_time);
         if (isNaN(target.getTime())) return;
 
         const tick = () => {
