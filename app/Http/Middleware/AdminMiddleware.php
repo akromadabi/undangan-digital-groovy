@@ -14,7 +14,7 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (!$request->user() || !$request->user()->isAdmin()) {
-            if ($request->wantsJson()) {
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
             return redirect()->route('dashboard');

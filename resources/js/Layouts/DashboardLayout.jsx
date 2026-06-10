@@ -502,6 +502,21 @@ export default function DashboardLayout({ children, title }) {
 
                 {/* Page Content — bottom padding for mobile nav */}
                 <main className="flex-1 p-4 lg:p-8 pb-20 lg:pb-8 overflow-x-clip page-enter" style={{ overflowX: 'clip' }}>
+                    {auth?.user?.invitation_locked && (
+                        <div className="mb-6 bg-amber-50/80 border border-amber-200/60 rounded-2xl p-4 flex items-start gap-3 shadow-sm max-w-3xl mx-auto animate-fade-in">
+                            <span className="text-xl mt-0.5 flex-shrink-0">
+                                <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </span>
+                            <div className="flex-grow min-w-0">
+                                <div className="font-semibold text-amber-900 text-sm">Mode Pratinjau (Hanya Membaca)</div>
+                                <div className="text-amber-750 text-xs mt-1 leading-relaxed">
+                                    Undangan ini telah dikunci secara otomatis karena acara telah selesai (H+3). Anda tidak dapat mengubah data. Silakan hubungi admin atau reseller jika memerlukan perubahan darurat.
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     <div className="stagger-children">
                         {children}
                     </div>

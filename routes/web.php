@@ -300,6 +300,9 @@ Route::middleware(['auth', 'onboarding', 'invitation.lock'])->group(function () 
         Route::post('/bank', [ContentController::class, 'saveBank'])->middleware('feature:bank')->name('bank.save');
 
         Route::get('/guestbook', [ContentController::class, 'guestbook'])->name('guestbook');
+        Route::get('/save-the-date', function () {
+            return redirect()->route('theme.index', ['tab' => 'pengaturan']);
+        })->name('save-the-date');
     });
 
     // Settings

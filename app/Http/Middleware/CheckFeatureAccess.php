@@ -16,7 +16,7 @@ class CheckFeatureAccess
         }
 
         if (!$user->hasFeatureAccess($featureSlug)) {
-            if ($request->wantsJson()) {
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
                 return response()->json([
                     'message' => 'Fitur ini terkunci. Upgrade paket Anda untuk mengakses.',
                     'feature' => $featureSlug,

@@ -181,8 +181,448 @@ const THEMES_CFG = {
     },
 };
 
-export default function ResellerThemes({ reseller, themes = [], greetingCards = [], greetingCardTypeOptions = {}, defaultTab = 'undangan' }) {
+export default function ResellerThemes({ reseller, themes = [], greetingCards = [], greetingCardTypeOptions = {}, defaultTab = 'undangan', sections = [] }) {
     const T = THEMES_CFG[reseller.template] || THEMES_CFG.default;
+
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsLoaded(true);
+        }, 200);
+        return () => clearTimeout(timer);
+    }, []);
+
+    const activeSections = sections || [];
+    const loadingScreenSection = activeSections.find(s => s.key === 'loading_screen');
+    const showLoadingScreen = loadingScreenSection ? loadingScreenSection.active : true;
+    const activeLoadingStyle = loadingScreenSection?.config?.style || reseller.loading_style || 'pulse';
+
+    const preloaderStyles = `
+        @keyframes rl-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+        @keyframes rl-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes rl-spin-reverse {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes rl-shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: 200px 0; }
+        }
+        @keyframes rl-fade-breath {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        @keyframes rl-envelope-open {
+            0% { transform: rotateX(0deg); z-index: 4; }
+            50% { transform: rotateX(90deg); z-index: 1; }
+            100% { transform: rotateX(180deg); z-index: 1; }
+        }
+        @keyframes rl-card-slide-up {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(0); }
+            100% { transform: translateY(-40px); }
+        }
+        @keyframes rl-progress-sweep {
+            0% { left: -30%; width: 30%; }
+            50% { left: 30%; width: 40%; }
+            100% { left: 100%; width: 30%; }
+        }
+    `;
+
+    const renderPreloaderContent = () => {
+        const brandChar = reseller.brand_name?.charAt(0) || 'U';
+        const accentColor = T.accent || '#d31124';
+        const isDark = T.isDark;
+        const textPrimaryColor = T.textPrimary || (isDark ? '#ffffff' : '#333333');
+        const textSecondaryColor = T.textSecondary || (isDark ? 'rgba(255,255,255,0.7)' : '#666666');
+
+        switch (activeLoadingStyle) {
+            case 'glass':
+                return (
+                    <div style={{
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '2.5rem',
+                        borderRadius: '24px',
+                        background: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.65)',
+                        backdropFilter: 'blur(16px)',
+                        WebkitBackdropFilter: 'blur(16px)',
+                        border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(255, 255, 255, 0.5)',
+                        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                        maxWidth: '320px',
+                        width: '90%',
+                    }}>
+                        <div style={{
+                            position: 'absolute',
+                            width: '120px',
+                            height: '120px',
+                            background: accentColor,
+                            borderRadius: '50%',
+                            filter: 'blur(40px)',
+                            opacity: isDark ? 0.3 : 0.15,
+                            zIndex: -1,
+                        }} />
+                        <div style={{
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '18px',
+                            background: `linear-gradient(135deg, ${accentColor}, ${T.accentDark || accentColor})`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: `0 8px 20px ${accentColor}30`,
+                            animation: 'rl-pulse 2s ease-in-out infinite',
+                            color: '#ffffff',
+                            fontWeight: '800',
+                            fontSize: '28px',
+                            marginBottom: '20px',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                        }}>
+                            {brandChar}
+                        </div>
+                        <h4 style={{
+                            color: textPrimaryColor,
+                            fontSize: '16px',
+                            fontWeight: '700',
+                            margin: '0 0 16px 0',
+                            textAlign: 'center',
+                            fontFamily: T.fontFamily || 'sans-serif'
+                        }}>
+                            {reseller.brand_name}
+                        </h4>
+                        <div style={{
+                            width: '120px',
+                            height: '4px',
+                            background: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                            borderRadius: '10px',
+                            overflow: 'hidden',
+                            position: 'relative'
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                height: '100%',
+                                width: '100%',
+                                background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
+                                animation: 'rl-shimmer 1.5s infinite',
+                                backgroundSize: '200px 100%',
+                            }} />
+                        </div>
+                    </div>
+                );
+
+            case 'rings':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{
+                            position: 'relative',
+                            width: '90px',
+                            height: '90px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '24px'
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                width: '90px',
+                                height: '90px',
+                                border: '2.5px solid transparent',
+                                borderTopColor: accentColor,
+                                borderBottomColor: accentColor,
+                                borderRadius: '50%',
+                                animation: 'rl-spin 1.5s cubic-bezier(0.53, 0.21, 0.29, 0.67) infinite'
+                            }} />
+                            <div style={{
+                                position: 'absolute',
+                                width: '70px',
+                                height: '70px',
+                                border: '2.5px solid transparent',
+                                borderLeftColor: isDark ? '#ffffff' : '#333333',
+                                borderRightColor: isDark ? '#ffffff' : '#333333',
+                                borderRadius: '50%',
+                                opacity: 0.8,
+                                animation: 'rl-spin-reverse 1.2s cubic-bezier(0.53, 0.21, 0.29, 0.67) infinite'
+                            }} />
+                            <div style={{
+                                width: '46px',
+                                height: '46px',
+                                borderRadius: '50%',
+                                background: isDark ? '#ffffff' : '#fff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: isDark ? `0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px ${accentColor}` : `0 4px 15px rgba(0, 0, 0, 0.05), 0 0 20px ${accentColor}40`,
+                                color: accentColor,
+                                fontWeight: '800',
+                                fontSize: '20px',
+                                textShadow: `0 1px 2px rgba(0,0,0,0.1)`
+                            }}>
+                                {brandChar}
+                            </div>
+                        </div>
+                        <h4 style={{
+                            color: textPrimaryColor,
+                            fontSize: '18px',
+                            fontWeight: '700',
+                            margin: '0 0 6px 0',
+                            animation: 'rl-fade-breath 2s ease-in-out infinite',
+                            fontFamily: T.fontFamily || 'sans-serif'
+                        }}>
+                            {reseller.brand_name}
+                        </h4>
+                        <p style={{
+                            color: textSecondaryColor,
+                            fontSize: '11px',
+                            margin: 0,
+                            letterSpacing: '2px',
+                            textTransform: 'uppercase',
+                            fontWeight: '600'
+                        }}>
+                            Memuat Halaman...
+                        </p>
+                    </div>
+                );
+
+            case 'bar':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            height: '3.5px',
+                            width: '100%',
+                            background: 'rgba(0,0,0,0.05)',
+                            zIndex: 1000000
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                height: '100%',
+                                background: `linear-gradient(90deg, ${accentColor}, ${isDark ? '#ffffff' : accentColor}, ${accentColor})`,
+                                boxShadow: `0 0 10px ${accentColor}`,
+                                animation: 'rl-progress-sweep 2s ease-in-out infinite',
+                                width: '30%'
+                            }} />
+                        </div>
+                        <div style={{
+                            width: '32px',
+                            height: '32px',
+                            border: isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(0,0,0,0.05)',
+                            borderTopColor: accentColor,
+                            borderRadius: '50%',
+                            animation: 'rl-spin 0.8s linear infinite',
+                            marginBottom: '20px'
+                        }} />
+                        <h4 style={{
+                            color: textPrimaryColor,
+                            fontSize: '20px',
+                            fontWeight: '600',
+                            letterSpacing: '0.5px',
+                            margin: '0 0 4px 0',
+                            fontFamily: T.fontFamily || 'sans-serif',
+                            opacity: 0.95
+                        }}>
+                            {reseller.brand_name}
+                        </h4>
+                        <p style={{
+                            color: textSecondaryColor,
+                            fontSize: '11px',
+                            margin: 0,
+                            letterSpacing: '1px'
+                        }}>
+                            Memuat Halaman...
+                        </p>
+                    </div>
+                );
+
+            case 'envelope':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{
+                            position: 'relative',
+                            width: '100px',
+                            height: '75px',
+                            background: `linear-gradient(135deg, ${accentColor}, ${T.accentDark || accentColor})`,
+                            borderRadius: '0 0 8px 8px',
+                            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+                            marginBottom: '35px',
+                            display: 'flex',
+                            alignItems: 'flex-end',
+                            justifyContent: 'center',
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                bottom: 0,
+                                left: 0,
+                                width: 0,
+                                height: 0,
+                                borderStyle: 'solid',
+                                borderWidth: '37.5px 0 37.5px 50px',
+                                borderColor: 'transparent transparent rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.1)',
+                                borderRadius: '0 0 0 8px',
+                                zIndex: 3
+                            }} />
+                            <div style={{
+                                position: 'absolute',
+                                bottom: 0,
+                                right: 0,
+                                width: 0,
+                                height: 0,
+                                borderStyle: 'solid',
+                                borderWidth: '37.5px 50px 37.5px 0',
+                                borderColor: 'transparent rgba(255, 255, 255, 0.1) rgba(255, 255, 255, 0.15) transparent',
+                                borderRadius: '0 0 8px 0',
+                                zIndex: 3
+                            }} />
+                            <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: 0,
+                                height: 0,
+                                borderStyle: 'solid',
+                                borderWidth: '38px 50px 0 50px',
+                                borderColor: `${accentColor} transparent transparent transparent`,
+                                transformOrigin: 'top center',
+                                animation: 'rl-envelope-open 1.8s ease-in-out infinite alternate',
+                                zIndex: 3,
+                            }} />
+                            <div style={{
+                                position: 'absolute',
+                                width: '80px',
+                                height: '70px',
+                                background: '#ffffff',
+                                borderRadius: '4px',
+                                bottom: '5px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 -2px 10px rgba(0,0,0,0.05)',
+                                animation: 'rl-card-slide-up 1.8s ease-in-out infinite alternate',
+                                zIndex: 2,
+                                border: '1px solid rgba(0,0,0,0.05)',
+                                padding: '4px'
+                            }}>
+                                <span style={{
+                                    fontSize: '18px',
+                                    animation: 'rl-pulse 1s infinite',
+                                    display: 'inline-block'
+                                }}>❤️</span>
+                                <span style={{
+                                    fontSize: '8px',
+                                    color: '#4b5563',
+                                    fontWeight: '700',
+                                    textAlign: 'center',
+                                    marginTop: '4px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
+                                }}>Love Ticket</span>
+                            </div>
+                        </div>
+                        <h4 style={{
+                            color: textPrimaryColor,
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            margin: '0 0 6px 0',
+                            fontFamily: T.fontFamily || 'sans-serif'
+                        }}>
+                            {reseller.brand_name}
+                        </h4>
+                        <p style={{
+                            color: textSecondaryColor,
+                            fontSize: '11px',
+                            margin: 0,
+                            letterSpacing: '2px',
+                            textTransform: 'uppercase',
+                            fontWeight: '500'
+                        }}>
+                            Membuka Undangan...
+                        </p>
+                    </div>
+                );
+
+            case 'pulse':
+            default:
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{
+                            position: 'relative',
+                            width: '80px',
+                            height: '80px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '20px'
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
+                                border: `3px solid ${accentColor}20`,
+                                borderTop: `3px solid ${accentColor}`,
+                                borderRadius: '50%',
+                                animation: 'rl-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite'
+                            }} />
+                            <div style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                background: accentColor,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: `0 0 20px ${accentColor}`,
+                                animation: 'rl-pulse 2s ease-in-out infinite',
+                                color: isDark ? '#000' : '#fff',
+                                fontWeight: 'bold',
+                                fontSize: '18px'
+                            }}>
+                                {brandChar}
+                            </div>
+                        </div>
+                        <h3 style={{
+                            color: textPrimaryColor,
+                            fontSize: '18px',
+                            fontWeight: '600',
+                            letterSpacing: '1px',
+                            margin: '0 0 8px 0',
+                            fontFamily: T.fontFamily || 'sans-serif',
+                            textAlign: 'center',
+                            animation: 'rl-pulse 2s ease-in-out infinite'
+                        }}>
+                            {reseller.brand_name}
+                        </h3>
+                        <p style={{
+                            color: textSecondaryColor,
+                            fontSize: '12px',
+                            margin: 0,
+                            letterSpacing: '2px',
+                            textTransform: 'uppercase',
+                            opacity: 0.9,
+                            fontWeight: '500',
+                            fontFamily: T.fontFamily || 'sans-serif',
+                            textAlign: 'center'
+                        }}>
+                            Memuat Halaman...
+                        </p>
+                    </div>
+                );
+        }
+    };
 
     const getLikesCount = (theme) => {
         const base = Number(theme.base_likes || 0);
@@ -518,9 +958,40 @@ export default function ResellerThemes({ reseller, themes = [], greetingCards = 
                 <style>{landingStyles}</style>
             </Head>
 
-            {/* Background orbs */}
-            <div className="rl-hero__orb rl-hero__orb--1" />
-            <div className="rl-hero__orb rl-hero__orb--2" />
+            {/* Elegant Preloader overlay */}
+            {showLoadingScreen && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: T.heroBg || T.sectionBase || '#1e1b4b',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 999999,
+                    opacity: isLoaded ? 0 : 1,
+                    visibility: isLoaded ? 'hidden' : 'visible',
+                    transition: 'opacity 0.4s ease-in-out, visibility 0.4s ease-in-out',
+                    pointerEvents: 'none'
+                }}>
+                    <style dangerouslySetInnerHTML={{ __html: preloaderStyles }} />
+                    {renderPreloaderContent()}
+                </div>
+            )}
+
+            <div
+                style={{
+                    opacity: (!showLoadingScreen || isLoaded) ? 1 : 0,
+                    transition: 'opacity 0.4s ease-in-out',
+                    minHeight: '100vh'
+                }}
+            >
+                {/* Background orbs */}
+                <div className="rl-hero__orb rl-hero__orb--1" />
+                <div className="rl-hero__orb rl-hero__orb--2" />
 
             {/* ═══ NAVBAR ═══ */}
             <nav className={`rl-nav ${scrolled ? 'rl-nav--scrolled' : ''}`}>
@@ -1100,6 +1571,7 @@ export default function ResellerThemes({ reseller, themes = [], greetingCards = 
                     </div>
                 </div>
             )}
+            </div>
         </>
     );
 }

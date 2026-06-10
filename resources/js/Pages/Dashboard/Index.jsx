@@ -17,7 +17,7 @@ const featureRoutes = {
     guestbook: '/content/guestbook',
     guest: '/settings/tamu',
     rsvp: '/settings/rsvp',
-    save_the_date: '/content/save-the-date',
+    save_the_date: '/theme?tab=pengaturan',
     turut_mengundang: '/content/turut-undang',
     bride_groom_detail: '/content/mempelai',
     whatsapp: '/settings/whatsapp',

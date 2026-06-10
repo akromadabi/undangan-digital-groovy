@@ -96,6 +96,7 @@ class HandleInertiaRequests extends Middleware
                     'avatar' => $user->avatar,
                     'invitation_slug' => $user->invitation?->slug,
                     'invitation_type' => $user->invitation?->type ?: 'wedding',
+                    'invitation_locked' => $user->invitation ? $user->invitation->isLocked() : false,
                 ] : null,
                 'impersonator' => session()->has('impersonator_id') ? [
                     'id' => session('impersonator_id'),

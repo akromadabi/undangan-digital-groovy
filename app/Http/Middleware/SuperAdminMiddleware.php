@@ -21,7 +21,7 @@ class SuperAdminMiddleware
         }
 
         if (!$request->user() || !$request->user()->isSuperAdmin()) {
-            if ($request->wantsJson()) {
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
             return redirect()->route('dashboard');

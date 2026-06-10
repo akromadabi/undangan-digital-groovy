@@ -48,8 +48,14 @@ class CheckInvitationLock
                     }
                 }
 
-                $errorMessage = 'Undangan telah dikunci (H+3 setelah acara selesai) dan tidak dapat diubah lagi.';
+                $errorMessage = 'Pemberitahuan: Masa aktif pengeditan undangan telah berakhir (kunci otomatis H+3 setelah acara selesai). Jika ada perubahan darurat, silakan hubungi Customer Service kami.';
                 
+                if ($request->header('X-Inertia')) {
+                    return back()->withErrors([
+                        'error' => $errorMessage
+                    ])->with('error', $errorMessage);
+                }
+
                 if ($request->wantsJson() || $request->ajax()) {
                     return response()->json([
                         'error' => $errorMessage
@@ -58,7 +64,7 @@ class CheckInvitationLock
                 
                 return back()->withErrors([
                     'error' => $errorMessage
-                ]);
+                ])->with('error', $errorMessage);
             }
         }
 
