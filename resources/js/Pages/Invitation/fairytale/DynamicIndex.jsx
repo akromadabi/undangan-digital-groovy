@@ -98,50 +98,76 @@ let globalShowAnimations = true;
 const CastleIcon = ({ className = '', size = 80 }) => (
     <svg 
         width={size} 
-        height={size * 0.8} 
-        viewBox="0 0 100 80" 
+        height={size} 
+        viewBox="0 0 100 100" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg" 
         className={`ft-ornament-castle ${className}`}
         style={{ display: 'block', margin: '0 auto 15px auto', color: 'var(--ft-secondary)' }}
     >
-        {/* Main towers */}
-        <path d="M10 70V40L15 35L20 40V70H10Z" fill="currentColor" />
-        <path d="M80 70V40L85 35L90 40V70H80Z" fill="currentColor" />
-        {/* Roof cones */}
-        <path d="M8 40L15 20L22 40H8Z" fill="var(--ft-accent)" />
-        <path d="M78 40L85 20L92 40H78Z" fill="var(--ft-accent)" />
+        {/* Base line */}
+        <path d="M15 85 H85" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        
+        {/* Outer Left Tower */}
+        <path d="M22 85 V50 L27 45 V85" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M20 45 L24.5 25 L29 45 Z" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="1" />
+        
+        {/* Outer Right Tower */}
+        <path d="M73 85 V50 L78 45 V85" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M71 45 L75.5 25 L80 45 Z" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="1" />
+        
         {/* Center Keep */}
-        <path d="M25 70V30H75V70H25Z" fill="currentColor" opacity="0.9" />
-        {/* crenellations */}
-        <path d="M25 30V25H32V30H39V25H46V30H53V25H60V30H67V25H75V30" stroke="currentColor" strokeWidth="2" fill="none" />
-        {/* Main High Tower */}
-        <path d="M42 30V12L50 5L58 12V30H42Z" fill="var(--ft-primary)" />
-        {/* Flags */}
-        <path d="M50 5V2L58 3.5L50 5Z" fill="var(--ft-accent)" />
+        <path d="M33 85 V40 H67 V85 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        {/* Crenellations */}
+        <path d="M33 40 V36 H38 V40 H43 V36 H48 V40 H52 V36 H57 V40 H62 V36 H67 V40" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        
+        {/* High Center Tower */}
+        <path d="M44 36 V18 H56 V36" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M41 18 L50 2 L59 18 Z" fill="var(--ft-primary)" stroke="currentColor" strokeWidth="1.5" />
+        
+        {/* Flag on high center tower */}
+        <path d="M50 2 V-4 L58 -1 L50 2" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="1" />
+        
         {/* Gate Arch */}
-        <path d="M42 70V52C42 46, 58 46, 58 52V70H42Z" fill="var(--ft-secondary)" />
-        <path d="M45 70V55C45 51, 55 51, 55 55V70H45Z" fill="none" stroke="var(--ft-text-light)" strokeWidth="1.5" />
+        <path d="M45 85 V70 C45 64, 55 64, 55 70 V85 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M47 85 V72 C47 67, 53 67, 53 72 V85" fill="none" stroke="var(--ft-accent)" strokeWidth="1" />
+        
         {/* Windows */}
-        <rect x="30" y="40" width="6" height="10" rx="3" fill="var(--ft-text-light)" />
-        <rect x="64" y="40" width="6" height="10" rx="3" fill="var(--ft-text-light)" />
-        <circle cx="50" cy="20" r="3" fill="var(--ft-text-light)" />
-        {/* Sparkles */}
-        <path d="M5 25L7 27L5 29L3 27L5 25Z" fill="var(--ft-accent)" />
-        <path d="M93 18L95 20L93 22L91 20L93 18Z" fill="var(--ft-accent)" />
+        <path d="M48 28 H52 V32 H48 Z" fill="none" stroke="currentColor" strokeWidth="1" />
+        <path d="M37 50 H41 V56 H37 Z" fill="none" stroke="currentColor" strokeWidth="1" />
+        <path d="M59 50 H63 V56 H59 Z" fill="none" stroke="currentColor" strokeWidth="1" />
+        
+        {/* Magic Stars / Sparkles */}
+        <path d="M12 30 L14 32 L12 34 L10 32 Z" fill="var(--ft-secondary)" />
+        <path d="M88 28 L90 30 L88 32 L86 30 Z" fill="var(--ft-secondary)" />
+        <path d="M50 10 L51 12 L50 13 L49 12 Z" fill="var(--ft-secondary)" />
     </svg>
 );
 
 const CrownDivider = ({ className = '' }) => (
-    <div className={`ft-crown-divider-wrap ${className}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', margin: '15px 0 25px 0', color: 'var(--ft-secondary)' }}>
+    <div className={`ft-crown-divider-wrap ${className}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', margin: '20px 0 28px 0', color: 'var(--ft-secondary)' }}>
         <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, var(--ft-secondary))', opacity: 0.6 }} />
-        <svg width="40" height="30" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--ft-secondary)' }}>
-            <path d="M6 24 L10 10 L18 16 L20 8 L22 16 L30 10 L34 24 Z" fill="currentColor" />
-            <circle cx="10" cy="9" r="1.5" fill="var(--ft-accent)" />
-            <circle cx="20" cy="7" r="1.8" fill="var(--ft-accent)" />
-            <circle cx="30" cy="9" r="1.5" fill="var(--ft-accent)" />
-            <rect x="4" y="24" width="32" height="2.5" rx="1" fill="currentColor" />
-            <circle cx="20" cy="25" r="1" fill="var(--ft-text-light)" />
+        <svg width="80" height="35" viewBox="0 0 80 35" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--ft-secondary)' }}>
+            {/* Ornate Swirls / Floral leaves flanking the crown */}
+            <path d="M 10 24 C 18 28, 25 24, 32 20 C 35 18, 38 18, 40 20 C 42 24, 45 28, 70 24" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+            <path d="M 15 22 C 18 20, 22 16, 25 18 C 28 20, 26 24, 20 23" stroke="currentColor" strokeWidth="0.8" fill="none" />
+            <path d="M 65 22 C 62 20, 58 16, 55 18 C 52 20, 54 24, 60 23" stroke="currentColor" strokeWidth="0.8" fill="none" />
+
+            {/* Elegant Royal Crown */}
+            {/* Base band */}
+            <path d="M 33 22 H 47 V 24 H 33 Z" fill="currentColor" />
+            <path d="M 31 20 C 31 20, 49 20, 49 20" stroke="currentColor" strokeWidth="1.5" />
+            {/* Crown arches (curved, royal styling) */}
+            <path d="M 33 20 C 33 14, 36 10, 40 10 C 44 10, 47 14, 47 20" stroke="currentColor" strokeWidth="1.2" fill="none" />
+            <path d="M 36 20 C 36 14, 38 12, 40 12 C 42 12, 44 14, 44 20" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
+            <path d="M 40 10 V 22" stroke="currentColor" strokeWidth="1" />
+            {/* Crown jewels / points */}
+            <circle cx="33" cy="19.5" r="1" fill="var(--ft-accent)" />
+            <circle cx="40" cy="19.5" r="1" fill="var(--ft-accent)" />
+            <circle cx="47" cy="19.5" r="1" fill="var(--ft-accent)" />
+            {/* Orb & Cross on top */}
+            <circle cx="40" cy="9" r="1.5" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="0.6" />
+            <path d="M 40 6 V 8 M 39 7 H 41" stroke="currentColor" strokeWidth="0.8" />
         </svg>
         <div style={{ flex: 1, height: '1px', background: 'linear-gradient(270deg, transparent, var(--ft-secondary))', opacity: 0.6 }} />
     </div>
@@ -150,48 +176,97 @@ const CrownDivider = ({ className = '' }) => (
 const CarriageIcon = ({ className = '', size = 70 }) => (
     <svg 
         width={size} 
-        height={size * 0.7} 
-        viewBox="0 0 100 70" 
+        height={size * 0.85} 
+        viewBox="0 0 120 100" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg" 
         className={`ft-ornament-carriage ${className}`}
         style={{ display: 'block', margin: '20px auto 10px auto', color: 'var(--ft-secondary)' }}
     >
-        {/* Wheels */}
-        <circle cx="30" cy="52" r="12" stroke="currentColor" strokeWidth="2" fill="var(--ft-text-light)" />
-        <circle cx="30" cy="52" r="4" fill="currentColor" />
-        <circle cx="70" cy="52" r="12" stroke="currentColor" strokeWidth="2" fill="var(--ft-text-light)" />
-        <circle cx="70" cy="52" r="4" fill="currentColor" />
-        
-        {/* Wheel Spokes */}
-        <path d="M30 40V64 M18 52H42" stroke="currentColor" strokeWidth="1" />
-        <path d="M70 40V64 M58 52H82" stroke="currentColor" strokeWidth="1" />
+        {/* Chassis Swirls / Filigree base */}
+        <path d="M12 60 C15 75, 45 78, 60 70 C75 78, 105 75, 108 60" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M25 65 C35 72, 85 72, 95 65" stroke="currentColor" strokeWidth="0.8" opacity="0.6" />
+        <path d="M5 52 C5 65, 18 68, 25 65 C32 62, 30 52, 22 52 C15 52, 10 58, 16 63" stroke="currentColor" strokeWidth="1.2" fill="none" />
+        <path d="M115 52 C115 65, 102 68, 95 65 C88 62, 90 52, 98 52 C105 52, 110 58, 104 63" stroke="currentColor" strokeWidth="1.2" fill="none" />
 
-        {/* Carriage body */}
-        <path d="M22 36C22 18, 78 18, 78 36C78 46, 22 46, 22 36Z" fill="var(--ft-primary)" opacity="0.9" />
-        <path d="M22 36C22 18, 78 18, 78 36Z" stroke="currentColor" strokeWidth="2" fill="none" />
+        {/* Carriage Cabin (Pumpkin shape) */}
+        <path d="M35 48 C35 25, 85 25, 85 48 C85 64, 35 64, 35 48 Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M42 48 C42 28, 78 28, 78 48 C78 62, 42 62, 42 48 Z" fill="var(--ft-text-light)" stroke="currentColor" strokeWidth="1" fillOpacity="0.8" />
         
+        {/* Vertical ribs */}
+        <path d="M60 26 V62" stroke="currentColor" strokeWidth="1.2" />
+        <path d="M50 27 C45 35, 45 55, 50 61" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+        <path d="M70 27 C75 35, 75 55, 70 61" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+
+        {/* Windows */}
+        <path d="M52 46 C52 38, 68 38, 68 46 C68 52, 52 52, 52 46 Z" fill="var(--ft-card-bg)" stroke="currentColor" strokeWidth="1.2" />
+        <path d="M60 38 V52 M52 46 H68" stroke="currentColor" strokeWidth="0.8" />
+
         {/* Crown on top */}
-        <path d="M46 18 L50 12 L54 18 Z" fill="var(--ft-secondary)" />
-        <circle cx="50" cy="11" r="1.5" fill="var(--ft-accent)" />
-        
-        {/* Window */}
-        <circle cx="50" cy="32" r="9" fill="var(--ft-text-light)" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M50 23V41 M41 32H59" stroke="var(--ft-secondary)" strokeWidth="1" />
-        
-        {/* Connecting frame / chassis */}
-        <path d="M30 52H70 M42 52L48 44 M58 52L52 44" stroke="currentColor" strokeWidth="2" />
-        {/* Carriage handles/swirls */}
-        <path d="M12 36C12 36, 16 32, 22 36 M78 36C78 36, 84 32, 88 36L94 44" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+        <path d="M54 26 C54 20, 56 18, 60 18 C64 18, 66 20, 66 26" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <path d="M52 26 H68" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="60" cy="17" r="2" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="0.8" />
+
+        {/* Wheels - Large back wheel, smaller front wheel */}
+        <circle cx="35" cy="72" r="16" stroke="currentColor" strokeWidth="2" fill="var(--ft-text-light)" />
+        <circle cx="35" cy="72" r="13" stroke="var(--ft-accent)" strokeWidth="0.8" strokeDasharray="2,2" />
+        <circle cx="35" cy="72" r="4" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="1" />
+        <path d="M35 56 V88 M19 72 H51 M23.7 60.7 L46.3 83.3 M23.7 83.3 L46.3 60.7" stroke="currentColor" strokeWidth="0.8" />
+
+        <circle cx="85" cy="72" r="16" stroke="currentColor" strokeWidth="2" fill="var(--ft-text-light)" />
+        <circle cx="85" cy="72" r="13" stroke="var(--ft-accent)" strokeWidth="0.8" strokeDasharray="2,2" />
+        <circle cx="85" cy="72" r="4" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="1" />
+        <path d="M85 56 V88 M69 72 H101 M73.7 60.7 L96.3 83.3 M73.7 83.3 L96.3 60.7" stroke="currentColor" strokeWidth="0.8" />
+
+        {/* Driver Seat & Whip */}
+        <path d="M86 42 H96 L94 48 H86" stroke="currentColor" strokeWidth="1.2" fill="none" />
+        <path d="M92 42 L102 22 C104 18, 108 24, 102 26" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+
+        {/* Carriage Lanterns */}
+        <path d="M32 38 H27 V46 H32 Z" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="1" />
+        <path d="M29.5 34 V38 M29.5 46 V48" stroke="currentColor" strokeWidth="1" />
+        <circle cx="29.5" cy="33" r="1" fill="var(--ft-secondary)" />
     </svg>
 );
 
 const CardCorner = () => (
     <>
-        <div className="ft-card-corner ft-card-corner-tl" />
-        <div className="ft-card-corner ft-card-corner-tr" />
-        <div className="ft-card-corner ft-card-corner-bl" />
-        <div className="ft-card-corner ft-card-corner-br" />
+        <div className="ft-card-corner ft-card-corner-tl">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="var(--ft-secondary)" strokeWidth="1.2" style={{ display: 'block' }}>
+                <path d="M 2 28 V 2 H 28" />
+                <path d="M 6 24 V 6 H 24" strokeWidth="0.8" opacity="0.6" />
+                <path d="M 2 2 C 8 8, 8 8, 14 6 C 16 4, 16 2, 12 2" strokeWidth="1" />
+                <path d="M 2 2 C 8 8, 8 8, 6 14 C 4 16, 2 16, 2 12" strokeWidth="1" />
+                <circle cx="8" cy="8" r="1.5" fill="var(--ft-accent)" />
+            </svg>
+        </div>
+        <div className="ft-card-corner ft-card-corner-tr">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="var(--ft-secondary)" strokeWidth="1.2" style={{ display: 'block' }}>
+                <path d="M 28 28 V 2 H 2" />
+                <path d="M 24 24 V 6 H 6" strokeWidth="0.8" opacity="0.6" />
+                <path d="M 28 2 C 22 8, 22 8, 16 6 C 14 4, 14 2, 18 2" strokeWidth="1" />
+                <path d="M 28 2 C 22 8, 22 8, 24 14 C 26 16, 28 16, 28 12" strokeWidth="1" />
+                <circle cx="22" cy="8" r="1.5" fill="var(--ft-accent)" />
+            </svg>
+        </div>
+        <div className="ft-card-corner ft-card-corner-bl">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="var(--ft-secondary)" strokeWidth="1.2" style={{ display: 'block' }}>
+                <path d="M 2 2 V 28 H 28" />
+                <path d="M 6 6 V 24 H 24" strokeWidth="0.8" opacity="0.6" />
+                <path d="M 2 28 C 8 22, 8 22, 14 24 C 16 26, 16 28, 12 28" strokeWidth="1" />
+                <path d="M 2 28 C 8 22, 8 22, 6 16 C 4 14, 2 14, 2 18" strokeWidth="1" />
+                <circle cx="8" cy="22" r="1.5" fill="var(--ft-accent)" />
+            </svg>
+        </div>
+        <div className="ft-card-corner ft-card-corner-br">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="var(--ft-secondary)" strokeWidth="1.2" style={{ display: 'block' }}>
+                <path d="M 28 2 V 28 H 2" />
+                <path d="M 24 6 V 24 H 6" strokeWidth="0.8" opacity="0.6" />
+                <path d="M 28 28 C 22 22, 22 22, 16 24 C 14 26, 14 28, 18 28" strokeWidth="1" />
+                <path d="M 28 28 C 22 22, 22 22, 24 16 C 26 14, 28 14, 28 18" strokeWidth="1" />
+                <circle cx="22" cy="22" r="1.5" fill="var(--ft-accent)" />
+            </svg>
+        </div>
     </>
 );
 
@@ -243,13 +318,20 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverI
             <div className="ft-cover__corner ft-cover__corner--br" />
 
             <div className="ft-cover__content">
-                {/* Decorative top stars/butterflies */}
+                {/* Decorative top row */}
                 <div className="ft-cover__deco-top">
-                    <span className="ft-cover__deco-star">✦</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--ft-secondary)' }}>
+                        <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z" />
+                    </svg>
                     <span className="ft-cover__deco-line" />
-                    <span className="ft-cover__deco-star">🦋</span>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--ft-accent)' }}>
+                        <path d="M12 8 C10 4, 4 4, 6 12 C7 16, 11 15, 12 13 C13 15, 17 16, 18 12 C20 4, 14 4, 12 8 Z" fill="var(--ft-accent)" fillOpacity="0.1" />
+                        <path d="M12 8 V16 M12 8 C11.5 7, 10 5, 9 5 M12 8 C12.5 7, 14 5, 15 5" />
+                    </svg>
                     <span className="ft-cover__deco-line" />
-                    <span className="ft-cover__deco-star">✦</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--ft-secondary)' }}>
+                        <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z" />
+                    </svg>
                 </div>
 
                 <span className="ft-cover__the-wedding">{t('invitation.wedding_of')}</span>
@@ -291,9 +373,15 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverI
 
                 {/* Bottom decorative stars */}
                 <div className="ft-cover__deco-bottom">
-                    <span className="ft-cover__deco-star ft-cover__deco-star--sm">✧</span>
-                    <span className="ft-cover__deco-star ft-cover__deco-star--sm">✦</span>
-                    <span className="ft-cover__deco-star ft-cover__deco-star--sm">✧</span>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--ft-secondary)' }}>
+                        <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z" />
+                    </svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--ft-secondary)' }}>
+                        <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z" />
+                    </svg>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--ft-secondary)' }}>
+                        <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z" />
+                    </svg>
                 </div>
             </div>
         </div>
@@ -452,6 +540,15 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
             {/* Groom (Pria) */}
             <Reveal className="ft-card ft-mempelai-card" variant="left">
                 <CardCorner />
+                
+                {/* Decorative card header */}
+                <div className="ft-card-header-ornament">
+                    <svg width="40" height="15" viewBox="0 0 40 15" fill="none" stroke="var(--ft-secondary)" strokeWidth="1">
+                        <path d="M 2 10 Q 20 2, 38 10 M 10 10 Q 20 6, 30 10 M 20 2 V 12" />
+                        <circle cx="20" cy="2" r="1" fill="currentColor" />
+                    </svg>
+                </div>
+
                 <div className="ft-mempelai-photo-wrap">
                     {showPhotos && groom.photo ? (
                         <img 
@@ -471,6 +568,7 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
                 </div>
                 
                 <h3 className="ft-mempelai-name">{groom.full_name || 'Nama Lengkap Pria'}</h3>
+                <div className="ft-mempelai-divider" />
                 <p className="ft-mempelai-parent-label">
                     {translateChildOrder(groom.child_order, 'pria')}
                 </p>
@@ -479,6 +577,14 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
                         ? (locale === 'en' ? `Mr. ${groom.father_name} & Mrs. ${groom.mother_name}` : `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`)
                         : (groom.father_name || groom.mother_name || '')}
                 </p>
+
+                {/* Decorative card footer */}
+                <div className="ft-card-footer-ornament">
+                    <svg width="30" height="10" viewBox="0 0 30 10" fill="none" stroke="var(--ft-secondary)" strokeWidth="0.8" style={{ opacity: 0.6, marginBottom: 15 }}>
+                        <path d="M 5 2 Q 15 8, 25 2 M 10 4 Q 15 7, 20 4" />
+                    </svg>
+                </div>
+
                 {groom.instagram && (
                     <a
                         href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
@@ -499,6 +605,15 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
             {/* Bride (Wanita) */}
             <Reveal className="ft-card ft-mempelai-card" variant="right">
                 <CardCorner />
+
+                {/* Decorative card header */}
+                <div className="ft-card-header-ornament">
+                    <svg width="40" height="15" viewBox="0 0 40 15" fill="none" stroke="var(--ft-secondary)" strokeWidth="1">
+                        <path d="M 2 10 Q 20 2, 38 10 M 10 10 Q 20 6, 30 10 M 20 2 V 12" />
+                        <circle cx="20" cy="2" r="1" fill="currentColor" />
+                    </svg>
+                </div>
+
                 <div className="ft-mempelai-photo-wrap">
                     {showPhotos && bride.photo ? (
                         <img 
@@ -518,6 +633,7 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
                 </div>
                 
                 <h3 className="ft-mempelai-name">{bride.full_name || 'Nama Lengkap Wanita'}</h3>
+                <div className="ft-mempelai-divider" />
                 <p className="ft-mempelai-parent-label">
                     {translateChildOrder(bride.child_order, 'wanita')}
                 </p>
@@ -526,6 +642,14 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
                         ? (locale === 'en' ? `Mr. ${bride.father_name} & Mrs. ${bride.mother_name}` : `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`)
                         : (bride.father_name || bride.mother_name || '')}
                 </p>
+
+                {/* Decorative card footer */}
+                <div className="ft-card-footer-ornament">
+                    <svg width="30" height="10" viewBox="0 0 30 10" fill="none" stroke="var(--ft-secondary)" strokeWidth="0.8" style={{ opacity: 0.6, marginBottom: 15 }}>
+                        <path d="M 5 2 Q 15 8, 25 2 M 10 4 Q 15 7, 20 4" />
+                    </svg>
+                </div>
+
                 {bride.instagram && (
                     <a
                         href={`https://instagram.com/${bride.instagram.replace('@', '')}`}
