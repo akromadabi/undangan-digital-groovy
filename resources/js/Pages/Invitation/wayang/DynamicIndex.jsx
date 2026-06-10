@@ -364,21 +364,18 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
     let circleFontSize = '9.5px';
     let circleLetterSpacing = '4px';
 
-    if (textLength > 45) {
-        circleFontSize = '4.8px';
-        circleLetterSpacing = '0.5px';
-    } else if (textLength > 40) {
-        circleFontSize = '5.5px';
-        circleLetterSpacing = '1px';
-    } else if (textLength > 35) {
-        circleFontSize = '6.3px';
-        circleLetterSpacing = '1.5px';
-    } else if (textLength > 30) {
-        circleFontSize = '7.2px';
-        circleLetterSpacing = '2.2px';
-    } else if (textLength > 25) {
-        circleFontSize = '8.2px';
-        circleLetterSpacing = '3px';
+    if (textLength > 0) {
+        const maxCircumference = 215; // Target length on the circle path (circumference ~220)
+        // Adjust for wide font (Jura): width is ~60% of fontSize, and letter spacing is ~35% of fontSize
+        const calculatedFontSize = maxCircumference / (0.95 * textLength);
+        const calculatedLetterSpacing = calculatedFontSize * 0.35;
+        
+        // Cap font size between 3.5px and 9.5px, and letter spacing between 0.5px and 4.0px
+        const finalFontSize = Math.max(3.5, Math.min(9.5, calculatedFontSize));
+        const finalLetterSpacing = Math.max(0.5, Math.min(4.0, calculatedLetterSpacing));
+        
+        circleFontSize = `${finalFontSize.toFixed(2)}px`;
+        circleLetterSpacing = `${finalLetterSpacing.toFixed(2)}px`;
     }
 
     // Dynamic sizing for main couple name to prevent cutoff on mobile

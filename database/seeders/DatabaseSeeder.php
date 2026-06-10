@@ -226,6 +226,8 @@ class DatabaseSeeder extends Seeder
             RoomJogjaThemeSeeder::class,
             ThreeDSceneSeeder::class,
             HandwritingThemeSeeder::class,
+            FairytaleThemeSeeder::class,
+            ChelseaThemeSeeder::class,
         ]);
 
         // Restore custom fields (like uploaded thumbnails) after seeders have run

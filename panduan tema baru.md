@@ -232,8 +232,8 @@ Seksi pembuka harus ada dan terstruktur dengan kriteria berikut:
   )}
   ```
 - **Keterangan Mempelai (Monogram/Initials/Nama)**: Harus menampilkan inisial monogram atau nama panggilan mempelai (misal: "B & R") sebagai pengantar yang jelas sebelum masuk ke detail profil masing-masing mempelai.
-- **Salam Pembuka & Basmalah**: Menampilkan lafadz basmalah/kalimat pembuka (contoh: "Bismillah" atau pembuka bernuansa islami/universal) sesuai preferensi yang disimpan di database:
-  - Judul pembuka (`invitation?.opening_title` dengan fallback "Maha Suci Allah" atau sejenisnya).
+- **Salam Pembuka (Multilingual & Netral)**: Menampilkan kalimat pembuka yang dinamis sesuai preferensi yang disimpan di database. **JANGAN PERNAH men-hardcode lafadz Basmalah arab/latin secara statis** karena tidak semua mempelai beragama Islam dan tema mendukung multibahasa (Indonesia/Inggris). Gunakan fallback yang netral atau render secara kondisional hanya jika diatur di database:
+  - Judul pembuka (`invitation?.opening_title` dengan fallback teks selamat datang yang netral/multilingual).
   - Ayat/kutipan pembuka (`invitation?.opening_ayat`).
   - Teks deskripsi pembuka (`invitation?.opening_text`).
 
@@ -256,12 +256,14 @@ Seksi pembuka harus ada dan terstruktur dengan kriteria berikut:
 > 3. **Ukuran Section Lebih Besar:** Section opening harus menjadi "hero section" kedua setelah cover. Berikan `padding: 60px 24px` atau lebih, dan pastikan ada foto slideshow yang berukuran cukup besar (minimal `aspect-ratio: 4/3` dengan `max-width: 320px`). Jangan biarkan section ini terasa seperti sekadar pengantar singkat.
 > 4. **Hierarki Visual Lengkap:** Urutan konten yang direkomendasikan:
 >    - Ornamen/motif atas (dekoratif)
->    - Basmalah / judul pembuka
+>    - Judul pembuka dinamis (tanpa hardcoded Basmalah)
 >    - Nama mempelai besar & elegan
 >    - Foto slideshow opening (jika ada foto)
 >    - Countdown hari-H
->    - Ayat / kutipan inspirasi
+>    - Ayat / kutipan inspirasi (ukuran font dibuat lebih kecil dan elegan)
 >    - Teks pembuka undangan
+> 5. **Ornamen Background Transparan:** Di latar belakang (background) seksi pembuka atau seksi lainnya, wajib disematkan ornamen visual baru yang relevan (seperti pola sulur, daun, watermark inisial, atau ornamen etnis sesuai tema) dengan tingkat transparansi tinggi (opacity `0.03` hingga `0.08` atau menggunakan `.png/.svg` transparan tipis) agar latar belakang tidak polos/monoton tanpa mengganggu keterbacaan teks utama.
+> 6. **Ukuran Font Quote (Ayat/Kutipan) yang Elegan & Proporsional:** Teks quote/ayat sering kali dirender terlalu besar. Kunci ukuran font quote agar lebih kecil dan anggun (misalnya `font-size: 0.85rem` hingga `0.95rem` atau `13px - 15px`, dan font style italic/handwriting tipis), dibungkus dengan baris tinggi (*line-height: 1.6*) yang longgar.
 
 ### 4.3 Seksi Mempelai (`bride_groom` / `couple`)
 - **Deteksi Gender yang Kokoh**: Jangan andalkan urutan indeks array `couples[0]`/`couples[1]` saja. Selalu filter berdasarkan string jenis kelamin:
@@ -890,9 +892,14 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown }) {
 
     return (
         <section id="opening" className="hw-section hw-opening">
+            {/* ✅ Wajib: Ornamen Background Transparan */}
+            <div className="hw-bg-ornament-transparent" />
+
             <Reveal>
-                {/* Judul / Basmalah */}
-                <h2 className="hw-section-title">{invitation?.opening_title || 'Bismillahirrahmanirrahim'}</h2>
+                {/* Judul Pembuka Dinamis (Tanpa Hardcoded Basmalah) */}
+                {invitation?.opening_title && (
+                    <h2 className="hw-section-title">{invitation.opening_title}</h2>
+                )}
                 <p className="hw-section-subtitle">The Wedding of</p>
 
                 {/* ✅ Wajib: Nama Mempelai Penuh — bukan inisial */}
@@ -919,6 +926,9 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown }) {
 
 **Aturan Baku:**
 > ✅ **Section Opening WAJIB menampilkan nama lengkap/nickname mempelai secara hero (besar & dominan)** — bukan hanya inisial. Countdown timer juga **WAJIB ada** di opening jika data event tersedia (`showCountdown` prop aktif), tanpa memerlukan konfigurasi tambahan dari pengguna.
+> ✅ **JANGAN keras-keras men-hardcode lafadz Basmalah** secara statis demi menjaga inklusivitas agama mempelai dan dukungan multibahasa.
+> ✅ **Wajib ada ornamen baru yang relevan di background** dengan transparansi tinggi (opacity `0.03` - `0.08`) agar tidak monoton namun teks tetap terbaca.
+> ✅ **Ukuran font quote (ayat/kutipan) wajib dibuat lebih kecil** (kisaran `0.85rem` - `0.95rem`) dan proporsional agar terlihat mewah dan elegan.
 
 ---
 
