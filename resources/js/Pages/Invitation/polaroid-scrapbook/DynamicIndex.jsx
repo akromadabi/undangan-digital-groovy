@@ -277,7 +277,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverI
 /* ==========================================================================
    SECTION 2: OPENING
    ========================================================================== */
-function OpeningSection({ invitation, brideGrooms, events, showCountdown }) {
+function OpeningSection({ invitation, brideGrooms, events, showCountdown, galleries }) {
     const { t, locale } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -287,31 +287,44 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown }) {
         ? `${groom.nickname} & ${bride.nickname}`
         : (invitation?.cover_title || 'Groom & Bride');
 
-    const openingImages = useMemo(() => {
-        return (invitation?.opening_image || '')
+    const resolvedOpeningImages = useMemo(() => {
+        const imgs = (invitation?.opening_image || '')
             .split(',')
             .map(img => getStorageUrl(img.trim()))
             .filter(Boolean);
-    }, [invitation?.opening_image]);
+        if (imgs.length > 0) return imgs;
+
+        // Fallback to gallery photos if available
+        const galleryImgs = safeArr(galleries).map(g => getStorageUrl(g.image_path || g.image_url)).filter(Boolean);
+        if (galleryImgs.length > 0) return [galleryImgs[0]];
+
+        // Fallback to default unsplash prewedding photo
+        return ['https://images.unsplash.com/photo-1519741497674-611481863552?w=800&h=600&fit=crop'];
+    }, [invitation?.opening_image, galleries]);
+
+    const titleLower = String(invitation?.opening_title || '').toLowerCase();
+    const showTheWeddingSubtitle = !titleLower.includes('wedding') && !titleLower.includes('nikah') && !titleLower.includes('pernikahan');
 
     return (
         <section id="opening" className="ps-section">
             <Reveal>
                 <h2 className="ps-section-title">{invitation?.opening_title || 'Bismillahirrahmanirrahim'}</h2>
                 <ScribbleUnderline style={{ width: '80px' }} />
-                <p className="ps-section-subtitle" style={{ marginTop: '8px', marginBottom: '20px' }}>The Wedding of</p>
+                {showTheWeddingSubtitle && (
+                    <p className="ps-section-subtitle" style={{ marginTop: '8px', marginBottom: '20px' }}>The Wedding of</p>
+                )}
 
                 <div className="ps-opening__couple-name">
                     {coupleName}
                 </div>
 
-                {globalShowPhotos && openingImages.length > 0 && (
+                {globalShowPhotos && resolvedOpeningImages.length > 0 && (
                     <div className="ps-polaroid ps-tilt-right relative" style={{ marginBottom: '25px' }}>
                         <div className="ps-tape ps-tape-top-left ps-tape--red" />
                         <div className="ps-paperclip" />
                         <div className="ps-opening__slideshow-wrapper">
                             <PremiumSlideshow
-                                images={openingImages}
+                                images={resolvedOpeningImages}
                                 positionX={invitation?.opening_position_x}
                                 positionY={invitation?.opening_position_y}
                                 zoom={invitation?.opening_zoom}
@@ -327,7 +340,7 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown }) {
                 )}
 
                 {invitation?.opening_ayat && (
-                    <div className="ps-card" style={{ transform: 'rotate(-0.5deg)', backgroundColor: '#faf7f2', border: '1px solid #eadecc' }}>
+                    <div className="ps-card ps-quote-card" style={{ transform: 'rotate(-0.5deg)', backgroundColor: '#faf7f2', border: '1px solid #eadecc' }}>
                         <ScribbledHeart style={{ top: '6px', right: '6px' }} />
                         <p className="ps-opening__ayat" style={{ fontFamily: 'var(--ps-font-script)', fontSize: '1.45rem', margin: '0 0 10px 0' }}>
                             &ldquo;{invitation.opening_ayat}&rdquo;
@@ -1259,9 +1272,8 @@ function Navigation({
 
                 <button
                     type="button"
-                    className="ps-floating-btn"
+                    className={`ps-floating-btn ${isFullscreen ? 'ps-floating-btn--active' : ''}`}
                     onClick={toggleFullscreen}
-                    style={isFullscreen ? { backgroundColor: 'var(--ps-primary, #b85c4c)', color: '#fff' } : {}}
                     title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
                 >
                     <i className={isFullscreen ? "fas fa-compress" : "fas fa-expand"} />
@@ -1270,9 +1282,8 @@ function Navigation({
                 {invitation?.enable_auto_scroll !== false && (
                     <button
                         type="button"
-                        className="ps-floating-btn"
+                        className={`ps-floating-btn ${autoScrollEnabled ? 'ps-floating-btn--active' : ''}`}
                         onClick={() => setAutoScrollEnabled(prev => !prev)}
-                        style={autoScrollEnabled ? { backgroundColor: 'var(--ps-primary, #b85c4c)', color: '#fff' } : {}}
                         title={autoScrollEnabled ? "Matikan Auto Scroll" : "Auto Scroll"}
                     >
                         <i className={autoScrollEnabled ? "fas fa-pause" : "fas fa-scroll"} />
@@ -1735,7 +1746,7 @@ export default function DynamicIndex({
         const key = section.section_key;
 
         const componentMap = {
-            'opening': <OpeningSection key={key} invitation={invitation} brideGrooms={brideGrooms} events={events} showCountdown={showCountdownInEvent} />,
+            'opening': <OpeningSection key={key} invitation={invitation} brideGrooms={brideGrooms} events={events} showCountdown={showCountdownInEvent} galleries={galleries} />,
             'bride_groom': <BrideGroomSection key={key} brideGrooms={brideGrooms} />,
             'countdown': null, // Embedded in Event section
             'event': <EventSection key={key} events={events} invitation={invitation} showCountdown={showCountdownInEvent} />,

@@ -395,8 +395,12 @@
   transform: scale(1.02);
   background: #a24b3c;
 }
-.ps-cover__btn i {
+.ps-cover__btn i,
+.ps-cover__btn svg,
+.ps-cover__btn .svg-inline--fa {
   font-size: 0.9rem;
+  width: 1em;
+  height: 1em;
 }
 
 /* Date Stamp Stroke decoration */
@@ -423,6 +427,7 @@
   line-height: 1.1;
 }
 .ps-opening__slideshow-wrapper {
+  position: relative;
   max-width: 280px;
   aspect-ratio: 4/3;
   margin: 0 auto;
@@ -588,10 +593,14 @@
   gap: 12px;
   align-items: flex-start;
 }
-.ps-event-card__meta-item i {
-  color: var(--ps-secondary);
+.ps-event-card__meta-item i,
+.ps-event-card__meta-item svg,
+.ps-event-card__meta-item .svg-inline--fa {
+  color: var(--ps-secondary) !important;
+  fill: currentColor !important;
   font-size: 1rem;
   width: 16px;
+  height: 16px;
   margin-top: 4px;
 }
 .ps-event-card__text {
@@ -1045,9 +1054,9 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--ps-white);
-  border: 1px solid rgba(0,0,0,0.06);
-  color: var(--ps-secondary);
+  background-color: var(--ps-white) !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  color: var(--ps-secondary) !important;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
@@ -1056,9 +1065,31 @@
   cursor: pointer;
   transition: all 0.2s;
 }
+.ps-floating-btn i,
+.ps-floating-btn svg,
+.ps-floating-btn .svg-inline--fa {
+  color: var(--ps-secondary) !important;
+  fill: currentColor !important;
+  width: 1em;
+  height: 1em;
+}
 .ps-floating-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* Active floating button overrides */
+.ps-floating-btn--active {
+  background-color: var(--ps-primary) !important;
+  border-color: var(--ps-primary) !important;
+  color: var(--ps-white) !important;
+  box-shadow: 0 0 10px rgba(184, 92, 76, 0.45) !important;
+}
+.ps-floating-btn--active i,
+.ps-floating-btn--active svg,
+.ps-floating-btn--active .svg-inline--fa {
+  color: var(--ps-white) !important;
+  fill: currentColor !important;
 }
 
 /* Music waves animations */
@@ -1072,9 +1103,12 @@
 .global-music-waves span {
   display: block;
   width: 3px;
-  background-color: currentColor;
+  background-color: var(--ps-secondary) !important;
   border-radius: 1px;
   animation: wave 1.2s ease-in-out infinite;
+}
+.ps-floating-btn--active .global-music-waves span {
+  background-color: var(--ps-white) !important;
 }
 .global-music-waves span:nth-child(1) { height: 40%; animation-delay: -1.2s; }
 .global-music-waves span:nth-child(2) { height: 100%; animation-delay: -0.9s; }
@@ -1129,13 +1163,19 @@
   align-items: center;
   gap: 4px;
   padding: 6px 12px;
-  color: #7a7369;
+  color: #7a7369 !important;
   cursor: pointer;
   transition: all 0.2s;
   min-width: 55px;
 }
-.ps-nav-menu__item i {
+.ps-nav-menu__item i,
+.ps-nav-menu__item svg,
+.ps-nav-menu__item .svg-inline--fa {
   font-size: 1.15rem;
+  color: #7a7369 !important;
+  fill: currentColor !important;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 .ps-nav-item-text {
   font-family: var(--ps-font-heading);
@@ -1143,8 +1183,25 @@
   letter-spacing: 0.2px;
 }
 .ps-nav-menu__item.active {
-  color: var(--ps-primary);
+  color: var(--ps-primary) !important;
   transform: translateY(-2px);
+}
+.ps-nav-menu__item.active i,
+.ps-nav-menu__item.active svg,
+.ps-nav-menu__item.active .svg-inline--fa {
+  color: var(--ps-primary) !important;
+  fill: currentColor !important;
+}
+
+/* Quote Box Shrunken styles */
+.ps-quote-card {
+  max-width: 285px !important;
+  margin: 12px auto 20px auto !important;
+  padding: 12px 14px !important;
+}
+.ps-opening__ayat {
+  font-size: 1.15rem !important;
+  line-height: 1.35 !important;
 }
 
 /* WhatsApp float button */
@@ -1171,6 +1228,12 @@
   font-size: 1.4rem;
   text-decoration: none;
   transition: transform 0.2s;
+}
+.ps-whatsapp-btn i,
+.ps-whatsapp-btn svg,
+.ps-whatsapp-btn .svg-inline--fa {
+  color: #fff !important;
+  fill: currentColor !important;
 }
 .ps-whatsapp-btn:hover {
   transform: scale(1.08);

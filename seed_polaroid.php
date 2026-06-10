@@ -38,6 +38,7 @@ $inv->update([
     'title' => 'Pernikahan Intan & Fahmi',
     'cover_title' => 'Intan & Fahmi',
     'cover_image' => null,
+    'opening_image' => '/images/demo/korea-11-768x512.jpg',
     'opening_title' => 'The Wedding of',
     'opening_ayat' => 'Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.',
     'opening_text' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan kami di bawah naungan berkah-Nya.\n\nKami mengundang Bapak/Ibu/Saudara/i untuk turut hadir dan memberikan doa restu di hari bahagia kami.",
