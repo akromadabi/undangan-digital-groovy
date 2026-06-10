@@ -238,6 +238,11 @@ class Invitation extends Model
 
     public function isLocked(): bool
     {
+        // Grace period: allow edits within 48 hours of invitation creation to prevent immediate locking on past placeholder dates
+        if ($this->created_at && $this->created_at->gt(now()->subDays(2))) {
+            return false;
+        }
+
         $primaryEvent = $this->events()->where('is_primary', true)->first() ?: $this->events()->first();
         if (!$primaryEvent || !$primaryEvent->event_date) {
             return false;
