@@ -79,7 +79,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
     }
 
     let labels = {
-        circleLogoText: isEn ? `• EVENT OF • ${coupleName.toUpperCase()} •` : `• ACARA • ${coupleName.toUpperCase()} •`,
+        circleLogoText: isEn ? `•EVENT OF•${coupleName.toUpperCase()}` : `•ACARA•${coupleName.toUpperCase()}`,
         heroBadge: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
         heroDateLabel: isEn ? 'SAVE THE DATE' : 'SIMPAN TANGGAL',
         
@@ -107,7 +107,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
     };
 
     if (t === 'wedding') {
-        labels.circleLogoText = isEn ? `• THE WEDDING OF • ${coupleName.toUpperCase()} •` : `• PERNIKAHAN • ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `•THE WEDDING OF•${coupleName.toUpperCase()}` : `•PERNIKAHAN•${coupleName.toUpperCase()}`;
         labels.heroBadge = isEn ? 'THE WEDDING OF' : 'PERNIKAHAN';
         labels.coupleTitle = isEn ? 'THE BRIDE & GROOM' : 'MEMPELAI';
         labels.coupleSubtitle = isEn ? 'The Couple' : 'Mempelai';
@@ -123,7 +123,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'It is an honor and a happiness for us if you are willing to attend and give your blessings to the newlyweds.' 
             : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.');
     } else if (t === 'anniversary') {
-        labels.circleLogoText = isEn ? `• ANNIVERSARY OF • ${coupleName.toUpperCase()} •` : `• ANNIVERSARY • ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `•ANNIVERSARY OF•${coupleName.toUpperCase()}` : `•ANNIVERSARY•${coupleName.toUpperCase()}`;
         labels.heroBadge = isEn ? 'ANNIVERSARY OF' : 'ANNIVERSARY';
         labels.coupleTitle = isEn ? 'THE COUPLE' : 'PASANGAN';
         labels.coupleSubtitle = isEn ? 'The Couple' : 'Pasangan';
@@ -136,7 +136,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'We will broadcast the happy moments of our anniversary procession virtually through the following platforms.'
             : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi anniversary kami secara virtual melalui platform berikut.';
     } else if (t === 'graduation') {
-        labels.circleLogoText = isEn ? `• GRADUATION OF • ${coupleName.toUpperCase()} •` : `• WISUDA • ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `•GRADUATION OF•${coupleName.toUpperCase()}` : `•WISUDA•${coupleName.toUpperCase()}`;
         labels.heroBadge = isEn ? 'GRADUATION OF' : 'WISUDA';
         labels.coupleTitle = isEn ? 'GRADUATE PROFILE' : 'PROFIL WISUDAWAN';
         labels.coupleSubtitle = isEn ? 'Graduate' : 'Wisudawan/wati';
@@ -148,7 +148,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'We will broadcast the happy moments of our graduation procession virtually through the following platforms.'
             : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi kelulusan kami secara virtual melalui platform berikut.';
     } else if (t === 'birthday') {
-        labels.circleLogoText = isEn ? `• BIRTHDAY OF • ${coupleName.toUpperCase()} •` : `• ULANG TAHUN • ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `•BIRTHDAY OF•${coupleName.toUpperCase()}` : `•ULANG TAHUN•${coupleName.toUpperCase()}`;
         labels.heroBadge = isEn ? 'THE BIRTHDAY OF' : 'ULANG TAHUN';
         labels.coupleTitle = isEn ? 'CELEBRANT PROFILE' : 'PROFIL UTAMA';
         labels.coupleSubtitle = isEn ? 'Celebrant' : 'Ulang Tahun';
@@ -160,7 +160,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'We will broadcast the happy moments of our birthday party virtually through the following platforms.'
             : 'Kami mengundang Anda untuk menyaksikan momen bahagia pesta ulang tahun kami secara virtual melalui platform berikut.';
     } else if (t === 'aqiqah') {
-        labels.circleLogoText = isEn ? `• AQIQAH OF • ${coupleName.toUpperCase()} •` : `• AQIQAH • ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `•AQIQAH OF•${coupleName.toUpperCase()}` : `•AQIQAH•${coupleName.toUpperCase()}`;
         labels.heroBadge = isEn ? 'AQIQAH OF' : 'AQIQAH';
         labels.coupleTitle = isEn ? 'BABY PROFILE' : 'PROFIL ANAK';
         labels.coupleSubtitle = isEn ? 'Child' : 'Buah Hati';
@@ -172,7 +172,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'We will broadcast the happy moments of our baby aqiqah virtually through the following platforms.'
             : 'Kami mengundang Anda untuk menyaksikan momen bahagia aqiqah anak kami secara virtual melalui platform berikut.';
     } else if (t === 'circumcision') {
-        labels.circleLogoText = isEn ? `• CIRCUMCISION OF • ${coupleName.toUpperCase()} •` : `• KHITANAN • ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `•CIRCUMCISION OF•${coupleName.toUpperCase()}` : `•KHITANAN•${coupleName.toUpperCase()}`;
         labels.heroBadge = isEn ? 'CIRCUMCISION OF' : 'KHITANAN';
         labels.coupleTitle = isEn ? 'CHILD PROFILE' : 'PROFIL ANAK';
         labels.coupleSubtitle = isEn ? 'Child' : 'Buah Hati';

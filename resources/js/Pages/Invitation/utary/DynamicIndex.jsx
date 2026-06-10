@@ -144,9 +144,44 @@ function useCountdown(targetDate) {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     useEffect(() => {
+        if (!targetDate) return;
+        
+        let datePart = String(targetDate).substring(0, 10);
+        let timePart = '08:00:00';
+        
+        if (String(targetDate).length > 10) {
+            let parts = String(targetDate).trim().split(/\s+/);
+            if (parts[1]) {
+                timePart = parts[1].substring(0, 5);
+            } else if (String(targetDate).includes('T')) {
+                let tParts = String(targetDate).trim().split('T');
+                if (tParts[1]) {
+                    timePart = tParts[1].substring(0, 5);
+                }
+            }
+            if (timePart.length === 5) {
+                timePart += ':00';
+            }
+        }
+        
+        let isoStr = `${datePart}T${timePart}`;
+        let target = new Date(isoStr);
+        if (isNaN(target.getTime())) {
+            const dateParts = datePart.split('-');
+            const timeParts = timePart.split(':');
+            target = new Date(
+                parseInt(dateParts[0], 10),
+                parseInt(dateParts[1], 10) - 1,
+                parseInt(dateParts[2], 10),
+                parseInt(timeParts[0], 10) || 0,
+                parseInt(timeParts[1], 10) || 0,
+                parseInt(timeParts[2], 10) || 0
+            );
+        }
+
         const tick = () => {
             const now = new Date().getTime();
-            const diff = new Date(String(targetDate).substring(0, 10) + 'T12:00:00').getTime() - now;
+            const diff = target.getTime() - now;
             if (diff <= 0) {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
                 return;
