@@ -1,3 +1,4 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Caveat:wght@400..700&family=Outfit:wght@200;300;400;500;600;700&display=swap');
 
 :root {
@@ -142,6 +143,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  width: 100%;
   max-width: 260px;
   margin: 20px auto;
   box-sizing: border-box;
@@ -428,6 +430,7 @@
 }
 .ps-opening__slideshow-wrapper {
   position: relative;
+  width: 100%;
   max-width: 280px;
   aspect-ratio: 4/3;
   margin: 0 auto;
@@ -501,9 +504,24 @@
 
 /* Countdown Block styling */
 .ps-countdown-wrapper {
-  margin: 20px auto;
-  max-width: 320px;
+  margin: 15px auto;
+  max-width: 280px;
+  padding: 15px 12px;
+  background: var(--ps-white);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px var(--ps-shadow);
+  border-radius: 4px;
   text-align: center;
+}
+.ps-countdown-wrapper h3 {
+  font-family: var(--ps-font-script) !important;
+  font-size: 1.55rem !important;
+  font-weight: bold !important;
+  color: var(--ps-primary) !important;
+  margin-top: 0 !important;
+  margin-bottom: 10px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
 }
 .ps-countdown {
   display: flex;
@@ -521,33 +539,33 @@
   gap: 2px;
 }
 .ps-countdown__digit {
-  font-family: var(--ps-font-heading);
-  background: var(--ps-white);
-  color: var(--ps-primary);
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 3px;
-  width: 26px;
-  height: 36px;
+  font-family: var(--ps-font-script) !important;
+  background: var(--ps-primary) !important;
+  color: var(--ps-white) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  border-radius: 3px !important;
+  width: 22px !important;
+  height: 32px !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  font-size: 1.35rem !important;
+  font-weight: bold !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 .ps-countdown__label {
-  font-family: var(--ps-font-heading);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  color: var(--ps-secondary);
-  margin-top: 6px;
-  letter-spacing: 0.5px;
+  font-family: var(--ps-font-script) !important;
+  font-size: 0.85rem !important;
+  color: var(--ps-secondary) !important;
+  text-transform: none !important;
+  margin-top: 4px !important;
+  letter-spacing: 0.2px !important;
 }
 .ps-countdown__colon {
-  font-family: var(--ps-font-heading);
-  font-size: 1.25rem;
-  color: var(--ps-primary);
-  margin-bottom: 18px;
+  font-family: var(--ps-font-script) !important;
+  font-size: 1.5rem !important;
+  color: var(--ps-primary) !important;
+  margin-bottom: 22px !important;
   animation: blink 1s infinite;
 }
 
@@ -1195,13 +1213,26 @@
 
 /* Quote Box Shrunken styles */
 .ps-quote-card {
-  max-width: 285px !important;
-  margin: 12px auto 20px auto !important;
-  padding: 12px 14px !important;
+  max-width: 250px !important;
+  margin: 10px auto 18px auto !important;
+  padding: 10px 12px !important;
 }
 .ps-opening__ayat {
-  font-size: 1.15rem !important;
-  line-height: 1.35 !important;
+  font-size: 0.95rem !important;
+  line-height: 1.4 !important;
+}
+.ps-opening__source {
+  font-size: 0.72rem !important;
+}
+.ps-opening__text {
+  font-family: var(--ps-font-script) !important;
+  font-size: 1.35rem !important;
+  line-height: 1.45 !important;
+  color: var(--ps-text) !important;
+  margin: 20px auto !important;
+  max-width: 320px !important;
+  text-align: center !important;
+  white-space: pre-line !important;
 }
 
 /* WhatsApp float button */

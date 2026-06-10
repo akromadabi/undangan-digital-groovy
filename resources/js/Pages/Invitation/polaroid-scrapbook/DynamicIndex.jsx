@@ -111,7 +111,7 @@ function TornPaperEdge({ color = '#faf7f2', flip = false }) {
 
 function ScribbleStar({ className = '', style = {} }) {
     return (
-        <svg viewBox="0 0 24 24" className={`ps-doodle ${className}`} style={{ width: '20px', height: '20px', ...style }}>
+        <svg viewBox="0 0 24 24" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '20px', height: '20px', ...style }}>
             <path d="M12 2 L14.5 8.5 L21.5 9 L16.5 13.5 L18 20 L12 16.5 L6 20 L7.5 13.5 L2.5 9 L9.5 8.5 Z" stroke="var(--ps-accent)" strokeWidth="1.8" fill="none" />
         </svg>
     );
@@ -119,8 +119,40 @@ function ScribbleStar({ className = '', style = {} }) {
 
 function ScribbledHeart({ className = '', style = {} }) {
     return (
-        <svg viewBox="0 0 100 100" className={`ps-doodle ${className}`} style={{ width: '30px', height: '30px', ...style }}>
+        <svg viewBox="0 0 100 100" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '30px', height: '30px', ...style }}>
             <path d="M50 35 C50 15, 80 15, 80 38 C80 58, 50 82, 50 82 C50 82, 20 58, 20 38 C20 15, 50 15, 50 35 Z" stroke="var(--ps-primary)" strokeWidth="2.5" fill="none" />
+        </svg>
+    );
+}
+
+function ScribbleSparkle({ className = '', style = {} }) {
+    return (
+        <svg viewBox="0 0 24 24" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '18px', height: '18px', ...style }}>
+            <path d="M12 3 Q12 12 3 12 Q12 12 12 21 Q12 12 21 12 Q12 12 12 3 Z" stroke="var(--ps-accent)" strokeWidth="1.8" fill="none" />
+        </svg>
+    );
+}
+
+function ScribbleSwirl({ className = '', style = {} }) {
+    return (
+        <svg viewBox="0 0 50 50" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '32px', height: '32px', ...style }}>
+            <path d="M25 25 C20 20, 15 25, 20 30 C25 35, 35 30, 30 20 C25 10, 10 15, 15 30 C20 45, 45 40, 40 15" stroke="var(--ps-secondary)" strokeWidth="2" fill="none" />
+        </svg>
+    );
+}
+
+function ScribbleArrow({ className = '', style = {} }) {
+    return (
+        <svg viewBox="0 0 40 40" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '35px', height: '35px', ...style }}>
+            <path d="M10 30 Q25 25 30 10 M22 12 L30 10 L28 18" stroke="var(--ps-accent)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
+function ScribbleCircle({ className = '', style = {} }) {
+    return (
+        <svg viewBox="0 0 100 100" className={`ps-doodle ${className}`} style={{ position: 'absolute', pointerEvents: 'none', zIndex: 10, width: '60px', height: '60px', ...style }}>
+            <path d="M50 15 C30 15, 15 30, 15 50 C15 70, 30 85, 50 85 C70 85, 85 70, 85 50 C85 30, 70 17, 48 18 C32 19, 18 32, 19 48" stroke="var(--ps-primary)" strokeWidth="2" fill="none" />
         </svg>
     );
 }
@@ -209,7 +241,7 @@ function Reveal({ children, className = '', variant = 'up', delay = 0 }) {
 /* ==========================================================================
    SECTION 1: COVER
    ========================================================================== */
-function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverImages }) {
+function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverImages, showPhotos }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -235,7 +267,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverI
             <div className="ps-cover__content">
                 <span className="ps-cover__the-wedding">{t('invitation.wedding_of')}</span>
                 
-                {globalShowPhotos && coverImages.length > 0 ? (
+                {showPhotos && coverImages.length > 0 ? (
                     <div className="ps-polaroid ps-tilt-left relative" style={{ zIndex: 10 }}>
                         <div className="ps-tape ps-tape-top ps-tape--teal" />
                         <div className="ps-polaroid-inner">
@@ -277,7 +309,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverI
 /* ==========================================================================
    SECTION 2: OPENING
    ========================================================================== */
-function OpeningSection({ invitation, brideGrooms, events, showCountdown, galleries }) {
+function OpeningSection({ invitation, brideGrooms, events, showCountdown, galleries, showPhotos }) {
     const { t, locale } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -303,7 +335,7 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown, galler
     }, [invitation?.opening_image, galleries]);
 
     const titleLower = String(invitation?.opening_title || '').toLowerCase();
-    const showTheWeddingSubtitle = !titleLower.includes('wedding') && !titleLower.includes('nikah') && !titleLower.includes('pernikahan');
+    const showTheWeddingSubtitle = (!titleLower || titleLower.includes('bismillah') || titleLower.includes('bismilah')) && !titleLower.includes('wedding') && !titleLower.includes('pernikahan');
 
     return (
         <section id="opening" className="ps-section">
@@ -318,7 +350,7 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown, galler
                     {coupleName}
                 </div>
 
-                {globalShowPhotos && resolvedOpeningImages.length > 0 && (
+                {showPhotos && resolvedOpeningImages.length > 0 && (
                     <div className="ps-polaroid ps-tilt-right relative" style={{ marginBottom: '25px' }}>
                         <div className="ps-tape ps-tape-top-left ps-tape--red" />
                         <div className="ps-paperclip" />
@@ -342,7 +374,7 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown, galler
                 {invitation?.opening_ayat && (
                     <div className="ps-card ps-quote-card" style={{ transform: 'rotate(-0.5deg)', backgroundColor: '#faf7f2', border: '1px solid #eadecc' }}>
                         <ScribbledHeart style={{ top: '6px', right: '6px' }} />
-                        <p className="ps-opening__ayat" style={{ fontFamily: 'var(--ps-font-script)', fontSize: '1.45rem', margin: '0 0 10px 0' }}>
+                        <p className="ps-opening__ayat" style={{ fontFamily: 'var(--ps-font-script)', margin: '0 0 10px 0' }}>
                             &ldquo;{invitation.opening_ayat}&rdquo;
                         </p>
                         {invitation?.opening_ayat_source && (
@@ -351,7 +383,7 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown, galler
                     </div>
                 )}
 
-                <p className="ps-opening__text" style={{ fontFamily: 'var(--ps-font-script)', fontSize: '1.4rem', marginTop: '20px', lineHeight: 1.3 }}>
+                <p className="ps-opening__text">
                     {invitation?.opening_text || 'Atas Karunia Tuhan Yang Maha Esa, perkenankanlah kami menyampaikan kabar bahagia mengenai hari pernikahan kami.'}
                 </p>
             </Reveal>
@@ -362,7 +394,7 @@ function OpeningSection({ invitation, brideGrooms, events, showCountdown, galler
 /* ==========================================================================
    SECTION 3: BRIDE & GROOM
    ========================================================================== */
-function BrideGroomSection({ brideGrooms }) {
+function BrideGroomSection({ brideGrooms, showPhotos }) {
     const { t, locale } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -429,7 +461,7 @@ function BrideGroomSection({ brideGrooms }) {
                 <div className="ps-polaroid ps-tilt-left-more relative">
                     <div className="ps-tape ps-tape-top-left ps-tape--mustard" />
                     <div className="ps-polaroid-inner">
-                        {globalShowPhotos && groom.photo ? (
+                        {showPhotos && groom.photo ? (
                             <img 
                                 src={getStorageUrl(groom.photo)} 
                                 alt={groom.full_name || 'Groom'} 
@@ -481,7 +513,7 @@ function BrideGroomSection({ brideGrooms }) {
                 <div className="ps-polaroid ps-tilt-right-more relative">
                     <div className="ps-tape ps-tape-top-right ps-tape--teal" />
                     <div className="ps-polaroid-inner">
-                        {globalShowPhotos && bride.photo ? (
+                        {showPhotos && bride.photo ? (
                             <img 
                                 src={getStorageUrl(bride.photo)} 
                                 alt={bride.full_name || 'Bride'} 
@@ -1279,7 +1311,7 @@ function Navigation({
                     <i className={isFullscreen ? "fas fa-compress" : "fas fa-expand"} />
                 </button>
 
-                {invitation?.enable_auto_scroll !== false && (
+                {parseBool(invitation?.enable_auto_scroll, true) && (
                     <button
                         type="button"
                         className={`ps-floating-btn ${autoScrollEnabled ? 'ps-floating-btn--active' : ''}`}
@@ -1359,7 +1391,7 @@ export default function DynamicIndex({
     const [activeSectionId, setActiveSectionId] = useState('opening');
     const audioRef = useRef(null);
     usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
-    const [autoScrollEnabled, setAutoScrollEnabled] = useState(invitation?.enable_auto_scroll !== false);
+    const [autoScrollEnabled, setAutoScrollEnabled] = useState(parseBool(invitation?.enable_auto_scroll, true));
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     useEffect(() => {
@@ -1746,8 +1778,8 @@ export default function DynamicIndex({
         const key = section.section_key;
 
         const componentMap = {
-            'opening': <OpeningSection key={key} invitation={invitation} brideGrooms={brideGrooms} events={events} showCountdown={showCountdownInEvent} galleries={galleries} />,
-            'bride_groom': <BrideGroomSection key={key} brideGrooms={brideGrooms} />,
+            'opening': <OpeningSection key={key} invitation={invitation} brideGrooms={brideGrooms} events={events} showCountdown={showCountdownInEvent} galleries={galleries} showPhotos={showPhotos} />,
+            'bride_groom': <BrideGroomSection key={key} brideGrooms={brideGrooms} showPhotos={showPhotos} />,
             'countdown': null, // Embedded in Event section
             'event': <EventSection key={key} events={events} invitation={invitation} showCountdown={showCountdownInEvent} />,
             'livestream': <LiveStreamingSection key={key} events={events} invitation={invitation} />,
@@ -1820,6 +1852,7 @@ export default function DynamicIndex({
                         isOpened={isOpened}
                         onOpen={handleOpen}
                         coverImages={coverImages}
+                        showPhotos={showPhotos}
                     />
 
                     {/* Main Scroller Content */}
