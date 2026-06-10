@@ -803,12 +803,14 @@
     margin-bottom: 0;
 }
 
-.sp02-bank-card__logo {
-    max-height: 20px;
-    width: auto;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
-    z-index: 2;
+.sp02-theme-wrapper img.sp02-bank-card__logo {
+    height: 24px !important;
+    max-height: 24px !important;
+    width: auto !important;
+    object-fit: contain !important;
+    filter: brightness(0) invert(1) !important;
+    z-index: 2 !important;
+    display: inline-block !important;
 }
 
 .sp02-bank-card__chip {

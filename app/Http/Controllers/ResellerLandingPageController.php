@@ -127,6 +127,7 @@ class ResellerLandingPageController extends Controller
                 'footer_address' => $setting->footer_address,
                 'footer_description' => $setting->footer_description,
                 'social_links' => $setting->social_links ?: [],
+                'loading_style' => $setting->landing_page_config['loading_style'] ?? 'pulse',
             ],
             'plans' => $plansData,
             'features' => $features,
@@ -201,7 +202,9 @@ class ResellerLandingPageController extends Controller
                 'footer_address' => $setting->footer_address,
                 'footer_description' => $setting->footer_description,
                 'social_links' => $setting->social_links ?: [],
+                'loading_style' => $setting->landing_page_config['loading_style'] ?? 'pulse',
             ],
+            'sections' => $setting->getOrderedSections(),
             'themes' => $themes,
             'greetingCards' => $greetingCards,
             'greetingCardTypeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
@@ -254,7 +257,9 @@ class ResellerLandingPageController extends Controller
                 'footer_address' => $setting->footer_address,
                 'footer_description' => $setting->footer_description,
                 'social_links' => $setting->social_links ?: [],
+                'loading_style' => $setting->landing_page_config['loading_style'] ?? 'pulse',
             ],
+            'sections' => $setting->getOrderedSections(),
         ]);
     }
 }

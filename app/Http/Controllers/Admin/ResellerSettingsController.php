@@ -266,6 +266,7 @@ class ResellerSettingsController extends Controller
                 'footer_address' => $settings->footer_address,
                 'footer_description' => $settings->footer_description,
                 'social_links' => $settings->social_links ?: [],
+                'loading_style' => $settings->landing_page_config['loading_style'] ?? 'pulse',
             ],
             'palette' => $palette,
             'plans' => $plansData,
@@ -304,6 +305,7 @@ class ResellerSettingsController extends Controller
             'theme'    => 'nullable|string|max:50',
             'palette'  => 'nullable|string|max:50',
             'sections' => 'nullable|array',
+            'loading_style' => 'nullable|string|max:50',
         ]);
 
         $settings = $this->getSettings();
@@ -318,6 +320,9 @@ class ResellerSettingsController extends Controller
         }
         if ($request->has('sections')) {
             $existing['sections'] = $request->sections;
+        }
+        if ($request->has('loading_style')) {
+            $existing['loading_style'] = $request->loading_style;
         }
         $settings->landing_page_config = $existing;
         $settings->save();

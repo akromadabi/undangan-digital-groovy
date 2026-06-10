@@ -916,12 +916,14 @@
   margin-bottom: 25px;
 }
 
-.lx3-bank-card__logo {
-  max-height: 25px;
-  width: auto;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-  z-index: 2;
+.lx3-page img.lx3-bank-card__logo {
+  height: 25px !important;
+  max-height: 25px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  filter: brightness(0) invert(1) !important;
+  z-index: 2 !important;
+  display: block !important;
 }
 
 .lx3-bank-card__chip {

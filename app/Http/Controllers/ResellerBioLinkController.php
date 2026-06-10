@@ -189,6 +189,8 @@ class ResellerBioLinkController extends Controller
             'resellerUrl'      => $resellerUrl,
             'subdomain'        => $subdomain,
             'landingPageTheme' => $setting->getLandingTheme(),
+            'loading_style'    => $setting->landing_page_config['loading_style'] ?? 'pulse',
+            'sections'         => $setting->getOrderedSections(),
         ]);
     }
 }

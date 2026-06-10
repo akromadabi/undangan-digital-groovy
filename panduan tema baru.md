@@ -303,6 +303,17 @@ Seksi pembuka harus ada dan terstruktur dengan kriteria berikut:
       document.body.removeChild(ta);
   };
   ```
+- **Pencegahan Bug Ukuran Logo Bank (BCA & DANA)**:
+  Beberapa browser seluler (dan reset stylesheet global seperti `.tema-page img { height: auto }`) sering menimpa tinggi logo bank di dalam kartu kado digital sehingga logo dirender dengan ukuran resolusi tinggi aslinya (sangat besar/bloated). 
+  **WAJIB** gunakan selektor dengan specificity tinggi (menyertakan tag `img`) dan sertakan properti `!important` agar ukuran logo bank terkunci dengan rapi:
+  ```css
+  .prefix-page img.prefix-card-bank-logo {
+    height: 20px !important;
+    width: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+  ```
 
 ### 4.7 Seksi RSVP & Ucapan Terpadu (`rsvp` / `wishes`)
 - **Unified Form**: RSVP dan Ucapan **WAJIB** berada dalam satu seksi terpadu untuk efisiensi ruang layar ponsel:
@@ -622,7 +633,14 @@ AI Coding Assistant wajib memahami bahwa **mereplikasi referensi berbeda dengan 
 * **Anti-Overlapping Konten:** Pastikan tidak ada elemen navigasi bawah (bottom navigation bar) yang menutupi konten seksi penutup atau tombol aksi penting di bagian bawah layar ponsel. Berikan padding bawah ekstra pada seksi penutup (contoh: `padding-bottom: 90px !important`).
 * **Verifikasi Grid & Flexbox:** AI harus secara cerdas membedakan elemen kolom yang butuh adaptasi responsif seluler. Struktur tabel lebar atau flex sebaris dari referensi desktop **wajib** diubah menjadi grid satu kolom atau flex-col saat mendeteksi ukuran layar ponsel agar konten tidak terpotong ke samping.
 
+### 10.4 Peningkatan Estetika Kreatif dengan Vektor SVG Murni (Anti-Pixelation)
+Saat mereplikasi atau meningkatkan tema yang memiliki visual etnik, tradisional, atau mewah (seperti tema **Adat Jawa**), hindari penggunaan aset gambar raster (PNG/JPG) berkualitas rendah untuk latar belakang, divider, watermark, dan ornamen sudut. 
+* **Redesain Latar Belakang Pola (Pattern):** Ganti pola latar belakang raster yang buram (seperti pola Batik Kawung) dengan SVG pattern murni. Tentukan ukuran cell yang proporsional (contoh: `80px x 80px`), garis stroke yang tipis dan kontras halus, serta tambahkan detail ornamen kecil di titik temu garis agar terlihat premium di semua resolusi layar.
+* **Ornamen Sudut & Pembatas (Divider) Vektor:** Gambar ulang ornamen ukiran sudut tradisional (Ukiran Jawa) dan divider sulur daun menggunakan komponen inline SVG. Ini menjamin ornamen tetap tajam 100% saat di-zoom pada layar ponsel resolusi tinggi (Retina display).
+* **Gunungan & Watermark Vektor:** Dibandingkan menggunakan file PNG siluet yang pecah saat diregangkan, gunakan inline SVG untuk menggambar monumen/monogram (seperti Gunungan Jawa) sebagai latar belakang watermark transparan (opacity `0.08` atau lebih rendah) untuk menyuntikkan atmosfer budaya yang sangat elegan.
+
 *Dokumen ini adalah standarisasi mutlak. Jika tema baru Anda memiliki perilaku yang berbeda dari aturan di atas, Anda telah melanggar blueprint dan wajib merevisinya kembali.*
-*Terakhir diperbarui: Mei 2026*
+*Terakhir diperbarui: Juni 2026*
+
 
 

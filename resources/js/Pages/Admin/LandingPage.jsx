@@ -83,6 +83,7 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
 
     const getSectionLabel = (key) => {
         if (key === 'banner') return 'Promo & Popup';
+        if (key === 'loading_screen') return 'Loading Screen';
         return key.replace(/_/g, ' ');
     };
 
@@ -136,8 +137,10 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
 
 
     // State definitions
-    const [activeTab, setActiveTab] = useState('sections'); // sections, palette
+    const [activeTab, setActiveTab] = useState('sections'); // sections, palette, loading
     const [selectedPalette, setSelectedPalette] = useState(currentPalette || 'crimson');
+    const initialLoadingStyle = (savedSections || defaultSections)?.find(s => s.key === 'loading_screen')?.config?.style || settings?.landing_page_config?.loading_style || 'pulse';
+    const [selectedLoadingStyle, setSelectedLoadingStyle] = useState(initialLoadingStyle);
     const [sections, setSections] = useState(savedSections || defaultSections);
     const [selectedSectionKey, setSelectedSectionKey] = useState(null);
     const [heroImgUrl, setHeroImgUrl] = useState(heroImage || null);
@@ -147,12 +150,14 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
     const [activeIconPickerIdx, setActiveIconPickerIdx] = useState(null);
     const [expandedItemIdx, setExpandedItemIdx] = useState(0);
     const [isVariantDropdownOpen, setIsVariantDropdownOpen] = useState(false);
+    const [isLoadingDropdownOpen, setIsLoadingDropdownOpen] = useState(false);
 
     // Reset editor popup collapsible indices when changing edited section
     useEffect(() => {
         setExpandedItemIdx(0);
         setActiveIconPickerIdx(null);
         setIsVariantDropdownOpen(false);
+        setIsLoadingDropdownOpen(false);
     }, [selectedSectionKey]);
     
     const [previewMode, setPreviewMode] = useState('mobile'); // mobile, desktop
@@ -171,7 +176,7 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
     // Effect to handle real-time postMessage to iframe when state changes
     useEffect(() => {
         updatePreview();
-    }, [sections, selectedPalette, heroImgUrl]);
+    }, [sections, selectedPalette, heroImgUrl, selectedLoadingStyle]);
 
     const updatePreview = () => {
         if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -181,7 +186,8 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                     theme: 'modern-split',
                     palette: selectedPalette,
                     sections: sections,
-                    heroImage: heroImgUrl
+                    heroImage: heroImgUrl,
+                    loading_style: selectedLoadingStyle
                 }
             }, '*');
         }
@@ -327,7 +333,8 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
             const res = await axios.put(`${adminRoutePrefix}/landing-page/config`, {
                 theme: 'modern-split',
                 palette: selectedPalette,
-                sections: sections
+                sections: sections,
+                loading_style: selectedLoadingStyle
             });
             if (res.data?.success) {
                 showToast('Sukses', 'Konfigurasi landing page berhasil disimpan!');
@@ -614,6 +621,8 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                                 </p>
                             </div>
                         )}
+
+
                     </div>
                 </div>
 
@@ -685,7 +694,7 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                         </div>
 
                         {/* Scrollable Form Body */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${selectedSection.key === 'loading_screen' ? 'pb-64' : ''}`}>
                             
                             {/* ══ VARIANT PICKER DROPDOWN ══ */}
                             {SECTION_VARIANTS[selectedSection.key] && (
@@ -765,6 +774,110 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                                             </div>
                                         );
                                     })()}
+                                </div>
+                            )}
+
+                            {/* ══ SECTION: LOADING SCREEN ══ */}
+                            {selectedSection.key === 'loading_screen' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <span className="text-[10px] font-black tracking-wider uppercase text-slate-400 block mb-2">
+                                            Pilih Gaya Animasi Loading Halaman
+                                        </span>
+                                        <p className="text-xs text-slate-500 font-medium mb-4">
+                                            Kustomisasi tampilan pembuka (preloader) sebelum halaman landing selesai memuat. Pilih salah satu dari pilihan menarik di bawah ini.
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="relative z-30">
+                                        {(() => {
+                                            const styles = [
+                                                { id: 'pulse', label: 'Pulse Logo (Klasik)', desc: 'Logo/inisial brand yang berdenyut lembut dengan lingkaran gradasi luar yang berputar secara dinamis.', icon: '🔄' },
+                                                { id: 'glass', label: 'Glassmorphic Shimmer (Premium)', desc: 'Panel kaca frosted mewah dengan logo brand bernafas lembut dan progress bar shimmer gradasi yang futuristik.', icon: '✨' },
+                                                { id: 'rings', label: 'Concentric Rings (Elegan)', desc: 'Cincin orbit ganda yang saling berputar berlawanan arah dengan pendar glow inisial brand di pusatnya.', icon: '🪐' },
+                                                { id: 'bar', label: 'Minimalist Top Bar (Sederhana)', desc: 'Indikator progress tipis berkilau di bagian paling atas layar dengan logo brand yang memudar lembut.', icon: '▬' },
+                                                { id: 'envelope', label: 'Thematic Envelope (Romantis)', desc: 'Animasi amplop pernikahan yang terbuka dan mengeluarkan kartu undangan berdenyut cinta. Sangat estetik!', icon: '✉️' },
+                                            ];
+                                            const currentStyleId = selectedSection.config?.style || 'pulse';
+                                            const activeStyle = styles.find(s => s.id === currentStyleId) || styles[0];
+                                            
+                                            return (
+                                                <div className="relative">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setIsLoadingDropdownOpen(!isLoadingDropdownOpen)}
+                                                        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-[#e8e5e0] hover:border-[#E5654B] rounded-2xl transition-all shadow-sm group text-left"
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-xl bg-orange-50 text-[#E5654B] w-8 h-8 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                                {activeStyle.icon}
+                                                            </span>
+                                                            <div>
+                                                                <div className="text-xs font-bold text-slate-800">{activeStyle.label}</div>
+                                                                <div className="text-[10px] text-slate-400 font-semibold leading-relaxed truncate max-w-[380px]">{activeStyle.desc}</div>
+                                                            </div>
+                                                        </div>
+                                                        <span className={`text-slate-400 transition-transform duration-200 flex-shrink-0 ${isLoadingDropdownOpen ? 'rotate-180' : ''}`}>
+                                                            <Icon d="M19.5 8.25l-7.5 7.5-7.5-7.5" className="w-4 h-4" />
+                                                        </span>
+                                                    </button>
+
+                                                    {/* Dropdown Menu Overlay */}
+                                                    {isLoadingDropdownOpen && (
+                                                        <>
+                                                            {/* Invisible backdrop to close on click outside */}
+                                                            <div 
+                                                                className="fixed inset-0 z-40 bg-transparent" 
+                                                                onClick={() => setIsLoadingDropdownOpen(false)} 
+                                                            />
+                                                            <div className="absolute left-0 right-0 mt-2 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl z-50 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 max-h-[320px] overflow-y-auto">
+                                                                {styles.map(s => {
+                                                                    const isSelected = s.id === currentStyleId;
+                                                                    return (
+                                                                        <button
+                                                                            key={s.id}
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                updateSectionConfigField('loading_screen', 'style', s.id);
+                                                                                setSelectedLoadingStyle(s.id);
+                                                                                setIsLoadingDropdownOpen(false);
+                                                                                if (iframeRef.current && iframeRef.current.contentWindow) {
+                                                                                    iframeRef.current.contentWindow.postMessage({
+                                                                                        type: 'replay_preloader',
+                                                                                        loading_style: s.id
+                                                                                    }, '*');
+                                                                                }
+                                                                            }}
+                                                                            className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all ${
+                                                                                isSelected 
+                                                                                    ? 'bg-orange-50/50 text-[#E5654B] font-extrabold' 
+                                                                                    : 'hover:bg-slate-50 text-slate-655'
+                                                                            }`}
+                                                                        >
+                                                                            <div className="flex items-start gap-3">
+                                                                                <span className={`text-lg w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${isSelected ? 'bg-orange-100 text-[#E5654B]' : 'bg-slate-100 text-slate-500'}`}>
+                                                                                    {s.icon}
+                                                                                </span>
+                                                                                <div>
+                                                                                    <div className="text-xs font-bold">{s.label}</div>
+                                                                                    <div className="text-[10px] text-slate-500 mt-0.5 font-medium leading-relaxed">{s.desc}</div>
+                                                                                </div>
+                                                                            </div>
+                                                                            {isSelected && (
+                                                                                <span className="text-[#E5654B] flex-shrink-0 ml-2">
+                                                                                    <Icon d="M4.5 12.75l6 6 9-13.5" className="w-4 h-4 stroke-[3]" />
+                                                                                </span>
+                                                                            )}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
                                 </div>
                             )}
 

@@ -65,6 +65,14 @@ class ResellerSetting extends Model
     {
         return [
             [
+                'key'    => 'loading_screen',
+                'active' => true,
+                'order'  => -1,
+                'config' => [
+                    'style' => 'pulse',
+                ],
+            ],
+            [
                 'key'    => 'banner',
                 'active' => true,
                 'order'  => 0,

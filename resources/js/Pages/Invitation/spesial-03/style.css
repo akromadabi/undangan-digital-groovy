@@ -1049,3 +1049,10 @@
     transform: scaleY(-0.35) translateY(15%);
   }
 }
+
+.sp03-bank-card img.sp03-bank-card__logo {
+  height: 24px !important;
+  max-height: 24px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}

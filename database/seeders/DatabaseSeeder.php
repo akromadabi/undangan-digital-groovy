@@ -219,6 +219,7 @@ class DatabaseSeeder extends Seeder
             TiktokThemeSeeder::class,
             ManchesterUnitedThemeSeeder::class,
             MoroccanThemeSeeder::class,
+            AdatJawaThemeSeeder::class,
             WhatsappThemeSeeder::class,
             SpidermanThemeSeeder::class,
             CandyLandThemeSeeder::class,
