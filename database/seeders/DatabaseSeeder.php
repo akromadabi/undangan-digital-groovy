@@ -228,6 +228,7 @@ class DatabaseSeeder extends Seeder
             HandwritingThemeSeeder::class,
             FairytaleThemeSeeder::class,
             ChelseaThemeSeeder::class,
+            PolaroidThemeSeeder::class,
         ]);
 
         // Restore custom fields (like uploaded thumbnails) after seeders have run
