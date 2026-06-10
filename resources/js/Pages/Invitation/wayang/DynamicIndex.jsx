@@ -79,7 +79,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
     }
 
     let labels = {
-        circleLogoText: isEn ? `• EVENT OF ${coupleName.toUpperCase()} •` : `• ACARA ${coupleName.toUpperCase()} •`,
+        circleLogoText: isEn ? `• EVENT OF • ${coupleName.toUpperCase()} •` : `• ACARA • ${coupleName.toUpperCase()} •`,
         heroBadge: isEn ? 'SPECIAL EVENT' : 'ACARA SPESIAL',
         heroDateLabel: isEn ? 'SAVE THE DATE' : 'SIMPAN TANGGAL',
         
@@ -107,7 +107,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
     };
 
     if (t === 'wedding') {
-        labels.circleLogoText = isEn ? `• THE WEDDING OF ${coupleName.toUpperCase()} •` : `• PERNIKAHAN ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `• THE WEDDING OF • ${coupleName.toUpperCase()} •` : `• PERNIKAHAN • ${coupleName.toUpperCase()} •`;
         labels.heroBadge = isEn ? 'THE WEDDING OF' : 'PERNIKAHAN';
         labels.coupleTitle = isEn ? 'THE BRIDE & GROOM' : 'MEMPELAI';
         labels.coupleSubtitle = isEn ? 'The Couple' : 'Mempelai';
@@ -123,7 +123,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'It is an honor and a happiness for us if you are willing to attend and give your blessings to the newlyweds.' 
             : 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.');
     } else if (t === 'anniversary') {
-        labels.circleLogoText = isEn ? `• ANNIVERSARY OF ${coupleName.toUpperCase()} •` : `• ANNIVERSARY ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `• ANNIVERSARY OF • ${coupleName.toUpperCase()} •` : `• ANNIVERSARY • ${coupleName.toUpperCase()} •`;
         labels.heroBadge = isEn ? 'ANNIVERSARY OF' : 'ANNIVERSARY';
         labels.coupleTitle = isEn ? 'THE COUPLE' : 'PASANGAN';
         labels.coupleSubtitle = isEn ? 'The Couple' : 'Pasangan';
@@ -136,7 +136,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'We will broadcast the happy moments of our anniversary procession virtually through the following platforms.'
             : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi anniversary kami secara virtual melalui platform berikut.';
     } else if (t === 'graduation') {
-        labels.circleLogoText = isEn ? `• GRADUATION OF ${coupleName.toUpperCase()} •` : `• WISUDA ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `• GRADUATION OF • ${coupleName.toUpperCase()} •` : `• WISUDA • ${coupleName.toUpperCase()} •`;
         labels.heroBadge = isEn ? 'GRADUATION OF' : 'WISUDA';
         labels.coupleTitle = isEn ? 'GRADUATE PROFILE' : 'PROFIL WISUDAWAN';
         labels.coupleSubtitle = isEn ? 'Graduate' : 'Wisudawan/wati';
@@ -148,7 +148,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'We will broadcast the happy moments of our graduation procession virtually through the following platforms.'
             : 'Kami mengundang Anda untuk menyaksikan momen bahagia prosesi kelulusan kami secara virtual melalui platform berikut.';
     } else if (t === 'birthday') {
-        labels.circleLogoText = isEn ? `• BIRTHDAY OF ${coupleName.toUpperCase()} •` : `• ULANG TAHUN ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `• BIRTHDAY OF • ${coupleName.toUpperCase()} •` : `• ULANG TAHUN • ${coupleName.toUpperCase()} •`;
         labels.heroBadge = isEn ? 'THE BIRTHDAY OF' : 'ULANG TAHUN';
         labels.coupleTitle = isEn ? 'CELEBRANT PROFILE' : 'PROFIL UTAMA';
         labels.coupleSubtitle = isEn ? 'Celebrant' : 'Ulang Tahun';
@@ -160,7 +160,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'We will broadcast the happy moments of our birthday party virtually through the following platforms.'
             : 'Kami mengundang Anda untuk menyaksikan momen bahagia pesta ulang tahun kami secara virtual melalui platform berikut.';
     } else if (t === 'aqiqah') {
-        labels.circleLogoText = isEn ? `• AQIQAH OF ${coupleName.toUpperCase()} •` : `• AQIQAH ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `• AQIQAH OF • ${coupleName.toUpperCase()} •` : `• AQIQAH • ${coupleName.toUpperCase()} •`;
         labels.heroBadge = isEn ? 'AQIQAH OF' : 'AQIQAH';
         labels.coupleTitle = isEn ? 'BABY PROFILE' : 'PROFIL ANAK';
         labels.coupleSubtitle = isEn ? 'Child' : 'Buah Hati';
@@ -172,7 +172,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
             ? 'We will broadcast the happy moments of our baby aqiqah virtually through the following platforms.'
             : 'Kami mengundang Anda untuk menyaksikan momen bahagia aqiqah anak kami secara virtual melalui platform berikut.';
     } else if (t === 'circumcision') {
-        labels.circleLogoText = isEn ? `• CIRCUMCISION OF ${coupleName.toUpperCase()} •` : `• KHITANAN ${coupleName.toUpperCase()} •`;
+        labels.circleLogoText = isEn ? `• CIRCUMCISION OF • ${coupleName.toUpperCase()} •` : `• KHITANAN • ${coupleName.toUpperCase()} •`;
         labels.heroBadge = isEn ? 'CIRCUMCISION OF' : 'KHITANAN';
         labels.coupleTitle = isEn ? 'CHILD PROFILE' : 'PROFIL ANAK';
         labels.coupleSubtitle = isEn ? 'Child' : 'Buah Hati';
@@ -487,17 +487,18 @@ function OpeningSection({ invitation, brideGrooms, events, language, themeConfig
     const coupleName = themeConfig?.coupleName || 'Bimo & Raras';
 
     // Date and Countdown
-    const targetDate = invitation?.countdown_target_date || '';
-    const countdown = useCountdown(targetDate);
+    const listEvents = safeArr(events);
+    const primaryEvent = listEvents.find(e => e.is_primary) || listEvents[0];
+    const targetDate = primaryEvent?.event_date || invitation?.countdown_target_date || '';
+    const targetTime = primaryEvent?.start_time || '';
+    const countdown = useCountdown(targetDate, targetTime);
 
     const getDotDateFormat = (dateStr) => {
         if (!dateStr) return '';
-        const d = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
-        if (isNaN(d.getTime())) return '';
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        return `${day}. ${month}. ${year}`;
+        const cleanDate = String(dateStr).substring(0, 10);
+        const parts = cleanDate.split('-');
+        if (parts.length < 3) return '';
+        return `${parts[2]}. ${parts[1]}. ${parts[0]}`;
     };
 
     const formattedDate = getDotDateFormat(targetDate);
@@ -707,13 +708,51 @@ function CoupleSection({ brideGrooms, language, id, themeConfig }) {
     );
 }
 
+// Safe date parsing helper for cross-browser local time countdowns
+function parseSafeDate(dateStr, timeStr = '') {
+    if (!dateStr) return null;
+    let datePart = String(dateStr).substring(0, 10);
+    let timePart = '08:00:00';
+    
+    if (timeStr) {
+        timePart = String(timeStr).substring(0, 5) + ':00';
+    } else if (String(dateStr).length > 10) {
+        let parts = String(dateStr).trim().split(/\s+/);
+        if (parts[1]) {
+            timePart = parts[1].substring(0, 5);
+            if (timePart.length === 5) {
+                timePart += ':00';
+            }
+        }
+    }
+    
+    let isoStr = `${datePart}T${timePart}`;
+    let d = new Date(isoStr);
+    if (!isNaN(d.getTime())) {
+        return d;
+    }
+    
+    const dateParts = datePart.split('-');
+    const timeParts = timePart.split(':');
+    return new Date(
+        parseInt(dateParts[0], 10),
+        parseInt(dateParts[1], 10) - 1,
+        parseInt(dateParts[2], 10),
+        parseInt(timeParts[0], 10) || 0,
+        parseInt(timeParts[1], 10) || 0,
+        parseInt(timeParts[2], 10) || 0
+    );
+}
+
 // 4. Countdown Hook
-function useCountdown(targetDate) {
+function useCountdown(targetDate, targetTime = '') {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     useEffect(() => {
         if (!targetDate) return;
         const tick = () => {
-            const diff = new Date(String(targetDate).substring(0, 10) + 'T12:00:00').getTime() - Date.now();
+            const target = parseSafeDate(targetDate, targetTime);
+            if (!target) return;
+            const diff = target.getTime() - Date.now();
             if (diff <= 0) {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
                 return;
@@ -728,16 +767,18 @@ function useCountdown(targetDate) {
         tick();
         const id = setInterval(tick, 1000);
         return () => clearInterval(id);
-    }, [targetDate]);
+    }, [targetDate, targetTime]);
     return timeLeft;
 }
 
 // 5. Countdown & Event Section
-// 5. Countdown & Event Section
 function EventSection({ events, invitation, language, themeConfig }) {
     const { t } = useTranslation(language);
-    const countdown = useCountdown(invitation?.countdown_target_date);
     const listEvents = safeArr(events);
+    const primaryEvent = listEvents.find(e => e.is_primary) || listEvents[0];
+    const countdownTargetDate = primaryEvent?.event_date || invitation?.countdown_target_date || '';
+    const countdownTargetTime = primaryEvent?.start_time || '';
+    const countdown = useCountdown(countdownTargetDate, countdownTargetTime);
 
     const eventTitle = themeConfig?.labels?.eventTitle || t('invitation.save_the_date');
     const eventSubtitle = themeConfig?.labels?.eventSubtitle || t('invitation.save_the_date');

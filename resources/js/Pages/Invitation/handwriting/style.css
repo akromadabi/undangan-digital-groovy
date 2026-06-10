@@ -3,7 +3,7 @@
    Scoped strictly under the .hw-page & .hw-theme to prevent leaks.
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Kalam:wght@400;700&family=Playpen+Sans:wght@300..700&family=Sacramento&family=Outfit:wght@200;300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Dancing+Script:wght@400..700&family=Kalam:wght@400;700&family=Playpen+Sans:wght@300..700&family=Sacramento&family=Outfit:wght@200;300;400;500;600;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 
 /* --- Design Tokens --- */
@@ -20,8 +20,8 @@
 
   --hw-font-heading: 'Kalam', cursive;
   --hw-font-body: 'Outfit', sans-serif;
-  --hw-font-accent: 'Sacramento', cursive;
-  --hw-font-script: 'Sacramento', cursive;
+  --hw-font-accent: 'Dancing Script', cursive;
+  --hw-font-script: 'Dancing Script', cursive;
   --hw-font-handwriting: 'Caveat', cursive;
 }
 
@@ -229,7 +229,7 @@
   z-index: 2;
   width: 100%;
   max-width: 400px;
-  padding: 30px;
+  padding: 10px 30px 30px 30px; /* Reduced padding-top to pull contents up */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -238,9 +238,10 @@
 
 .hw-cover__the-wedding {
   font-family: var(--hw-font-accent);
-  font-size: 2.8rem;
+  font-size: 3.2rem; /* Adjusted size for Dancing Script */
   color: var(--hw-primary);
-  margin-bottom: 5px; /* Reduced from 25px to pull the rope up */
+  margin-top: -10px; /* Pull the text slightly up */
+  margin-bottom: 5px;
   line-height: 1.1;
   letter-spacing: normal;
   text-transform: none;
@@ -265,8 +266,8 @@
 .hw-rope-container {
   width: 100%;
   max-width: 320px;
-  margin-top: 0px; /* Reduced from 10px to pull the rope up */
-  margin-bottom: 115px; /* Increased from 40px to give vertical clearance for the single large polaroid */
+  margin-top: -5px; /* Pull the rope container slightly up */
+  margin-bottom: 155px; /* Increased to 155px to ensure polaroid fully clears the couple names below */
 }
 
 .hw-rope {
