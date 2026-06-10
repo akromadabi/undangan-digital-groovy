@@ -145,7 +145,11 @@ function pad2(n) {
 function formatDate(d, locale = 'id') {
     if (!d) return '';
     const loc = String(locale).toLowerCase() === 'en' ? 'en-US' : 'id-ID';
-    return new Date(d).toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const safe = String(d).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safe);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function formatTime(t) {
@@ -153,14 +157,15 @@ function formatTime(t) {
     return String(t).substring(0, 5);
 }
 
-function parseEventDate(dateString) {
+function parseEventDate(dateString, locale = 'id') {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    const d = new Date(dateString);
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    
+    const loc = String(locale).toLowerCase() === 'en' ? 'en-US' : 'id-ID';
     const dayNum = String(d.getDate()).padStart(2, '0');
-    const dayName = d.toLocaleDateString('id-ID', { weekday: 'long' });
-    const monthName = d.toLocaleDateString('id-ID', { month: 'long' });
+    const dayName = d.toLocaleDateString(loc, { weekday: 'long' });
+    const monthName = d.toLocaleDateString(loc, { month: 'long' });
     const year = d.getFullYear();
     
     return { dayNum, dayName, monthName, year };
@@ -945,12 +950,14 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language, onToa
 /* ═══════════════════════════════════════
    COUNTDOWN TIMER INSIDE EVENT SECTION
    ═══════════════════════════════════════ */
-function CountdownTimer({ targetDate, language }) {
+function CountdownTimer({ targetDate, startTime, language }) {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     useEffect(() => {
         if (!targetDate) return;
-        const target = new Date(targetDate.replace(/-/g, '/')).getTime();
+        const ds = String(targetDate).substring(0, 10);
+        const timeStr = String(startTime || '08:00').substring(0, 5);
+        const target = new Date(`${ds}T${timeStr}:00`).getTime();
         if (isNaN(target)) return;
 
         const updateTimer = () => {
@@ -1007,9 +1014,12 @@ function EventSection({ events, invitation, language, sections }) {
     const isEn = t('invitation.save_the_date') === 'Save The Date';
 
     const showCountdown = parseBool(invitation?.show_countdown, true);
+    const primaryEvent = eventList.find(e => e.is_primary) || eventList[0];
+    const countdownTargetDate = primaryEvent?.event_date || invitation?.countdown_target_date || '';
+    const countdownTargetTime = primaryEvent?.start_time || '08:00';
+
     const showCountdownInEvent = (() => {
-        const targetDate = invitation?.countdown_target_date;
-        if (!targetDate || !showCountdown) return false;
+        if (!countdownTargetDate || !showCountdown) return false;
         
         const safeSections = safeArr(sections);
         if (safeSections.length > 0) {
@@ -1040,7 +1050,7 @@ function EventSection({ events, invitation, language, sections }) {
                         <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--ttk-gray)', fontWeight: 700, marginBottom: 5 }}>
                             {isEn ? 'Countdown to Joy' : 'Hitung Mundur Hari Bahagia'}
                         </div>
-                        <CountdownTimer targetDate={invitation.countdown_target_date} language={language} />
+                        <CountdownTimer targetDate={countdownTargetDate} startTime={countdownTargetTime} language={language} />
                     </div>
                 </Reveal>
             )}

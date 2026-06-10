@@ -194,7 +194,7 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
 
 function formatDate(dateStr, lang = 'id') {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const date = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
     if (isNaN(date.getTime())) {
         return String(dateStr).toUpperCase();
     }
@@ -206,7 +206,7 @@ function formatDate(dateStr, lang = 'id') {
 
 function formatShortDate(dateStr, lang = 'id') {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const date = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
     if (isNaN(date.getTime())) {
         return dateStr;
     }
@@ -357,6 +357,41 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
 
     const coupleName = themeConfig?.coupleName || 'Bimo & Raras';
 
+    const circleText = themeConfig?.labels?.circleLogoText || (isEn ? '• THE WEDDING OF •' : '• PERNIKAHAN •');
+
+    // Dynamic sizing for circular text to prevent overflow/cutoff
+    const textLength = circleText.length;
+    let circleFontSize = '9.5px';
+    let circleLetterSpacing = '4px';
+
+    if (textLength > 45) {
+        circleFontSize = '4.8px';
+        circleLetterSpacing = '0.5px';
+    } else if (textLength > 40) {
+        circleFontSize = '5.5px';
+        circleLetterSpacing = '1px';
+    } else if (textLength > 35) {
+        circleFontSize = '6.3px';
+        circleLetterSpacing = '1.5px';
+    } else if (textLength > 30) {
+        circleFontSize = '7.2px';
+        circleLetterSpacing = '2.2px';
+    } else if (textLength > 25) {
+        circleFontSize = '8.2px';
+        circleLetterSpacing = '3px';
+    }
+
+    // Dynamic sizing for main couple name to prevent cutoff on mobile
+    const coupleNameLength = coupleName.length;
+    let coupleFontSize = undefined;
+    if (coupleNameLength > 30) {
+        coupleFontSize = '28px';
+    } else if (coupleNameLength > 24) {
+        coupleFontSize = '36px';
+    } else if (coupleNameLength > 18) {
+        coupleFontSize = '44px';
+    }
+
     const coverImages = useMemo(() => {
         if (!invitation?.cover_image) return [];
         return invitation.cover_image.split(',').map(url => getThemeAssetUrl(url, null)).filter(Boolean);
@@ -393,11 +428,14 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
             <div className="wy-cover-wrapper">
                 {/* Rotating Circle Logo Text with Javanese Gunungan in center */}
                 <div className="wy-cover-circle-logo">
-                    <svg viewBox="0 0 100 100">
+                    <svg viewBox="0 0 100 100" style={{
+                        '--wy-circle-font-size': circleFontSize,
+                        '--wy-circle-letter-spacing': circleLetterSpacing
+                    }}>
                         <path id="circlePath" fill="none" stroke="none" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
                         <text>
                             <textPath href="#circlePath" startOffset="0%">
-                                {themeConfig?.labels?.circleLogoText || (isEn ? '• THE WEDDING OF •' : '• PERNIKAHAN •')}
+                                {circleText}
                             </textPath>
                         </text>
                     </svg>
@@ -406,7 +444,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
                     </div>
                 </div>
 
-                <h1 className="wy-cover-couple">{coupleName}</h1>
+                <h1 className="wy-cover-couple" style={coupleFontSize ? { '--wy-cover-couple-size': coupleFontSize } : undefined}>{coupleName}</h1>
 
                 <div className="wy-cover-dear">{isEn ? 'To:' : 'Kepada:'}</div>
                 <div className="wy-cover-guest">{activeGuest.name}</div>
@@ -454,7 +492,7 @@ function OpeningSection({ invitation, brideGrooms, events, language, themeConfig
 
     const getDotDateFormat = (dateStr) => {
         if (!dateStr) return '';
-        const d = new Date(dateStr);
+        const d = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
         if (isNaN(d.getTime())) return '';
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -675,7 +713,7 @@ function useCountdown(targetDate) {
     useEffect(() => {
         if (!targetDate) return;
         const tick = () => {
-            const diff = new Date(targetDate).getTime() - Date.now();
+            const diff = new Date(String(targetDate).substring(0, 10) + 'T12:00:00').getTime() - Date.now();
             if (diff <= 0) {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
                 return;

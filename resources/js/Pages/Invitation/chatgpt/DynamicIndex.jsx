@@ -338,7 +338,11 @@ function pad2(n) {
 function formatDate(d, locale = 'id') {
     if (!d) return '';
     const loc = String(locale).toLowerCase() === 'en' ? 'en-US' : 'id-ID';
-    return new Date(d).toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const safe = String(d).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safe);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function formatTime(t) {
@@ -346,14 +350,15 @@ function formatTime(t) {
     return String(t).substring(0, 5);
 }
 
-function parseEventDate(dateString) {
+function parseEventDate(dateString, locale = 'id') {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    const d = new Date(dateString);
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    
+    const loc = locale === 'en' ? 'en-US' : 'id-ID';
     const dayNum = String(d.getDate()).padStart(2, '0');
-    const dayName = d.toLocaleDateString('id-ID', { weekday: 'long' });
-    const monthName = d.toLocaleDateString('id-ID', { month: 'long' });
+    const dayName = d.toLocaleDateString(loc, { weekday: 'long' });
+    const monthName = d.toLocaleDateString(loc, { month: 'long' });
     const year = d.getFullYear();
     
     return { dayNum, dayName, monthName, year };

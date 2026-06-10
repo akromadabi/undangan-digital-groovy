@@ -40,9 +40,13 @@ function pad2(n) {
     return String(n).padStart(2, '0');
 }
 
-function formatDate(d) {
+function formatDate(d, locale = 'id') {
     if (!d) return '';
-    return new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const safe = String(d).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safe);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function getYoutubeId(url) {
@@ -63,14 +67,15 @@ function formatTime(t) {
     return String(t).substring(0, 5);
 }
 
-function parseEventDate(dateString) {
+function parseEventDate(dateString, locale = 'id') {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    const d = new Date(dateString);
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    
+    const loc = locale === 'en' ? 'en-US' : 'id-ID';
     const dayNum = String(d.getDate()).padStart(2, '0');
-    const dayName = d.toLocaleDateString('id-ID', { weekday: 'long' });
-    const monthName = d.toLocaleDateString('id-ID', { month: 'long' });
+    const dayName = d.toLocaleDateString(loc, { weekday: 'long' });
+    const monthName = d.toLocaleDateString(loc, { month: 'long' });
     const year = d.getFullYear();
     
     return { dayNum, dayName, monthName, year };
@@ -284,7 +289,8 @@ function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode, c
 
     const formattedDate = useMemo(() => {
         if (!targetDate) return '';
-        const d = new Date(targetDate);
+        // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+        const d = new Date(String(targetDate).substring(0, 10) + 'T12:00:00');
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
@@ -905,7 +911,7 @@ function TimelineCard({ story, idx, isEven }) {
         <div ref={ref} className={`lx4-story__node lx4-story__node--${isEven ? 'left' : 'right'} ${isActive ? 'is-active' : ''}`}>
             <Reveal className="lx4-story__card">
                 <div className="lx4-story__date">
-                    {story.story_date ? (isNaN(new Date(story.story_date).getTime()) ? story.story_date : new Date(story.story_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long' })) : ''}
+                    {story.story_date ? (isNaN(new Date(String(story.story_date).substring(0, 10) + 'T12:00:00').getTime()) ? story.story_date : new Date(String(story.story_date).substring(0, 10) + 'T12:00:00').toLocaleDateString('id-ID', { year: 'numeric', month: 'long' })) : ''}
                 </div>
                 <h3 className="lx4-story__title">{story.title}</h3>
                 <p className="lx4-story__desc">{story.description || story.story}</p>

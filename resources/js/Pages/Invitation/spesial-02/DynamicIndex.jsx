@@ -64,7 +64,11 @@ function pad2(n) {
 
 function formatDate(d, locale) {
     if (!d) return '';
-    return new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', { 
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const safe = String(d).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safe);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', { 
         weekday: 'long', 
         day: 'numeric', 
         month: 'long', 
@@ -79,7 +83,8 @@ function formatTime(t) {
 
 function parseEventDate(dateString, locale) {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    const d = new Date(dateString);
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
     
     const dayNum = String(d.getDate()).padStart(2, '0');
@@ -830,7 +835,7 @@ function LoveStorySection({ loveStories }) {
                     <div key={story.id || i} className="sp02-timeline-item">
                         <div className="sp02-story-bubble">
                             <div className="sp02-timeline-date">
-                                {story.story_date ? new Date(story.story_date).getFullYear() : story.year || ''}
+                                {story.story_date ? new Date(String(story.story_date).substring(0, 10) + 'T12:00:00').getFullYear() : story.year || ''}
                             </div>
                             <h4 className="sp02-timeline-title">
                                 {story.title}

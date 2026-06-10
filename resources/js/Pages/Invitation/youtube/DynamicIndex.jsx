@@ -48,7 +48,7 @@ function formatStoryDate(dateStr) {
     const datePattern = /^\d{4}-\d{2}-\d{2}/;
     if (datePattern.test(dateStr)) {
         try {
-            const d = new Date(dateStr);
+            const d = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
             if (!isNaN(d.getTime())) {
                 return d.toLocaleDateString('id-ID', {
                     day: 'numeric',
@@ -644,7 +644,7 @@ function BrideGroomSection({ invitation, brideGrooms, events, id, galleries }) {
                         <div className="yt-premiere-details" style={{ backgroundColor: 'var(--yt-card-bg)', border: '1px solid var(--yt-border)', borderTop: 'none', borderRadius: '0 0 12px 12px', padding: '16px', textAlign: 'center', boxSizing: 'border-box' }}>
                             <div className="yt-premiere-badge" style={{ fontSize: '10px', color: '#ff0000', fontWeight: 'bold', letterSpacing: '0.8px', marginBottom: '4px' }}>PREMIERE LIVE IN</div>
                             {(() => {
-                                const d = new Date(primaryEvent.event_date);
+                                const d = new Date(String(primaryEvent.event_date).substring(0, 10) + 'T12:00:00');
                                 return (
                                     <div className="yt-premiere-date-display" style={{ marginBottom: '12px' }}>
                                         <h4 className="yt-premiere-date-text" style={{ margin: 0, fontSize: '14px', fontWeight: 'bold', color: 'var(--yt-white)' }}>
@@ -692,7 +692,7 @@ function EventSection({ events, invitation }) {
             <div className="yt-events-list">
                 {safeEvents.map((ev, idx) => {
                     const evDate = ev.event_date || ev.date;
-                    const d = evDate ? new Date(evDate) : null;
+                    const d = evDate ? new Date(String(evDate).substring(0, 10) + 'T12:00:00') : null;
                     const fallbackImg = getStorageUrl(invitation?.cover_image, dummyCover);
                     const eventImg = getStorageUrl(ev.image, fallbackImg);
 

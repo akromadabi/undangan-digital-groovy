@@ -452,7 +452,9 @@ const isArabicText = (text) => {
 
 function formatDate(dateStr, lang = 'id') {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    // Safe parsing: append T12:00:00 to prevent UTC midnight offset bug
+    const safe = String(dateStr).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safe);
     if (isNaN(date.getTime())) {
         return String(dateStr).toUpperCase();
     }
@@ -673,7 +675,8 @@ function OpeningSection({ invitation, brideGrooms, language, themeConfig }) {
 
     const getDotDateFormat = (dateStr) => {
         if (!dateStr) return '';
-        const d = new Date(dateStr);
+        // Safe parsing: append T12:00:00 to prevent UTC midnight offset bug
+        const d = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
         if (isNaN(d.getTime())) return '';
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -899,12 +902,16 @@ function CoupleSection({ brideGrooms, language, id, themeConfig }) {
 }
 
 // 4. Countdown Hook
-function useCountdown(targetDate) {
+function useCountdown(targetDate, targetTime = '08:00') {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     useEffect(() => {
         if (!targetDate) return;
+        // Safe parsing: combine date + time as local time (not UTC)
+        const dateStr = String(targetDate).substring(0, 10);
+        const timeStr = String(targetTime || '08:00').substring(0, 5);
         const tick = () => {
-            const diff = new Date(targetDate).getTime() - Date.now();
+            const target = new Date(`${dateStr}T${timeStr}:00`);
+            const diff = target.getTime() - Date.now();
             if (diff <= 0) {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
                 return;
@@ -919,14 +926,19 @@ function useCountdown(targetDate) {
         tick();
         const id = setInterval(tick, 1000);
         return () => clearInterval(id);
-    }, [targetDate]);
+    }, [targetDate, targetTime]);
     return timeLeft;
 }
 
 // 5. Event Section & Countdown
 function EventSection({ events, invitation, sections, language, themeConfig }) {
-    const countdown = useCountdown(invitation?.countdown_target_date);
+    // Gunakan event_date dari primary event sebagai sumber countdown utama
+    // fallback ke countdown_target_date jika tidak ada primary event
     const listEvents = safeArr(events);
+    const primaryEvent = listEvents.find(e => e.is_primary) || listEvents[0];
+    const countdownTargetDate = primaryEvent?.event_date || invitation?.countdown_target_date || '';
+    const countdownTargetTime = primaryEvent?.start_time || '08:00';
+    const countdown = useCountdown(countdownTargetDate, countdownTargetTime);
 
     const eventTitle = themeConfig?.labels?.eventTitle || 'SAVE THE DATE';
     const eventSubtitle = themeConfig?.labels?.eventSubtitle || 'Agenda Acara';
@@ -952,7 +964,7 @@ function EventSection({ events, invitation, sections, language, themeConfig }) {
             </Reveal>
 
             {/* Countdown widget */}
-            {showCountdownInEvent && invitation?.countdown_target_date && (
+            {showCountdownInEvent && countdownTargetDate && (
                 <Reveal className="aj-countdown-row" variant="zoom">
                     <div className="aj-countdown-item">
                         <span className="aj-countdown-value">{String(countdown.days).padStart(2, '0')}</span>

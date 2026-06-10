@@ -76,7 +76,7 @@ const fallbackCopy = (text) => {
 
 function formatDate(dateString, locale) {
     if (!dateString) return '';
-    const d = new Date(dateString);
+    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
     if (isNaN(d.getTime())) return dateString;
     return d.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', {
         weekday: 'long',
@@ -92,7 +92,7 @@ function useCountdown(targetDate) {
     useEffect(() => {
         if (!targetDate) return;
         const calculate = () => {
-            const difference = +new Date(targetDate) - +new Date();
+            const difference = +new Date(String(targetDate).substring(0, 10) + 'T12:00:00') - +new Date();
             let left = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
             if (difference > 0) {

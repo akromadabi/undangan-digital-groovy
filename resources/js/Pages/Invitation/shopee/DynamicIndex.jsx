@@ -20,9 +20,13 @@ function parseBool(val, defaultVal = true) {
     return true;
 }
 
-function formatDate(d) {
+function formatDate(d, locale = 'id') {
     if (!d) return '';
-    return new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const safe = String(d).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safe);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function formatTime(t) {

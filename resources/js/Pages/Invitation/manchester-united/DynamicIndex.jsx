@@ -152,16 +152,21 @@ function getThemeLabels(type, locale = 'id', brideGrooms = [], invitation = {}) 
     };
 }
 function pad2(n) { return String(n).padStart(2, '0'); }
-function formatDate(d) {
+function formatDate(d, locale = 'id') {
     if (!d) return '';
-    return new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const safe = String(d).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safe);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 function formatStoryDate(dateStr) {
     if (!dateStr) return '';
     const datePattern = /^\d{4}-\d{2}-\d{2}/;
     if (datePattern.test(dateStr)) {
         try {
-            const d = new Date(dateStr);
+            // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+            const d = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
             if (!isNaN(d.getTime())) {
                 return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
             }
@@ -364,7 +369,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, themeC
                         <h2 className="mu-stadium-label">{(primaryEvent?.venue_name || 'THEATRE OF LOVE').toUpperCase()}</h2>
                         <h1 className="mu-match-title">{coupleName.toUpperCase()}</h1>
                         <p className="mu-match-date">
-                            {invitation?.countdown_target_date ? formatDate(invitation.countdown_target_date.substring(0, 10)).toUpperCase() : 'DESEMBER 2026'}
+                            {primaryEvent?.event_date ? formatDate(primaryEvent.event_date).toUpperCase() : (invitation?.countdown_target_date ? formatDate(invitation.countdown_target_date.substring(0, 10)).toUpperCase() : 'DESEMBER 2026')}
                         </p>
                     </div>
                 </div>
@@ -935,7 +940,7 @@ function EventSection({ events, invitation, themeConfig }) {
                 <div className="mu-events-list">
                     {safeEvents.map((ev, idx) => {
                         const evDate = ev.event_date || ev.date;
-                        const d = evDate ? new Date(evDate) : null;
+                        const d = evDate ? new Date(String(evDate).substring(0, 10) + 'T12:00:00') : null;
                         const isAkad = ev.event_name?.toLowerCase().includes('akad') || ev.event_name?.toLowerCase().includes('utama');
 
                         return (

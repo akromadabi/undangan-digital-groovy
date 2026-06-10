@@ -202,7 +202,7 @@ const isArabicText = (text) => {
 
 function formatDate(dateStr, lang = 'id') {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const date = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
     if (isNaN(date.getTime())) {
         return String(dateStr).toUpperCase();
     }
@@ -431,7 +431,7 @@ function OpeningSection({ invitation, brideGrooms, language, themeConfig }) {
 
     const getDotDateFormat = (dateStr) => {
         if (!dateStr) return '';
-        const d = new Date(dateStr);
+        const d = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
         if (isNaN(d.getTime())) return '';
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -662,7 +662,7 @@ function useCountdown(targetDate) {
     useEffect(() => {
         if (!targetDate) return;
         const tick = () => {
-            const diff = new Date(targetDate).getTime() - Date.now();
+            const diff = new Date(String(targetDate).substring(0, 10) + 'T12:00:00').getTime() - Date.now();
             if (diff <= 0) {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
                 return;

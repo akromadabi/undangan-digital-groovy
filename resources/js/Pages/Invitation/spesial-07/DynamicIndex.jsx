@@ -28,7 +28,7 @@ function formatTime(t) {
 
 function parseEventDate(dateString, locale) {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    const d = new Date(dateString);
+    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
     
     const dayNum = String(d.getDate()).padStart(2, '0');
@@ -73,7 +73,7 @@ const fallbackCopy = (text) => {
 
 function formatDate(dateString, locale) {
     if (!dateString) return '';
-    const d = new Date(dateString);
+    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
     if (isNaN(d.getTime())) return dateString;
     return d.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', {
         weekday: 'long',
@@ -89,7 +89,7 @@ function useCountdown(targetDate) {
     useEffect(() => {
         if (!targetDate) return;
         const calculate = () => {
-            const difference = +new Date(targetDate) - +new Date();
+            const difference = +new Date(String(targetDate).substring(0, 10) + 'T12:00:00') - +new Date();
             let left = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
             if (difference > 0) {
@@ -360,7 +360,7 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, events, locale })
                     <button 
                         type="button" 
                         onClick={() => {
-                            const target = invitation?.countdown_target_date ? new Date(invitation.countdown_target_date) : new Date('2026-12-12T09:00:00');
+                            const target = invitation?.countdown_target_date ? new Date(String(invitation.countdown_target_date).substring(0, 10) + 'T12:00:00') : new Date('2026-12-12T09:00:00');
                             const ds = target.toISOString().substring(0, 10).replace(/-/g, '');
                             const names = `${groom.nickname || 'Gilang'} & ${bride.nickname || 'Kirana'}`;
                             const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Pernikahan ' + names)}&dates=${ds}T090000/${ds}T160000&sf=true&output=xml`;
@@ -644,7 +644,7 @@ function LoveStorySection({ loveStories }) {
                     <Reveal key={story.id || i} variant={i % 2 === 0 ? 'left' : 'right'} className="sp07-timeline-item">
                         <div className="sp07-story-card">
                             <span className="sp07-story-year">
-                                {story.story_date ? new Date(story.story_date).getFullYear() : story.year || '2025'}
+                                {story.story_date ? new Date(String(story.story_date).substring(0, 10) + 'T12:00:00').getFullYear() : story.year || '2025'}
                             </span>
                             <h4 className="text-md font-bold text-[var(--sp07-primary)] sp07-font-script tracking-wide mb-1.5">
                                 {story.title}

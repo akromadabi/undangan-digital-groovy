@@ -119,6 +119,34 @@ Semua tema wajib mendukung multi-bahasa (Indonesia/Inggris) secara dinamis mengg
    - Contoh: `locale === 'en' ? 'Groom & Bride' : 'Kedua Mempelai'`
    - Pastikan format penulisan dan tanda hubung disesuaikan dengan bahasa aktif.
 
+### 2.4 Penanganan Tanggal & Waktu Aman (Anti-Timezone Midnight Bug)
+*Masalah*: Saat JavaScript mem-parse string tanggal format `YYYY-MM-DD` langsung dengan `new Date('YYYY-MM-DD')`, ini dibaca sebagai **UTC midnight**. Pada browser klien dengan timezone offset negatif (misalnya US/UTC-5), tanggal akan bergeser mundur 1 hari.
+*Solusi Wajib*: Selalu lakukan standardisasi parsing tanggal dengan memotong 10 karakter pertama (`YYYY-MM-DD`) lalu append waktu siang hari local (`T12:00:00`) agar parsing konsisten di timezone manapun.
+
+Contoh Fungsi Helper Safe:
+```js
+function formatDate(dateStr, lang = 'id') {
+    if (!dateStr) return '';
+    // Potong YYYY-MM-DD, append T12:00:00 untuk menghindari offset UTC midnight
+    const safeStr = String(dateStr).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safeStr);
+    if (isNaN(date.getTime())) {
+        return String(dateStr).toUpperCase();
+    }
+    const locale = lang === 'en' ? 'en-US' : 'id-ID';
+    return date.toLocaleDateString(locale, {
+        day: 'numeric', month: 'long', year: 'numeric'
+    }).toUpperCase();
+}
+```
+
+Untuk Countdown Timer, gunakan perpaduan `event_date` dan `start_time` dari primary event sebagai penanda local time (tanpa offset Z):
+```js
+const ds = String(targetDate).substring(0, 10);
+const timeStr = String(startTime || '08:00').substring(0, 5);
+const target = new Date(`${ds}T${timeStr}:00`); // parses as local time on that exact hour
+```
+
 ---
 
 ## 3. Aturan Global Penonaktifan Fitur (Global Override Mode)
@@ -208,6 +236,32 @@ Seksi pembuka harus ada dan terstruktur dengan kriteria berikut:
   - Judul pembuka (`invitation?.opening_title` dengan fallback "Maha Suci Allah" atau sejenisnya).
   - Ayat/kutipan pembuka (`invitation?.opening_ayat`).
   - Teks deskripsi pembuka (`invitation?.opening_text`).
+
+> [!IMPORTANT]
+> **Bug Ditemukan (Tema Handwriting – Juni 2026): Opening Terlalu Sederhana**
+> Section opening yang hanya menampilkan inisial huruf dan ayat terasa **terlalu kecil dan tidak impresif** bagi tamu undangan yang baru membuka halaman. Standar minimum yang WAJIB dipenuhi untuk section opening adalah:
+>
+> 1. **Nama Lengkap Mempelai (Bukan Sekadar Inisial):** Tampilkan `nickname` atau `full_name` kedua mempelai secara eksplisit (bukan hanya huruf inisial "B & R"). Gunakan font besar yang elegan:
+>    ```jsx
+>    const coupleName = (groom?.nickname && bride?.nickname)
+>        ? `${groom.nickname} & ${bride.nickname}`
+>        : invitation?.cover_title || 'Groom & Bride';
+>    // Render:
+>    <h1 className="tema-opening-couple-name">{coupleName}</h1>
+>    ```
+> 2. **Countdown Waktu di Opening:** Section opening wajib menampilkan hitungan mundur menuju hari-H tepat di bawah nama mempelai, sehingga tamu langsung merasakan urgensi acara. Gunakan `CountdownBlock` yang sama dengan yang ada di section event:
+>    ```jsx
+>    {showCountdown && <CountdownBlock events={events} />}
+>    ```
+> 3. **Ukuran Section Lebih Besar:** Section opening harus menjadi "hero section" kedua setelah cover. Berikan `padding: 60px 24px` atau lebih, dan pastikan ada foto slideshow yang berukuran cukup besar (minimal `aspect-ratio: 4/3` dengan `max-width: 320px`). Jangan biarkan section ini terasa seperti sekadar pengantar singkat.
+> 4. **Hierarki Visual Lengkap:** Urutan konten yang direkomendasikan:
+>    - Ornamen/motif atas (dekoratif)
+>    - Basmalah / judul pembuka
+>    - Nama mempelai besar & elegan
+>    - Foto slideshow opening (jika ada foto)
+>    - Countdown hari-H
+>    - Ayat / kutipan inspirasi
+>    - Teks pembuka undangan
 
 ### 4.3 Seksi Mempelai (`bride_groom` / `couple`)
 - **Deteksi Gender yang Kokoh**: Jangan andalkan urutan indeks array `couples[0]`/`couples[1]` saja. Selalu filter berdasarkan string jenis kelamin:
@@ -388,6 +442,55 @@ Setiap foto profil mempelai, foto galeri, slideshow cover, dan slideshow opening
 > * **Cara Kerja Browser:** Karena CSS global tema hanya mengunci ukuran dimensi dan `object-fit`, properti inline dinamis dari database seperti `object-position` (untuk geser koordinat X/Y) dan `transform: scale` (untuk perbesaran/zoom) tidak menggunakan `!important`, sehingga tetap akan diterapkan secara sempurna oleh browser sebagai overlay style.
 > * **Kuncian Wadah (Parent Container):** Selalu pastikan elemen pembungkus (parent container) dari gambar mempelai, cover, dan opening yang mendukung zoom memiliki properti `overflow: hidden`. Ini penting agar bagian gambar yang ter-zoom tidak melebar keluar batas frame/lingkaran wadahnya.
 
+> [!IMPORTANT]
+> **Bug Ditemukan (Tema Handwriting – Juni 2026): Foto Mempelai Tidak Otomatis Gradasi**
+> Foto profil mempelai yang ditampilkan di dalam bingkai/polaroid **tidak memiliki efek gradasi/overlay** sehingga terlihat mentah dan kurang artistik. Setiap tema premium wajib menerapkan **overlay gradasi otomatis** di atas foto mempelai untuk menciptakan kedalaman visual:
+>
+> **Solusi CSS (Overlay Gradasi di Atas Foto):**
+> Gunakan pseudo-element `::after` pada container foto untuk menambahkan overlay gradasi yang elegan secara otomatis:
+> ```css
+> /* Container foto harus position: relative dan overflow: hidden */
+> .prefix-mempelai-photo-inner {
+>   position: relative;
+>   overflow: hidden;
+> }
+>
+> /* Overlay gradasi otomatis di atas foto (bawah ke atas, warna tema) */
+> .prefix-mempelai-photo-inner::after {
+>   content: '';
+>   position: absolute;
+>   bottom: 0;
+>   left: 0;
+>   width: 100%;
+>   height: 40%;                           /* Tutupi 40% bagian bawah foto */
+>   background: linear-gradient(
+>     to top,
+>     rgba(61, 55, 48, 0.55) 0%,           /* Warna primer tema (gelap) */
+>     rgba(61, 55, 48, 0.0) 100%
+>   );
+>   pointer-events: none;
+>   z-index: 2;
+> }
+> ```
+>
+> **Efek Filter Foto (Tone-Matching):**
+> Selain gradasi, tambahkan filter CSS ringan agar foto menyesuaikan palet warna tema secara otomatis:
+> ```css
+> .prefix-mempelai-photo {
+>   width: 100% !important;
+>   height: 100% !important;
+>   object-fit: cover !important;
+>   /* Filter sepia/warmth untuk menyesuaikan tone tema */
+>   filter: sepia(20%) saturate(0.9) contrast(1.05) brightness(0.97);
+>   /* Gunakan intensitas yang sesuai dengan palet warna tema:
+>      - Tema hangat (cokelat/gold): sepia(15-25%) saturate(0.85-0.95)
+>      - Tema gelap/elegan: brightness(0.9) contrast(1.1)
+>      - Tema cerah/pastel: saturate(1.1) brightness(1.02) */
+> }
+> ```
+>
+> **Catatan:** Nilai `filter` di atas hanya berlaku pada gambar foto mempelai di dalam bingkai foto, bukan pada gambar gallery atau slideshow cover/opening (yang tidak memerlukan penyesuaian tone otomatis).
+
 ### 4.11 Seksi Video Undangan / Background Video (`video`)
 - **Auto-Hide Cerdas**: Seksi ini **WAJIB** otomatis menyembunyikan dirinya sendiri (kembali bernilai `null` atau terfilter keluar dari list sections) jika kolom URL video (`invitation?.video_url` atau `video`) di database dalam keadaan kosong.
 - **Pemisahan dari Galeri Foto**: Seksi video ini harus dipisah secara terdedikasi dan mandiri dari seksi foto galeri.
@@ -450,6 +553,41 @@ Tema undangan harus berjalan mulus dalam 3 mode tata letak: `scroll` (gulir vert
 
 ### 5.1 Mode Gulir (`scroll` dengan Scrollspy)
 Untuk mode scroll vertikal biasa, menu navigasi mengambang (bottom bar) wajib menyelaraskan tab aktif secara otomatis sesuai posisi gulir layar dengan presisi menggunakan Intersection Observer atau window scroll listener (Scrollspy).
+
+> [!CAUTION]
+> **Bug Kritis Ditemukan (Tema Handwriting – Juni 2026): Bottom Menu Tidak Otomatis Geser ke Tab Aktif**
+>
+> **Penyebab:** Menggunakan `element.scrollIntoView({ inline: 'center' })` di dalam elemen `button` yang berada di dalam nav bar dengan `position: fixed` dan `overflow-x: auto` **tidak berfungsi dengan reliabel**. Browser memperlakukan `scrollIntoView` sebagai scroll pada *seluruh halaman*, bukan pada container fixed nav bar.
+>
+> **Solusi Wajib — Gunakan `scrollLeft` Manual:**
+> Ganti seluruh blok `scrollIntoView` dengan perhitungan `scrollLeft` manual terhadap elemen nav container:
+> ```js
+> // ✅ SOLUSI BENAR (gunakan scrollLeft manual)
+> useEffect(() => {
+>     if (!isOpened) return;
+>     const navEl = document.querySelector('.prefix-nav'); // selector nav bar tema
+>     const activeBtn = document.getElementById(`nav-btn-${activeSection}`);
+>     if (navEl && activeBtn) {
+>         const btnLeft = activeBtn.offsetLeft;
+>         const btnWidth = activeBtn.offsetWidth;
+>         const navWidth = navEl.offsetWidth;
+>         // Geser nav agar tombol aktif tepat berada di tengah nav bar
+>         navEl.scrollLeft = btnLeft - (navWidth / 2) + (btnWidth / 2);
+>     }
+> }, [activeSection, isOpened]);
+> ```
+>
+> ```js
+> // ❌ SALAH — jangan gunakan ini untuk nav fixed:
+> // activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+> ```
+>
+> **Catatan tambahan:** Pastikan nav bar diberi `scroll-behavior: smooth` via CSS agar pergeseran scrollLeft terasa halus:
+> ```css
+> .prefix-nav {
+>   scroll-behavior: smooth; /* Animasi smooth pada pergeseran scrollLeft */
+> }
+> ```
 
 ### 5.2 Mode Slide Geser (`slide-h` / `slide-v`)
 Agar setara dengan kelancaran tema **Luxury-02**, struktur transisi geser wajib mematuhi aturan baku berikut:
@@ -641,6 +779,167 @@ Saat mereplikasi atau meningkatkan tema yang memiliki visual etnik, tradisional,
 
 *Dokumen ini adalah standarisasi mutlak. Jika tema baru Anda memiliki perilaku yang berbeda dari aturan di atas, Anda telah melanggar blueprint dan wajib merevisinya kembali.*
 *Terakhir diperbarui: Juni 2026*
+
+---
+
+## 11. Catatan Bug Penting & Solusi Baku (Lessons Learned dari Tema Handwriting)
+
+Seksi ini mendokumentasikan bug-bug yang ditemukan selama pengembangan tema **Handwriting** berikut solusi standarnya. Jadikan ini acuan untuk mencegah bug serupa di tema berikutnya.
+
+---
+
+### 11.1 Bug: Bottom Navigation Bar Tidak Otomatis Bergeser ke Tab Aktif
+
+**Gejala:** Ketika pengguna scroll ke section lain, tombol aktif di bottom menu sudah berubah (state `activeSection` benar), namun posisi scroll bar navigasi tidak bergeser untuk menampilkan tombol yang aktif ke tengah layar.
+
+**Akar Masalah:** Menggunakan `activeBtn.scrollIntoView({ inline: 'center' })` di dalam elemen `position: fixed` tidak bekerja secara konsisten di semua browser mobile (terutama iOS Safari). `scrollIntoView` kurang reliable untuk scroll horizontal di dalam kontainer fixed.
+
+**Solusi Baku (scrollLeft Manual):**
+```js
+useEffect(() => {
+    if (!isOpened) return;
+    const navEl = document.querySelector('.hw-nav');
+    const activeBtn = document.getElementById(`nav-btn-${activeSection}`);
+    if (navEl && activeBtn) {
+        const btnLeft = activeBtn.offsetLeft;
+        const btnWidth = activeBtn.offsetWidth;
+        const navWidth = navEl.offsetWidth;
+        // Hitung manual agar tombol aktif selalu terpusat dalam nav bar
+        navEl.scrollLeft = btnLeft - (navWidth / 2) + (btnWidth / 2);
+    }
+}, [activeSection, isOpened]);
+```
+
+**Aturan Baku:**
+> ⚠️ **JANGAN gunakan `scrollIntoView` untuk auto-scroll horizontal di elemen `position: fixed`.** Selalu gunakan `navEl.scrollLeft = ...` dengan perhitungan `offsetLeft` manual.
+
+---
+
+### 11.2 Bug: Foto di Opening Section & Mempelai Tidak Bergradasi Otomatis
+
+**Gejala:** Foto pada slideshow di opening section dan foto polaroid mempelai tampak "mentah" tanpa efek visual — tidak ada gradasi tepi, tidak ada tone warna yang menyesuaikan tema.
+
+**Akar Masalah:** 
+1. Wrapper foto tidak memiliki pseudo-element `::after` dengan `background: linear-gradient(...)`.
+2. Filter CSS pada elemen `<img>` foto hanya pakai `filter: grayscale(10%)` yang terlalu tipis.
+
+**Solusi Baku CSS:**
+
+Untuk **foto mempelai (polaroid)**:
+```css
+/* Overlay gradasi otomatis di atas foto mempelai */
+.hw-mempelai-photo-inner::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 40%;
+  background: linear-gradient(to top, rgba(61, 55, 48, 0.5) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Filter warna menyesuaikan palet tema */
+.hw-mempelai-photo {
+  filter: sepia(20%) saturate(0.9) contrast(1.05) brightness(0.97);
+}
+```
+
+Untuk **slideshow di opening section** (wrapper harus `position: relative`):
+```css
+.hw-opening__slideshow-wrapper {
+  position: relative; /* WAJIB */
+  overflow: hidden;
+}
+
+.hw-opening__slideshow-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 50%;
+  background: linear-gradient(to top, rgba(61, 55, 48, 0.55) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+  border-radius: 0 0 12px 12px;
+}
+```
+
+**Aturan Baku:**
+> ✅ **Setiap elemen foto/slideshow WAJIB memiliki gradasi overlay (::after) yang otomatis aktif** tanpa bergantung pada pengaturan user. Gunakan `z-index: 5` pada overlay agar tidak tertutup kontainer, dan pastikan parent wrapper memiliki `position: relative`.
+
+---
+
+### 11.3 Bug: Opening Section Terlalu Sederhana (Hanya Inisial, Tanpa Countdown)
+
+**Gejala:** Tampilan opening section hanya menampilkan 2 huruf inisial di dalam lingkaran, tanpa nama lengkap mempelai dan tanpa hitung mundur waktu. Terasa minimal dan tidak menarik.
+
+**Akar Masalah:** Kode hanya menampilkan `initials` dari data groom dan bride, bukan nama lengkap atau nama panggilan. Countdown juga tidak dirender di opening meskipun data event tersedia.
+
+**Solusi Baku JSX di `OpeningSection`:**
+```jsx
+function OpeningSection({ invitation, brideGrooms, events, showCountdown }) {
+    const bgs = safeArr(brideGrooms);
+    const groom = bgs.find(b => ['pria', 'male'].includes(b.gender?.toLowerCase())) || bgs[0] || {};
+    const bride = bgs.find(b => ['wanita', 'female'].includes(b.gender?.toLowerCase())) || bgs[1] || {};
+
+    // Wajib tampilkan nama lengkap, bukan inisial
+    const coupleName = useMemo(() => {
+        if (groom?.nickname && bride?.nickname) return `${groom.nickname} & ${bride.nickname}`;
+        if (groom?.full_name && bride?.full_name) return `${groom.full_name} & ${bride.full_name}`;
+        return invitation?.cover_title || 'Groom & Bride';
+    }, [groom, bride, invitation]);
+
+    return (
+        <section id="opening" className="hw-section hw-opening">
+            <Reveal>
+                {/* Judul / Basmalah */}
+                <h2 className="hw-section-title">{invitation?.opening_title || 'Bismillahirrahmanirrahim'}</h2>
+                <p className="hw-section-subtitle">The Wedding of</p>
+
+                {/* ✅ Wajib: Nama Mempelai Penuh — bukan inisial */}
+                <div className="hw-opening__couple-name">{coupleName}</div>
+
+                {/* ✅ Wajib: Countdown Timer tepat di bawah nama */}
+                {showCountdown && (
+                    <div style={{ marginTop: '20px' }}>
+                        <CountdownBlock events={events} />
+                    </div>
+                )}
+
+                {/* Foto Slideshow Opening (opsional) */}
+                {openingImages.length > 0 && (
+                    <div className="hw-opening__slideshow-wrapper">
+                        <PremiumSlideshow images={openingImages} />
+                    </div>
+                )}
+            </Reveal>
+        </section>
+    );
+}
+```
+
+**Aturan Baku:**
+> ✅ **Section Opening WAJIB menampilkan nama lengkap/nickname mempelai secara hero (besar & dominan)** — bukan hanya inisial. Countdown timer juga **WAJIB ada** di opening jika data event tersedia (`showCountdown` prop aktif), tanpa memerlukan konfigurasi tambahan dari pengguna.
+
+---
+
+### 11.4 Checklist Verifikasi Tema Baru (Post-Development QA)
+
+Gunakan checklist ini setelah selesai membuat tema baru sebelum dinyatakan siap produksi:
+
+| No | Item Verifikasi | Cara Cek |
+|---|---|---|
+| 1 | ✅ Bottom nav bergeser otomatis saat scroll | Scroll manual ke tiap section, tombol aktif di menu harus terpusat |
+| 2 | ✅ Foto mempelai bergradasi otomatis | Buka tema tanpa login, cek foto ada efek dark gradient di bawah |
+| 3 | ✅ Opening menampilkan nama lengkap mempelai | Buka section opening, nama `Groom & Bride` harus terbaca besar |
+| 4 | ✅ Countdown aktif di opening | Section opening menampilkan hitung mundur hari/jam/menit |
+| 5 | ✅ ATM Chip tidak broken image | Import asset ATM chip menggunakan path relatif ke direktori asset lokal |
+| 6 | ✅ Teks penutup (closing) tidak tertutup bottom nav | Pastikan closing section punya `padding-bottom: 90px !important` |
+| 7 | ✅ Semua section aktif tampil di menu, yang tidak aktif disembunyikan | Nonaktifkan satu section, tombol menunya harus hilang dari nav |
+| 8 | ✅ Musik tidak terus main saat tab berganti | Gunakan hook `usePageVisibilityAudio` |
+| 9 | ✅ QR Code, rekening, galeri tidak crash saat data kosong | Cek masing-masing section dengan data kosong, harusnya return null |
+| 10 | ✅ Build production berhasil tanpa error | Jalankan `npm run build` dan periksa output terminal |
+
+
 
 
 

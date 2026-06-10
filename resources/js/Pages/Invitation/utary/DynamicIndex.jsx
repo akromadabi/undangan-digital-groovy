@@ -146,7 +146,7 @@ function useCountdown(targetDate) {
     useEffect(() => {
         const tick = () => {
             const now = new Date().getTime();
-            const diff = new Date(targetDate).getTime() - now;
+            const diff = new Date(String(targetDate).substring(0, 10) + 'T12:00:00').getTime() - now;
             if (diff <= 0) {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
                 return;
@@ -227,7 +227,7 @@ function RevealDiv({ children, className = '', variant = '' }) {
 /* ── Formatting Helpers ── */
 const formatDate = (dateStr, lang = 'id') => {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const date = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
     if (isNaN(date.getTime())) {
         return String(dateStr).toUpperCase();
     }
@@ -241,7 +241,7 @@ const formatDate = (dateStr, lang = 'id') => {
 
 const formatShortDate = (dateStr, lang = 'id') => {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const date = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
     if (isNaN(date.getTime())) {
         return dateStr;
     }
@@ -268,7 +268,7 @@ function CoverSection({ onOpen, guestName, invitation, brideGrooms, isOpened }) 
         : (invitation?.cover_title || THEME_DEFAULTS.cover_title);
 
     const subtitle = invitation?.cover_subtitle || THEME_DEFAULTS.cover_subtitle;
-    const year = invitation?.countdown_target_date ? new Date(invitation.countdown_target_date).getFullYear() : '2026';
+    const year = invitation?.countdown_target_date ? new Date(String(invitation.countdown_target_date).substring(0, 10) + 'T12:00:00').getFullYear() : '2026';
 
     return (
         <div className={`utary-cover ${isOpened ? 'is-opened' : ''}`} id="utary-cover">
@@ -1256,7 +1256,7 @@ function FooterSection({ invitation, brideGrooms, id }) {
         : (invitation?.cover_title || THEME_DEFAULTS.cover_title);
 
     const names = displayNames.toUpperCase();
-    const year = invitation?.countdown_target_date ? new Date(invitation.countdown_target_date).getFullYear() : '2026';
+    const year = invitation?.countdown_target_date ? new Date(String(invitation.countdown_target_date).substring(0, 10) + 'T12:00:00').getFullYear() : '2026';
 
     const defaultIdText = 'Merupakan suatu kehormatan dan kebahagiaan bagi kami, apabila Bapak/Ibu, Saudara/i berkenan hadir di hari bahagia kami.';
     const defaultIdTitle = 'THANK YOU';

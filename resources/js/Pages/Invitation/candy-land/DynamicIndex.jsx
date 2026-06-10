@@ -38,7 +38,7 @@ function getStorageUrl(url, fallback) {
 function formatDate(d, locale = 'id') {
     if (!d) return '';
     try {
-        const dateObj = new Date(d);
+        const dateObj = new Date(String(d).substring(0, 10) + 'T12:00:00');
         if (isNaN(dateObj.getTime())) return d;
         return dateObj.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', {
             weekday: 'long',
@@ -56,7 +56,7 @@ function formatStoryDate(dateStr, locale = 'id') {
     const datePattern = /^\d{4}-\d{2}-\d{2}/;
     if (datePattern.test(dateStr)) {
         try {
-            const d = new Date(dateStr);
+            const d = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
             if (!isNaN(d.getTime())) {
                 return d.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', {
                     day: 'numeric',

@@ -40,9 +40,13 @@ function pad2(n) {
     return String(n).padStart(2, '0');
 }
 
-function formatDate(d) {
+function formatDate(d, locale = 'id') {
     if (!d) return '';
-    return new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const safe = String(d).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safe);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function getYoutubeId(url) {
@@ -143,11 +147,13 @@ function CountdownBlock({ targetDate }) {
 
     useEffect(() => {
         if (!targetDate) return;
-        const target = new Date(targetDate).getTime();
+        // Safe parsing: combine date + time to avoid UTC midnight bug
+        const dateStr = String(targetDate).substring(0, 10);
+        const target = new Date(`${dateStr}T08:00:00`);
 
         const updateTimer = () => {
             const now = new Date().getTime();
-            const difference = target - now;
+            const difference = target.getTime() - now;
 
             if (difference <= 0) {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });

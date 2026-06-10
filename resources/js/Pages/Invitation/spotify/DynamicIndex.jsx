@@ -132,7 +132,11 @@ function pad2(n) {
 function formatDate(d, locale = 'id') {
     if (!d) return '';
     const loc = String(locale).toLowerCase() === 'en' ? 'en-US' : 'id-ID';
-    return new Date(d).toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const safe = String(d).substring(0, 10) + 'T12:00:00';
+    const date = new Date(safe);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function formatTime(t) {
@@ -155,7 +159,8 @@ function getYoutubeId(url) {
 
 function parseEventDate(dateString, locale = 'id') {
     if (!dateString) return { dayNum: '', dayName: '', monthName: '', year: '' };
-    const d = new Date(dateString);
+    // Safe parsing: T12:00:00 prevents UTC midnight timezone offset bug
+    const d = new Date(String(dateString).substring(0, 10) + 'T12:00:00');
     if (isNaN(d.getTime())) return { dayNum: '', dayName: '', monthName: '', year: '' };
     
     const loc = String(locale).toLowerCase() === 'en' ? 'en-US' : 'id-ID';
@@ -971,7 +976,7 @@ function formatStoryDate(dateStr, locale = 'id') {
     const datePattern = /^\d{4}-\d{2}-\d{2}/;
     if (datePattern.test(dateStr)) {
         try {
-            const d = new Date(dateStr);
+            const d = new Date(String(dateStr).substring(0, 10) + 'T12:00:00');
             if (!isNaN(d.getTime())) {
                 const loc = String(locale).toLowerCase() === 'en' ? 'en-US' : 'id-ID';
                 return d.toLocaleDateString(loc, {
