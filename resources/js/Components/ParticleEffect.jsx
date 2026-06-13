@@ -215,23 +215,45 @@ export default function ParticleEffect({ type = 'snow', count = 30, speed = 'nor
                     ctx.globalAlpha = this.opacity;
                     ctx.fillRect(-this.size*0.3, -this.size*0.2, this.size*0.6, this.size*0.4);
                 } else if (type === 'butterfly') {
+                    // Left wings (Primary color base)
                     ctx.fillStyle = this.colorBase + this.opacity + ')';
                     ctx.beginPath();
+                    // Left Upper Wing
                     ctx.moveTo(0, 0);
-                    ctx.bezierCurveTo(-this.size*0.3, -this.size*0.5, -this.size*0.8, -this.size*0.4, -this.size*0.6, -this.size*0.1);
-                    ctx.bezierCurveTo(-this.size*0.4, this.size*0.1, -this.size*0.2, this.size*0.2, 0, 0);
+                    ctx.bezierCurveTo(-this.size * 0.2, -this.size * 0.6, -this.size * 0.8, -this.size * 0.5, -this.size * 0.6, -this.size * 0.1);
+                    ctx.bezierCurveTo(-this.size * 0.4, 0, -this.size * 0.2, 0, 0, 0);
+                    // Left Lower Wing
+                    ctx.bezierCurveTo(-this.size * 0.2, 0, -this.size * 0.6, this.size * 0.1, -this.size * 0.5, this.size * 0.4);
+                    ctx.bezierCurveTo(-this.size * 0.3, this.size * 0.5, -this.size * 0.1, this.size * 0.3, 0, 0);
                     ctx.fill();
-                    ctx.fillStyle = `rgba(130, 120, 230, ${this.opacity})`;
+
+                    // Right wings (Accent pink-rose tone, dual-toned)
+                    ctx.fillStyle = `rgba(192, 122, 151, ${this.opacity})`;
                     ctx.beginPath();
+                    // Right Upper Wing
                     ctx.moveTo(0, 0);
-                    ctx.bezierCurveTo(this.size*0.3, -this.size*0.5, this.size*0.8, -this.size*0.4, this.size*0.6, -this.size*0.1);
-                    ctx.bezierCurveTo(this.size*0.4, this.size*0.1, this.size*0.2, this.size*0.2, 0, 0);
+                    ctx.bezierCurveTo(this.size * 0.2, -this.size * 0.6, this.size * 0.8, -this.size * 0.5, this.size * 0.6, -this.size * 0.1);
+                    ctx.bezierCurveTo(this.size * 0.4, 0, this.size * 0.2, 0, 0, 0);
+                    // Right Lower Wing
+                    ctx.bezierCurveTo(this.size * 0.2, 0, this.size * 0.6, this.size * 0.1, this.size * 0.5, this.size * 0.4);
+                    ctx.bezierCurveTo(this.size * 0.3, this.size * 0.5, this.size * 0.1, this.size * 0.3, 0, 0);
                     ctx.fill();
-                    ctx.strokeStyle = `rgba(100, 90, 180, ${this.opacity})`;
-                    ctx.lineWidth = 0.8;
+
+                    // Slender body
+                    ctx.strokeStyle = `rgba(108, 82, 123, ${this.opacity})`;
+                    ctx.lineWidth = 1.0;
                     ctx.beginPath();
-                    ctx.moveTo(0, -this.size*0.3);
-                    ctx.lineTo(0, this.size*0.3);
+                    ctx.moveTo(0, -this.size * 0.35);
+                    ctx.lineTo(0, this.size * 0.3);
+                    ctx.stroke();
+
+                    // Slender antennae
+                    ctx.lineWidth = 0.6;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.size * 0.35);
+                    ctx.quadraticCurveTo(-this.size * 0.15, -this.size * 0.5, -this.size * 0.2, -this.size * 0.45);
+                    ctx.moveTo(0, -this.size * 0.35);
+                    ctx.quadraticCurveTo(this.size * 0.15, -this.size * 0.5, this.size * 0.2, -this.size * 0.45);
                     ctx.stroke();
                 } else if (type === 'flower') {
                     ctx.fillStyle = this.colorBase + this.opacity + ')';

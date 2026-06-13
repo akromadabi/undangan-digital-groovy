@@ -86,7 +86,7 @@ class SettingsController extends Controller
                 'live_counter' => $invitation->live_counter,
                 'live_template' => $invitation->live_template,
             ] : null,
-            'liveUrl' => $invitation ? url('/live/' . $invitation->slug) : null,
+            'liveUrl' => $invitation ? $invitation->getLiveUrl() : null,
         ]);
     }
     public function saveTamu(Request $request)

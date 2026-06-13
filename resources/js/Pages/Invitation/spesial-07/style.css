@@ -1,7 +1,4 @@
-/* ═══════════════════════════════════════
-   THEME SPESIAL 07 - SAGE GREEN & GOLD MODERNISM
-   ═══════════════════════════════════════ */
-
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Caramel&family=Kaushan+Script&family=Croissant+One&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Roboto:wght@300;400;500;700&display=swap');
 
 :root {
@@ -166,12 +163,13 @@
     position: relative;
     z-index: 10;
     height: 100%;
-    padding: 60px 24px 40px;
+    padding: 60px 24px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     text-align: center;
+    gap: 20px;
 }
 
 .sp07-cover-names {
@@ -226,10 +224,43 @@
     position: relative;
 }
 
-.sp07-opening-section {
-    background-color: var(--sp07-primary);
-    color: #ffffff;
+#section-opening {
+    position: relative;
+    background: radial-gradient(circle at center, #4d6057 0%, #1e2823 100%) !important;
+    color: #ffffff !important;
     overflow: hidden;
+}
+
+#section-opening::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/themes/spesial-07/full-background-leaf.png');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#section-opening > * {
+    position: relative;
+    z-index: 2;
+}
+
+.sp07-opening-section {
+    background: transparent !important;
+    color: #ffffff !important;
+    padding-bottom: 20px;
+    overflow: visible;
+    position: relative;
+}
+
+.sp07-opening-section::before {
+    display: none !important;
 }
 
 .sp07-wellcome2-card {
@@ -438,7 +469,7 @@
    4. EVENTS SECTION (Rotated Akad/Resepsi headers)
    ═══════════════════════════════════════ */
 .sp07-event-section {
-    background-color: var(--sp07-primary);
+    background: radial-gradient(circle at center, #4d6057 0%, #1e2823 100%) !important;
     color: #ffffff;
     position: relative;
     overflow: hidden;
@@ -452,8 +483,18 @@
     width: 100%;
     height: 100%;
     background: radial-gradient(circle at 10% 20%, rgba(91, 132, 74, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 90% 80%, rgba(228, 219, 31, 0.05) 0%, transparent 40%);
+                radial-gradient(circle at 90% 80%, rgba(228, 219, 31, 0.05) 0%, transparent 40%),
+                url('/themes/spesial-07/full-background-leaf.png');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.12;
     pointer-events: none;
+    z-index: 1;
+}
+
+.sp07-event-section > * {
+    position: relative;
+    z-index: 2;
 }
 
 /* Offset Split Cards for Events */
@@ -720,10 +761,32 @@
    9. CLOSING & WATERMARK SECTION
    ═══════════════════════════════════════ */
 .sp07-closing-section {
-    background-color: var(--sp07-primary);
+    background: radial-gradient(circle at center, #4d6057 0%, #1e2823 100%) !important;
     color: #ffffff;
     text-align: center;
     padding: 80px 24px 100px;
+    position: relative;
+    overflow: hidden;
+}
+
+.sp07-closing-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/themes/spesial-07/full-background-leaf.png');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.sp07-closing-section > * {
+    position: relative;
+    z-index: 2;
 }
 
 .sp07-divider {
@@ -876,4 +939,141 @@
     transition: none !important;
     transition-delay: 0s !important;
     animation-delay: 0s !important;
+}
+
+/* Bottom Navigation Bar */
+.sp07-nav-menu {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 420px;
+  background-color: rgba(62, 78, 72, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 8px 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  overflow-x: auto;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sp07-nav-menu::-webkit-scrollbar {
+  display: none !important;
+}
+
+.sp07-nav-menu__inner--row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.sp07-nav-menu__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  padding: 4px 2px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  width: 62px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sp07-nav-menu__item i {
+  font-size: 13px;
+}
+
+.sp07-nav-item-text {
+  font-size: 7.5px;
+  font-weight: 500;
+  margin-top: 2px;
+  text-transform: none;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
+}
+
+.sp07-nav-menu__item:hover {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.sp07-nav-menu__item.active {
+  color: var(--sp07-accent);
+  background-color: rgba(255, 255, 255, 0.08);
+  opacity: 1;
+}
+
+/* Auto-scroll floating controls tweaks */
+.sp07-btn-floating i {
+  color: #ffffff !important;
+  font-size: 14px;
+}
+
+.sp07-btn-floating.is-active {
+  background-color: var(--sp07-secondary);
+}
+
+/* Section Subtitle Colors */
+.sp07-section-subtitle {
+  color: #5B844A; /* default for light sections (Sage Green) */
+}
+
+/* Dark section overrides for subtitle color */
+.sp07-opening-section .sp07-section-subtitle,
+.sp07-event-section .sp07-section-subtitle,
+.sp07-closing-section .sp07-section-subtitle {
+  color: #ECE5C8 !important; /* champagne gold */
+  opacity: 0.9;
+}
+
+/* Dress Code box card container styling */
+.sp07-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.global-music-waves {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 18px;
+}
+.global-music-waves span {
+  display: block;
+  width: 3px;
+  border-radius: 2px;
+  background-color: currentColor;
+  animation: wave-bar 0.9s ease-in-out infinite;
+  transform-origin: bottom;
+}
+.global-music-waves span:nth-child(1) { height: 8px; animation-delay: 0s; }
+.global-music-waves span:nth-child(2) { height: 16px; animation-delay: 0.15s; }
+.global-music-waves span:nth-child(3) { height: 10px; animation-delay: 0.3s; }
+
+@keyframes wave-bar {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
 }

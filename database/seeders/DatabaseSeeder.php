@@ -223,12 +223,14 @@ class DatabaseSeeder extends Seeder
             WhatsappThemeSeeder::class,
             SpidermanThemeSeeder::class,
             CandyLandThemeSeeder::class,
+            AstronautThemeSeeder::class,
             RoomJogjaThemeSeeder::class,
             ThreeDSceneSeeder::class,
             HandwritingThemeSeeder::class,
             FairytaleThemeSeeder::class,
             ChelseaThemeSeeder::class,
             PolaroidThemeSeeder::class,
+            SageMinimalistThemeSeeder::class,
         ]);
 
         // Restore custom fields (like uploaded thumbnails) after seeders have run

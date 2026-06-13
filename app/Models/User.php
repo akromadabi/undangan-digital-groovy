@@ -169,6 +169,30 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'editor';
     }
 
+    /**
+     * Get the brand base URL (custom domain or subdomain) for this user.
+     */
+    public function getBrandBaseUrl(): string
+    {
+        $resellerSetting = null;
+        if ($this->role === 'admin') {
+            $resellerSetting = $this->resellerSettings;
+        } elseif ($this->role === 'user' && $this->reseller_id && $this->reseller) {
+            $resellerSetting = $this->reseller->resellerSettings;
+        }
+
+        if ($resellerSetting) {
+            if ($resellerSetting->custom_domain) {
+                return 'https://' . $resellerSetting->custom_domain;
+            } elseif ($resellerSetting->subdomain) {
+                $centralDomain = parse_url(config('app.url'), PHP_URL_HOST);
+                return 'https://' . $resellerSetting->subdomain . '.' . $centralDomain;
+            }
+        }
+
+        return config('app.url');
+    }
+
     public function currentPlan()
     {
         return $this->activeSubscription?->plan;

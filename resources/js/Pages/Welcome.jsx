@@ -573,11 +573,7 @@ function HeroSection({ mounted, resellerCount, invitationCount, themesCount, app
                                     strokeWidth="4.5"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    style={{
-                                        strokeDasharray: 200,
-                                        strokeDashoffset: mounted ? 0 : 200,
-                                        transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.5s'
-                                    }}
+                                    className="doodle-path-1"
                                 />
                             </svg>
                         </span>
@@ -590,11 +586,7 @@ function HeroSection({ mounted, resellerCount, invitationCount, themesCount, app
                                     strokeWidth="4.5"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    style={{
-                                        strokeDasharray: 200,
-                                        strokeDashoffset: mounted ? 0 : 200,
-                                        transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.75s'
-                                    }}
+                                    className="doodle-path-2"
                                 />
                             </svg>
                         </span>{' '}
@@ -608,15 +600,15 @@ function HeroSection({ mounted, resellerCount, invitationCount, themesCount, app
                     </p>
 
                     {/* CTAs */}
-                    <div className="flex flex-col sm:flex-row gap-3.5 mt-8 w-full sm:w-auto reveal-on-scroll reveal-up" style={{ transitionDelay: '450ms' }}>
-                        <Link href="/register/reseller" className="glow-button inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-[#E5654B] text-white rounded-2xl font-bold shadow-lg shadow-[#E5654B]/35 hover:bg-[#d4523a] transition-all hover:scale-[1.02] active:scale-[0.98] duration-300 w-full sm:w-auto text-sm sm:text-base">
+                    <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2.5 sm:gap-3.5 mt-8 w-full sm:w-auto reveal-on-scroll reveal-up" style={{ transitionDelay: '450ms' }}>
+                        <Link href="/register/reseller" className="glow-button inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 py-3 sm:px-8 sm:py-4 bg-[#E5654B] text-white rounded-xl sm:rounded-2xl font-bold shadow-lg shadow-[#E5654B]/35 hover:bg-[#d4523a] transition-all hover:scale-[1.02] active:scale-[0.98] duration-300 w-full sm:w-auto text-[11px] min-[375px]:text-xs sm:text-base text-center leading-tight">
                             <span>Daftar Partner</span>
-                            <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                             </svg>
                         </Link>
-                        <a href="#tema" className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white text-gray-900 border border-gray-200/80 rounded-2xl font-bold shadow-sm hover:border-gray-350 hover:shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] duration-300 w-full sm:w-auto text-sm sm:text-base">
-                            <svg className="w-5 h-5 text-[#E5654B] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                        <a href="#tema" className="inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 py-3 sm:px-8 sm:py-4 bg-white text-gray-900 border border-gray-200/80 rounded-xl sm:rounded-2xl font-bold shadow-sm hover:border-gray-350 hover:shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] duration-300 w-full sm:w-auto text-[11px] min-[375px]:text-xs sm:text-base text-center leading-tight">
+                            <svg className="w-3.5 h-3.5 text-[#E5654B] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                             </svg>
                             <span>Lihat Katalog Tema</span>
@@ -791,7 +783,20 @@ function HeroSection({ mounted, resellerCount, invitationCount, themesCount, app
     );
 }
 
-export default function Welcome({ auth, canLogin, canRegister, appName, themes = [], recentInvitations = [], resellerCount = 15, invitationCount = 40, adminWhatsapp = '6283132211830', adminEmail = 'admin@groovy.com', minModalCost = 15000, subscriptionPlans = [], greetingCards = [], greetingCardTypeOptions = {} }) {
+export default function Welcome({ auth, canLogin, canRegister, appName, brandLogo, themes = [], recentInvitations = [], resellerCount = 15, invitationCount = 40, adminWhatsapp = '6283132211830', adminEmail = 'admin@groovy.com', minModalCost = 15000, subscriptionPlans = [], greetingCards = [], greetingCardTypeOptions = {} }) {
+    const renderBrandName = (name) => {
+        if (!name) return <>Groovy<span className="text-[#E5654B]">.agency</span></>;
+        if (name.endsWith('.agency')) {
+            const baseName = name.slice(0, -7);
+            return (
+                <>
+                    {baseName}
+                    <span className="text-[#E5654B]">.agency</span>
+                </>
+            );
+        }
+        return name;
+    };
     const { flash } = usePage().props;
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -1173,6 +1178,23 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                     border-radius: 2px;
                     transition: all 0.3s;
                 }
+
+                /* Doodle Underline path animation trigger on scroll active */
+                .doodle-path-1, .doodle-path-2 {
+                    stroke-dasharray: 200;
+                    stroke-dashoffset: 200;
+                    transition: stroke-dashoffset 0s;
+                }
+                .reveal-active .doodle-path-1 {
+                    stroke-dashoffset: 0;
+                    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition-delay: 0.5s;
+                }
+                .reveal-active .doodle-path-2 {
+                    stroke-dashoffset: 0;
+                    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition-delay: 0.75s;
+                }
             `}</style>
 
             {/* Flash Messages */}
@@ -1210,14 +1232,18 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b bg-white/95 backdrop-blur-md ${scrolled ? 'shadow-md border-gray-150 py-3' : 'border-transparent py-4'}`}>
                 <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
                     {/* Logo */}
-                    <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2.5 group flex-shrink-0">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E5654B] to-[#f97316] flex items-center justify-center shadow-md shadow-[#E5654B]/30 group-hover:scale-105 transition-transform duration-300">
-                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3" />
-                            </svg>
-                        </div>
-                        <span className="text-xl font-black tracking-tight text-gray-900">
-                            {appName || 'Groovy'}<span className="text-[#E5654B]">.agency</span>
+                    <Link href="/" onClick={handleLogoClick} className="flex items-center gap-1.5 sm:gap-2 group flex-shrink-0">
+                        {brandLogo ? (
+                            <img src={brandLogo} alt={appName || 'Logo'} className="w-8 h-8 sm:w-9 h-9 object-contain rounded-xl shadow-sm group-hover:scale-105 transition-transform duration-300 flex-shrink-0" />
+                        ) : (
+                            <div className="w-8 h-8 sm:w-9 h-9 rounded-xl bg-gradient-to-br from-[#E5654B] to-[#f97316] flex items-center justify-center shadow-md shadow-[#E5654B]/30 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
+                                <svg className="w-4 h-4 sm:w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3" />
+                                </svg>
+                            </div>
+                        )}
+                        <span className="text-base sm:text-[17px] md:text-lg lg:text-xl font-black tracking-tight text-gray-900 transition-all duration-300">
+                            {renderBrandName(appName)}
                         </span>
                     </Link>
 
@@ -1260,56 +1286,71 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
 
             {/* Mobile Menu Drawer Overlay */}
             <div 
-                className={`fixed inset-0 z-40 bg-white/98 backdrop-blur-md transition-all duration-300 md:hidden flex flex-col pt-24 px-6 pb-8 border-b border-orange-100/60 shadow-xl h-screen overflow-y-auto ${
+                className={`fixed inset-0 z-40 bg-white/98 backdrop-blur-md transition-all duration-300 md:hidden flex flex-col pt-20 px-5 pb-6 border-b border-orange-100/60 shadow-xl h-screen overflow-y-auto ${
                     mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
                 }`}
             >
-                {/* Navigation Links */}
-                <div className="flex flex-col gap-5 text-center my-auto">
+                {/* Navigation Links Grouped in a Card */}
+                <div className="flex flex-col bg-[#FAF3EC]/60 border border-orange-100/40 rounded-2xl p-2 gap-1 mt-6">
                     <a 
                         href="#tema" 
                         onClick={() => setMobileMenuOpen(false)} 
-                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 border-b border-orange-50/50 hover:bg-orange-50/20 rounded-xl"
+                        className="text-sm font-extrabold text-gray-800 hover:text-[#E5654B] hover:bg-white/85 active:bg-white transition-all duration-205 py-2.5 px-4 rounded-xl flex items-center justify-between"
                     >
-                        Tema
+                        <span>Tema</span>
+                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
                     </a>
                     <a 
                         href="#alur-kerja" 
                         onClick={() => setMobileMenuOpen(false)} 
-                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 border-b border-orange-50/50 hover:bg-orange-50/20 rounded-xl"
+                        className="text-sm font-extrabold text-gray-800 hover:text-[#E5654B] hover:bg-white/85 active:bg-white transition-all duration-205 py-2.5 px-4 rounded-xl flex items-center justify-between"
                     >
-                        Cara Kerja
+                        <span>Cara Kerja</span>
+                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
                     </a>
                     <a 
                         href="#keunggulan" 
                         onClick={() => setMobileMenuOpen(false)} 
-                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 border-b border-orange-50/50 hover:bg-orange-50/20 rounded-xl"
+                        className="text-sm font-extrabold text-gray-800 hover:text-[#E5654B] hover:bg-white/85 active:bg-white transition-all duration-205 py-2.5 px-4 rounded-xl flex items-center justify-between"
                     >
-                        Fitur
+                        <span>Fitur</span>
+                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
                     </a>
                     <a 
                         href="#kalkulator" 
                         onClick={() => setMobileMenuOpen(false)} 
-                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 border-b border-orange-50/50 hover:bg-orange-50/20 rounded-xl"
+                        className="text-sm font-extrabold text-gray-800 hover:text-[#E5654B] hover:bg-white/85 active:bg-white transition-all duration-205 py-2.5 px-4 rounded-xl flex items-center justify-between"
                     >
-                        Simulasi
+                        <span>Simulasi</span>
+                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
                     </a>
                     <a 
                         href="#faq" 
                         onClick={() => setMobileMenuOpen(false)} 
-                        className="text-lg font-extrabold text-gray-800 hover:text-[#E5654B] transition-colors py-2.5 hover:bg-orange-50/20 rounded-xl"
+                        className="text-sm font-extrabold text-gray-800 hover:text-[#E5654B] hover:bg-white/85 active:bg-white transition-all duration-205 py-2.5 px-4 rounded-xl flex items-center justify-between"
                     >
-                        FAQ
+                        <span>FAQ</span>
+                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
                     </a>
                 </div>
 
                 {/* Drawer CTAs */}
-                <div className="flex flex-col gap-3 mt-auto w-full max-w-sm mx-auto">
+                <div className="flex flex-col gap-3 mt-auto pt-6 w-full max-w-sm mx-auto">
                     {auth?.user ? (
                         <Link 
                             href={route('admin.dashboard')} 
                             onClick={() => setMobileMenuOpen(false)} 
-                            className="w-full py-4 bg-[#E5654B] text-white rounded-full text-center font-extrabold hover:bg-[#d4523a] transition-all shadow-md shadow-[#E5654B]/25 text-sm"
+                            className="w-full py-3 bg-[#E5654B] text-white rounded-full text-center font-extrabold hover:bg-[#d4523a] transition-all shadow-md shadow-[#E5654B]/25 text-sm"
                         >
                             Dashboard
                         </Link>
@@ -1319,7 +1360,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                             <Link 
                                 href="/register/reseller" 
                                 onClick={() => setMobileMenuOpen(false)} 
-                                className="w-full py-4 bg-[#E5654B] text-white rounded-full text-center font-extrabold hover:bg-[#d4523a] shadow-md shadow-[#E5654B]/25 transition-all text-sm"
+                                className="w-full py-3 bg-[#E5654B] text-white rounded-full text-center font-extrabold hover:bg-[#d4523a] shadow-md shadow-[#E5654B]/25 transition-all text-sm"
                             >
                                 Daftar Partner
                             </Link>
@@ -1518,7 +1559,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                 </div>
                             </div>
 
-                            <button onClick={() => handleWhatsAppRedirect(`Halo Admin, saya melakukan simulasi profit agensi saya dan mendapat Rp ${netProfit.toLocaleString('id-ID')}/bulan. Saya ingin mendaftar menjadi partner reseller.`)} className="w-full mt-8 py-4 bg-white text-[#E5654B] hover:bg-[#FFF5EE] rounded-2xl font-black text-center text-sm shadow-xl shadow-black/10 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300">
+                            <button onClick={() => handleWhatsAppRedirect(`Halo Admin, saya melakukan simulasi profit agensi saya dan mendapat Rp ${netProfit.toLocaleString('id-ID')}/bulan. Saya ingin mendaftar menjadi partner reseller.`)} className="w-full mt-8 py-3 sm:py-4 bg-white text-[#E5654B] hover:bg-[#FFF5EE] rounded-xl sm:rounded-2xl font-black text-center text-sm shadow-xl shadow-black/10 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300">
                                 Klaim Lisensi Agensi Anda
                             </button>
                         </div>
@@ -1951,16 +1992,16 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                                 <h3 className="text-xl font-bold text-gray-900">Ingin membuat kartu ucapan Anda sendiri?</h3>
                                 <p className="text-gray-600 text-xs sm:text-sm mt-1">Gunakan editor interaktif kami untuk mengirim ucapan dalam hitungan menit.</p>
                             </div>
-                            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2.5 sm:gap-3 w-full md:w-auto">
                                 <Link
                                     href="/buat-kartu"
-                                    className="px-7 py-3.5 bg-gradient-to-r from-[#E5654B] to-[#f97316] text-white font-bold rounded-2xl text-sm hover:shadow-xl hover:shadow-[#E5654B]/30 transition-all hover:scale-105 duration-300 text-center"
+                                    className="px-3 py-3 sm:px-7 sm:py-3.5 bg-gradient-to-r from-[#E5654B] to-[#f97316] text-white font-bold rounded-xl sm:rounded-2xl text-[11px] min-[375px]:text-xs sm:text-sm hover:shadow-xl hover:shadow-[#E5654B]/30 transition-all hover:scale-105 duration-300 text-center flex items-center justify-center leading-tight"
                                 >
                                     Buat Kartu Sekarang
                                 </Link>
                                 <Link
                                     href="/katalog-kartu"
-                                    className="px-7 py-3.5 bg-white text-gray-750 font-semibold rounded-2xl text-sm hover:bg-gray-50 transition-all border border-orange-100 text-center"
+                                    className="px-3 py-3 sm:px-7 sm:py-3.5 bg-white text-gray-750 font-semibold rounded-xl sm:rounded-2xl text-[11px] min-[375px]:text-xs sm:text-sm hover:bg-gray-50 transition-all border border-orange-100 text-center flex items-center justify-center leading-tight"
                                 >
                                     Katalog Lengkap Kartu →
                                 </Link>
@@ -2032,7 +2073,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
                             Aktivasi lisensi dalam hitungan menit. Hubungi tim kami untuk aktivasi instan dan dapatkan platform reseller profesional Anda hari ini.
                         </p>
                         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
-                            <button onClick={() => handleWhatsAppRedirect()} className="w-full px-8 py-4 bg-white text-[#E5654B] hover:bg-[#FFF5EE] rounded-2xl font-black tracking-wide shadow-xl shadow-black/10 transition-all hover:scale-[1.03] text-sm">
+                            <button onClick={() => handleWhatsAppRedirect()} className="w-full px-8 py-3 sm:py-4 bg-white text-[#E5654B] hover:bg-[#FFF5EE] rounded-xl sm:rounded-2xl font-black tracking-wide shadow-xl shadow-black/10 transition-all hover:scale-[1.03] text-sm">
                                 Hubungi Admin via WhatsApp
                             </button>
                         </div>
@@ -2044,13 +2085,17 @@ export default function Welcome({ auth, canLogin, canRegister, appName, themes =
             <footer className="bg-[#FAF3EC] text-gray-500 py-14 border-t border-orange-100/60">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-10 border-b border-orange-100/60">
-                        <div className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-[#E5654B] flex items-center justify-center shadow-lg shadow-[#E5654B]/30">
-                                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3" />
-                                </svg>
-                            </div>
-                            <span className="text-lg font-black tracking-tight text-gray-900">{appName || 'Groovy'}<span className="text-[#E5654B]">.agency</span></span>
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                            {brandLogo ? (
+                                <img src={brandLogo} alt={appName || 'Logo'} className="w-8 h-8 sm:w-9 h-9 object-contain rounded-xl shadow-sm flex-shrink-0" />
+                            ) : (
+                                <div className="w-8 h-8 sm:w-9 h-9 rounded-xl bg-[#E5654B] flex items-center justify-center shadow-lg shadow-[#E5654B]/30 flex-shrink-0">
+                                    <svg className="w-4 h-4 sm:w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3" />
+                                    </svg>
+                                </div>
+                            )}
+                            <span className="text-base sm:text-lg font-black tracking-tight text-gray-900">{renderBrandName(appName)}</span>
                         </div>
                         <div className="text-xs text-gray-500 text-center sm:text-right font-semibold">
                             Email Dukungan Kemitraan: <a href={`mailto:${adminEmail}`} className="text-[#E5654B] hover:underline ml-1 font-bold">{adminEmail}</a>

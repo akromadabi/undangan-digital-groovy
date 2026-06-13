@@ -15,7 +15,7 @@ class LiveTamuController extends Controller
 
         return Inertia::render('Dashboard/LiveTamu', [
             'invitation' => $invitation?->only(['id', 'slug', 'live_delay', 'live_counter', 'live_template']),
-            'liveUrl' => $invitation ? url("/live/{$invitation->slug}") : null,
+            'liveUrl' => $invitation ? $invitation->getLiveUrl() : null,
         ]);
     }
 
@@ -107,6 +107,11 @@ class LiveTamuController extends Controller
                 'checked_in' => $guests->count(),
                 'total' => Guest::where('invitation_id', $invitation->id)->count(),
             ],
+            'settings' => [
+                'live_delay' => (int)$invitation->live_delay,
+                'live_counter' => (bool)$invitation->live_counter,
+                'live_template' => $invitation->live_template,
+            ]
         ]);
     }
 }

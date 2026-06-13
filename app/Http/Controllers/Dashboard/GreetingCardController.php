@@ -172,7 +172,7 @@ class GreetingCardController extends Controller
             return response()->json([
                 'success'  => true,
                 'redirect' => $redirectUrl,
-                'card_url' => url('/card/' . $card->custom_url),
+                'card_url' => $card->getShareUrl(),
             ]);
         }
 

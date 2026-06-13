@@ -7,22 +7,38 @@ export default function Fullscreen({ invitation, colors }) {
     const [newGuest, setNewGuest] = useState(null);
     const [showWelcome, setShowWelcome] = useState(false);
     const prevCountRef = useRef(0);
-    const delay = (invitation?.live_delay || 3) * 1000;
-    const showCounter = invitation?.live_counter !== false;
-    const template = invitation?.live_template || 'elegant';
+
+    const [settings, setSettings] = useState({
+        live_delay: invitation?.live_delay ?? 3,
+        live_counter: invitation?.live_counter ?? true,
+        live_template: invitation?.live_template ?? 'elegant',
+    });
+    const settingsRef = useRef(settings);
+
+    useEffect(() => {
+        settingsRef.current = settings;
+    }, [settings]);
+
+    const delay = settings.live_delay * 1000;
+    const showCounter = settings.live_counter !== false;
+    const template = settings.live_template || 'elegant';
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const res = await fetch(`/live/${invitation.slug}/data`);
                 const d = await res.json();
+                if (d.settings) {
+                    setSettings(d.settings);
+                }
                 if (d.stats.checked_in > prevCountRef.current && prevCountRef.current > 0) {
                     const latest = d.guests[0];
                     if (latest) {
                         setShowWelcome(true);
                         setNewGuest(latest);
-                        setTimeout(() => { setShowWelcome(false); }, delay + 2000);
-                        setTimeout(() => { setNewGuest(null); }, delay + 3000);
+                        const currentDelay = ((d.settings ? d.settings.live_delay : null) ?? settingsRef.current.live_delay) * 1000;
+                        setTimeout(() => { setShowWelcome(false); }, currentDelay + 2000);
+                        setTimeout(() => { setNewGuest(null); }, currentDelay + 3000);
                     }
                 }
                 prevCountRef.current = d.stats.checked_in;

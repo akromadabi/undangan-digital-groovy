@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Niconne&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 
 /* ==========================================================================
    DESIGN SYSTEM / THEME VARIABLES (SPESIAL-04)
@@ -629,7 +630,7 @@
    ========================================================================== */
 .sp04-floating-controls {
   position: fixed;
-  bottom: 24px;
+  bottom: 90px;
   right: 24px;
   display: flex;
   flex-direction: column;
@@ -770,4 +771,102 @@
   border-radius: 50%;
   background: var(--sp04-primary);
   box-shadow: 0 0 8px rgba(var(--sp04-primary-rgb), 0.4);
+}
+
+#section-opening {
+  min-height: auto;
+  padding: 60px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sp04-control-btn i {
+  color: #ffffff !important;
+  font-size: 14px;
+}
+
+.sp04-control-btn.is-active {
+  background-color: var(--sp04-primary);
+}
+
+/* Bottom Navigation Bar */
+.sp04-nav-menu {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 420px;
+  background-color: rgba(64, 48, 45, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 8px 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  overflow-x: auto;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sp04-nav-menu::-webkit-scrollbar {
+  display: none !important;
+}
+
+.sp04-nav-menu__inner--row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.sp04-nav-menu__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  padding: 4px 2px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  width: 62px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sp04-nav-menu__item i {
+  font-size: 13px;
+}
+
+.sp04-nav-item-text {
+  font-size: 7.5px;
+  font-weight: 500;
+  margin-top: 2px;
+  text-transform: none;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
+}
+
+.sp04-nav-menu__item:hover {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.sp04-nav-menu__item.active {
+  color: var(--sp04-secondary);
+  background-color: rgba(255, 255, 255, 0.08);
+  opacity: 1;
 }

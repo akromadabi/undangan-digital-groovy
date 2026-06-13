@@ -66,7 +66,8 @@ class GreetingCard extends Model
      */
     public function getShareUrl(): string
     {
-        return url('/card/' . $this->custom_url);
+        $baseUrl = $this->user ? $this->user->getBrandBaseUrl() : config('app.url');
+        return $baseUrl . '/card/' . $this->custom_url;
     }
 
     /**

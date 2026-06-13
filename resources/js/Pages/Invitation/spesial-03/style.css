@@ -56,6 +56,14 @@
   border-radius: 30px;
 }
 
+#section-opening {
+  min-height: auto;
+  padding: 60px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .sp03-section:nth-child(even) {
   background-color: var(--sp03-bg-soft);
   box-shadow: none;
@@ -753,13 +761,13 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(46, 63, 84, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background-color: var(--sp03-primary);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--sp03-primary);
+  color: #ffffff;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -767,16 +775,20 @@
   -webkit-backdrop-filter: blur(8px);
 }
 
+.sp03-control-btn i {
+  color: #ffffff !important;
+  font-size: 14px;
+}
+
 .sp03-control-btn:hover {
   background-color: var(--sp03-primary);
-  color: white;
+  opacity: 0.9;
   transform: scale(1.08);
 }
 
 .sp03-control-btn.is-active {
-  background-color: var(--sp03-accent);
-  color: var(--sp03-primary-dark);
-  border-color: var(--sp03-accent);
+  background-color: var(--sp03-primary);
+  border-color: var(--sp03-primary);
 }
 
 /* ═══════════════════════════════════════
@@ -788,7 +800,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);
-  max-width: 480px;
+  max-width: 420px;
   background-color: rgba(26, 40, 55, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -797,21 +809,22 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 49;
+  overflow-x: auto;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sp03-nav-menu::-webkit-scrollbar {
+  display: none !important;
 }
 
 .sp03-nav-menu__inner--row {
   display: flex;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  gap: 4px;
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-.sp03-nav-menu__inner--row::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .sp03-nav-menu__item {
@@ -823,8 +836,8 @@
   font-size: 14px;
   padding: 6px 8px;
   border-radius: 12px;
-  flex: 1 0 auto;
-  min-width: 60px;
+  flex-shrink: 0;
+  width: 62px;
   transition: all 0.25s ease;
   cursor: pointer;
   white-space: nowrap;

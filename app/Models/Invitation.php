@@ -224,11 +224,18 @@ class Invitation extends Model
 
     public function getUrl(?string $guestSlug = null): string
     {
-        $url = config('app.url') . '/u/' . $this->slug;
+        $baseUrl = $this->user ? $this->user->getBrandBaseUrl() : config('app.url');
+        $url = $baseUrl . '/u/' . $this->slug;
         if ($guestSlug) {
             $url .= '?to=' . $guestSlug;
         }
         return $url;
+    }
+
+    public function getLiveUrl(): string
+    {
+        $baseUrl = $this->user ? $this->user->getBrandBaseUrl() : config('app.url');
+        return $baseUrl . '/live/' . $this->slug;
     }
 
     public function visibleSections()

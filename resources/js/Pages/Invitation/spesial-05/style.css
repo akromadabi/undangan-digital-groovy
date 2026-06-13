@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=MonteCarlo&family=Amita:wght@400;700&family=Croissant+One&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 
 /* ==========================================================================
    DESIGN SYSTEM / THEME VARIABLES (SPESIAL-05)
@@ -43,6 +44,7 @@
   min-height: 100vh;
   min-height: 100dvh;
   background-color: var(--sp05-secondary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='rgba(72, 71, 41, 0.04)' stroke-width='0.75'%3E%3Cpath d='M0,120 C10,90 40,60 60,60'/%3E%3Cpath d='M20,100 C15,90 5,95 10,105 Q20,100 20,100' fill='rgba(72, 71, 41, 0.015)'/%3E%3Cpath d='M40,80 C35,70 25,75 30,85 Q40,80 40,80' fill='rgba(72, 71, 41, 0.015)'/%3E%3Cpath d='M60,60 C80,40 110,10 120,0'/%3E%3Cpath d='M80,40 C75,30 65,35 70,45 Q80,40 80,40' fill='rgba(72, 71, 41, 0.015)'/%3E%3Cpath d='M100,20 C95,10 85,15 90,25 Q100,20 100,20' fill='rgba(72, 71, 41, 0.015)'/%3E%3C/g%3E%3C/svg%3E");
   position: relative;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
   overflow-y: auto;
@@ -131,12 +133,28 @@
   max-width: 450px;
   margin: 0 auto;
   background-color: var(--sp05-secondary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='rgba(72, 71, 41, 0.04)' stroke-width='0.75'%3E%3Cpath d='M0,120 C10,90 40,60 60,60'/%3E%3Cpath d='M20,100 C15,90 5,95 10,105 Q20,100 20,100' fill='rgba(72, 71, 41, 0.015)'/%3E%3Cpath d='M40,80 C35,70 25,75 30,85 Q40,80 40,80' fill='rgba(72, 71, 41, 0.015)'/%3E%3Cpath d='M60,60 C80,40 110,10 120,0'/%3E%3Cpath d='M80,40 C75,30 65,35 70,45 Q80,40 80,40' fill='rgba(72, 71, 41, 0.015)'/%3E%3Cpath d='M100,20 C95,10 85,15 90,25 Q100,20 100,20' fill='rgba(72, 71, 41, 0.015)'/%3E%3C/g%3E%3C/svg%3E");
   transition: transform 1.2s cubic-bezier(0.76, 0, 0.24, 1), opacity 1s ease;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.sp05-cover.sp05-cover-with-bg {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.sp05-cover.sp05-cover-with-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(var(--sp05-primary-rgb), 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 0;
 }
 
 .sp05-cover.sp05-is-opened {
@@ -148,18 +166,19 @@
 .sp05-cover-arch {
   width: calc(100% - 40px);
   height: calc(100% - 40px);
-  background-color: var(--sp05-secondary);
+  background-color: rgba(251, 251, 247, 0.9); /* soft off-white backdrop */
   border: 4px solid var(--sp05-primary);
   border-radius: 200px 0 200px 0; /* Elegant asymmetrical double arch from Elementor! */
   box-shadow: 0 10px 30px rgba(var(--sp05-primary-rgb), 0.15);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 45px 24px;
   text-align: center;
   position: relative;
   overflow: hidden;
+  gap: 16px;
 }
 
 .sp05-cover-arch::before {
@@ -170,6 +189,48 @@
   background-size: 16px 16px;
   pointer-events: none;
   z-index: 1;
+}
+
+.sp05-cover-photo-frame {
+  width: 130px;
+  height: 170px;
+  overflow: hidden;
+  border-radius: 80px 80px 0 0;
+  border: 3px solid var(--sp05-primary);
+  box-shadow: 0 8px 25px rgba(var(--sp05-primary-rgb), 0.2);
+  margin: 4px 0;
+  background-color: #eee;
+}
+
+.sp05-cover-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sp05-cover-ornament-tl {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  width: 65px;
+  height: 65px;
+  color: var(--sp05-primary);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.sp05-cover-ornament-br {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  width: 65px;
+  height: 65px;
+  color: var(--sp05-primary);
+  opacity: 0.25;
+  transform: rotate(180deg);
+  pointer-events: none;
+  z-index: 2;
 }
 
 .sp05-btn-buka {
@@ -198,7 +259,45 @@
    ========================================================================== */
 .sp05-opening-section {
   padding: 80px 24px;
+  position: relative;
+  overflow: hidden;
 }
+
+.sp05-opener-bg-ornament-tr {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 110px;
+  height: 110px;
+  color: var(--sp05-primary);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  transform: rotate(90deg);
+}
+
+.sp05-opener-bg-ornament-bl {
+  position: absolute;
+  bottom: -20px;
+  left: -20px;
+  width: 110px;
+  height: 110px;
+  color: var(--sp05-primary);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  transform: rotate(-90deg);
+}
+
+.spin-slow {
+  animation: spinSlow 30s linear infinite;
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 
 .sp05-title-wedding {
   color: var(--sp05-primary);
@@ -270,14 +369,49 @@
   box-shadow: 0 10px 30px rgba(var(--sp05-primary-rgb), 0.08);
 }
 
+.sp05-couple-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+  display: inline-block;
+}
+
+.sp05-couple-offset-border {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border: 2px dashed var(--sp05-accent);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
+  transition: all 0.3s ease;
+}
+
+.sp05-couple-offset-border-groom {
+  border-radius: 126px 0 126px 0;
+}
+
+.sp05-couple-offset-border-bride {
+  border-radius: 0 126px 0 126px;
+}
+
 .sp05-couple-frame {
-  width: 250px;
-  height: 250px;
+  width: 230px;
+  height: 230px;
   overflow: hidden;
-  border-radius: 20px;
   border: 3px solid var(--sp05-primary);
   box-shadow: 0 10px 30px rgba(var(--sp05-primary-rgb), 0.15);
   position: relative;
+  z-index: 1;
+}
+
+.sp05-couple-frame-groom {
+  border-radius: 120px 0 120px 0;
+}
+
+.sp05-couple-frame-bride {
+  border-radius: 0 120px 0 120px;
 }
 
 .sp05-couple-frame img {
@@ -696,7 +830,7 @@
    ========================================================================== */
 .sp05-floating-controls {
   position: fixed;
-  bottom: 24px;
+  bottom: 90px;
   right: 24px;
   display: flex;
   flex-direction: column;
@@ -835,4 +969,102 @@
   border-radius: 50%;
   background: var(--sp05-primary);
   box-shadow: 0 0 8px rgba(var(--sp05-primary-rgb), 0.4);
+}
+
+#section-opening {
+  min-height: auto;
+  padding: 60px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sp05-control-btn i {
+  color: #ffffff !important;
+  font-size: 14px;
+}
+
+.sp05-control-btn.is-active {
+  background-color: var(--sp05-primary);
+}
+
+/* Bottom Navigation Bar */
+.sp05-nav-menu {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 420px;
+  background-color: rgba(72, 71, 41, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 8px 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  overflow-x: auto;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sp05-nav-menu::-webkit-scrollbar {
+  display: none !important;
+}
+
+.sp05-nav-menu__inner--row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.sp05-nav-menu__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  padding: 4px 2px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  width: 62px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sp05-nav-menu__item i {
+  font-size: 13px;
+}
+
+.sp05-nav-item-text {
+  font-size: 7.5px;
+  font-weight: 500;
+  margin-top: 2px;
+  text-transform: none;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
+}
+
+.sp05-nav-menu__item:hover {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.sp05-nav-menu__item.active {
+  color: var(--sp05-secondary);
+  background-color: rgba(255, 255, 255, 0.08);
+  opacity: 1;
 }

@@ -394,6 +394,16 @@ Seksi pembuka harus ada dan terstruktur dengan kriteria berikut:
   </p>
   ```
   *(Catatan khusus Shopee: Letakkan watermark ini di bagian paling bawah tab Beranda/Home dengan `padding-bottom: 80px` agar tidak tertutup navigation bar bawah).*
+- **Gaya Penulisan Huruf Kapital (Cursive Capitalization Rule)**: Judul penutup (seperti "Thank You" atau "Terima Kasih") sering kali menggunakan font bernuansa tulisan tangan/cursive/script (seperti Great Vibes). Cursive font yang ditulis dengan **HURUF KAPITAL SEMUA (ALL CAPS)** sangat sulit dibaca dan merusak visual estetis. Pastikan judul penutup diformat hanya huruf besar di awal kata saja (Title Case), dan override string bawaan database yang bertuliskan "THANK YOU" atau "TERIMA KASIH" secara dinamis:
+  ```js
+  function formatTitle(title) {
+      if (!title) return '';
+      if (title.toUpperCase() === 'THANK YOU') return 'Thank You';
+      if (title.toUpperCase() === 'TERIMA KASIH') return 'Terima Kasih';
+      return title;
+  }
+  ```
+  Gunakan fungsi ini di dalam render JSX: `{formatTitle(invitation?.closing_title || t('invitation.closing_title'))}`.
 
 ### 4.9 Fitur QR Code Presensi / Check-in Tamu (`enableQr` / `showQr`)
 Every theme must support QR Code presence check-in automatically if enabled.

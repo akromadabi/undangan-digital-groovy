@@ -233,7 +233,7 @@ class InvitationController extends Controller
 
         // THEME ADDED BY BHAKTIAJI ILHAM
         $page = 'Invitation/Show';
-        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'handwriting', 'polaroid-scrapbook', 'fairytale', 'chelsea'])) {
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'handwriting', 'polaroid-scrapbook', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
             if ($isDemo) {
                 $page = 'Invitation/DemoWrapper';
             } else {
@@ -474,15 +474,14 @@ class InvitationController extends Controller
                 ->first();
         }
 
-        // Fallback: Jika reseller belum mengatur demo sendiri, cari demo dari Super Admin dengan tema yang sama
+        // Fallback: Jika reseller belum mengatur demo sendiri, cari demo dari Super Admin atau client langsung di domain utama dengan tema yang sama
         if (!$customDemoInvitation) {
-            $superAdmin = \App\Models\User::where('role', 'super_admin')->first();
-            if ($superAdmin) {
-                $customDemoInvitation = Invitation::where('user_id', $superAdmin->id)
-                    ->where('theme_id', $theme->id)
-                    ->with(['theme.threeDScene', 'threeDScene', 'brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
-                    ->first();
-            }
+            $customDemoInvitation = Invitation::whereHas('user', function($q) {
+                    $q->whereNull('reseller_id');
+                })
+                ->where('theme_id', $theme->id)
+                ->with(['theme.threeDScene', 'threeDScene', 'brideGrooms', 'events', 'galleries', 'loveStories', 'bankAccounts', 'sections', 'user'])
+                ->first();
         }
 
 
@@ -543,7 +542,7 @@ class InvitationController extends Controller
                 'hideDemoPlanSelector' => $resellerSetting ? (bool)$resellerSetting->hide_demo_plan_selector : false,
             ];
 
-            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'handwriting', 'polaroid-scrapbook', 'fairytale', 'chelsea'])) {
+            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'handwriting', 'polaroid-scrapbook', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
                 $page = 'Invitation/DemoWrapper';
                 $props['themeSlug'] = $theme->slug;
                 $props['allowedPlans'] = $theme->allowed_plans;
@@ -571,6 +570,12 @@ class InvitationController extends Controller
         $invitation->countdown_target_date = $defaultData['invitation']['countdown_target_date'] ?? now()->addDays(30)->toDateTimeString();
         $invitation->music_url = $defaultData['invitation']['music_url'] ?? '/audio/backsound.mp3';
         $invitation->music_autoplay = true;
+        
+        // Full features fallback data
+        $invitation->video_url = $defaultData['invitation']['video_url'] ?? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+        $invitation->show_dresscode = true;
+        $invitation->dresscode_text = 'Para tamu disarankan mengenakan pakaian formal atau semi-formal dengan palet warna berikut.';
+        $invitation->dresscode_colors = '#40302d,#d4a373,#e9edc9,#fefae0';
         
         $user = auth()->user() ?: \App\Models\User::where('role', 'reseller')->first();
         if ($user) {
@@ -640,6 +645,16 @@ class InvitationController extends Controller
                 'gmaps_link' => 'https://maps.google.com/?q=Gedung+Kesenian+Yogyakarta',
                 'sort_order' => 0,
                 'is_primary' => true,
+                'streaming_url' => 'https://youtube.com/live/example-wedding',
+                'streaming_provider' => 'youtube',
+                'show_dress_code' => true,
+                'dress_code_text' => 'Mohon mengenakan pakaian formal dengan palet warna hangat sesuai tema pernikahan kami.',
+                'dress_code_colors' => [
+                    [
+                        'label' => 'Aesthetic Warm Palette',
+                        'colors' => ['#40302d', '#d4a373', '#e9edc9', '#fefae0']
+                    ]
+                ],
             ],
             [
                 'event_type' => 'resepsi',
@@ -653,6 +668,14 @@ class InvitationController extends Controller
                 'gmaps_link' => 'https://maps.google.com/?q=Gedung+Kesenian+Yogyakarta',
                 'sort_order' => 1,
                 'is_primary' => false,
+                'show_dress_code' => true,
+                'dress_code_text' => 'Mohon mengenakan pakaian formal dengan palet warna hangat sesuai tema pernikahan kami.',
+                'dress_code_colors' => [
+                    [
+                        'label' => 'Aesthetic Warm Palette',
+                        'colors' => ['#40302d', '#d4a373', '#e9edc9', '#fefae0']
+                    ]
+                ],
             ]
         ];
         $events = collect($eventsData)->map(fn($ev) => new \App\Models\Event($ev));
@@ -731,7 +754,7 @@ class InvitationController extends Controller
             'hideDemoPlanSelector' => $resellerSetting ? (bool)$resellerSetting->hide_demo_plan_selector : false,
         ];
 
-        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'handwriting', 'polaroid-scrapbook', 'fairytale', 'chelsea'])) {
+        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'handwriting', 'polaroid-scrapbook', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
             $page = 'Invitation/DemoWrapper';
             $props['themeSlug'] = $theme->slug;
             $props['allowedPlans'] = $theme->allowed_plans;

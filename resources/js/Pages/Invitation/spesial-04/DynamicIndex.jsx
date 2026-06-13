@@ -343,7 +343,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
 
                 {/* Guest Box */}
                 <div className="sp04-guest-card p-5 my-2">
-                    <p className="text-[11px] text-[var(--sp04-text-muted)] font-semibold uppercase tracking-wider mb-2 select-none">
+                    <p className="text-[11px] text-[var(--sp04-text-muted)] font-semibold tracking-wider mb-2 select-none">
                         {isEn ? 'Dear Guest' : 'Kepada Yth. Bapak/Ibu/Saudara/i :'}
                     </p>
                     <p className="text-md font-bold text-[var(--sp04-primary)] tracking-wide mb-1">
@@ -364,7 +364,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
 }
 
 // 2. OPENING SECTION
-function OpeningSection({ invitation, showPhotos, brideGrooms, locale }) {
+function OpeningSection({ invitation, showPhotos, brideGrooms, events, locale }) {
     const { t } = useTranslation();
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
@@ -377,6 +377,10 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, locale }) {
             .map(img => getStorageUrl(img.trim()))
             .filter(Boolean);
     }, [invitation?.opening_image]);
+
+    const primaryEvent = useMemo(() => safeArr(events).find(e => e.is_primary) || safeArr(events)[0], [events]);
+    const targetDate = useMemo(() => invitation?.countdown_target_date || primaryEvent?.event_date || '', [invitation?.countdown_target_date, primaryEvent]);
+    const showCountdown = parseBool(invitation?.show_countdown, true);
 
     return (
         <div className="sp04-opening-section w-full">
@@ -411,6 +415,12 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, locale }) {
                 <p className="text-xs font-semibold text-[var(--sp04-text-muted)] tracking-wider uppercase mb-6 select-none">
                     {invitation?.countdown_target_date ? formatDate(invitation.countdown_target_date, locale) : 'Sabtu, 16 Desember 2026'}
                 </p>
+
+                {showCountdown && targetDate && (
+                    <Reveal variant="zoom" className="mb-6">
+                        <CountdownTimer targetDate={targetDate} targetTime={primaryEvent?.start_time || ''} />
+                    </Reveal>
+                )}
 
                 <button 
                     type="button" 
@@ -629,12 +639,6 @@ function EventSection({ events, locale, invitation, sections }) {
             <Reveal>
                 <FlowerSwirl title={t('nav.acara')} />
             </Reveal>
-
-            {showCountdownInEvent && targetDate && (
-                <Reveal variant="zoom">
-                    <CountdownTimer targetDate={targetDate} targetTime={primaryEvent?.start_time || ''} />
-                </Reveal>
-            )}
 
             <div className="space-y-8 mt-6">
                 {list.map((evt, idx) => {
@@ -1110,13 +1114,16 @@ function ClosingSection({ invitation, brideGrooms, locale }) {
     const hasGroomParents = !!(groom.father_name || groom.mother_name);
     const hasBrideParents = !!(bride.father_name || bride.mother_name);
 
+    const rawTitle = invitation?.closing_title || (isEn ? 'Thank You' : 'Terima Kasih');
+    const formattedTitle = rawTitle.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
     return (
         <div className="w-full py-16 px-6 text-center bg-[var(--sp04-bg-light)]">
             <Reveal variant="zoom" className="max-w-xs mx-auto flex flex-col items-center">
                 <i className="fas fa-heart text-[var(--sp04-primary)] text-3xl mb-4 sp04-breathe" />
                 
                 <h4 className="text-3xl text-[var(--sp04-primary)] sp04-font-heading-style leading-none mb-4 tracking-wide select-none">
-                    {invitation?.closing_title || (isEn ? 'Thank You' : 'Terima Kasih')}
+                    {formattedTitle}
                 </h4>
 
                 <p className="text-xs leading-relaxed text-[var(--sp04-text-muted)] px-1 mb-8 select-none font-medium">
@@ -1155,6 +1162,28 @@ function ClosingSection({ invitation, brideGrooms, locale }) {
 /* ═══════════════════════════════════════
    MAIN DYNAMIC INDEX COMPONENT (Page root)
    ═══════════════════════════════════════ */
+const isControlElement = (target) => {
+    if (!target) return false;
+    let node = target;
+    while (node) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            const tag = node.tagName;
+            if (
+                tag === 'BUTTON' || 
+                tag === 'INPUT' || 
+                tag === 'TEXTAREA' || 
+                tag === 'SELECT' || 
+                node.classList.contains('global-music-waves') ||
+                (typeof node.className === 'string' && /sp\d+-(control|nav|floating|menu)/.test(node.className))
+            ) {
+                return true;
+            }
+        }
+        node = node.parentNode || node.host;
+    }
+    return false;
+};
+
 export default function DynamicIndex({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest, isDemo }) {
     // 1. Language Setup (i18n)
     const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
@@ -1166,9 +1195,21 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showQr, setShowQr] = useState(false);
+    const [autoScroll, setAutoScroll] = useState(parseBool(invitation?.enable_auto_scroll, false));
+    const [activeSection, setActiveSection] = useState('opening');
 
     const audioRef = useRef(null);
     const containerRef = useRef(null);
+    const lastToggleTimeRef = useRef(0);
+    const activeSectionRef = useRef('opening');
+    const activeSectionTimeoutRef = useRef(null);
+    const intersectingSectionsRef = useRef(new Map());
+    const isNavigatingRef = useRef(false);
+    const navigatingTimeoutRef = useRef(null);
+
+    useEffect(() => {
+        lastToggleTimeRef.current = Date.now();
+    }, [autoScroll]);
 
     // Filtered visible sections based on settings
     const showPhotos = !parseBool(invitation?.hide_photos, false) && parseBool(invitation?.show_photos, true);
@@ -1207,6 +1248,197 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
 
     // Page Visibility Hook to pause/play audio
     usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
+
+    // High-performance IntersectionObserver scrollspy
+    useEffect(() => {
+        if (!isOpened || resolvedSections.length === 0) return;
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '-35% 0px -35% 0px',
+            threshold: 0
+        };
+
+        const handleIntersection = (entries) => {
+            if (isNavigatingRef.current) return;
+
+            entries.forEach(entry => {
+                const sectionKey = entry.target.id.replace('section-', '');
+                if (entry.isIntersecting) {
+                    intersectingSectionsRef.current.set(sectionKey, entry.boundingClientRect.top);
+                } else {
+                    intersectingSectionsRef.current.delete(sectionKey);
+                }
+            });
+
+            let bestSectionKey = null;
+            let minDistance = Infinity;
+            const viewportMiddle = window.innerHeight * 0.4;
+
+            intersectingSectionsRef.current.forEach((_, key) => {
+                const el = document.getElementById(`section-${key}`);
+                if (el) {
+                    const rect = el.getBoundingClientRect();
+                    const coversMiddle = rect.top <= viewportMiddle && rect.bottom >= viewportMiddle;
+                    
+                    if (coversMiddle) {
+                        bestSectionKey = key;
+                        minDistance = -1;
+                    } else if (minDistance !== -1) {
+                        const distance = Math.abs(rect.top - viewportMiddle);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            bestSectionKey = key;
+                        }
+                    }
+                }
+            });
+
+            if (bestSectionKey && bestSectionKey !== activeSectionRef.current) {
+                activeSectionRef.current = bestSectionKey;
+                
+                if (activeSectionTimeoutRef.current) {
+                    clearTimeout(activeSectionTimeoutRef.current);
+                }
+                activeSectionTimeoutRef.current = setTimeout(() => {
+                    setActiveSection(bestSectionKey);
+                }, 80);
+            }
+        };
+
+        const observer = new IntersectionObserver(handleIntersection, observerOptions);
+
+        resolvedSections.forEach(s => {
+            const el = document.getElementById(`section-${s.section_key}`);
+            if (el) observer.observe(el);
+        });
+
+        return () => {
+            observer.disconnect();
+            if (activeSectionTimeoutRef.current) {
+                clearTimeout(activeSectionTimeoutRef.current);
+            }
+        };
+    }, [isOpened, resolvedSections]);
+
+    // Cleanups on unmount
+    useEffect(() => {
+        return () => {
+            if (navigatingTimeoutRef.current) clearTimeout(navigatingTimeoutRef.current);
+            if (activeSectionTimeoutRef.current) clearTimeout(activeSectionTimeoutRef.current);
+        };
+    }, []);
+
+    // Pause auto scroll on user interaction
+    useEffect(() => {
+        if (!isOpened || !autoScroll) return;
+
+        const handleUserInteraction = (e) => {
+            if (Date.now() - lastToggleTimeRef.current < 350) {
+                return;
+            }
+
+            if (e.type === 'keydown') {
+                const scrollKeys = ['ArrowUp', 'ArrowDown', 'Space', ' ', 'PageUp', 'PageDown', 'Home', 'End'];
+                if (!scrollKeys.includes(e.key)) return;
+            }
+
+            if (isControlElement(e.target)) {
+                return;
+            }
+            setAutoScroll(false);
+        };
+
+        window.addEventListener('wheel', handleUserInteraction, { passive: true });
+        window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+        window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+        window.addEventListener('keydown', handleUserInteraction, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction);
+            window.removeEventListener('mousedown', handleUserInteraction);
+            window.removeEventListener('keydown', handleUserInteraction);
+        };
+    }, [isOpened, autoScroll]);
+
+    // requestAnimationFrame scroll loop
+    useEffect(() => {
+        if (!isOpened || !autoScroll) return;
+
+        let animationFrameId = null;
+        let lastTime = performance.now();
+        const speed = 0.04;
+        let accumulatedScroll = 0;
+
+        const scrollLoop = (time) => {
+            const delta = time - lastTime;
+            lastTime = time;
+
+            if (delta > 0 && delta < 100) {
+                accumulatedScroll += speed * delta;
+                const scrollPixels = Math.floor(accumulatedScroll);
+                if (scrollPixels > 0) {
+                    accumulatedScroll -= scrollPixels;
+                    window.scrollBy(0, scrollPixels);
+                }
+            }
+
+            const scrollContainer = document.documentElement || document.body;
+            const currentScroll = window.scrollY;
+            const maxScroll = scrollContainer.scrollHeight - window.innerHeight;
+
+            if (currentScroll < maxScroll - 3) {
+                animationFrameId = requestAnimationFrame(scrollLoop);
+            } else {
+                setAutoScroll(false);
+            }
+        };
+
+        const delayTimeout = setTimeout(() => {
+            lastTime = performance.now();
+            animationFrameId = requestAnimationFrame(scrollLoop);
+        }, 1000);
+
+        return () => {
+            clearTimeout(delayTimeout);
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        };
+    }, [isOpened, autoScroll]);
+
+    // Auto-scroll active bottom menu to center
+    useEffect(() => {
+        if (!isOpened) return;
+        const navEl = document.querySelector('.sp04-nav-menu');
+        const activeBtn = document.getElementById(`nav-btn-${activeSection}`);
+        if (navEl && activeBtn) {
+            const btnLeft = activeBtn.offsetLeft;
+            const btnWidth = activeBtn.offsetWidth;
+            const navWidth = navEl.offsetWidth;
+            navEl.scrollLeft = btnLeft - (navWidth / 2) + (btnWidth / 2);
+        }
+    }, [activeSection, isOpened]);
+
+    const handleNavigate = (key) => {
+        setAutoScroll(false);
+        isNavigatingRef.current = true;
+        activeSectionRef.current = key;
+        setActiveSection(key);
+        
+        const el = document.getElementById(`section-${key}`);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        if (navigatingTimeoutRef.current) {
+            clearTimeout(navigatingTimeoutRef.current);
+        }
+        navigatingTimeoutRef.current = setTimeout(() => {
+            isNavigatingRef.current = false;
+        }, 800);
+    };
 
     // Audio Autoplay when Opened
     const handleOpenInvitation = () => {
@@ -1308,81 +1540,82 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                             
                             return (
                                 <ErrorBoundary key={sec.id || key}>
-                                    {key === 'cover' && (
-                                        /* In some designs, cover is also integrated statically inside main view. 
-                                           We skip to avoid repeating cover content */
-                                        null
-                                    )}
+                                    <div id={`section-${key}`} className="w-full">
+                                        {key === 'opening' && (
+                                            <div>
+                                                <OpeningSection
+                                                    invitation={invitation}
+                                                    showPhotos={showPhotos}
+                                                    brideGrooms={brideGrooms}
+                                                    events={events}
+                                                    locale={locale}
+                                                />
+                                                <QuoteSection invitation={invitation} locale={locale} />
+                                                
+                                                <Reveal delay={200} className="w-full text-center my-6 px-4">
+                                                    <p className="text-xs sm:text-sm leading-relaxed opacity-95 text-[var(--sp04-primary)] font-serif italic max-w-sm mx-auto select-none">
+                                                        {invitation?.cover_subtitle || (isEn 
+                                                            ? 'Without reducing respect, we cordially invite you to celebrate our marriage.' 
+                                                            : 'Tanpa Mengurangi Rasa Hormat, Kami Mengundang Anda Untuk Berhadir Di Acara Pernikahan Kami.')}
+                                                    </p>
+                                                </Reveal>
+                                            </div>
+                                        )}
 
-                                    {key === 'opening' && (
-                                        <OpeningSection
-                                            invitation={invitation}
-                                            showPhotos={showPhotos}
-                                            brideGrooms={brideGrooms}
-                                            events={events}
-                                            locale={locale}
-                                        />
-                                    )}
-
-                                    {key === 'bride_groom' && (
-                                        <div className="w-full">
-                                            {/* We embed quote here inside brideGroom section as part of classical flow */}
-                                            <QuoteSection invitation={invitation} locale={locale} />
+                                        {key === 'bride_groom' && (
                                             <BrideGroomSection
                                                 brideGrooms={brideGrooms}
                                                 locale={locale}
                                                 showPhotos={showPhotos}
                                             />
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {key === 'event' && (
-                                        <div className="w-full">
-                                            <EventSection
-                                                events={events}
-                                                locale={locale}
-                                                invitation={invitation}
-                                                sections={sections}
-                                            />
-                                            {/* Embed Google Maps right after Event details */}
-                                            <GmapSection events={events} locale={locale} />
-                                        </div>
-                                    )}
-
-                                    {key === 'love_story' && (
-                                        <LoveStorySection loveStories={loveStories} />
-                                    )}
-
-                                    {key === 'gallery' && (
-                                        <GallerySection galleries={galleries} showPhotos={showPhotos} />
-                                    )}
-
-                                    {key === 'rsvp' && (
-                                        <RsvpWishesSection
-                                            invitation={invitation}
-                                            wishes={wishes}
-                                            locale={locale}
-                                        />
-                                    )}
-
-                                    {key === 'bank' && (
-                                        <BankSection bankAccounts={bankAccounts} locale={locale} />
-                                    )}
-
-                                    {key === 'closing' && (
-                                        <div className="w-full flex flex-col items-center">
-                                            <ClosingSection
-                                                invitation={invitation}
-                                                brideGrooms={brideGrooms}
-                                                locale={locale}
-                                            />
-                                            
-                                            {/* Dynamic central / reseller brand watermark */}
-                                            <div className="sp04-watermark select-none">
-                                                Made with ❤️ by <span className="font-bold text-[var(--sp04-primary)]">{brandName}</span>
+                                        {key === 'event' && (
+                                            <div>
+                                                <EventSection
+                                                    events={events}
+                                                    locale={locale}
+                                                    invitation={invitation}
+                                                    sections={sections}
+                                                />
+                                                <GmapSection events={events} locale={locale} />
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
+
+                                        {key === 'love_story' && (
+                                            <LoveStorySection loveStories={loveStories} />
+                                        )}
+
+                                        {key === 'gallery' && (
+                                            <GallerySection galleries={galleries} showPhotos={showPhotos} />
+                                        )}
+
+                                        {key === 'rsvp' && (
+                                            <RsvpWishesSection
+                                                invitation={invitation}
+                                                wishes={wishes}
+                                                locale={locale}
+                                            />
+                                        )}
+
+                                        {key === 'bank' && (
+                                            <BankSection bankAccounts={bankAccounts} locale={locale} />
+                                        )}
+
+                                        {key === 'closing' && (
+                                            <div className="w-full flex flex-col items-center">
+                                                <ClosingSection
+                                                    invitation={invitation}
+                                                    brideGrooms={brideGrooms}
+                                                    locale={locale}
+                                                />
+                                                
+                                                <div className="sp04-watermark select-none">
+                                                    Made with ❤️ by <span className="font-bold text-[var(--sp04-primary)]">{brandName}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </ErrorBoundary>
                             );
                         })}
@@ -1393,6 +1626,20 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
             {/* FLOATING ACTION CONTROL BUTTONS (High contrast overlay controls) */}
             {isOpened && (
                 <div className="sp04-floating-controls">
+                    {/* Auto Scroll Button */}
+                    <button 
+                        type="button" 
+                        onClick={() => setAutoScroll(!autoScroll)} 
+                        className={`sp04-control-btn ${autoScroll ? 'is-active' : ''}`}
+                        title={autoScroll ? 'Pause Auto Scroll' : 'Start Auto Scroll'}
+                    >
+                        {autoScroll ? (
+                            <i className="fas fa-pause" />
+                        ) : (
+                            <i className="fas fa-arrows-up-down" />
+                        )}
+                    </button>
+
                     {/* QR Code Presensi Trigger */}
                     {enableQr && activeGuest && (
                         <button 
@@ -1435,6 +1682,57 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                         </button>
                     )}
                 </div>
+            )}
+
+            {/* Scoped Bottom Navigation Bar */}
+            {isOpened && resolvedSections.length > 0 && (
+                <nav className="sp04-nav-menu">
+                    <div className="sp04-nav-menu__inner--row">
+                        {resolvedSections.map(s => {
+                            const key = s.section_key;
+                            const isActive = activeSection === key;
+                            
+                            let icon = 'fas fa-heart';
+                            if (key === 'opening') icon = 'far fa-envelope-open';
+                            else if (key === 'bride_groom') icon = 'fas fa-user-friends';
+                            else if (key === 'event') icon = 'far fa-calendar-alt';
+                            else if (key === 'love_story') icon = 'fas fa-history';
+                            else if (key === 'livestream') icon = 'fas fa-video';
+                            else if (key === 'dresscode') icon = 'fas fa-shirt';
+                            else if (key === 'video') icon = 'fas fa-play-circle';
+                            else if (key === 'gallery') icon = 'far fa-images';
+                            else if (key === 'rsvp') icon = 'fas fa-signature';
+                            else if (key === 'bank') icon = 'far fa-credit-card';
+                            else if (key === 'closing') icon = 'fas fa-paper-plane';
+
+                            // Label translation
+                            let labelText = s.section_name || key;
+                            if (key === 'opening') { labelText = t('nav.pembuka') || 'Pembuka'; }
+                            else if (key === 'bride_groom') { labelText = t('nav.mempelai') || 'Mempelai'; }
+                            else if (key === 'event') { labelText = t('nav.acara') || 'Acara'; }
+                            else if (key === 'love_story') { labelText = t('nav.kisah') || 'Kisah'; }
+                            else if (key === 'gallery') { labelText = t('nav.galeri') || 'Galeri'; }
+                            else if (key === 'livestream') { labelText = t('nav.streaming') || 'Siaran'; }
+                            else if (key === 'bank') { labelText = t('nav.hadiah') || 'Hadiah'; }
+                            else if (key === 'rsvp') { labelText = t('nav.rsvp') || 'RSVP'; }
+                            else if (key === 'closing') { labelText = t('nav.penutup') || 'Penutup'; }
+
+                            return (
+                                <button
+                                    key={key}
+                                    id={`nav-btn-${key}`}
+                                    type="button"
+                                    onClick={() => handleNavigate(key)}
+                                    className={`sp04-nav-menu__item ${isActive ? 'active' : ''}`}
+                                    title={s.section_name}
+                                >
+                                    <i className={icon} />
+                                    <span className="sp04-nav-item-text">{labelText}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </nav>
             )}
 
             {/* QR CHECK-IN PRESENSI MODAL OVERLAY */}

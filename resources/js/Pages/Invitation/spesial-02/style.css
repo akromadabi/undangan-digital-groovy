@@ -306,6 +306,14 @@
     text-align: center;
 }
 
+#section-opening {
+    min-height: auto;
+    padding: 60px 16px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 /* Slide Mode Styles */
 .sp02-slide-mode-container {
     height: 100vh;
@@ -952,12 +960,12 @@
     width: 40px;
     height: 40px;
     border-radius: 9999px;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--sp02-primary);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    color: var(--sp02-primary);
-    border: 1.5px solid rgba(152, 106, 82, 0.22);
-    box-shadow: 0 6px 18px rgba(152, 106, 82, 0.1);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -966,17 +974,21 @@
     transition: all 0.3s ease;
 }
 
+.sp02-control-btn i {
+    color: #ffffff !important;
+    font-size: 14px;
+}
+
 .sp02-control-btn:hover {
     background-color: var(--sp02-primary);
-    color: #ffffff;
+    opacity: 0.9;
     transform: scale(1.08) translateY(-2px);
-    box-shadow: 0 8px 22px rgba(152, 106, 82, 0.25);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
 }
 
 .sp02-control-btn.is-active {
     background-color: var(--sp02-primary);
-    color: #ffffff;
-    box-shadow: 0 4px 15px rgba(152, 106, 82, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Diagonal Background Grid Pattern override */
@@ -998,7 +1010,7 @@
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 32px);
-    max-width: 480px;
+    max-width: 420px;
     background-color: rgba(72, 46, 49, 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -1008,19 +1020,22 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 1000;
     transition: all 0.3s ease;
+    overflow-x: auto;
+    white-space: nowrap;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.sp02-nav-menu::-webkit-scrollbar {
+    display: none;
 }
 
 .sp02-nav-menu__inner--row {
     display: flex;
-    flex-wrap: nowrap;
-    justify-content: space-around;
     align-items: center;
-    gap: 2px;
+    justify-content: flex-start;
     width: 100%;
-}
-
-.sp02-nav-menu__inner--row::-webkit-scrollbar {
-    display: none;
 }
 
 .sp02-nav-menu__item {
@@ -1034,8 +1049,8 @@
     font-size: 13px;
     padding: 4px 2px;
     border-radius: 10px;
-    flex: 1;
-    min-width: 0;
+    flex-shrink: 0;
+    width: 62px;
     transition: all 0.25s ease;
     cursor: pointer;
     white-space: nowrap;

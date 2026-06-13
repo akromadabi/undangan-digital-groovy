@@ -114,7 +114,7 @@ class AdminUserController extends Controller
         return Inertia::render('Admin/Users/Show', [
             'user' => $user,
             'invitationsData' => $invitationsData,
-            'siteUrl' => url('/'),
+            'siteUrl' => $user->getBrandBaseUrl(),
         ]);
     }
 

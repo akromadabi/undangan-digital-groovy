@@ -105,69 +105,91 @@ const CastleIcon = ({ className = '', size = 80 }) => (
         className={`ft-ornament-castle ${className}`}
         style={{ display: 'block', margin: '0 auto 15px auto', color: 'var(--ft-secondary)' }}
     >
-        {/* Base line */}
-        <path d="M15 85 H85" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Baseground elegant swirls to support the castle */}
+        <path d="M 8 85 C 20 85, 25 88, 35 85 C 42 82, 58 82, 65 85 C 75 88, 80 85, 92 85" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 18 85 C 10 85, 5 80, 8 75 C 11 70, 18 73, 16 80 C 15 83, 12 82, 12 80" stroke="currentColor" strokeWidth="0.8" fill="none" opacity="0.6" />
+        <path d="M 82 85 C 90 85, 95 80, 92 75 C 89 70, 82 73, 84 80 C 85 83, 88 82, 88 80" stroke="currentColor" strokeWidth="0.8" fill="none" opacity="0.6" />
+
+        {/* Central Tall Spire */}
+        {/* Slender main tower wall */}
+        <path d="M 43 85 V 30 H 57 V 85" stroke="currentColor" strokeWidth="1.2" fill="none" />
+        {/* High roof / spire */}
+        <path d="M 41 30 L 50 8 L 59 30 Z" fill="var(--ft-primary)" fillOpacity="0.12" stroke="currentColor" strokeWidth="1.2" />
+        {/* Slender flag */}
+        <path d="M 50 8 V 1 L 57 4 L 50 6" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="0.8" />
+
+        {/* Inner Left Flanking Spire */}
+        <path d="M 31 85 V 42 H 39 V 85" stroke="currentColor" strokeWidth="1.2" fill="none" />
+        <path d="M 29 42 L 35 25 L 41 42 Z" fill="var(--ft-accent)" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.2" />
+        <circle cx="35" cy="24" r="0.8" fill="var(--ft-secondary)" />
+
+        {/* Inner Right Flanking Spire */}
+        <path d="M 61 85 V 42 H 69 V 85" stroke="currentColor" strokeWidth="1.2" fill="none" />
+        <path d="M 59 42 L 65 25 L 71 42 Z" fill="var(--ft-accent)" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.2" />
+        <circle cx="65" cy="24" r="0.8" fill="var(--ft-secondary)" />
+
+        {/* Outer Slender Left Spire */}
+        <path d="M 20 85 V 54 H 26 V 85" stroke="currentColor" strokeWidth="1" fill="none" />
+        <path d="M 18.5 54 L 23 38 L 27.5 54 Z" fill="var(--ft-primary)" fillOpacity="0.1" stroke="currentColor" strokeWidth="1" />
         
-        {/* Outer Left Tower */}
-        <path d="M22 85 V50 L27 45 V85" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M20 45 L24.5 25 L29 45 Z" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="1" />
-        
-        {/* Outer Right Tower */}
-        <path d="M73 85 V50 L78 45 V85" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M71 45 L75.5 25 L80 45 Z" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="1" />
-        
-        {/* Center Keep */}
-        <path d="M33 85 V40 H67 V85 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        {/* Crenellations */}
-        <path d="M33 40 V36 H38 V40 H43 V36 H48 V40 H52 V36 H57 V40 H62 V36 H67 V40" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        
-        {/* High Center Tower */}
-        <path d="M44 36 V18 H56 V36" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M41 18 L50 2 L59 18 Z" fill="var(--ft-primary)" stroke="currentColor" strokeWidth="1.5" />
-        
-        {/* Flag on high center tower */}
-        <path d="M50 2 V-4 L58 -1 L50 2" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="1" />
-        
-        {/* Gate Arch */}
-        <path d="M45 85 V70 C45 64, 55 64, 55 70 V85 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M47 85 V72 C47 67, 53 67, 53 72 V85" fill="none" stroke="var(--ft-accent)" strokeWidth="1" />
-        
-        {/* Windows */}
-        <path d="M48 28 H52 V32 H48 Z" fill="none" stroke="currentColor" strokeWidth="1" />
-        <path d="M37 50 H41 V56 H37 Z" fill="none" stroke="currentColor" strokeWidth="1" />
-        <path d="M59 50 H63 V56 H59 Z" fill="none" stroke="currentColor" strokeWidth="1" />
-        
-        {/* Magic Stars / Sparkles */}
-        <path d="M12 30 L14 32 L12 34 L10 32 Z" fill="var(--ft-secondary)" />
-        <path d="M88 28 L90 30 L88 32 L86 30 Z" fill="var(--ft-secondary)" />
-        <path d="M50 10 L51 12 L50 13 L49 12 Z" fill="var(--ft-secondary)" />
+        {/* Outer Slender Right Spire */}
+        <path d="M 74 85 V 54 H 80 V 85" stroke="currentColor" strokeWidth="1" fill="none" />
+        <path d="M 72.5 54 L 77 38 L 81.5 54 Z" fill="var(--ft-primary)" fillOpacity="0.1" stroke="currentColor" strokeWidth="1" />
+
+        {/* Main Central Gate (Double gothic arch) */}
+        <path d="M 46 85 V 69 C 46 64, 54 64, 54 69 V 85 Z" stroke="currentColor" strokeWidth="1.2" fill="none" />
+        <path d="M 48 85 V 71 C 48 68, 52 68, 52 71 V 85" stroke="var(--ft-accent)" strokeWidth="0.8" fill="none" />
+        <path d="M 50 67 V 85" stroke="currentColor" strokeWidth="0.8" strokeDasharray="1,1" />
+
+        {/* Gothic pointed windows */}
+        {/* Center tower windows */}
+        <path d="M 48 40 C 48 37, 52 37, 52 40 V 46 Z" stroke="currentColor" strokeWidth="0.8" fill="none" />
+        <path d="M 48 50 C 48 47, 52 47, 52 50 V 56 Z" stroke="currentColor" strokeWidth="0.8" fill="none" />
+        {/* Left tower windows */}
+        <path d="M 33 55 C 33 53, 37 53, 37 55 V 60 Z" stroke="currentColor" strokeWidth="0.8" fill="none" />
+        {/* Right tower windows */}
+        <path d="M 63 55 C 63 53, 67 53, 67 55 V 60 Z" stroke="currentColor" strokeWidth="0.8" fill="none" />
+
+        {/* Slender brick accents */}
+        <path d="M 44 60 H 46 M 54 52 H 56 M 33 67 H 35 M 65 67 H 67" stroke="currentColor" strokeWidth="0.6" />
+
+        {/* Sparkles / Magic Stars surrounding the castle */}
+        <path d="M 12 33 L 14 35 L 12 37 L 10 35 Z" fill="var(--ft-accent)" />
+        <path d="M 88 28 L 90 30 L 88 32 L 86 30 Z" fill="var(--ft-accent)" />
+        <path d="M 50 14 L 51 15.5 L 50 17 L 49 15.5 Z" fill="var(--ft-secondary)" />
+        <path d="M 28 20 L 29.5 21 L 28 22 L 26.5 21 Z" fill="var(--ft-secondary)" />
+        <path d="M 72 20 L 73.5 21 L 72 22 L 70.5 21 Z" fill="var(--ft-secondary)" />
     </svg>
 );
 
 const CrownDivider = ({ className = '' }) => (
     <div className={`ft-crown-divider-wrap ${className}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', margin: '20px 0 28px 0', color: 'var(--ft-secondary)' }}>
         <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, var(--ft-secondary))', opacity: 0.6 }} />
-        <svg width="80" height="35" viewBox="0 0 80 35" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--ft-secondary)' }}>
-            {/* Ornate Swirls / Floral leaves flanking the crown */}
-            <path d="M 10 24 C 18 28, 25 24, 32 20 C 35 18, 38 18, 40 20 C 42 24, 45 28, 70 24" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-            <path d="M 15 22 C 18 20, 22 16, 25 18 C 28 20, 26 24, 20 23" stroke="currentColor" strokeWidth="0.8" fill="none" />
-            <path d="M 65 22 C 62 20, 58 16, 55 18 C 52 20, 54 24, 60 23" stroke="currentColor" strokeWidth="0.8" fill="none" />
-
-            {/* Elegant Royal Crown */}
-            {/* Base band */}
-            <path d="M 33 22 H 47 V 24 H 33 Z" fill="currentColor" />
-            <path d="M 31 20 C 31 20, 49 20, 49 20" stroke="currentColor" strokeWidth="1.5" />
-            {/* Crown arches (curved, royal styling) */}
-            <path d="M 33 20 C 33 14, 36 10, 40 10 C 44 10, 47 14, 47 20" stroke="currentColor" strokeWidth="1.2" fill="none" />
-            <path d="M 36 20 C 36 14, 38 12, 40 12 C 42 12, 44 14, 44 20" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
-            <path d="M 40 10 V 22" stroke="currentColor" strokeWidth="1" />
-            {/* Crown jewels / points */}
-            <circle cx="33" cy="19.5" r="1" fill="var(--ft-accent)" />
-            <circle cx="40" cy="19.5" r="1" fill="var(--ft-accent)" />
-            <circle cx="47" cy="19.5" r="1" fill="var(--ft-accent)" />
+        <svg width="85" height="35" viewBox="0 0 85 35" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--ft-secondary)' }}>
+            {/* Elegant botanical scrolls flanking the crown */}
+            <path d="M 8 22 C 16 26, 24 22, 30 18 C 34 16, 36 17, 38 19 C 40 23, 44 26, 77 22" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+            <path d="M 14 20 C 18 17, 21 14, 24 16 C 27 18, 25 21, 20 20" stroke="currentColor" strokeWidth="0.8" fill="none" opacity="0.85" />
+            <path d="M 71 20 C 67 17, 64 14, 61 16 C 58 18, 60 21, 65 20" stroke="currentColor" strokeWidth="0.8" fill="none" opacity="0.85" />
+            
+            {/* Royal Crown Details */}
+            {/* Crown Base */}
+            <path d="M 33 21 H 52 V 23 H 33 Z" fill="currentColor" />
+            <circle cx="36" cy="22" r="0.7" fill="var(--ft-accent)" />
+            <circle cx="42.5" cy="22" r="0.7" fill="var(--ft-accent)" />
+            <circle cx="49" cy="22" r="0.7" fill="var(--ft-accent)" />
+            
+            {/* Crown body and arches */}
+            <path d="M 33 21 C 32 14, 37 10, 42.5 10 C 48 10, 53 14, 52 21" stroke="currentColor" strokeWidth="1.2" fill="none" />
+            <path d="M 37 21 C 37 14, 40 12, 42.5 12 C 45 12, 48 14, 48 21" stroke="currentColor" strokeWidth="0.8" fill="none" opacity="0.7" />
+            <path d="M 42.5 10 V 21" stroke="currentColor" strokeWidth="1" opacity="0.8" />
+            
+            {/* Jewels on crown points */}
+            <circle cx="32" cy="18.5" r="1.2" fill="var(--ft-accent)" />
+            <circle cx="42.5" cy="9.5" r="1.2" fill="var(--ft-accent)" />
+            <circle cx="53" cy="18.5" r="1.2" fill="var(--ft-accent)" />
+            
             {/* Orb & Cross on top */}
-            <circle cx="40" cy="9" r="1.5" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="0.6" />
-            <path d="M 40 6 V 8 M 39 7 H 41" stroke="currentColor" strokeWidth="0.8" />
+            <path d="M 42.5 5 V 8 M 41 6.5 H 44" stroke="currentColor" strokeWidth="1" />
         </svg>
         <div style={{ flex: 1, height: '1px', background: 'linear-gradient(270deg, transparent, var(--ft-secondary))', opacity: 0.6 }} />
     </div>
@@ -184,48 +206,74 @@ const CarriageIcon = ({ className = '', size = 70 }) => (
         style={{ display: 'block', margin: '20px auto 10px auto', color: 'var(--ft-secondary)' }}
     >
         {/* Chassis Swirls / Filigree base */}
-        <path d="M12 60 C15 75, 45 78, 60 70 C75 78, 105 75, 108 60" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M25 65 C35 72, 85 72, 95 65" stroke="currentColor" strokeWidth="0.8" opacity="0.6" />
-        <path d="M5 52 C5 65, 18 68, 25 65 C32 62, 30 52, 22 52 C15 52, 10 58, 16 63" stroke="currentColor" strokeWidth="1.2" fill="none" />
-        <path d="M115 52 C115 65, 102 68, 95 65 C88 62, 90 52, 98 52 C105 52, 110 58, 104 63" stroke="currentColor" strokeWidth="1.2" fill="none" />
-
-        {/* Carriage Cabin (Pumpkin shape) */}
-        <path d="M35 48 C35 25, 85 25, 85 48 C85 64, 35 64, 35 48 Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M42 48 C42 28, 78 28, 78 48 C78 62, 42 62, 42 48 Z" fill="var(--ft-text-light)" stroke="currentColor" strokeWidth="1" fillOpacity="0.8" />
+        <path d="M 15 62 C 18 78, 48 80, 60 72 C 72 80, 102 78, 105 62" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M 28 66 C 38 73, 82 73, 92 66" stroke="currentColor" strokeWidth="0.8" opacity="0.6" />
         
-        {/* Vertical ribs */}
-        <path d="M60 26 V62" stroke="currentColor" strokeWidth="1.2" />
-        <path d="M50 27 C45 35, 45 55, 50 61" stroke="currentColor" strokeWidth="1" opacity="0.7" />
-        <path d="M70 27 C75 35, 75 55, 70 61" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+        {/* Delicate side filigree scrolls */}
+        <path d="M 5 54 C 5 66, 17 69, 24 66 C 30 63, 29 54, 21 54 C 15 54, 11 60, 16 65" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+        <path d="M 115 54 C 115 66, 103 69, 96 66 C 90 63, 91 54, 99 54 C 105 54, 109 60, 104 65" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
 
-        {/* Windows */}
-        <path d="M52 46 C52 38, 68 38, 68 46 C68 52, 52 52, 52 46 Z" fill="var(--ft-card-bg)" stroke="currentColor" strokeWidth="1.2" />
-        <path d="M60 38 V52 M52 46 H68" stroke="currentColor" strokeWidth="0.8" />
+        {/* Carriage Cabin (Ornate heart/pumpkin shape) */}
+        {/* Outer Cabin Border */}
+        <path d="M 60 22 C 38 22, 32 42, 32 53 C 32 66, 50 70, 60 70 C 70 70, 88 66, 88 53 C 88 42, 82 22, 60 22 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        {/* Inner Cabin Glass Area */}
+        <path d="M 60 24 C 41 24, 35 43, 35 53 C 35 64, 50 67, 60 67 C 70 67, 85 64, 85 53 C 85 43, 79 24, 60 24 Z" fill="var(--ft-text-light)" stroke="currentColor" strokeWidth="0.8" fillOpacity="0.8" />
+        
+        {/* Vertical and horizontal elegant ribs inside cabin */}
+        <path d="M 60 24 V 67" stroke="currentColor" strokeWidth="1" opacity="0.8" />
+        <path d="M 48 27 C 43 37, 43 55, 48 64" stroke="currentColor" strokeWidth="0.8" opacity="0.6" />
+        <path d="M 72 27 C 77 37, 77 55, 72 64" stroke="currentColor" strokeWidth="0.8" opacity="0.6" />
+
+        {/* Elegant Gothic/Oval Window */}
+        <path d="M 60 36 C 52 36, 52 49, 60 51 C 68 49, 68 36, 60 36 Z" fill="var(--ft-card-bg)" stroke="currentColor" strokeWidth="1.2" />
+        <path d="M 60 36 V 51 M 54 44.5 H 66" stroke="currentColor" strokeWidth="0.8" />
 
         {/* Crown on top */}
-        <path d="M54 26 C54 20, 56 18, 60 18 C64 18, 66 20, 66 26" stroke="currentColor" strokeWidth="1.5" fill="none" />
-        <path d="M52 26 H68" stroke="currentColor" strokeWidth="1.5" />
-        <circle cx="60" cy="17" r="2" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 55 22 C 55 17, 57 15, 60 15 C 63 15, 65 17, 65 22" stroke="currentColor" strokeWidth="1.2" fill="none" />
+        <path d="M 52 22 H 68" stroke="currentColor" strokeWidth="1.2" />
+        <circle cx="60" cy="14" r="1.5" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="0.6" />
 
-        {/* Wheels - Large back wheel, smaller front wheel */}
-        <circle cx="35" cy="72" r="16" stroke="currentColor" strokeWidth="2" fill="var(--ft-text-light)" />
-        <circle cx="35" cy="72" r="13" stroke="var(--ft-accent)" strokeWidth="0.8" strokeDasharray="2,2" />
-        <circle cx="35" cy="72" r="4" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="1" />
-        <path d="M35 56 V88 M19 72 H51 M23.7 60.7 L46.3 83.3 M23.7 83.3 L46.3 60.7" stroke="currentColor" strokeWidth="0.8" />
+        {/* Left Wheel (Ornate, curved spokes) */}
+        <circle cx="35" cy="74" r="17" stroke="currentColor" strokeWidth="1.8" fill="var(--ft-text-light)" />
+        <circle cx="35" cy="74" r="14" stroke="var(--ft-accent)" strokeWidth="0.8" strokeDasharray="2,2" />
+        <circle cx="35" cy="74" r="4.5" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="1" />
+        {/* Swirling/curved elegant spokes */}
+        <path d="M 35 57 C 41 62, 41 68, 35 69.5" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 35 91 C 29 86, 29 80, 35 78.5" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 68 74 C 73 80, 79 80, 80.5 74" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 52 74 C 47 68, 41 68, 39.5 74" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 23 62 C 29 64, 32 70, 31.8 70.8" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 47 86 C 41 84, 38 78, 38.2 77.2" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 23 86 C 25 80, 31 77, 31.8 77.2" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 47 62 C 45 68, 39 71, 38.2 70.8" stroke="currentColor" strokeWidth="0.8" />
 
-        <circle cx="85" cy="72" r="16" stroke="currentColor" strokeWidth="2" fill="var(--ft-text-light)" />
-        <circle cx="85" cy="72" r="13" stroke="var(--ft-accent)" strokeWidth="0.8" strokeDasharray="2,2" />
-        <circle cx="85" cy="72" r="4" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="1" />
-        <path d="M85 56 V88 M69 72 H101 M73.7 60.7 L96.3 83.3 M73.7 83.3 L96.3 60.7" stroke="currentColor" strokeWidth="0.8" />
+        {/* Right Wheel (Ornate, curved spokes) */}
+        <circle cx="85" cy="74" r="17" stroke="currentColor" strokeWidth="1.8" fill="var(--ft-text-light)" />
+        <circle cx="85" cy="74" r="14" stroke="var(--ft-accent)" strokeWidth="0.8" strokeDasharray="2,2" />
+        <circle cx="85" cy="74" r="4.5" fill="var(--ft-secondary)" stroke="currentColor" strokeWidth="1" />
+        {/* Swirling/curved elegant spokes */}
+        <path d="M 85 57 C 91 62, 91 68, 85 69.5" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 85 91 C 79 86, 79 80, 85 78.5" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 68 74 C 73 80, 79 80, 80.5 74" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 102 74 C 97 68, 91 68, 89.5 74" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 73 62 C 79 64, 82 70, 81.8 70.8" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 97 86 C 91 84, 88 78, 88.2 77.2" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 73 86 C 75 80, 81 77, 81.8 77.2" stroke="currentColor" strokeWidth="0.8" />
+        <path d="M 97 62 C 95 68, 89 71, 88.2 70.8" stroke="currentColor" strokeWidth="0.8" />
 
-        {/* Driver Seat & Whip */}
-        <path d="M86 42 H96 L94 48 H86" stroke="currentColor" strokeWidth="1.2" fill="none" />
-        <path d="M92 42 L102 22 C104 18, 108 24, 102 26" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+        {/* Ornate Coach Driver Seat & Whip */}
+        <path d="M 87 40 H 98 L 95 47 H 87 Z" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+        <path d="M 94 40 L 104 18 C 106 14, 110 20, 104 22" stroke="currentColor" strokeWidth="1" strokeLinecap="round" fill="none" />
 
-        {/* Carriage Lanterns */}
-        <path d="M32 38 H27 V46 H32 Z" fill="var(--ft-accent)" stroke="currentColor" strokeWidth="1" />
-        <path d="M29.5 34 V38 M29.5 46 V48" stroke="currentColor" strokeWidth="1" />
-        <circle cx="29.5" cy="33" r="1" fill="var(--ft-secondary)" />
+        {/* Elegant side lanterns */}
+        {/* Left lantern */}
+        <path d="M 30 38 H 26 V 46 H 30 Z" fill="var(--ft-accent)" fillOpacity="0.2" stroke="currentColor" strokeWidth="1" />
+        <path d="M 28 34 V 38 M 28 46 V 49" stroke="currentColor" strokeWidth="0.8" />
+        <circle cx="28" cy="33.5" r="1" fill="var(--ft-secondary)" />
+        {/* Right lantern */}
+        <path d="M 94 38 H 90 V 46 H 94 Z" fill="var(--ft-accent)" fillOpacity="0.2" stroke="currentColor" strokeWidth="1" />
+        <path d="M 92 34 V 38 M 92 46 V 49" stroke="currentColor" strokeWidth="0.8" />
+        <circle cx="92" cy="33.5" r="1" fill="var(--ft-secondary)" />
     </svg>
 );
 
@@ -1264,6 +1312,14 @@ function ClosingSection({ invitation, brideGrooms, brandName }) {
 
     const cleanClosingTitle = useMemo(() => {
         const title = invitation?.closing_title || 'Thank You';
+        // Convert all-caps titles like "THANK YOU" to Title Case "Thank You"
+        if (title === title.toUpperCase()) {
+            return title
+                .toLowerCase()
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
         return title;
     }, [invitation?.closing_title]);
 

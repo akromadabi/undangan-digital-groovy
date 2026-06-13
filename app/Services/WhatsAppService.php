@@ -46,7 +46,7 @@ class WhatsAppService
         }
 
         // Parse template variables
-        $personalUrl = url('/u/' . $invitation->slug . '?to=' . $guest->slug);
+        $personalUrl = $invitation->getUrl($guest->slug);
         $message = str_replace(
             ['{nama}', '{link}'],
             [$guest->name, $personalUrl],

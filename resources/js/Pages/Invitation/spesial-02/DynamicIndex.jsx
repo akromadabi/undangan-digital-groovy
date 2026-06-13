@@ -426,7 +426,9 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
    OPENING SECTION
    ═══════════════════════════════════════ */
 function OpeningSection({ invitation, showPhotos, brideGrooms, events }) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
+    const isEn = locale === 'en';
+    const showCountdown = parseBool(invitation?.show_countdown, true);
     const bgs = safeArr(brideGrooms);
     const groom = bgs.find(b => ['pria', 'male'].includes(String(b.gender).toLowerCase())) || bgs[0] || {};
     const bride = bgs.find(b => ['wanita', 'female'].includes(String(b.gender).toLowerCase())) || bgs[1] || bgs[0] || bgs[0] || {};
@@ -484,20 +486,19 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, events }) {
                 </Reveal>
             )}
 
-            {invitation?.opening_ayat && (
-                <Reveal delay={300}>
-                    <div className="px-4 py-2 border-l-2 border-[var(--sp02-primary)]/15 italic my-4 text-center">
-                        <p className="text-[13px] sm:text-[14px] leading-relaxed opacity-85 text-[var(--sp02-text)]">
-                            &ldquo;{invitation.opening_ayat}&rdquo;
-                        </p>
-                        {invitation?.opening_ayat_source && (
-                            <p className="text-[11px] font-semibold tracking-wider text-[var(--sp02-primary)] mt-1">
-                                &mdash; {invitation.opening_ayat_source}
-                            </p>
-                        )}
-                    </div>
-                </Reveal>
-            )}
+            <Reveal delay={300}>
+                <div className="px-4 py-2 border-l-2 border-[var(--sp02-primary)]/15 italic my-4 text-center">
+                    <p className="text-[13px] sm:text-[14px] leading-relaxed opacity-85 text-[var(--sp02-text)]">
+                        &ldquo;{invitation?.opening_ayat || (isEn 
+                            ? "And among His Signs is this, that He created for you mates from among yourselves, that ye may dwell in tranquillity with them, and He has put love and mercy between your (hearts): handy in that are Signs for those who reflect."
+                            : "Dan diantara tanda-tanda kekuasaanNya ialah Dia menciptakan untukmu pasangan-pasangan dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya, dan dijadikanNya diantaramu rasa kasih dan sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda bagi kaum yang berpikir."
+                        )}&rdquo;
+                    </p>
+                    <p className="text-[11px] font-semibold tracking-wider text-[var(--sp02-primary)] mt-1">
+                        &mdash; {invitation?.opening_ayat_source || (isEn ? "Surah Ar-Rum: 21" : "Qs. Ar-Rum: 21")}
+                    </p>
+                </div>
+            </Reveal>
 
             <Reveal delay={400}>
                 <FlowerSwirl title={isWeddingOf ? t('invitation.wedding_of') : invitation.opening_title} />
@@ -508,6 +509,12 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, events }) {
                     {invitation?.opening_text || "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan kami."}
                 </p>
             </Reveal>
+
+            {showCountdown && (
+                <Reveal delay={550} variant="zoom" className="my-6">
+                    <CountdownBlock events={events} invitation={invitation} />
+                </Reveal>
+            )}
         </div>
     );
 }
@@ -1302,10 +1309,13 @@ function ClosingSection({ invitation, brideGrooms, locale }) {
         || invitation?.user?.reseller?.reseller_settings?.brand_name 
         || 'TrueLove Invitation';
 
+    const rawTitle = invitation?.closing_title || t('invitation.closing_title') || 'Terima Kasih';
+    const formattedTitle = rawTitle.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
     return (
         <div className="max-w-lg mx-auto text-center py-4 flex flex-col items-center">
             <Reveal delay={100}>
-                <FlowerSwirl title={invitation?.closing_title || t('invitation.closing_title') || 'Terima Kasih'} />
+                <FlowerSwirl title={formattedTitle} />
             </Reveal>
 
             <Reveal delay={300}>
@@ -1350,6 +1360,28 @@ function ClosingSection({ invitation, brideGrooms, locale }) {
 /* ═══════════════════════════════════════
    MAIN COMPONENT PORT export
    ═══════════════════════════════════════ */
+const isControlElement = (target) => {
+    if (!target) return false;
+    let node = target;
+    while (node) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            const tag = node.tagName;
+            if (
+                tag === 'BUTTON' || 
+                tag === 'INPUT' || 
+                tag === 'TEXTAREA' || 
+                tag === 'SELECT' || 
+                node.classList.contains('global-music-waves') ||
+                (typeof node.className === 'string' && /sp\d+-(control|nav|floating|menu)/.test(node.className))
+            ) {
+                return true;
+            }
+        }
+        node = node.parentNode || node.host;
+    }
+    return false;
+};
+
 export default function DynamicIndex({ invitation, sections, brideGrooms, events, galleries, loveStories, bankAccounts, wishes, guest }) {
     const activeLanguage = invitation?.language || invitation?.default_locale || 'id';
     const { t, locale } = useTranslation(activeLanguage);
@@ -1358,7 +1390,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     const [isOpened, setIsOpened] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [autoScroll, setAutoScroll] = useState(invitation?.enable_auto_scroll !== false);
+    const [autoScroll, setAutoScroll] = useState(parseBool(invitation?.enable_auto_scroll, false));
     const [showQrCode, setShowQrCode] = useState(false);
     const [copiedIdx, setCopiedIdx] = useState(null);
 
@@ -1366,9 +1398,14 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
     const [slideIdx, setSlideIdx] = useState(0);
 
     const audioRef = useRef(null);
+    const lastToggleTimeRef = useRef(0);
     usePageVisibilityAudio(audioRef, isPlaying, setIsPlaying);
     const layoutMode = invitation?.layout_mode || 'scroll'; // 'scroll', 'slide-h', 'slide-v'
     const isHorizontal = layoutMode === 'slide-h';
+
+    useEffect(() => {
+        lastToggleTimeRef.current = Date.now();
+    }, [autoScroll]);
 
     // Global settings injection
     const showPhotos = invitation?.show_photos !== false;
@@ -1568,13 +1605,16 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
         if (!isOpened || !autoScroll) return;
 
         const handleUserInteraction = (e) => {
-            if (
-                e.target.closest('button') || 
-                e.target.closest('input') ||
-                e.target.closest('textarea') ||
-                e.target.closest('select') ||
-                e.target.closest('.sp02-nav-menu')
-            ) {
+            if (Date.now() - lastToggleTimeRef.current < 350) {
+                return;
+            }
+
+            if (e.type === 'keydown') {
+                const scrollKeys = ['ArrowUp', 'ArrowDown', 'Space', ' ', 'PageUp', 'PageDown', 'Home', 'End'];
+                if (!scrollKeys.includes(e.key)) return;
+            }
+
+            if (isControlElement(e.target)) {
                 return;
             }
             setAutoScroll(false);
@@ -1583,43 +1623,86 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
         window.addEventListener('wheel', handleUserInteraction, { passive: true });
         window.addEventListener('touchstart', handleUserInteraction, { passive: true });
         window.addEventListener('mousedown', handleUserInteraction, { passive: true });
+        window.addEventListener('keydown', handleUserInteraction, { passive: true });
 
         return () => {
             window.removeEventListener('wheel', handleUserInteraction);
             window.removeEventListener('touchstart', handleUserInteraction);
             window.removeEventListener('mousedown', handleUserInteraction);
+            window.removeEventListener('keydown', handleUserInteraction);
         };
     }, [isOpened, autoScroll]);
 
-    // Pixel auto scroll in scroll mode, and index swiper in slide modes
+    // Butter-smooth 60fps/120fps auto scroll using requestAnimationFrame for scroll mode
     useEffect(() => {
         if (!isOpened || !autoScroll) return;
 
         const isSlide = layoutMode === 'slide-h' || layoutMode === 'slide-v';
-        let timer = null;
-
         if (isSlide) {
-            timer = setInterval(() => {
+            const timer = setInterval(() => {
                 setSlideIdx(prev => {
                     const count = resolvedSections.length;
                     if (prev >= count - 1) return 0;
                     return prev + 1;
                 });
             }, 5500);
+            return () => clearInterval(timer);
         } else {
-            timer = setInterval(() => {
-                window.scrollBy(0, 1);
-                const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 5;
-                if (isAtBottom) {
+            let animationFrameId = null;
+            let lastTime = performance.now();
+            const speed = 0.04;
+            let accumulatedScroll = 0;
+
+            const scrollLoop = (time) => {
+                const delta = time - lastTime;
+                lastTime = time;
+
+                if (delta > 0 && delta < 100) {
+                    accumulatedScroll += speed * delta;
+                    const scrollPixels = Math.floor(accumulatedScroll);
+                    if (scrollPixels > 0) {
+                        accumulatedScroll -= scrollPixels;
+                        window.scrollBy(0, scrollPixels);
+                    }
+                }
+
+                const scrollContainer = document.documentElement || document.body;
+                const currentScroll = window.scrollY;
+                const maxScroll = scrollContainer.scrollHeight - window.innerHeight;
+
+                if (currentScroll < maxScroll - 3) {
+                    animationFrameId = requestAnimationFrame(scrollLoop);
+                } else {
                     setAutoScroll(false);
                 }
-            }, 25);
-        }
+            };
 
-        return () => {
-            if (timer) clearInterval(timer);
-        };
+            const delayTimeout = setTimeout(() => {
+                lastTime = performance.now();
+                animationFrameId = requestAnimationFrame(scrollLoop);
+            }, 1000);
+
+            return () => {
+                clearTimeout(delayTimeout);
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+            };
+        }
     }, [isOpened, autoScroll, layoutMode, resolvedSections.length]);
+
+    // Auto-scroll active navigation button to center
+    useEffect(() => {
+        if (!isOpened) return;
+        const navEl = document.querySelector('.sp02-nav-menu');
+        const activeBtn = document.getElementById(`nav-btn-${activeSection}`);
+        if (navEl && activeBtn) {
+            const btnLeft = activeBtn.offsetLeft;
+            const btnWidth = activeBtn.offsetWidth;
+            const navWidth = navEl.offsetWidth;
+            navEl.scrollLeft = btnLeft - (navWidth / 2) + (btnWidth / 2);
+        }
+    }, [activeSection, isOpened]);
 
 
 
@@ -1844,53 +1927,54 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
                             )}
 
                             {/* AUTO SCROLL TOGGLER */}
-                            {invitation?.enable_auto_scroll !== false && (
-                                <button 
-                                    type="button" 
-                                    onClick={() => setAutoScroll(!autoScroll)}
-                                    className={`sp02-control-btn ${autoScroll ? 'is-active' : ''}`}
-                                    title="Auto Scroll"
-                                >
-                                    <i className="fas fa-chevron-down" style={{ transform: autoScroll ? 'none' : 'rotate(-90deg)', transition: 'transform 0.3s' }} />
-                                </button>
-                            )}
+                            <button 
+                                type="button" 
+                                onClick={() => setAutoScroll(!autoScroll)}
+                                className={`sp02-control-btn ${autoScroll ? 'is-active' : ''}`}
+                                title={autoScroll ? "Pause Auto Scroll" : "Start Auto Scroll"}
+                            >
+                                {autoScroll ? (
+                                    <i className="fas fa-pause" />
+                                ) : (
+                                    <i className="fas fa-arrows-up-down" />
+                                )}
+                            </button>
                         </div>
 
                         {/* 4. PREMIUM COMPACT NAVIGATION FLOATING BAR */}
-                        {invitation?.menu_position !== 'none' && (
-                            <div className="sp02-nav-menu">
-                                <div className="sp02-nav-menu__inner--row flex justify-around">
-                                    {resolvedSections.map((sec) => {
-                                        const key = sec.section_key;
-                                        const isCurrent = activeSectionKey === key;
-                                        let navIcon = 'fa-star';
-                                        let labelText = sec.section_name || key;
-                                        if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.pembuka') || 'Pembuka'; }
-                                        else if (key === 'bride_groom') { navIcon = 'fa-heart'; labelText = t('nav.mempelai') || 'Mempelai'; }
-                                        else if (key === 'event') { navIcon = 'fa-calendar-alt'; labelText = t('nav.acara') || 'Acara'; }
-                                        else if (key === 'love_story') { navIcon = 'fa-book-open'; labelText = t('nav.kisah') || 'Kisah'; }
-                                        else if (key === 'gallery') { navIcon = 'fa-images'; labelText = t('nav.galeri') || 'Galeri'; }
-                                        else if (key === 'livestream') { navIcon = 'fa-video'; labelText = t('nav.streaming') || 'Siaran'; }
-                                        else if (key === 'bank') { navIcon = 'fa-gift'; labelText = t('nav.hadiah') || 'Hadiah'; }
-                                        else if (key === 'rsvp') { navIcon = 'fa-envelope-open-text'; labelText = t('nav.rsvp') || 'RSVP'; }
-                                        else if (key === 'closing') { navIcon = 'fa-handshake'; labelText = t('nav.penutup') || 'Penutup'; }
+                        <div className="sp02-nav-menu">
+                            <div className="sp02-nav-menu__inner--row flex justify-around">
+                                {resolvedSections.map((sec) => {
+                                    const key = sec.section_key;
+                                    const isCurrent = activeSectionKey === key;
+                                    let navIcon = 'fa-star';
+                                    let labelText = sec.section_name || key;
+                                    if (key === 'opening') { navIcon = 'fa-star'; labelText = t('nav.pembuka') || 'Pembuka'; }
+                                    else if (key === 'bride_groom') { navIcon = 'fa-heart'; labelText = t('nav.mempelai') || 'Mempelai'; }
+                                    else if (key === 'event') { navIcon = 'fa-calendar-alt'; labelText = t('nav.acara') || 'Acara'; }
+                                    else if (key === 'love_story') { navIcon = 'fa-book-open'; labelText = t('nav.kisah') || 'Kisah'; }
+                                    else if (key === 'gallery') { navIcon = 'fa-images'; labelText = t('nav.galeri') || 'Galeri'; }
+                                    else if (key === 'livestream') { navIcon = 'fa-video'; labelText = t('nav.streaming') || 'Siaran'; }
+                                    else if (key === 'bank') { navIcon = 'fa-gift'; labelText = t('nav.hadiah') || 'Hadiah'; }
+                                    else if (key === 'rsvp') { navIcon = 'fa-envelope-open-text'; labelText = t('nav.rsvp') || 'RSVP'; }
+                                    else if (key === 'closing') { navIcon = 'fa-handshake'; labelText = t('nav.penutup') || 'Penutup'; }
 
-                                        return (
-                                            <button 
-                                                key={sec.id}
-                                                type="button"
-                                                onClick={() => jumpToSection(key)}
-                                                className={`sp02-nav-menu__item ${isCurrent ? 'active' : ''}`}
-                                                title={sec.section_name}
-                                            >
-                                                <i className={`fas ${navIcon}`} />
-                                                <span className="sp02-nav-item-text">{labelText}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                                    return (
+                                        <button 
+                                            key={sec.id}
+                                            id={`nav-btn-${key}`}
+                                            type="button"
+                                            onClick={() => jumpToSection(key)}
+                                            className={`sp02-nav-menu__item ${isCurrent ? 'active' : ''}`}
+                                            title={sec.section_name}
+                                        >
+                                            <i className={`fas ${navIcon}`} />
+                                            <span className="sp02-nav-item-text">{labelText}</span>
+                                        </button>
+                                    );
+                                })}
                             </div>
-                        )}
+                        </div>
 
                         {/* 5. PRESENSI CHECK-IN MODAL OVERLAY */}
                         {enableQr && showQrCode && guest && (
