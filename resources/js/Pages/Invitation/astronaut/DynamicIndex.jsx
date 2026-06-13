@@ -1042,9 +1042,7 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
     const { t } = useTranslation();
     const activeGuest = guest || { name: '', id: null };
     const guestName = activeGuest.name || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : '') || '';
-    
     const [success, setSuccess] = useState(false);
-    const [showEmoji, setShowEmoji] = useState(false);
     const wishesInputRef = useRef(null);
 
     // Single unified form state
@@ -1164,7 +1162,12 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                     {enableWishes && (
                         <div className="ast-form-group relative">
                             <label className="ast-label">{t('invitation.wishes_field') || 'DOA & UCAPAN'}</label>
-                            <div className="relative">
+                            <WishesEmojiPicker
+                                value={form.data.message}
+                                onChange={(newValue) => form.setData('message', newValue)}
+                                inputRef={wishesInputRef}
+                                isDark={true}
+                            >
                                 <textarea
                                     ref={wishesInputRef}
                                     value={form.data.message}
@@ -1174,27 +1177,8 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
                                     maxLength={300}
                                     required
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowEmoji(prev => !prev)}
-                                    className="absolute right-3 bottom-3 text-cyan-400 hover:text-cyan-300 focus:outline-none"
-                                >
-                                    <i className="far fa-smile text-lg" />
-                                </button>
-                            </div>
+                            </WishesEmojiPicker>
                             {form.errors.message && <div className="ast-error-msg">{form.errors.message}</div>}
-
-                            {showEmoji && (
-                                <div className="absolute right-0 bottom-full mb-2 z-50">
-                                    <WishesEmojiPicker 
-                                        inputRef={wishesInputRef}
-                                        onSelect={(emoji) => {
-                                            form.setData('message', form.data.message + emoji);
-                                            setShowEmoji(false);
-                                        }}
-                                    />
-                                </div>
-                            )}
                         </div>
                     )}
 

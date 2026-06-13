@@ -1060,17 +1060,21 @@ function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes
 
                             <div className="space-y-1 relative">
                                 <label className="text-xs font-bold uppercase text-rose-500 tracking-wider block">{t('invitation.wish_message')}</label>
-                                <textarea 
-                                    ref={wishesInputRef}
+                                <WishesEmojiPicker
                                     value={wishForm.data.message}
-                                    onChange={e => wishForm.setData('message', e.target.value)}
-                                    placeholder="Tulis ucapan termanismu di sini..."
-                                    className="candy-input h-28 font-medium"
-                                    required
-                                />
-                                <div className="absolute right-3.5 bottom-3">
-                                    <WishesEmojiPicker inputRef={wishesInputRef} onEmojiSelect={(em) => wishForm.setData('message', wishForm.data.message + em)} />
-                                </div>
+                                    onChange={(newValue) => wishForm.setData('message', newValue)}
+                                    inputRef={wishesInputRef}
+                                    isDark={false}
+                                >
+                                    <textarea 
+                                        ref={wishesInputRef}
+                                        value={wishForm.data.message}
+                                        onChange={e => wishForm.setData('message', e.target.value)}
+                                        placeholder="Tulis ucapan termanismu di sini..."
+                                        className="candy-input h-28 font-medium"
+                                        required
+                                    />
+                                </WishesEmojiPicker>
                             </div>
 
                             <button 

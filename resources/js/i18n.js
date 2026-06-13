@@ -129,6 +129,10 @@ const translations = {
         'invitation.kisah_cinta_kami': 'Kisah Cinta Kami',
         'invitation.rangkaian_acara': 'Rangkaian Acara',
         'invitation.galeri': 'Galeri',
+        'invitation.countdown_title': 'MENGHITUNG MUNDUR HARI BAHAGIA',
+        'invitation.opening_title': 'Pernikahan',
+        'invitation.opening_text': 'Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri rangkaian acara pernikahan kami.',
+        'invitation.our_moments': 'MOMEN KAMI',
     },
 
     en: {
@@ -258,6 +262,10 @@ const translations = {
         'invitation.kisah_cinta_kami': 'Our Love Story',
         'invitation.rangkaian_acara': 'Wedding Events',
         'invitation.galeri': 'Gallery',
+        'invitation.countdown_title': 'COUNTDOWN TO THE CELEBRATION',
+        'invitation.opening_title': 'The Wedding of',
+        'invitation.opening_text': 'By requesting the grace and blessings of God, we intend to invite you to attend our wedding events.',
+        'invitation.our_moments': 'OUR MOMENTS',
     },
 };
 

@@ -1062,6 +1062,7 @@ function RsvpWishesSection({ invitation, guest, wishes, slug }) {
     const { t, locale } = useTranslation();
     const guestId = guest?.id || null;
     const defaultSenderName = guest?.name || '';
+    const wishesInputRef = useRef(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         guest_id: guestId,
@@ -1088,9 +1089,7 @@ function RsvpWishesSection({ invitation, guest, wishes, slug }) {
         });
     };
 
-    const handleEmojiSelect = (emoji) => {
-        setData('message', data.message + emoji);
-    };
+
 
     const isEn = locale === 'en';
 
@@ -1153,20 +1152,23 @@ function RsvpWishesSection({ invitation, guest, wishes, slug }) {
                     {/* Ucapan Pesan */}
                     <div className="ft-form-group" style={{ position: 'relative' }}>
                         <label className="ft-form-label">{isEn ? 'Your Wish' : 'Doa & Ucapan'}</label>
-                        <textarea
+                        <WishesEmojiPicker
                             value={data.message}
-                            onChange={e => setData('message', e.target.value)}
-                            className="ft-textarea"
-                            placeholder={isEn ? 'Write your beautiful wishes here...' : 'Tuliskan ucapan dan doa terbaik Anda...'}
-                            rows="4"
-                            required
-                        />
+                            onChange={(newValue) => setData('message', newValue)}
+                            inputRef={wishesInputRef}
+                            isDark={false}
+                        >
+                            <textarea
+                                ref={wishesInputRef}
+                                value={data.message}
+                                onChange={e => setData('message', e.target.value)}
+                                className="ft-textarea"
+                                placeholder={isEn ? 'Write your beautiful wishes here...' : 'Tuliskan ucapan dan doa terbaik Anda...'}
+                                rows="4"
+                                required
+                            />
+                        </WishesEmojiPicker>
                         {errors.message && <span style={{ color: '#e53e3e', fontSize: '10px', marginTop: '4px', display: 'block' }}>{errors.message}</span>}
-                        
-                        {/* Emoji Picker */}
-                        <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'flex-end' }}>
-                            <WishesEmojiPicker onSelectEmoji={handleEmojiSelect} />
-                        </div>
                     </div>
 
                     <button

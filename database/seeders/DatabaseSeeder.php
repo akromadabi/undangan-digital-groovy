@@ -230,6 +230,7 @@ class DatabaseSeeder extends Seeder
             FairytaleThemeSeeder::class,
             ChelseaThemeSeeder::class,
             PolaroidThemeSeeder::class,
+            PolaroidNewspaperThemeSeeder::class,
             SageMinimalistThemeSeeder::class,
         ]);
 
