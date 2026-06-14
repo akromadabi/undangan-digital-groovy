@@ -17,7 +17,6 @@ export default defineConfig({
         rollupOptions: {
             maxParallelFileOps: 1,
             cache: false,
-            treeshake: false,
         },
     },
 });

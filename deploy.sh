@@ -54,8 +54,12 @@ echo "📦 3. Menginstall dependensi Node.js (NPM)..."
 npm install
 
 echo "🛠️ 4. Membangun aset frontend (Vite)..."
-export NODE_OPTIONS="--max-old-space-size=2048"
+export NODE_OPTIONS="--max-old-space-size=1024"
 npm run build
+if [ $? -ne 0 ]; then
+    echo "❌ ERROR: Gagal membangun aset frontend (Vite)!"
+    exit 1
+fi
 
 # Hapus node_modules setelah build selesai untuk menghemat penyimpanan VPS
 echo "🧹 Menghapus node_modules setelah build selesai..."
