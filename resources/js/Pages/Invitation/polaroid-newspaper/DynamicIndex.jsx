@@ -289,7 +289,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverI
                         <div className="pn-masthead-meta">
                             <span className="pn-masthead-meta-item">VOL. I NO. 1</span>
                             <span className="pn-masthead-meta-item">{formattedDate}</span>
-                            <span className="pn-masthead-meta-item font-semibold">{isEn ? 'SPECIAL EDITION - FREE' : 'EDISI SPESIAL - GRATIS'}</span>
+                            <span className="pn-masthead-meta-item font-semibold">{isEn ? 'SPECIAL EDITION' : 'EDISI SPESIAL'}</span>
                         </div>
                     </div>
 

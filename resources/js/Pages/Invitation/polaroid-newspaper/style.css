@@ -387,10 +387,10 @@
 
 .pn-cover__content {
   width: 100%;
-  height: 70vh;
-  height: 70dvh;
+  height: 65vh;
+  height: 65dvh;
   min-height: 520px;
-  max-height: 70dvh;
+  max-height: 65dvh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

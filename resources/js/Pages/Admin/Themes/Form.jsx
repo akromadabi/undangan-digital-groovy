@@ -998,12 +998,13 @@ export default function Form({ theme, plans = [], categories = [] }) {
                                     <label className={labelClass}>Live Preview Kartu Katalog (Interaktif)</label>
                                     <div className="max-w-[240px] mx-auto p-2 bg-[#faf9f7] border border-[#e8e5e0]/60 rounded-2xl shadow-inner mt-2">
                                         <ThemePreviewCard 
+                                            key={`preview-${previewImagesPreviews.join(',')}-${data.preview_template}-${data.preview_bg_style}`}
                                             theme={{
                                                 name: data.name || 'Nama Tema',
                                                 slug: data.slug || 'slug',
-                                                thumbnail: data.thumbnail,
+                                                thumbnail: thumbnailPreview || data.thumbnail,
                                                 preview_template: data.preview_template,
-                                                preview_images: data.preview_images,
+                                                preview_images: previewImagesPreviews.length > 0 ? previewImagesPreviews : data.preview_images,
                                                 preview_bg_style: data.preview_bg_style,
                                                 category: data.category,
                                                 is_premium: data.is_premium

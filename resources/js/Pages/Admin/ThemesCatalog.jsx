@@ -212,6 +212,7 @@ export default function ThemesCatalog({ themes }) {
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
     const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+    const [previewImagesPreviews, setPreviewImagesPreviews] = useState([]);
 
     const categoryDropdownRef = useRef(null);
     const typeDropdownRef = useRef(null);
@@ -326,16 +327,20 @@ export default function ThemesCatalog({ themes }) {
         setActiveTheme(theme);
         const custom = theme.custom_setting || {};
 
+        const existingImages = custom.preview_images || [];
         setData({
             preview_template: custom.preview_template || 'default',
             preview_bg_style: custom.preview_bg_style || 'default',
-            preview_images: custom.preview_images || [],
+            preview_images: existingImages,
             thumbnail: custom.thumbnail || '',
         });
+        // Inisialisasi previewImagesPreviews dari gambar yang sudah ada
+        setPreviewImagesPreviews(existingImages.map(p => getThumbnailUrl(p)));
     };
 
     const handleCloseModal = () => {
         setActiveTheme(null);
+        setPreviewImagesPreviews([]);
         reset();
     };
 
@@ -385,6 +390,15 @@ export default function ThemesCatalog({ themes }) {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Tampilkan preview base64 secara instan (sebelum upload ke server)
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const nextPreviews = [...previewImagesPreviews];
+            nextPreviews[index] = ev.target.result;
+            setPreviewImagesPreviews(nextPreviews);
+        };
+        reader.readAsDataURL(file);
+
         setUploadingIndex(index);
         const formData = new FormData();
         formData.append('file', file);
@@ -417,6 +431,11 @@ export default function ThemesCatalog({ themes }) {
             const nextImages = [...(data.preview_images || [])];
             nextImages[index] = result.url;
 
+            // Update previews dengan URL server yang final
+            const nextPreviews = [...previewImagesPreviews];
+            nextPreviews[index] = getThumbnailUrl(result.url);
+            setPreviewImagesPreviews(nextPreviews);
+
             if (index === 0) {
                 setData({
                     ...data,
@@ -429,6 +448,10 @@ export default function ThemesCatalog({ themes }) {
         } catch (err) {
             console.error('Upload failed:', err);
             alert(`Gagal mengunggah screenshot HP #${index + 1}: ${err.message}`);
+            // Kembalikan preview ke gambar sebelumnya saat gagal
+            const nextPreviews = [...previewImagesPreviews];
+            nextPreviews[index] = getThumbnailUrl(data.preview_images?.[index] || '');
+            setPreviewImagesPreviews(nextPreviews);
         } finally {
             setUploadingIndex(null);
         }
@@ -1034,12 +1057,13 @@ export default function ThemesCatalog({ themes }) {
                                 <label className={labelClass}>Live Preview Kartu Katalog (Hasil Resolusi)</label>
                                 <div className="max-w-[200px] mx-auto p-1.5 bg-[#faf9f7] border border-[#e8e5e0]/60 rounded-xl shadow-inner mt-2">
                                     <ThemePreviewCard 
+                                        key={`tc-preview-${previewImagesPreviews.join(',')}-${resolvedTemplate}-${resolvedBg}`}
                                         theme={{
                                             name: activeTheme.name,
                                             slug: activeTheme.slug,
                                             thumbnail: resolvedThumbnail,
                                             preview_template: resolvedTemplate,
-                                            preview_images: resolvedImages,
+                                            preview_images: previewImagesPreviews.length > 0 ? previewImagesPreviews : resolvedImages,
                                             preview_bg_style: resolvedBg,
                                             category: activeTheme.category,
                                             is_premium: activeTheme.is_premium

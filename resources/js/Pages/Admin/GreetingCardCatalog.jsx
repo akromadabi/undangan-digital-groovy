@@ -154,6 +154,7 @@ export default function GreetingCardCatalog({ templates = [], typeOptions = {} }
     const [searchQuery, setSearchQuery] = useState('');
     const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+    const [previewImagesPreviews, setPreviewImagesPreviews] = useState([]);
 
     const typeDropdownRef  = useRef(null);
     const sortDropdownRef  = useRef(null);
@@ -217,16 +218,20 @@ export default function GreetingCardCatalog({ templates = [], typeOptions = {} }
     const handleEditClick = (tpl) => {
         setActiveTemplate(tpl);
         const custom = tpl.custom_setting || {};
+        const existingImages = custom.preview_images || [];
         setData({
             preview_template: custom.preview_template || 'default',
             preview_bg_style: custom.preview_bg_style || 'default',
-            preview_images:   custom.preview_images   || [],
+            preview_images:   existingImages,
             thumbnail:        custom.thumbnail         || '',
         });
+        // Inisialisasi previewImagesPreviews dari gambar yang sudah ada
+        setPreviewImagesPreviews(existingImages.map(p => getThumbnailUrl(p)));
     };
 
     const handleCloseModal = () => {
         setActiveTemplate(null);
+        setPreviewImagesPreviews([]);
         reset();
     };
 
@@ -259,6 +264,16 @@ export default function GreetingCardCatalog({ templates = [], typeOptions = {} }
     const handlePreviewImageUpload = async (index, e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        // Tampilkan preview base64 secara instan
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const nextPreviews = [...previewImagesPreviews];
+            nextPreviews[index] = ev.target.result;
+            setPreviewImagesPreviews(nextPreviews);
+        };
+        reader.readAsDataURL(file);
+
         setUploadingIndex(index);
         const formData = new FormData();
         formData.append('file', file);
@@ -276,6 +291,12 @@ export default function GreetingCardCatalog({ templates = [], typeOptions = {} }
             const result = await response.json();
             const nextImages = [...(data.preview_images || [])];
             nextImages[index] = result.url;
+
+            // Update previews dengan URL server yang final
+            const nextPreviews = [...previewImagesPreviews];
+            nextPreviews[index] = getThumbnailUrl(result.url);
+            setPreviewImagesPreviews(nextPreviews);
+
             if (index === 0) {
                 setData({ ...data, preview_images: nextImages, thumbnail: result.url });
             } else {
@@ -283,6 +304,10 @@ export default function GreetingCardCatalog({ templates = [], typeOptions = {} }
             }
         } catch (err) {
             alert(`Gagal mengunggah screenshot #${index + 1}: ${err.message}`);
+            // Kembalikan preview ke gambar sebelumnya saat gagal
+            const nextPreviews = [...previewImagesPreviews];
+            nextPreviews[index] = getThumbnailUrl(data.preview_images?.[index] || '');
+            setPreviewImagesPreviews(nextPreviews);
         } finally {
             setUploadingIndex(null);
         }
@@ -750,12 +775,13 @@ export default function GreetingCardCatalog({ templates = [], typeOptions = {} }
                                 <label className={labelClass}>Live Preview Kartu Katalog (Hasil Resolusi)</label>
                                 <div className="max-w-[200px] mx-auto p-1.5 bg-[#faf9f7] border border-[#e8e5e0]/60 rounded-xl shadow-inner mt-2">
                                     <ThemePreviewCard
+                                        key={`gcc-preview-${previewImagesPreviews.join(',')}-${resolvedTemplate}-${resolvedBg}`}
                                         theme={{
                                             name:             activeTemplate.name,
                                             slug:             activeTemplate.slug,
                                             thumbnail:        resolvedThumbnail,
                                             preview_template: resolvedTemplate,
-                                            preview_images:   resolvedImages,
+                                            preview_images:   previewImagesPreviews.length > 0 ? previewImagesPreviews : resolvedImages,
                                             preview_bg_style: resolvedBg,
                                         }}
                                         reseller={null}
