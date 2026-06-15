@@ -14,9 +14,5 @@ export default defineConfig({
         minify: 'esbuild',
         cssMinify: true,
         sourcemap: false,
-        rollupOptions: {
-            maxParallelFileOps: 1,
-            cache: false,
-        },
     },
 });

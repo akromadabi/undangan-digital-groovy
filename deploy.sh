@@ -61,9 +61,9 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Hapus node_modules setelah build selesai untuk menghemat penyimpanan VPS
-echo "🧹 Menghapus node_modules setelah build selesai..."
-rm -rf node_modules
+# Hapus node_modules dinonaktifkan agar deployment berikutnya jauh lebih cepat menggunakan cache
+# echo "🧹 Menghapus node_modules setelah build selesai..."
+# rm -rf node_modules
 
 echo "🗄️ 5. Menjalankan migrasi database..."
 $PHP_BIN artisan migrate --force
