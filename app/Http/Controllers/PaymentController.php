@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\ResellerPlanPrice;
 use App\Models\SubscriptionPlan;
-use App\Services\XenditService;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -58,8 +58,8 @@ class PaymentController extends Controller
     public function checkout(Request $request)
     {
         $request->validate([
-            'plan_id' => 'required_without:greeting_card_id|exists:subscription_plans,id',
-            'greeting_card_id' => 'required_without:plan_id|exists:greeting_cards,id',
+            'plan_id' => 'required|exists:subscription_plans,id',
+            'greeting_card_id' => 'nullable|exists:greeting_cards,id',
             'invitation_id' => 'nullable|exists:invitations,id',
         ]);
 
@@ -73,45 +73,105 @@ class PaymentController extends Controller
                 abort(403, 'Akses ditolak.');
             }
 
-            // Ambil harga dasar global dari settings
-            $price = \App\Models\GlobalSetting::getValue('greeting_card_price', 49000.00);
+            $plan = \App\Models\SubscriptionPlan::where('type', 'greeting_card')->findOrFail($request->plan_id);
 
-            // Jika user memiliki reseller, ambil harga kustom reseller jika ada
+            // Cek kecocokan template dengan allowed_plans dari paket
+            $template = \App\Models\GreetingCardTemplate::where('slug', $card->template)->first();
+            if ($template && $template->allowed_plans) {
+                $allowed = is_array($template->allowed_plans) ? $template->allowed_plans : json_decode($template->allowed_plans, true);
+                if (!in_array($plan->slug, $allowed)) {
+                    return back()->with('error', "Tema {$template->name} tidak didukung oleh paket {$plan->name}.");
+                }
+            }
+
+            // Tentukan harga paket (reseller kustom atau base price)
+            $price = (float)$plan->price;
             if ($user->reseller_id) {
-                $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
-                if ($resellerSetting && $resellerSetting->greeting_card_price !== null) {
-                    $price = (float) $resellerSetting->greeting_card_price;
+                $resellerPrice = \App\Models\ResellerPlanPrice::where('reseller_id', $user->reseller_id)
+                    ->where('plan_id', $plan->id)
+                    ->first();
+                if ($resellerPrice) {
+                    $price = (float)$resellerPrice->reseller_price;
                 }
             }
 
             if ($price <= 0) {
                 // Gratis - langsung aktifkan!
                 $card->update(['is_active' => true]);
+                \App\Models\Subscription::create([
+                    'user_id' => $user->id,
+                    'greeting_card_id' => $card->id,
+                    'plan_id' => $plan->id,
+                    'starts_at' => now(),
+                    'expires_at' => $plan->duration_days > 0 ? now()->addDays($plan->duration_days) : null,
+                    'status' => 'active',
+                ]);
                 return redirect()->route('greeting-card.index')->with('success', 'Kartu ucapan gratis berhasil diaktifkan! 🎉');
             }
 
-            // Transfer Bank Manual (untuk semua user, baik reseller maupun direct)
-            $existingPendingManual = Payment::where('user_id', $user->id)
+            // Transfer Bank Manual (untuk user reseller)
+            if ($user->reseller_id) {
+                $existingPendingManual = Payment::where('user_id', $user->id)
+                    ->where('greeting_card_id', $card->id)
+                    ->where('plan_id', $plan->id)
+                    ->whereIn('status', ['pending_manual', 'waiting_review'])
+                    ->where('payment_gateway', 'manual')
+                    ->where('created_at', '>', now()->subHours(24))
+                    ->first();
+
+                if ($existingPendingManual) {
+                    return redirect()->route('payment.manual.show', $existingPendingManual->id);
+                }
+
+                $payment = Payment::create([
+                    'user_id' => $user->id,
+                    'greeting_card_id' => $card->id,
+                    'plan_id' => $plan->id,
+                    'amount' => $price,
+                    'payment_method' => 'transfer',
+                    'payment_gateway' => 'manual',
+                    'status' => 'pending_manual',
+                ]);
+
+                return redirect()->route('payment.manual.show', $payment->id);
+            }
+
+            // Direct user greeting card checkout via Midtrans
+            $existingPending = Payment::where('user_id', $user->id)
                 ->where('greeting_card_id', $card->id)
-                ->whereIn('status', ['pending_manual', 'waiting_review'])
-                ->where('payment_gateway', 'manual')
+                ->where('plan_id', $plan->id)
+                ->where('status', 'pending')
                 ->where('created_at', '>', now()->subHours(24))
                 ->first();
 
-            if ($existingPendingManual) {
-                return redirect()->route('payment.manual.show', $existingPendingManual->id);
+            if ($existingPending && !empty($existingPending->metadata['invoice_url'])) {
+                return Inertia::location($existingPending->metadata['invoice_url']);
             }
 
             $payment = Payment::create([
                 'user_id' => $user->id,
                 'greeting_card_id' => $card->id,
+                'plan_id' => $plan->id,
                 'amount' => $price,
-                'payment_method' => 'transfer',
-                'payment_gateway' => 'manual',
-                'status' => 'pending_manual',
+                'payment_gateway' => 'midtrans',
+                'status' => 'pending',
             ]);
 
-            return redirect()->route('payment.manual.show', $payment->id);
+            $midtrans = new MidtransService();
+
+            if (!$midtrans->isConfigured()) {
+                $payment->delete();
+                return back()->with('error', 'Payment gateway belum dikonfigurasi. Hubungi admin.');
+            }
+
+            $result = $midtrans->createInvoice($payment);
+
+            if ($result['success']) {
+                return Inertia::location($result['invoice_url']);
+            }
+
+            $payment->update(['status' => 'failed']);
+            return back()->with('error', 'Gagal membuat invoice online: ' . ($result['error'] ?? 'Unknown error'));
         }
 
         // ── UNDANGAN PLAN CHECKOUT (EXISTING) ──
@@ -182,18 +242,18 @@ class PaymentController extends Controller
             'plan_id' => $plan->id,
             'invitation_id' => $invitationId,
             'amount' => $price,
-            'payment_gateway' => 'xendit',
+            'payment_gateway' => 'midtrans',
             'status' => 'pending',
         ]);
 
-        $xendit = new XenditService();
+        $midtrans = new MidtransService();
 
-        if (!$xendit->isConfigured()) {
+        if (!$midtrans->isConfigured()) {
             $payment->delete();
             return back()->with('error', 'Payment gateway belum dikonfigurasi. Hubungi admin.');
         }
 
-        $result = $xendit->createInvoice($payment);
+        $result = $midtrans->createInvoice($payment);
 
         if ($result['success']) {
             return Inertia::location($result['invoice_url']);
@@ -219,22 +279,20 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle Xendit webhook.
+     * Handle Midtrans webhook.
      */
     public function webhook(Request $request)
     {
-        $xendit = new XenditService();
+        $midtrans = new MidtransService();
+        $payload = $request->all();
 
-        // Verify webhook token
-        $callbackToken = $request->header('x-callback-token');
-        if ($callbackToken && !$xendit->verifyWebhookToken($callbackToken)) {
-            return response()->json(['error' => 'Invalid token'], 403);
+        $success = $midtrans->handleNotification($payload);
+
+        if ($success) {
+            return response()->json(['status' => 'ok']);
         }
 
-        $payload = $request->all();
-        $xendit->handleWebhook($payload);
-
-        return response()->json(['status' => 'ok']);
+        return response()->json(['status' => 'failed'], 400);
     }
 
     /**

@@ -4,11 +4,12 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login({ status, canResetPassword, autoLoginUsers, reseller = null }) {
+    const { flash } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -42,6 +43,12 @@ export default function Login({ status, canResetPassword, autoLoginUsers, resell
             {status && (
                 <div className="mb-4 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-xl border border-green-100">
                     {status}
+                </div>
+            )}
+
+            {flash?.error && (
+                <div className="mb-4 text-sm font-medium text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
+                    {flash.error}
                 </div>
             )}
 

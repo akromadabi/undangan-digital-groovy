@@ -220,6 +220,10 @@ class DatabaseSeeder extends Seeder
             ManchesterUnitedThemeSeeder::class,
             MoroccanThemeSeeder::class,
             AdatJawaThemeSeeder::class,
+            AdatMinangThemeSeeder::class,
+            AdatSundaThemeSeeder::class,
+            AdatBaliThemeSeeder::class,
+            AdatBatakThemeSeeder::class,
             WhatsappThemeSeeder::class,
             SpidermanThemeSeeder::class,
             CandyLandThemeSeeder::class,
@@ -281,12 +285,12 @@ class DatabaseSeeder extends Seeder
             ['setting_key' => 'site_tagline', 'setting_value' => 'Buat Undangan Digital Premium dalam Hitungan Menit', 'setting_type' => 'string', 'category' => 'general', 'description' => 'Tagline situs'],
             ['setting_key' => 'default_locale', 'setting_value' => 'id', 'setting_type' => 'string', 'category' => 'general', 'description' => 'Bahasa default (id/en)'],
 
-            // Xendit Payment
-            ['setting_key' => 'xendit_mode', 'setting_value' => 'sandbox', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Mode: sandbox / production'],
-            ['setting_key' => 'xendit_secret_key', 'setting_value' => '', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Xendit Secret API Key'],
-            ['setting_key' => 'xendit_webhook_token', 'setting_value' => '', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Xendit Webhook Verification Token'],
-            ['setting_key' => 'xendit_success_url', 'setting_value' => '/dashboard?payment=success', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Redirect URL setelah bayar sukses'],
-            ['setting_key' => 'xendit_failure_url', 'setting_value' => '/dashboard?payment=failed', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Redirect URL setelah bayar gagal'],
+            // Midtrans Payment
+            ['setting_key' => 'midtrans_mode', 'setting_value' => 'sandbox', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Mode: sandbox / production'],
+            ['setting_key' => 'midtrans_client_key', 'setting_value' => '', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Midtrans Client API Key'],
+            ['setting_key' => 'midtrans_server_key', 'setting_value' => '', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Midtrans Server API Key'],
+            ['setting_key' => 'midtrans_success_url', 'setting_value' => '/dashboard?payment=success', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Redirect URL setelah bayar sukses'],
+            ['setting_key' => 'midtrans_failure_url', 'setting_value' => '/dashboard?payment=failed', 'setting_type' => 'string', 'category' => 'payment', 'description' => 'Redirect URL setelah bayar gagal'],
 
             // MP WA V9
             ['setting_key' => 'mpwav9_api_url', 'setting_value' => '', 'setting_type' => 'string', 'category' => 'whatsapp', 'description' => 'URL API MP WA V9 (contoh: https://api.mpwav9.com)'],
@@ -318,7 +322,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => $userGold->id,
             'plan_id' => $gold->id,
             'amount' => $gold->price,
-            'payment_gateway' => 'xendit',
+            'payment_gateway' => 'midtrans',
             'status' => 'paid',
             'paid_at' => now()->subDays(5),
         ]);

@@ -49,9 +49,30 @@ const templateIcons = {
     balloonpop:     Sparkles,
 };
 
-export default function GreetingCardIndex({ cards }) {
+export default function GreetingCardIndex({ cards, cardPlans = [], templates = [] }) {
     const [deletingId, setDeletingId] = useState(null);
     const [copyId, setCopyId] = useState(null);
+    const [activeCardForCheckout, setActiveCardForCheckout] = useState(null);
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(amount);
+    };
+
+    const getCompatiblePlans = (card) => {
+        const templateObj = templates.find(t => t.slug === card.template);
+        if (!templateObj) return cardPlans;
+        return cardPlans.map(plan => {
+            const isAllowed = templateObj.allowed_plans && templateObj.allowed_plans.includes(plan.slug);
+            return {
+                ...plan,
+                isCompatible: !!isAllowed
+            };
+        });
+    };
 
     const handleDelete = (id) => {
         if (!confirm('Hapus kartu ucapan ini?')) return;
@@ -137,6 +158,23 @@ export default function GreetingCardIndex({ cards }) {
                                     <div className={`absolute top-2.5 left-2.5 text-[9px] font-bold px-2 py-0.5 rounded-full border ${typeColors[card.type] || 'bg-gray-100 text-gray-600'}`}>
                                         {card.type_label}
                                     </div>
+
+                                    {/* Plan/Active badge */}
+                                    <div className="absolute top-2.5 right-2.5 z-10">
+                                        {card.is_active ? (
+                                            <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm border border-emerald-400">
+                                                {card.plan_name || 'Aktif'}
+                                            </span>
+                                        ) : card.pending_payment_status ? (
+                                            <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500 text-white shadow-sm border border-amber-400">
+                                                {card.pending_payment_status === 'pending' ? 'Belum Bayar' : 'Proses Verifikasi'}
+                                            </span>
+                                        ) : (
+                                            <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-gray-400 text-white shadow-sm border border-gray-300">
+                                                Belum Aktif
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Body */}
@@ -152,6 +190,11 @@ export default function GreetingCardIndex({ cards }) {
                                             <span>Dari: <strong className="text-gray-700">{card.sender_name}</strong></span>
                                         </div>
                                         <div className="text-[10px] text-gray-400 mt-2">{card.created_at}</div>
+                                        {card.is_active && card.expires_at_formatted && (
+                                            <div className="text-[10px] text-emerald-600 font-bold mt-1.5 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 inline-block">
+                                                Aktif s.d {card.expires_at_formatted}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Actions */}
@@ -206,6 +249,39 @@ export default function GreetingCardIndex({ cards }) {
                                                 <Icon d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
+
+                                        {/* Activation / Payment button */}
+                                        {!card.is_active && (
+                                            <div className="pt-2">
+                                                {card.pending_payment_status ? (
+                                                    card.pending_payment_status === 'pending' ? (
+                                                        <button
+                                                            onClick={() => setActiveCardForCheckout(card)}
+                                                            className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
+                                                        >
+                                                            <Icon d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" className="w-3.5 h-3.5" />
+                                                            Selesaikan Pembayaran
+                                                        </button>
+                                                    ) : (
+                                                        <Link
+                                                            href={`/payment/manual/${card.pending_payment_id}`}
+                                                            className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-all border border-gray-200 flex items-center justify-center gap-1.5"
+                                                        >
+                                                            <Icon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" className="w-3.5 h-3.5 text-gray-400" />
+                                                            Lihat Status Verifikasi
+                                                        </Link>
+                                                    )
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setActiveCardForCheckout(card)}
+                                                        className="w-full py-2 bg-[#E5654B] hover:bg-[#c24b33] text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
+                                                    >
+                                                        <Icon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" className="w-3.5 h-3.5" />
+                                                        Aktifkan Kartu Ucapan
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -213,6 +289,103 @@ export default function GreetingCardIndex({ cards }) {
                     </div>
                 )}
             </div>
+
+            {/* Choose Activation Plan Modal */}
+            {activeCardForCheckout && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+                        onClick={() => setActiveCardForCheckout(null)}
+                    />
+                    
+                    {/* Modal Content */}
+                    <div className="relative bg-white rounded-3xl border border-gray-100 shadow-2xl p-6 sm:p-8 w-full max-w-md animate-in zoom-in-95 duration-200 z-10 space-y-6">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Aktifkan Kartu</h3>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Pilih paket aktivasi untuk kartu: <strong className="text-gray-700">{activeCardForCheckout.title}</strong>
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => setActiveCardForCheckout(null)}
+                                className="w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors text-lg font-bold"
+                            >
+                                &times;
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {getCompatiblePlans(activeCardForCheckout).map(plan => {
+                                const isCompatible = plan.isCompatible;
+                                return (
+                                    <div 
+                                        key={plan.id}
+                                        className={`border rounded-2xl p-4 transition-all duration-200 ${
+                                            isCompatible 
+                                                ? 'border-gray-200 hover:border-[#E5654B] hover:shadow-xs bg-white' 
+                                                : 'border-gray-100 bg-gray-50/50 opacity-60'
+                                        }`}
+                                    >
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div>
+                                                <h4 className="text-sm font-bold text-gray-900 flex items-center gap-1.5 flex-wrap">
+                                                    {plan.name}
+                                                    {!isCompatible && (
+                                                        <span className="text-[8px] font-extrabold px-1.5 py-0.5 bg-red-50 text-red-600 border border-red-100 rounded-md">
+                                                            Tidak Cocok
+                                                        </span>
+                                                    )}
+                                                </h4>
+                                                <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
+                                                    {plan.description || `Paket masa aktif kartu selama 365 hari dengan batasan template.`}
+                                                </p>
+                                            </div>
+                                            <div className="text-right flex-shrink-0">
+                                                <span className="text-sm font-extrabold text-[#E5654B]">
+                                                    {formatCurrency(plan.price)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="mt-4 flex items-center justify-between gap-4">
+                                            {!isCompatible ? (
+                                                <span className="text-[10px] text-red-500 font-semibold leading-tight flex-1">
+                                                    ⚠️ Kartu ini menggunakan template premium. Harap pilih paket Premium.
+                                                </span>
+                                            ) : (
+                                                <div className="flex-1 text-[10px] text-gray-400 font-semibold">
+                                                    Kompatibel dengan template terpilih
+                                                </div>
+                                            )}
+                                            
+                                            <button
+                                                type="button"
+                                                disabled={!isCompatible}
+                                                onClick={() => {
+                                                    setActiveCardForCheckout(null);
+                                                    router.post('/checkout', {
+                                                        greeting_card_id: activeCardForCheckout.id,
+                                                        plan_id: plan.id
+                                                    });
+                                                }}
+                                                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all shadow-sm ${
+                                                    isCompatible 
+                                                        ? 'bg-gradient-to-r from-[#E5654B] to-[#ff7d63] hover:from-[#c94f3a] hover:to-[#e05b41] text-white hover:shadow-md' 
+                                                        : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed shadow-none'
+                                                }`}
+                                            >
+                                                Pilih & Aktifkan
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 }

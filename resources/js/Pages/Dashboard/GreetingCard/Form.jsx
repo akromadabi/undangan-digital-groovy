@@ -659,6 +659,18 @@ export default function GreetingCardForm({ card, types, templates, defaultTempla
     const [checkingUrl, setCheckingUrl] = useState(false);
     const [urlAvailable, setUrlAvailable] = useState(null);
 
+    const { data, setData, post, put, processing, errors } = useForm({
+        title:          card?.title ?? 'Kartu Ucapan',
+        template:       card?.template ?? defaultTemplate,
+        type:           card?.type ?? defaultType,
+        recipient_name: card?.recipient_name ?? '',
+        sender_name:    card?.sender_name ?? '',
+        photo_url:      card?.photo_url ?? '',
+        photos:         card?.photos ?? (card?.photo_url ? [card.photo_url] : []),
+        messages:       card?.messages?.length ? card.messages : [''],
+        custom_url:     card?.custom_url ?? '',
+    });
+
     // Debounce check for custom URL availability
     useEffect(() => {
         const cleanUrl = data.custom_url ? data.custom_url.trim().toLowerCase().replace(/[^a-zA-Z0-9-_]/g, '') : '';
@@ -690,18 +702,6 @@ export default function GreetingCardForm({ card, types, templates, defaultTempla
         }, 500);
         return () => clearTimeout(t);
     }, [data.custom_url, isEdit, card]);
-
-    const { data, setData, post, put, processing, errors } = useForm({
-        title:          card?.title ?? 'Kartu Ucapan',
-        template:       card?.template ?? defaultTemplate,
-        type:           card?.type ?? defaultType,
-        recipient_name: card?.recipient_name ?? '',
-        sender_name:    card?.sender_name ?? '',
-        photo_url:      card?.photo_url ?? '',
-        photos:         card?.photos ?? (card?.photo_url ? [card.photo_url] : []),
-        messages:       card?.messages?.length ? card.messages : [''],
-        custom_url:     card?.custom_url ?? '',
-    });
 
 
     // Messages helpers

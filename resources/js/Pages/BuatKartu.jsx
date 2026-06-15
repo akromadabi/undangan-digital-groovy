@@ -166,6 +166,14 @@ function Step1Template({ templates, value, onChange, onNext }) {
                         >
                             {/* Thumbnail */}
                             <div className={`h-24 ${thumbnail ? '' : `bg-gradient-to-br ${templateGradients[tpl.slug] || 'from-gray-900 to-gray-700'}`} relative overflow-hidden flex items-center justify-center`}>
+                                {/* Badge Plan */}
+                                <div className="absolute top-1.5 left-1.5 z-10">
+                                    {tpl.allowed_plans && tpl.allowed_plans.length === 1 && tpl.allowed_plans.includes('card_premium') ? (
+                                        <span className="text-[8px] font-extrabold px-1.5 py-0.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-md tracking-wider uppercase shadow-sm">Premium</span>
+                                    ) : (
+                                        <span className="text-[8px] font-extrabold px-1.5 py-0.5 bg-gray-500 text-white rounded-md tracking-wider uppercase shadow-sm">Basic</span>
+                                    )}
+                                </div>
                                 {thumbnail ? (
                                     <img src={thumbnail} alt={tpl.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                 ) : (
@@ -176,7 +184,7 @@ function Step1Template({ templates, value, onChange, onNext }) {
                                 )}
                                 {isSelected && (
                                     <div className="absolute inset-0 bg-[#E5654B]/20 flex items-center justify-center">
-                                        <div className="w-6 h-6 bg-[#E5654B] rounded-full flex items-center justify-center text-white">
+                                        <div className="w-6 h-6 bg-[#E5654B] rounded-full flex items-center justify-center text-white font-bold text-xs">
                                             ✓
                                         </div>
                                     </div>

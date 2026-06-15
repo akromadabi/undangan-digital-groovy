@@ -850,7 +850,12 @@ function CoupleSection({ brideGrooms, language, id, themeConfig }) {
                 </Reveal>
                 <Reveal variant="up" delay={300}>
                     <div className="aj-profile-parents">
-                        {isEn ? 'Beloved offspring of:' : 'Putra/Putri tercinta dari Bapak & Ibu:'} <br />
+                        {!m.child_order && (
+                            <>
+                                {isEn ? 'Beloved offspring of:' : 'Putra/Putri tercinta dari Bapak & Ibu:'}
+                                <br />
+                            </>
+                        )}
                         <strong>{m.father_name || '...'}</strong> &amp; <strong>{m.mother_name || '...'}</strong>
                     </div>
                 </Reveal>

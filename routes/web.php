@@ -437,6 +437,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/pricing', [\App\Http\Controllers\Admin\ResellerPricingController::class, 'index'])->name('pricing');
     Route::post('/pricing', [\App\Http\Controllers\Admin\ResellerPricingController::class, 'update'])->name('pricing.update');
 
+    // Reseller Greeting Card Pricing
+    Route::get('/greeting-card-pricing', [\App\Http\Controllers\Admin\ResellerGreetingCardPricingController::class, 'index'])->name('greeting-card-pricing');
+    Route::post('/greeting-card-pricing', [\App\Http\Controllers\Admin\ResellerGreetingCardPricingController::class, 'update'])->name('greeting-card-pricing.update');
+
     // Reseller Withdrawal (pencairan)
     Route::get('/pencairan', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'index'])->name('pencairan');
     Route::post('/pencairan/request', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'requestWithdrawal'])->name('pencairan.request');
@@ -474,6 +478,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     // Global Management (plans, quotes, settings, instagram filters)
     Route::post('plans/update-greeting-card-price', [AdminPlanController::class, 'updateGreetingCardPrice'])->name('plans.update-greeting-card-price');
     Route::resource('plans', AdminPlanController::class);
+    Route::resource('greeting-card-plans', \App\Http\Controllers\Admin\AdminGreetingCardPlanController::class);
     Route::resource('instagram-filters', \App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class);
     Route::post('/instagram-filters/{instagramFilter}/toggle-active', [\App\Http\Controllers\SuperAdmin\SuperAdminInstagramFilterController::class, 'toggleActive'])->name('instagram-filters.toggle-active');
 
@@ -560,6 +565,7 @@ Route::middleware(['auth', 'editor_or_super_admin'])->prefix('super-admin')->nam
 // ═══════════════════════════════════════
 // Webhooks (no CSRF, no auth)
 // ═══════════════════════════════════════
+Route::post('/webhooks/midtrans', [PaymentController::class, 'webhook'])->name('webhook.midtrans')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::post('/webhooks/xendit', [PaymentController::class, 'webhook'])->name('webhook.xendit')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::middleware(['auth'])->group(function () {

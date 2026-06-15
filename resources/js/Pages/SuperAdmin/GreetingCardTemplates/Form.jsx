@@ -81,7 +81,7 @@ const getStorageUrl = (path) => {
 
 const phoneCountMap = { 'single-phone': 1, 'double-phone': 2, 'triple-phone': 3 };
 
-export default function GreetingCardTemplateForm({ template = null }) {
+export default function GreetingCardTemplateForm({ template = null, cardPlans = [] }) {
     const isEditing = !!template;
 
     const { data, setData, post, processing, errors, transform } = useForm({
@@ -91,6 +91,7 @@ export default function GreetingCardTemplateForm({ template = null }) {
         bg_gradient:      template?.bg_gradient || 'from-[#0d0915] via-[#1b102b] to-[#09090b]',
         base_likes:       template?.base_likes ?? 0,
         price:            template?.price ?? 49000,
+        allowed_plans:    template?.allowed_plans || [],
         is_active:        template?.is_active ?? true,
         thumbnail:        template?.thumbnail || '',
         preview_template: template?.preview_template || 'full-mockup',
@@ -226,6 +227,17 @@ export default function GreetingCardTemplateForm({ template = null }) {
             currentTypes.push(typeId);
         }
         setData('type', currentTypes);
+    };
+
+    const handlePlanToggle = (planSlug) => {
+        const currentPlans = [...(data.allowed_plans || [])];
+        const index = currentPlans.indexOf(planSlug);
+        if (index > -1) {
+            currentPlans.splice(index, 1);
+        } else {
+            currentPlans.push(planSlug);
+        }
+        setData('allowed_plans', currentPlans);
     };
 
     const autoSlug = (name) => {
@@ -417,6 +429,31 @@ export default function GreetingCardTemplateForm({ template = null }) {
                                     required
                                 />
                                 {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
+                            </div>
+
+                            {/* Akses Paket Kartu */}
+                            <div className="sm:col-span-2 border-t border-[#f5f3f0] pt-5">
+                                <label className={labelClass}>Paket yang Diizinkan Menggunakan Tema Ini *</label>
+                                <div className="grid grid-cols-2 gap-3 mt-2 mb-4">
+                                    {cardPlans && cardPlans.map(plan => {
+                                        const isChecked = (data.allowed_plans || []).includes(plan.slug);
+                                        return (
+                                            <label key={plan.id} className={`flex items-center gap-3 p-3.5 rounded-xl cursor-pointer transition-all border ${isChecked ? 'bg-[#E5654B]/5 border-[#E5654B]/20 text-[#E5654B]' : 'bg-[#fcfbfa] border-[#e8e5e0] text-gray-700 hover:bg-gray-50'}`}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isChecked}
+                                                    onChange={() => handlePlanToggle(plan.slug)}
+                                                    className="rounded border-[#e8e5e0] text-[#E5654B] focus:ring-[#E5654B] h-4 w-4"
+                                                />
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-bold">{plan.name}</span>
+                                                    <span className="text-[10px] opacity-75">{plan.slug}</span>
+                                                </div>
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                                {errors.allowed_plans && <p className="text-red-500 text-xs mt-1">{errors.allowed_plans}</p>}
                             </div>
 
                             {/* Publish Toggle */}

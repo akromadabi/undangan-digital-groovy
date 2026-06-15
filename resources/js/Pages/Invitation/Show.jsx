@@ -646,7 +646,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                             </>
                         )}
                         {invitation.cover_image && <div className="flex-1" />}
-                        <div className="text-center px-8 max-w-sm mx-auto relative z-20" style={invitation.cover_image ? { paddingBottom: '8vh' } : {}}>
+                        <div className="text-center px-8 max-w-sm mx-auto relative z-20 default-cover-content" style={invitation.cover_image ? { paddingBottom: '8vh' } : {}}>
                             {isTraditional ? (
                                 <>
                                     <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: colors.primary, fontFamily: fonts.heading }}>{t('invitation.wedding_of')}</p>

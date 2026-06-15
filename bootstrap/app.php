@@ -37,10 +37,10 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($response->getStatusCode() === 419) {
                 // If accessing admin/dashboard routes, redirect to login page with a friendly message
                 if ($request->is('dashboard*') || $request->is('admin*') || $request->is('super-admin*') || $request->is('wizard*')) {
-                    return redirect()->route('login')->with('message', 'Sesi Anda telah berakhir karena tidak ada aktivitas. Silakan masuk kembali.');
+                    return redirect()->route('login')->with('error', 'Sesi Anda telah berakhir karena tidak ada aktivitas. Silakan masuk kembali.');
                 }
                 // For public/invitation pages, redirect back to refresh the CSRF token automatically
-                return back()->with('message', 'Sesi halaman telah kedaluwarsa. Silakan coba kembali.');
+                return back()->with('error', 'Sesi halaman telah kedaluwarsa. Silakan coba kembali.');
             }
             return $response;
         });

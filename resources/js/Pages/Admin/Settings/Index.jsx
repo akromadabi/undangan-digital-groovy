@@ -108,7 +108,7 @@ export default function Index({ settings }) {
 
     const tabs = [
         { id: 'general', label: 'Umum & Branding', desc: 'Nama aplikasi, domain, logo & favicon utama.', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l-3 3m3-3l3 3" /></svg> },
-        { id: 'payment', label: 'Gerbang Pembayaran', desc: 'Kunci API Xendit, Midtrans & rekening transfer manual.', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg> },
+        { id: 'payment', label: 'Gerbang Pembayaran', desc: 'Kunci API Midtrans & rekening transfer manual.', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg> },
         { id: 'whatsapp', label: 'WhatsApp Gateway', desc: 'Integrasi pengiriman notifikasi via API Gateway.', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> },
         { id: 'footer', label: 'Informasi Footer', desc: 'Kontak, media sosial & deskripsi di kaki halaman.', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" /></svg> },
     ];
@@ -246,7 +246,7 @@ export default function Index({ settings }) {
                             <div className="space-y-6">
                                 <div className="border-b border-gray-100 pb-3">
                                     <h3 className="font-bold text-gray-800 text-sm">Metode & Sistem Pembayaran</h3>
-                                    <p className="text-[10px] text-gray-400 mt-0.5">Konfigurasi Midtrans, Xendit, dan daftar rekening transfer bank manual untuk transaksi reseller.</p>
+                                    <p className="text-[10px] text-gray-400 mt-0.5">Konfigurasi Midtrans dan daftar rekening transfer bank manual untuk transaksi reseller.</p>
                                 </div>
 
                                 {/* Manual Transfer Section */}
@@ -311,37 +311,37 @@ export default function Index({ settings }) {
                                     )}
                                 </div>
 
-                                {/* Xendit Config */}
+                                {/* Midtrans Config */}
                                 <div className="border border-gray-100 rounded-2xl p-4 bg-gray-50/20 space-y-4">
                                     <div>
-                                        <h4 className="font-bold text-gray-800 text-xs">Xendit Integration Settings</h4>
-                                        <p className="text-[9px] text-gray-400 mt-0.5">Integrasi pembayaran utama untuk invoicing reseller.</p>
+                                        <h4 className="font-bold text-gray-800 text-xs">Midtrans Integration Settings</h4>
+                                        <p className="text-[9px] text-gray-400 mt-0.5">Integrasi pembayaran online Midtrans Snap.</p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className={labelClass}>Xendit Mode</label>
-                                            <select value={getSettingValue('xendit_mode')} onChange={(e) => updateSettingValue('xendit_mode', e.target.value)} className={inputClass}>
+                                            <label className={labelClass}>Midtrans Mode</label>
+                                            <select value={getSettingValue('midtrans_mode')} onChange={(e) => updateSettingValue('midtrans_mode', e.target.value)} className={inputClass}>
                                                 <option value="sandbox">Sandbox (Testing)</option>
                                                 <option value="production">Production (Live)</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label className={labelClass}>Xendit Webhook Token</label>
-                                            <input type="password" value={getSettingValue('xendit_webhook_token')} onChange={(e) => updateSettingValue('xendit_webhook_token', e.target.value)} className={inputClass} placeholder="Verification Token" />
+                                            <label className={labelClass}>Midtrans Client Key</label>
+                                            <input type="text" value={getSettingValue('midtrans_client_key')} onChange={(e) => updateSettingValue('midtrans_client_key', e.target.value)} className={inputClass} placeholder="Client Key" />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className={labelClass}>Xendit Secret Key</label>
-                                        <input type="password" value={getSettingValue('xendit_secret_key')} onChange={(e) => updateSettingValue('xendit_secret_key', e.target.value)} className={inputClass} placeholder="xnd_development_..." />
+                                        <label className={labelClass}>Midtrans Server Key</label>
+                                        <input type="password" value={getSettingValue('midtrans_server_key')} onChange={(e) => updateSettingValue('midtrans_server_key', e.target.value)} className={inputClass} placeholder="Server Key" />
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className={labelClass}>Success Redirect URL</label>
-                                            <input type="text" value={getSettingValue('xendit_success_url')} onChange={(e) => updateSettingValue('xendit_success_url', e.target.value)} className={inputClass} />
+                                            <input type="text" value={getSettingValue('midtrans_success_url')} onChange={(e) => updateSettingValue('midtrans_success_url', e.target.value)} className={inputClass} />
                                         </div>
                                         <div>
                                             <label className={labelClass}>Failure Redirect URL</label>
-                                            <input type="text" value={getSettingValue('xendit_failure_url')} onChange={(e) => updateSettingValue('xendit_failure_url', e.target.value)} className={inputClass} />
+                                            <input type="text" value={getSettingValue('midtrans_failure_url')} onChange={(e) => updateSettingValue('midtrans_failure_url', e.target.value)} className={inputClass} />
                                         </div>
                                     </div>
                                 </div>

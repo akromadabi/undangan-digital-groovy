@@ -22,9 +22,11 @@ class AdminGreetingCardTemplateController extends Controller
 
     public function create()
     {
+        $cardPlans = \App\Models\SubscriptionPlan::where('type', 'greeting_card')->get();
         return Inertia::render('SuperAdmin/GreetingCardTemplates/Form', [
             'template'    => null,
             'typeOptions' => GreetingCardTemplate::$typeOptions,
+            'cardPlans'   => $cardPlans,
         ]);
     }
 
@@ -51,6 +53,8 @@ class AdminGreetingCardTemplateController extends Controller
             'bg_gradient'      => 'nullable|string|max:200',
             'base_likes'       => 'nullable|integer|min:0',
             'price'            => 'nullable|numeric|min:0',
+            'allowed_plans'    => 'nullable|array',
+            'allowed_plans.*'  => 'string|exists:subscription_plans,slug',
             'is_active'        => 'boolean',
             'thumbnail'        => 'nullable|string|max:500',
             'preview_template' => 'nullable|string|in:full-mockup,single-phone,double-phone,triple-phone',
@@ -64,6 +68,7 @@ class AdminGreetingCardTemplateController extends Controller
             'preview_images' => array_values(array_filter($validated['preview_images'] ?? [])),
             'base_likes'     => $validated['base_likes'] ?? 0,
             'price'          => $validated['price'] ?? 49000.00,
+            'allowed_plans'  => $validated['allowed_plans'] ?? [],
         ]);
 
         GreetingCardTemplate::create($data);
@@ -74,9 +79,11 @@ class AdminGreetingCardTemplateController extends Controller
 
     public function edit(GreetingCardTemplate $greetingCardTemplate)
     {
+        $cardPlans = \App\Models\SubscriptionPlan::where('type', 'greeting_card')->get();
         return Inertia::render('SuperAdmin/GreetingCardTemplates/Form', [
             'template'    => $greetingCardTemplate,
             'typeOptions' => GreetingCardTemplate::$typeOptions,
+            'cardPlans'   => $cardPlans,
         ]);
     }
 
@@ -92,6 +99,8 @@ class AdminGreetingCardTemplateController extends Controller
             'bg_gradient'      => 'nullable|string|max:200',
             'base_likes'       => 'nullable|integer|min:0',
             'price'            => 'nullable|numeric|min:0',
+            'allowed_plans'    => 'nullable|array',
+            'allowed_plans.*'  => 'string|exists:subscription_plans,slug',
             'is_active'        => 'boolean',
             'thumbnail'        => 'nullable|string|max:500',
             'preview_template' => 'nullable|string|in:full-mockup,single-phone,double-phone,triple-phone',
@@ -105,6 +114,7 @@ class AdminGreetingCardTemplateController extends Controller
             'preview_images' => array_values(array_filter($validated['preview_images'] ?? [])),
             'base_likes'     => $validated['base_likes'] ?? 0,
             'price'          => $validated['price'] ?? 49000.00,
+            'allowed_plans'  => $validated['allowed_plans'] ?? [],
         ]);
 
         $greetingCardTemplate->update($updateData);

@@ -11,6 +11,7 @@ use App\Models\Event;
 use App\Models\Gallery;
 use App\Models\BankAccount;
 use App\Models\InvitationSection;
+use App\Models\LoveStory;
 
 $inv = Invitation::where('slug', 'mira-randi')->first();
 if (!$inv) {
@@ -37,6 +38,7 @@ BrideGroom::where('invitation_id', $inv->id)->delete();
 Event::where('invitation_id', $inv->id)->delete();
 Gallery::where('invitation_id', $inv->id)->delete();
 BankAccount::where('invitation_id', $inv->id)->delete();
+LoveStory::where('invitation_id', $inv->id)->delete();
 
 // Mempelai Wanita
 BrideGroom::create([
@@ -81,6 +83,13 @@ Event::create([
     'venue_address' => 'Jl. Raya Ciputat No. 15, Tangerang Selatan, Banten',
     'gmaps_link' => 'https://maps.google.com',
     'sort_order' => 1,
+    'is_primary' => true,
+    'streaming_platform' => 'YouTube',
+    'streaming_url' => 'https://youtube.com/live/demo',
+    'streamings' => [['platform' => 'YouTube', 'url' => 'https://youtube.com/live/demo']],
+    'show_dress_code' => true,
+    'dress_code_text' => 'Batik Modern / Busana Nasional Rapi',
+    'dress_code_colors' => [['label' => 'Dress Code', 'colors' => ['#8B5A2B', '#CD853F', '#DEB887', '#F5F5DC']]],
 ]);
 
 Event::create([
@@ -95,15 +104,18 @@ Event::create([
     'venue_address' => 'Jl. Gatot Subroto No. 88, Jakarta Selatan',
     'gmaps_link' => 'https://maps.google.com',
     'sort_order' => 2,
+    'is_primary' => false,
+    'show_dress_code' => true,
+    'dress_code_text' => 'Batik Modern / Busana Nasional Rapi',
+    'dress_code_colors' => [['label' => 'Dress Code', 'colors' => ['#8B5A2B', '#CD853F', '#DEB887', '#F5F5DC']]],
 ]);
 
-// Gallery - use placeholder images
+// Gallery
 $galleryUrls = [
-    'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=400&h=400&fit=crop',
+    '/images/demo/korea-7-768x512.jpg',
+    '/images/demo/korea-11-768x512.jpg',
+    '/images/demo/korea-12-768x512.jpg',
+    '/images/demo/korea-4-768x528.jpg',
 ];
 
 foreach ($galleryUrls as $i => $url) {
@@ -114,6 +126,23 @@ foreach ($galleryUrls as $i => $url) {
         'sort_order' => $i + 1,
     ]);
 }
+
+// Love Stories
+LoveStory::create([
+    'invitation_id' => $inv->id,
+    'title' => 'Pertemuan',
+    'story_date' => '2023-11-20',
+    'description' => 'Dipertemukan pertama kali di Yogyakarta, awal kisah indah perjalanan kami.',
+    'sort_order' => 1,
+]);
+
+LoveStory::create([
+    'invitation_id' => $inv->id,
+    'title' => 'Membangun Komitmen',
+    'story_date' => '2024-11-20',
+    'description' => 'Niat suci untuk melangkah bersama membangun masa depan.',
+    'sort_order' => 2,
+]);
 
 // Bank Accounts
 BankAccount::create([
@@ -133,26 +162,19 @@ BankAccount::create([
     'sort_order' => 2,
 ]);
 
-// Make sure invitation sections exist
-$existingSections = \App\Models\InvitationSection::where('invitation_id', $inv->id)->count();
-if ($existingSections == 0) {
-    $sections = [
-        ['section_key' => 'opening', 'section_label' => 'Opening', 'sort_order' => 1, 'is_visible' => true],
-        ['section_key' => 'bride_groom', 'section_label' => 'Mempelai', 'sort_order' => 2, 'is_visible' => true],
-        ['section_key' => 'event', 'section_label' => 'Acara', 'sort_order' => 3, 'is_visible' => true],
-        ['section_key' => 'gallery', 'section_label' => 'Galeri', 'sort_order' => 4, 'is_visible' => true],
-        ['section_key' => 'bank', 'section_label' => 'Amplop', 'sort_order' => 5, 'is_visible' => true],
-        ['section_key' => 'wishes', 'section_label' => 'Ucapan', 'sort_order' => 6, 'is_visible' => true],
-        ['section_key' => 'closing', 'section_label' => 'Penutup', 'sort_order' => 7, 'is_visible' => true],
-    ];
-    foreach ($sections as $sec) {
-        \App\Models\InvitationSection::create(array_merge($sec, ['invitation_id' => $inv->id]));
+// Re-generate invitation sections for this invitation specifically
+$theme = \App\Models\Theme::where('slug', 'adat-jawa')->first();
+if ($theme) {
+    $inv->update(['theme_id' => $theme->id]);
+    $inv->sections()->delete();
+    foreach ($theme->sections as $ts) {
+        $inv->sections()->create([
+            'section_key' => $ts->section_key,
+            'section_name' => $ts->section_name,
+            'sort_order' => $ts->default_order,
+            'is_visible' => true,
+        ]);
     }
-    echo "Created {count($sections)} invitation sections\n";
 }
 
 echo "Done! Populated demo data for mira-randi\n";
-echo "  - 2 bride/grooms\n";
-echo "  - 2 events\n";
-echo "  - " . count($galleryUrls) . " gallery photos\n";
-echo "  - 2 bank accounts\n";

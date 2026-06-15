@@ -233,7 +233,7 @@ class InvitationController extends Controller
 
         // THEME ADDED BY BHAKTIAJI ILHAM
         $page = 'Invitation/Show';
-        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'adat-minang', 'adat-sunda', 'adat-bali', 'adat-batak', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
             if ($isDemo) {
                 $page = 'Invitation/DemoWrapper';
             } else {
@@ -505,10 +505,116 @@ class InvitationController extends Controller
 
             $brideGrooms = $customDemoInvitation->brideGrooms;
             $events = $customDemoInvitation->events;
+
+            // Make sure all events have dress code and streaming populated for the demo!
+            if ($events->count() === 0) {
+                $events = collect([
+                    [
+                        'event_type' => 'akad',
+                        'event_name' => 'Akad Nikah',
+                        'event_date' => now()->addDays(30)->toDateString(),
+                        'start_time' => '08:00',
+                        'end_time' => '10:00',
+                        'timezone' => 'WIB',
+                        'venue_name' => 'Masjid Agung',
+                        'venue_address' => 'Jl. Khatib Sulaiman, Padang',
+                        'gmaps_link' => 'https://maps.google.com',
+                        'sort_order' => 0,
+                        'is_primary' => true,
+                        'streaming_platform' => 'YouTube',
+                        'streaming_url' => 'https://youtube.com/live/example-wedding',
+                        'streamings' => [['platform' => 'YouTube', 'url' => 'https://youtube.com/live/example-wedding']],
+                        'show_dress_code' => true,
+                        'dress_code_text' => 'Para tamu disarankan mengenakan pakaian batik modern / pakaian rapi bernuansa pastel.',
+                        'dress_code_colors' => [['label' => 'Dress Code', 'colors' => ['#40302d', '#d4a373', '#e9edc9', '#fefae0']]]
+                    ]
+                ])->map(fn($ev) => new \App\Models\Event($ev));
+            } else {
+                foreach ($events as $event) {
+                    $event->show_dress_code = true;
+                    if (empty($event->dress_code_text)) {
+                        $event->dress_code_text = 'Para tamu disarankan mengenakan pakaian batik modern / pakaian rapi bernuansa pastel.';
+                    }
+                    if (empty($event->dress_code_colors) || !is_array($event->dress_code_colors)) {
+                        $themeColors = $theme->color_scheme;
+                        $palette = [
+                            $themeColors['primary'] ?? '#d4a373',
+                            $themeColors['secondary'] ?? '#e9edc9',
+                            $themeColors['bg'] ?? '#fefae0',
+                            $themeColors['accent'] ?? '#40302d'
+                        ];
+                        $event->dress_code_colors = [
+                            [
+                                'label' => 'Dress Code',
+                                'colors' => $palette
+                            ]
+                        ];
+                    }
+                    if (empty($event->streaming_url)) {
+                        $event->streaming_platform = 'YouTube';
+                        $event->streaming_url = 'https://youtube.com/live/example-wedding';
+                    }
+                    if (empty($event->streamings) || !is_array($event->streamings)) {
+                        $event->streamings = [
+                            ['platform' => 'YouTube', 'url' => $event->streaming_url ?? 'https://youtube.com/live/example-wedding']
+                        ];
+                    }
+                }
+            }
+
             $galleries = $customDemoInvitation->galleries;
+            if ($galleries->count() === 0) {
+                $galleries = collect([
+                    ['image_url' => '/images/demo/korea-7-768x512.jpg', 'caption' => 'Kisah Bahagia', 'sort_order' => 0],
+                    ['image_url' => '/images/demo/korea-11-768x512.jpg', 'caption' => 'Prewedding Day', 'sort_order' => 1],
+                    ['image_url' => '/images/demo/korea-12-768x512.jpg', 'caption' => 'Momen Bersama', 'sort_order' => 2],
+                    ['image_url' => '/images/demo/korea-4-768x528.jpg', 'caption' => 'Dua Hati', 'sort_order' => 3],
+                ])->map(fn($gl) => new \App\Models\Gallery($gl));
+            }
+
             $loveStories = $customDemoInvitation->loveStories;
+            if ($loveStories->count() === 0) {
+                $loveStories = collect([
+                    [
+                        'title' => 'Awal Bertemu',
+                        'story_date' => '2023-11-20',
+                        'description' => 'Pertama kali dipertemukan oleh takdir di Yogyakarta. Awal kisah indah yang membawa kami ke arah yang sama.',
+                        'sort_order' => 0,
+                    ],
+                    [
+                        'title' => 'Membangun Komitmen',
+                        'story_date' => '2024-11-20',
+                        'description' => 'Setelah melewati berbagai perjalanan obrolan dan komitmen mendalam, kami memutuskan untuk mengakhiri masa pencarian.',
+                        'sort_order' => 1,
+                    ]
+                ])->map(fn($ls) => new \App\Models\LoveStory($ls));
+            }
+
             $bankAccounts = $customDemoInvitation->bankAccounts;
+            if ($bankAccounts->count() === 0) {
+                $bankAccounts = collect([
+                    [
+                        'bank_name' => 'BCA',
+                        'account_name' => 'Randi Wijaya',
+                        'account_number' => '1234567890',
+                        'sort_order' => 0,
+                    ],
+                    [
+                        'bank_name' => 'Mandiri',
+                        'account_name' => 'Mira Rahayu',
+                        'account_number' => '0987654321',
+                        'sort_order' => 1,
+                    ]
+                ])->map(fn($bk) => new \App\Models\BankAccount($bk));
+            }
+
             $wishes = $customDemoInvitation->wishes()->latest()->take(50)->get();
+            if ($wishes->count() === 0) {
+                $wishes = collect([
+                    ['sender_name' => 'Ahmad Saputra', 'message' => 'Selamat menempuh hidup baru! Semoga sakinah mawaddah wa rahmah selalu.'],
+                    ['sender_name' => 'Siti Aminah', 'message' => 'Selamat berbahagia ya! Berkah dunia akhirat untuk kedua mempelai.'],
+                ])->map(fn($ws) => new Wish($ws));
+            }
 
             // Setup sections from theme if custom invitation has no sections yet
             $sections = $customDemoInvitation->sections->count() > 0 ? $customDemoInvitation->sections : $theme->sections()->orderBy('default_order')->get()->map(function($ts) {
@@ -542,7 +648,7 @@ class InvitationController extends Controller
                 'hideDemoPlanSelector' => $resellerSetting ? (bool)$resellerSetting->hide_demo_plan_selector : false,
             ];
 
-            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
+            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'adat-minang', 'adat-sunda', 'adat-bali', 'adat-batak', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
                 $page = 'Invitation/DemoWrapper';
                 $props['themeSlug'] = $theme->slug;
                 $props['allowedPlans'] = $theme->allowed_plans;
@@ -627,7 +733,7 @@ class InvitationController extends Controller
 
         $brideGrooms = collect($brideGroomsData)->map(function ($bg) {
             $model = new \App\Models\BrideGroom($bg);
-            $model->photo = $model->gender === 'wanita' ? '/images/demo/korea-3.jpg' : '/images/demo/korea-8.jpg';
+            $model->photo = $bg['photo'] ?? ($model->gender === 'wanita' ? '/images/demo/korea-3.jpg' : '/images/demo/korea-8.jpg');
             return $model;
         });
 
@@ -646,7 +752,7 @@ class InvitationController extends Controller
                 'sort_order' => 0,
                 'is_primary' => true,
                 'streaming_url' => 'https://youtube.com/live/example-wedding',
-                'streaming_provider' => 'youtube',
+                'streaming_platform' => 'YouTube',
                 'show_dress_code' => true,
                 'dress_code_text' => 'Mohon mengenakan pakaian formal dengan palet warna hangat sesuai tema pernikahan kami.',
                 'dress_code_colors' => [
@@ -678,7 +784,39 @@ class InvitationController extends Controller
                 ],
             ]
         ];
-        $events = collect($eventsData)->map(fn($ev) => new \App\Models\Event($ev));
+        
+        $events = collect($eventsData)->map(function($ev) use ($theme) {
+            $event = new \App\Models\Event($ev);
+            $event->show_dress_code = true;
+            if (empty($event->dress_code_text)) {
+                $event->dress_code_text = 'Para tamu disarankan mengenakan pakaian batik modern / pakaian rapi bernuansa pastel.';
+            }
+            if (empty($event->dress_code_colors) || !is_array($event->dress_code_colors)) {
+                $themeColors = $theme->color_scheme;
+                $palette = [
+                    $themeColors['primary'] ?? '#d4a373',
+                    $themeColors['secondary'] ?? '#e9edc9',
+                    $themeColors['bg'] ?? '#fefae0',
+                    $themeColors['accent'] ?? '#40302d'
+                ];
+                $event->dress_code_colors = [
+                    [
+                        'label' => 'Dress Code',
+                        'colors' => $palette
+                    ]
+                ];
+            }
+            if (empty($event->streaming_url)) {
+                $event->streaming_platform = 'YouTube';
+                $event->streaming_url = 'https://youtube.com/live/example-wedding';
+            }
+            if (empty($event->streamings) || !is_array($event->streamings)) {
+                $event->streamings = [
+                    ['platform' => 'YouTube', 'url' => $event->streaming_url ?? 'https://youtube.com/live/example-wedding']
+                ];
+            }
+            return $event;
+        });
 
         // Map love stories
         $loveStoriesData = $defaultData['love_stories'] ?? [
@@ -754,7 +892,7 @@ class InvitationController extends Controller
             'hideDemoPlanSelector' => $resellerSetting ? (bool)$resellerSetting->hide_demo_plan_selector : false,
         ];
 
-        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
+        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'adat-minang', 'adat-sunda', 'adat-bali', 'adat-batak', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
             $page = 'Invitation/DemoWrapper';
             $props['themeSlug'] = $theme->slug;
             $props['allowedPlans'] = $theme->allowed_plans;

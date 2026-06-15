@@ -13,14 +13,10 @@ class AdminPlanController extends Controller
 {
     public function index()
     {
-        $plans = SubscriptionPlan::withCount('subscriptions')->orderBy('sort_order')->get();
-        $greetingCardPrice = \App\Models\GlobalSetting::getValue('greeting_card_price', 49000.00);
-        $greetingCardSuggestedPrice = \App\Models\GlobalSetting::getValue('greeting_card_suggested_price', 49000.00);
+        $plans = SubscriptionPlan::where('type', 'invitation')->withCount('subscriptions')->orderBy('sort_order')->get();
 
         return Inertia::render('Admin/Plans/Index', [
             'plans' => $plans,
-            'greetingCardPrice' => (float) $greetingCardPrice,
-            'greetingCardSuggestedPrice' => (float) $greetingCardSuggestedPrice,
         ]);
     }
 
@@ -45,7 +41,7 @@ class AdminPlanController extends Controller
             'features' => 'nullable|array',
         ]);
 
-        $plan = SubscriptionPlan::create($request->only([
+        $plan = SubscriptionPlan::create(array_merge($request->only([
             'name',
             'slug',
             'description',
@@ -55,6 +51,8 @@ class AdminPlanController extends Controller
             'max_guests',
             'max_galleries',
             'sort_order',
+        ]), [
+            'type' => 'invitation',
         ]));
 
         if ($request->features) {

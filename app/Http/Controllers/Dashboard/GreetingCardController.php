@@ -12,21 +12,43 @@ class GreetingCardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        // Fetch unified greeting card price based on reseller/global settings
-        $globalPrice = \App\Models\GlobalSetting::getValue('greeting_card_price', 49000.00);
-        $cardPrice = (float) $globalPrice;
-        if ($user->reseller_id) {
-            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
-            if ($resellerSetting && $resellerSetting->greeting_card_price !== null) {
-                $cardPrice = (float) $resellerSetting->greeting_card_price;
-            }
-        }
+
+        // Fetch card plans with prices adjusted for reseller markup if applicable
+        $cardPlans = \App\Models\SubscriptionPlan::where('type', 'greeting_card')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(function ($plan) use ($user) {
+                $price = (float)$plan->price;
+                if ($user->reseller_id) {
+                    $resellerPrice = \App\Models\ResellerPlanPrice::where('reseller_id', $user->reseller_id)
+                        ->where('plan_id', $plan->id)
+                        ->first();
+                    if ($resellerPrice) {
+                        $price = (float)$resellerPrice->reseller_price;
+                    }
+                }
+                return [
+                    'id'          => $plan->id,
+                    'name'        => $plan->name,
+                    'slug'        => $plan->slug,
+                    'description' => $plan->description,
+                    'price'       => $price,
+                ];
+            });
 
         $greetingCards = GreetingCard::where('user_id', $user->id)
             ->latest()
             ->get()
-            ->map(function ($card) use ($cardPrice) {
-                // Find any pending manual / Xendit payment for this card
+            ->map(function ($card) use ($user) {
+                // Find any active subscription for this card to see which plan it uses
+                $activeSub = \App\Models\Subscription::where('greeting_card_id', $card->id)
+                    ->where('status', 'active')
+                    ->first();
+                $planName = $activeSub && $activeSub->plan ? $activeSub->plan->name : null;
+                $expiresAt = $activeSub && $activeSub->expires_at ? $activeSub->expires_at->format('d M Y') : null;
+
+                // Find any pending manual / online payment for this card
                 $pendingPayment = \App\Models\Payment::where('user_id', $card->user_id)
                     ->where('greeting_card_id', $card->id)
                     ->whereIn('status', ['pending', 'pending_manual', 'waiting_review'])
@@ -38,7 +60,8 @@ class GreetingCardController extends Controller
                     'title'          => $card->title,
                     'template'       => $card->template,
                     'template_label' => $card->template_label,
-                    'template_price' => $cardPrice,
+                    'plan_name'      => $planName,
+                    'expires_at_formatted' => $expiresAt,
                     'type'           => $card->type,
                     'type_label'     => $card->type_label,
                     'recipient_name' => $card->recipient_name,
@@ -56,12 +79,11 @@ class GreetingCardController extends Controller
 
         return Inertia::render('Dashboard/GreetingCard/Index', [
             'cards' => $greetingCards,
+            'cardPlans' => $cardPlans,
+            'templates' => \App\Models\GreetingCardTemplate::where('is_active', true)->get(['slug', 'allowed_plans']),
         ]);
     }
 
-    /**
-     * Wizard buat kartu ucapan — butuh login.
-     */
     public function wizard(Request $request, ?string $templateSlug = null)
     {
         if (!auth()->check()) {
@@ -80,6 +102,7 @@ class GreetingCardController extends Controller
                 'icon'      => $t->icon,
                 'type'      => $t->type ?? [],
                 'features'  => $t->features ?? [],
+                'allowed_plans' => $t->allowed_plans,
             ]);
 
         // Validasi template slug
@@ -231,6 +254,22 @@ class GreetingCardController extends Controller
             'messages.*'     => 'nullable|string|max:500',
             'custom_url'     => 'required|string|max:100|alpha_dash|unique:greeting_cards,custom_url,' . $id,
         ]);
+
+        // Cek kecocokan template baru dengan paket aktif (jika kartu sudah memiliki paket aktif)
+        $newTemplate = \App\Models\GreetingCardTemplate::where('slug', $validated['template'])->first();
+        if ($newTemplate) {
+            $activeSub = \App\Models\Subscription::where('greeting_card_id', $card->id)
+                ->where('status', 'active')
+                ->first();
+            if ($activeSub && $activeSub->plan) {
+                $allowed = is_array($newTemplate->allowed_plans) 
+                    ? $newTemplate->allowed_plans 
+                    : json_decode($newTemplate->allowed_plans, true);
+                if (!in_array($activeSub->plan->slug, $allowed)) {
+                    return back()->withErrors(['template' => "Paket aktif Anda ({$activeSub->plan->name}) tidak mendukung tema ini. Silakan upgrade paket terlebih dahulu."]);
+                }
+            }
+        }
 
         // Delete old cached OG image to force regeneration with updated details/slug
         $oldCachePath = storage_path('app/public/og-images/' . $card->custom_url . '.png');

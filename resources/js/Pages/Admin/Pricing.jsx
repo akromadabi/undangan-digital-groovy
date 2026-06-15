@@ -7,7 +7,7 @@ import {
 
 const formatCurrency = (v) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(v);
 
-export default function Pricing({ planPricing, features = [], resellerGreetingCardPrice = 49000, greetingCardBasePrice = 49000, greetingCardSuggestedPrice = 49000 }) {
+export default function Pricing({ planPricing, features = [] }) {
     const { flash } = usePage().props;
     const [saved, setSaved] = useState(false);
     const [showComparison, setShowComparison] = useState(false);
@@ -88,7 +88,6 @@ export default function Pricing({ planPricing, features = [], resellerGreetingCa
             plan_id: p.id,
             reseller_price: p.reseller_price,
         })),
-        greeting_card_price: resellerGreetingCardPrice,
     });
 
     const handlePriceChange = (index, value) => {
@@ -236,68 +235,7 @@ export default function Pricing({ planPricing, features = [], resellerGreetingCa
                             );
                         })}
 
-                        {/* Kartu Ucapan Pricing Card */}
-                        <div className={`bg-white rounded-2xl border p-6 transition-all hover:shadow-md ${data.greeting_card_price < greetingCardBasePrice ? 'border-red-300' : 'border-[#e8e5e0]'}`}>
-                            <div className="flex items-center justify-between mb-4">
-                                <div>
-                                    <h3 className="font-bold text-[#1a1a1a] text-lg">Kartu Ucapan (Greeting Card)</h3>
-                                    <p className="text-xs text-[#999] mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                        <span>Harga dasar: {formatCurrency(greetingCardBasePrice)}</span>
-                                        {greetingCardSuggestedPrice !== null && (
-                                            <span className="font-medium text-amber-600">
-                                                (Saran harga jual: {formatCurrency(greetingCardSuggestedPrice)})
-                                            </span>
-                                        )}
-                                    </p>
-                                </div>
-                                {data.greeting_card_price > greetingCardBasePrice && (
-                                    <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-xl">
-                                        <TrendingUp size={14} />
-                                        <span className="text-xs font-bold">+{(((data.greeting_card_price - greetingCardBasePrice) / greetingCardBasePrice) * 100).toFixed(0)}%</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="space-y-3">
-                                <div>
-                                    <label className="block text-sm font-medium text-[#666] mb-1.5">
-                                        Harga Jual Kartu (Rp)
-                                    </label>
-                                    <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999] text-sm">Rp</span>
-                                        <input
-                                            type="number"
-                                            min={greetingCardBasePrice}
-                                            step="1000"
-                                            value={data.greeting_card_price}
-                                            onChange={(e) => setData('greeting_card_price', e.target.value === '' ? '' : Number(e.target.value))}
-                                            style={{ paddingLeft: '2.75rem' }}
-                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm font-semibold focus:ring-1 transition-colors ${data.greeting_card_price < greetingCardBasePrice
-                                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500 text-red-600'
-                                                : 'border-[#e8e5e0] focus:border-[#E5654B] focus:ring-[#E5654B] text-[#1a1a1a]'
-                                                }`}
-                                        />
-                                    </div>
-                                    {errors.greeting_card_price && (
-                                        <p className="text-xs text-red-500 mt-1">
-                                            {errors.greeting_card_price}
-                                        </p>
-                                    )}
-                                    {data.greeting_card_price < greetingCardBasePrice && (
-                                        <p className="text-xs text-red-500 mt-1">
-                                            Harga jual tidak boleh lebih rendah dari harga dasar ({formatCurrency(greetingCardBasePrice)})
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className="bg-[#f8f7f4] rounded-xl p-3 flex items-center justify-between">
-                                    <span className="text-xs text-[#999]">Estimasi profit per kartu ucapan</span>
-                                    <span className={`text-sm font-bold ${data.greeting_card_price > greetingCardBasePrice ? 'text-emerald-600' : 'text-[#999]'}`}>
-                                        {data.greeting_card_price > greetingCardBasePrice ? `+${formatCurrency(data.greeting_card_price - greetingCardBasePrice)}` : formatCurrency(0)}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+                        {/* Kartu Ucapan Pricing Card removed - has its own page now */}
                     </div>
 
                     <div className="mt-6 flex gap-3">

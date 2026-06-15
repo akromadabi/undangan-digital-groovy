@@ -110,9 +110,10 @@ class AdminPaymentController extends Controller
             Subscription::create([
                 'user_id'          => $payment->user_id,
                 'greeting_card_id' => $payment->greeting_card_id,
+                'plan_id'          => $payment->plan_id,
                 'payment_id'       => $payment->id,
                 'starts_at'        => now(),
-                'expires_at'       => null,
+                'expires_at'       => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
                 'status'           => 'active',
             ]);
 

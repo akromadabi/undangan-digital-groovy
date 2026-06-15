@@ -107,7 +107,10 @@ class DemoCreatorSeeder extends Seeder
                         'sort_order' => 1,
                         'show_dress_code' => true,
                         'dress_code_text' => 'Colorful & Playful / Pakaian Ceria Nyaman',
-                        'dress_code_colors' => ['#FF4B72', '#FFC107', '#00D2FC', '#4CAF50'],
+                        'dress_code_colors' => [['label' => 'Dress Code', 'colors' => ['#FF4B72', '#FFC107', '#00D2FC', '#4CAF50']]],
+                        'streaming_platform' => 'YouTube',
+                        'streaming_url' => 'https://youtube.com/live/demo',
+                        'streamings' => [['platform' => 'YouTube', 'url' => 'https://youtube.com/live/demo']],
                     ]
                 ],
                 'galleries' => [
@@ -221,7 +224,10 @@ class DemoCreatorSeeder extends Seeder
                         'sort_order' => 1,
                         'show_dress_code' => true,
                         'dress_code_text' => 'Semi Formal / Pastel & Earth Tone Theme',
-                        'dress_code_colors' => ['#C2A590', '#EAE3D2', '#A6B1E1', '#DCD6F7'],
+                        'dress_code_colors' => [['label' => 'Dress Code', 'colors' => ['#C2A590', '#EAE3D2', '#A6B1E1', '#DCD6F7']]],
+                        'streaming_platform' => 'YouTube',
+                        'streaming_url' => 'https://youtube.com/live/demo',
+                        'streamings' => [['platform' => 'YouTube', 'url' => 'https://youtube.com/live/demo']],
                     ]
                 ],
                 'galleries' => [
@@ -325,7 +331,10 @@ class DemoCreatorSeeder extends Seeder
                         'sort_order' => 1,
                         'show_dress_code' => true,
                         'dress_code_text' => 'Batik Modern / Busana Nasional Rapi',
-                        'dress_code_colors' => ['#8B5A2B', '#CD853F', '#DEB887', '#F5F5DC'],
+                        'dress_code_colors' => [['label' => 'Dress Code', 'colors' => ['#8B5A2B', '#CD853F', '#DEB887', '#F5F5DC']]],
+                        'streaming_platform' => 'YouTube',
+                        'streaming_url' => 'https://youtube.com/live/demo',
+                        'streamings' => [['platform' => 'YouTube', 'url' => 'https://youtube.com/live/demo']],
                     ]
                 ],
                 'galleries' => [

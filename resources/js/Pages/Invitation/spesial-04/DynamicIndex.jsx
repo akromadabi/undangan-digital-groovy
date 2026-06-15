@@ -314,7 +314,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, showPh
                 </div>
             )}
             
-            <div className="flex-grow relative z-10 flex flex-col justify-between items-center py-8 px-6 text-center">
+            <div className="sp04-cover-content flex-grow relative z-10 flex flex-col justify-between items-center py-8 px-6 text-center">
                 {/* Title */}
                 <div className="mt-2">
                     <p className="text-[10px] tracking-[0.25em] font-semibold text-[var(--sp04-text-muted)] mb-1 uppercase select-none">

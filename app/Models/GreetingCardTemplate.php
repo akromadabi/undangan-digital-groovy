@@ -21,6 +21,7 @@ class GreetingCardTemplate extends Model
         'sort_order',
         'base_likes',
         'price',
+        'allowed_plans',
         'is_active',
     ];
 
@@ -31,6 +32,7 @@ class GreetingCardTemplate extends Model
         'is_active'       => 'boolean',
         'base_likes'      => 'integer',
         'price'           => 'float',
+        'allowed_plans'   => 'array',
     ];
 
     // Tipe kartu yang tersedia

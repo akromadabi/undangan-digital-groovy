@@ -630,6 +630,95 @@ input[type="range"].premium-slider.slider-amber::-moz-range-thumb {
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* ═══ Cover Screen Entrance Animations ═══ */
+.ab-cover-wrapper,
+.ak-cover-wrapper,
+.aj-cover-wrapper,
+.am-cover-wrapper,
+.as-cover-wrapper,
+.ast-cover-body,
+.ast-cover-header,
+.ast-cover-footer,
+.candy-cover-card,
+.gpt-auth-modal,
+.ch-cover__content,
+.ft-cover__content,
+.hw-cover__content,
+.ig-device-container,
+.lx1-cover-content,
+.lx2-cover__content,
+.lx3-cover__content,
+.lx4-cover__content,
+.mu-cover__content,
+.mc-cover-wrapper,
+.nf-cover__content,
+.pn-cover__content,
+.ps-cover__content,
+.rj-cover__content,
+.sgm-cover__arch-wrapper,
+.sp-cover-body,
+.sp02-cover__content,
+.sp03-cover__content,
+.sp04-cover-content,
+.sp05-cover-arch,
+.sp06-cover__content,
+.sp07-cover__content,
+.sp08-cover__content,
+.spy-cover__content,
+.spty-cover__inner,
+.tcm-cover-header,
+.tcm-cover-photo-window,
+.tcm-cover-guest,
+.ttk-cover__inner,
+.utary-cover > *,
+.wy-cover-wrapper,
+.wa-cover-top,
+.wa-cover-middle,
+.wa-cover-bottom,
+.yt-cover__main,
+.default-cover-content {
+    animation: coverFadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes coverFadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger delays for cover elements to look highly premium */
+.wa-cover-top,
+.tcm-cover-header,
+.ast-cover-header {
+    animation-delay: 0ms;
+}
+
+.wa-cover-middle,
+.tcm-cover-photo-window,
+.ast-cover-body {
+    animation-delay: 150ms;
+}
+
+.wa-cover-bottom,
+.tcm-cover-guest,
+.ast-cover-footer {
+    animation-delay: 300ms;
+}
+
+/* Custom stagger for Utary cover children */
+.utary-cover > :nth-child(1) { animation-delay: 0ms; }
+.utary-cover > :nth-child(2) { animation-delay: 100ms; }
+.utary-cover > :nth-child(3) { animation-delay: 200ms; }
+.utary-cover > :nth-child(4) { animation-delay: 300ms; }
+.utary-cover > :nth-child(5) { animation-delay: 400ms; }
+.utary-cover > :nth-child(6) { animation-delay: 500ms; }
+
+
 
 
 
