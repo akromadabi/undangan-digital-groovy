@@ -2637,100 +2637,10 @@
   }
   
   /* Align floating buttons inside container bounds */
-  .xx-floating-controls, .xx-floating-btns {
-    right: calc(50% - 369px) !important;
-  }
-}
-
-@media (min-width: 992px) {
-  /* Transition bottom navigation bar into a vertical floating sidebar capsule */
-  .ab-nav-menu {
-    position: fixed !important;
-    top: 50% !important;
-    bottom: auto !important;
-    right: calc(50% + 384px + 20px) !important; /* anchors 20px left of the 768px container */
+  .ab-floating-controls, .ab-floating-btns, .ab-floating-btn, .ab-floating-btns-container, .ab-floating-btns-wrapper, .xx-floating-controls, .xx-floating-btns, .xx-floating-btn {
+    right: 50% !important;
+    margin-right: -369px !important;
     left: auto !important;
-    transform: translateY(-50%) !important;
-    width: auto !important;
-    max-width: 75px !important;
-    border-radius: 40px !important;
-    padding: 16px 8px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    border: 2px solid var(--ab-primary) !important;
-    border-top: 2px solid var(--ab-primary) !important;
-    z-index: 900 !important;
-    display: flex !important;
-    justify-content: center !important;
-  }
-
-  /* Make nav buttons arrange vertically */
-  .ab-nav-menu__inner--row {
-    flex-direction: column !important;
-    gap: 10px !important;
-    overflow: visible !important;
-    width: 100% !important;
-  }
-
-  /* Adjust nav item size and context */
-  .ab-nav-menu__item {
-    position: relative !important;
-    padding: 10px 0 !important;
-    min-width: auto !important;
-    width: 100% !important;
-    display: flex !important;
-    justify-content: center !important;
-  }
-
-  /* Floating menu tooltips expanding to the RIGHT */
-  .ab-nav-item-text {
-    position: absolute !important;
-    left: 55px !important;
-    right: auto !important;
-    background-color: var(--ab-primary) !important;
-    color: #ffffff !important;
-    padding: 6px 12px !important;
-    border-radius: 6px !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transition: all 0.25s ease !important;
-    white-space: nowrap !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
-    z-index: 1000 !important;
-  }
-
-  /* Arrow tooltip pointing left */
-  .ab-nav-item-text::before {
-    content: '' !important;
-    position: absolute !important;
-    right: 100% !important;
-    left: auto !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    border-width: 5px !important;
-    border-style: solid !important;
-    border-color: transparent var(--ab-primary) transparent transparent !important;
-  }
-
-  /* Reveal tooltip on hover */
-  .ab-nav-menu__item:hover .ab-nav-item-text {
-    opacity: 1 !important;
-    left: 50px !important; /* slide-in right effect */
-  }
-}
-/* ═══════ END WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */
-
-/* ═══════ START WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */
-@media (min-width: 768px) {
-  /* Widen content container */
-  .ab-container {
-    max-width: 768px !important;
-  }
-  
-  /* Align floating buttons inside container bounds */
-  .xx-floating-controls, .xx-floating-btns {
-    right: calc(50% - 369px) !important;
   }
 }
 
