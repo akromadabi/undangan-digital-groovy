@@ -1257,3 +1257,132 @@
   }
 }
 /* ═══════ END WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */
+
+/* ═══════ START WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */
+@media (min-width: 768px) {
+  /* Widen content container */
+  .sp02-section, .sp02-card {
+    max-width: 768px !important;
+  }
+  
+  /* Align floating buttons inside container bounds */
+  .xx-floating-controls, .xx-floating-btns {
+    right: calc(50% - 369px) !important;
+  }
+}
+
+@media (min-width: 992px) {
+  /* Transition bottom navigation bar into a vertical floating sidebar capsule */
+  .sp02-nav-menu {
+    position: fixed !important;
+    top: 50% !important;
+    bottom: auto !important;
+    right: calc(50% + 384px + 20px) !important; /* anchors 20px left of the 768px container */
+    left: auto !important;
+    transform: translateY(-50%) !important;
+    width: 60px !important;
+    max-width: 60px !important;
+    height: auto !important;
+    border-radius: 40px !important;
+    padding: 12px 6px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    border: 2px solid var(--sp02-primary) !important;
+    border-top: 2px solid var(--sp02-primary) !important;
+    z-index: 999 !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  /* Make nav buttons arrange vertically */
+  .sp02-nav-menu__inner--row {
+    flex-direction: column !important;
+    gap: 8px !important;
+    overflow: visible !important;
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Adjust nav item size and context to be clean circular buttons */
+  .sp02-nav-menu__item {
+    position: relative !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 2px auto !important;
+    padding: 0 !important;
+    min-width: auto !important;
+    flex: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+  }
+
+  /* Icon size and centering */
+  .sp02-nav-menu__item i, .sp02-nav-menu__item svg {
+    font-size: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-block !important;
+  }
+
+  /* Active state highlight - filled circle */
+  .sp02-nav-menu__item.active, 
+  .sp02-nav-menu__item.is-active, 
+  .sp02-nav-menu__item.lx1-active,
+  .sp02-nav-menu__item[class*="active"] {
+    background-color: var(--sp02-primary) !important;
+    color: #ffffff !important;
+  }
+
+  /* Hover state highlight */
+  .sp02-nav-menu__item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+  }
+
+  /* Floating menu tooltips expanding to the RIGHT */
+  .sp02-nav-item-text {
+    position: absolute !important;
+    left: 60px !important;
+    right: auto !important;
+    background-color: var(--sp02-primary) !important;
+    color: #ffffff !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: all 0.25s ease !important;
+    white-space: nowrap !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+    z-index: 1000 !important;
+    display: block !important;
+  }
+
+  /* Arrow tooltip pointing left */
+  .sp02-nav-item-text::before {
+    content: '' !important;
+    position: absolute !important;
+    right: 100% !important;
+    left: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    border-width: 5px !important;
+    border-style: solid !important;
+    border-color: transparent var(--sp02-primary) transparent transparent !important;
+  }
+
+  /* Reveal tooltip on hover */
+  .sp02-nav-menu__item:hover .sp02-nav-item-text {
+    opacity: 1 !important;
+    left: 52px !important; /* slide-in right effect */
+  }
+}
+/* ═══════ END WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */

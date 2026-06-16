@@ -1700,3 +1700,132 @@
   }
 }
 /* ═══════ END WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */
+
+/* ═══════ START WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */
+@media (min-width: 768px) {
+  /* Widen content container */
+  .hw-main {
+    max-width: 768px !important;
+  }
+  
+  /* Align floating buttons inside container bounds */
+  .xx-floating-controls, .xx-floating-btns {
+    right: calc(50% - 369px) !important;
+  }
+}
+
+@media (min-width: 992px) {
+  /* Transition bottom navigation bar into a vertical floating sidebar capsule */
+  .hw-nav {
+    position: fixed !important;
+    top: 50% !important;
+    bottom: auto !important;
+    right: calc(50% + 384px + 20px) !important; /* anchors 20px left of the 768px container */
+    left: auto !important;
+    transform: translateY(-50%) !important;
+    width: 60px !important;
+    max-width: 60px !important;
+    height: auto !important;
+    border-radius: 40px !important;
+    padding: 12px 6px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    border: 2px solid var(--hw-primary) !important;
+    border-top: 2px solid var(--hw-primary) !important;
+    z-index: 999 !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  /* Make nav buttons arrange vertically */
+  .hw-nav {
+    flex-direction: column !important;
+    gap: 8px !important;
+    overflow: visible !important;
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Adjust nav item size and context to be clean circular buttons */
+  .hw-nav-btn {
+    position: relative !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 2px auto !important;
+    padding: 0 !important;
+    min-width: auto !important;
+    flex: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+  }
+
+  /* Icon size and centering */
+  .hw-nav-btn i, .hw-nav-btn svg {
+    font-size: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-block !important;
+  }
+
+  /* Active state highlight - filled circle */
+  .hw-nav-btn.active, 
+  .hw-nav-btn.is-active, 
+  .hw-nav-btn.lx1-active,
+  .hw-nav-btn[class*="active"] {
+    background-color: var(--hw-primary) !important;
+    color: #ffffff !important;
+  }
+
+  /* Hover state highlight */
+  .hw-nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+  }
+
+  /* Floating menu tooltips expanding to the RIGHT */
+  .hw-nav-btn-label {
+    position: absolute !important;
+    left: 60px !important;
+    right: auto !important;
+    background-color: var(--hw-primary) !important;
+    color: #ffffff !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: all 0.25s ease !important;
+    white-space: nowrap !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+    z-index: 1000 !important;
+    display: block !important;
+  }
+
+  /* Arrow tooltip pointing left */
+  .hw-nav-btn-label::before {
+    content: '' !important;
+    position: absolute !important;
+    right: 100% !important;
+    left: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    border-width: 5px !important;
+    border-style: solid !important;
+    border-color: transparent var(--hw-primary) transparent transparent !important;
+  }
+
+  /* Reveal tooltip on hover */
+  .hw-nav-btn:hover .hw-nav-btn-label {
+    opacity: 1 !important;
+    left: 52px !important; /* slide-in right effect */
+  }
+}
+/* ═══════ END WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */
