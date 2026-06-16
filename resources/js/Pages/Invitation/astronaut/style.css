@@ -1,4 +1,4 @@
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
+﻿@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap');
 
 :root {
@@ -1504,14 +1504,14 @@
     height: auto !important;
     border-radius: 40px !important;
     padding: 12px 6px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    border: 2px solid #B76E79 !important;
-    border-top: 2px solid #B76E79 !important;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15) !important;
+    border: 1px solid rgba(0, 163, 255, 0.3) !important;
     z-index: 999 !important;
     display: flex !important;
     justify-content: center !important;
-    background-color: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
   }
 
   /* Make nav buttons arrange vertically */
@@ -1539,6 +1539,7 @@
     padding: 0 !important;
     min-width: auto !important;
     flex: none !important;
+    color: var(--ast-text-muted) !important;
     background-color: transparent !important;
     border: none !important;
     transition: all 0.3s ease !important;
@@ -1557,14 +1558,14 @@
   .ast-nav-item.is-active, 
   .ast-nav-item.lx1-active,
   .ast-nav-item[class*="active"] {
-    background-color: #B76E79 !important;
-    color: #ffffff !important;
+    background-color: rgba(0, 163, 255, 0.1) !important;
+    color: var(--ast-secondary) !important;
   }
 
   /* Hover state highlight */
   .ast-nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: #ffffff !important;
+    background-color: rgba(0, 163, 255, 0.07) !important;
+    color: var(--ast-secondary) !important;
   }
 
   /* Floating menu tooltips expanding to the RIGHT */
@@ -1572,7 +1573,7 @@
     position: absolute !important;
     left: 60px !important;
     right: auto !important;
-    background-color: #B76E79 !important;
+    background-color: var(--ast-secondary) !important;
     color: #ffffff !important;
     padding: 6px 12px !important;
     border-radius: 6px !important;
@@ -1597,7 +1598,7 @@
     transform: translateY(-50%) !important;
     border-width: 5px !important;
     border-style: solid !important;
-    border-color: transparent #B76E79 transparent transparent !important;
+    border-color: transparent var(--ast-secondary) transparent transparent !important;
   }
 
   /* Reveal tooltip on hover */

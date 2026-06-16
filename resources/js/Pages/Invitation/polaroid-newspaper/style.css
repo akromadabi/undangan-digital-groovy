@@ -1,4 +1,4 @@
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
+﻿@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@200;300;400;500;600;700&display=swap');
 
 :root {
@@ -1850,13 +1850,13 @@
     border-radius: 40px !important;
     padding: 12px 6px !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    border: 2px solid var(--pn-primary) !important;
-    border-top: 2px solid var(--pn-primary) !important;
+    border: 1.5px solid rgba(17, 17, 17, 0.15) !important;
     z-index: 999 !important;
     display: flex !important;
     justify-content: center !important;
     background-color: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
   }
 
   /* Make nav buttons arrange vertically */
@@ -1902,14 +1902,14 @@
   .pn-nav-btn.is-active, 
   .pn-nav-btn.lx1-active,
   .pn-nav-btn[class*="active"] {
-    background-color: var(--pn-primary) !important;
-    color: #ffffff !important;
+    background-color: rgba(17, 17, 17, 0.08) !important;
+    color: var(--pn-primary) !important;
   }
 
   /* Hover state highlight */
   .pn-nav-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: #ffffff !important;
+    background-color: rgba(17, 17, 17, 0.05) !important;
+    color: var(--pn-primary) !important;
   }
 
   /* Floating menu tooltips expanding to the RIGHT */

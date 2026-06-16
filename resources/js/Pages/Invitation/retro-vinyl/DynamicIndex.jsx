@@ -381,25 +381,29 @@ function CassetteCountdown({ events, isPlaying, language }) {
 
     return (
         <div className="rv-cassette-countdown">
+            {/* Magnetic tape spine slot */}
+            <div className="rv-cassette-spine" />
+
+            {/* Cassette label with timer */}
             <div className="rv-cassette-label">
                 <div className="rv-cassette-title">Mixtape: Save The Date</div>
-                
+
                 <div className="rv-cassette-timer-row">
                     <div className="rv-cassette-unit">
                         <span className="rv-cassette-number">{pad2(cd.d)}</span>
                         <span className="rv-cassette-label-text">{t('invitation.days') || 'Hari'}</span>
                     </div>
-                    <span className="font-bold text-slate-400">:</span>
+                    <span style={{fontWeight:'bold', color:'#94a3b8', fontSize:'1.1rem'}}>·</span>
                     <div className="rv-cassette-unit">
                         <span className="rv-cassette-number">{pad2(cd.h)}</span>
                         <span className="rv-cassette-label-text">{t('invitation.hours') || 'Jam'}</span>
                     </div>
-                    <span className="font-bold text-slate-400">:</span>
+                    <span style={{fontWeight:'bold', color:'#94a3b8', fontSize:'1.1rem'}}>·</span>
                     <div className="rv-cassette-unit">
                         <span className="rv-cassette-number">{pad2(cd.m)}</span>
                         <span className="rv-cassette-label-text">{t('invitation.minutes') || 'Menit'}</span>
                     </div>
-                    <span className="font-bold text-slate-400">:</span>
+                    <span style={{fontWeight:'bold', color:'#94a3b8', fontSize:'1.1rem'}}>·</span>
                     <div className="rv-cassette-unit">
                         <span className="rv-cassette-number">{pad2(cd.s)}</span>
                         <span className="rv-cassette-label-text">{t('invitation.seconds') || 'Detik'}</span>
@@ -407,10 +411,15 @@ function CassetteCountdown({ events, isPlaying, language }) {
                 </div>
             </div>
 
-            <div className="rv-cassette-wheels">
+            {/* Spool area with tape path and spinning wheels */}
+            <div className="rv-cassette-spool-area">
                 <div className={`rv-cassette-wheel ${!isPlaying ? 'rv-cassette-wheel-paused' : ''}`} />
+                <span className="rv-cassette-spool-label">♪ Side A ♪</span>
                 <div className={`rv-cassette-wheel ${!isPlaying ? 'rv-cassette-wheel-paused' : ''}`} />
             </div>
+
+            {/* Bottom brand strip */}
+            <div className="rv-cassette-brand">★ Retro Love Tape ★</div>
         </div>
     );
 }
@@ -1339,6 +1348,22 @@ export default function DynamicIndex({
         }
     }, [invitation, brideGrooms]);
 
+    // Inject style to forcefully hide rv-slide-container scrollbar on ALL browsers including mobile
+    useEffect(() => {
+        const styleId = 'rv-hide-slide-scrollbar';
+        if (!document.getElementById(styleId)) {
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = `
+                .rv-slide-container::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+                .rv-slide-container::-webkit-scrollbar-track { display: none !important; }
+                .rv-slide-container::-webkit-scrollbar-thumb { display: none !important; }
+                .rv-slide-container { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+            `;
+            document.head.appendChild(style);
+        }
+    }, []);
+
     // Handle viewport locked scrolling until opened or when in slide mode
     useEffect(() => {
         if (!isOpened || isSlideMode) {
@@ -1748,6 +1773,7 @@ export default function DynamicIndex({
                                             key={secKey}
                                             id={secKey}
                                             className={`rv-slide-container rv-slide--${secKey} ${statusClass}`}
+                                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                                         >
                                             {renderSection(secKey)}
                                         </div>

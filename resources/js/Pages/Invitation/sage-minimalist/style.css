@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    SAGE MINIMALIST (sage-minimalist) WEDDING THEME STYLE
    Scoped strictly under the .sgm- prefix to prevent global layout leaks.
    ========================================================================== */
@@ -1472,14 +1472,14 @@ html {
     height: auto !important;
     border-radius: 40px !important;
     padding: 12px 6px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    border: 2px solid var(--sgm-primary) !important;
-    border-top: 2px solid var(--sgm-primary) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgba(163, 184, 153, 0.2) !important;
     z-index: 999 !important;
     display: flex !important;
     justify-content: center !important;
-    background-color: rgba(255, 255, 255, 0.95) !important;
+    background-color: rgba(245, 239, 230, 0.92) !important;
     backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
   }
 
   /* Make nav buttons arrange vertically */

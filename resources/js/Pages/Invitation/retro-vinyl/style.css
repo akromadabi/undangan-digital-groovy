@@ -19,6 +19,10 @@
 .rv-page {
     font-family: var(--rv-font-body);
     background-color: var(--rv-bg);
+    /* Subtle retro dot texture */
+    background-image:
+        radial-gradient(circle, rgba(217, 93, 57, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
     color: var(--rv-text);
     line-height: 1.6;
     overflow-x: hidden;
@@ -26,6 +30,38 @@
     font-size: 15px;
     scroll-behavior: smooth;
     min-height: 100vh;
+}
+
+/* Hide ALL scrollbars inside the theme — only rv-wishes-list will show one */
+.rv-page *,
+.rv-page *::before,
+.rv-page *::after {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+.rv-page *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+}
+
+/* Re-enable scrollbar ONLY on wishes list */
+.rv-page .rv-wishes-list {
+    scrollbar-width: thin !important;
+    -ms-overflow-style: auto !important;
+}
+.rv-page .rv-wishes-list::-webkit-scrollbar {
+    width: 4px !important;
+    height: auto !important;
+    display: block !important;
+}
+.rv-page .rv-wishes-list::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+.rv-page .rv-wishes-list::-webkit-scrollbar-thumb {
+    background: var(--rv-secondary) !important;
+    border-radius: 4px !important;
 }
 
 /* Typography styles */
@@ -51,6 +87,23 @@
 @keyframes rv-float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
+}
+
+@keyframes rv-tape-shimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes rv-note-float {
+    0% { transform: translateY(0) rotate(-10deg); opacity: 0.6; }
+    50% { transform: translateY(-12px) rotate(5deg); opacity: 1; }
+    100% { transform: translateY(0) rotate(-10deg); opacity: 0.6; }
+}
+
+@keyframes rv-glow-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(241,161,83,0.3), 0 12px 25px rgba(0,0,0,0.4); }
+    50% { box-shadow: 0 0 20px rgba(241,161,83,0.6), 0 12px 30px rgba(0,0,0,0.5); }
 }
 
 /* NO ANIMATION OVERRIDE */
@@ -598,6 +651,31 @@
     border-bottom: 1px dashed var(--rv-border);
 }
 
+/* Floating musical note ornaments on alternating sections */
+.rv-section:nth-child(odd)::before {
+    content: '♪';
+    position: absolute;
+    top: 20px;
+    left: 18px;
+    font-size: 1.4rem;
+    color: rgba(217, 93, 57, 0.12);
+    animation: rv-note-float 5s ease-in-out infinite;
+    pointer-events: none;
+    line-height: 1;
+}
+
+.rv-section:nth-child(even)::before {
+    content: '♫';
+    position: absolute;
+    top: 20px;
+    right: 18px;
+    font-size: 1.4rem;
+    color: rgba(241, 161, 83, 0.12);
+    animation: rv-note-float 6s ease-in-out infinite 1s;
+    pointer-events: none;
+    line-height: 1;
+}
+
 .rv-section:last-of-type {
     border-bottom: none;
 }
@@ -658,6 +736,22 @@
     background: linear-gradient(90deg, var(--rv-primary), var(--rv-secondary));
 }
 
+/* Corner vinyl groove ornament */
+.rv-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    right: -30px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(217, 93, 57, 0.08);
+    box-shadow:
+        0 0 0 8px rgba(217, 93, 57, 0.05),
+        0 0 0 16px rgba(217, 93, 57, 0.03);
+    pointer-events: none;
+}
+
 /* OPENING SECTION */
 .rv-opening-names {
     font-family: var(--rv-font-heading);
@@ -716,51 +810,172 @@
 /* CASSETTE COUNTDOWN BLOCK */
 .rv-cassette-countdown {
     width: 100%;
-    max-width: 320px;
-    background: #2b2525;
-    border-radius: 12px;
-    border: 5px solid #1c1818;
-    padding: 15px;
+    max-width: 340px;
+    /* Dark brown cassette body */
+    background: linear-gradient(160deg, #3a2e2b 0%, #271f1d 50%, #1e1714 100%);
+    border-radius: 14px;
+    border: 6px solid #1a1210;
+    padding: 14px 14px 10px;
     margin: 25px auto;
-    box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+    animation: rv-glow-pulse 4s ease-in-out infinite;
     color: #fff;
     position: relative;
+    overflow: hidden;
+    /* Subtle screw-corner look via box-shadow */
+    box-shadow:
+        0 0 0 1px #4a3a35,
+        0 12px 30px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        inset 0 -1px 0 rgba(0,0,0,0.4);
+}
+
+/* Cassette top ridge texture */
+.rv-cassette-countdown::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.04) 0px,
+        rgba(255,255,255,0.04) 8px,
+        transparent 8px,
+        transparent 16px
+    );
+    border-radius: 8px 8px 0 0;
+    z-index: 1;
+}
+
+/* Decorative musical note ornaments */
+.rv-cassette-countdown::after {
+    content: '♪ ♫ ♩ ♬';
+    position: absolute;
+    top: 14px;
+    right: 12px;
+    font-size: 0.55rem;
+    color: rgba(241,161,83,0.35);
+    letter-spacing: 3px;
+    animation: rv-note-float 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Cassette spine slot (center opening) */
+.rv-cassette-spine {
+    position: relative;
+    background: #111;
+    border-radius: 4px;
+    height: 8px;
+    margin: 0 20px 10px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Magnetic tape shimmer */
+.rv-cassette-spine::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    background: linear-gradient(
+        90deg,
+        #1a1a1a 0%,
+        #3d2f1e 20%,
+        #8b6914 40%,
+        #3d2f1e 60%,
+        #1a1a1a 80%,
+        #2a2a2a 100%
+    );
+    background-size: 200% 100%;
+    animation: rv-tape-shimmer 3s linear infinite;
+    border-radius: 3px;
 }
 
 /* Cassette label area */
 .rv-cassette-label {
-    background: #f1f0ea;
-    border-radius: 6px;
-    padding: 10px;
+    background: linear-gradient(135deg, #faf8f0 0%, #f1efdf 60%, #e8e5d0 100%);
+    border-radius: 8px;
+    padding: 12px 12px 8px;
     color: #2e2528;
-    border: 2px solid #c9c7b9;
+    border: 1.5px solid #c9c4a8;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9),
+        0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Label vintage diagonal lines background */
+.rv-cassette-label::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 8px,
+        rgba(217, 93, 57, 0.04) 8px,
+        rgba(217, 93, 57, 0.04) 9px
+    );
+    border-radius: 6px;
+    pointer-events: none;
+}
+
+/* Label corner star ornament */
+.rv-cassette-label::after {
+    content: '★';
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    font-size: 0.65rem;
+    color: var(--rv-secondary);
+    opacity: 0.5;
 }
 
 .rv-cassette-title {
     font-family: var(--rv-font-script);
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    border-bottom: 2px dashed #bbb;
-    padding-bottom: 4px;
-    margin-bottom: 8px;
+    border-bottom: 1.5px dashed #c5bfa0;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
     color: var(--rv-primary);
+    position: relative;
+    text-align: center;
+}
+
+/* Small decorative dot flanking title */
+.rv-cassette-title::before,
+.rv-cassette-title::after {
+    content: '·';
+    font-size: 1.5rem;
+    color: var(--rv-secondary);
+    opacity: 0.6;
+    vertical-align: middle;
+    margin: 0 4px;
+    line-height: 0;
 }
 
 .rv-cassette-timer-row {
     display: flex;
     justify-content: space-around;
     align-items: center;
+    position: relative;
 }
 
 .rv-cassette-unit {
     display: flex;
     flex-direction: column;
     align-items: center;
+    background: rgba(14, 59, 67, 0.06);
+    border-radius: 6px;
+    padding: 4px 8px;
+    min-width: 44px;
+    border: 1px solid rgba(14, 59, 67, 0.1);
 }
 
 .rv-cassette-number {
     font-family: var(--rv-font-heading);
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 800;
     color: var(--rv-accent);
     line-height: 1;
@@ -770,29 +985,124 @@
     font-size: 7px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #777;
-    margin-top: 4px;
+    color: #888;
+    margin-top: 3px;
 }
 
-/* Cassette wheels (holes) */
+/* Cassette spool area */
+.rv-cassette-spool-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding: 0 8px;
+    position: relative;
+}
+
+/* Decorative tape path between spools */
+.rv-cassette-spool-area::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(241,161,83,0.4) 20%,
+        rgba(241,161,83,0.7) 50%,
+        rgba(241,161,83,0.4) 80%,
+        transparent
+    );
+    border-radius: 2px;
+}
+
+/* Spool hub label */
+.rv-cassette-spool-label {
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(241,161,83,0.5);
+    text-align: center;
+    flex: 1;
+    padding: 0 4px;
+}
+
+/* Cassette wheels (holes) - spools */
 .rv-cassette-wheels {
     display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin-top: 12px;
+    align-items: center;
+    gap: 0;
+    position: relative;
 }
 
 .rv-cassette-wheel {
-    width: 24px;
-    height: 24px;
-    background: #111;
+    width: 32px;
+    height: 32px;
+    position: relative;
     border-radius: 50%;
-    border: 3px dashed var(--rv-secondary);
+    /* Outer spool ring */
+    background:
+        radial-gradient(circle at 50% 50%,
+            #111 0%,
+            #111 30%,
+            #2a2010 31%,
+            #2a2010 38%,
+            #111 39%,
+            #111 48%,
+            #3a2d18 49%,
+            #3a2d18 52%,
+            #111 53%,
+            #111 100%
+        );
+    border: 3px solid #0d0a08;
+    box-shadow:
+        inset 0 0 0 2px rgba(241,161,83,0.2),
+        0 0 8px rgba(0,0,0,0.6);
     animation: rv-spin 10s linear infinite;
+    flex-shrink: 0;
+}
+
+/* Spool spoke lines via clip */
+.rv-cassette-wheel::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px dashed rgba(241,161,83,0.35);
+    animation: rv-spin 8s linear infinite reverse;
+}
+
+/* Center hub dot */
+.rv-cassette-wheel::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px; height: 8px;
+    background: radial-gradient(circle, #f1a153 0%, #c4791e 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(241,161,83,0.8);
 }
 
 .rv-cassette-wheel-paused {
     animation-play-state: paused;
+}
+.rv-cassette-wheel-paused::before {
+    animation-play-state: paused;
+}
+
+/* Bottom brand strip on cassette body */
+.rv-cassette-brand {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 0.45rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: rgba(241,161,83,0.4);
+    font-family: var(--rv-font-heading);
 }
 
 /* MEMPELAI SECTION (Polaroid Style) */
@@ -1521,11 +1831,12 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    width: calc(100% + 20px); /* extra width to push scrollbar off-screen */
     height: 100%;
-    overflow-y: auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    padding: 60px 20px 100px; /* space for bottom nav bar */
+    padding: 60px 40px 100px 20px; /* extra right padding compensates for hidden scrollbar */
     opacity: 0;
     pointer-events: none;
     visibility: hidden;
@@ -1533,19 +1844,17 @@
     transform: translate3d(0, 0, 0);
     transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
     z-index: 10;
-    scrollbar-width: thin;
-    scrollbar-color: var(--rv-primary) transparent;
+    /* Hide scrollbar — all browsers */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
+/* Chrome/Safari/Mobile webkit — hide scrollbar completely */
 .rv-slide-container::-webkit-scrollbar {
-    width: 5px;
-}
-.rv-slide-container::-webkit-scrollbar-track {
-    background: transparent;
-}
-.rv-slide-container::-webkit-scrollbar-thumb {
-    background: var(--rv-primary);
-    border-radius: 10px;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+    appearance: none !important;
 }
 
 .rv-slide-container.is-active {
@@ -2161,18 +2470,24 @@
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
 }
-.is-slide-mode .rv-slide-container:not(#wishes)::-webkit-scrollbar {
+.is-slide-mode .rv-slide-container:not(#wishes)::-webkit-scrollbar,
+.is-slide-mode .rv-slide-container:not(#wishes)::-webkit-scrollbar-track,
+.is-slide-mode .rv-slide-container:not(#wishes)::-webkit-scrollbar-thumb,
+.is-slide-mode .rv-slide-container:not(#wishes)::-webkit-scrollbar-button {
     display: none !important;
+    width: 0 !important;
+    background: transparent !important;
 }
 
-/* Force overflow-y hidden on #rsvp to completely eliminate slide-level scrollbar */
+/* RSVP slide container: COMPLETELY disable scroll — wishes list handles its own scroll */
 .is-slide-mode #rsvp.rv-slide-container {
-    overflow-y: hidden !important;
+    overflow: hidden !important;
 }
 
-/* Tighter comments list max-height inside RSVP card to prevent card overflow */
+/* Wishes list in slide mode: taller so all ucapan tamu visible */
 .is-slide-mode .rv-wishes-list {
-    max-height: 120px !important;
+    max-height: 180px !important;
+    overflow-y: auto !important;
 }
 
 /* ═══════ START WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */

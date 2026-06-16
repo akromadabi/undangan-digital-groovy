@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    TEMA WAYANG (wayang) WEDDING THEME STYLESHEET
    Scoped strictly under the .wy- prefix to prevent global layout leaks.
    ========================================================================== */
@@ -1638,14 +1638,14 @@
     height: auto !important;
     border-radius: 40px !important;
     padding: 12px 6px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    border: 2px solid var(--wy-primary) !important;
-    border-top: 2px solid var(--wy-primary) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid var(--wy-primary) !important;
     z-index: 999 !important;
     display: flex !important;
     justify-content: center !important;
-    background-color: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
+    background-color: rgba(18, 17, 19, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
   }
 
   /* Make nav buttons arrange vertically */
@@ -1673,6 +1673,7 @@
     padding: 0 !important;
     min-width: auto !important;
     flex: none !important;
+    color: rgba(255, 255, 255, 0.5) !important;
     background-color: transparent !important;
     border: none !important;
     transition: all 0.3s ease !important;
@@ -1691,13 +1692,13 @@
   .wy-nav-item.is-active, 
   .wy-nav-item.lx1-active,
   .wy-nav-item[class*="active"] {
-    background-color: var(--wy-primary) !important;
-    color: #ffffff !important;
+    background-color: rgba(212, 177, 127, 0.12) !important;
+    color: var(--wy-primary) !important;
   }
 
   /* Hover state highlight */
   .wy-nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
     color: #ffffff !important;
   }
 

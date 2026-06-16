@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    TERRACOTTA MINIMALIST (terracotta-minimalist) WEDDING THEME STYLE
    Scoped strictly under the .tcm- prefix to prevent global layout leaks.
    ========================================================================== */
@@ -1603,14 +1603,14 @@ body.tcm-body-locked {
     height: auto !important;
     border-radius: 40px !important;
     padding: 12px 6px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    border: 2px solid var(--tcm-primary) !important;
-    border-top: 2px solid var(--tcm-primary) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(179, 92, 60, 0.15) !important;
     z-index: 999 !important;
     display: flex !important;
     justify-content: center !important;
-    background-color: rgba(255, 255, 255, 0.95) !important;
+    background-color: rgba(245, 235, 224, 0.95) !important;
     backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
   }
 
   /* Make nav buttons arrange vertically */

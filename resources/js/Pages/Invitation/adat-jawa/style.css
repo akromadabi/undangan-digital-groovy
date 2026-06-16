@@ -2379,14 +2379,14 @@
     height: auto !important;
     border-radius: 40px !important;
     padding: 12px 6px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    border: 2px solid var(--aj-accent) !important;
-    border-top: 2px solid var(--aj-accent) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(212, 163, 115, 0.35) !important;
     z-index: 999 !important;
     display: flex !important;
     justify-content: center !important;
-    background-color: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
+    background-color: rgba(11, 10, 9, 0.96) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
   }
 
   /* Make nav buttons arrange vertically */
@@ -2414,6 +2414,7 @@
     padding: 0 !important;
     min-width: auto !important;
     flex: none !important;
+    color: rgba(255, 255, 255, 0.5) !important;
     background-color: transparent !important;
     border: none !important;
     transition: all 0.3s ease !important;
@@ -2427,18 +2428,18 @@
     display: inline-block !important;
   }
 
-  /* Active state highlight - filled circle */
+  /* Active state highlight - filled circle, matches bottom nav active */
   .aj-nav-menu__item.active, 
   .aj-nav-menu__item.is-active, 
   .aj-nav-menu__item.lx1-active,
   .aj-nav-menu__item[class*="active"] {
-    background-color: var(--aj-accent) !important;
-    color: #ffffff !important;
+    background-color: rgba(196, 154, 69, 0.15) !important;
+    color: var(--aj-primary) !important;
   }
 
   /* Hover state highlight */
   .aj-nav-menu__item:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
     color: #ffffff !important;
   }
 

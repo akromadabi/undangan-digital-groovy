@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    TEMA ADAT Balinese (adat-bali)
    Scoped strictly under the .ab- prefix to prevent global layout leaks.
    ========================================================================== */
@@ -2658,14 +2658,14 @@
     height: auto !important;
     border-radius: 40px !important;
     padding: 12px 6px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    border: 2px solid var(--ab-primary) !important;
-    border-top: 2px solid var(--ab-primary) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+    border: 1.5px solid var(--ab-secondary) !important;
     z-index: 999 !important;
     display: flex !important;
     justify-content: center !important;
-    background-color: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
+    background-color: rgba(252, 248, 242, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
   }
 
   /* Make nav buttons arrange vertically */
@@ -2711,14 +2711,14 @@
   .ab-nav-menu__item.is-active, 
   .ab-nav-menu__item.lx1-active,
   .ab-nav-menu__item[class*="active"] {
-    background-color: var(--ab-primary) !important;
-    color: #ffffff !important;
+    background-color: rgba(92, 30, 78, 0.1) !important;
+    color: var(--ab-primary) !important;
   }
 
   /* Hover state highlight */
   .ab-nav-menu__item:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: #ffffff !important;
+    background-color: rgba(92, 30, 78, 0.08) !important;
+    color: var(--ab-primary) !important;
   }
 
   /* Floating menu tooltips expanding to the RIGHT */

@@ -1435,14 +1435,14 @@
     height: auto !important;
     border-radius: 40px !important;
     padding: 12px 6px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    border: 2px solid var(--ft-primary, #6c527b) !important;
-    border-top: 2px solid var(--ft-primary, #6c527b) !important;
+    box-shadow: 0 8px 25px rgba(108, 82, 123, 0.15) !important;
+    border: 1px solid var(--ft-border) !important;
     z-index: 999 !important;
     display: flex !important;
     justify-content: center !important;
-    background-color: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
   }
 
   /* Make nav buttons arrange vertically */
@@ -1470,6 +1470,8 @@
     padding: 0 !important;
     min-width: auto !important;
     flex: none !important;
+    color: var(--ft-text) !important;
+    opacity: 0.6 !important;
     background-color: transparent !important;
     border: none !important;
     transition: all 0.3s ease !important;
@@ -1483,19 +1485,21 @@
     display: inline-block !important;
   }
 
-  /* Active state highlight - filled circle */
+  /* Active state highlight - filled circle, matches bottom nav */
   .ft-nav-btn.active, 
   .ft-nav-btn.is-active, 
   .ft-nav-btn.lx1-active,
   .ft-nav-btn[class*="active"] {
-    background-color: var(--ft-primary, #6c527b) !important;
-    color: #ffffff !important;
+    background-color: rgba(108, 82, 123, 0.1) !important;
+    color: var(--ft-primary) !important;
+    opacity: 1 !important;
   }
 
   /* Hover state highlight */
   .ft-nav-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: #ffffff !important;
+    background-color: rgba(108, 82, 123, 0.07) !important;
+    color: var(--ft-primary) !important;
+    opacity: 1 !important;
   }
 
   /* Floating menu tooltips expanding to the RIGHT */
