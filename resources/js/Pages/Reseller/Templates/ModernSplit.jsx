@@ -118,6 +118,64 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
     const [bannerDismissed, setBannerDismissed] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
 
+    // Infinite sliding carousel for fixed perspective phone mockups
+    const [slideIndex, setSlideIndex] = useState(themes && themes.length > 1 ? 2 : 0);
+    const [isTransitioning, setIsTransitioning] = useState(true);
+
+    const clonedThemes = useMemo(() => {
+        if (!themes || themes.length === 0) return [];
+        if (themes.length === 1) return [themes[0]];
+        const lastTwo = themes.slice(-2);
+        const firstTwo = themes.slice(0, 2);
+        return [...lastTwo, ...themes, ...firstTwo];
+    }, [themes]);
+
+    useEffect(() => {
+        if (themes && themes.length > 1) {
+            setSlideIndex(2);
+            setIsTransitioning(true);
+        } else {
+            setSlideIndex(0);
+        }
+    }, [themes]);
+
+    useEffect(() => {
+        if (!themes || themes.length <= 1) return;
+        const interval = setInterval(() => {
+            setSlideIndex(prev => prev + 1);
+            setIsTransitioning(true);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, [themes]);
+
+    useEffect(() => {
+        if (!themes || themes.length <= 1) return;
+        const N = themes.length;
+        if (slideIndex === N + 2) {
+            const timer = setTimeout(() => {
+                setIsTransitioning(false);
+                setSlideIndex(2);
+            }, 800); // matches the 0.8s CSS transition
+            return () => clearTimeout(timer);
+        }
+        if (slideIndex === 1) {
+            const timer = setTimeout(() => {
+                setIsTransitioning(false);
+                setSlideIndex(N + 1);
+            }, 800);
+            return () => clearTimeout(timer);
+        }
+    }, [slideIndex, themes]);
+
+    useEffect(() => {
+        if (!isTransitioning) {
+            const timer = setTimeout(() => {
+                setIsTransitioning(true);
+            }, 50);
+            return () => clearTimeout(timer);
+        }
+    }, [isTransitioning]);
+
     const featuresScrollRef = useRef(null);
     const scrollFeatures = (direction) => {
         if (featuresScrollRef.current) {
@@ -221,9 +279,7 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
         return null;
     };
 
-    const leftImg = getThemePreviewImage(themes[0]);
-    const centerImg = getThemePreviewImage(themes[1] || themes[0]);
-    const rightImg = getThemePreviewImage(themes[2] || themes[0]);
+
 
     // Color tokens tailored for the Modern-Split Crimson Red light theme (Abadikan.id reference)
     const T = {
@@ -656,6 +712,7 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
     const registerUrl = `${reseller.reseller_url}/register`;
 
     const getThemesUrl = () => `${reseller.reseller_url}/katalog-tema`;
+    const getGreetingCardsUrl = () => `${reseller.reseller_url}/katalog-kartu`;
     const getFaqUrl = () => `${reseller.reseller_url}/faq`;
 
     const renderBanner = (c) => {
@@ -1067,49 +1124,43 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
                     {/* Centered 3D Perspective Phone Mockups */}
                     <div className="rl-hero__perspective-mockups-container">
                         <div className="rl-hero__perspective-stage">
-                            {/* Left rotated phone */}
-                            <div className="rl-perspective-phone rl-perspective-phone--left">
-                                <div className="rl-perspective-phone__inner">
-                                    <div className="rl-perspective-phone__notch" />
-                                    <div className="rl-perspective-phone__screen">
-                                        {leftImg ? (
-                                            <img src={leftImg} alt="Theme Left" className="w-full h-full object-cover object-top" />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-b from-[#1e293b] to-[#0f172a]" />
-                                        )}
-                                        <div className="rl-phone-glare" />
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            {/* Center raised phone */}
-                            <div className="rl-perspective-phone rl-perspective-phone--center">
-                                <div className="rl-perspective-phone__inner">
-                                    <div className="rl-perspective-phone__notch" />
-                                    <div className="rl-perspective-phone__screen-active">
-                                        {centerImg ? (
-                                            <img src={centerImg} alt="Theme Center" className="w-full h-full object-cover object-top" />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-b from-[#be123c] to-[#d31124]" />
-                                        )}
-                                        <div className="rl-phone-glare" />
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            {/* Right rotated phone */}
-                            <div className="rl-perspective-phone rl-perspective-phone--right">
-                                <div className="rl-perspective-phone__inner">
-                                    <div className="rl-perspective-phone__notch" />
-                                    <div className="rl-perspective-phone__screen">
-                                        {rightImg ? (
-                                            <img src={rightImg} alt="Theme Right" className="w-full h-full object-cover object-top" />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-b from-[#1e293b] to-[#0f172a]" />
-                                        )}
-                                        <div className="rl-phone-glare" />
-                                    </div>
-                                </div>
+                            <div 
+                                className={`rl-perspective-track ${!isTransitioning ? 'rl-perspective-track--no-transition' : ''}`}
+                                style={{ transform: `translateX(calc(50% - (var(--phone-width) / 2) - (${slideIndex} * var(--phone-step))))` }}
+                            >
+                                {clonedThemes.map((theme, idx) => {
+                                    const diff = idx - slideIndex;
+                                    let posClass = '';
+                                    if (diff === 0) {
+                                        posClass = 'rl-perspective-phone--center';
+                                    } else if (diff === -1) {
+                                        posClass = 'rl-perspective-phone--left';
+                                    } else if (diff === 1) {
+                                        posClass = 'rl-perspective-phone--right';
+                                    } else if (diff < -1) {
+                                        posClass = 'rl-perspective-phone--far-left';
+                                    } else {
+                                        posClass = 'rl-perspective-phone--far-right';
+                                    }
+                                    
+                                    const imgUrl = getThemePreviewImage(theme);
+                                    
+                                    return (
+                                        <div key={`${theme.id || theme.slug || idx}-${idx}`} className={`rl-perspective-phone ${posClass}`}>
+                                            <div className="rl-perspective-phone__inner">
+                                                <div className="rl-perspective-phone__notch" />
+                                                <div className={diff === 0 ? "rl-perspective-phone__screen-active" : "rl-perspective-phone__screen"}>
+                                                    {imgUrl ? (
+                                                        <img src={imgUrl} alt={theme.name} className="w-full h-full object-cover object-top" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-b from-[#1e293b] to-[#0f172a]" />
+                                                    )}
+                                                    <div className="rl-phone-glare" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -1459,6 +1510,13 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
                             ))}
                         </div>
                     )}
+
+                    {/* Centered button to view all themes */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2.5rem' }}>
+                        <a href={getThemesUrl()} className="rl-btn rl-btn--accent" style={{ padding: '12px 28px', borderRadius: '100px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                            Lihat Semua Tema
+                        </a>
+                    </div>
                 </div>
             </section>
         );
@@ -1499,6 +1557,13 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
                             ))}
                         </div>
                     )}
+
+                    {/* Centered button to view all greeting cards */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2.5rem' }}>
+                        <a href={getGreetingCardsUrl()} className="rl-btn rl-btn--accent" style={{ padding: '12px 28px', borderRadius: '100px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                            Lihat Semua Kartu Ucapan
+                        </a>
+                    </div>
                 </div>
             </section>
         );
@@ -2724,21 +2789,51 @@ body { font-family: var(--font-family); background: var(--section-base); color: 
     box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.4);
 }
 
+:root {
+    --phone-width: 200px;
+    --phone-overlap: -64px;
+    --phone-step: 136px;
+}
+@media (max-width: 640px) {
+    :root {
+        --phone-width: 110px;
+        --phone-overlap: -36px;
+        --phone-step: 74px;
+    }
+}
+
 /* Centered 3D Perspective Stage */
 .rl-hero__perspective-mockups-container {
-    width: 100%; max-width: 900px; margin-top: 4rem; overflow: visible;
+    width: 100%; max-width: 900px; margin-top: 4rem; overflow: hidden; position: relative;
 }
 .rl-hero__perspective-stage {
     perspective: 1200px; display: flex; align-items: center; justify-content: center;
-    height: 380px; position: relative; overflow: visible;
+    height: 410px; position: relative; overflow: visible;
 }
-
+.rl-perspective-track {
+    display: flex;
+    align-items: center;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+}
+.rl-perspective-track--no-transition {
+    transition: none !important;
+}
+.rl-perspective-track--no-transition .rl-perspective-phone {
+    transition: none !important;
+}
 .rl-perspective-phone {
-    width: 200px; height: 380px; background: #0f172a;
+    width: var(--phone-width) !important; height: 380px; background: #0f172a;
     border: 6px solid #1e293b; border-radius: 28px;
-    position: relative; overflow: hidden; transition: all 0.5s ease;
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+    position: relative; overflow: hidden; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
     backface-visibility: hidden;
+    margin-right: var(--phone-overlap) !important;
+    flex-shrink: 0;
 }
 .rl-perspective-phone__inner {
     width: 100%; height: 100%; background: #070a12; border-radius: 22px; overflow: hidden;
@@ -2765,16 +2860,24 @@ body { font-family: var(--font-family); background: var(--section-base); color: 
 /* 3D transformations */
 .rl-perspective-phone--left {
     transform: rotateY(24deg) rotateX(8deg) scale(0.85) translateZ(-40px);
-    z-index: 10; margin-right: -4rem; opacity: 0.65;
+    z-index: 10; opacity: 0.65;
 }
 .rl-perspective-phone--center {
     transform: translateZ(50px) scale(1.02);
     z-index: 20; border-color: rgba(var(--accent-rgb), 0.3);
-    box-shadow: 0 40px 90px rgba(var(--accent-rgb), 0.2);
+    box-shadow: none;
 }
 .rl-perspective-phone--right {
     transform: rotateY(-24deg) rotateX(8deg) scale(0.85) translateZ(-40px);
-    z-index: 10; margin-left: -4rem; opacity: 0.65;
+    z-index: 10; opacity: 0.65;
+}
+.rl-perspective-phone--far-left {
+    transform: rotateY(24deg) rotateX(8deg) scale(0.7) translateZ(-80px);
+    z-index: 5; opacity: 0; pointer-events: none;
+}
+.rl-perspective-phone--far-right {
+    transform: rotateY(-24deg) rotateX(8deg) scale(0.7) translateZ(-80px);
+    z-index: 5; opacity: 0; pointer-events: none;
 }
 
 .rl-perspective-phone:hover {
@@ -3476,7 +3579,7 @@ body { font-family: var(--font-family); background: var(--section-base); color: 
 .rl-perspective-phone {
     background: #000000 !important;
     border: 6px solid #151b26 !important;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: none !important;
 }
 
 /* ACCENT OVERRIDES FOR CATALOG CARDS */
@@ -3592,11 +3695,16 @@ body { font-family: var(--font-family); background: var(--section-base); color: 
     }
     
     .rl-hero__perspective-stage { height: 260px !important; }
-    .rl-perspective-phone { width: 110px !important; height: 210px !important; border-radius: 14px !important; border-width: 4px !important; }
+    .rl-perspective-phone { 
+        height: 210px !important; 
+        border-radius: 14px !important; 
+        border-width: 4px !important; 
+        margin-right: var(--phone-overlap) !important;
+    }
     .rl-perspective-phone__inner { border-radius: 10px !important; }
     .rl-perspective-phone__notch { width: 45px !important; height: 10px !important; border-radius: 0 0 7px 7px !important; }
-    .rl-perspective-phone--left { margin-right: -2.25rem !important; }
-    .rl-perspective-phone--right { margin-left: -2.25rem !important; }
+    .rl-perspective-phone--left { margin: 0 !important; }
+    .rl-perspective-phone--right { margin: 0 !important; }
 
     /* Stats Compact Overrides */
     .rl-stats {
