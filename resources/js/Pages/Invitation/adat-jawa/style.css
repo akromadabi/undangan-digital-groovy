@@ -2349,3 +2349,95 @@
   height: 100% !important;
   object-fit: cover !important;
 }
+
+/* ═══════ START WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */
+@media (min-width: 768px) {
+  /* Widen content container */
+  .aj-container {
+    max-width: 768px !important;
+  }
+  
+  /* Align floating buttons inside container bounds */
+  .xx-floating-controls, .xx-floating-btns {
+    right: calc(50% - 369px) !important;
+  }
+}
+
+@media (min-width: 992px) {
+  /* Transition bottom navigation bar into a vertical floating sidebar capsule */
+  .aj-nav-menu {
+    position: fixed !important;
+    top: 50% !important;
+    bottom: auto !important;
+    right: calc(50% + 384px + 20px) !important; /* anchors 20px left of the 768px container */
+    left: auto !important;
+    transform: translateY(-50%) !important;
+    width: auto !important;
+    max-width: 75px !important;
+    border-radius: 40px !important;
+    padding: 16px 8px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    border: 2px solid var(--aj-accent) !important;
+    border-top: 2px solid var(--aj-accent) !important;
+    z-index: 900 !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  /* Make nav buttons arrange vertically */
+  .aj-nav-menu__inner--row {
+    flex-direction: column !important;
+    gap: 10px !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  /* Adjust nav item size and context */
+  .aj-nav-menu__item {
+    position: relative !important;
+    padding: 10px 0 !important;
+    min-width: auto !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  /* Floating menu tooltips expanding to the RIGHT */
+  .aj-nav-item-text {
+    position: absolute !important;
+    left: 55px !important;
+    right: auto !important;
+    background-color: var(--aj-accent) !important;
+    color: #ffffff !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: all 0.25s ease !important;
+    white-space: nowrap !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+    z-index: 1000 !important;
+  }
+
+  /* Arrow tooltip pointing left */
+  .aj-nav-item-text::before {
+    content: '' !important;
+    position: absolute !important;
+    right: 100% !important;
+    left: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    border-width: 5px !important;
+    border-style: solid !important;
+    border-color: transparent var(--aj-accent) transparent transparent !important;
+  }
+
+  /* Reveal tooltip on hover */
+  .aj-nav-menu__item:hover .aj-nav-item-text {
+    opacity: 1 !important;
+    left: 50px !important; /* slide-in right effect */
+  }
+}
+/* ═══════ END WIDESCREEN RESPONSIVENESS OVERRIDES ═══════ */
