@@ -1,0 +1,1 @@
+import{j as s}from"./app-BNn5b5pI.js";function c({activeNav:n,scrollTo:r,navItems:e}){return s.jsx("nav",{className:"utary-navbar",children:e.map(a=>s.jsx("button",{onClick:()=>r(`section-${a.key}`),className:`utary-navbar__item ${n===a.key?"is-active":""}`,title:a.name,children:s.jsx("i",{className:a.icon})},a.id))})}export{c as default};

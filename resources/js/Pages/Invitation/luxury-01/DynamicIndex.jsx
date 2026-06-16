@@ -322,7 +322,7 @@ export default function DynamicIndex({
     const isSlideMode = layoutMode === 'slide-h' || layoutMode === 'slide-v' || layoutMode === 'slide';
 
     // Menu Position auto-fallback
-    let menuPosition = invitation?.menu_position || 'none';
+    let menuPosition = invitation?.menu_position || 'bottom';
     if (isSlideMode && (menuPosition === 'none' || !menuPosition)) {
         menuPosition = 'bottom';
     }

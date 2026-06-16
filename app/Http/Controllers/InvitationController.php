@@ -502,6 +502,7 @@ class InvitationController extends Controller
             $invitation->enable_auto_scroll = true;
             $invitation->show_qr_code = true;
             $invitation->enable_qr = true;
+            $invitation->menu_position = 'bottom';
 
             $brideGrooms = $customDemoInvitation->brideGrooms;
             $events = $customDemoInvitation->events;
@@ -698,6 +699,7 @@ class InvitationController extends Controller
         $invitation->enable_auto_scroll = true;
         $invitation->show_qr_code = true;
         $invitation->enable_qr = true;
+        $invitation->menu_position = 'bottom';
         $invitation->particle_type = $defaultData['invitation']['particle_type'] ?? 'gold-dust';
         
         // Override cover image with korea demo photo

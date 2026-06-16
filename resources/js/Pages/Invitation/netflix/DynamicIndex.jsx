@@ -1708,7 +1708,7 @@ function WedflixThemeContent({ invitation, sections, brideGrooms, events, galler
     // Check for streaming
     const hasStream = safeArr(events).some(e => e.streaming_url || (Array.isArray(e.streamings) && e.streamings.length > 0));
     
-    let menuPosition = invitation?.menu_position || 'none';
+    let menuPosition = invitation?.menu_position || 'bottom';
     if (isSlideMode && (menuPosition === 'none' || !menuPosition)) {
         menuPosition = 'bottom';
     }
