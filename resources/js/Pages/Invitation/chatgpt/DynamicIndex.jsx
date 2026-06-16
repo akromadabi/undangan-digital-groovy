@@ -2028,6 +2028,7 @@ function ViteGptThemeContent({ invitation, sections, brideGrooms, events, wishes
 
     const jumpToSection = (idx, key) => {
         setSidebarOpen(false); // Auto close sidebar
+        setAutoScrollEnabled(false);
 
         if (isSlideMode) {
             setActiveSlideIdx(idx);

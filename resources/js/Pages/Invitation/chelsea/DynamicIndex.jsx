@@ -1358,6 +1358,7 @@ function ChelseaInViteContent({ invitation, sections, brideGrooms, events, galle
     }, [activeSlideIdx]);
 
     const scrollToSection = (key) => {
+        setAutoScrollEnabled(false);
         if (isSlideMode) {
             const idx = navSections.findIndex(s => s.section_key === key);
             if (idx !== -1) setActiveSlideIdx(idx);

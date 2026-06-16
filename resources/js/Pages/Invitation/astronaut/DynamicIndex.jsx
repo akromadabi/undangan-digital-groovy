@@ -1542,6 +1542,7 @@ export default function DynamicIndex({
 
     // Scroll to section helper
     const scrollToSection = (key) => {
+        setAutoScroll(false);
         const el = document.getElementById(key);
         if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });

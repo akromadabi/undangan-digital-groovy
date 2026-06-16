@@ -1958,6 +1958,7 @@ function InstaViteThemeContent({ invitation, sections, brideGrooms, events, wish
     };
 
     const jumpToSection = (idx, key) => {
+        setAutoScrollEnabled(false);
         if (isSlideMode) {
             setActiveSlideIdx(idx);
         } else {

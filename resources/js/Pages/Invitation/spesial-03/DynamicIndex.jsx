@@ -1510,6 +1510,7 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
 
     // Navigation jumps
     const jumpToSection = (key) => {
+        setAutoScroll(false);
         if (layoutMode === 'scroll') {
             const el = document.getElementById(`section-${key}`);
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
