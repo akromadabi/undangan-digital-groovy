@@ -925,7 +925,7 @@ export default function Galaxy({ reseller, plans = [], themes = [], greetingCard
     const renderGreetingCardsCatalog = (c) => {
         const title = c?.title || 'Koleksi Kartu Ucapan Premium';
         return (
-            <section id="preview-kartu" className="rl-section">
+            <section id="preview-kartu" className="rl-section rl-section--alt">
                 <div className="rl-container">
                     <div className="rl-section__header">
                         <span className="rl-section__tag" style={{ background: 'var(--accent)', color: '#fff' }}>Koleksi Kartu</span>
@@ -1101,17 +1101,78 @@ export default function Galaxy({ reseller, plans = [], themes = [], greetingCard
     };
 
     const renderPlans = (c) => {
-        const title = c?.title || 'Pilih Paket yang Sesuai';
+        const title = c?.title || 'Pilih Paket Undangan Digital';
+        const invitationPlans = plans.filter(p => p.type === 'invitation' || !p.type);
+        if (invitationPlans.length === 0) return null;
         return (
             <section id="plans" className="rl-section">
                 <div className="rl-container">
                     <div className="rl-section__header">
-                        <span className="rl-section__tag">Harga & Paket</span>
+                        <span className="rl-section__tag">Harga & Paket Undangan</span>
                         <h2 className="rl-section__title">{title}</h2>
                         <p className="rl-section__desc">Pilih paket terbaik dengan harga terjangkau sesuai kebutuhan acara Anda.</p>
                     </div>
                     <div className="rl-plans-grid">
-                        {plans.map((plan) => {
+                        {invitationPlans.map((plan) => {
+                            const meta = planMeta[plan.slug] || { color: 'var(--accent)', label: 'Mulai Sekarang' };
+                            const isPopular = !!meta.popular;
+                            return (
+                                <div key={plan.id} className={`rl-plan-card ${isPopular ? 'rl-plan-card--popular' : ''}`}>
+                                    {isPopular && <div className="rl-plan-card__popular-badge">REKOMENDASI</div>}
+                                    <h3 className="rl-plan-card__name">{plan.name}</h3>
+                                    <div className="rl-plan-card__price">
+                                        {plan.price === 0 ? 'GRATIS' : formatRp(plan.price)}
+                                        {plan.price > 0 && <span className="rl-plan-card__duration">/{plan.duration_days} hari</span>}
+                                    </div>
+                                    <p className="rl-plan-card__desc">{plan.description}</p>
+                                    <a
+                                        href={`${registerUrl}&plan=${plan.slug}`}
+                                        className={`rl-plan-card__btn ${isPopular ? 'rl-plan-card__btn--popular' : ''}`}
+                                    >
+                                        {meta.label}
+                                    </a>
+                                    <ul className="rl-plan-card__features">
+                                        <li>
+                                            <Svg d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" size={18} color="var(--accent)" />
+                                            Maks. {plan.max_guests === -1 ? 'Unlimited' : plan.max_guests} Tamu
+                                        </li>
+                                        <li>
+                                            <Svg d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" size={18} color="var(--accent)" />
+                                            Maks. {plan.max_galleries} Foto Album
+                                        </li>
+                                        {plan.feature_access?.map((fa) => {
+                                            if (!fa.is_enabled || !fa.feature) return null;
+                                            return (
+                                                <li key={fa.feature_id}>
+                                                    <Svg d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" size={18} color="var(--accent)" />
+                                                    {fa.feature.name}
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+        );
+    };
+
+    const renderPlansCards = (c) => {
+        const title = c?.title || 'Pilih Paket Kartu Ucapan Digital';
+        const cardPlans = plans.filter(p => p.type === 'greeting_card');
+        if (cardPlans.length === 0) return null;
+        return (
+            <section id="plans-cards" className="rl-section">
+                <div className="rl-container">
+                    <div className="rl-section__header">
+                        <span className="rl-section__tag">Harga & Paket Kartu</span>
+                        <h2 className="rl-section__title">{title}</h2>
+                        <p className="rl-section__desc">Pilih paket kartu terbaik dengan harga terjangkau sesuai kebutuhan kartu ucapan Anda.</p>
+                    </div>
+                    <div className="rl-plans-grid">
+                        {cardPlans.map((plan) => {
                             const meta = planMeta[plan.slug] || { color: 'var(--accent)', label: 'Mulai Sekarang' };
                             const isPopular = !!meta.popular;
                             return (
@@ -1161,7 +1222,7 @@ export default function Galaxy({ reseller, plans = [], themes = [], greetingCard
         const title = c?.title || 'Pertanyaan yang Sering Ditanyakan';
         const items = c?.items || FAQS;
         return (
-            <section className="rl-section rl-section--alt">
+            <section className="rl-section">
                 <div className="rl-container">
                     <div className="rl-section__header">
                         <span className="rl-section__tag">FAQ</span>
@@ -1215,6 +1276,7 @@ export default function Galaxy({ reseller, plans = [], themes = [], greetingCard
             case 'greeting_cards': return renderGreetingCardsCatalog(config);
             case 'testimonials': return renderTestimonials(config);
             case 'plans': return renderPlans(config);
+            case 'plans_cards': return renderPlansCards(config);
             case 'faq': return renderFaq(config);
             case 'cta': return renderCta(config);
             default: return null;

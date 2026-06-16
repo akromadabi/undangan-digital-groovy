@@ -252,76 +252,84 @@ html {
 
 /* 3D Phone Mockup Transforms */
 .phone-rotate-default {
-    transform: none;
+    transform: rotateY(-8deg) rotateX(4deg);
 }
 .phone-rotate-default:hover,
 .group:hover .phone-rotate-default {
-    transform: scale(1.03);
+    transform: rotateY(-5deg) rotateX(2deg) scale(1.03);
 }
 
 .phone-rotate-left {
-    transform: none;
+    transform: rotateY(20deg) rotateX(4deg);
 }
 .phone-rotate-left:hover,
 .group:hover .phone-rotate-left {
-    transform: scale(1.03);
+    transform: rotateY(16deg) rotateX(2deg) scale(1.02);
 }
 
 .phone-rotate-right {
-    transform: none;
+    transform: rotateY(-20deg) rotateX(4deg);
 }
 .phone-rotate-right:hover,
 .group:hover .phone-rotate-right {
-    transform: scale(1.03);
+    transform: rotateY(-16deg) rotateX(2deg) scale(1.02);
 }
 
 .phone-rotate-scaled {
-    transform: none;
+    transform: rotateY(-10deg) rotateX(4deg) scale(0.9);
 }
 .phone-rotate-scaled:hover,
 .group:hover .phone-rotate-scaled {
-    transform: scale(1.03);
+    transform: rotateY(-8deg) rotateX(2deg) scale(0.93);
 }
 
 /* Specific overrides for triple-phone layout */
+.triple-phone-layout .phone-rotate-default {
+    transform: rotateY(0deg) rotateX(4deg);
+}
+.triple-phone-layout .phone-rotate-default:hover,
+.group:hover .triple-phone-layout .phone-rotate-default {
+    transform: rotateY(0deg) rotateX(2deg) scale(1.03);
+}
+
 .triple-phone-layout .phone-rotate-left.phone-back {
-    transform: scale(0.86);
+    transform: rotateY(20deg) rotateX(4deg) scale(0.86);
 }
 .triple-phone-layout .phone-rotate-left.phone-back:hover,
 .group:hover .triple-phone-layout .phone-rotate-left.phone-back {
-    transform: scale(0.89);
+    transform: rotateY(16deg) rotateX(2deg) scale(0.89);
 }
 
 .triple-phone-layout .phone-rotate-right.phone-back {
-    transform: scale(0.86);
+    transform: rotateY(-20deg) rotateX(4deg) scale(0.86);
 }
 .triple-phone-layout .phone-rotate-right.phone-back:hover,
 .group:hover .triple-phone-layout .phone-rotate-right.phone-back {
-    transform: scale(0.89);
+    transform: rotateY(-16deg) rotateX(2deg) scale(0.89);
 }
 
 /* Make phone borders and corner radius sleek and proportional for the scaled down 3-phone mockup */
 .triple-phone-layout .phone-mockup {
-    border-width: 2px !important;
+    border-width: 1.8px !important;
     border-radius: 12px !important;
 }
 .triple-phone-layout .phone-mockup > div.w-full.h-full {
-    border-radius: 9px !important;
+    border-radius: 10px !important;
 }
 .triple-phone-layout .phone-mockup > div.w-full.h-full > div.pointer-events-none {
-    border-radius: 9px !important;
+    border-radius: 10px !important;
 }
 
 @media (min-width: 640px) {
     .triple-phone-layout .phone-mockup {
-        border-width: 2.5px !important;
-        border-radius: 15px !important;
+        border-width: 2.4px !important;
+        border-radius: 17px !important;
     }
     .triple-phone-layout .phone-mockup > div.w-full.h-full {
-        border-radius: 12px !important;
+        border-radius: 15px !important;
     }
     .triple-phone-layout .phone-mockup > div.w-full.h-full > div.pointer-events-none {
-        border-radius: 12px !important;
+        border-radius: 15px !important;
     }
 }
 
@@ -631,92 +639,224 @@ input[type="range"].premium-slider.slider-amber::-moz-range-thumb {
 }
 
 /* ═══ Cover Screen Entrance Animations ═══ */
-.ab-cover-wrapper,
-.ak-cover-wrapper,
-.aj-cover-wrapper,
-.am-cover-wrapper,
-.as-cover-wrapper,
-.ast-cover-body,
-.ast-cover-header,
-.ast-cover-footer,
-.candy-cover-card,
-.gpt-auth-modal,
-.ch-cover__content,
-.ft-cover__content,
-.hw-cover__content,
-.ig-device-container,
-.lx1-cover-content,
-.lx2-cover__content,
-.lx3-cover__content,
-.lx4-cover__content,
-.mu-cover__content,
-.mc-cover-wrapper,
-.nf-cover__content,
-.pn-cover__content,
-.ps-cover__content,
-.rj-cover__content,
-.sgm-cover__arch-wrapper,
-.sp-cover-body,
-.sp02-cover__content,
-.sp03-cover__content,
-.sp04-cover-content,
-.sp05-cover-arch,
-.sp06-cover__content,
-.sp07-cover__content,
-.sp08-cover__content,
-.spy-cover__content,
-.spty-cover__inner,
-.tcm-cover-header,
-.tcm-cover-photo-window,
-.tcm-cover-guest,
-.ttk-cover__inner,
-.utary-cover > *,
-.wy-cover-wrapper,
-.wa-cover-top,
-.wa-cover-middle,
-.wa-cover-bottom,
-.yt-cover__main,
-.default-cover-content {
-    animation: coverFadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+/* --- Keyframe Animations --- */
+@keyframes coverFadeDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes coverScaleUp {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(15px);
+    filter: blur(10px);
+  }
+  70% {
+    transform: scale(1.03) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes coverFadeInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-40px);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes coverFadeInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(40px);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
 }
 
 @keyframes coverFadeUp {
-    0% {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
-/* Stagger delays for cover elements to look highly premium */
-.wa-cover-top,
-.tcm-cover-header,
-.ast-cover-header {
-    animation-delay: 0ms;
+@keyframes coverGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.35), 0 12px 25px rgba(0, 0, 0, 0.18);
+    transform: scale(1.04);
+  }
 }
 
-.wa-cover-middle,
-.tcm-cover-photo-window,
-.ast-cover-body {
-    animation-delay: 150ms;
+@keyframes coverProfilePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.6));
+  }
 }
 
-.wa-cover-bottom,
-.tcm-cover-guest,
-.ast-cover-footer {
-    animation-delay: 300ms;
+/* --- Target Selectors for ALL Themes --- */
+
+/* 1. Header Badge / Logo / Intro text (e.g. "THE WEDDING OF") */
+[class*="-cover"] [class*="badge"],
+[class*="-cover"] [class*="logo-text"],
+[class*="-cover"] [class*="the-wedding"],
+[class*="-cover"] [class*="intro"],
+[class*="cover-screen"] [class*="badge"],
+[class*="candy-cover"] [class*="badge"],
+[class*="ast-cover"] [class*="badge"],
+[class*="-cover"] [class*="kubah-icon-container"],
+[class*="-cover"] [class*="kubah-icon"],
+.default-cover-content > p:first-of-type,
+.default-cover-content > p:first-child {
+  animation: coverFadeDown 1.4s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+  animation-delay: 200ms !important;
 }
 
-/* Custom stagger for Utary cover children */
-.utary-cover > :nth-child(1) { animation-delay: 0ms; }
-.utary-cover > :nth-child(2) { animation-delay: 100ms; }
-.utary-cover > :nth-child(3) { animation-delay: 200ms; }
-.utary-cover > :nth-child(4) { animation-delay: 300ms; }
-.utary-cover > :nth-child(5) { animation-delay: 400ms; }
-.utary-cover > :nth-child(6) { animation-delay: 500ms; }
+/* 2. Couple Names / Main Title */
+[class*="-cover"] h1,
+[class*="-cover"] [class*="couple"],
+[class*="-cover"] [class*="cover-title"],
+[class*="-cover"] [class*="title-text"],
+[class*="cover-screen"] h1,
+[class*="candy-cover"] [class*="title"],
+[class*="ast-cover"] h1,
+[class*="nf-cover"] [class*="title"],
+.default-cover-content h1 {
+  animation: coverScaleUp 1.6s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
+  animation-delay: 450ms !important;
+}
+
+/* 3. Date / Countdown Section */
+[class*="-cover"] [class*="date"],
+[class*="-cover"] [class*="countdown"],
+[class*="cover-screen"] [class*="date"],
+[class*="candy-cover"] [class*="subtitle"],
+[class*="ast-cover"] [class*="subtitle"],
+.default-cover-content .Swirl + p,
+.default-cover-content p:nth-of-type(2),
+.default-cover-content p:nth-child(3) {
+  animation: coverFadeUp 1.3s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+  animation-delay: 700ms !important;
+}
+
+/* 4. Guest Info Section / Box */
+[class*="-cover"] [class*="dear"],
+[class*="-cover"] [class*="guest"],
+[class*="-cover"] [class*="apology"],
+[class*="-cover"] [class*="dear-box"],
+[class*="-cover"] [class*="guest-box"],
+[class*="cover-screen"] [class*="dear"],
+[class*="cover-screen"] [class*="guest"],
+[class*="candy-cover"] [class*="guest"],
+[class*="ast-cover"] [class*="guest"],
+[class*="nf-cover"] [class*="guest"],
+.default-cover-content [class*="guest"],
+.default-cover-content > div:nth-last-of-type(2) {
+  animation: coverFadeUp 1.3s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+  animation-delay: 950ms !important;
+}
+
+/* Special profiles for Netflix theme */
+[class*="nf-cover"] .nf-profile {
+  animation: coverScaleUp 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
+}
+[class*="nf-cover"] .nf-profile:nth-child(1) {
+  animation-delay: 600ms !important;
+}
+[class*="nf-cover"] .nf-profile:nth-child(2) {
+  animation-delay: 750ms !important;
+}
+[class*="nf-cover"] .nf-profile:hover {
+  animation: coverProfilePulse 1.8s ease-in-out infinite alternate !important;
+}
+
+/* 5. Open Invitation Button */
+[class*="-cover"] button,
+[class*="-cover"] [class*="btn"],
+[class*="-cover"] [id="tombol-buka"],
+[class*="cover-screen"] button,
+[class*="candy-cover"] button,
+[class*="ast-cover"] button,
+[class*="nf-cover"] button,
+.default-cover-content button {
+  animation: coverFadeUp 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) both !important, 
+             coverGlowPulse 2.8s ease-in-out infinite alternate !important;
+  animation-delay: 1200ms !important, 2600ms !important;
+  transform-origin: center !important;
+}
+
+/* 6. Corner/Lantern Ornaments */
+[class*="-cover"] [class*="lantern-left"],
+[class*="-cover"] [class*="lantern-left"] svg,
+[class*="-cover"] [class*="corner-left"] {
+  animation: coverFadeInLeft 1.8s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+  animation-delay: 100ms !important;
+}
+
+[class*="-cover"] [class*="lantern-right"],
+[class*="-cover"] [class*="lantern-right"] svg,
+[class*="-cover"] [class*="corner-right"] {
+  animation: coverFadeInRight 1.8s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+  animation-delay: 100ms !important;
+}
+
+/* Bottom decorative elements */
+[class*="-cover"] [class*="wayang"],
+[class*="-cover"] [class*="ornament-bottom"],
+[class*="-cover"] [class*="arch-ornament"],
+[class*="-cover"] [class*="deco-bottom"] {
+  animation: coverFadeUp 1.6s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+  animation-delay: 300ms !important;
+}
+
+/* Swan / Badge Arch in sage/other minimalist styles */
+[class*="-cover"] [class*="arch-wrapper"],
+[class*="-cover"] [class*="arch-bg"] {
+  animation: coverScaleUp 1.6s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
+  animation-delay: 150ms !important;
+}
+
+/* Floating background particles */
+[class*="-cover"] [class*="deco"],
+[class*="-cover"] [class*="ambient"] {
+  animation: coverFadeUp 1.8s ease-out both !important;
+}
 
 
 

@@ -233,7 +233,7 @@ class InvitationController extends Controller
 
         // THEME ADDED BY BHAKTIAJI ILHAM
         $page = 'Invitation/Show';
-        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'adat-minang', 'adat-sunda', 'adat-bali', 'adat-batak', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
+        if ($invitation->theme && in_array($invitation->theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'adat-minang', 'adat-sunda', 'adat-bali', 'adat-batak', 'adat-betawi', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist', 'retro-vinyl'])) {
             if ($isDemo) {
                 $page = 'Invitation/DemoWrapper';
             } else {
@@ -648,7 +648,7 @@ class InvitationController extends Controller
                 'hideDemoPlanSelector' => $resellerSetting ? (bool)$resellerSetting->hide_demo_plan_selector : false,
             ];
 
-            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'adat-minang', 'adat-sunda', 'adat-bali', 'adat-batak', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
+            if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'adat-minang', 'adat-sunda', 'adat-bali', 'adat-batak', 'adat-betawi', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist', 'retro-vinyl'])) {
                 $page = 'Invitation/DemoWrapper';
                 $props['themeSlug'] = $theme->slug;
                 $props['allowedPlans'] = $theme->allowed_plans;
@@ -892,7 +892,7 @@ class InvitationController extends Controller
             'hideDemoPlanSelector' => $resellerSetting ? (bool)$resellerSetting->hide_demo_plan_selector : false,
         ];
 
-        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'adat-minang', 'adat-sunda', 'adat-bali', 'adat-batak', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist'])) {
+        if (in_array($theme->slug, ['utary', 'netflix', 'luxury-02', 'luxury-01', 'luxury-03', 'luxury-04', 'wayang', 'shopee', 'spotify', 'instagram', 'tiktok', 'chatgpt', 'manchester-united', 'moroccan', 'youtube', 'spesial-02', 'spesial-03', 'spesial-04', 'spesial-05', 'spesial-06', 'spesial-07', 'spesial-08', 'whatsapp', 'spiderman', 'candy-land', 'room-jogja', 'adat-jawa', 'adat-minang', 'adat-sunda', 'adat-bali', 'adat-batak', 'adat-betawi', 'handwriting', 'polaroid-scrapbook', 'polaroid-newspaper', 'fairytale', 'chelsea', 'astronaut', 'sage-minimalist', 'terracotta-minimalist', 'retro-vinyl'])) {
             $page = 'Invitation/DemoWrapper';
             $props['themeSlug'] = $theme->slug;
             $props['allowedPlans'] = $theme->allowed_plans;

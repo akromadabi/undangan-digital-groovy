@@ -475,16 +475,7 @@ export default function ThemesCatalog({ themes }) {
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
-        
-        const payload = {
-            preview_template: data.preview_template,
-            preview_bg_style: data.preview_bg_style,
-            preview_images: data.preview_images,
-            thumbnail: data.thumbnail,
-        };
-
         post(`${resolvedPrefix}/themes/${activeTheme.id}/custom-preview`, {
-            data: payload,
             onSuccess: () => {
                 handleCloseModal();
             }

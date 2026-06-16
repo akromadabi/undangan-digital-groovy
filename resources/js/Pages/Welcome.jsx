@@ -1779,6 +1779,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, brandLog
                                             <div key={theme.id} className="flex-shrink-0 animate-in fade-in duration-300">
                                                 <ThemePreviewCard 
                                                     theme={theme}
+                                                    plans={subscriptionPlans}
                                                 />
                                             </div>
                                         ))}
@@ -1903,6 +1904,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, brandLog
                                                     <GreetingCardPreviewCard 
                                                         theme={card}
                                                         typeOptions={greetingCardTypeOptions}
+                                                        plans={subscriptionPlans}
                                                     />
                                                 </div>
                                             ))}

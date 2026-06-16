@@ -134,7 +134,7 @@ export default function GreetingCardPreviewCard({ theme, reseller = null, onlyMo
 
         return (
             <div 
-                className={`phone-mockup relative ${widthClass} aspect-[9/18.5] bg-black border-[2px] sm:border-[5px] border-[#1a1a1a] rounded-[12px] sm:rounded-[24px] overflow-hidden transition-all duration-500 ${perspectiveClass} ${isScaledDown ? 'phone-back' : 'phone-front'} ${additionalClass}`}
+                className={`phone-mockup relative ${widthClass} aspect-[9/17.8] bg-black border-[2px] sm:border-[3.2px] border-[#1a1a1a] rounded-[13px] sm:rounded-[22px] overflow-hidden transition-all duration-500 ${perspectiveClass} ${isScaledDown ? 'phone-back' : 'phone-front'} ${additionalClass}`}
                 style={{
                     transformStyle: 'preserve-3d',
                     boxShadow: isScaledDown 
@@ -149,14 +149,14 @@ export default function GreetingCardPreviewCard({ theme, reseller = null, onlyMo
                 </div>
                 
                 {/* Screen Container */}
-                <div className="w-full h-full overflow-hidden bg-gray-900 rounded-[9px] sm:rounded-[19px] relative group-hover:shadow-inner">
+                <div className="w-full h-full overflow-hidden bg-gray-900 rounded-[11px] sm:rounded-[19px] relative group-hover:shadow-inner">
                     <img 
                         src={getImageUrl(imageSrc)} 
                         alt="Screen Preview"
                         className="w-full h-full object-cover object-top transition-[object-position] duration-[5s] ease-in-out group-hover:object-bottom"
                     />
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-10" />
-                    <div className="absolute inset-0 border border-white/10 rounded-[9px] sm:rounded-[19px] pointer-events-none z-10" />
+                    <div className="absolute inset-0 border border-white/10 rounded-[11px] sm:rounded-[19px] pointer-events-none z-10" />
                 </div>
             </div>
         );
@@ -316,7 +316,7 @@ export default function GreetingCardPreviewCard({ theme, reseller = null, onlyMo
                 <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4 overflow-hidden" style={{ perspective: '800px' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
                     {renderGroundShadow('translate-y-[80%]', 'w-[54%] max-w-[145px]', 'opacity-65')}
-                    <div className="relative z-10 animate-in fade-in zoom-in duration-300 w-[65%] sm:w-[70%] max-w-[185px]">
+                    <div className="relative z-10 animate-in fade-in zoom-in duration-300 w-[65%] sm:w-[70%] max-w-[185px]" style={{ transformStyle: 'preserve-3d' }}>
                         {renderPhone(images[0])}
                     </div>
                 </div>
@@ -325,15 +325,15 @@ export default function GreetingCardPreviewCard({ theme, reseller = null, onlyMo
 
         if (template === 'double-phone') {
             return (
-                <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-1 sm:p-3" style={{ perspective: '800px' }}>
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-1 sm:p-3" style={{ perspective: '800px', transformStyle: 'preserve-3d' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
                     {renderGroundShadow('-translate-x-[35%] rotate-[-5deg]', 'w-[45%] max-w-[150px]', 'opacity-50', 'bottom-[11%]')}
                     {renderGroundShadow('translate-x-[19%] rotate-[4deg]', 'w-[45%] max-w-[150px]', 'opacity-60', 'bottom-[7%]')}
                     
-                    <div className="absolute w-[50%] sm:w-[55%] max-w-[150px] -translate-x-[28%] -translate-y-[2%] transform transition-transform duration-500 group-hover:-translate-x-[32%] z-10">
+                    <div className="absolute w-[50%] sm:w-[55%] max-w-[150px] -translate-x-[28%] -translate-y-[2%] transform transition-transform duration-500 group-hover:-translate-x-[32%] z-10" style={{ transformStyle: 'preserve-3d' }}>
                         {renderPhone(images[1] || images[0], true, '', true, false)}
                     </div>
-                    <div className="absolute w-[50%] sm:w-[55%] max-w-[150px] translate-x-[14%] translate-y-[6%] transform transition-transform duration-500 group-hover:translate-x-[18%] z-20">
+                    <div className="absolute w-[50%] sm:w-[55%] max-w-[150px] translate-x-[14%] translate-y-[6%] transform transition-transform duration-500 group-hover:translate-x-[18%] z-20" style={{ transformStyle: 'preserve-3d' }}>
                         {renderPhone(images[0], false, '', false, true)}
                     </div>
                 </div>
@@ -342,19 +342,19 @@ export default function GreetingCardPreviewCard({ theme, reseller = null, onlyMo
 
         if (template === 'triple-phone') {
             return (
-                <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-1 sm:p-2 triple-phone-layout" style={{ perspective: '800px' }}>
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-1 sm:p-2 triple-phone-layout" style={{ perspective: '800px', transformStyle: 'preserve-3d' }}>
                     {renderBackgroundDecorations(theme.preview_bg_style)}
                     {renderGroundShadow('-translate-x-[46%] rotate-[0deg]', 'w-[38%] max-w-[130px]', 'opacity-25', 'bottom-[10%]')}
                     {renderGroundShadow('translate-x-[46%] rotate-[0deg]', 'w-[38%] max-w-[130px]', 'opacity-25', 'bottom-[10%]')}
                     {renderGroundShadow('translate-x-[0%] rotate-[0deg]', 'w-[38%] max-w-[130px]', 'opacity-50', 'bottom-[7%]')}
                     
-                    <div className="absolute w-[42%] sm:w-[46%] max-w-[130px] -translate-x-[40%] -translate-y-[4%] transform transition-transform duration-500 group-hover:-translate-x-[45%] z-10">
+                    <div className="absolute w-[42%] sm:w-[46%] max-w-[130px] -translate-x-[40%] -translate-y-[4%] transform transition-transform duration-500 group-hover:-translate-x-[45%] z-10" style={{ transformStyle: 'preserve-3d' }}>
                         {renderPhone(images[1] || images[0], true, '', true, false)}
                     </div>
-                    <div className="absolute w-[42%] sm:w-[46%] max-w-[130px] translate-x-[40%] -translate-y-[4%] transform transition-transform duration-500 group-hover:translate-x-[45%] z-10">
+                    <div className="absolute w-[42%] sm:w-[46%] max-w-[130px] translate-x-[40%] -translate-y-[4%] transform transition-transform duration-500 group-hover:translate-x-[45%] z-10" style={{ transformStyle: 'preserve-3d' }}>
                         {renderPhone(images[2] || images[0], true, '', false, true)}
                     </div>
-                    <div className="absolute w-[42%] sm:w-[46%] max-w-[130px] translate-y-[5%] z-20 transform transition-transform duration-500 group-hover:scale-[1.03] group-hover:translate-y-[3%]">
+                    <div className="absolute w-[42%] sm:w-[46%] max-w-[130px] translate-y-[5%] z-20 transform transition-transform duration-500 group-hover:scale-[1.03] group-hover:translate-y-[3%]" style={{ transformStyle: 'preserve-3d' }}>
                         {renderPhone(images[0], false, '', false, false)}
                     </div>
                 </div>

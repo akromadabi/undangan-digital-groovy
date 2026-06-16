@@ -195,8 +195,17 @@ class ResellerSetting extends Model
                 'active' => true,
                 'order'  => 8,
                 'config' => [
-                    'title'    => 'Pilih Paket yang Sesuai',
-                    'subtitle' => 'Harga & Paket',
+                    'title'    => 'Pilih Paket Undangan Digital',
+                    'subtitle' => 'Harga & Paket Undangan',
+                ],
+            ],
+            [
+                'key'    => 'plans_cards',
+                'active' => true,
+                'order'  => 8.5,
+                'config' => [
+                    'title'    => 'Pilih Paket Kartu Ucapan Digital',
+                    'subtitle' => 'Harga & Paket Kartu',
                 ],
             ],
             [

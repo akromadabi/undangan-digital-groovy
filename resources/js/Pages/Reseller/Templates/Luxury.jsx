@@ -653,7 +653,7 @@ export default function Luxury({ reseller, plans = [], themes = [], greetingCard
     const renderGreetingCardsCatalog = (c) => {
         const title = c?.title || 'Kartu Ucapan Premium';
         return (
-            <section id="preview-kartu" className="rl-section">
+            <section id="preview-kartu" className="rl-section rl-section--alt">
                 <div className="rl-container">
                     <div className="rl-section__header">
                         <span className="rl-section__tag">E-Cards</span>
@@ -710,15 +710,53 @@ export default function Luxury({ reseller, plans = [], themes = [], greetingCard
 
     const renderPlans = (c) => {
         const title = c?.title || 'Paket Pilihan Eksklusif';
+        const invitationPlans = plans.filter(p => p.type === 'invitation' || !p.type);
+        if (invitationPlans.length === 0) return null;
         return (
             <section id="plans" className="rl-section">
                 <div className="rl-container">
                     <div className="rl-section__header">
-                        <span className="rl-section__tag">Investasi</span>
+                        <span className="rl-section__tag">Investasi Undangan</span>
                         <h2 className="rl-section__title">{title}</h2>
                     </div>
                     <div className="rl-plans-grid">
-                        {plans.map((plan) => {
+                        {invitationPlans.map((plan) => {
+                            const meta = planMeta[plan.slug] || { color: 'var(--accent)', label: 'Mulai Sekarang' };
+                            const isPopular = !!meta.popular;
+                            return (
+                                <div key={plan.id} className={`rl-plan-card ${isPopular ? 'rl-plan-card--popular' : ''}`}>
+                                    {isPopular && <div className="rl-plan-card__popular-badge">RECOMMENDED</div>}
+                                    <h3 className="rl-plan-card__name">{plan.name}</h3>
+                                    <div className="rl-plan-card__price">
+                                        {plan.price === 0 ? 'GRATIS' : formatRp(plan.price)}
+                                        {plan.price > 0 && <span className="rl-plan-card__duration">/{plan.duration_days} hari</span>}
+                                    </div>
+                                    <p className="rl-plan-card__desc">{plan.description}</p>
+                                    <a href={`${registerUrl}&plan=${plan.slug}`} className={`rl-plan-card__btn ${isPopular ? 'rl-plan-card__btn--popular' : ''}`}>
+                                        {meta.label}
+                                    </a>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+        );
+    };
+
+    const renderPlansCards = (c) => {
+        const title = c?.title || 'Paket Kartu Eksklusif';
+        const cardPlans = plans.filter(p => p.type === 'greeting_card');
+        if (cardPlans.length === 0) return null;
+        return (
+            <section id="plans-cards" className="rl-section">
+                <div className="rl-container">
+                    <div className="rl-section__header">
+                        <span className="rl-section__tag">Investasi Kartu</span>
+                        <h2 className="rl-section__title">{title}</h2>
+                    </div>
+                    <div className="rl-plans-grid">
+                        {cardPlans.map((plan) => {
                             const meta = planMeta[plan.slug] || { color: 'var(--accent)', label: 'Mulai Sekarang' };
                             const isPopular = !!meta.popular;
                             return (
@@ -745,7 +783,7 @@ export default function Luxury({ reseller, plans = [], themes = [], greetingCard
     const renderFaq = (c) => {
         const title = c?.title || 'Pertanyaan Umum';
         return (
-            <section className="rl-section rl-section--alt">
+            <section className="rl-section">
                 <div className="rl-container">
                     <div className="rl-section__header">
                         <span className="rl-section__tag">FAQ</span>
@@ -797,6 +835,7 @@ export default function Luxury({ reseller, plans = [], themes = [], greetingCard
             case 'greeting_cards': return renderGreetingCardsCatalog(config);
             case 'testimonials': return renderTestimonials(config);
             case 'plans': return renderPlans(config);
+            case 'plans_cards': return renderPlansCards(config);
             case 'faq': return renderFaq(config);
             case 'cta': return renderCta(config);
             default: return null;

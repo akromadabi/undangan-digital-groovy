@@ -364,6 +364,9 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
         return feature.description || FEATURE_DESCS[feature.slug] || `Fitur detail untuk ${feature.name}`;
     };
 
+    const invitationPlans = plans.filter(p => p.type === 'invitation' || !p.type);
+    const cardPlans = plans.filter(p => p.type === 'greeting_card');
+
     // Build feature access map: { planId: { featureId: is_enabled } }
     const planFeatureMap = {};
     plans.forEach(plan => {
@@ -1134,274 +1137,17 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                 )}
             </section>
 
-            {/* ══════════════ GREETING CARD SHOWCASE ══════════════ */}
-            {greetingCards.length > 0 && (
-                <section id="preview-kartu" className="rl-section">
+            {/* ══════════════ PRICING - INVITATION ══════════════ */}
+            {invitationPlans.length > 0 && (
+                <section className="rl-section" id="pricing-invitation">
                     <div className="rl-container">
                         <div className="rl-section__header">
-                            <span className="rl-section__tag" style={{ background: 'var(--accent)', color: '#fff' }}>Koleksi Kartu</span>
-                            <h2 className="rl-section__title">Koleksi Kartu Ucapan Premium</h2>
-                            <p className="rl-section__desc">Kirimkan ucapan spesial dengan animasi, musik, dan efek interaktif memukau untuk berbagai momen penting Anda. Klik untuk melihat preview.</p>
-                        </div>
-
-                        {/* Filters & Search Bar for Cards */}
-                        <div className="rl-filter-panel">
-                            <div className="rl-filter-row">
-                                {/* Search Box */}
-                                <div className="rl-filter-search-container">
-                                    <svg style={{
-                                        position: 'absolute',
-                                        left: '0.85rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        width: '16px',
-                                        height: '16px',
-                                        color: 'var(--text-muted)'
-                                    }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                    </svg>
-                                    <input
-                                        type="text"
-                                        value={cardSearchQuery}
-                                        onChange={e => setCardSearchQuery(e.target.value)}
-                                        placeholder="Cari kartu..."
-                                        className="rl-filter-search-input"
-                                    />
-                                </div>
-
-                                {/* Controls */}
-                                <div className="rl-filter-controls">
-                                    {/* Event Types Select Dropdown */}
-                                    <div className="rl-filter-dropdown-wrapper" ref={cardTypeDropdownRef}>
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsCardTypeDropdownOpen(!isCardTypeDropdownOpen)}
-                                            style={{
-                                                border: '1.5px solid ' + (cardSelectedTypes.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
-                                                background: cardSelectedTypes.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
-                                                color: cardSelectedTypes.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
-                                            }}
-                                            className="rl-filter-btn"
-                                        >
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
-                                                <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                    {cardSelectedTypes.length === 0 ? 'Acara' : `Acara (${cardSelectedTypes.length})`}
-                                                </span>
-                                            </div>
-                                            <svg style={{
-                                                width: '12px',
-                                                height: '12px',
-                                                flexShrink: 0,
-                                                transform: isCardTypeDropdownOpen ? 'rotate(180deg)' : 'none',
-                                                transition: 'transform 0.2s'
-                                            }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </button>
-
-                                        {isCardTypeDropdownOpen && (
-                                            <div className="rl-filter-dropdown-menu" style={{
-                                                background: T.isDark ? '#1e293b' : '#ffffff',
-                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
-                                            }}>
-                                                <div className="rl-filter-dropdown-menu-header">
-                                                    <span className="rl-filter-dropdown-menu-title">Tipe Acara</span>
-                                                    {cardSelectedTypes.length > 0 && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={clearCardTypes}
-                                                            className="rl-filter-dropdown-menu-reset"
-                                                        >
-                                                            Reset
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                <div className="rl-filter-dropdown-list">
-                                                    {cardTypesWithCount.map(type => {
-                                                        const isChecked = cardSelectedTypes.includes(type.key);
-                                                        return (
-                                                            <label
-                                                                key={type.key}
-                                                                className="rl-filter-checkbox-label"
-                                                                style={{
-                                                                    color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
-                                                                    background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
-                                                                }}
-                                                            >
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={isChecked}
-                                                                    onChange={() => toggleCardType(type.key)}
-                                                                    className="rl-filter-checkbox-input"
-                                                                />
-                                                                <span>{type.label}</span>
-                                                            </label>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Sort Dropdown */}
-                                    <div className="rl-filter-dropdown-wrapper" ref={cardSortDropdownRef}>
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsCardSortDropdownOpen(!isCardSortDropdownOpen)}
-                                            style={{
-                                                border: '1.5px solid ' + (isCardSortDropdownOpen ? 'var(--accent)' : 'var(--card-border)'),
-                                                background: isCardSortDropdownOpen ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
-                                                color: isCardSortDropdownOpen ? 'var(--accent)' : 'var(--text-secondary)',
-                                                width: '38px',
-                                                height: '38px',
-                                                borderRadius: '100px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s',
-                                                flexShrink: 0
-                                            }}
-                                            title="Urutkan Desain"
-                                        >
-                                            <svg style={{ width: '16px', height: '16px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                                            </svg>
-                                        </button>
-
-                                        {isCardSortDropdownOpen && (
-                                            <div className="rl-filter-dropdown-menu" style={{
-                                                background: T.isDark ? '#1e293b' : '#ffffff',
-                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
-                                            }}>
-                                                <div className="rl-filter-dropdown-menu-header" style={{ borderBottom: '1px solid var(--card-border)', paddingBottom: '0.5rem' }}>
-                                                    <span className="rl-filter-dropdown-menu-title">Urutkan</span>
-                                                </div>
-                                                <div className="rl-filter-dropdown-list">
-                                                    {[
-                                                        { key: 'terbaru', label: 'Terbaru' },
-                                                        { key: 'populer', label: 'Terpopuler' },
-                                                        { key: 'disukai', label: 'Terfavorit' }
-                                                    ].map(opt => {
-                                                        const isActive = cardSortKey === opt.key;
-                                                        return (
-                                                            <button
-                                                                key={opt.key}
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setCardSortKey(opt.key);
-                                                                    setIsCardSortDropdownOpen(false);
-                                                                }}
-                                                                style={{
-                                                                    width: '100%',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'space-between',
-                                                                    padding: '0.4rem 0.5rem',
-                                                                    borderRadius: '8px',
-                                                                    fontSize: '0.75rem',
-                                                                    fontWeight: 600,
-                                                                    cursor: 'pointer',
-                                                                    transition: 'background 0.2s',
-                                                                    border: 'none',
-                                                                    background: isActive ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent',
-                                                                    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-                                                                    textAlign: 'left',
-                                                                    margin: '2px 0'
-                                                                }}
-                                                            >
-                                                                <span>{opt.label}</span>
-                                                                {isActive && (
-                                                                    <svg style={{ width: '14px', height: '14px', color: 'var(--accent)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                                    </svg>
-                                                                )}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {sortedCards.length > 0 ? (
-                        <div className="rl-themes-scroll-wrap">
-                            <div className="rl-themes-scroll" id="cards-scroll">
-                                {sortedCards.map(card => (
-                                    <div key={card.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
-                                        <GreetingCardPreviewCard 
-                                            theme={card}
-                                            reseller={reseller}
-                                            onUse={handleUseCard}
-                                            typeOptions={greetingCardTypeOptions}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="rl-themes-scroll-controls">
-                                <button onClick={() => document.getElementById('cards-scroll')?.scrollBy({ left: -280, behavior: 'smooth' })} className="rl-scroll-btn">←</button>
-                                <Link href={getCardsUrl()} className="rl-btn rl-btn--accent-outline">Lihat Semua Kartu →</Link>
-                                <button onClick={() => document.getElementById('cards-scroll')?.scrollBy({ left: 280, behavior: 'smooth' })} className="rl-scroll-btn">→</button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="rl-container" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                            Belum ada kartu ucapan dalam tipe ini atau tidak ada hasil pencarian yang cocok.
-                        </div>
-                    )}
-                </section>
-            )}
-
-            {/* ══════════════ TESTIMONIALS ══════════════ */}
-            <section className="rl-section">
-                <div className="rl-container">
-                    <div className="rl-section__header">
-                        <span className="rl-section__tag">Testimoni</span>
-                        <h2 className="rl-section__title">Dipercaya Ribuan Pasangan Bahagia</h2>
-                        <p className="rl-section__desc">Lihat apa kata mereka yang sudah menggunakan layanan kami.</p>
-                    </div>
-                </div>
-                <div className="rl-marquee-wrap">
-                    <div className="rl-marquee" ref={marqueeRef}>
-                        {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-                            <div key={i} className="rl-testi-card">
-                                <div className="rl-testi-card__stars">
-                                    {[...Array(t.stars)].map((_, j) => <StarIcon key={j} />)}
-                                </div>
-                                <p className="rl-testi-card__text">"{t.text}"</p>
-                                <div className="rl-testi-card__author">
-                                    <div className="rl-testi-card__avatar">
-                                        {t.name.split(' & ').map(n => n[0]).join('')}
-                                    </div>
-                                    <div>
-                                        <div className="rl-testi-card__name">{t.name}</div>
-                                        <div className="rl-testi-card__city">{t.city}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ══════════════ PRICING ══════════════ */}
-            {plans.length > 0 && (
-                <section className="rl-section rl-section--alt">
-                    <div className="rl-container">
-                        <div className="rl-section__header">
-                            <span className="rl-section__tag">Harga & Paket</span>
-                            <h2 className="rl-section__title">Pilih Paket yang Sesuai</h2>
-                            <p className="rl-section__desc">Mulai gratis, upgrade kapan saja sesuai kebutuhan Anda.</p>
+                            <span className="rl-section__tag">Harga & Paket Undangan</span>
+                            <h2 className="rl-section__title">Pilih Paket Undangan Digital</h2>
+                            <p className="rl-section__desc">Mulai gratis, upgrade kapan saja sesuai kebutuhan undangan Anda.</p>
                         </div>
                         <div className="rl-pricing">
-                            {plans.map((plan, i) => {
+                            {invitationPlans.map((plan, i) => {
                                 const meta = planMeta[plan.slug] || planMeta.silver;
                                 return (
                                     <div key={i} className={`rl-plan ${meta.popular ? 'rl-plan--popular' : ''}`}
@@ -1461,7 +1207,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                             {showFeatureDetails && (
                                                 <th style={{ textAlign: 'left', width: '240px', minWidth: '220px', maxWidth: '280px', whiteSpace: 'normal', wordBreak: 'break-word' }}>Detail Fitur</th>
                                             )}
-                                            {plans.map(plan => (
+                                            {invitationPlans.map(plan => (
                                                 <th key={plan.id}>{plan.name}</th>
                                             ))}
                                         </tr>
@@ -1469,7 +1215,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                     <tbody>
                                         {/* Quota rows */}
                                         <tr className="rl-comparison-cat-row">
-                                            <td colSpan={showFeatureDetails ? plans.length + 2 : plans.length + 1}>
+                                            <td colSpan={showFeatureDetails ? invitationPlans.length + 2 : invitationPlans.length + 1}>
                                                 <span className="rl-comparison-cat-label">Kuota & Batasan</span>
                                             </td>
                                         </tr>
@@ -1480,7 +1226,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                                     Batas maksimal jumlah tamu yang dapat diundang
                                                 </td>
                                             )}
-                                            {plans.map(plan => (
+                                            {invitationPlans.map(plan => (
                                                 <td key={plan.id} style={{ fontWeight: 700 }}>{plan.max_guests?.toLocaleString()}</td>
                                             ))}
                                         </tr>
@@ -1491,7 +1237,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                                     Maksimal foto yang dapat diunggah ke galeri undangan
                                                 </td>
                                             )}
-                                            {plans.map(plan => (
+                                            {invitationPlans.map(plan => (
                                                 <td key={plan.id} style={{ fontWeight: 700 }}>{plan.max_galleries}</td>
                                             ))}
                                         </tr>
@@ -1502,7 +1248,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                                     Masa aktif undangan digital setelah dibuat
                                                 </td>
                                             )}
-                                            {plans.map(plan => (
+                                            {invitationPlans.map(plan => (
                                                 <td key={plan.id} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                                                     {plan.slug === 'free' ? '5 hari (Trial)' : (plan.duration_days > 0 ? `${plan.duration_days} hari` : 'Selamanya (∞)')}
                                                 </td>
@@ -1513,7 +1259,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                         {Object.entries(featuresByCategory).map(([category, catFeatures]) => (
                                             <Fragment key={category}>
                                                 <tr className="rl-comparison-cat-row">
-                                                    <td colSpan={showFeatureDetails ? plans.length + 2 : plans.length + 1}>
+                                                    <td colSpan={showFeatureDetails ? invitationPlans.length + 2 : invitationPlans.length + 1}>
                                                         <span className="rl-comparison-cat-label">{category}</span>
                                                     </td>
                                                 </tr>
@@ -1530,7 +1276,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                                                 {getFeatureDesc(feature)}
                                                             </td>
                                                         )}
-                                                        {plans.map(plan => {
+                                                        {invitationPlans.map(plan => {
                                                             const enabled = plan.slug === 'free' ? true : planFeatureMap[plan.id]?.[feature.id];
                                                             return (
                                                                 <td key={plan.id}>
@@ -1561,6 +1307,261 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                     </div>
                 </section>
             )}
+
+            {/* ══════════════ GREETING CARD SHOWCASE ══════════════ */}
+            {greetingCards.length > 0 && (
+                <section id="preview-kartu" className="rl-section rl-section--alt">
+                    <div className="rl-container">
+                        <div className="rl-section__header">
+                            <span className="rl-section__tag" style={{ background: 'var(--accent)', color: '#fff' }}>Koleksi Kartu</span>
+                            <h2 className="rl-section__title">Koleksi Kartu Ucapan Premium</h2>
+                            <p className="rl-section__desc">Kirimkan ucapan spesial dengan animasi, musik, dan efek interaktif memukau untuk berbagai momen penting Anda. Klik untuk melihat preview.</p>
+                        </div>
+
+                        {/* Filters & Search Bar for Cards */}
+                        <div className="rl-filter-panel">
+                            <div className="rl-filter-row">
+                                {/* Search Box */}
+                                <div className="rl-filter-search-container">
+                                    <svg style={{
+                                        position: 'absolute',
+                                        left: '0.85rem',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        width: '16px',
+                                        height: '16px',
+                                        color: 'var(--text-muted)'
+                                    }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        value={cardSearchQuery}
+                                        onChange={e => setCardSearchQuery(e.target.value)}
+                                        placeholder="Cari kartu..."
+                                        className="rl-filter-search-input"
+                                    />
+                                </div>
+
+                                {/* Controls */}
+                                <div className="rl-filter-controls">
+                                    {/* Event Types Select Dropdown */}
+                                    <div className="rl-filter-dropdown-wrapper" ref={cardTypeDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCardTypeDropdownOpen(!isCardTypeDropdownOpen)}
+                                            style={{
+                                                border: '1.5px solid ' + (cardSelectedTypes.length > 0 ? 'var(--accent)' : 'var(--card-border)'),
+                                                background: cardSelectedTypes.length > 0 ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
+                                                color: cardSelectedTypes.length > 0 ? 'var(--accent)' : 'var(--text-secondary)'
+                                            }}
+                                            className="rl-filter-btn"
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                                                <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                                </svg>
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {cardSelectedTypes.length === 0 ? 'Kategori Kartu' : `Kategori (${cardSelectedTypes.length})`}
+                                                </span>
+                                            </div>
+                                            <svg style={{
+                                                width: '12px',
+                                                height: '12px',
+                                                flexShrink: 0,
+                                                transform: isCardTypeDropdownOpen ? 'rotate(180deg)' : 'none',
+                                                transition: 'transform 0.2s'
+                                            }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        {isCardTypeDropdownOpen && (
+                                            <div className="rl-filter-dropdown-menu" style={{
+                                                background: T.isDark ? '#1e293b' : '#ffffff',
+                                                border: '1.5px solid ' + (T.isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'),
+                                            }}>
+                                                <div className="rl-filter-dropdown-menu-header">
+                                                    <span className="rl-filter-dropdown-menu-title">Kategori Kartu</span>
+                                                    {cardSelectedTypes.length > 0 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={cardClearTypes}
+                                                            className="rl-filter-dropdown-menu-reset"
+                                                        >
+                                                            Reset
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="rl-filter-dropdown-list">
+                                                    {cardTypesWithCount.map(opt => {
+                                                        const isChecked = cardSelectedTypes.includes(opt.key);
+                                                        return (
+                                                            <label
+                                                                key={opt.key}
+                                                                className="rl-filter-checkbox-label"
+                                                                style={{
+                                                                    color: isChecked ? 'var(--accent)' : 'var(--text-secondary)',
+                                                                    background: isChecked ? 'rgba(var(--accent-rgb), 0.05)' : 'transparent'
+                                                                }}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={() => cardToggleType(opt.key)}
+                                                                    className="rl-filter-checkbox-input"
+                                                                />
+                                                                <span style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                                                                    <span>{opt.label}</span>
+                                                                    <span style={{ opacity: 0.6 }}>({opt.count})</span>
+                                                                </span>
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Sort By Dropdown */}
+                                    <div className="rl-filter-dropdown-wrapper" ref={cardSortDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCardSortDropdownOpen(!isCardSortDropdownOpen)}
+                                            className="rl-filter-btn"
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <svg style={{ width: '14px', height: '14px', color: 'var(--text-secondary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m-4 4l4 4" />
+                                                </svg>
+                                                <span>Urutkan: {cardSortKey === 'terbaru' ? 'Terbaru' : cardSortKey === 'populer' ? 'Terpopuler' : 'Paling Disukai'}</span>
+                                            </div>
+                                            <svg style={{
+                                                width: '12px',
+                                                height: '12px',
+                                                transform: isCardSortDropdownOpen ? 'rotate(180deg)' : 'none',
+                                                transition: 'transform 0.2s'
+                                            }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        {isCardSortDropdownOpen && (
+                                            <div className="rl-dropdown-menu">
+                                                {['terbaru', 'populer', 'disukai'].map(key => (
+                                                    <button 
+                                                        key={key} 
+                                                        onClick={() => { setCardSortKey(key); setIsCardSortDropdownOpen(false); }}
+                                                        className={`rl-dropdown-menu-item ${cardSortKey === key ? 'rl-dropdown-menu-item--active' : ''}`}
+                                                    >
+                                                        {key === 'terbaru' ? 'Terbaru' : key === 'populer' ? 'Terpopuler' : 'Paling Disukai'}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {sortedCards.length > 0 ? (
+                            <div className="rl-themes-scroll-wrap">
+                                <div className="rl-themes-scroll" id="cards-scroll">
+                                    {sortedCards.map(card => (
+                                        <div key={card.id} className="w-[240px] sm:w-[260px] flex-shrink-0">
+                                            <GreetingCardPreviewCard 
+                                                theme={card}
+                                                reseller={reseller}
+                                                onUse={handleUseCard}
+                                                typeOptions={greetingCardTypeOptions}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="rl-themes-scroll-controls">
+                                    <button onClick={() => document.getElementById('cards-scroll')?.scrollBy({ left: -280, behavior: 'smooth' })} className="rl-scroll-btn">←</button>
+                                    <Link href={getCardsUrl()} className="rl-btn rl-btn--accent-outline">Lihat Semua Kartu →</Link>
+                                    <button onClick={() => document.getElementById('cards-scroll')?.scrollBy({ left: 280, behavior: 'smooth' })} className="rl-scroll-btn">→</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="rl-container" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                                Belum ada kartu ucapan dalam tipe ini atau tidak ada hasil pencarian yang cocok.
+                            </div>
+                        )}
+                    </div>
+                </section>
+            )}
+
+            {/* ══════════════ PRICING - CARD ══════════════ */}
+            {cardPlans.length > 0 && (
+                <section className="rl-section" id="pricing-cards">
+                    <div className="rl-container">
+                        <div className="rl-section__header">
+                            <span className="rl-section__tag">Harga & Paket Kartu</span>
+                            <h2 className="rl-section__title">Pilih Paket Kartu Ucapan Digital</h2>
+                            <p className="rl-section__desc">Mulai gratis, upgrade kapan saja sesuai kebutuhan kartu ucapan Anda.</p>
+                        </div>
+                        <div className="rl-pricing">
+                            {cardPlans.map((plan, i) => {
+                                const meta = planMeta[plan.slug] || planMeta.silver;
+                                return (
+                                    <div key={i} className={`rl-plan ${meta.popular ? 'rl-plan--popular' : ''}`}
+                                        style={{ '--plan-color': meta.color, '--plan-glow': meta.glow }}>
+                                        {meta.popular && <div className="rl-plan__popular-badge">⭐ Paling Populer</div>}
+                                        <div className="rl-plan__name">{plan.name}</div>
+                                        <div className="rl-plan__price">
+                                            {plan.price > 0 ? formatRp(plan.price) : <span style={{ color: '#4ade80' }}>Gratis</span>}
+                                            {(plan.duration_days > 0 || plan.slug === 'free') && <span className="rl-plan__duration"> / {plan.slug === 'free' ? '5 hari' : `${plan.duration_days} hari`}</span>}
+                                        </div>
+                                        <div className="rl-plan__divider" />
+                                        <ul className="rl-plan__features">
+                                            <li><Svg d="M4.5 12.75l6 6 9-13.5" size={16} color={meta.color} /> Max <strong>{plan.max_guests?.toLocaleString()}</strong> tamu</li>
+                                            <li><Svg d="M4.5 12.75l6 6 9-13.5" size={16} color={meta.color} /> Max <strong>{plan.max_galleries}</strong> foto galeri</li>
+                                            {plan.enable_rsvp && <li><Svg d="M4.5 12.75l6 6 9-13.5" size={16} color={meta.color} /> Fitur RSVP</li>}
+                                            {plan.enable_qr_code && <li><Svg d="M4.5 12.75l6 6 9-13.5" size={16} color={meta.color} /> QR Code Check-in</li>}
+                                            {plan.enable_digital_envelope && <li><Svg d="M4.5 12.75l6 6 9-13.5" size={16} color={meta.color} /> Amplop Digital</li>}
+                                        </ul>
+                                        <a href={registerUrl} className="rl-plan__btn">{meta.label}</a>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ══════════════ TESTIMONIALS ══════════════ */}
+            <section className="rl-section rl-section--alt">
+                <div className="rl-container">
+                    <div className="rl-section__header">
+                        <span className="rl-section__tag">Testimoni</span>
+                        <h2 className="rl-section__title">Dipercaya Ribuan Pasangan Bahagia</h2>
+                        <p className="rl-section__desc">Lihat apa kata mereka yang sudah menggunakan layanan kami.</p>
+                    </div>
+                </div>
+                <div className="rl-marquee-wrap">
+                    <div className="rl-marquee" ref={marqueeRef}>
+                        {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
+                            <div key={i} className="rl-testi-card">
+                                <div className="rl-testi-card__stars">
+                                    {[...Array(t.stars)].map((_, j) => <StarIcon key={j} />)}
+                                </div>
+                                <p className="rl-testi-card__text">"{t.text}"</p>
+                                <div className="rl-testi-card__author">
+                                    <div className="rl-testi-card__avatar">
+                                        {t.name.split(' & ').map(n => n[0]).join('')}
+                                    </div>
+                                    <div>
+                                        <div className="rl-testi-card__name">{t.name}</div>
+                                        <div className="rl-testi-card__city">{t.city}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
             {/* ══════════════ FAQ ══════════════ */}
             <section className="rl-section">

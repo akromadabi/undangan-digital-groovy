@@ -139,7 +139,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
 
         return (
             <div 
-                className={`phone-mockup relative ${widthClass} aspect-[9/18.5] bg-black border-[2px] sm:border-[5px] border-[#1a1a1a] rounded-[12px] sm:rounded-[24px] overflow-hidden transition-all duration-500 ${perspectiveClass} ${isScaledDown ? 'phone-back' : 'phone-front'} ${additionalClass}`}
+                className={`phone-mockup relative ${widthClass} aspect-[9/17.8] bg-black border-[2px] sm:border-[3.2px] border-[#1a1a1a] rounded-[13px] sm:rounded-[22px] overflow-hidden transition-all duration-500 ${perspectiveClass} ${isScaledDown ? 'phone-back' : 'phone-front'} ${additionalClass}`}
                 style={{
                     transformStyle: 'preserve-3d',
                     boxShadow: isScaledDown 
@@ -156,7 +156,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                 </div>
                 
                 {/* Screen Container */}
-                <div className="w-full h-full overflow-hidden bg-gray-900 rounded-[9px] sm:rounded-[19px] relative group-hover:shadow-inner">
+                <div className="w-full h-full overflow-hidden bg-gray-900 rounded-[11px] sm:rounded-[19px] relative group-hover:shadow-inner">
                     <img 
                         src={getImageUrl(imageSrc)} 
                         alt="Screen Preview"
@@ -165,7 +165,7 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                     {/* Glass glare overlay */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-10" />
                     {/* Bezel inner highlight */}
-                    <div className="absolute inset-0 border border-white/10 rounded-[9px] sm:rounded-[19px] pointer-events-none z-10" />
+                    <div className="absolute inset-0 border border-white/10 rounded-[11px] sm:rounded-[19px] pointer-events-none z-10" />
                 </div>
             </div>
         );

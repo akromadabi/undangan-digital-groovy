@@ -771,7 +771,6 @@ function BioPreview({ config, settings }) {
 export default function BioLinkEditor({ settings, bioConfig }) {
     const [config, setConfig] = useState(bioConfig);
     const [saving, setSaving] = useState(false);
-    const [saved, setSaved] = useState(true);
     const isFirstRender = useRef(true);
     const [activeTab, setActiveTab] = useState('sections');
     const [toast, setToast] = useState(null);
@@ -780,6 +779,12 @@ export default function BioLinkEditor({ settings, bioConfig }) {
     const dragIndex = useRef(null);
     const saveTimeoutRef = useRef(null);
     const skipAutosaveRef = useRef(false);
+
+    const configRef = useRef(config);
+    configRef.current = config;
+    const lastSavedConfigRef = useRef(bioConfig);
+
+    const saved = JSON.stringify(config) === JSON.stringify(lastSavedConfigRef.current);
 
     const openModal = (sectionId, sectionType) => {
         if (sectionType === 'sosmed') {
@@ -817,10 +822,12 @@ export default function BioLinkEditor({ settings, bioConfig }) {
             await axios.post('/admin/bio', configToSave, {
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
             });
-            setSaved(true);
+            lastSavedConfigRef.current = configToSave;
+            return true;
         } catch (err) {
             console.error("Save error", err);
             showToast('Gagal menyimpan. Coba lagi.', 'error');
+            return false;
         } finally {
             setSaving(false);
         }
@@ -873,25 +880,12 @@ export default function BioLinkEditor({ settings, bioConfig }) {
             return;
         }
 
-        setSaved(false);
-
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
         }
 
-        saveTimeoutRef.current = setTimeout(async () => {
-            setSaving(true);
-            try {
-                await axios.post('/admin/bio', config, {
-                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
-                });
-                setSaved(true);
-            } catch (err) {
-                console.error("Autosave error", err);
-                showToast('Gagal menyimpan otomatis. Coba lagi.', 'error');
-            } finally {
-                setSaving(false);
-            }
+        saveTimeoutRef.current = setTimeout(() => {
+            triggerSave(configRef.current);
         }, 1000);
 
         return () => {
@@ -946,11 +940,16 @@ export default function BioLinkEditor({ settings, bioConfig }) {
         }
     };
 
-    const closeModal = () => {
-        if (!saved) {
-            triggerSave(config);
+    const closeModal = async () => {
+        const isDirty = JSON.stringify(configRef.current) !== JSON.stringify(lastSavedConfigRef.current);
+        if (isDirty) {
+            const success = await triggerSave(configRef.current);
+            if (success) {
+                setActiveModalSection(null);
+            }
+        } else {
+            setActiveModalSection(null);
         }
-        setActiveModalSection(null);
     };
 
     const subdomain = settings?.subdomain;
@@ -1176,7 +1175,7 @@ export default function BioLinkEditor({ settings, bioConfig }) {
                                             <p className="text-[10px] text-[#999] mt-0.5">Atur variasi tampilan dan konten untuk section ini</p>
                                         </div>
                                     </div>
-                                    <button onClick={closeModal} className="p-1.5 rounded-xl hover:bg-[#f5f3f0] text-[#888] hover:text-[#555] transition-colors">
+                                    <button onClick={closeModal} disabled={saving} className="p-1.5 rounded-xl hover:bg-[#f5f3f0] text-[#888] hover:text-[#555] transition-colors disabled:opacity-50">
                                         <Icon d={ICONS.x} className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -1374,8 +1373,17 @@ export default function BioLinkEditor({ settings, bioConfig }) {
 
                                 {/* Modal Footer */}
                                 <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#f0ede8] bg-[#fafaf9]">
-                                    <button onClick={closeModal}
-                                        className="px-5 py-2.5 rounded-xl bg-[#E5654B] text-white text-sm font-semibold hover:bg-[#d4573f] transition-colors shadow-sm">
+                                    <button
+                                        onClick={closeModal}
+                                        disabled={saving}
+                                        className="px-5 py-2.5 rounded-xl bg-[#E5654B] text-white text-sm font-semibold hover:bg-[#d4573f] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 justify-center min-w-[90px]"
+                                    >
+                                        {saving && (
+                                            <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                        )}
                                         Selesai
                                     </button>
                                 </div>

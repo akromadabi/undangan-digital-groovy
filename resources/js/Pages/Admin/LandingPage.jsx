@@ -84,6 +84,10 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
     const getSectionLabel = (key) => {
         if (key === 'banner') return 'Promo & Popup';
         if (key === 'loading_screen') return 'Loading Screen';
+        if (key === 'plans') return 'Paket Undangan';
+        if (key === 'plans_cards') return 'Paket Kartu Ucapan';
+        if (key === 'preview') return 'Tema Undangan';
+        if (key === 'greeting_cards') return 'Tema Kartu Ucapan';
         return key.replace(/_/g, ' ');
     };
 
@@ -131,6 +135,7 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
         greeting_cards: [{ id: 'grid', label: 'Grid Layout', icon: '⊞' }, { id: 'carousel', label: 'Carousel Slider', icon: '↔' }, { id: 'list', label: 'Simple List', icon: '≡' }],
         testimonials: [{ id: 'marquee', label: 'Marquee', icon: '↔' }, { id: 'grid', label: 'Grid', icon: '⊞' }, { id: 'quote', label: 'Quote', icon: '❝' }],
         plans:        [{ id: 'cards', label: 'Pricing Cards', icon: '⊞' }, { id: 'stacked', label: 'Row Stacked', icon: '☰' }, { id: 'highlight', label: 'Featured Focus', icon: '⭐' }],
+        plans_cards:  [{ id: 'cards', label: 'Pricing Cards', icon: '⊞' }, { id: 'stacked', label: 'Row Stacked', icon: '☰' }, { id: 'highlight', label: 'Featured Focus', icon: '⭐' }],
         faq:          [{ id: 'accordion', label: 'Accordion', icon: '≡' }, { id: 'twocol', label: '2 Kolom', icon: '⊟' }, { id: 'grouped', label: 'Grouped', icon: '⊞' }],
         cta:          [{ id: 'dark', label: 'Dark', icon: '■' }, { id: 'split', label: 'Split', icon: '◧' }, { id: 'minimal', label: 'Minimal', icon: '○' }],
     };
@@ -1867,6 +1872,30 @@ export default function LandingPage({ settings, themes, defaultSections, savedSe
                                             type="text"
                                             value={selectedSection.config.title || ''}
                                             onChange={e => updateSectionConfigField('plans', 'title', e.target.value)}
+                                            className="w-full px-3 py-2 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-xs outline-none"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ══ SECTION: PLANS CARDS ══ */}
+                            {selectedSection.key === 'plans_cards' && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Sub-judul Section (Tag)</label>
+                                        <input
+                                            type="text"
+                                            value={selectedSection.config.subtitle || ''}
+                                            onChange={e => updateSectionConfigField('plans_cards', 'subtitle', e.target.value)}
+                                            className="w-full px-3 py-2 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-xs outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Judul Utama Section</label>
+                                        <input
+                                            type="text"
+                                            value={selectedSection.config.title || ''}
+                                            onChange={e => updateSectionConfigField('plans_cards', 'title', e.target.value)}
                                             className="w-full px-3 py-2 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-xs outline-none"
                                         />
                                     </div>

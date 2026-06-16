@@ -959,6 +959,78 @@ Gunakan checklist ini setelah selesai membuat tema baru sebelum dinyatakan siap 
 | 9 | ✅ QR Code, rekening, galeri tidak crash saat data kosong | Cek masing-masing section dengan data kosong, harusnya return null |
 | 10 | ✅ Build production berhasil tanpa error | Jalankan `npm run build` dan periksa output terminal |
 
+---
+
+## 12. Standar Responsivitas Layar Lebar (Tablet & PC Desktop)
+
+Setiap tema baru **WAJIB** mendukung responsivitas layar lebar agar tidak menyisakan ruang margin hitam kosong (*emulator-like bars*) di kiri-kanan saat dibuka di tablet portrait, tablet landscape, atau desktop PC.
+
+### 12.1 Penanganan Latar Belakang & Batas Kontainer (Global & Tablet Portrait)
+* **Latar Belakang Halaman (`.pn-page` atau sejenisnya)**: Latar belakang root halaman wajib diset menggunakan warna yang **senada dengan warna kertas/tema undangan** (bukan warna hitam pekat `#000000` atau cokelat gelap kayu `--pn-desk`) secara global. Hal ini agar sisi tepi kiri/kanan yang kosong menyatu secara visual dengan undangan di semua resolusi.
+* **Lebar Kontainer Maksimal (`.pn-container`)**:
+  * Pada layar tablet portrait (lebar $\ge 768\text{px}$ hingga $991\text{px}$), kontainer undangan diatur ke `max-width: 768px` agar memenuhi seluruh layar tablet potrait secara rapi tanpa sisa margin.
+  * Garis tepi kontainer (`border-left` / `border-right`) pada mode desktop/tablet wajib disesuaikan menjadi warna gelap tipis ber-opacity rendah (contoh: `rgba(0, 0, 0, 0.08) dashed`) dan bayangan kontainer dibuat sangat lembut (`box-shadow: 0 0 30px rgba(0,0,0,0.08)`). Jangan gunakan garis tepi putih terang karena akan tidak terlihat pada background halaman yang kini terang.
+
+### 12.2 Menu Navigasi Samping Kapsul (Tablet Landscape & Desktop)
+Ketika lebar layar masuk ke ukuran desktop atau tablet landscape (lebar layar $\ge 992\text{px}$), menu navigasi bottom bar horizontal harus diubah menjadi **vertical floating capsule menu** yang diletakkan di **sisi kiri luar kontainer**:
+* **Posisi Fixed**: Menu samping ditempatkan menggunakan posisi fixed di sebelah kiri kontainer:
+  ```css
+  @media (min-width: 992px) {
+    .pn-nav-wrapper {
+      position: fixed;
+      top: 50%;
+      bottom: auto;
+      right: calc(50% + 384px + 20px); /* Melayang 20px di kiri kontainer 768px (half width = 384px) */
+      left: auto;
+      transform: translateY(-50%);
+      width: auto;
+      background-color: transparent;
+      border-top: none;
+      box-shadow: none;
+      z-index: 900;
+      display: flex;
+      justify-content: center;
+    }
+    .pn-nav-menu {
+      flex-direction: column;
+      max-width: 75px;
+      /* Tambahkan styling background senada, border tipis, & border-radius: 40px */
+    }
+  }
+  ```
+* **Arah Tooltip Label**: Karena menu berada di sisi kiri kontainer, label menu (seperti "Beranda", "Mempelai", "Acara") yang muncul saat di-hover/di-klik **wajib meluncur ke arah KANAN** (ke arah celah antara menu dan undangan utama) agar tidak terpotong tepi layar kiri:
+  ```css
+  @media (min-width: 992px) {
+    .pn-nav-label {
+      position: absolute;
+      left: 55px; /* Tampilkan di sisi kanan tombol */
+      right: auto;
+      /* Styling tooltip font typewriter, padding, border-radius */
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+    /* Panah indikator tooltip menunjuk ke kiri (ke arah tombol) */
+    .pn-nav-label::before {
+      content: '';
+      position: absolute;
+      right: 100%;
+      left: auto;
+      top: 50%;
+      transform: translateY(-50%);
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent var(--pn-primary) transparent transparent;
+    }
+    .pn-nav-btn:hover .pn-nav-label {
+      opacity: 1;
+      left: 50px; /* Efek meluncur ke kanan */
+    }
+  }
+  ```
+* **Floating Controls**: Jangan lupa menyesuaikan juga posisi `.pn-floating-controls` (tombol audio, fullscreen, QR) agar tetap menempel presisi di tepi kanan dalam kontainer yang melebar (`right: calc(50% - 369px)` pada kontainer `768px`).
+
 
 
 

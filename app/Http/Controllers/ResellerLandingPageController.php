@@ -39,6 +39,7 @@ class ResellerLandingPageController extends Controller
                 'id' => $plan->id,
                 'name' => $plan->name,
                 'slug' => $plan->slug,
+                'type' => $plan->type,
                 'price' => isset($resellerPrices[$plan->id])
                     ? (float)$resellerPrices[$plan->id]
                     : (float)$plan->price,
@@ -66,7 +67,7 @@ class ResellerLandingPageController extends Controller
 
         // Get themes for gallery
         $themes = \App\Models\Theme::where('is_active', true)
-            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url', 'allowed_plans')
             ->latest()
             ->take(8)
             ->get();
@@ -78,7 +79,7 @@ class ResellerLandingPageController extends Controller
 
         // Get greeting cards for gallery
         $greetingCards = \App\Models\GreetingCardTemplate::where('is_active', true)
-            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'type', 'base_likes', 'sort_order')
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'type', 'base_likes', 'sort_order', 'price', 'allowed_plans')
             ->orderBy('sort_order')
             ->get();
         $greetingCards = \App\Models\GreetingCardTemplate::applyResellerCustomizations($greetingCards, $reseller->id);
@@ -154,9 +155,46 @@ class ResellerLandingPageController extends Controller
         }
  
         $reseller = $setting->reseller;
+
+        // Get plans with reseller pricing and feature access
+        $plans = SubscriptionPlan::with('featureAccess.feature')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        $resellerPrices = ResellerPlanPrice::where('reseller_id', $reseller->id)
+            ->pluck('reseller_price', 'plan_id');
+
+        $plansData = $plans->map(function ($plan) use ($resellerPrices) {
+            return [
+                'id' => $plan->id,
+                'name' => $plan->name,
+                'slug' => $plan->slug,
+                'type' => $plan->type,
+                'price' => isset($resellerPrices[$plan->id])
+                    ? (float)$resellerPrices[$plan->id]
+                    : (float)$plan->price,
+                'duration_days' => $plan->duration_days,
+                'max_guests' => $plan->max_guests,
+                'max_galleries' => $plan->max_galleries,
+                'description' => $plan->description,
+                'feature_access' => $plan->featureAccess->map(function ($fa) {
+                    return [
+                        'feature_id' => $fa->feature_id,
+                        'is_enabled' => (bool)$fa->is_enabled,
+                        'feature' => $fa->feature ? [
+                            'id' => $fa->feature->id,
+                            'name' => $fa->feature->name,
+                            'slug' => $fa->feature->slug,
+                            'category' => $fa->feature->category,
+                        ] : null,
+                    ];
+                })->toArray(),
+            ];
+        });
  
         $themes = \App\Models\Theme::where('is_active', true)
-            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url')
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url', 'allowed_plans')
             ->orderBy('sort_order')
             ->get();
         $themes = \App\Models\Theme::applyResellerCustomizations($themes, $reseller->id);
@@ -209,6 +247,7 @@ class ResellerLandingPageController extends Controller
             'greetingCards' => $greetingCards,
             'greetingCardTypeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
             'defaultTab' => $defaultTab,
+            'plans' => $plansData,
         ]);
     }
 

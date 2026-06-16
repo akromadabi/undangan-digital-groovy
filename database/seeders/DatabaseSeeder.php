@@ -224,6 +224,7 @@ class DatabaseSeeder extends Seeder
             AdatSundaThemeSeeder::class,
             AdatBaliThemeSeeder::class,
             AdatBatakThemeSeeder::class,
+            AdatBetawiThemeSeeder::class,
             WhatsappThemeSeeder::class,
             SpidermanThemeSeeder::class,
             CandyLandThemeSeeder::class,

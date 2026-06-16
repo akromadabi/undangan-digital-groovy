@@ -1467,7 +1467,7 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
     const renderGreetingCardsCatalog = (c) => {
         const title = c?.title || 'Koleksi Kartu Ucapan Premium';
         return (
-            <section className="rl-catalog rl-catalog--alt">
+            <section className="rl-catalog">
                 <div className="rl-catalog__inner">
                     <div className="rl-catalog__header">
                         <h2 className="rl-catalog__title">{title}</h2>
@@ -1509,7 +1509,7 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
         const items = c?.items || TESTIMONIALS;
 
         return (
-            <section className="rl-testimonials">
+            <section className="rl-testimonials" style={{ background: 'var(--section-base)' }}>
                 <div className="rl-testimonials__inner">
                     <h2 className="rl-section-title">{title}</h2>
                     <div className="rl-testimonials__marquee-container">
@@ -1534,13 +1534,66 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
     };
 
     const renderPlans = (c) => {
-        const title = c?.title || 'Pilih Paket yang Sesuai';
+        const title = c?.title || 'Pilih Paket Undangan Digital';
+        const invitationPlans = plans.filter(p => p.type === 'invitation' || !p.type);
+        if (invitationPlans.length === 0) return null;
         return (
-            <section className="rl-pricing" id="plans">
+            <section className="rl-pricing" id="plans" style={{ background: 'var(--section-alt)' }}>
                 <div className="rl-pricing__inner">
                     <h2 className="rl-section-title">{title}</h2>
                     <div className="rl-pricing__grid">
-                        {plans.map((p) => {
+                        {invitationPlans.map((p) => {
+                            const meta = planMeta[p.slug] || planMeta.free;
+                            const isPopular = meta.popular;
+                            return (
+                                <div key={p.id} className={`rl-pricing-card ${isPopular ? 'rl-pricing-card--popular' : ''}`}>
+                                    {isPopular && <div className="rl-pricing-card__popular-badge">Terpopuler</div>}
+                                    <h3 className="rl-pricing-card__name">{p.name}</h3>
+                                    <div className="rl-pricing-card__price">
+                                        <span className="rl-pricing-card__price-amount">{formatRp(p.price)}</span>
+                                        <span className="rl-pricing-card__price-period">/paket</span>
+                                    </div>
+                                    <p className="rl-pricing-card__desc">{p.description}</p>
+                                    
+                                    <div style={{ flex: 1, margin: '1.5rem 0' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                                                <Svg d="M4.5 12.75l6 6 9-13.5" size={16} color="var(--accent)" />
+                                                <span>Aktif {p.duration_days} hari</span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                                                <Svg d="M4.5 12.75l6 6 9-13.5" size={16} color="var(--accent)" />
+                                                <span>Maksimal {p.max_guests === 999999 ? 'Tamu Tanpa Batas' : `${p.max_guests} Tamu`}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                                                <Svg d="M4.5 12.75l6 6 9-13.5" size={16} color="var(--accent)" />
+                                                <span>Galeri foto: {p.max_galleries}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <a href={`${registerUrl}?plan=${p.slug}`} className={`rl-pricing-card__btn ${isPopular ? 'rl-pricing-card__btn--primary' : 'rl-pricing-card__btn--outline'}`}>
+                                        {meta.label}
+                                    </a>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+        );
+    };
+
+    const renderPlansCards = (c) => {
+        const title = c?.title || 'Pilih Paket Kartu Ucapan Digital';
+        const cardPlans = plans.filter(p => p.type === 'greeting_card');
+        if (cardPlans.length === 0) return null;
+        return (
+            <section className="rl-pricing" id="plans-cards" style={{ background: 'var(--section-alt)' }}>
+                <div className="rl-pricing__inner">
+                    <h2 className="rl-section-title">{title}</h2>
+                    <div className="rl-pricing__grid">
+                        {cardPlans.map((p) => {
                             const meta = planMeta[p.slug] || planMeta.free;
                             const isPopular = meta.popular;
                             return (
@@ -1660,6 +1713,7 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
             case 'greeting_cards': return renderGreetingCardsCatalog(config);
             case 'testimonials': return renderTestimonials(config);
             case 'plans': return renderPlans(config);
+            case 'plans_cards': return renderPlansCards(config);
             case 'faq': return renderFaq(config);
             case 'cta': return renderCta(config);
             default: return null;

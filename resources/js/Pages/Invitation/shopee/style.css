@@ -23,7 +23,7 @@
 
 /* Base resets within theme */
 .sp-theme-wrapper {
-  background-color: #111111;
+  background-color: var(--sp-peach);
   min-height: 100vh;
   display: flex;
   justify-content: center;

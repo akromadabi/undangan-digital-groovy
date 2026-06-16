@@ -1,4 +1,4 @@
-import { Head, useForm, Link, usePage } from '@inertiajs/react';
+import { Head, useForm, Link, usePage, router } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
@@ -144,13 +144,14 @@ const eventTypes = [
     { id: 'general', name: 'Umum / General (Semua Acara)', desc: 'Izinkan tema digunakan untuk Semua jenis acara.' },
 ];
 
-export default function Form({ theme, plans = [], categories = [] }) {
+export default function Form({ theme, plans = [], categories = [], categoryCounts = {} }) {
     const { adminRoutePrefix } = usePage().props;
     const isEdit = !!theme;
     const fileInputRef = useRef(null);
     const dropdownRef = useRef(null);
     const eventDropdownRef = useRef(null);
     const bgDropdownRef = useRef(null);
+    const categoryDropdownRef = useRef(null);
     
     const [thumbnailPreview, setThumbnailPreview] = useState('');
     const [uploading, setUploading] = useState(false);
@@ -158,6 +159,79 @@ export default function Form({ theme, plans = [], categories = [] }) {
     const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
     const [isBgDropdownOpen, setIsBgDropdownOpen] = useState(false);
     
+    // States for dynamic category selection & inline management
+    const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+    const [editingCategory, setEditingCategory] = useState(null);
+    const [editCategoryValue, setEditCategoryValue] = useState('');
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+
+    const handleInlineCreateCategory = (e) => {
+        e.preventDefault();
+        if (!newCategoryName || newCategoryName.trim() === '') return;
+        setIsCreatingCategory(true);
+        router.post(`${adminRoutePrefix}/themes/categories/store`, {
+            category: newCategoryName.trim()
+        }, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                const addedName = newCategoryName.trim();
+                const formattedName = addedName.split(' ')
+                    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                    .join(' ');
+                setData('category', formattedName);
+                setNewCategoryName('');
+                setIsCreatingCategory(false);
+            },
+            onError: () => {
+                setIsCreatingCategory(false);
+            }
+        });
+    };
+
+    const handleInlineUpdateCategory = (oldCategory) => {
+        if (!editCategoryValue || editCategoryValue.trim() === '') return;
+        if (editCategoryValue.trim().toLowerCase() === oldCategory.toLowerCase()) {
+            setEditingCategory(null);
+            return;
+        }
+        const updatedName = editCategoryValue.trim();
+        const formattedName = updatedName.split(' ')
+            .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(' ');
+
+        router.post(`${adminRoutePrefix}/themes/categories/update`, {
+            old_category: oldCategory,
+            new_category: updatedName
+        }, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                if (data.category === oldCategory) {
+                    setData('category', formattedName);
+                }
+                setEditingCategory(null);
+            }
+        });
+    };
+
+    const handleInlineDeleteCategory = (category) => {
+        if (confirm(`Hapus kategori "${category}"? Semua tema dengan kategori ini akan dialihkan ke kategori "Elegant".`)) {
+            router.post(`${adminRoutePrefix}/themes/categories/delete`, {
+                category: category
+            }, {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    if (data.category === category) {
+                        setData('category', 'Elegant');
+                    }
+                }
+            });
+        }
+    };
+
     // States for dynamic preview screenshots
     const [previewImagesPreviews, setPreviewImagesPreviews] = useState([]);
     const [uploadingIndex, setUploadingIndex] = useState(null);
@@ -230,7 +304,7 @@ export default function Form({ theme, plans = [], categories = [] }) {
         }
     }, [theme?.id, theme?.thumbnail, theme?.preview_images]);
 
-    // Click outside listener untuk menutup dropdown paket, event, & background
+    // Click outside listener untuk menutup dropdown paket, event, background, & kategori
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -241,6 +315,10 @@ export default function Form({ theme, plans = [], categories = [] }) {
             }
             if (bgDropdownRef.current && !bgDropdownRef.current.contains(event.target)) {
                 setIsBgDropdownOpen(false);
+            }
+            if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+                setIsCategoryDropdownOpen(false);
+                setEditingCategory(null);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -523,17 +601,153 @@ export default function Form({ theme, plans = [], categories = [] }) {
                                     {errors.slug && <p className="text-red-500 text-xs mt-1">{errors.slug}</p>}
                                 </div>
 
-                                <div>
+                                <div className={`relative ${isCategoryDropdownOpen ? 'z-40' : 'z-10'}`} ref={categoryDropdownRef}>
                                     <label className={labelClass}>Kategori Desain</label>
-                                    <select 
-                                        value={data.category || 'Elegant'} 
-                                        onChange={(e) => setData('category', e.target.value)}
-                                        className={inputClass}
+                                    
+                                    {/* Trigger Button Dropdown */}
+                                    <div 
+                                        onClick={() => {
+                                            setIsCategoryDropdownOpen(!isCategoryDropdownOpen);
+                                            setIsEventDropdownOpen(false);
+                                            setIsDropdownOpen(false);
+                                            setIsBgDropdownOpen(false);
+                                        }}
+                                        className="w-full min-h-[44px] bg-[#fcfbfa] border border-[#e8e5e0] rounded-xl px-4 py-2.5 flex items-center justify-between cursor-pointer hover:border-[#E5654B] transition-all select-none shadow-xs"
                                     >
-                                        {categories.map((cat) => (
-                                            <option key={cat} value={cat}>{cat}</option>
-                                        ))}
-                                    </select>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold text-gray-700">
+                                                {data.category || 'Elegant'}
+                                            </span>
+                                            <span className="text-[9px] font-extrabold bg-[#E5654B]/10 text-[#E5654B] px-1.5 py-0.5 rounded-md">
+                                                {categoryCounts[data.category || 'Elegant'] || 0} Tema
+                                            </span>
+                                        </div>
+                                        
+                                        <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${isCategoryDropdownOpen ? 'rotate-180 text-[#E5654B]' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+
+                                    {/* Dropdown Options List */}
+                                    {isCategoryDropdownOpen && (
+                                        <div className="absolute z-25 left-0 right-0 top-[100%] mt-1.5 bg-white border border-[#e8e5e0] rounded-2xl shadow-xl overflow-hidden max-h-[300px] flex flex-col p-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                            
+                                            {/* Form Tambah Kategori Baru */}
+                                            <div className="flex gap-1.5 p-1.5 bg-[#faf9f7] border-b border-[#e8e5e0] rounded-t-xl mb-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                                                <input
+                                                    type="text"
+                                                    value={newCategoryName}
+                                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                                    placeholder="Tambah kategori..."
+                                                    className="flex-grow bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-[11px] focus:ring-1 focus:ring-[#E5654B] focus:border-[#E5654B] font-semibold text-gray-700 placeholder-gray-400 outline-none"
+                                                    disabled={isCreatingCategory}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleInlineCreateCategory}
+                                                    disabled={isCreatingCategory || !newCategoryName.trim()}
+                                                    className="px-2.5 py-1.5 bg-[#E5654B] text-white rounded-lg text-[11px] font-bold hover:bg-[#c94f3a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center justify-center whitespace-nowrap"
+                                                >
+                                                    {isCreatingCategory ? '...' : '+ Tambah'}
+                                                </button>
+                                            </div>
+
+                                            {/* List Kategori */}
+                                            <div className="overflow-y-auto space-y-0.5 flex-grow pr-0.5">
+                                                {categories.map((cat) => {
+                                                    const isSelected = (data.category || 'Elegant') === cat;
+                                                    const isEditing = editingCategory === cat;
+                                                    const count = categoryCounts[cat] || 0;
+
+                                                    return (
+                                                        <div 
+                                                            key={cat}
+                                                            className={`group flex items-center justify-between p-1.5 rounded-xl cursor-pointer transition-all select-none ${isSelected ? 'bg-[#E5654B]/5' : 'hover:bg-gray-50'}`}
+                                                            onClick={() => {
+                                                                if (!isEditing) {
+                                                                    setData('category', cat);
+                                                                    setIsCategoryDropdownOpen(false);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <div className="flex-1 min-w-0 mr-2">
+                                                                {isEditing ? (
+                                                                    <div className="flex items-center gap-1 w-full" onClick={(e) => e.stopPropagation()}>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={editCategoryValue}
+                                                                            onChange={(e) => setEditCategoryValue(e.target.value)}
+                                                                            className="w-full bg-white border border-gray-200 rounded-md px-2 py-1 text-[11px] focus:ring-1 focus:ring-[#E5654B] focus:border-[#E5654B]"
+                                                                            placeholder="Nama baru..."
+                                                                            autoFocus
+                                                                        />
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleInlineUpdateCategory(cat)}
+                                                                            className="p-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded transition-colors"
+                                                                            title="Simpan"
+                                                                        >
+                                                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                            </svg>
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setEditingCategory(null)}
+                                                                            className="p-1 bg-gray-100 text-gray-500 hover:bg-gray-200 rounded transition-colors"
+                                                                            title="Batal"
+                                                                        >
+                                                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={`text-xs font-semibold truncate ${isSelected ? 'text-[#E5654B]' : 'text-gray-700'}`}>
+                                                                            {cat}
+                                                                        </span>
+                                                                        <span className="text-[9px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                                                                            {count} Tema
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {!isEditing && (
+                                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setEditingCategory(cat);
+                                                                            setEditCategoryValue(cat);
+                                                                        }}
+                                                                        className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-[#E5654B] transition-colors"
+                                                                        title="Ubah Nama"
+                                                                    >
+                                                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                                        </svg>
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleInlineDeleteCategory(cat)}
+                                                                        className="p-1 hover:bg-red-50 rounded text-gray-400 hover:text-red-600 transition-colors"
+                                                                        title="Hapus Kategori"
+                                                                    >
+                                                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
                                 </div>
                                 
                                 <div className={`relative ${isEventDropdownOpen ? 'z-40' : 'z-10'}`} ref={eventDropdownRef}>

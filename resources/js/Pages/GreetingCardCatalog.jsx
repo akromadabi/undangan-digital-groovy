@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Mail, Sparkles } from 'lucide-react';
 import GreetingCardPreviewCard from '@/Components/GreetingCardPreviewCard';
 
-export default function GreetingCardCatalog({ templates = [], appName = 'Groovy', typeOptions = {} }) {
+export default function GreetingCardCatalog({ templates = [], appName = 'Groovy', typeOptions = {}, subscriptionPlans = [] }) {
     const { auth } = usePage().props;
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [search, setSearch] = useState('');
@@ -288,6 +288,7 @@ export default function GreetingCardCatalog({ templates = [], appName = 'Groovy'
                                     theme={tpl}
                                     onUse={handleUse}
                                     typeOptions={typeOptions}
+                                    plans={subscriptionPlans}
                                 />
                             ))}
                         </div>

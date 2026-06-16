@@ -18,7 +18,7 @@
 
 /* Base Styles */
 .pn-page {
-  background-color: var(--pn-desk);
+  background-color: var(--pn-bg); /* Mengubah latar belakang dasar agar senada dengan undangan secara global */
   color: var(--pn-text);
   font-family: var(--pn-font-body);
   min-height: 100vh;
@@ -53,10 +53,10 @@
     100% 100%,
     20px 100%;
   min-height: 100vh;
-  box-shadow: 0 0 35px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 30px rgba(139, 90, 10, 0.12); /* Bayangan kecokelatan halus agar menyatu dengan halaman terang */
   position: relative;
-  border-left: 2px dashed rgba(255, 255, 255, 0.1);
-  border-right: 2px dashed rgba(255, 255, 255, 0.1);
+  border-left: 2px dashed rgba(0, 0, 0, 0.08); /* Garis putus-putus gelap tipis */
+  border-right: 2px dashed rgba(0, 0, 0, 0.08); /* Garis putus-putus gelap tipis */
   display: flex;
   flex-direction: column;
 }
@@ -387,17 +387,16 @@
 
 .pn-cover__content {
   width: 100%;
-  height: 65vh;
-  height: 65dvh;
-  min-height: 520px;
-  max-height: 65dvh;
+  max-width: 450px;
+  height: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   z-index: 2;
   text-align: center;
   box-sizing: border-box;
+  gap: 12px;
 }
 
 .pn-cover-group-top {
@@ -1700,5 +1699,124 @@
   transform: translate3d(0, -200%, 0);
 }
 .pn-page:has(.layout-slide-v) .pn-slide-item.is-after-next {
-  transform: translate3d(0, 200%, 0);
 }
+
+/* ═══════════════════════════════════════
+   TABLET & DESKTOP RESPONSIVE LAYOUT OVERRIDES
+   ═══════════════════════════════════════ */
+
+/* Tablet & iPad Portrait / Landscape (Lebar >= 768px) */
+@media (min-width: 768px) {
+  .pn-container {
+    max-width: 768px;
+  }
+  
+  .pn-nav-menu {
+    max-width: 768px;
+  }
+  
+  .pn-floating-controls {
+    right: calc(50% - 369px); /* anchors controls inside the 768px container (384px - 15px margin) */
+  }
+}
+
+/* Tablet Landscape & Desktop Layout (Lebar >= 992px) */
+@media (min-width: 992px) {
+  .pn-nav-wrapper {
+    position: fixed;
+    top: 50%;
+    bottom: auto;
+    right: calc(50% + 384px + 20px); /* melayang tepat 20px di kiri kontainer 768px */
+    left: auto;
+    transform: translateY(-50%);
+    width: auto;
+    background-color: transparent;
+    border-top: none;
+    box-shadow: none;
+    z-index: 900;
+    display: flex;
+    justify-content: center;
+  }
+
+  .pn-nav-menu {
+    flex-direction: column;
+    max-width: 75px;
+    background-color: var(--pn-bg);
+    border: 2px solid var(--pn-primary);
+    border-radius: 40px;
+    padding: 16px 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    gap: 10px;
+    overflow: visible;
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(139, 90, 10, 0.05) 0%, transparent 60%);
+  }
+
+  .pn-nav-btn {
+    flex: 0 0 auto;
+    padding: 10px 8px;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+  }
+
+  .pn-nav-btn.is-active {
+    background-color: var(--pn-primary);
+    color: var(--pn-bg) !important;
+    transform: scale(1.1) translateY(0);
+  }
+
+  .pn-nav-btn.is-active i {
+    color: var(--pn-bg) !important;
+  }
+
+  .pn-nav-btn i {
+    font-size: 1.15rem;
+    margin-bottom: 0;
+  }
+
+  /* Tooltip Label Mesin Ketik saat Hover (Tampil di Kanan) */
+  .pn-nav-label {
+    position: absolute;
+    left: 55px; /* Tampilkan di sebelah kanan tombol */
+    right: auto;
+    background-color: var(--pn-primary);
+    color: var(--pn-bg);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-family: var(--pn-font-typewriter);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  }
+
+  .pn-nav-label::before {
+    content: '';
+    position: absolute;
+    right: 100%; /* Panah di sisi kiri tooltip */
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent var(--pn-primary) transparent transparent; /* Panah menunjuk ke kiri (ke tombol) */
+  }
+
+  .pn-nav-btn:hover {
+    transform: scale(1.08);
+  }
+
+  .pn-nav-btn:hover .pn-nav-label {
+    opacity: 1;
+    left: 50px; /* sliding effect ke kanan */
+  }
+}
+

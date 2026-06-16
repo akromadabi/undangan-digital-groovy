@@ -326,12 +326,6 @@ export default function GreetingCardCatalog({ templates = [], typeOptions = {} }
     const handleFormSubmit = (e) => {
         e.preventDefault();
         post(`${resolvedPrefix}/greeting-card-catalog/${activeTemplate.id}/custom-preview`, {
-            data: {
-                preview_template: data.preview_template,
-                preview_bg_style: data.preview_bg_style,
-                preview_images:   data.preview_images,
-                thumbnail:        data.thumbnail,
-            },
             onSuccess: () => handleCloseModal(),
         });
     };

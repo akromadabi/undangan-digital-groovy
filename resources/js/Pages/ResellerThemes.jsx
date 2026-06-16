@@ -181,7 +181,7 @@ const THEMES_CFG = {
     },
 };
 
-export default function ResellerThemes({ reseller, themes = [], greetingCards = [], greetingCardTypeOptions = {}, defaultTab = 'undangan', sections = [] }) {
+export default function ResellerThemes({ reseller, plans = [], themes = [], greetingCards = [], greetingCardTypeOptions = {}, defaultTab = 'undangan', sections = [] }) {
     const T = THEMES_CFG[reseller.template] || THEMES_CFG.default;
 
     const [isLoaded, setIsLoaded] = useState(false);
@@ -1360,6 +1360,7 @@ export default function ResellerThemes({ reseller, themes = [], greetingCards = 
                                 key={theme.id} 
                                 theme={theme}
                                 reseller={reseller}
+                                plans={plans}
                             />
                         ))}
 
@@ -1378,6 +1379,7 @@ export default function ResellerThemes({ reseller, themes = [], greetingCards = 
                                 reseller={reseller}
                                 onUse={handleUseCard}
                                 typeOptions={greetingCardTypeOptions}
+                                plans={plans}
                             />
                         ))}
 

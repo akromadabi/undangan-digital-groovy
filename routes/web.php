@@ -34,7 +34,7 @@ Route::get('/', function () {
 
     $themes = \App\Models\Theme::where('is_active', true)
         ->orderBy('sort_order')
-        ->get(['id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'preview_url', 'category', 'is_premium', 'base_likes', 'real_likes'])
+        ->get(['id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'preview_url', 'category', 'is_premium', 'base_likes', 'real_likes', 'allowed_plans'])
         ->map(function ($theme) {
             $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
             return $theme;
@@ -55,10 +55,10 @@ Route::get('/', function () {
     $minModalCost = \App\Models\SubscriptionPlan::where('price', '>', 0)->min('price') ?: 15000;
     $subscriptionPlans = \App\Models\SubscriptionPlan::where('price', '>', 0)
         ->orderBy('sort_order')
-        ->get(['id', 'name', 'slug', 'price', 'suggested_price']);
+        ->get(['id', 'name', 'slug', 'price', 'suggested_price', 'type']);
 
     $greetingCards = \App\Models\GreetingCardTemplate::where('is_active', true)
-        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'type', 'base_likes', 'sort_order')
+        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'type', 'base_likes', 'sort_order', 'price', 'allowed_plans')
         ->orderBy('sort_order')
         ->get();
 
@@ -103,7 +103,7 @@ Route::get('/katalog-tema', function () {
 
     // Domain utama: tampilkan katalog semua tema global
     $themes = \App\Models\Theme::where('is_active', true)
-        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'preview_url', 'base_likes', 'real_likes')
+        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'preview_url', 'base_likes', 'real_likes', 'allowed_plans')
         ->orderBy('sort_order')
         ->get()
         ->map(function ($theme) {
@@ -111,9 +111,14 @@ Route::get('/katalog-tema', function () {
             return $theme;
         });
 
+    $subscriptionPlans = \App\Models\SubscriptionPlan::where('price', '>', 0)
+        ->orderBy('sort_order')
+        ->get(['id', 'name', 'slug', 'price', 'suggested_price', 'type']);
+
     return Inertia::render('Themes', [
         'themes' => $themes,
         'appName' => \App\Models\GlobalSetting::where('setting_key', 'site_name')->value('setting_value') ?: 'Undangan Digital',
+        'subscriptionPlans' => $subscriptionPlans,
     ]);
 })->name('themes');
 
@@ -130,10 +135,15 @@ Route::get('/katalog-kartu', function () {
         ->orderBy('id')
         ->get();
 
+    $subscriptionPlans = \App\Models\SubscriptionPlan::where('price', '>', 0)
+        ->orderBy('sort_order')
+        ->get(['id', 'name', 'slug', 'price', 'suggested_price', 'type']);
+
     return Inertia::render('GreetingCardCatalog', [
         'templates' => $templates,
         'appName'   => \App\Models\GlobalSetting::where('setting_key', 'site_name')->value('setting_value') ?: 'Undangan Digital',
         'typeOptions' => \App\Models\GreetingCardTemplate::$typeOptions,
+        'subscriptionPlans' => $subscriptionPlans,
     ]);
 })->name('greeting-card-catalog');
 

@@ -9,7 +9,7 @@ const getThumbnailUrl = (path) => {
     return `/storage/${path}`;
 };
 
-export default function Themes({ themes = [], appName = 'Groovy' }) {
+export default function Themes({ themes = [], appName = 'Groovy', subscriptionPlans = [] }) {
     const { auth } = usePage().props;
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
@@ -398,6 +398,7 @@ export default function Themes({ themes = [], appName = 'Groovy' }) {
                                 <ThemePreviewCard 
                                     key={theme.id} 
                                     theme={theme}
+                                    plans={subscriptionPlans}
                                 />
                             ))}
                         </div>

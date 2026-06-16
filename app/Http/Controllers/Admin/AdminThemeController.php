@@ -23,7 +23,8 @@ class AdminThemeController extends Controller
         $plans = \App\Models\SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug']);
         return Inertia::render('Admin/Themes/Form', [
             'plans' => $plans,
-            'categories' => $this->getAvailableCategories()
+            'categories' => $this->getAvailableCategories(),
+            'categoryCounts' => $this->getCategoryCounts()
         ]);
     }
 
@@ -61,7 +62,8 @@ class AdminThemeController extends Controller
         return Inertia::render('Admin/Themes/Form', [
             'theme' => $theme->load('sections'),
             'plans' => $plans,
-            'categories' => $this->getAvailableCategories()
+            'categories' => $this->getAvailableCategories(),
+            'categoryCounts' => $this->getCategoryCounts()
         ]);
     }
 
@@ -238,6 +240,23 @@ class AdminThemeController extends Controller
         }
 
         sort($normalized);
+
+        return $normalized;
+    }
+
+    private function getCategoryCounts()
+    {
+        $counts = \App\Models\Theme::selectRaw('category, count(*) as count')
+            ->whereNotNull('category')
+            ->where('category', '!=', '')
+            ->groupBy('category')
+            ->pluck('count', 'category')
+            ->toArray();
+
+        $normalized = [];
+        foreach ($counts as $cat => $count) {
+            $normalized[ucwords(strtolower(trim($cat)))] = $count;
+        }
 
         return $normalized;
     }
