@@ -1644,6 +1644,8 @@
     z-index: 999 !important;
     display: flex !important;
     justify-content: center !important;
+    background-color: rgba(244, 239, 230, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
   }
 
   /* Make nav buttons arrange vertically */
