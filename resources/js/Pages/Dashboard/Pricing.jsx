@@ -2,10 +2,13 @@ import { Head, router, usePage, Link } from '@inertiajs/react';
 import { useState, Fragment } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
-export default function Pricing({ plans, currentPlan, features }) {
+export default function Pricing({ plans, currentPlan, features, paymentGatewayType, tripayChannels }) {
     const { flash, auth } = usePage().props;
     const [showComparison, setShowComparison] = useState(false);
     const [showFeatureDetails, setShowFeatureDetails] = useState(false);
+    const [selectedPlanId, setSelectedPlanId] = useState(null);
+    const [showTripayModal, setShowTripayModal] = useState(false);
+    const [selectedChannel, setSelectedChannel] = useState('');
 
     const formatCurrency = (a) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(a);
 
@@ -49,7 +52,23 @@ export default function Pricing({ plans, currentPlan, features }) {
     };
 
     const handleUpgrade = (planId) => {
-        router.post(route('payment.checkout'), { plan_id: planId });
+        if (paymentGatewayType === 'reseller_gateway' && tripayChannels && tripayChannels.length > 0) {
+            setSelectedPlanId(planId);
+            setSelectedChannel('');
+            setShowTripayModal(true);
+        } else {
+            router.post(route('payment.checkout'), { plan_id: planId });
+        }
+    };
+
+    const handleTripayCheckout = () => {
+        if (!selectedChannel) return;
+        router.post(route('payment.checkout'), { 
+            plan_id: selectedPlanId, 
+            payment_method_code: selectedChannel 
+        }, {
+            onFinish: () => setShowTripayModal(false)
+        });
     };
 
     // Build feature access map: { planId: { featureId: is_enabled } }
@@ -478,6 +497,77 @@ export default function Pricing({ plans, currentPlan, features }) {
                     </div>
                 )}
             </div>
+
+            {/* Modal Pemilihan Channel TriPay */}
+            {showTripayModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={e => e.target === e.currentTarget && setShowTripayModal(false)}>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4 flex flex-col max-h-[85vh]">
+                        <div>
+                            <h3 className="font-bold text-gray-800 text-lg">Pilih Metode Pembayaran</h3>
+                            <p className="text-xs text-gray-400 mt-1">Silakan pilih salah satu channel pembayaran TriPay di bawah ini untuk melanjutkan upgrade paket Anda.</p>
+                        </div>
+                        
+                        <div className="overflow-y-auto pr-1 flex-1 space-y-4">
+                            {/* Grouping channels */}
+                            {['Virtual Account', 'E-Wallet / QRIS', 'Retail Store'].map(group => {
+                                const matchedChannels = tripayChannels.filter(c => {
+                                    const g = group.toLowerCase();
+                                    if (g.includes('virtual')) return c.group === 'Virtual Account';
+                                    if (g.includes('wallet') || g.includes('qris')) return c.group === 'E-Wallet' || c.group === 'QRIS' || c.code.includes('QRIS');
+                                    if (g.includes('retail') || g.includes('store')) return c.group === 'Retail Outlet';
+                                    return false;
+                                });
+
+                                // Fallback/Unclassified to Virtual Account or other
+                                if (group === 'Virtual Account') {
+                                    const unclassified = tripayChannels.filter(c => !['Virtual Account', 'E-Wallet', 'Retail Outlet'].includes(c.group) && !c.code.includes('QRIS'));
+                                    matchedChannels.push(...unclassified);
+                                }
+
+                                if (matchedChannels.length === 0) return null;
+
+                                return (
+                                    <div key={group} className="space-y-2">
+                                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{group}</h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {matchedChannels.map(channel => (
+                                                <button
+                                                    key={channel.code}
+                                                    type="button"
+                                                    onClick={() => setSelectedChannel(channel.code)}
+                                                    className={`p-3 border rounded-xl flex flex-col items-center justify-center text-center transition-all ${selectedChannel === channel.code ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-gray-200 hover:border-gray-300'}`}
+                                                >
+                                                    <img src={channel.icon_url} alt={channel.name} className="h-6 object-contain mb-1.5 opacity-90" />
+                                                    <span className="text-xs font-bold text-gray-700">{channel.name}</span>
+                                                    {channel.total_fee && (
+                                                        <span className="text-[10px] text-gray-400 mt-0.5">Fee: {channel.total_fee.flat > 0 ? `+Rp ${channel.total_fee.flat}` : ''} {channel.total_fee.percent > 0 ? `+${channel.total_fee.percent}%` : ''}</span>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex gap-2 pt-2 border-t border-gray-100">
+                            <button
+                                onClick={handleTripayCheckout}
+                                disabled={!selectedChannel}
+                                className="flex-1 py-2.5 bg-[#E5654B] text-white rounded-xl font-bold hover:bg-[#c94f3a] disabled:opacity-50 text-sm transition-colors"
+                            >
+                                Bayar Sekarang
+                            </button>
+                            <button
+                                onClick={() => setShowTripayModal(false)}
+                                className="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-colors"
+                            >
+                                Batal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 }

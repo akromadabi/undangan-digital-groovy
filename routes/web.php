@@ -460,6 +460,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/transactions', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/{payment}', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'show'])->name('transactions.show');
     Route::post('/transactions/{payment}/approve', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'approve'])->name('transactions.approve');
+    Route::post('/transactions/{payment}/approve-wallet', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'approveViaWallet'])->name('transactions.approve_wallet');
+    Route::post('/transactions/{payment}/approve-online', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'approveViaOnline'])->name('transactions.approve_online');
     Route::post('/transactions/{payment}/reject', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'reject'])->name('transactions.reject');
 
     // Impersonation
@@ -520,6 +522,8 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::get('/transactions', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/{payment}', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'show'])->name('transactions.show');
     Route::post('/transactions/{payment}/approve', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'approve'])->name('transactions.approve');
+    Route::post('/transactions/{payment}/approve-wallet', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'approveViaWallet'])->name('transactions.approve_wallet');
+    Route::post('/transactions/{payment}/approve-online', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'approveViaOnline'])->name('transactions.approve_online');
     Route::post('/transactions/{payment}/reject', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'reject'])->name('transactions.reject');
 
     // Impersonation
@@ -576,6 +580,7 @@ Route::middleware(['auth', 'editor_or_super_admin'])->prefix('super-admin')->nam
 // Webhooks (no CSRF, no auth)
 // ═══════════════════════════════════════
 Route::post('/webhooks/midtrans', [PaymentController::class, 'webhook'])->name('webhook.midtrans')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('/webhooks/tripay', [PaymentController::class, 'tripayWebhook'])->name('webhook.tripay')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::post('/webhooks/xendit', [PaymentController::class, 'webhook'])->name('webhook.xendit')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::middleware(['auth'])->group(function () {

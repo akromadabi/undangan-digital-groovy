@@ -1,0 +1,389 @@
+diff --git a/resources/js/Pages/Admin/Branding.jsx b/resources/js/Pages/Admin/Branding.jsx
+index 587ee5b..159bd5b 100644
+--- a/resources/js/Pages/Admin/Branding.jsx
++++ b/resources/js/Pages/Admin/Branding.jsx
+@@ -78,6 +78,10 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
+         subdomain: settings?.subdomain || '',
+         custom_domain: settings?.custom_domain || '',
+         hide_demo_plan_selector: settings?.hide_demo_plan_selector || false,
++        payment_mode: settings?.payment_mode || 'admin',
++        reseller_gateway_type: settings?.reseller_gateway_type || 'midtrans',
++        reseller_midtrans_settings: settings?.reseller_midtrans_settings || { mode: 'sandbox', client_key: '', server_key: '' },
++        reseller_tripay_settings: settings?.reseller_tripay_settings || { mode: 'sandbox', api_key: '', private_key: '', merchant_code: '' },
+     });
+ 
+     const [preview, setPreview] = useState(null);
+@@ -383,90 +387,321 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
+                         </div>
+                     )}
+ 
+-                    {/* ═══ TAB 2: REKENING PEMBAYARAN ═══ */}
++                    {/* ═══ TAB 2: METODE PEMBAYARAN ═══ */}
+                     {activeTab === 'payment' && (
+                         <div className="space-y-6">
+                             <div>
+-                                <h3 className="text-base font-bold text-[#1a1a1a]">Rekening Pembayaran Pelanggan</h3>
+-                                <p className="text-xs text-[#999] mt-0.5">Atur semua rekening bank, e-wallet, atau merchant yang Anda gunakan untuk menerima pembayaran manual dari pelanggan Anda.</p>
++                                <h3 className="text-base font-bold text-[#1a1a1a]">Pengaturan Pembayaran Pelanggan</h3>
++                                <p className="text-xs text-[#999] mt-0.5">Tentukan bagaimana pelanggan Anda membayar ketika melakukan pemesanan undangan atau kartu ucapan.</p>
+                             </div>
+ 
+-                            {data.bank_accounts.length === 0 ? (
+-                                <div className="text-center py-8 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] space-y-3">
+-                                    <div className="inline-flex w-12 h-12 rounded-full bg-[#f0ede8] items-center justify-center text-[#999]">
+-                                        <Icon d="M2.25 8.25h19.5M2.25 9h19.5" className="w-6 h-6" />
++                            {/* Pilihan Mode Pembayaran */}
++                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
++                                <label className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${data.payment_mode === 'admin' ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-[#e8e5e0] bg-[#faf9f6] hover:bg-[#f0ede8]'}`}>
++                                    <div className="flex items-start gap-3">
++                                        <input
++                                            type="radio"
++                                            name="payment_mode"
++                                            value="admin"
++                                            checked={data.payment_mode === 'admin'}
++                                            onChange={e => setData('payment_mode', e.target.value)}
++                                            className="mt-1 text-[#E5654B] focus:ring-[#E5654B]"
++                                        />
++                                        <div>
++                                            <span className="block text-sm font-bold text-[#333]">Titip via Admin</span>
++                                            <span className="block text-xs text-[#777] mt-1">Pembayaran otomatis diproses via Midtrans Admin utama. Profit akan masuk otomatis ke Saldo Dompet Anda.</span>
++                                        </div>
+                                     </div>
+-                                    <div>
+-                                        <div className="text-sm font-bold text-[#333]">Belum Ada Rekening Pembayaran</div>
+-                                        <div className="text-xs text-[#999] mt-1">Tambahkan setidaknya satu rekening untuk pembayaran transfer manual.</div>
++                                </label>
++
++                                <label className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${data.payment_mode === 'reseller_gateway' ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-[#e8e5e0] bg-[#faf9f6] hover:bg-[#f0ede8]'}`}>
++                                    <div className="flex items-start gap-3">
++                                        <input
++                                            type="radio"
++                                            name="payment_mode"
++                                            value="reseller_gateway"
++                                            checked={data.payment_mode === 'reseller_gateway'}
++                                            onChange={e => setData('payment_mode', e.target.value)}
++                                            className="mt-1 text-[#E5654B] focus:ring-[#E5654B]"
++                                        />
++                                        <div>
++                                            <span className="block text-sm font-bold text-[#333]">Gateway Otomatis Sendiri</span>
++                                            <span className="block text-xs text-[#777] mt-1">Pasang akun Midtrans atau Tripay Anda sendiri. Pelanggan membayar langsung ke Anda, saldo didebit biaya modal.</span>
++                                        </div>
++                                    </div>
++                                </label>
++
++                                <label className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${data.payment_mode === 'manual' ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-[#e8e5e0] bg-[#faf9f6] hover:bg-[#f0ede8]'}`}>
++                                    <div className="flex items-start gap-3">
++                                        <input
++                                            type="radio"
++                                            name="payment_mode"
++                                            value="manual"
++                                            checked={data.payment_mode === 'manual'}
++                                            onChange={e => setData('payment_mode', e.target.value)}
++                                            className="mt-1 text-[#E5654B] focus:ring-[#E5654B]"
++                                        />
++                                        <div>
++                                            <span className="block text-sm font-bold text-[#333]">Manual Transfer Bank</span>
++                                            <span className="block text-xs text-[#777] mt-1">Pelanggan mentransfer manual ke rekening bank pribadi Anda. Anda perlu menyetujui transfer & membayar modal ke admin.</span>
++                                        </div>
+                                     </div>
++                                </label>
++                            </div>
++
++                            <hr className="border-[#e8e5e0]" />
++
++                            {/* Detil sesuai dengan Mode Pembayaran yang dipilih */}
++
++                            {data.payment_mode === 'admin' && (
++                                <div className="p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] space-y-2">
++                                    <h4 className="text-sm font-bold text-[#333]">💡 Informasi Titip Pembayaran</h4>
++                                    <p className="text-xs text-[#666] leading-relaxed">
++                                        Dengan metode ini, Anda tidak perlu mengkonfigurasi API apa pun. Pelanggan Anda akan membayar tagihan paket undangan secara online (Midtrans) atau manual transfer ke rekening Super Admin. Setelah pembayaran diverifikasi, akun pelanggan Anda otomatis aktif, dan **profit Anda (Harga Jual - Harga Modal Paket)** akan langsung masuk ke dompet digital reseller Anda. Anda dapat mengajukan pencairan dana kapan saja.
++                                    </p>
+                                 </div>
+-                            ) : (
+-                                <div className="space-y-4">
+-                                    {data.bank_accounts.map((account, index) => (
+-                                        <div key={index} className="p-3 sm:p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] relative space-y-3 sm:space-y-4">
++                            )}
++
++                            {data.payment_mode === 'reseller_gateway' && (
++                                <div className="space-y-6">
++                                    <div>
++                                        <label className="block text-xs font-semibold text-[#555] mb-1.5">Pilih Layanan Payment Gateway</label>
++                                        <div className="flex gap-4">
++                                            <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-[#333]">
++                                                <input
++                                                    type="radio"
++                                                    name="reseller_gateway_type"
++                                                    value="midtrans"
++                                                    checked={data.reseller_gateway_type === 'midtrans'}
++                                                    onChange={e => setData('reseller_gateway_type', e.target.value)}
++                                                    className="text-[#E5654B] focus:ring-[#E5654B]"
++                                                />
++                                                Midtrans Snap
++                                            </label>
++                                            <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-[#333]">
++                                                <input
++                                                    type="radio"
++                                                    name="reseller_gateway_type"
++                                                    value="tripay"
++                                                    checked={data.reseller_gateway_type === 'tripay'}
++                                                    onChange={e => setData('reseller_gateway_type', e.target.value)}
++                                                    className="text-[#E5654B] focus:ring-[#E5654B]"
++                                                />
++                                                TriPay
++                                            </label>
++                                        </div>
++                                    </div>
++
++                                    {/* KREDENSIAL MIDTRANS */}
++                                    {data.reseller_gateway_type === 'midtrans' && (
++                                        <div className="p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] space-y-4">
+                                             <div className="flex items-center justify-between border-b border-[#e8e5e0] pb-2">
+-                                                <span className="text-xs font-extrabold text-[#E5654B]">REKENING KESATU #{index + 1}</span>
+-                                                <button
+-                                                    type="button"
+-                                                    onClick={() => handleRemoveBankAccount(index)}
+-                                                    className="inline-flex items-center text-xs font-bold text-red-500 hover:text-red-700 transition-colors gap-1"
+-                                                >
+-                                                    <Icon d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-3.5 h-3.5" />
+-                                                    Hapus Rekening
+-                                                </button>
++                                                <span className="text-xs font-extrabold text-[#E5654B]">KREDENSIAL MIDTRANS RESELLER</span>
+                                             </div>
+-                                            
+-                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
++                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
++                                                <div>
++                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Mode Lingkungan</label>
++                                                    <select
++                                                        value={data.reseller_midtrans_settings?.mode || 'sandbox'}
++                                                        onChange={e => setData('reseller_midtrans_settings', {
++                                                            ...data.reseller_midtrans_settings,
++                                                            mode: e.target.value
++                                                        })}
++                                                        className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
++                                                    >
++                                                        <option value="sandbox">Sandbox (Pengujian)</option>
++                                                        <option value="production">Production (Asli / Live)</option>
++                                                    </select>
++                                                </div>
+                                                 <div>
+-                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Nama Bank / E-Wallet</label>
++                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Client Key</label>
+                                                     <input
+                                                         type="text"
+-                                                        value={account.bank_name}
+-                                                        onChange={e => handleBankAccountChange(index, 'bank_name', e.target.value)}
++                                                        value={data.reseller_midtrans_settings?.client_key || ''}
++                                                        onChange={e => setData('reseller_midtrans_settings', {
++                                                            ...data.reseller_midtrans_settings,
++                                                            client_key: e.target.value
++                                                        })}
++                                                        placeholder="Cth: SB-Mid-client-..."
+                                                         className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+-                                                        placeholder="Cth: BCA, Mandiri, OVO, Dana"
+-                                                        required
+                                                     />
+                                                 </div>
+                                                 <div>
+-                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Nomor Rekening / HP</label>
++                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Server Key</label>
+                                                     <input
+-                                                        type="text"
+-                                                        value={account.account_number}
+-                                                        onChange={e => handleBankAccountChange(index, 'account_number', e.target.value)}
++                                                        type="password"
++                                                        value={data.reseller_midtrans_settings?.server_key || ''}
++                                                        onChange={e => setData('reseller_midtrans_settings', {
++                                                            ...data.reseller_midtrans_settings,
++                                                            server_key: e.target.value
++                                                        })}
++                                                        placeholder="Cth: SB-Mid-server-..."
+                                                         className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+-                                                        placeholder="Cth: 1234567890"
+-                                                        required
+                                                     />
+                                                 </div>
++                                            </div>
++                                            <div className="text-xs text-[#999] leading-relaxed mt-2 p-3 bg-white border border-[#e8e5e0] rounded-xl">
++                                                <strong>Webhook URL Midtrans:</strong> Silakan tambahkan URL berikut ke pengaturan Notification URL di dashboard Midtrans Anda:<br />
++                                                <code className="text-[#E5654B] font-mono select-all bg-[#faf9f6] px-1 rounded block mt-1 py-1 border">{window.location.origin}/webhooks/midtrans</code>
++                                            </div>
++                                        </div>
++                                    )}
++
++                                    {/* KREDENSIAL TRIPAY */}
++                                    {data.reseller_gateway_type === 'tripay' && (
++                                        <div className="p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] space-y-4">
++                                            <div className="flex items-center justify-between border-b border-[#e8e5e0] pb-2">
++                                                <span className="text-xs font-extrabold text-[#E5654B]">KREDENSIAL TRIPAY RESELLER</span>
++                                            </div>
++                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
++                                                <div>
++                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Mode Lingkungan</label>
++                                                    <select
++                                                        value={data.reseller_tripay_settings?.mode || 'sandbox'}
++                                                        onChange={e => setData('reseller_tripay_settings', {
++                                                            ...data.reseller_tripay_settings,
++                                                            mode: e.target.value
++                                                        })}
++                                                        className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
++                                                    >
++                                                        <option value="sandbox">Sandbox (Pengujian)</option>
++                                                        <option value="production">Production (Asli / Live)</option>
++                                                    </select>
++                                                </div>
+                                                 <div>
+-                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Nama Pemilik Rekening</label>
++                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Kode Merchant</label>
+                                                     <input
+                                                         type="text"
+-                                                        value={account.account_name}
+-                                                        onChange={e => handleBankAccountChange(index, 'account_name', e.target.value)}
++                                                        value={data.reseller_tripay_settings?.merchant_code || ''}
++                                                        onChange={e => setData('reseller_tripay_settings', {
++                                                            ...data.reseller_tripay_settings,
++                                                            merchant_code: e.target.value
++                                                        })}
++                                                        placeholder="Cth: T0001"
++                                                        className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
++                                                    />
++                                                </div>
++                                                <div>
++                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">API Key</label>
++                                                    <input
++                                                        type="password"
++                                                        value={data.reseller_tripay_settings?.api_key || ''}
++                                                        onChange={e => setData('reseller_tripay_settings', {
++                                                            ...data.reseller_tripay_settings,
++                                                            api_key: e.target.value
++                                                        })}
++                                                        placeholder="Kunci API TriPay..."
++                                                        className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
++                                                    />
++                                                </div>
++                                                <div>
++                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Private Key</label>
++                                                    <input
++                                                        type="password"
++                                                        value={data.reseller_tripay_settings?.private_key || ''}
++                                                        onChange={e => setData('reseller_tripay_settings', {
++                                                            ...data.reseller_tripay_settings,
++                                                            private_key: e.target.value
++                                                        })}
++                                                        placeholder="Private Key TriPay..."
+                                                         className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+-                                                        placeholder="Cth: Ahmad Fauzi"
+-                                                        required
+                                                     />
+                                                 </div>
+                                             </div>
++                                            <div className="text-xs text-[#999] leading-relaxed mt-2 p-3 bg-white border border-[#e8e5e0] rounded-xl">
++                                                <strong>Webhook URL TriPay:</strong> Silakan tambahkan URL berikut ke kolom Callback URL di dashboard TriPay Anda:<br />
++                                                <code className="text-[#E5654B] font-mono select-all bg-[#faf9f6] px-1 rounded block mt-1 py-1 border">{window.location.origin}/webhooks/tripay</code>
++                                            </div>
+                                         </div>
+-                                    ))}
++                                    )}
+                                 </div>
+                             )}
+ 
+-                            <div className="flex justify-start">
+-                                <button
+-                                    type="button"
+-                                    onClick={handleAddBankAccount}
+-                                    className="px-4 py-2 bg-[#f5f3f0] hover:bg-[#e8e5e0] text-[#555] text-xs font-bold rounded-xl transition-colors inline-flex items-center gap-1.5"
+-                                >
+-                                    <Icon d="M12 4.5v15m7.5-7.5h-15" className="w-4 h-4" />
+-                                    Tambah Rekening Baru
+-                                </button>
+-                            </div>
++                            {data.payment_mode === 'manual' && (
++                                <div className="space-y-6">
++                                    <div className="p-4 bg-yellow-50 rounded-2xl border border-yellow-200 text-xs text-yellow-800 space-y-1">
++                                        <p className="font-bold">⚠️ Informasi Pembayaran Manual:</p>
++                                        <p>Pelanggan akan mentransfer langsung ke rekening bank di bawah ini. Akun mereka tidak otomatis aktif. Reseller harus menyetujui transaksi secara manual dan membayar biaya modal paket dasar kepada platform terlebih dahulu.</p>
++                                    </div>
++
++                                    {data.bank_accounts.length === 0 ? (
++                                        <div className="text-center py-8 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] space-y-3">
++                                            <div className="inline-flex w-12 h-12 rounded-full bg-[#f0ede8] items-center justify-center text-[#999]">
++                                                <Icon d="M2.25 8.25h19.5M2.25 9h19.5" className="w-6 h-6" />
++                                            </div>
++                                            <div>
++                                                <div className="text-sm font-bold text-[#333]">Belum Ada Rekening Pembayaran</div>
++                                                <div className="text-xs text-[#999] mt-1">Tambahkan setidaknya satu rekening untuk pembayaran transfer manual.</div>
++                                            </div>
++                                        </div>
++                                    ) : (
++                                        <div className="space-y-4">
++                                            {data.bank_accounts.map((account, index) => (
++                                                <div key={index} className="p-3 sm:p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] relative space-y-3 sm:space-y-4">
++                                                    <div className="flex items-center justify-between border-b border-[#e8e5e0] pb-2">
++                                                        <span className="text-xs font-extrabold text-[#E5654B]">REKENING KESATU #{index + 1}</span>
++                                                        <button
++                                                            type="button"
++                                                            onClick={() => handleRemoveBankAccount(index)}
++                                                            className="inline-flex items-center text-xs font-bold text-red-500 hover:text-red-700 transition-colors gap-1"
++                                                        >
++                                                            <Icon d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-3.5 h-3.5" />
++                                                            Hapus Rekening
++                                                        </button>
++                                                    </div>
++                                                    
++                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
++                                                        <div>
++                                                            <label className="block text-xs font-semibold text-[#555] mb-1.5">Nama Bank / E-Wallet</label>
++                                                            <input
++                                                                type="text"
++                                                                value={account.bank_name}
++                                                                onChange={e => handleBankAccountChange(index, 'bank_name', e.target.value)}
++                                                                className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
++                                                                placeholder="Cth: BCA, Mandiri, OVO, Dana"
++                                                                required
++                                                            />
++                                                        </div>
++                                                        <div>
++                                                            <label className="block text-xs font-semibold text-[#555] mb-1.5">Nomor Rekening / HP</label>
++                                                            <input
++                                                                type="text"
++                                                                value={account.account_number}
++                                                                onChange={e => handleBankAccountChange(index, 'account_number', e.target.value)}
++                                                                className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
++                                                                placeholder="Cth: 1234567890"
++                                                                required
++                                                            />
++                                                        </div>
++                                                        <div>
++                                                            <label className="block text-xs font-semibold text-[#555] mb-1.5">Nama Pemilik Rekening</label>
++                                                            <input
++                                                                type="text"
++                                                                value={account.account_name}
++                                                                onChange={e => handleBankAccountChange(index, 'account_name', e.target.value)}
++                                                                className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
++                                                                placeholder="Cth: Ahmad Fauzi"
++                                                                required
++                                                            />
++                                                        </div>
++                                                    </div>
++                                                </div>
++                                            ))}
++                                        </div>
++                                    )}
++
++                                    <div className="flex justify-start">
++                                        <button
++                                            type="button"
++                                            onClick={handleAddBankAccount}
++                                            className="px-4 py-2 bg-[#f5f3f0] hover:bg-[#e8e5e0] text-[#555] text-xs font-bold rounded-xl transition-colors inline-flex items-center gap-1.5"
++                                        >
++                                            <Icon d="M12 4.5v15m7.5-7.5h-15" className="w-4 h-4" />
++                                            Tambah Rekening Baru
++                                        </button>
++                                    </div>
++                                </div>
++                            )}
+                         </div>
+                     )}
+ 

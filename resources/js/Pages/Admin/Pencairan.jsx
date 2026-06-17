@@ -29,11 +29,12 @@ const StatusBadge = ({ status }) => {
 
 const tabs = [
     { key: 'saldo', label: 'Saldo & Pencairan', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z' },
+    { key: 'mutasi', label: 'Mutasi Saldo', icon: 'M7.5 21V3M3 7l4.5-4.5L12 7M21 17l-4.5 4.5L12 17M16.5 3v18' },
     { key: 'riwayat', label: 'Riwayat Pencairan', icon: 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z' },
     { key: 'rekening', label: 'Info Rekening', icon: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z' },
 ];
 
-export default function Pencairan({ balance, withdrawals, bankInfo }) {
+export default function Pencairan({ balance, withdrawals, walletTransactions = [], bankInfo }) {
     const { flash } = usePage().props;
     const [activeTab, setActiveTab] = useState('saldo');
 
@@ -60,12 +61,12 @@ export default function Pencairan({ balance, withdrawals, bankInfo }) {
     const hasBankInfo = bankInfo.bank_name && bankInfo.bank_account && bankInfo.bank_holder;
 
     return (
-        <AdminLayout title="Pencairan">
-            <Head title="Pencairan" />
+        <AdminLayout title="Dompet & Pencairan">
+            <Head title="Dompet & Pencairan" />
             <div className="space-y-6">
                 <div>
-                    <h2 className="text-xl font-bold text-[#1a1a1a]">Pencairan Dana</h2>
-                    <p className="text-[#999] text-sm mt-1">Kelola saldo profit dan ajukan pencairan dana Anda</p>
+                    <h2 className="text-xl font-bold text-[#1a1a1a]">Dompet & Pencairan</h2>
+                    <p className="text-[#999] text-sm mt-1">Kelola saldo dompet, mutasi transaksi, dan ajukan pencairan dana Anda</p>
                 </div>
 
                 {/* Flash messages */}
@@ -160,6 +161,65 @@ export default function Pencairan({ balance, withdrawals, bankInfo }) {
                                     {withdrawForm.processing ? 'Mengirim...' : 'Ajukan Pencairan'}
                                 </button>
                             </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* ═══ Tab: Mutasi Saldo ═══ */}
+                {activeTab === 'mutasi' && (
+                    <div className="bg-white rounded-2xl border border-[#e8e5e0] overflow-hidden">
+                        <div className="px-6 py-4 border-b border-[#f0ede8] flex items-center justify-between">
+                            <h3 className="font-bold text-[#1a1a1a] text-sm flex items-center gap-2">
+                                <Icon d="M7.5 21V3M3 7l4.5-4.5L12 7M21 17l-4.5 4.5L12 17M16.5 3v18" className="w-4 h-4 text-[#E5654B]" />
+                                Riwayat Mutasi Saldo
+                            </h3>
+                            <span className="text-xs text-[#999]">{walletTransactions.length} transaksi</span>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-[#f0ede8]">
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#999] uppercase">Tanggal</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#999] uppercase">Deskripsi</th>
+                                        <th className="px-6 py-3 text-center text-xs font-semibold text-[#999] uppercase">Tipe</th>
+                                        <th className="px-6 py-3 text-right text-xs font-semibold text-[#999] uppercase">Jumlah</th>
+                                        <th className="px-6 py-3 text-right text-xs font-semibold text-[#999] uppercase">Saldo Akhir</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#f5f3f0]">
+                                    {walletTransactions.map(t => (
+                                        <tr key={t.id} className="hover:bg-[#faf9f6] transition-colors">
+                                            <td className="px-6 py-3 text-sm text-[#333] whitespace-nowrap">{t.created_at}</td>
+                                            <td className="px-6 py-3 text-sm text-[#555]">{t.description || '-'}</td>
+                                            <td className="px-6 py-3 text-center whitespace-nowrap">
+                                                <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                                    t.type === 'credit'
+                                                        ? 'bg-emerald-50 text-emerald-700'
+                                                        : 'bg-red-50 text-red-700'
+                                                }`}>
+                                                    {t.type === 'credit' ? 'Uang Masuk' : 'Uang Keluar'}
+                                                </span>
+                                            </td>
+                                            <td className={`px-6 py-3 text-right text-sm font-semibold whitespace-nowrap ${
+                                                t.type === 'credit' ? 'text-emerald-600' : 'text-red-600'
+                                            }`}>
+                                                {t.type === 'credit' ? '+' : '-'}{formatCurrency(t.amount)}
+                                            </td>
+                                            <td className="px-6 py-3 text-right text-sm text-[#1a1a1a] font-medium whitespace-nowrap">
+                                                {formatCurrency(t.balance_after)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {walletTransactions.length === 0 && (
+                                        <tr>
+                                            <td colSpan={5} className="px-6 py-12 text-center text-[#999]">
+                                                <Icon d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75" className="w-8 h-8 text-[#ddd] mx-auto mb-2" />
+                                                <p className="text-sm">Belum ada riwayat mutasi saldo</p>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 )}

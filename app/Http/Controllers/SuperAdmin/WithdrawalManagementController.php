@@ -56,6 +56,16 @@ class WithdrawalManagementController extends Controller
             'admin_notes' => 'nullable|string|max:500',
         ]);
 
+        // If rejected and not previously rejected, refund wallet balance
+        if ($request->status === 'rejected' && $withdrawal->status !== 'rejected') {
+            \App\Models\ResellerWallet::creditProfit(
+                $withdrawal->reseller_id,
+                null,
+                $withdrawal->amount,
+                "Pengembalian penarikan dana #{$withdrawal->id} (Ditolak)"
+            );
+        }
+
         $data = [
             'status' => $request->status,
             'admin_notes' => $request->admin_notes,

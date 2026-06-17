@@ -86,8 +86,8 @@ class AdminPaymentController extends Controller
     public function approve(Request $request, Payment $payment)
     {
         $user = auth()->user();
-        if ($user->isReseller() && $payment->user->reseller_id !== $user->id) {
-            abort(403, 'Akses ditolak.');
+        if ($user->isReseller()) {
+            abort(403, 'Akses ditolak. Reseller tidak dapat menyetujui transaksi secara langsung. Silakan bayar harga modal.');
         }
 
         if (!in_array($payment->status, ['waiting_review', 'pending_manual'])) {
@@ -116,8 +116,6 @@ class AdminPaymentController extends Controller
                 'expires_at'       => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
                 'status'           => 'active',
             ]);
-
-            return back()->with('success', "Pembayaran disetujui. Kartu ucapan {$payment->user->name} telah diaktifkan.");
         } else {
             Subscription::create([
                 'user_id'       => $payment->user_id,
@@ -128,9 +126,183 @@ class AdminPaymentController extends Controller
                 'expires_at'    => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
                 'status'        => 'active',
             ]);
-
-            return back()->with('success', "Pembayaran disetujui. Langganan {$payment->user->name} telah diaktifkan.");
         }
+
+        // Credit profit / debit cost based on settings
+        $client = $payment->user;
+        if ($client && $client->reseller_id && $payment->plan_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $client->reseller_id)->first();
+            $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
+            $basePrice = (float)$payment->plan->price;
+
+            if ($paymentMode === 'manual' || $paymentMode === 'reseller_gateway') {
+                \App\Models\ResellerWallet::debitCost(
+                    $client->reseller_id,
+                    $payment->id,
+                    $basePrice,
+                    "Biaya modal paket {$payment->plan->name} - Pelanggan {$client->name} (Disetujui Admin)"
+                );
+            } else {
+                $paidAmount = (float)$payment->amount;
+                $profit = $paidAmount - $basePrice;
+
+                if ($profit > 0) {
+                    \App\Models\ResellerWallet::creditProfit(
+                        $client->reseller_id,
+                        $payment->id,
+                        $profit,
+                        "Profit dari {$client->name} - Paket {$payment->plan->name} (Disetujui Admin)"
+                    );
+                }
+            }
+        }
+
+        return back()->with('success', "Pembayaran disetujui.");
+    }
+
+    /**
+     * Approve manual payment by reseller using wallet balance to pay base cost.
+     */
+    public function approveViaWallet(Payment $payment)
+    {
+        $user = auth()->user();
+        if (!$user->isReseller() || $payment->user->reseller_id !== $user->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        if (!in_array($payment->status, ['waiting_review', 'pending_manual'])) {
+            return back()->with('error', 'Pembayaran tidak dalam status yang dapat diaktifkan.');
+        }
+
+        $basePrice = $payment->plan ? (float)$payment->plan->price : 0;
+        
+        // Check wallet balance
+        $wallet = \App\Models\ResellerWallet::firstOrCreate(['reseller_id' => $user->id], ['balance' => 0]);
+        if ($wallet->balance < $basePrice) {
+            return back()->with('error', 'Saldo dompet Anda tidak cukup untuk membayar biaya modal (Rp ' . number_format($basePrice, 0, ',', '.') . '). Silakan lakukan pembayaran online.');
+        }
+
+        // Deduct wallet balance
+        \App\Models\ResellerWallet::debitCost(
+            $user->id,
+            $payment->id,
+            $basePrice,
+            "Aktivasi manual pelanggan {$payment->user->name} - Paket {$payment->plan->name}"
+        );
+
+        // Mark customer payment as paid
+        $payment->update([
+            'status'      => 'paid',
+            'paid_at'     => now(),
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+            'admin_notes' => 'Diaktifkan oleh reseller menggunakan Saldo Dompet.',
+        ]);
+
+        // Activate customer subscription
+        if ($payment->greeting_card_id) {
+            $payment->greetingCard()->update(['is_active' => true]);
+
+            Subscription::create([
+                'user_id'          => $payment->user_id,
+                'greeting_card_id' => $payment->greeting_card_id,
+                'plan_id'          => $payment->plan_id,
+                'payment_id'       => $payment->id,
+                'starts_at'        => now(),
+                'expires_at'       => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                'status'           => 'active',
+            ]);
+        } else {
+            Subscription::create([
+                'user_id'       => $payment->user_id,
+                'plan_id'       => $payment->plan_id,
+                'invitation_id' => $payment->invitation_id,
+                'payment_id'    => $payment->id,
+                'starts_at'     => now(),
+                'expires_at'    => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                'status'        => 'active',
+            ]);
+        }
+
+        return back()->with('success', 'Undangan pelanggan berhasil diaktifkan dengan memotong Saldo Dompet.');
+    }
+
+    /**
+     * Approve manual payment by reseller paying base cost online.
+     */
+    public function approveViaOnline(Payment $payment)
+    {
+        $user = auth()->user();
+        if (!$user->isReseller() || $payment->user->reseller_id !== $user->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        if (!in_array($payment->status, ['waiting_review', 'pending_manual'])) {
+            return back()->with('error', 'Pembayaran tidak dalam status yang dapat diaktifkan.');
+        }
+
+        $basePrice = $payment->plan ? (float)$payment->plan->price : 0;
+
+        if ($basePrice <= 0) {
+            // Modal gratis, langsung aktifkan
+            $payment->update([
+                'status'      => 'paid',
+                'paid_at'     => now(),
+                'reviewed_by' => $user->id,
+                'reviewed_at' => now(),
+                'admin_notes' => 'Diaktifkan gratis (modal Rp 0).',
+            ]);
+            
+            if ($payment->greeting_card_id) {
+                $payment->greetingCard()->update(['is_active' => true]);
+                Subscription::create([
+                    'user_id'          => $payment->user_id,
+                    'greeting_card_id' => $payment->greeting_card_id,
+                    'plan_id'          => $payment->plan_id,
+                    'payment_id'       => $payment->id,
+                    'starts_at'        => now(),
+                    'expires_at'       => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                    'status'           => 'active',
+                ]);
+            } else {
+                Subscription::create([
+                    'user_id'       => $payment->user_id,
+                    'plan_id'       => $payment->plan_id,
+                    'invitation_id' => $payment->invitation_id,
+                    'payment_id'    => $payment->id,
+                    'starts_at'     => now(),
+                    'expires_at'    => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                    'status'        => 'active',
+                ]);
+            }
+            return back()->with('success', 'Langganan pelanggan berhasil diaktifkan.');
+        }
+
+        // Create temporary reseller payment of amount = base price to admin
+        $modalPayment = Payment::create([
+            'user_id' => $user->id,
+            'plan_id' => $payment->plan_id,
+            'invitation_id' => $payment->invitation_id,
+            'greeting_card_id' => $payment->greeting_card_id,
+            'parent_payment_id' => $payment->id,
+            'amount' => $basePrice,
+            'status' => 'pending',
+        ]);
+
+        $midtrans = new \App\Services\MidtransService();
+        if (!$midtrans->isConfigured()) {
+            $modalPayment->delete();
+            return back()->with('error', 'Gateway pembayaran utama platform belum terkonfigurasi. Hubungi pemilik platform.');
+        }
+
+        $result = $midtrans->createInvoice($modalPayment);
+
+        if ($result['success']) {
+            return Inertia::location($result['invoice_url']);
+        }
+
+        $modalPayment->delete();
+        return back()->with('error', 'Gagal membuat tagihan online: ' . ($result['error'] ?? 'Unknown error'));
     }
 
     /**

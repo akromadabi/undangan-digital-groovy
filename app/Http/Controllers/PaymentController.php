@@ -45,15 +45,33 @@ class PaymentController extends Controller
             return $planArray;
         });
 
+        $paymentGatewayType = 'admin';
+        $tripayChannels = [];
+
+        if ($user->reseller_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+            if ($resellerSetting) {
+                $paymentGatewayType = $resellerSetting->payment_mode;
+                if ($paymentGatewayType === 'reseller_gateway' && $resellerSetting->reseller_gateway_type === 'tripay') {
+                    $tripay = new \App\Services\TripayService($resellerSetting);
+                    $tripayChannels = cache()->remember('reseller_tripay_channels_' . $user->reseller_id, 300, function () use ($tripay) {
+                        return $tripay->getPaymentChannels();
+                    });
+                }
+            }
+        }
+
         return Inertia::render('Dashboard/Pricing', [
             'plans' => $plansData,
             'currentPlan' => $currentPlan,
             'features' => $features,
+            'paymentGatewayType' => $paymentGatewayType,
+            'tripayChannels' => $tripayChannels,
         ]);
     }
 
     /**
-     * Create payment and redirect to Xendit invoice.
+     * Create payment and redirect to invoice.
      * Uses reseller custom price if applicable.
      */
     public function checkout(Request $request)
@@ -62,10 +80,16 @@ class PaymentController extends Controller
             'plan_id' => 'required|exists:subscription_plans,id',
             'greeting_card_id' => 'nullable|exists:greeting_cards,id',
             'invitation_id' => 'nullable|exists:invitations,id',
+            'payment_method_code' => 'nullable|string',
         ]);
 
         $user = auth()->user();
         $greetingCardId = $request->input('greeting_card_id');
+        
+        $resellerSetting = null;
+        if ($user->reseller_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+        }
 
         // ── KARTU UCAPAN CHECKOUT ──
         if ($greetingCardId) {
@@ -110,8 +134,8 @@ class PaymentController extends Controller
                 return redirect()->route('greeting-card.index')->with('success', 'Kartu ucapan gratis berhasil diaktifkan! 🎉');
             }
 
-            // Transfer Bank Manual (untuk user reseller)
-            if ($user->reseller_id) {
+            // Transfer Bank Manual (untuk user reseller yang mengaktifkan opsi manual)
+            if ($user->reseller_id && $resellerSetting && $resellerSetting->payment_mode === 'manual') {
                 $existingPendingManual = Payment::where('user_id', $user->id)
                     ->where('greeting_card_id', $card->id)
                     ->where('plan_id', $plan->id)
@@ -137,7 +161,7 @@ class PaymentController extends Controller
                 return redirect()->route('payment.manual.show', $payment->id);
             }
 
-            // Direct user greeting card checkout via Midtrans
+            // Online checkout via Admin gateway atau Reseller gateway
             $existingPending = Payment::where('user_id', $user->id)
                 ->where('greeting_card_id', $card->id)
                 ->where('plan_id', $plan->id)
@@ -154,28 +178,20 @@ class PaymentController extends Controller
                 'greeting_card_id' => $card->id,
                 'plan_id' => $plan->id,
                 'amount' => $price,
-                'payment_gateway' => 'midtrans',
                 'status' => 'pending',
             ]);
 
-            $midtrans = new MidtransService();
-
-            if (!$midtrans->isConfigured()) {
-                $payment->delete();
-                return back()->with('error', 'Payment gateway belum dikonfigurasi. Hubungi admin.');
-            }
-
-            $result = $midtrans->createInvoice($payment);
+            $result = $this->processOnlineCheckout($payment, $resellerSetting, $request->payment_method_code);
 
             if ($result['success']) {
                 return Inertia::location($result['invoice_url']);
             }
 
-            $payment->update(['status' => 'failed']);
-            return back()->with('error', 'Gagal membuat invoice online: ' . ($result['error'] ?? 'Unknown error'));
+            $payment->delete();
+            return back()->with('error', $result['error'] ?? 'Gagal membuat tagihan online.');
         }
 
-        // ── UNDANGAN PLAN CHECKOUT (EXISTING) ──
+        // ── UNDANGAN PLAN CHECKOUT ──
         $invitationId = $request->input('invitation_id') ?: session('active_invitation_id');
         if (!$invitationId) {
             return back()->with('error', 'Undangan tidak ditemukan untuk pemesanan ini.');
@@ -199,7 +215,7 @@ class PaymentController extends Controller
         }
 
         // Intercept reseller checkout for manual bank transfer
-        if ($user->reseller_id) {
+        if ($user->reseller_id && $resellerSetting && $resellerSetting->payment_mode === 'manual') {
             $existingPendingManual = Payment::where('user_id', $user->id)
                 ->where('plan_id', $plan->id)
                 ->where('invitation_id', $invitationId)
@@ -237,31 +253,51 @@ class PaymentController extends Controller
             return Inertia::location($existingPending->metadata['invoice_url']);
         }
 
-        // Create payment record with reseller price
+        // Create payment record
         $payment = Payment::create([
             'user_id' => $user->id,
             'plan_id' => $plan->id,
             'invitation_id' => $invitationId,
             'amount' => $price,
-            'payment_gateway' => 'midtrans',
             'status' => 'pending',
         ]);
 
-        $midtrans = new MidtransService();
-
-        if (!$midtrans->isConfigured()) {
-            $payment->delete();
-            return back()->with('error', 'Payment gateway belum dikonfigurasi. Hubungi admin.');
-        }
-
-        $result = $midtrans->createInvoice($payment);
+        $result = $this->processOnlineCheckout($payment, $resellerSetting, $request->payment_method_code);
 
         if ($result['success']) {
             return Inertia::location($result['invoice_url']);
         }
 
-        $payment->update(['status' => 'failed']);
-        return back()->with('error', $result['error'] ?? 'Gagal membuat pembayaran.');
+        $payment->delete();
+        return back()->with('error', $result['error'] ?? 'Gagal membuat tagihan online.');
+    }
+
+    /**
+     * Helper to process online gateway invoice creation.
+     */
+    private function processOnlineCheckout(Payment $payment, $resellerSetting, $methodCode = null)
+    {
+        $gatewayType = 'midtrans';
+
+        if ($resellerSetting && $resellerSetting->payment_mode === 'reseller_gateway') {
+            $gatewayType = $resellerSetting->reseller_gateway_type;
+        }
+
+        if ($gatewayType === 'tripay') {
+            $tripay = new \App\Services\TripayService($resellerSetting);
+            if (!$tripay->isConfigured()) {
+                return ['success' => false, 'error' => 'API TriPay belum dikonfigurasi oleh reseller.'];
+            }
+            $channelCode = $methodCode ?: 'QRIS';
+            return $tripay->createTransaction($payment, $channelCode);
+        } else {
+            // Midtrans snap invoice
+            $midtrans = new MidtransService($resellerSetting);
+            if (!$midtrans->isConfigured()) {
+                return ['success' => false, 'error' => 'Midtrans belum dikonfigurasi. Hubungi admin.'];
+            }
+            return $midtrans->createInvoice($payment);
+        }
     }
 
     /**
@@ -411,5 +447,163 @@ class PaymentController extends Controller
         $payment->update(['status' => 'cancelled']);
 
         return redirect()->route('payment.pricing')->with('success', 'Pembayaran dibatalkan.');
+    }
+
+    /**
+     * Handle TriPay Webhook
+     */
+    public function tripayWebhook(Request $request)
+    {
+        $signature = $request->header('X-Callback-Signature') ?: $request->header('Callback-Signature');
+        $rawJson = $request->getContent();
+
+        if (!$signature) {
+            \Illuminate\Support\Facades\Log::warning('Tripay Webhook: missing signature header');
+            return response()->json(['status' => 'failed', 'message' => 'No signature header'], 400);
+        }
+
+        $payload = json_decode($rawJson, true);
+        if (!$payload) {
+            \Illuminate\Support\Facades\Log::warning('Tripay Webhook: invalid JSON body');
+            return response()->json(['status' => 'failed', 'message' => 'Invalid JSON body'], 400);
+        }
+
+        $orderId = $payload['merchant_ref'] ?? null;
+        if (!$orderId) {
+            \Illuminate\Support\Facades\Log::warning('Tripay Webhook: missing merchant_ref');
+            return response()->json(['status' => 'failed', 'message' => 'Missing merchant_ref'], 400);
+        }
+
+        $payment = Payment::where('external_id', $orderId)->first();
+        if (!$payment) {
+            \Illuminate\Support\Facades\Log::warning('Tripay Webhook: payment not found', ['order_id' => $orderId]);
+            return response()->json(['status' => 'failed', 'message' => 'Payment not found'], 400);
+        }
+
+        // Load correct credentials for signature verification
+        $user = $payment->user;
+        $resellerSetting = null;
+        if ($user && $user->reseller_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+        }
+
+        $tripay = new \App\Services\TripayService($resellerSetting);
+        if (!$tripay->verifyWebhookSignature($rawJson, $signature)) {
+            \Illuminate\Support\Facades\Log::warning('Tripay Webhook: signature mismatch', ['merchant_ref' => $orderId]);
+            return response()->json(['status' => 'failed', 'message' => 'Invalid signature'], 400);
+        }
+
+        $status = strtoupper($payload['status'] ?? 'UNPAID');
+
+        if ($status === 'PAID') {
+            if ($payment->status !== 'paid') {
+                $payment->update([
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'metadata' => array_merge($payment->metadata ?? [], [
+                        'tripay_status' => $status,
+                        'tripay_response' => $payload,
+                    ]),
+                ]);
+
+                // check if it's a reseller modal payment
+                if ($payment->parent_payment_id) {
+                    $parent = $payment->parentPayment;
+                    if ($parent && $parent->status !== 'paid') {
+                        $parent->update([
+                            'status' => 'paid',
+                            'paid_at' => now(),
+                            'payment_method' => $payment->payment_method ?: 'tripay',
+                            'reviewed_by' => $payment->user_id, // reseller user id
+                            'reviewed_at' => now(),
+                            'admin_notes' => 'Pembayaran modal lunas via gateway online TriPay.',
+                        ]);
+
+                        // Activate subscription for the customer
+                        if ($parent->greeting_card_id) {
+                            $parent->greetingCard()->update(['is_active' => true]);
+                            \App\Models\Subscription::create([
+                                'user_id' => $parent->user_id,
+                                'greeting_card_id' => $parent->greeting_card_id,
+                                'plan_id' => $parent->plan_id,
+                                'payment_id' => $parent->id,
+                                'starts_at' => now(),
+                                'expires_at' => $parent->plan ? now()->addDays($parent->plan->duration_days) : null,
+                                'status' => 'active',
+                            ]);
+                        } else {
+                            \App\Models\Subscription::create([
+                                'user_id' => $parent->user_id,
+                                'plan_id' => $parent->plan_id,
+                                'invitation_id' => $parent->invitation_id,
+                                'payment_id' => $parent->id,
+                                'starts_at' => now(),
+                                'expires_at' => $parent->plan ? now()->addDays($parent->plan->duration_days) : null,
+                                'status' => 'active',
+                            ]);
+                        }
+                    }
+                    \Illuminate\Support\Facades\Log::info('Tripay Webhook: reseller modal payment successful', ['payment_id' => $payment->id]);
+                    return response()->json(['success' => true]);
+                }
+
+                // Activate subscription for direct payment
+                if ($payment->greeting_card_id) {
+                    $payment->greetingCard()->update(['is_active' => true]);
+                    \App\Models\Subscription::create([
+                        'user_id' => $payment->user_id,
+                        'greeting_card_id' => $payment->greeting_card_id,
+                        'plan_id' => $payment->plan_id,
+                        'payment_id' => $payment->id,
+                        'starts_at' => now(),
+                        'expires_at' => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                        'status' => 'active',
+                    ]);
+                } else {
+                    \App\Models\Subscription::create([
+                        'user_id' => $payment->user_id,
+                        'plan_id' => $payment->plan_id,
+                        'invitation_id' => $payment->invitation_id,
+                        'payment_id' => $payment->id,
+                        'starts_at' => now(),
+                        'expires_at' => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                        'status' => 'active',
+                    ]);
+                }
+
+                // Credit reseller wallet or debit cost
+                if ($user && $user->reseller_id && $payment->plan_id) {
+                    $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
+                    $basePrice = (float)$payment->plan->price;
+
+                    if ($paymentMode === 'reseller_gateway') {
+                        // Debit cost
+                        \App\Models\ResellerWallet::debitCost(
+                            $user->reseller_id,
+                            $payment->id,
+                            $basePrice,
+                            "Biaya modal paket {$payment->plan->name} - Pelanggan {$user->name}"
+                        );
+                    } else {
+                        // Credit profit
+                        $paidAmount = (float)$payment->amount;
+                        $profit = $paidAmount - $basePrice;
+
+                        if ($profit > 0) {
+                            \App\Models\ResellerWallet::creditProfit(
+                                $user->reseller_id,
+                                $payment->id,
+                                $profit,
+                                "Profit dari {$user->name} - Paket {$payment->plan->name}"
+                            );
+                        }
+                    }
+                }
+            }
+        } elseif (in_array($status, ['FAILED', 'EXPIRED'])) {
+            $payment->update(['status' => 'failed']);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

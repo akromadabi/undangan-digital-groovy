@@ -17,19 +17,14 @@ class ResellerWithdrawalController extends Controller
         $reseller = auth()->user();
         $settings = $reseller->resellerSettings;
 
-        // Calculate total profit from actual payments
-        $userIds = User::where('reseller_id', $reseller->id)->pluck('id');
-        $payments = Payment::whereIn('user_id', $userIds)
-            ->where('status', 'paid')
-            ->with('plan:id,name,price')
-            ->get();
+        // Get actual reseller wallet balance
+        $wallet = \App\Models\ResellerWallet::firstOrCreate(['reseller_id' => $reseller->id], ['balance' => 0]);
 
-        $totalProfit = 0;
-        foreach ($payments as $payment) {
-            $basePrice = $payment->plan ? (float)$payment->plan->price : 0;
-            $actualPaid = (float)$payment->amount;
-            $totalProfit += max($actualPaid - $basePrice, 0);
-        }
+        // Calculate total profit from wallet transactions (credits excluding refunds/credit reversals)
+        $totalProfit = \App\Models\ResellerWalletTransaction::where('reseller_id', $reseller->id)
+            ->where('type', 'credit')
+            ->where('description', 'NOT LIKE', '%Pengembalian%')
+            ->sum('amount');
 
         // Calculate withdrawn amount (approved + transferred)
         $totalWithdrawn = Withdrawal::where('reseller_id', $reseller->id)
@@ -41,7 +36,8 @@ class ResellerWithdrawalController extends Controller
             ->where('status', 'pending')
             ->sum('amount');
 
-        $availableBalance = max($totalProfit - (float)$totalWithdrawn - (float)$pendingWithdrawals, 0);
+        // Available balance is the current wallet balance since pending is already debited immediately
+        $availableBalance = (float)$wallet->balance;
 
         // Withdrawal history
         $withdrawals = Withdrawal::where('reseller_id', $reseller->id)
@@ -56,14 +52,28 @@ class ResellerWithdrawalController extends Controller
                 'created_at' => $w->created_at->format('d M Y H:i'),
             ]);
 
+        // Wallet transactions (mutasi)
+        $walletTransactions = \App\Models\ResellerWalletTransaction::where('reseller_id', $reseller->id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn($t) => [
+                'id' => $t->id,
+                'type' => $t->type,
+                'amount' => (float)$t->amount,
+                'description' => $t->description,
+                'balance_after' => (float)$t->balance_after,
+                'created_at' => $t->created_at->format('d M Y H:i'),
+            ]);
+
         return Inertia::render('Admin/Pencairan', [
             'balance' => [
-                'total_profit' => $totalProfit,
+                'total_profit' => (float)$totalProfit,
                 'total_withdrawn' => (float)$totalWithdrawn,
                 'pending' => (float)$pendingWithdrawals,
                 'available' => $availableBalance,
             ],
             'withdrawals' => $withdrawals,
+            'walletTransactions' => $walletTransactions,
             'bankInfo' => [
                 'bank_name' => $settings->bank_name ?? '',
                 'bank_account' => $settings->bank_account ?? '',
@@ -95,33 +105,26 @@ class ResellerWithdrawalController extends Controller
         }
 
         // Calculate available balance
-        $userIds = User::where('reseller_id', $reseller->id)->pluck('id');
-        $payments = Payment::whereIn('user_id', $userIds)->where('status', 'paid')->with('plan:id,price')->get();
-
-        $totalProfit = 0;
-        foreach ($payments as $p) {
-            $base = $p->plan ? (float)$p->plan->price : 0;
-            $totalProfit += max((float)$p->amount - $base, 0);
-        }
-
-        $totalWithdrawn = Withdrawal::where('reseller_id', $reseller->id)
-            ->whereIn('status', ['approved', 'transferred'])
-            ->sum('amount');
-        $pendingAmount = Withdrawal::where('reseller_id', $reseller->id)
-            ->where('status', 'pending')
-            ->sum('amount');
-
-        $available = max($totalProfit - (float)$totalWithdrawn - (float)$pendingAmount, 0);
+        $wallet = \App\Models\ResellerWallet::firstOrCreate(['reseller_id' => $reseller->id], ['balance' => 0]);
+        $available = (float)$wallet->balance;
 
         if ($request->amount > $available) {
             return back()->withErrors(['amount' => 'Jumlah pencairan melebihi saldo tersedia (Rp ' . number_format($available, 0, ',', '.') . ').']);
         }
 
-        Withdrawal::create([
+        $withdrawal = Withdrawal::create([
             'reseller_id' => $reseller->id,
             'amount' => $request->amount,
             'status' => 'pending',
         ]);
+
+        // Debit from wallet immediately to block balance
+        \App\Models\ResellerWallet::debitCost(
+            $reseller->id,
+            null,
+            $request->amount,
+            "Penarikan dana #{$withdrawal->id} (Pending)"
+        );
 
         return back()->with('success', 'Permohonan pencairan berhasil diajukan.');
     }

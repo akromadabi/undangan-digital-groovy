@@ -16,11 +16,19 @@ class MidtransService
     protected string $mode;
     protected string $baseUrl;
 
-    public function __construct()
+    public function __construct(?\App\Models\ResellerSetting $resellerSetting = null)
     {
-        $this->clientKey = GlobalSetting::getValue('midtrans_client_key', '');
-        $this->serverKey = GlobalSetting::getValue('midtrans_server_key', '');
-        $this->mode = GlobalSetting::getValue('midtrans_mode', 'sandbox');
+        if ($resellerSetting && $resellerSetting->payment_mode === 'reseller_gateway' && $resellerSetting->reseller_gateway_type === 'midtrans') {
+            $settings = $resellerSetting->reseller_midtrans_settings ?? [];
+            $this->clientKey = $settings['client_key'] ?? '';
+            $this->serverKey = $settings['server_key'] ?? '';
+            $this->mode = $settings['mode'] ?? 'sandbox';
+        } else {
+            $this->clientKey = GlobalSetting::getValue('midtrans_client_key', '');
+            $this->serverKey = GlobalSetting::getValue('midtrans_server_key', '');
+            $this->mode = GlobalSetting::getValue('midtrans_mode', 'sandbox');
+        }
+
         $this->baseUrl = $this->mode === 'production'
             ? 'https://app.midtrans.com/snap/v1'
             : 'https://app.sandbox.midtrans.com/snap/v1';
@@ -132,6 +140,23 @@ class MidtransService
             return false;
         }
 
+        $payment = Payment::where('external_id', $orderId)->first();
+
+        if (!$payment) {
+            Log::warning('Midtrans Webhook: payment not found', ['order_id' => $orderId]);
+            return false;
+        }
+
+        // Dynamically reload keys if it belongs to a reseller using custom Midtrans
+        $user = $payment->user;
+        if ($user && $user->reseller_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+            if ($resellerSetting && $resellerSetting->payment_mode === 'reseller_gateway' && $resellerSetting->reseller_gateway_type === 'midtrans') {
+                $settings = $resellerSetting->reseller_midtrans_settings ?? [];
+                $this->serverKey = $settings['server_key'] ?? '';
+            }
+        }
+
         // Verify signature
         $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $this->serverKey);
 
@@ -141,13 +166,6 @@ class MidtransService
                 'expected' => $expectedSignature,
                 'payload' => $payload
             ]);
-            return false;
-        }
-
-        $payment = Payment::where('external_id', $orderId)->first();
-
-        if (!$payment) {
-            Log::warning('Midtrans Webhook: payment not found', ['order_id' => $orderId]);
             return false;
         }
 
@@ -172,6 +190,48 @@ class MidtransService
                     'midtrans_response' => $payload,
                 ]),
             ]);
+
+            // check if it's a reseller modal payment
+            if ($payment->parent_payment_id) {
+                $parent = $payment->parentPayment;
+                if ($parent && $parent->status !== 'paid') {
+                    $parent->update([
+                        'status' => 'paid',
+                        'paid_at' => now(),
+                        'payment_method' => $payment->payment_method,
+                        'reviewed_by' => $payment->user_id, // reseller user id
+                        'reviewed_at' => now(),
+                        'admin_notes' => 'Pembayaran modal lunas via gateway online.',
+                    ]);
+
+                    // Activate subscription for the customer
+                    if ($parent->greeting_card_id) {
+                        $parent->greetingCard()->update(['is_active' => true]);
+                        Subscription::create([
+                            'user_id' => $parent->user_id,
+                            'greeting_card_id' => $parent->greeting_card_id,
+                            'plan_id' => $parent->plan_id,
+                            'payment_id' => $parent->id,
+                            'starts_at' => now(),
+                            'expires_at' => $parent->plan ? now()->addDays($parent->plan->duration_days) : null,
+                            'status' => 'active',
+                        ]);
+                    } else {
+                        Subscription::create([
+                            'user_id' => $parent->user_id,
+                            'plan_id' => $parent->plan_id,
+                            'invitation_id' => $parent->invitation_id,
+                            'payment_id' => $parent->id,
+                            'starts_at' => now(),
+                            'expires_at' => $parent->plan ? now()->addDays($parent->plan->duration_days) : null,
+                            'status' => 'active',
+                        ]);
+                    }
+                }
+                
+                Log::info('Midtrans Webhook: reseller modal payment successful', ['payment_id' => $payment->id]);
+                return true;
+            }
 
             if ($payment->greeting_card_id) {
                 // Aktifkan kartu ucapan
@@ -199,20 +259,33 @@ class MidtransService
                 ]);
             }
 
-            // Credit reseller wallet if user belongs to a reseller and it is a plan payment
-            $user = $payment->user;
+            // Credit reseller wallet or debit cost
             if ($user && $user->reseller_id && $payment->plan_id) {
+                $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+                $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
                 $basePrice = (float)$payment->plan->price;
-                $paidAmount = (float)$payment->amount;
-                $profit = $paidAmount - $basePrice;
 
-                if ($profit > 0) {
-                    \App\Models\ResellerWallet::creditProfit(
+                if ($paymentMode === 'reseller_gateway') {
+                    // Reseller received money directly. We debit their wallet by basePrice (cost)
+                    \App\Models\ResellerWallet::debitCost(
                         $user->reseller_id,
                         $payment->id,
-                        $profit,
-                        "Profit dari {$user->name} - Paket {$payment->plan->name}"
+                        $basePrice,
+                        "Biaya modal paket {$payment->plan->name} - Pelanggan {$user->name}"
                     );
+                } else {
+                    // Admin received money. We credit reseller with profit
+                    $paidAmount = (float)$payment->amount;
+                    $profit = $paidAmount - $basePrice;
+
+                    if ($profit > 0) {
+                        \App\Models\ResellerWallet::creditProfit(
+                            $user->reseller_id,
+                            $payment->id,
+                            $profit,
+                            "Profit dari {$user->name} - Paket {$payment->plan->name}"
+                        );
+                    }
                 }
             }
 

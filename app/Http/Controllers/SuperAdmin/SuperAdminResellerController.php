@@ -19,7 +19,7 @@ class SuperAdminResellerController extends Controller
     public function index(Request $request)
     {
         $resellers = User::where('role', 'admin')
-            ->with('resellerSettings')
+            ->with(['resellerSettings', 'resellerWallet'])
             ->withCount('resellerUsers')
             ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"))
             ->latest()
@@ -117,7 +117,7 @@ class SuperAdminResellerController extends Controller
     {
         abort_if($reseller->role !== 'admin', 404);
 
-        $reseller->load(['resellerSettings', 'resellerPlanPrices.plan']);
+        $reseller->load(['resellerSettings', 'resellerPlanPrices.plan', 'resellerWallet']);
 
         $users = User::where('reseller_id', $reseller->id)
             ->with('activeSubscription.plan')

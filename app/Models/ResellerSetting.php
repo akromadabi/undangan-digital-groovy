@@ -34,6 +34,10 @@ class ResellerSetting extends Model
         'greeting_card_price',
         'hide_demo_plan_selector',
         'bio_link_config',
+        'payment_mode',
+        'reseller_gateway_type',
+        'reseller_midtrans_settings',
+        'reseller_tripay_settings',
     ];
 
     protected function casts(): array
@@ -45,6 +49,8 @@ class ResellerSetting extends Model
             'social_links'            => 'array',
             'landing_page_config'     => 'array',
             'bio_link_config'         => 'array',
+            'reseller_midtrans_settings' => 'array',
+            'reseller_tripay_settings' => 'array',
         ];
     }
 

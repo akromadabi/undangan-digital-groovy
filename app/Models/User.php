@@ -145,6 +145,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(ResellerPlanPrice::class, 'reseller_id');
     }
 
+    /** Wallet reseller */
+    public function resellerWallet()
+    {
+        return $this->hasOne(ResellerWallet::class, 'reseller_id');
+    }
+
     // ── Helpers ──
 
     public function isSuperAdmin(): bool

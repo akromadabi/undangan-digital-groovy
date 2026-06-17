@@ -15,6 +15,7 @@ class Payment extends Model
         'plan_id',
         'invitation_id',
         'greeting_card_id',
+        'parent_payment_id',
         'amount',
         'payment_method',
         'payment_gateway',
@@ -62,5 +63,15 @@ class Payment extends Model
     public function subscription()
     {
         return $this->hasOne(Subscription::class);
+    }
+
+    public function parentPayment()
+    {
+        return $this->belongsTo(Payment::class, 'parent_payment_id');
+    }
+
+    public function childPayments()
+    {
+        return $this->hasMany(Payment::class, 'parent_payment_id');
     }
 }

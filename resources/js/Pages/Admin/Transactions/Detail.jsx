@@ -15,7 +15,9 @@ const formatCurrency = a => new Intl.NumberFormat('id-ID', { style: 'currency', 
 const formatDate = d => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export default function TransactionDetail({ payment }) {
-    const { adminRoutePrefix, flash } = usePage().props;
+    const { adminRoutePrefix, flash, auth } = usePage().props;
+    const user = auth?.user;
+    const isReseller = user?.role === 'admin';
     const [showApprove, setShowApprove] = useState(false);
     const [showReject, setShowReject] = useState(false);
     const [approveNotes, setApproveNotes] = useState('');
@@ -42,6 +44,22 @@ export default function TransactionDetail({ payment }) {
         );
     };
 
+    const handleApproveViaWallet = () => {
+        if (confirm(`Apakah Anda yakin ingin memotong saldo dompet sebesar ${formatCurrency(payment.plan?.price || 0)} untuk mengaktifkan pesanan ini?`)) {
+            setProcessing(true);
+            router.post(`${adminRoutePrefix}/transactions/${payment.id}/approve-wallet`, {}, {
+                onFinish: () => setProcessing(false)
+            });
+        }
+    };
+
+    const handleApproveViaOnline = () => {
+        setProcessing(true);
+        router.post(`${adminRoutePrefix}/transactions/${payment.id}/approve-online`, {}, {
+            onFinish: () => setProcessing(false)
+        });
+    };
+
     return (
         <DynamicAdminLayout title="Detail Transaksi">
             <Head title="Detail Transaksi" />
@@ -66,12 +84,25 @@ export default function TransactionDetail({ payment }) {
                     </div>
 
                     {isReviewable && (
-                        <div className="flex gap-2">
-                            <button onClick={() => setShowApprove(true)}
-                                className="px-5 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 transition-colors flex items-center gap-2">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                Setujui
-                            </button>
+                        <div className="flex flex-wrap gap-2">
+                            {isReseller ? (
+                                <>
+                                    <button onClick={handleApproveViaWallet} disabled={processing}
+                                        className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5">
+                                        💼 Aktifkan via Saldo ({formatCurrency(payment.plan?.price || 0)})
+                                    </button>
+                                    <button onClick={handleApproveViaOnline} disabled={processing}
+                                        className="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-1.5">
+                                        💳 Bayar Modal Online ({formatCurrency(payment.plan?.price || 0)})
+                                    </button>
+                                </>
+                            ) : (
+                                <button onClick={() => setShowApprove(true)}
+                                    className="px-5 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 transition-colors flex items-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                    Setujui
+                                </button>
+                            )}
                             <button onClick={() => setShowReject(true)}
                                 className="px-5 py-2.5 border border-red-200 text-red-500 rounded-xl text-sm font-bold hover:bg-red-50 transition-colors flex items-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>

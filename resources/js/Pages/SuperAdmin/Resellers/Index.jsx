@@ -8,6 +8,8 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
     </svg>
 );
 
+const formatCurrency = (a) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(a);
+
 export default function Index({ resellers, filters, centralHost }) {
     const [search, setSearch] = useState(filters?.search || '');
 
@@ -69,6 +71,7 @@ export default function Index({ resellers, filters, centralHost }) {
                                     <th rowSpan={2} className="px-4 py-2.5 text-left text-[11px] font-semibold text-[#999] uppercase tracking-wider align-middle">Reseller</th>
                                     <th rowSpan={2} className="px-4 py-2.5 text-left text-[11px] font-semibold text-[#999] uppercase tracking-wider align-middle">Brand</th>
                                     <th rowSpan={2} className="px-3 py-2.5 text-center text-[11px] font-semibold text-[#999] uppercase tracking-wider align-middle">Users</th>
+                                    <th rowSpan={2} className="px-3 py-2.5 text-right text-[11px] font-semibold text-[#999] uppercase tracking-wider align-middle">Saldo Dompet</th>
                                     <th colSpan={3} className="px-3 py-1.5 text-center text-[11px] font-semibold text-[#999] uppercase tracking-wider border-b border-[#f0ede8]">Pengunjung</th>
                                     <th rowSpan={2} className="px-3 py-2.5 text-center text-[11px] font-semibold text-[#999] uppercase tracking-wider align-middle">Status</th>
                                     <th rowSpan={2} className="px-4 py-2.5 text-right text-[11px] font-semibold text-[#999] uppercase tracking-wider align-middle">Aksi</th>
@@ -106,6 +109,11 @@ export default function Index({ resellers, filters, centralHost }) {
                                         </td>
                                         <td className="px-3 py-3 text-center">
                                             <span className="text-xs font-bold text-[#333]">{r.reseller_users_count || 0}</span>
+                                        </td>
+                                        <td className="px-3 py-3 text-right">
+                                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100/50 px-2.5 py-1 rounded-lg inline-block min-w-[70px] select-none text-right">
+                                                {formatCurrency(r.reseller_wallet?.balance || 0)}
+                                            </span>
                                         </td>
                                         {/* Hari */}
                                         <td className="px-2 py-3 text-center border-r border-[#f5f3f0]/60">
@@ -155,7 +163,7 @@ export default function Index({ resellers, filters, centralHost }) {
                                 ))}
                                 {(!resellers?.data || resellers.data.length === 0) && (
                                     <tr>
-                                        <td colSpan={8} className="px-4 py-8 text-center text-[#999] text-xs">Belum ada reseller terdaftar</td>
+                                        <td colSpan={9} className="px-4 py-8 text-center text-[#999] text-xs">Belum ada reseller terdaftar</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -200,11 +208,19 @@ export default function Index({ resellers, filters, centralHost }) {
                                                     : '-')}
                                         </span>
                                     </div>
-                                    <div className="text-right flex-shrink-0">
-                                        <span className="text-[#999] text-[8.5px] uppercase tracking-wider block font-bold leading-none mb-1">Users</span>
-                                        <span className="text-xs font-black text-gray-800 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md inline-block">
-                                            {r.reseller_users_count || 0}
-                                        </span>
+                                    <div className="flex items-center gap-3 flex-shrink-0">
+                                        <div className="text-right">
+                                            <span className="text-[#999] text-[8.5px] uppercase tracking-wider block font-bold leading-none mb-1">Saldo Dompet</span>
+                                            <span className="text-xs font-black text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md inline-block">
+                                                {formatCurrency(r.reseller_wallet?.balance || 0)}
+                                            </span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-[#999] text-[8.5px] uppercase tracking-wider block font-bold leading-none mb-1">Users</span>
+                                            <span className="text-xs font-black text-gray-800 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md inline-block">
+                                                {r.reseller_users_count || 0}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
