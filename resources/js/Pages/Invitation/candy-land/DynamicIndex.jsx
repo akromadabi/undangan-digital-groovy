@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import WishesEmojiPicker from '@/Components/WishesEmojiPicker';
 import PremiumSlideshow from '@/Components/PremiumSlideshow';
 import usePageVisibilityAudio from '@/hooks/usePageVisibilityAudio';
@@ -178,7 +178,7 @@ function BalloonEffect({ active }) {
                         backgroundColor: b.color,
                         borderRadius: '50% 50% 50% 50% / 40% 40% 60% 60%',
                         boxShadow: 'inset -5px -5px 10px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.1)',
-                        animation: `balloon-float ${b.duration}s linear ${b.delay}s infinite`,
+                        animation: `balloon-float ${b.duration}s linear ${b.delay}s backwards`,
                         cursor: 'pointer',
                         zIndex: 35
                     }}
@@ -512,7 +512,7 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
             .toUpperCase();
         
         return (
-            <div className="candy-panel text-center flex-1 max-w-[280px] w-full">
+            <div className="candy-panel text-center flex-1 max-w-[360px] w-full">
                 <div className="candy-avatar-frame my-6 mx-auto">
                     {globalShowPhotos && person.photo ? (
                         <img 
@@ -960,146 +960,209 @@ function GallerySection({ galleries, id, locale, onSelectImage }) {
 function WishesRsvpSection({ invitation, guest, wishes, enableRsvp, enableWishes, id, locale }) {
     const wishesInputRef = useRef(null);
     const { t } = useTranslation();
+    const isEn = locale === 'en';
     const activeGuest = guest || { name: '', id: null };
     const guestName = activeGuest.name || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('to') : '') || '';
-    
-    // RSVP Form State
-    const rsvpForm = useForm({
-        guest_id: activeGuest.id || '',
-        attendance: 'hadir',
-        number_of_guests: 1
-    });
 
-    const handleRsvpSubmit = (e) => {
+    const [sharedName, setSharedName] = useState(guestName || '');
+    const [attendance, setAttendance] = useState('hadir');
+    const [numGuests, setNumGuests] = useState(1);
+    const [message, setMessage] = useState('');
+    const [success, setSuccess] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-        rsvpForm.post(route('invitation.rsvp', invitation.slug), {
-            preserveScroll: true
-        });
+        setIsSubmitting(true);
+
+        const rsvpPayload = {
+            sender_name: sharedName,
+            attendance: attendance,
+            number_of_guests: numGuests,
+            guest_id: activeGuest.id || null,
+        };
+
+        const wishPayload = {
+            sender_name: sharedName,
+            message: message,
+            guest_id: activeGuest.id || null,
+        };
+
+        const submitWish = () => {
+            if (enableWishes && message.trim()) {
+                router.post(route('invitation.wish', invitation.slug), wishPayload, {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        setMessage('');
+                        setSuccess(true);
+                        setIsSubmitting(false);
+                        setTimeout(() => setSuccess(false), 5000);
+                    },
+                    onError: () => setIsSubmitting(false)
+                });
+            } else {
+                setSuccess(true);
+                setIsSubmitting(false);
+                setTimeout(() => setSuccess(false), 5000);
+            }
+        };
+
+        if (enableRsvp) {
+            router.post(route('invitation.rsvp', invitation.slug), rsvpPayload, {
+                preserveScroll: true,
+                onSuccess: submitWish,
+                onError: () => setIsSubmitting(false)
+            });
+        } else {
+            submitWish();
+        }
     };
 
-    // Wishes Form State
-    const wishForm = useForm({
-        guest_id: activeGuest.id || '',
-        sender_name: guestName || '',
-        message: ''
-    });
+    const wishList = safeArr(wishes);
+    const recentWishes = wishList.slice(0, 5);
 
-    const handleWishSubmit = (e) => {
-        e.preventDefault();
-        wishForm.post(route('invitation.wish', invitation.slug), {
-            preserveScroll: true,
-            onSuccess: () => wishForm.reset('message')
-        });
-    };
+    const sectionTitle = enableRsvp && enableWishes
+        ? (isEn ? 'RSVP & WISHES' : 'KONFIRMASI KEHADIRAN & UCAPAN')
+        : enableRsvp
+            ? (isEn ? 'RSVP' : 'KONFIRMASI KEHADIRAN')
+            : (isEn ? 'WISHES' : 'UCAPAN & DOA');
+
+    if (!enableRsvp && !enableWishes) return null;
 
     return (
         <section id={id || "rsvp"} className="py-12 px-6">
-            <div className="max-w-md mx-auto space-y-8">
-                {/* RSVP Card */}
-                {enableRsvp && (
-                    <Reveal className="candy-panel">
-                        <span className="text-3xl block mb-2 text-center">✉️</span>
-                        <h2 className="candy-section-title">{t('invitation.rsvp_title') || 'KONFIRMASI KEHADIRAN'}</h2>
-                        
-                        <form onSubmit={handleRsvpSubmit} className="space-y-4 mt-6">
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold uppercase text-rose-500 tracking-wider block">{t('invitation.rsvp_attendance')}</label>
-                                <select 
-                                    value={rsvpForm.data.attendance}
-                                    onChange={e => rsvpForm.setData('attendance', e.target.value)}
-                                    className="candy-input candy-select font-semibold"
-                                >
-                                    <option value="hadir">{t('invitation.rsvp_attend_yes') || 'Hadir'}</option>
-                                    <option value="tidak_hadir">{t('invitation.rsvp_attend_no') || 'Tidak Hadir'}</option>
-                                    <option value="belum_pasti">{t('invitation.rsvp_attend_maybe') || 'Belum Pasti'}</option>
-                                </select>
-                            </div>
+            <div className="max-w-md mx-auto">
+                <Reveal className="candy-panel">
+                    <span className="text-3xl block mb-2 text-center">💌</span>
+                    <h2 className="candy-section-title">{sectionTitle}</h2>
 
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold uppercase text-rose-500 tracking-wider block">{t('invitation.rsvp_guests')}</label>
-                                <select 
-                                    value={rsvpForm.data.number_of_guests}
-                                    onChange={e => rsvpForm.setData('number_of_guests', Number(e.target.value))}
-                                    className="candy-input candy-select font-semibold"
-                                >
-                                    {[...Array(6)].map((_, i) => (
-                                        <option key={i+1} value={i+1}>{i+1} {t('invitation.rsvp_guests_unit') || 'Orang'}</option>
-                                    ))}
-                                </select>
-                            </div>
-
+                    {success ? (
+                        <div className="text-center py-6 space-y-3">
+                            <div className="text-4xl">🎉</div>
+                            <h3 className="font-bold text-rose-700 text-lg">{isEn ? 'Thank you!' : 'Terima Kasih!'}</h3>
+                            <p className="text-sm opacity-80">
+                                {isEn ? 'Your response has been successfully sent.' : 'Respon dan ucapan Anda telah berhasil terkirim.'}
+                            </p>
                             <button 
-                                type="submit" 
-                                disabled={rsvpForm.processing}
-                                className="candy-btn-action candy-btn-primary w-full justify-center py-3.5 mt-2"
+                                type="button" 
+                                onClick={() => setSuccess(false)} 
+                                className="candy-btn-action candy-btn-primary py-2 px-6 text-xs mt-4"
                             >
-                                {rsvpForm.processing ? 'Menyimpan...' : 'KONFIRMASI SEKARANG'}
+                                {isEn ? 'SUBMIT ANOTHER RESPONSE' : 'KIRIM RESPON BARU'}
                             </button>
-                        </form>
-                    </Reveal>
-                )}
-
-                {/* Wishes Card */}
-                {enableWishes && (
-                    <Reveal className="candy-panel">
-                        <span className="text-3xl block mb-2 text-center">💬</span>
-                        <h2 className="candy-section-title">{t('invitation.wishes_title') || 'UCAPAN & DOA MANIS'}</h2>
-                        
-                        <form onSubmit={handleWishSubmit} className="space-y-4 mt-6">
+                        </div>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
                             <div className="space-y-1">
-                                <label className="text-xs font-bold uppercase text-rose-500 tracking-wider block">{t('invitation.wish_name')}</label>
+                                <label className="text-xs font-bold uppercase text-rose-500 tracking-wider block">
+                                    {isEn ? 'YOUR NAME' : 'NAMA LENGKAP'}
+                                </label>
                                 <input 
                                     type="text"
-                                    value={wishForm.data.sender_name}
-                                    onChange={e => wishForm.setData('sender_name', e.target.value)}
-                                    placeholder="Nama Anda"
+                                    value={sharedName}
+                                    onChange={e => setSharedName(e.target.value)}
+                                    placeholder={isEn ? 'Enter your name' : 'Tulis nama Anda'}
                                     className="candy-input font-bold"
                                     required
                                 />
                             </div>
 
-                            <div className="space-y-1 relative">
-                                <label className="text-xs font-bold uppercase text-rose-500 tracking-wider block">{t('invitation.wish_message')}</label>
-                                <WishesEmojiPicker
-                                    value={wishForm.data.message}
-                                    onChange={(newValue) => wishForm.setData('message', newValue)}
-                                    inputRef={wishesInputRef}
-                                    isDark={false}
-                                >
-                                    <textarea 
-                                        ref={wishesInputRef}
-                                        value={wishForm.data.message}
-                                        onChange={e => wishForm.setData('message', e.target.value)}
-                                        placeholder="Tulis ucapan termanismu di sini..."
-                                        className="candy-input h-28 font-medium"
-                                        required
-                                    />
-                                </WishesEmojiPicker>
-                            </div>
+                            {enableRsvp && (
+                                <>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold uppercase text-rose-500 tracking-wider block">
+                                            {isEn ? 'ATTENDANCE' : 'KONFIRMASI KEHADIRAN'}
+                                        </label>
+                                        <select 
+                                            value={attendance}
+                                            onChange={e => setAttendance(e.target.value)}
+                                            className="candy-input candy-select font-semibold"
+                                        >
+                                            <option value="hadir">{isEn ? 'Yes, I will attend' : 'Ya, Saya akan Hadir'}</option>
+                                            <option value="tidak_hadir">{isEn ? 'No, I cannot attend' : 'Maaf, Saya Tidak Bisa Hadir'}</option>
+                                            <option value="belum_pasti">{isEn ? 'Maybe' : 'Belum Pasti / Ragu'}</option>
+                                        </select>
+                                    </div>
+
+                                    {attendance === 'hadir' && (
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold uppercase text-rose-500 tracking-wider block">
+                                                {isEn ? 'NUMBER OF GUESTS' : 'JUMLAH ORANG / PAX'}
+                                            </label>
+                                            <select 
+                                                value={numGuests}
+                                                onChange={e => setNumGuests(Number(e.target.value))}
+                                                className="candy-input candy-select font-semibold"
+                                            >
+                                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                                                    <option key={n} value={n}>{n} {isEn ? 'Person' : 'Orang'}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {enableWishes && (
+                                <div className="space-y-1 relative">
+                                    <label className="text-xs font-bold uppercase text-rose-500 tracking-wider block">
+                                        {isEn ? 'WISHES & PRAYERS' : 'UCAPAN & DOA'}
+                                    </label>
+                                    <WishesEmojiPicker
+                                        value={message}
+                                        onChange={setMessage}
+                                        inputRef={wishesInputRef}
+                                        isDark={false}
+                                    >
+                                        <textarea 
+                                            ref={wishesInputRef}
+                                            value={message}
+                                            onChange={e => setMessage(e.target.value)}
+                                            placeholder={isEn ? 'Write your sweet wishes here...' : 'Tulis ucapan termanismu di sini...'}
+                                            className="candy-input h-28 font-medium"
+                                            required={!enableRsvp}
+                                        />
+                                    </WishesEmojiPicker>
+                                </div>
+                            )}
 
                             <button 
                                 type="submit" 
-                                disabled={wishForm.processing}
+                                disabled={isSubmitting}
                                 className="candy-btn-action candy-btn-primary w-full justify-center py-3.5 mt-2"
                             >
-                                {wishForm.processing ? 'Mengirim...' : 'KIRIM UCAPAN'}
+                                {isSubmitting ? (isEn ? 'TRANSMITTING...' : 'MENGIRIM...') : (isEn ? 'SEND RESPONSE' : 'KIRIM RESPON')}
                             </button>
                         </form>
+                    )}
 
-                        {/* Wishes Listing */}
-                        <div className="mt-8 border-t border-rose-100/50 pt-6 max-h-[350px] overflow-y-auto space-y-4">
-                            {wishes.map((w, idx) => (
+                    {enableWishes && recentWishes.length > 0 && (
+                        <div className="mt-8 border-t border-rose-100/50 pt-6 max-h-[280px] overflow-y-auto space-y-4">
+                            <h4 className="text-xs font-bold text-rose-600 uppercase tracking-wider block mb-3 text-left">
+                                {isEn ? 'RECENT WISHES' : 'UCAPAN TERBARU'}
+                            </h4>
+                            {recentWishes.map((w, idx) => (
                                 <div key={w.id || idx} className="bg-rose-50/20 border border-rose-100/20 rounded-2xl p-4 space-y-1 text-left relative z-10 transition-all hover:bg-rose-50/40">
                                     <div className="flex justify-between items-center">
                                         <span className="font-bold text-[13px] text-rose-900">{w.sender_name}</span>
-                                        <span className="text-[9px] opacity-45 font-bold uppercase">SWEET GUEST</span>
+                                        {w.rsvp?.attendance && (
+                                            <span className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase ${
+                                                w.rsvp.attendance === 'hadir' 
+                                                    ? 'bg-emerald-100 text-emerald-800' 
+                                                    : w.rsvp.attendance === 'tidak_hadir'
+                                                        ? 'bg-rose-100 text-rose-800'
+                                                        : 'bg-amber-100 text-amber-800'
+                                            }`}>
+                                                {w.rsvp.attendance === 'hadir' ? (isEn ? 'Attending' : 'Hadir') : w.rsvp.attendance === 'tidak_hadir' ? (isEn ? 'Absent' : 'Tidak Hadir') : (isEn ? 'Maybe' : 'Ragu')}
+                                            </span>
+                                        )}
                                     </div>
                                     <p className="text-[12px] opacity-90 leading-relaxed font-semibold">{w.message}</p>
                                 </div>
                             ))}
                         </div>
-                    </Reveal>
-                )}
+                    )}
+                </Reveal>
             </div>
         </section>
     );
@@ -1298,11 +1361,32 @@ export default function DynamicIndex({
     globalShowPhotos = showPhotos;
     globalShowAnimations = showAnimations;
 
+    const enableRsvp = parseBool(invitation?.enable_rsvp);
+    const enableWishes = parseBool(invitation?.enable_wishes);
+
     const visibleSections = useMemo(() => {
+        const validKeys = ['opening', 'bride_groom', 'event', 'countdown', 'love_story', 'gallery', 'bank', 'rsvp', 'wishes', 'closing', 'livestream', 'video_wedding'];
+        const primaryEvent = safeArr(events).find(e => e.is_primary) || safeArr(events)[0];
+        const hasStream = primaryEvent?.streaming_url || safeArr(primaryEvent?.streamings).length > 0;
+
         return sections
-            .filter(s => s.is_visible)
-            .sort((a, b) => a.sort_order - b.sort_order);
-    }, [sections]);
+            .filter(s => s.is_visible && validKeys.includes(s.section_key))
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .filter(s => {
+                if (s.section_key === 'love_story' && !(loveStories?.length > 0)) return false;
+                if (s.section_key === 'gallery' && !(galleries?.length > 0)) return false;
+                if (s.section_key === 'bank' && !(bankAccounts?.length > 0)) return false;
+                if (s.section_key === 'bride_groom' && !(brideGrooms?.length >= 1)) return false;
+                if (s.section_key === 'countdown') return false; // integrated in event
+                if (s.section_key === 'rsvp' && !enableRsvp) return false;
+                if (s.section_key === 'wishes') {
+                    if (!enableWishes) return false;
+                    if (enableRsvp) return false; // Skip wishes slide (integrated in RSVP)
+                }
+                if (s.section_key === 'livestream' && !hasStream) return false;
+                return true;
+            });
+    }, [sections, events, loveStories, galleries, bankAccounts, brideGrooms, enableRsvp, enableWishes]);
 
     const handleOpen = () => {
         setIsOpen(true);
@@ -1497,7 +1581,7 @@ export default function DynamicIndex({
                                     {section.section_key === 'gallery' && (
                                         <GallerySection galleries={galleries} id={section.section_key} locale={locale} onSelectImage={setLightboxImage} />
                                     )}
-                                    {section.section_key === 'rsvp' && (
+                                    {(section.section_key === 'rsvp' || section.section_key === 'wishes') && (
                                         <WishesRsvpSection 
                                             invitation={invitation} 
                                             guest={guest} 

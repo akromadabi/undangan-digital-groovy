@@ -1151,7 +1151,15 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
                                                 <div className="rl-perspective-phone__notch" />
                                                 <div className={diff === 0 ? "rl-perspective-phone__screen-active" : "rl-perspective-phone__screen"}>
                                                     {imgUrl ? (
-                                                        <img src={imgUrl} alt={theme.name} className="w-full h-full object-cover object-top" />
+                                                        <img 
+                                                            src={imgUrl} 
+                                                            alt={theme.name} 
+                                                            className="w-full h-full object-cover object-top" 
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = '/themes/utary/preview.webp';
+                                                            }}
+                                                        />
                                                     ) : (
                                                         <div className="w-full h-full bg-gradient-to-b from-[#1e293b] to-[#0f172a]" />
                                                     )}
@@ -3703,8 +3711,6 @@ body { font-family: var(--font-family); background: var(--section-base); color: 
     }
     .rl-perspective-phone__inner { border-radius: 10px !important; }
     .rl-perspective-phone__notch { width: 45px !important; height: 10px !important; border-radius: 0 0 7px 7px !important; }
-    .rl-perspective-phone--left { margin: 0 !important; }
-    .rl-perspective-phone--right { margin: 0 !important; }
 
     /* Stats Compact Overrides */
     .rl-stats {

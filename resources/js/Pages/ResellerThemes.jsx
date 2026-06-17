@@ -1023,7 +1023,7 @@ export default function ResellerThemes({ reseller, plans = [], themes = [], gree
             </nav>
 
             {/* ═══ MAIN CONTENT ═══ */}
-            <main className="flex-1 max-w-6xl mx-auto w-full px-6 pt-32 pb-20" style={{ zIndex: 1, position: 'relative' }}>
+            <main className="flex-1 max-w-6xl mx-auto w-full px-6 pt-20 sm:pt-32 pb-12 sm:pb-20" style={{ zIndex: 1, position: 'relative' }}>
                 <div className="mb-10 text-center sm:text-left">
                     <Link href={`/r/${reseller.ref}`} className="inline-flex items-center gap-1.5 text-sm font-semibold mb-4 transition-colors" style={{ color: 'var(--accent)' }}>
                         <Icon d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" className="w-4 h-4" /> Kembali
@@ -1270,17 +1270,9 @@ export default function ResellerThemes({ reseller, plans = [], themes = [], gree
                                         style={{
                                             border: '1.5px solid ' + (isSortDropdownOpen ? 'var(--accent)' : 'var(--card-border)'),
                                             background: isSortDropdownOpen ? 'rgba(var(--accent-rgb), 0.12)' : 'var(--card-bg)',
-                                            color: isSortDropdownOpen ? 'var(--accent)' : 'var(--text-secondary)',
-                                            width: '38px',
-                                            height: '38px',
-                                            borderRadius: '100px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                            flexShrink: 0
+                                            color: isSortDropdownOpen ? 'var(--accent)' : 'var(--text-secondary)'
                                         }}
+                                        className="rl-filter-btn-sort"
                                         title={activeTab === 'undangan' ? 'Urutkan Tema' : 'Urutkan Kartu'}
                                     >
                                         <svg style={{ width: '16px', height: '16px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1354,7 +1346,7 @@ export default function ResellerThemes({ reseller, plans = [], themes = [], gree
 
                 {/* Grid Content */}
                 {activeTab === 'undangan' ? (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                         {sortedThemes.map((theme) => (
                             <ThemePreviewCard 
                                 key={theme.id} 
@@ -1371,7 +1363,7 @@ export default function ResellerThemes({ reseller, plans = [], themes = [], gree
                         )}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                         {sortedCards.map((card) => (
                             <GreetingCardPreviewCard 
                                 key={card.id} 
@@ -1855,6 +1847,19 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     border-width: 1.5px;
     border-style: solid;
 }
+.rl-filter-btn-sort {
+    width: 38px;
+    height: 38px;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    border-width: 1.5px;
+    border-style: solid;
+}
 .rl-filter-dropdown-menu {
     position: absolute;
     right: 0;
@@ -1913,22 +1918,39 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
 }
 
 @media (max-width: 640px) {
+    .rl-filter-panel {
+        margin-top: 1rem;
+        margin-bottom: 1.75rem !important;
+        padding: 0.875rem !important;
+        gap: 0.75rem;
+    }
     .rl-filter-row {
         flex-direction: column;
         align-items: stretch;
+        gap: 0.5rem;
     }
     .rl-filter-search-container {
         width: 100%;
     }
     .rl-filter-controls {
         width: 100%;
+        gap: 0.5rem;
     }
     .rl-filter-dropdown-wrapper:not(:last-child) {
         flex: 1;
+        min-width: 0;
     }
     .rl-filter-btn {
         width: 100%;
         justify-content: space-between;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.7rem !important;
+        height: 34px !important;
+        gap: 0.25rem !important;
+    }
+    .rl-filter-btn-sort {
+        width: 34px;
+        height: 34px;
     }
     .rl-filter-dropdown-wrapper:first-of-type .rl-filter-dropdown-menu {
         left: 0;
@@ -1938,7 +1960,28 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
-    .rl-nav__inner { padding: 0.875rem 1.25rem; }
+    .rl-nav__inner {
+        padding: 0.5rem 0.875rem;
+    }
+    .rl-nav__logo-img, .rl-nav__logo-placeholder {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 8px !important;
+    }
+    .rl-nav__logo-placeholder {
+        font-size: 14px !important;
+    }
+    .rl-nav__brand-name {
+        font-size: 0.95rem !important;
+    }
+    .rl-nav__actions {
+        gap: 0.4rem !important;
+    }
+    .rl-btn {
+        padding: 0.4rem 0.75rem !important;
+        font-size: 0.75rem !important;
+        gap: 0.25rem !important;
+    }
     .rl-footer__grid { grid-template-columns: 1fr; gap: 2rem; }
     .rl-footer__col { align-items: center; text-align: center; }
     .rl-footer__links-stack { align-items: center; }

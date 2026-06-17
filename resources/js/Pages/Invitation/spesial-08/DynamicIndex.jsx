@@ -254,7 +254,7 @@ function FlowerSwirl({ title, subtitle }) {
     return (
         <div className="mb-8 flex flex-col items-center select-none text-center px-4">
             {title && (
-                <h2 className="text-3.5xl sm:text-4xl text-[var(--sp08-secondary)] sp08-font-script leading-none mb-3">
+                <h2 className="text-5xl sm:text-6xl text-[var(--sp08-secondary)] sp08-font-script leading-none mb-3">
                     {title}
                 </h2>
             )}
@@ -385,7 +385,7 @@ function OpeningSection({ invitation, showPhotos, brideGrooms, events, locale })
                         Undangan Pernikahan
                     </p>
                     
-                    <h2 className="text-5xl text-[var(--sp08-text-dark)] sp08-font-couple leading-none mb-3">
+                    <h2 className="text-6.5xl text-[var(--sp08-text-dark)] sp08-font-couple leading-none mb-3">
                         {groom.nickname || 'Gilang'} &amp; {bride.nickname || 'Kirana'}
                     </h2>
                     
@@ -427,11 +427,11 @@ function QuoteSection({ invitation, locale }) {
     return (
         <div className="w-full py-16 px-6 text-center bg-[#8F8477] text-white my-8 rounded-3xl relative overflow-hidden select-none">
             <Reveal variant="fade">
-                <i className="fas fa-quote-left text-3xl opacity-20 text-[var(--sp08-secondary)] mb-4 block" />
-                <p className="italic text-sm leading-relaxed max-w-xs mx-auto text-white/90">
+                <i className="fas fa-quote-left text-3xl opacity-35 text-[var(--sp08-accent)] mb-4 block" />
+                <p className="italic text-sm leading-relaxed max-w-xs mx-auto text-white/95">
                     &ldquo;{quoteText}&rdquo;
                 </p>
-                <p className="font-semibold text-xs tracking-wider uppercase mt-4 text-[var(--sp08-secondary)]">
+                <p className="font-semibold text-xs tracking-wider uppercase mt-4 text-[var(--sp08-accent)]">
                     — {quoteSource}
                 </p>
             </Reveal>

@@ -255,7 +255,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverE
     return (
         <div className={`lx4-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'lx4-no-photo-mode' : ''}`}>
             {globalShowPhotos && coverEmbedId ? (
-                <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                <div className="lx4-cover__video-wrapper">
                     <iframe
                         src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
                         title="Background Cover Video"
@@ -391,7 +391,7 @@ function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode, c
         <section id="hero" className="lx4-hero">
             {globalShowPhotos && coverEmbedId ? (
                 <>
-                    <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                    <div className="lx4-cover__video-wrapper">
                         <iframe
                             src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
                             title="Background Cover Video"
@@ -1083,7 +1083,7 @@ function VideoGallerySection({ invitation, locale }) {
                     <Reveal key={idx} variant="zoom" delay={idx * 50} className="w-full">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {videoItems.length > 1 && (
-                                <h4 style={{ color: 'var(--lx4-text-dark, #333)', fontSize: '0.9rem', fontWeight: 'bold', margin: '0', letterSpacing: '0.5px' }}>
+                                <h4 style={{ color: 'var(--lx4-text-light, #fff)', fontSize: '0.9rem', fontWeight: 'bold', margin: '0', letterSpacing: '0.5px' }}>
                                     {item.title}
                                 </h4>
                             )}

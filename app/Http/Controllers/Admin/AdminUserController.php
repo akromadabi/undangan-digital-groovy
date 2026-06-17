@@ -134,7 +134,7 @@ class AdminUserController extends Controller
 
         return Inertia::render('Admin/Users/Edit', [
             'user' => $user,
-            'plans' => SubscriptionPlan::orderBy('sort_order')->get(),
+            'plans' => SubscriptionPlan::where('type', 'invitation')->orderBy('sort_order')->get(),
         ]);
     }
 

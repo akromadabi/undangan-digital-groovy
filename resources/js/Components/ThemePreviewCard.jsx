@@ -534,18 +534,20 @@ export default function ThemePreviewCard({ theme, reseller = null, isDemoLink = 
                     <h4 className="font-semibold text-sm text-[#1a1a1a] truncate group-hover:text-[#E5654B] transition-colors" title={theme.name}>
                         {theme.name}
                     </h4>
-                    <div className="flex items-center justify-between mt-1.5">
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] text-gray-400 capitalize">{theme.category || 'Umum'}</span>
+                    <div className="flex items-center justify-between gap-1 mt-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-1">
+                            <span className="text-[11px] text-gray-400 capitalize truncate flex-shrink min-w-0" title={theme.category}>
+                                {theme.category || 'Umum'}
+                            </span>
                             {theme.is_premium ? (
-                                <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full tracking-wider">PREMIUM</span>
+                                <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full tracking-wider flex-shrink-0">PREMIUM</span>
                             ) : (
-                                <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full tracking-wider">GRATIS</span>
+                                <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full tracking-wider flex-shrink-0">GRATIS</span>
                             )}
                         </div>
 
                         {/* Like Button in bottom right */}
-                        <div className="relative z-30 select-none">
+                        <div className="relative z-30 select-none flex-shrink-0">
                             <AnimatedLikeButton 
                                 count={count}
                                 liked={liked}

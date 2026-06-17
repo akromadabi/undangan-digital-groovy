@@ -186,13 +186,13 @@ export default function Themes({ themes = [], appName = 'Groovy', subscriptionPl
                             </div>
 
                             {/* Filters Dropdowns */}
-                            <div className="flex items-center gap-2.5 w-full sm:w-auto flex-shrink-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto flex-shrink-0">
                                 {/* Categories Dropdown */}
                                 <div className="relative flex-1 sm:flex-initial" ref={categoryDropdownRef}>
                                     <button
                                         type="button"
                                         onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                                        className={`w-full px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-between sm:justify-start gap-2 select-none min-h-[42px] ${
+                                        className={`w-full px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-[10px] sm:text-xs font-bold transition-all duration-200 border flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 select-none min-h-[36px] sm:min-h-[42px] ${
                                             selectedCategories.length > 0
                                                 ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
                                                 : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
@@ -263,7 +263,7 @@ export default function Themes({ themes = [], appName = 'Groovy', subscriptionPl
                                     <button
                                         type="button"
                                         onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
-                                        className={`w-full px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-between sm:justify-start gap-2 select-none min-h-[42px] ${
+                                        className={`w-full px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-[10px] sm:text-xs font-bold transition-all duration-200 border flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 select-none min-h-[36px] sm:min-h-[42px] ${
                                             selectedTypes.length > 0
                                                 ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
                                                 : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
@@ -335,7 +335,7 @@ export default function Themes({ themes = [], appName = 'Groovy', subscriptionPl
                                         type="button"
                                         onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
                                         title="Urutkan Tema"
-                                        className={`p-0 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-center select-none min-h-[42px] w-[42px] ${
+                                        className={`p-0 rounded-2xl text-xs font-bold transition-all duration-200 border flex items-center justify-center select-none min-h-[36px] sm:min-h-[42px] w-[36px] sm:w-[42px] ${
                                             isSortDropdownOpen
                                                 ? 'bg-[#E5654B]/10 text-[#E5654B] border-[#E5654B]/30'
                                                 : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
@@ -393,7 +393,7 @@ export default function Themes({ themes = [], appName = 'Groovy', subscriptionPl
             <main className="bg-[#faf9f6] min-h-[60vh] py-12">
                 <div className="max-w-6xl mx-auto px-6">
                     {sortedThemes.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
                             {sortedThemes.map((theme) => (
                                 <ThemePreviewCard 
                                     key={theme.id} 

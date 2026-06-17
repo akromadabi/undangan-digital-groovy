@@ -252,7 +252,7 @@ function CoverSection({ invitation, brideGrooms, guest, isOpened, onOpen, coverE
     return (
         <div className={`lx3-cover${isOpened ? ' is-opened' : ''} ${!globalShowPhotos ? 'lx3-no-photo-mode' : ''}`}>
             {globalShowPhotos && coverEmbedId ? (
-                <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                <div className="lx3-cover__video-wrapper">
                     <iframe
                         src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
                         title="Background Cover Video"
@@ -388,7 +388,7 @@ function HeroSection({ invitation, brideGrooms, events, galleries, layoutMode, c
         <section id="hero" className="lx3-hero">
             {globalShowPhotos && coverEmbedId ? (
                 <>
-                    <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+                    <div className="lx3-cover__video-wrapper">
                         <iframe
                             src={`https://www.youtube.com/embed/${coverEmbedId}?autoplay=1&mute=1&loop=1&playlist=${coverEmbedId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0`}
                             title="Background Cover Video"

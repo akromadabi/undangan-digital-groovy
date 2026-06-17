@@ -200,7 +200,7 @@ class InvitationController extends Controller
 
             $subscriptionPlans = \App\Models\SubscriptionPlan::with(['features' => function($query) {
                 $query->wherePivot('is_enabled', true);
-            }])->orderBy('sort_order')->get()->map(function($plan) use ($resellerSetting, $resellerPrices) {
+            }])->where('type', 'invitation')->orderBy('sort_order')->get()->map(function($plan) use ($resellerSetting, $resellerPrices) {
                 if ($resellerSetting) {
                     $price = isset($resellerPrices[$plan->id])
                         ? (float)$resellerPrices[$plan->id]
@@ -425,7 +425,7 @@ class InvitationController extends Controller
 
         $subscriptionPlans = \App\Models\SubscriptionPlan::with(['features' => function($query) {
             $query->wherePivot('is_enabled', true);
-        }])->orderBy('sort_order')->get()->map(function($plan) use ($resellerSetting, $resellerPrices) {
+        }])->where('type', 'invitation')->orderBy('sort_order')->get()->map(function($plan) use ($resellerSetting, $resellerPrices) {
             if ($resellerSetting) {
                 // If reseller demo, display custom retail price, fallback to 2x base price if not customized
                 $price = isset($resellerPrices[$plan->id])

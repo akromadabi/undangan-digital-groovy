@@ -20,7 +20,7 @@ class AdminThemeController extends Controller
 
     public function create()
     {
-        $plans = \App\Models\SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug']);
+        $plans = \App\Models\SubscriptionPlan::where('type', 'invitation')->orderBy('sort_order')->get(['id', 'name', 'slug']);
         return Inertia::render('Admin/Themes/Form', [
             'plans' => $plans,
             'categories' => $this->getAvailableCategories(),
@@ -58,7 +58,7 @@ class AdminThemeController extends Controller
 
     public function edit(Theme $theme)
     {
-        $plans = \App\Models\SubscriptionPlan::orderBy('sort_order')->get(['id', 'name', 'slug']);
+        $plans = \App\Models\SubscriptionPlan::where('type', 'invitation')->orderBy('sort_order')->get(['id', 'name', 'slug']);
         return Inertia::render('Admin/Themes/Form', [
             'theme' => $theme->load('sections'),
             'plans' => $plans,

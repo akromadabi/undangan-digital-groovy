@@ -18,6 +18,7 @@ class PaymentController extends Controller
     public function pricing()
     {
         $plans = SubscriptionPlan::with('featureAccess.feature')
+            ->where('type', 'invitation')
             ->orderBy('sort_order')
             ->get();
         $user = auth()->user();

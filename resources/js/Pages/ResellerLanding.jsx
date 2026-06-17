@@ -2504,7 +2504,28 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     .rl-features { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
 }
 @media (max-width: 768px) {
-    .rl-nav__inner { padding: 0.875rem 1.25rem; }
+    .rl-nav__inner {
+        padding: 0.5rem 0.875rem;
+    }
+    .rl-nav__logo-img, .rl-nav__logo-placeholder {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 8px !important;
+    }
+    .rl-nav__logo-placeholder {
+        font-size: 14px !important;
+    }
+    .rl-nav__brand-name {
+        font-size: 0.95rem !important;
+    }
+    .rl-nav__actions {
+        gap: 0.4rem !important;
+    }
+    .rl-btn {
+        padding: 0.4rem 0.75rem !important;
+        font-size: 0.75rem !important;
+        gap: 0.25rem !important;
+    }
     .rl-hero { padding: 6rem 1.5rem 3rem; }
     .rl-stats__inner { padding: 1.5rem; }
     .rl-section { padding: 3.5rem 0; }

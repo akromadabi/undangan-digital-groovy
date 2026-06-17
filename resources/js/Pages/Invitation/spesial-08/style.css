@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════
+/* ═══════════════════════════════════════
    THEME SPESIAL 08 - WARM ALABASTER & VINTAGE GOLD
    ═══════════════════════════════════════ */
 
@@ -22,6 +22,7 @@
     max-width: 480px;
     margin: 0 auto;
     background-color: var(--sp08-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M 10,80 Q 20,40 40,40 T 70,10' fill='none' stroke='%23AB956A' stroke-width='0.5' stroke-opacity='0.08' stroke-linecap='round'/%3E%3Cpath d='M 22,58 Q 15,50 20,46 Q 28,48 22,58 Z' fill='%23AB956A' fill-opacity='0.05'/%3E%3Cpath d='M 40,40 Q 35,28 42,25 Q 48,30 40,40 Z' fill='%23AB956A' fill-opacity='0.05'/%3E%3Cpath d='M 58,22 Q 55,12 62,10 Q 68,15 58,22 Z' fill='%23AB956A' fill-opacity='0.05'/%3E%3Cpath d='M 25,55 Q 35,48 32,38 Q 24,42 25,55 Z' fill='%23AB956A' fill-opacity='0.05'/%3E%3Cpath d='M 45,35 Q 55,28 52,18 Q 44,22 45,35 Z' fill='%23AB956A' fill-opacity='0.05'/%3E%3Ccircle cx='10' cy='10' r='1' fill='%23AB956A' fill-opacity='0.06'/%3E%3Ccircle cx='70' cy='70' r='1' fill='%23AB956A' fill-opacity='0.06'/%3E%3C/svg%3E");
     color: var(--sp08-text-dark);
     font-family: 'Montserrat', sans-serif;
     min-height: 100vh;
@@ -102,7 +103,7 @@
     height: 100vh;
     height: 100dvh;
     z-index: 100;
-    background-color: var(--sp08-bg);
+    background-color: transparent;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -157,7 +158,7 @@
 }
 
 .sp08-cover-names {
-    font-size: 3.5rem;
+    font-size: 5.25rem;
     font-weight: 500;
     color: var(--sp08-text-dark);
     text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
@@ -209,9 +210,10 @@
 }
 
 .sp08-opening-section {
-    background-color: var(--sp08-bg);
+    background-color: transparent;
     color: var(--sp08-text-dark);
     overflow: hidden;
+    position: relative;
 }
 
 .sp08-wellcome2-card {
@@ -224,6 +226,34 @@
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     box-shadow: 0 10px 30px rgba(171, 149, 106, 0.08);
+}
+
+.sp08-wellcome2-card::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 25px;
+    height: 25px;
+    border-top: 2.5px solid var(--sp08-secondary);
+    border-left: 2.5px solid var(--sp08-secondary);
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.8;
+}
+
+.sp08-wellcome2-card::after {
+    content: '';
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 25px;
+    height: 25px;
+    border-bottom: 2.5px solid var(--sp08-secondary);
+    border-right: 2.5px solid var(--sp08-secondary);
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.8;
 }
 
 .sp08-wellcome2-bg {
@@ -324,7 +354,7 @@
    3. BRIDE & GROOM PROFILE SECTION (Rotated double-border frames)
    ═══════════════════════════════════════ */
 .sp08-mempelai-section {
-    background-color: var(--sp08-bg);
+    background-color: transparent;
 }
 
 /* Editorial Profile Layout with Double Borders */
@@ -419,7 +449,7 @@
    4. EVENTS SECTION
    ═══════════════════════════════════════ */
 .sp08-event-section {
-    background-color: var(--sp08-bg);
+    background-color: transparent;
 }
 
 /* Offset Split Cards for Events */
@@ -489,7 +519,7 @@
    5. TIMELINE / LOVE STORY SECTION
    ═══════════════════════════════════════ */
 .sp08-timeline-section {
-    background-color: var(--sp08-bg);
+    background-color: transparent;
 }
 
 .sp08-timeline {
@@ -550,7 +580,7 @@
    6. GALLERY SECTION
    ═══════════════════════════════════════ */
 .sp08-gallery-section {
-    background-color: var(--sp08-bg);
+    background-color: transparent;
 }
 
 .sp08-strict-cover {
@@ -568,7 +598,7 @@
    7. unified RSVP & WISHES SECTION
    ═══════════════════════════════════════ */
 .sp08-rsvp-section {
-    background-color: var(--sp08-bg);
+    background-color: transparent;
 }
 
 .sp08-rsvp-card {
@@ -649,7 +679,7 @@
    8. DIGITAL KADO / BANK SECTION
    ═══════════════════════════════════════ */
 .sp08-bank-section {
-    background-color: var(--sp08-bg);
+    background-color: transparent;
 }
 
 .sp08-bank-card {
@@ -682,7 +712,7 @@
    9. CLOSING & WATERMARK SECTION
    ═══════════════════════════════════════ */
 .sp08-closing-section {
-    background-color: var(--sp08-bg);
+    background-color: transparent;
     text-align: center;
     padding: 80px 24px 100px;
 }
