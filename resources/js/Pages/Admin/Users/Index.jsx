@@ -55,6 +55,8 @@ export default function Index({ users, filters }) {
                                     )}
                                     <th className="text-left px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide hidden sm:table-cell">Email</th>
                                     <th className="text-center px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide">Paket</th>
+                                    <th className="text-center px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide hidden md:table-cell">Kunjungan</th>
+                                    <th className="text-center px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide hidden md:table-cell">Komentar</th>
                                     <th className="text-center px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide">Tanggal</th>
                                     <th className="text-center px-3 sm:px-5 py-3 text-[#999] font-semibold text-xs tracking-wide">Aksi</th>
                                 </tr>
@@ -122,6 +124,34 @@ export default function Index({ users, filters }) {
                                                             </span>
                                                         )}
                                                     </div>
+                                                );
+                                            })()}
+                                        </td>
+                                        <td className="px-3 sm:px-5 py-3 text-center hidden md:table-cell">
+                                            {(() => {
+                                                const totalViews = user.invitations?.reduce((sum, inv) => sum + (inv.views_count || 0), 0) || 0;
+                                                const totalUniqueViews = user.invitations?.reduce((sum, inv) => sum + (inv.unique_views_count || 0), 0) || 0;
+                                                return (
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-sm font-semibold text-[#333]">{totalViews.toLocaleString('id-ID')}</span>
+                                                        {totalUniqueViews > 0 && (
+                                                            <span className="text-[10px] text-[#aaa]">unik: {totalUniqueViews.toLocaleString('id-ID')}</span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
+                                        </td>
+                                        <td className="px-3 sm:px-5 py-3 text-center hidden md:table-cell">
+                                            {(() => {
+                                                const totalWishes = user.invitations?.reduce((sum, inv) => sum + (inv.wishes?.length || 0), 0) || 0;
+                                                return (
+                                                    <span className={`inline-flex items-center justify-center min-w-[1.75rem] px-2 py-0.5 rounded-full text-xs font-bold ${
+                                                        totalWishes > 0
+                                                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                                            : 'bg-[#f0ede8] text-[#bbb]'
+                                                    }`}>
+                                                        {totalWishes}
+                                                    </span>
                                                 );
                                             })()}
                                         </td>

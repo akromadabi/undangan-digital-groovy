@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
@@ -811,6 +811,16 @@ export default function ThemesCatalog({ themes }) {
                                             Lihat
                                         </a>
                                     </div>
+                                    <Link 
+                                        href={`/admin/theme-builder/${theme.id}`}
+                                        className="inline-flex items-center justify-center gap-1 py-1.5 rounded-md text-[9.5px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors w-full"
+                                        title="Buka Theme Builder (Dalam Pengembangan)"
+                                    >
+                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.982-8.982m-9 9L3 21l1.096-5.912L9.813 15.904zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                        </svg>
+                                        Theme Builder
+                                    </Link>
                                 </div>
                             </div>
                         </div>

@@ -415,6 +415,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/greeting-card-catalog/{greetingCardTemplate}/custom-preview', [AdminDashboardController::class, 'updateGreetingCardCustomPreview'])->name('greeting-card-catalog.custom-preview.update');
 
     Route::get('/faq', [AdminDashboardController::class, 'faq'])->name('faq');
+    
+    // Theme Builder reseller placeholder
+    Route::get('/theme-builder/{theme}', function () {
+        return Inertia::render('Admin/ThemeBuilderComingSoon');
+    })->name('theme-builder.coming-soon');
     Route::resource('users', AdminUserController::class)->only(['index', 'show']);
     Route::get('/live-tamu', [AdminLiveTamuController::class, 'index'])->name('live-tamu');
     Route::get('/live-tamu/data', [AdminLiveTamuController::class, 'data'])->name('live-tamu.data');
@@ -559,6 +564,12 @@ Route::middleware(['auth', 'editor_or_super_admin'])->prefix('super-admin')->nam
     Route::post('themes/categories/update', [AdminThemeController::class, 'updateCategory'])->name('themes.categories.update');
     Route::post('themes/categories/delete', [AdminThemeController::class, 'deleteCategory'])->name('themes.categories.delete');
     Route::resource('themes', AdminThemeController::class);
+
+    // Theme Builder
+    Route::get('theme-builder/{theme}', [\App\Http\Controllers\ThemeBuilderController::class, 'edit'])->name('theme-builder.edit');
+    Route::post('theme-builder/{theme}/save', [\App\Http\Controllers\ThemeBuilderController::class, 'save'])->name('theme-builder.save');
+    Route::get('theme-builder/{theme}/export', [\App\Http\Controllers\ThemeBuilderController::class, 'export'])->name('theme-builder.export');
+    Route::post('theme-builder/import', [\App\Http\Controllers\ThemeBuilderController::class, 'import'])->name('theme-builder.import');
 
     // Music Library
     Route::get('/music', [AdminMusicController::class, 'index'])->name('music.index');

@@ -502,13 +502,24 @@ export default function Index({ themes, availableCategories = [] }) {
                                         </button>
                                     </div>
                                     
+                                    <Link 
+                                        href={`${adminRoutePrefix}/theme-builder/${theme.id}`}
+                                        className="inline-flex items-center justify-center gap-1 py-1.5 rounded-md text-[9.5px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors w-full"
+                                        title="Buka Theme Builder"
+                                    >
+                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.982-8.982m-9 9L3 21l1.096-5.912L9.813 15.904zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                        </svg>
+                                        Buka Builder
+                                    </Link>
+                                    
                                     <a 
                                         href={`/demo/${theme.slug}`} 
                                         target="_blank" 
                                         rel="noopener noreferrer" 
-                                        className="inline-flex items-center justify-center gap-0.5 py-1.5 rounded-md text-[9.5px] font-bold text-white bg-[#E5654B] border border-transparent hover:bg-[#c94f3a] transition-colors w-full"
+                                        className="inline-flex items-center justify-center gap-0.5 py-1.5 rounded-md text-[9.5px] font-bold text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 transition-colors w-full"
                                     >
-                                        <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
+                                        <svg className="w-3 h-3 fill-current text-gray-500" viewBox="0 0 20 20">
                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                             <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                                         </svg>

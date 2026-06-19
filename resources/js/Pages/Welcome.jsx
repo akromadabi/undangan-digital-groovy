@@ -406,55 +406,126 @@ const SORT_OPTIONS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-const APP_SLIDES = [
-    {
-        id: 1,
-        label: 'Landing Page Partner',
-        badge: 'Landing Page Partner',
-        content: (
-            <img src="/images/hero_mobile_1.png" alt="Landing Page Partner" className="w-full h-full object-cover object-top rounded-[1.6rem]" />
-        )
-    },
-    {
-        id: 2,
-        label: 'Dashboard Panel',
-        badge: 'Dashboard Panel',
-        content: (
-            <img src="/images/hero_mobile_2.png" alt="Dashboard Panel" className="w-full h-full object-cover object-top rounded-[1.6rem]" />
-        )
-    },
-    {
-        id: 3,
-        label: 'Pengaturan Agensi',
-        badge: 'Brand & White-Label',
-        content: (
-            <img src="/images/hero_mobile_3.png" alt="Pengaturan Agensi" className="w-full h-full object-cover object-top rounded-[1.6rem]" />
-        )
-    },
-    {
-        id: 4,
-        label: 'Katalog Tema Premium',
-        badge: 'Pilihan Tema',
-        content: (
-            <img src="/images/hero_mobile_4.png" alt="Katalog Tema Premium" className="w-full h-full object-cover object-top rounded-[1.6rem]" />
-        )
-    }
-];
+// Helper: get top N themes sorted by total likes
+function getTopThemesByLikes(themes = [], n = 5) {
+    return [...themes]
+        .sort((a, b) => {
+            const bLikes = (b.base_likes || 0) + (b.real_likes || 0);
+            const aLikes = (a.base_likes || 0) + (a.real_likes || 0);
+            return bLikes - aLikes;
+        })
+        .slice(0, n);
+}
 
-const CLONED_SLIDES = [
-    APP_SLIDES[APP_SLIDES.length - 2], // Slide 3 at index 0
-    APP_SLIDES[APP_SLIDES.length - 1], // Slide 4 at index 1
-    ...APP_SLIDES,                     // Slides 1, 2, 3, 4 at index 2, 3, 4, 5
-    APP_SLIDES[0],                     // Slide 1 at index 6
-    APP_SLIDES[1]                      // Slide 2 at index 7
-];
+// Helper: resolve image URL
+function resolveImgUrl(path) {
+    if (!path) return null;
+    if (path.startsWith('http') || path.startsWith('/') || path.startsWith('data:')) return path;
+    return `/storage/${path}`;
+}
 
-function HeroSection({ mounted, resellerCount, invitationCount, themesCount, appName, canRegister }) {
+// Build phone-mockup slide content for a theme
+function ThemePhoneSlide({ theme }) {
+    const imgSrc = resolveImgUrl(
+        // prefer first preview_image, fallback to thumbnail
+        (theme.preview_images && theme.preview_images.length > 0 ? theme.preview_images[0] : null)
+        || theme.thumbnail
+    );
+
+    return (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#020617] relative overflow-hidden">
+            {/* Background glow */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:18px_18px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 rounded-full bg-indigo-500/10 blur-[60px]" />
+
+            {/* Phone frame */}
+            <div
+                className="relative z-10"
+                style={{ width: '62%', maxWidth: 175 }}
+            >
+                {/* Outer phone shell */}
+                <div
+                    className="relative w-full rounded-[18px] overflow-hidden border-[2.5px] border-[#1a1a1a] bg-black"
+                    style={{
+                        aspectRatio: '9 / 18',
+                        boxShadow: '-10px 20px 30px -8px rgba(0,0,0,0.45), -2px 6px 12px -5px rgba(0,0,0,0.18)',
+                    }}
+                >
+                    {/* Notch */}
+                    <div className="absolute top-[4px] left-1/2 -translate-x-1/2 w-8 h-1.5 bg-black rounded-full z-20" />
+
+                    {/* Screen */}
+                    <div className="w-full h-full rounded-[15px] overflow-hidden bg-gray-900">
+                        {imgSrc ? (
+                            <img
+                                src={imgSrc}
+                                alt={theme.name}
+                                className="w-full h-full object-cover object-top"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-white/60 text-xs font-semibold gap-2">
+                                <svg className="w-8 h-8 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 21h18M3.75 3h16.5A.75.75 0 0121 3.75v13.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75V3.75A.75.75 0 013.75 3z" /></svg>
+                                {theme.name}
+                            </div>
+                        )}
+                        {/* Glass glare */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-10" />
+                    </div>
+                </div>
+
+                {/* Theme name label below phone */}
+                <div className="mt-2.5 text-center">
+                    <span className="inline-block text-[9px] font-bold text-white/70 uppercase tracking-widest bg-white/10 px-2.5 py-1 rounded-full backdrop-blur-sm truncate max-w-full">
+                        {theme.name}
+                    </span>
+                </div>
+            </div>
+
+            {/* Like badge floating top-right */}
+            <div className="absolute top-3 right-3 z-20 flex items-center gap-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-2 py-0.5">
+                <svg className="w-3 h-3 text-rose-400 fill-rose-400" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <span className="text-[9px] font-black text-white/90">{(theme.base_likes || 0) + (theme.real_likes || 0)}</span>
+            </div>
+        </div>
+    );
+}
+
+function HeroSection({ mounted, resellerCount, invitationCount, themesCount, appName, canRegister, themes = [] }) {
+    // Build top-5 theme slides dynamically
+    const TOP_THEMES = useMemo(() => getTopThemesByLikes(themes, 5), [themes]);
+
+    // If we have themes, use them; otherwise use 4 placeholder slides
+    const APP_SLIDES = useMemo(() => {
+        if (TOP_THEMES.length > 0) {
+            return TOP_THEMES.map((theme) => ({
+                id: theme.id,
+                label: theme.name,
+                badge: theme.name,
+                content: <ThemePhoneSlide key={theme.id} theme={theme} />,
+            }));
+        }
+        // Fallback placeholders (no images)
+        return [
+            { id: 'p1', label: 'Memuat Tema...', badge: '🌸 Tema Terpopuler', content: <div className="w-full h-full bg-gray-900" /> },
+            { id: 'p2', label: 'Memuat Tema...', badge: '🌸 Tema Terpopuler', content: <div className="w-full h-full bg-gray-900" /> },
+        ];
+    }, [TOP_THEMES]);
+
+    const CLONED_SLIDES = useMemo(() => {
+        if (APP_SLIDES.length < 2) return APP_SLIDES;
+        return [
+            APP_SLIDES[APP_SLIDES.length - 2],
+            APP_SLIDES[APP_SLIDES.length - 1],
+            ...APP_SLIDES,
+            APP_SLIDES[0],
+            APP_SLIDES[1],
+        ];
+    }, [APP_SLIDES]);
     const [slideIndex, setSlideIndex] = useState(2);
     const [isTransitioning, setIsTransitioning] = useState(true);
     const timerRef = useRef(null);
 
-    const activeSlide = (slideIndex - 2 + APP_SLIDES.length) % APP_SLIDES.length;
+    const activeSlide = APP_SLIDES.length > 0 ? (slideIndex - 2 + APP_SLIDES.length) % APP_SLIDES.length : 0;
 
     const handleNext = useCallback(() => {
         setSlideIndex(prev => prev + 1);
@@ -473,22 +544,26 @@ function HeroSection({ mounted, resellerCount, invitationCount, themesCount, app
         return () => clearInterval(timerRef.current);
     }, [handleNext]);
 
+    const maxClonedIndex = CLONED_SLIDES.length - 1;
+    const wrapForwardIndex = APP_SLIDES.length + 2; // index after last real slide in cloned array
+    const wrapBackIndex = 1; // index before first real slide in cloned array
+
     useEffect(() => {
-        if (slideIndex === 6) {
+        if (slideIndex === wrapForwardIndex) {
             const timer = setTimeout(() => {
                 setIsTransitioning(false);
                 setSlideIndex(2);
             }, 500);
             return () => clearTimeout(timer);
         }
-        if (slideIndex === 1) {
+        if (slideIndex === wrapBackIndex) {
             const timer = setTimeout(() => {
                 setIsTransitioning(false);
-                setSlideIndex(5);
+                setSlideIndex(APP_SLIDES.length + 1);
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [slideIndex]);
+    }, [slideIndex, wrapForwardIndex, wrapBackIndex, APP_SLIDES.length]);
 
     useEffect(() => {
         if (!isTransitioning) {
@@ -642,9 +717,9 @@ function HeroSection({ mounted, resellerCount, invitationCount, themesCount, app
                     <div className="relative">
                         {/* Slide badge (Floating above the phone) */}
                         <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-20 transition-all duration-300">
-                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white rounded-full text-[11px] font-black text-gray-750 shadow-md border border-gray-150 whitespace-nowrap">
-                                <span className="w-1.5 h-1.5 bg-[#E5654B] rounded-full animate-pulse"></span>
-                                {APP_SLIDES[activeSlide].badge}
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white rounded-full text-[11px] font-black text-gray-750 shadow-md border border-gray-150 whitespace-nowrap max-w-[220px]">
+                                <svg className="w-3 h-3 text-rose-500 fill-rose-500 flex-shrink-0" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                <span className="truncate">{APP_SLIDES[activeSlide]?.badge || '—'}</span>
                             </span>
                         </div>
 
@@ -1377,6 +1452,7 @@ export default function Welcome({ auth, canLogin, canRegister, appName, brandLog
                 themesCount={themes.length}
                 appName={appName}
                 canRegister={canRegister}
+                themes={themes}
             />
 
             {/* ═══ INFINITE AUTOSCROLLING PARTNER TICKER (Large, moving and infinite) ═══ */}

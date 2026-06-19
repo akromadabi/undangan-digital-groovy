@@ -17,7 +17,7 @@ class AdminUserController extends Controller
     {
         $user = auth()->user();
 
-        $query = User::with(['invitations.activeSubscription.plan', 'greetingCards', 'reseller.resellerSettings']);
+        $query = User::with(['invitations.activeSubscription.plan', 'invitations.wishes', 'greetingCards', 'reseller.resellerSettings']);
 
         if ($user->isSuperAdmin()) {
             $query->whereIn('role', ['user', 'editor']);
