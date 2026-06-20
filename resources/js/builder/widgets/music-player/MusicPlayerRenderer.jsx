@@ -2,10 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getResponsiveSetting } from '../../core/deepMergeResponsive';
 import { Play, Pause, Music } from 'lucide-react';
 
-export default function MusicPlayerRenderer({ settings = {}, globalSettings = {} }) {
-    const audioUrl = settings.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-    const songTitle = settings.songTitle || 'Beautiful Wedding Piano';
-    const autoplay = settings.autoplay || false;
+export default function MusicPlayerRenderer({ settings = {}, activeBreakpoint = 'desktop', invitation, globalSettings = {} }) {
+    const isDynamic = settings.sourceType === 'dynamic';
+    const audioUrl = isDynamic && invitation?.music_url 
+        ? invitation.music_url 
+        : (settings.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+    const songTitle = isDynamic && invitation?.music_url
+        ? (invitation.music_url.split('/').pop() || 'Background Music')
+        : (settings.songTitle || 'Beautiful Wedding Piano');
+    const autoplay = isDynamic && invitation?.music_autoplay !== undefined
+        ? !!invitation.music_autoplay
+        : (settings.autoplay || false);
     const playerType = settings.playerType || 'floating'; // 'floating' or 'inline'
     const floatPosition = settings.floatPosition || 'bottom-right';
     
@@ -161,7 +168,7 @@ export default function MusicPlayerRenderer({ settings = {}, globalSettings = {}
                                 className="text-xs font-bold text-gray-800 line-clamp-1"
                                 style={{ fontFamily: `"${bodyFontFamily}", sans-serif` }}
                             >
-                                {songTitle}
+                                {songTitle} {isDynamic && <span className="text-[9px] text-indigo-500 font-bold bg-indigo-50 px-1 rounded ml-1">Dinamis</span>}
                             </h4>
                             <p 
                                 className="text-[10px] text-gray-400 font-medium"

@@ -1,12 +1,25 @@
 import React from 'react';
 import { getResponsiveSetting } from '../../core/deepMergeResponsive';
 
-export default function LivestreamRenderer({ settings = {}, activeBreakpoint = 'desktop', globalSettings = {} }) {
+export default function LivestreamRenderer({ settings = {}, activeBreakpoint = 'desktop', invitation, events, globalSettings = {} }) {
+    const isDynamic = settings.sourceType === 'dynamic';
+    
+    // Find primary streaming event
+    const primaryEvent = isDynamic && events 
+        ? (events.find(e => e.is_primary) || events[0]) 
+        : null;
+
     const title = settings.title || 'Siaran Langsung';
     const description = settings.description || 'Saksikan prosesi pernikahan kami secara virtual melalui siaran langsung.';
-    const platform = settings.platform || 'youtube'; // youtube | zoom | meet | instagram | facebook
-    const date = settings.date || 'Kamis, 31 Desember 2026';
-    const time = settings.time || '08:00 WIB - Selesai';
+    const platform = isDynamic && primaryEvent
+        ? (primaryEvent.streaming_platform || 'youtube')
+        : (settings.platform || 'youtube');
+    const date = isDynamic && primaryEvent
+        ? (primaryEvent.event_date || 'Tanggal Acara')
+        : (settings.date || 'Kamis, 31 Desember 2026');
+    const time = isDynamic && primaryEvent
+        ? (`${primaryEvent.start_time || ''} - ${primaryEvent.end_time || ''} ${primaryEvent.timezone || ''}`)
+        : (settings.time || '08:00 WIB - Selesai');
     const buttonText = settings.buttonText || 'Nonton Live Streaming';
     const buttonBg = settings.buttonBg || '#E5654B';
     const buttonTextColor = settings.buttonTextColor || '#ffffff';
@@ -59,6 +72,11 @@ export default function LivestreamRenderer({ settings = {}, activeBreakpoint = '
 
     return (
         <div style={containerStyle} className="livestream-card border border-gray-100 relative overflow-hidden text-center">
+            {isDynamic && (
+                <div className="absolute top-2 right-2 text-[8px] font-black text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">
+                    DINAMIS
+                </div>
+            )}
             {/* Header Badge */}
             <div className="flex items-center justify-center gap-2 mb-4">
                 <span className="flex h-2 w-2 relative">

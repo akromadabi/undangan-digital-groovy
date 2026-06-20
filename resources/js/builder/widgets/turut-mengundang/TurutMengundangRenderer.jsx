@@ -1,10 +1,17 @@
 import React from 'react';
 import { getResponsiveSetting } from '../../core/deepMergeResponsive';
+import { Database } from 'lucide-react';
 
-export default function TurutMengundangRenderer({ settings = {}, activeBreakpoint = 'desktop', globalSettings = {} }) {
+export default function TurutMengundangRenderer({ settings = {}, activeBreakpoint = 'desktop', invitation, globalSettings = {} }) {
+    const isDynamic = settings.sourceType === 'dynamic';
     const title = settings.title || 'Turut Mengundang';
-    const namesText = settings.names || 'Keluarga Besar Bpk. Ahmad (Jakarta)\nKeluarga Besar Ibu Siti (Bandung)\nSahabat & Rekan Kerja';
     
+    let namesText = settings.names || 'Keluarga Besar Bpk. Ahmad (Jakarta)\nKeluarga Besar Ibu Siti (Bandung)\nSahabat & Rekan Kerja';
+    
+    if (isDynamic && invitation) {
+        namesText = invitation.turut_mengundang_text || '';
+    }
+
     // Style settings
     const textColor = settings.textColor || '#4b5563';
     const titleColor = settings.titleColor || '#1f2937';
@@ -34,7 +41,15 @@ export default function TurutMengundangRenderer({ settings = {}, activeBreakpoin
     const nameLines = namesText.split('\n').filter(line => line.trim() !== '');
 
     return (
-        <div style={containerStyle} className="turut-mengundang-container">
+        <div style={containerStyle} className="turut-mengundang-container relative">
+            {isDynamic && !invitation && (
+                <div className="flex justify-center mb-4">
+                    <span className="inline-flex items-center gap-1 text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        <Database className="w-2.5 h-2.5" /> Mode Dinamis (Pratinjau)
+                    </span>
+                </div>
+            )}
+
             {title && (
                 <h3 
                     style={{ 

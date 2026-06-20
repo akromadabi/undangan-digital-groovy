@@ -328,6 +328,7 @@ export const widgetRegistry = {
         icon: 'MusicPlayer',
         category: 'custom',
         defaultSettings: {
+            sourceType: 'static',
             audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
             songTitle: 'Beautiful Wedding Piano',
             autoplay: false,
@@ -421,6 +422,7 @@ export const widgetRegistry = {
         icon: 'Livestream',
         category: 'custom',
         defaultSettings: {
+            sourceType: 'static',
             title: 'Siaran Langsung',
             description: 'Saksikan prosesi pernikahan kami secara virtual melalui siaran langsung.',
             platform: 'youtube',
@@ -442,6 +444,7 @@ export const widgetRegistry = {
         icon: 'Dresscode',
         category: 'custom',
         defaultSettings: {
+            sourceType: 'static',
             title: 'Dresscode / Tata Busana',
             description: 'Demi kenyamanan bersama, para tamu undangan dihimbau untuk mengenakan pakaian yang sopan dengan nuansa warna berikut:',
             colors: ['#F5EBE0', '#D6CCC2', '#E3D5CA', '#D5BDAF', '#4A3E3D'],
@@ -458,6 +461,7 @@ export const widgetRegistry = {
         icon: 'TurutMengundang',
         category: 'custom',
         defaultSettings: {
+            sourceType: 'static',
             title: 'Turut Mengundang',
             names: 'Keluarga Besar Bpk. Ahmad (Jakarta)\nKeluarga Besar Ibu Siti (Bandung)\nSahabat & Rekan Kerja',
             alignment: 'center',

@@ -54,11 +54,25 @@ export default function MusicPlayerEditor({ settings = {}, onChange, mode = 'con
     };
 
     if (mode === 'content') {
+        const sourceType = settings.sourceType || 'static';
         return (
             <div className="space-y-4">
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
                     <Sliders className="w-3.5 h-3.5" /> Sumber Lagu
                 </h3>
+
+                {/* Source Type Selector */}
+                <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-700">Sumber Data</label>
+                    <select
+                        value={sourceType}
+                        onChange={(e) => handleUpdate('sourceType', e.target.value)}
+                        className="w-full text-sm border-gray-200 rounded-lg p-2 bg-white"
+                    >
+                        <option value="static">Statis (Custom Input di sini)</option>
+                        <option value="dynamic">Dinamis (Dari Data Undangan Klien)</option>
+                    </select>
+                </div>
 
                 {/* Autoplay Warning */}
                 <div className="flex gap-2 p-2.5 bg-amber-50 border border-amber-100 rounded-lg text-amber-800">
@@ -68,61 +82,69 @@ export default function MusicPlayerEditor({ settings = {}, onChange, mode = 'con
                     </p>
                 </div>
 
-                {/* Presets */}
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-700">Pilih Musik Rekomendasi</label>
-                    <select
-                        value={audioPresets.some(p => p.url === currentUrl) ? currentUrl : ''}
-                        onChange={(e) => handleSelectPreset(e.target.value)}
-                        className="w-full text-sm border-gray-200 rounded-lg p-2 bg-white"
-                    >
-                        <option value="" disabled>-- Pilih Musik Bawaan --</option>
-                        {audioPresets.map((preset) => (
-                            <option key={preset.url} value={preset.url}>
-                                {preset.title}
-                            </option>
-                        ))}
-                        {!audioPresets.some(p => p.url === currentUrl) && (
-                            <option value="">Kustom URL MP3</option>
-                        )}
-                    </select>
-                </div>
+                {sourceType === 'static' ? (
+                    <>
+                        {/* Presets */}
+                        <div className="space-y-1">
+                            <label className="text-xs font-semibold text-gray-700">Pilih Musik Rekomendasi</label>
+                            <select
+                                value={audioPresets.some(p => p.url === currentUrl) ? currentUrl : ''}
+                                onChange={(e) => handleSelectPreset(e.target.value)}
+                                className="w-full text-sm border-gray-200 rounded-lg p-2 bg-white"
+                            >
+                                <option value="" disabled>-- Pilih Musik Bawaan --</option>
+                                {audioPresets.map((preset) => (
+                                    <option key={preset.url} value={preset.url}>
+                                        {preset.title}
+                                    </option>
+                                ))}
+                                {!audioPresets.some(p => p.url === currentUrl) && (
+                                    <option value="">Kustom URL MP3</option>
+                                )}
+                            </select>
+                        </div>
 
-                {/* Custom URL */}
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-700">Custom URL File MP3</label>
-                    <input
-                        type="text"
-                        value={settings.audioUrl || ''}
-                        onChange={(e) => handleUpdate('audioUrl', e.target.value)}
-                        className="w-full text-sm border-gray-200 rounded-lg p-2 font-mono"
-                        placeholder="https://domain.com/music.mp3"
-                    />
-                </div>
+                        {/* Custom URL */}
+                        <div className="space-y-1">
+                            <label className="text-xs font-semibold text-gray-700">Custom URL File MP3</label>
+                            <input
+                                type="text"
+                                value={settings.audioUrl || ''}
+                                onChange={(e) => handleUpdate('audioUrl', e.target.value)}
+                                className="w-full text-sm border-gray-200 rounded-lg p-2 font-mono"
+                                placeholder="https://domain.com/music.mp3"
+                            />
+                        </div>
 
-                {/* Song Title */}
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-700">Judul Lagu</label>
-                    <input
-                        type="text"
-                        value={settings.songTitle || ''}
-                        onChange={(e) => handleUpdate('songTitle', e.target.value)}
-                        className="w-full text-sm border-gray-200 rounded-lg p-2"
-                        placeholder="e.g. Beautiful Wedding Piano"
-                    />
-                </div>
+                        {/* Song Title */}
+                        <div className="space-y-1">
+                            <label className="text-xs font-semibold text-gray-700">Judul Lagu</label>
+                            <input
+                                type="text"
+                                value={settings.songTitle || ''}
+                                onChange={(e) => handleUpdate('songTitle', e.target.value)}
+                                className="w-full text-sm border-gray-200 rounded-lg p-2"
+                                placeholder="e.g. Beautiful Wedding Piano"
+                            />
+                        </div>
 
-                {/* Autoplay Toggle */}
-                <div className="flex items-center gap-2 pt-1">
-                    <input
-                        type="checkbox"
-                        checked={settings.autoplay || false}
-                        onChange={(e) => handleUpdate('autoplay', e.target.checked)}
-                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
-                        id="autoplay-toggle"
-                    />
-                    <label htmlFor="autoplay-toggle" className="text-xs font-semibold text-gray-700 cursor-pointer">Putar Otomatis (Autoplay)</label>
-                </div>
+                        {/* Autoplay Toggle */}
+                        <div className="flex items-center gap-2 pt-1">
+                            <input
+                                type="checkbox"
+                                checked={settings.autoplay || false}
+                                onChange={(e) => handleUpdate('autoplay', e.target.checked)}
+                                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                                id="autoplay-toggle"
+                            />
+                            <label htmlFor="autoplay-toggle" className="text-xs font-semibold text-gray-700 cursor-pointer">Putar Otomatis (Autoplay)</label>
+                        </div>
+                    </>
+                ) : (
+                    <div className="p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg text-indigo-800 text-[10px] leading-relaxed">
+                        Lagu latar akan dimuat secara dinamis dari data file musik yang diunggah klien untuk undangan ini di dashboard.
+                    </div>
+                )}
             </div>
         );
     }

@@ -1,10 +1,22 @@
 import React from 'react';
 import { getResponsiveSetting } from '../../core/deepMergeResponsive';
+import { Database } from 'lucide-react';
 
-export default function DresscodeRenderer({ settings = {}, activeBreakpoint = 'desktop', globalSettings = {} }) {
+export default function DresscodeRenderer({ settings = {}, activeBreakpoint = 'desktop', invitation, globalSettings = {} }) {
+    const isDynamic = settings.sourceType === 'dynamic';
     const title = settings.title || 'Dresscode / Tata Busana';
-    const description = settings.description || 'Demi kenyamanan bersama, para tamu undangan dihimbau untuk mengenakan pakaian yang sopan dengan nuansa warna berikut:';
-    const colors = settings.colors || ['#F5EBE0', '#D6CCC2', '#E3D5CA', '#D5BDAF', '#4A3E3D'];
+    
+    let description = settings.description || 'Demi kenyamanan bersama, para tamu undangan dihimbau untuk mengenakan pakaian yang sopan dengan nuansa warna berikut:';
+    let colors = settings.colors || ['#F5EBE0', '#D6CCC2', '#E3D5CA', '#D5BDAF', '#4A3E3D'];
+
+    if (isDynamic && invitation) {
+        if (invitation.dresscode_text) {
+            description = invitation.dresscode_text;
+        }
+        if (invitation.dresscode_colors) {
+            colors = invitation.dresscode_colors.split(',').map(c => c.trim()).filter(Boolean);
+        }
+    }
     
     // Style settings
     const cardBg = settings.cardBg || '#faf9f6';
@@ -37,7 +49,15 @@ export default function DresscodeRenderer({ settings = {}, activeBreakpoint = 'd
     const flexAlign = alignment === 'left' ? 'justify-start' : alignment === 'right' ? 'justify-end' : 'justify-center';
 
     return (
-        <div style={containerStyle} className="dresscode-card border border-gray-100 text-center">
+        <div style={containerStyle} className="dresscode-card border border-gray-100 text-center relative">
+            {isDynamic && !invitation && (
+                <div className="flex justify-center mb-3">
+                    <span className="inline-flex items-center gap-1 text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        <Database className="w-2.5 h-2.5" /> Mode Dinamis (Pratinjau)
+                    </span>
+                </div>
+            )}
+
             {/* Coat Hanger Icon */}
             <div className={`flex ${flexAlign} mb-3 text-[#E5654B]`}>
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

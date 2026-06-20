@@ -248,7 +248,7 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
     const themeSlug = invitation.theme?.slug || '';
     const isJawa = themeSlug === 'adat-jawa';
     const isSunda = themeSlug === 'adat-sunda';
-    const isSpesial02 = themeSlug === 'spesial-02';
+    const isSpesial02 = themeSlug === 'spesial-02' || themeSlug === 'spesial-02-copy';
     const isTraditional = isJawa || isSunda;
     const isDecorated = isTraditional || isSpesial02;
 

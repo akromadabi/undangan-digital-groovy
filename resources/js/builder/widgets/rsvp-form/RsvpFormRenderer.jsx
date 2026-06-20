@@ -1,6 +1,13 @@
 import React from 'react';
 import { getResponsiveSetting } from '../../core/deepMergeResponsive';
 
+// Mock wishes list for the builder preview
+const MOCK_WISHES = [
+    { name: 'Rian & Dita', message: 'Selamat menempuh hidup baru untuk kedua mempelai! Semoga menjadi keluarga yang sakinah, mawaddah, warahmah. Aamiin.' },
+    { name: 'Budi Santoso', message: 'Happy wedding! Semoga cinta kalian terus bersemi hingga akhir hayat. Maaf belum bisa hadir langsung karena masih di luar kota.' },
+    { name: 'Siti Rahma', message: 'Selamat yaa! Akhirnya hari bahagia ini tiba juga. Semoga acaranya lancar dan sukses selalu.' }
+];
+
 export default function RsvpFormRenderer({ settings = {}, activeBreakpoint = 'desktop', globalSettings = {} }) {
     const layoutModel = settings.layoutModel || 'card'; // 'card' | 'minimal' | 'inline'
     
@@ -138,6 +145,33 @@ export default function RsvpFormRenderer({ settings = {}, activeBreakpoint = 'de
             <button type="button" style={buttonStyle}>
                 {buttonText}
             </button>
+
+            {/* Wishes List Mockup (Combined inside RSVP form widget) */}
+            <div className="border-t border-gray-100 pt-4 mt-6 text-left w-full">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 block">Ucapan Tamu (Contoh Preview)</span>
+                
+                <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                    {MOCK_WISHES.map((w, index) => (
+                        <div 
+                            key={index} 
+                            className="p-3 bg-gray-50/80 rounded-xl border border-gray-100/50"
+                        >
+                            <div 
+                                style={{ 
+                                    color: globalSettings?.colors?.primary || '#E5654B',
+                                    fontFamily: `"${titleFontFamily}", sans-serif`
+                                }}
+                                className="font-bold text-xs"
+                            >
+                                {w.name}
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                                {w.message}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
