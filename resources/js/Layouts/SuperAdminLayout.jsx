@@ -15,6 +15,7 @@ const menuItems = [
     { label: 'Paket', href: '/super-admin/plans', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
     { label: 'Paket Kartu', href: '/super-admin/greeting-card-plans', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
     { label: 'Tema', href: '/super-admin/themes', icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.486M7 17h.01' },
+    { label: 'Theme Builder', href: '/super-admin/theme-builder', icon: 'M9.813 15.904L9 21l8.982-8.982m-9 9L3 21l1.096-5.912L9.813 15.904zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10' },
     { label: 'Kartu Ucapan', href: '/super-admin/greeting-card-templates', icon: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z' },
     { label: 'Instagram Filter', href: '/super-admin/instagram-filters', icon: 'M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316A2.192 2.192 0 0014.512 3.75H9.488c-.69 0-1.328.327-1.748.883l-.823 1.316zM12 9.75a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5zm0 1.5a2.25 2.25 0 110 4.5 2.25 2.25 0 010-4.5z' },
     { label: '3D Canvas Builder', href: '/super-admin/three-d-scenes', icon: 'M6.429 9.75L2.25 12l4.179 2.25m-4.179-2.25L12 7.5l7.75 4.5M2.25 12l9.75 5.25L19.75 12M2.25 16.5l9.75 5.25 7.75-4.5' },
@@ -38,6 +39,7 @@ const menuSheetItems = [
     { label: 'Paket', href: '/super-admin/plans', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10', color: 'bg-orange-50 text-[#E5654B]' },
     { label: 'Paket Kartu', href: '/super-admin/greeting-card-plans', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', color: 'bg-orange-50 text-[#E5654B]' },
     { label: 'Tema', href: '/super-admin/themes', icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.486M7 17h.01', color: 'bg-orange-50 text-[#E5654B]' },
+    { label: 'Theme Builder', href: '/super-admin/theme-builder', icon: 'M9.813 15.904L9 21l8.982-8.982m-9 9L3 21l1.096-5.912L9.813 15.904zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10', color: 'bg-indigo-50 text-indigo-600' },
     { label: '3D Canvas', href: '/super-admin/three-d-scenes', icon: 'M6.429 9.75L2.25 12l4.179 2.25m-4.179-2.25L12 7.5l7.75 4.5M2.25 12l9.75 5.25L19.75 12M2.25 16.5l9.75 5.25 7.75-4.5', color: 'bg-orange-50 text-[#E5654B]' },
     { label: 'Kartu Ucapan', href: '/super-admin/greeting-card-templates', icon: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z', color: 'bg-pink-50 text-pink-600' },
     { label: 'Instagram Filter', href: '/super-admin/instagram-filters', icon: 'M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316A2.192 2.192 0 0014.512 3.75H9.488c-.69 0-1.328.327-1.748.883l-.823 1.316zM12 9.75a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5zm0 1.5a2.25 2.25 0 110 4.5 2.25 2.25 0 010-4.5z', color: 'bg-orange-50 text-[#E5654B]' },
@@ -58,7 +60,7 @@ export default function SuperAdminLayout({ children, title }) {
     // Filter Desktop Menu Items
     const filteredMenuItems = menuItems.filter(item => {
         if (isEditor) {
-            const allowedLabels = ['Tema', '3D Canvas Builder', 'Musik', 'Preview Statis'];
+            const allowedLabels = ['Tema', 'Theme Builder', '3D Canvas Builder', 'Musik', 'Preview Statis'];
             return allowedLabels.includes(item.label);
         }
         return true;
@@ -81,7 +83,7 @@ export default function SuperAdminLayout({ children, title }) {
     // Filter Mobile Menu Sheet Items (FAB)
     const filteredMenuSheetItems = menuSheetItems.filter(item => {
         if (isEditor) {
-            const allowedLabels = ['Tema', '3D Canvas', 'Preview Statis'];
+            const allowedLabels = ['Tema', 'Theme Builder', '3D Canvas', 'Preview Statis'];
             return allowedLabels.includes(item.label);
         }
         return true;

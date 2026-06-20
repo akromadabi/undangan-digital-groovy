@@ -15,7 +15,9 @@ import axios from 'axios';
 import { 
     Paintbrush, Save, Undo2, Redo2, Download, Upload, 
     X, Type, Image, MousePointerClick, Search, HelpCircle,
-    ChevronRight, Layers, FileJson, CheckCircle2, AlertCircle, RefreshCw
+    ChevronRight, Layers, FileJson, CheckCircle2, AlertCircle, RefreshCw,
+    FileText, Minus, ArrowUpDown, Heart, Video, Map, User, Clock, CheckSquare, Grid, CreditCard, BookOpen, Music, Users, Calendar,
+    MessageSquare, Tv, Shirt
 } from 'lucide-react';
 
 export default function Builder({ theme, builderDocument, documentVersion }) {
@@ -25,9 +27,10 @@ export default function Builder({ theme, builderDocument, documentVersion }) {
     const setSelectedId = useBuilderStore((state) => state.setSelectedId);
     const addSection = useBuilderStore((state) => state.addSection);
     const addWidget = useBuilderStore((state) => state.addWidget);
+    const leftPanelTab = useBuilderStore((state) => state.leftPanelTab);
+    const setLeftPanelTab = useBuilderStore((state) => state.setLeftPanelTab);
     
     // UI Local States
-    const [leftPanelTab, setLeftPanelTab] = useState('widget'); // 'widget' | 'navigator'
     const [rightPanelTab, setRightPanelTab] = useState('content'); // 'content' | 'style' | 'advanced'
     const [searchQuery, setSearchQuery] = useState('');
     const [saveStatus, setSaveStatus] = useState('saved'); // 'saved' | 'saving' | 'error'
@@ -101,6 +104,52 @@ export default function Builder({ theme, builderDocument, documentVersion }) {
         return () => clearTimeout(timer);
     }, [documentState]);
 
+    // Global keyboard listener to increment/decrement numbers & percentages using Up/Down arrow keys
+    useEffect(() => {
+        const handleGlobalKeyDown = (e) => {
+            if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+
+            const activeEl = document.activeElement;
+            if (!activeEl || activeEl.tagName !== 'INPUT') return;
+            if (activeEl.readOnly || activeEl.disabled) return;
+
+            const type = activeEl.getAttribute('type') || 'text';
+            if (type !== 'text' && type !== 'number') return;
+
+            const value = activeEl.value.trim();
+            const numericRegex = /^(-?\d*\.?\d+)(%|px|rem|em|vh|vw|s|ms)?$/i;
+            const match = value.match(numericRegex);
+
+            if (!match) return;
+
+            e.preventDefault();
+
+            const num = parseFloat(match[1]);
+            const unit = match[2] || '';
+            const step = e.shiftKey ? 10 : 1;
+            const direction = e.key === 'ArrowUp' ? 1 : -1;
+            
+            // Preserve the original decimal precision if any
+            const decimalParts = match[1].split('.');
+            const decimals = decimalParts.length > 1 ? decimalParts[1].length : 0;
+            const precision = Math.max(decimals, 0);
+            const newNum = parseFloat((num + direction * step).toFixed(precision || 3));
+
+            const newValue = `${newNum}${unit}`;
+
+            const valueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+            if (valueSetter) {
+                valueSetter.call(activeEl, newValue);
+                // Dispatch input and change events for React state binding to sync
+                activeEl.dispatchEvent(new Event('input', { bubbles: true }));
+                activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, []);
+
     // Add Widget clicked fallback helper
     const handleWidgetClick = (widgetType) => {
         let targetColId = selectedId;
@@ -165,7 +214,26 @@ export default function Builder({ theme, builderDocument, documentVersion }) {
     const widgetIcons = {
         Heading: Type,
         Image: Image,
-        MousePointerClick: MousePointerClick
+        MousePointerClick: MousePointerClick,
+        TextEditor: FileText,
+        Divider: Minus,
+        Spacer: ArrowUpDown,
+        Icon: Heart,
+        Video: Video,
+        Map: Map,
+        GuestName: User,
+        Countdown: Clock,
+        RsvpForm: CheckSquare,
+        Gallery: Grid,
+        DigitalEnvelope: CreditCard,
+        LoveStory: BookOpen,
+        MusicPlayer: Music,
+        BrideGroom: Users,
+        EventDetails: Calendar,
+        WishesList: MessageSquare,
+        Livestream: Tv,
+        Dresscode: Shirt,
+        TurutMengundang: Users
     };
 
     // Filter widgets by search query
@@ -326,25 +394,50 @@ export default function Builder({ theme, builderDocument, documentVersion }) {
                                     />
                                 </div>
 
-                                {/* Widgets list grid */}
-                                <div className="grid grid-cols-2 gap-2.5">
-                                    {filteredWidgets.map((key) => {
-                                        const widget = widgetRegistry[key];
-                                        const IconComponent = widgetIcons[widget.icon] || HelpCircle;
+                                {/* Grouped Widget List */}
+                                <div className="space-y-6">
+                                    {[
+                                        { id: 'basic', name: 'Widget Dasar' },
+                                        { id: 'custom', name: 'Fitur Undangan' }
+                                    ].map((category) => {
+                                        const categoryWidgets = filteredWidgets.filter(
+                                            (key) => (widgetRegistry[key]?.category || 'basic') === category.id
+                                        );
+                                        
+                                        if (categoryWidgets.length === 0) return null;
+
                                         return (
-                                            <button
-                                                key={key}
-                                                type="button"
-                                                onClick={() => handleWidgetClick(key)}
-                                                className="group flex flex-col items-center justify-center p-4 border border-gray-100 hover:border-indigo-500/50 rounded-xl bg-white hover:bg-indigo-50/10 transition-all hover:shadow-sm text-center"
-                                            >
-                                                <div className="p-2.5 bg-gray-50 group-hover:bg-indigo-50 rounded-lg text-gray-500 group-hover:text-indigo-600 transition-all mb-2">
-                                                    <IconComponent className="w-5 h-5" strokeWidth={1.8} />
+                                            <div key={category.id} className="space-y-2.5">
+                                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">
+                                                    {category.name}
+                                                </h4>
+                                                <div className="grid grid-cols-2 gap-2.5">
+                                                    {categoryWidgets.map((key) => {
+                                                        const widget = widgetRegistry[key];
+                                                        const IconComponent = widgetIcons[widget.icon] || HelpCircle;
+                                                        return (
+                                                            <button
+                                                                key={key}
+                                                                type="button"
+                                                                draggable="true"
+                                                                onDragStart={(e) => {
+                                                                    e.dataTransfer.setData('text/plain', key);
+                                                                    e.dataTransfer.effectAllowed = 'copy';
+                                                                }}
+                                                                onClick={() => handleWidgetClick(key)}
+                                                                className="group flex flex-col items-center justify-center p-4 border border-gray-100 hover:border-indigo-500/50 rounded-xl bg-white hover:bg-indigo-50/10 transition-all hover:shadow-sm text-center animate-fadeIn cursor-grab active:cursor-grabbing"
+                                                            >
+                                                                <div className="p-2.5 bg-gray-50 group-hover:bg-indigo-50 rounded-lg text-gray-500 group-hover:text-indigo-600 transition-all mb-2">
+                                                                    <IconComponent className="w-5 h-5" strokeWidth={1.8} />
+                                                                </div>
+                                                                <span className="text-[11px] font-bold text-gray-700 group-hover:text-indigo-700 truncate w-full">
+                                                                    {widget.name}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
-                                                <span className="text-[11px] font-bold text-gray-700 group-hover:text-indigo-700 truncate w-full">
-                                                    {widget.name}
-                                                </span>
-                                            </button>
+                                            </div>
                                         );
                                     })}
                                 </div>

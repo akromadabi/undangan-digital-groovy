@@ -10,8 +10,10 @@ export default function ColumnWrapper({ column, index, section, activeBreakpoint
     const deleteNode = useBuilderStore((state) => state.deleteNode);
     const duplicateNode = useBuilderStore((state) => state.duplicateNode);
     const addWidget = useBuilderStore((state) => state.addWidget);
+    const setLeftPanelTab = useBuilderStore((state) => state.setLeftPanelTab);
 
     const isSelected = selectedId === column.id;
+    const [isDraggingOver, setIsDraggingOver] = React.useState(false);
 
     // Resolve column width responsive setting
     const rawWidth = column.settings?.width || '100%';
@@ -61,18 +63,42 @@ export default function ColumnWrapper({ column, index, section, activeBreakpoint
 
     const handleAddWidget = (e) => {
         e.stopPropagation();
-        // Prompt for widget type or default to heading
-        addWidget(column.id, 'heading');
+        setSelectedId(column.id);
+        setLeftPanelTab('widget');
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        setIsDraggingOver(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDraggingOver(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDraggingOver(false);
+        const widgetType = e.dataTransfer.getData('text/plain');
+        if (widgetType) {
+            addWidget(column.id, widgetType);
+        }
     };
 
     return (
         <div 
             onClick={handleSelect}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
             style={style}
-            className={`group/column border border-transparent min-h-[60px] ${
-                isSelected 
-                    ? 'border-amber-500 ring-2 ring-amber-500/10' 
-                    : 'hover:border-amber-300/40'
+            className={`group/column border border-transparent min-h-[60px] transition-all ${
+                isDraggingOver
+                    ? 'border-indigo-500 bg-indigo-50/10 ring-2 ring-indigo-500/20'
+                    : isSelected 
+                        ? 'border-amber-500 ring-2 ring-amber-500/10' 
+                        : 'hover:border-amber-300/40'
             }`}
         >
             {/* COLUMN TOOLBAR */}

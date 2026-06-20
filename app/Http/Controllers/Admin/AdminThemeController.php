@@ -94,9 +94,25 @@ class AdminThemeController extends Controller
         return redirect()->back()->with('success', 'Tema berhasil diupdate.');
     }
 
-    public function toggleActive(Theme $theme)
+    public function toggleActive(Request $request, Theme $theme)
     {
-        $theme->update(['is_active' => !$theme->is_active]);
+        if ($request->has('is_active')) {
+            $isActive = (bool)$request->input('is_active');
+            $userId = null;
+            if ($isActive && $request->input('publish_target') === 'user') {
+                $userId = $request->input('user_id');
+            }
+            $theme->update([
+                'is_active' => $isActive,
+                'user_id'   => $userId
+            ]);
+        } else {
+            $isActive = !$theme->is_active;
+            $theme->update([
+                'is_active' => $isActive,
+                'user_id'   => $isActive ? $theme->user_id : null
+            ]);
+        }
         return redirect()->back()->with('success', 'Status aktif tema berhasil diubah.');
     }
 

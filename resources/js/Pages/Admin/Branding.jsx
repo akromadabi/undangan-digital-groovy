@@ -82,6 +82,7 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
         reseller_gateway_type: settings?.reseller_gateway_type || 'midtrans',
         reseller_midtrans_settings: settings?.reseller_midtrans_settings || { mode: 'sandbox', client_key: '', server_key: '' },
         reseller_tripay_settings: settings?.reseller_tripay_settings || { mode: 'sandbox', api_key: '', private_key: '', merchant_code: '' },
+        reseller_xendit_settings: settings?.reseller_xendit_settings || { mode: 'sandbox', secret_key: '', webhook_token: '' },
     });
 
     const [preview, setPreview] = useState(null);
@@ -489,6 +490,17 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                                                 />
                                                 TriPay
                                             </label>
+                                            <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-[#333]">
+                                                <input
+                                                    type="radio"
+                                                    name="reseller_gateway_type"
+                                                    value="xendit"
+                                                    checked={data.reseller_gateway_type === 'xendit'}
+                                                    onChange={e => setData('reseller_gateway_type', e.target.value)}
+                                                    className="text-[#E5654B] focus:ring-[#E5654B]"
+                                                />
+                                                Xendit
+                                            </label>
                                         </div>
                                     </div>
 
@@ -611,6 +623,61 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                                             <div className="text-xs text-[#999] leading-relaxed mt-2 p-3 bg-white border border-[#e8e5e0] rounded-xl">
                                                 <strong>Webhook URL TriPay:</strong> Silakan tambahkan URL berikut ke kolom Callback URL di dashboard TriPay Anda:<br />
                                                 <code className="text-[#E5654B] font-mono select-all bg-[#faf9f6] px-1 rounded block mt-1 py-1 border">{window.location.origin}/webhooks/tripay</code>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* KREDENSIAL XENDIT */}
+                                    {data.reseller_gateway_type === 'xendit' && (
+                                        <div className="p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] space-y-4">
+                                            <div className="flex items-center justify-between border-b border-[#e8e5e0] pb-2">
+                                                <span className="text-xs font-extrabold text-[#E5654B]">KREDENSIAL XENDIT RESELLER</span>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Mode Lingkungan</label>
+                                                    <select
+                                                        value={data.reseller_xendit_settings?.mode || 'sandbox'}
+                                                        onChange={e => setData('reseller_xendit_settings', {
+                                                            ...data.reseller_xendit_settings,
+                                                            mode: e.target.value
+                                                        })}
+                                                        className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                                    >
+                                                        <option value="sandbox">Sandbox (Pengujian)</option>
+                                                        <option value="production">Production (Asli / Live)</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-[#555] mb-1.5">Secret Key (API Key)</label>
+                                                    <input
+                                                        type="password"
+                                                        value={data.reseller_xendit_settings?.secret_key || ''}
+                                                        onChange={e => setData('reseller_xendit_settings', {
+                                                            ...data.reseller_xendit_settings,
+                                                            secret_key: e.target.value
+                                                        })}
+                                                        placeholder="xnd_development_... atau xnd_production_..."
+                                                        className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-[#555] mb-1.5">Verification Token / Callback Token</label>
+                                                <input
+                                                    type="password"
+                                                    value={data.reseller_xendit_settings?.webhook_token || ''}
+                                                    onChange={e => setData('reseller_xendit_settings', {
+                                                        ...data.reseller_xendit_settings,
+                                                        webhook_token: e.target.value
+                                                    })}
+                                                    placeholder="Callback Token dari dashboard Xendit..."
+                                                    className="w-full px-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                                />
+                                            </div>
+                                            <div className="text-xs text-[#999] leading-relaxed mt-2 p-3 bg-white border border-[#e8e5e0] rounded-xl">
+                                                <strong>Webhook URL Xendit:</strong> Silakan tambahkan URL berikut ke kolom Callback URL (event **Invoice Paid** / **Tagihan Dibayar**) di dashboard Xendit Anda:<br />
+                                                <code className="text-[#E5654B] font-mono select-all bg-[#faf9f6] px-1 rounded block mt-1 py-1 border">{window.location.origin}/webhooks/xendit</code>
                                             </div>
                                         </div>
                                     )}

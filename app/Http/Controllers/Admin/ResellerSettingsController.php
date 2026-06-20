@@ -56,9 +56,10 @@ class ResellerSettingsController extends Controller
             'custom_domain' => 'nullable|string|max:255|unique:reseller_settings,custom_domain,' . $this->getSettings()->id,
             'hide_demo_plan_selector' => 'nullable|boolean',
             'payment_mode' => 'nullable|string|in:admin,reseller_gateway,manual',
-            'reseller_gateway_type' => 'nullable|string|in:midtrans,tripay',
+            'reseller_gateway_type' => 'nullable|string|in:midtrans,tripay,xendit',
             'reseller_midtrans_settings' => 'nullable|array',
             'reseller_tripay_settings' => 'nullable|array',
+            'reseller_xendit_settings' => 'nullable|array',
         ]);
 
         $settings = $this->getSettings();
@@ -79,6 +80,7 @@ class ResellerSettingsController extends Controller
         $settings->reseller_gateway_type = $request->reseller_gateway_type;
         $settings->reseller_midtrans_settings = $request->reseller_midtrans_settings;
         $settings->reseller_tripay_settings = $request->reseller_tripay_settings;
+        $settings->reseller_xendit_settings = $request->reseller_xendit_settings;
         
         // Save multiple bank accounts and auto-sync primary to legacy columns
         $settings->bank_accounts = $request->bank_accounts;

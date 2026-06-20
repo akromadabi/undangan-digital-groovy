@@ -1,9 +1,11 @@
 import React from 'react';
 import { useBuilderStore, findNodeAndParent } from '../state/builderStore';
+import { widgetRegistry } from '../widgets';
 
 export default function StyleTab() {
     const document = useBuilderStore((state) => state.document);
     const selectedId = useBuilderStore((state) => state.selectedId);
+    const activeBreakpoint = useBuilderStore((state) => state.activeBreakpoint);
     const updateNodeSettings = useBuilderStore((state) => state.updateNodeSettings);
 
     if (!selectedId) {
@@ -16,14 +18,29 @@ export default function StyleTab() {
 
     const nodeInfo = findNodeAndParent(document.content, selectedId);
     if (!nodeInfo) return null;
-    const { node } = nodeInfo;
+    const { node, type } = nodeInfo;
 
     const handleSettingsChange = (newSettings) => {
         updateNodeSettings(selectedId, newSettings);
     };
 
+    const widgetConfig = type === 'widget' ? widgetRegistry[node.type] : null;
+    const Editor = widgetConfig?.Editor;
+
     return (
         <div className="p-4 space-y-6">
+            {type === 'widget' && Editor && (
+                <>
+                    <Editor
+                        settings={node.settings || {}}
+                        activeBreakpoint={activeBreakpoint}
+                        onChange={handleSettingsChange}
+                        mode="style"
+                    />
+                    <hr className="border-gray-100" />
+                </>
+            )}
+
             {/* COMMON BORDER STYLE */}
             <div className="space-y-4">
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Bingkai (Border)</h3>

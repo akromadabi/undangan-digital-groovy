@@ -135,7 +135,7 @@ export default function Navigator() {
                                                                 )}
                                                             </button>
                                                             <Columns className="w-3.5 h-3.5 text-amber-500" />
-                                                            <span className="font-semibold">Kolom {cIndex + 1} ({column.settings?.width || '100%'})</span>
+                                                            <span className="font-semibold">Kolom {cIndex + 1} ({typeof column.settings?.width === 'object' ? (column.settings.width.desktop || '100%') : (column.settings?.width || '100%')})</span>
                                                         </div>
                                                         
                                                         {/* Action Hover Buttons */}

@@ -38,6 +38,7 @@ class ResellerSetting extends Model
         'reseller_gateway_type',
         'reseller_midtrans_settings',
         'reseller_tripay_settings',
+        'reseller_xendit_settings',
     ];
 
     protected function casts(): array
@@ -51,6 +52,7 @@ class ResellerSetting extends Model
             'bio_link_config'         => 'array',
             'reseller_midtrans_settings' => 'array',
             'reseller_tripay_settings' => 'array',
+            'reseller_xendit_settings' => 'array',
         ];
     }
 

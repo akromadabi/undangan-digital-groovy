@@ -82,6 +82,7 @@ export default function ContentTab() {
                     settings={node.settings || {}}
                     activeBreakpoint={activeBreakpoint}
                     onChange={handleSettingsChange}
+                    mode="content"
                 />
             </div>
         );

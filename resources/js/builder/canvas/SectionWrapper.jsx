@@ -69,7 +69,7 @@ export default function SectionWrapper({ section, index, activeBreakpoint }) {
 
     const handleAddColumn = (e) => {
         e.stopPropagation();
-        addColumn(section.id, '50%');
+        addColumn(section.id);
     };
 
     const handleMoveUp = (e) => {

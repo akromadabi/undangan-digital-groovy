@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
 
-export default function HeadingEditor({ settings = {}, activeBreakpoint = 'desktop', onChange }) {
+export default function HeadingEditor({ settings = {}, activeBreakpoint = 'desktop', onChange, mode = 'content' }) {
     const handleUpdate = (key, value) => {
         onChange({ [key]: value });
     };
@@ -23,9 +23,8 @@ export default function HeadingEditor({ settings = {}, activeBreakpoint = 'deskt
         return val || fallback;
     };
 
-    return (
-        <div className="space-y-6">
-            {/* CONTENT SECTION */}
+    if (mode === 'content') {
+        return (
             <div className="space-y-4">
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Konten Judul</h3>
                 
@@ -60,7 +59,15 @@ export default function HeadingEditor({ settings = {}, activeBreakpoint = 'deskt
                         <option value="span">Span</option>
                     </select>
                 </div>
+            </div>
+        );
+    }
 
+    return (
+        <div className="space-y-6">
+            {/* ALIGNMENT */}
+            <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Penyelarasan</h3>
                 {/* Alignment (Responsive) */}
                 <div className="space-y-1">
                     <div className="flex items-center justify-between">

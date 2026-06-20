@@ -345,6 +345,45 @@ export default function Index({ settings }) {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Xendit Config */}
+                                <div className="border border-gray-100 rounded-2xl p-4 bg-gray-50/20 space-y-4">
+                                    <div>
+                                        <h4 className="font-bold text-gray-800 text-xs">Xendit Integration Settings</h4>
+                                        <p className="text-[9px] text-gray-400 mt-0.5">Integrasi pembayaran online Xendit Invoice.</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className={labelClass}>Xendit Mode</label>
+                                            <select value={getSettingValue('xendit_mode')} onChange={(e) => updateSettingValue('xendit_mode', e.target.value)} className={inputClass}>
+                                                <option value="sandbox">Sandbox (Testing)</option>
+                                                <option value="production">Production (Live)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className={labelClass}>Xendit Secret Key</label>
+                                            <input type="password" value={getSettingValue('xendit_secret_key')} onChange={(e) => updateSettingValue('xendit_secret_key', e.target.value)} className={inputClass} placeholder="xnd_development_... atau xnd_production_..." />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Xendit Webhook Verification Token (Callback Token)</label>
+                                        <input type="password" value={getSettingValue('xendit_webhook_token')} onChange={(e) => updateSettingValue('xendit_webhook_token', e.target.value)} className={inputClass} placeholder="Callback Token dari Dashboard Xendit" />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className={labelClass}>Success Redirect URL</label>
+                                            <input type="text" value={getSettingValue('xendit_success_url')} onChange={(e) => updateSettingValue('xendit_success_url', e.target.value)} className={inputClass} />
+                                        </div>
+                                        <div>
+                                            <label className={labelClass}>Failure Redirect URL</label>
+                                            <input type="text" value={getSettingValue('xendit_failure_url')} onChange={(e) => updateSettingValue('xendit_failure_url', e.target.value)} className={inputClass} />
+                                        </div>
+                                    </div>
+                                    <div className="text-xs text-[#666] leading-relaxed mt-2 p-3 bg-white border border-gray-100 rounded-xl">
+                                        <strong>Webhook URL Xendit:</strong> Silakan tambahkan URL berikut ke pengaturan Callback di dashboard Xendit Anda (pada event **Invoice Paid** / **Tagihan Dibayar**):<br />
+                                        <code className="text-[#E5654B] font-mono select-all bg-gray-50 px-1 rounded block mt-1 py-1 border">{window.location.origin}/webhooks/xendit</code>
+                                    </div>
+                                </div>
                             </div>
                         )}
 

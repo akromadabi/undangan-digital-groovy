@@ -566,10 +566,13 @@ Route::middleware(['auth', 'editor_or_super_admin'])->prefix('super-admin')->nam
     Route::resource('themes', AdminThemeController::class);
 
     // Theme Builder
+    Route::get('theme-builder', [\App\Http\Controllers\ThemeBuilderController::class, 'index'])->name('theme-builder.index');
+    Route::post('theme-builder', [\App\Http\Controllers\ThemeBuilderController::class, 'store'])->name('theme-builder.store');
     Route::get('theme-builder/{theme}', [\App\Http\Controllers\ThemeBuilderController::class, 'edit'])->name('theme-builder.edit');
     Route::post('theme-builder/{theme}/save', [\App\Http\Controllers\ThemeBuilderController::class, 'save'])->name('theme-builder.save');
     Route::get('theme-builder/{theme}/export', [\App\Http\Controllers\ThemeBuilderController::class, 'export'])->name('theme-builder.export');
     Route::post('theme-builder/import', [\App\Http\Controllers\ThemeBuilderController::class, 'import'])->name('theme-builder.import');
+    Route::delete('theme-builder/{theme}', [\App\Http\Controllers\ThemeBuilderController::class, 'destroy'])->name('theme-builder.destroy');
 
     // Music Library
     Route::get('/music', [AdminMusicController::class, 'index'])->name('music.index');
@@ -592,7 +595,7 @@ Route::middleware(['auth', 'editor_or_super_admin'])->prefix('super-admin')->nam
 // ═══════════════════════════════════════
 Route::post('/webhooks/midtrans', [PaymentController::class, 'webhook'])->name('webhook.midtrans')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::post('/webhooks/tripay', [PaymentController::class, 'tripayWebhook'])->name('webhook.tripay')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
-Route::post('/webhooks/xendit', [PaymentController::class, 'webhook'])->name('webhook.xendit')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('/webhooks/xendit', [PaymentController::class, 'xenditWebhook'])->name('webhook.xendit')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/impersonate/leave', [\App\Http\Controllers\Auth\ImpersonateController::class, 'leave'])->name('impersonate.leave');

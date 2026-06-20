@@ -34,6 +34,7 @@ class Theme extends Model
         'base_likes',
         'real_likes',
         'three_d_scene_id',
+        'user_id',
     ];
 
     protected function casts(): array
@@ -68,9 +69,25 @@ class Theme extends Model
         return $this->belongsTo(ThreeDScene::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function builderDocument()
+    {
+        return $this->hasOne(ThemeBuilderDocument::class);
+    }
+
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('user_id');
+                if (auth()->check()) {
+                    $q->orWhere('user_id', auth()->id());
+                }
+            });
     }
 
     public function scopeFree($query)

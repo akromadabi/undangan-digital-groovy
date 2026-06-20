@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\ResellerPlanPrice;
 use App\Models\SubscriptionPlan;
 use App\Services\MidtransService;
+use App\Services\XenditService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -290,6 +291,12 @@ class PaymentController extends Controller
             }
             $channelCode = $methodCode ?: 'QRIS';
             return $tripay->createTransaction($payment, $channelCode);
+        } elseif ($gatewayType === 'xendit') {
+            $xendit = new XenditService($resellerSetting);
+            if (!$xendit->isConfigured()) {
+                return ['success' => false, 'error' => 'Kredensial Xendit belum dikonfigurasi.'];
+            }
+            return $xendit->createInvoice($payment);
         } else {
             // Midtrans snap invoice
             $midtrans = new MidtransService($resellerSetting);
@@ -544,6 +551,154 @@ class PaymentController extends Controller
                         }
                     }
                     \Illuminate\Support\Facades\Log::info('Tripay Webhook: reseller modal payment successful', ['payment_id' => $payment->id]);
+                    return response()->json(['success' => true]);
+                }
+
+                // Activate subscription for direct payment
+                if ($payment->greeting_card_id) {
+                    $payment->greetingCard()->update(['is_active' => true]);
+                    \App\Models\Subscription::create([
+                        'user_id' => $payment->user_id,
+                        'greeting_card_id' => $payment->greeting_card_id,
+                        'plan_id' => $payment->plan_id,
+                        'payment_id' => $payment->id,
+                        'starts_at' => now(),
+                        'expires_at' => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                        'status' => 'active',
+                    ]);
+                } else {
+                    \App\Models\Subscription::create([
+                        'user_id' => $payment->user_id,
+                        'plan_id' => $payment->plan_id,
+                        'invitation_id' => $payment->invitation_id,
+                        'payment_id' => $payment->id,
+                        'starts_at' => now(),
+                        'expires_at' => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                        'status' => 'active',
+                    ]);
+                }
+
+                // Credit reseller wallet or debit cost
+                if ($user && $user->reseller_id && $payment->plan_id) {
+                    $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
+                    $basePrice = (float)$payment->plan->price;
+
+                    if ($paymentMode === 'reseller_gateway') {
+                        // Debit cost
+                        \App\Models\ResellerWallet::debitCost(
+                            $user->reseller_id,
+                            $payment->id,
+                            $basePrice,
+                            "Biaya modal paket {$payment->plan->name} - Pelanggan {$user->name}"
+                        );
+                    } else {
+                        // Credit profit
+                        $paidAmount = (float)$payment->amount;
+                        $profit = $paidAmount - $basePrice;
+
+                        if ($profit > 0) {
+                            \App\Models\ResellerWallet::creditProfit(
+                                $user->reseller_id,
+                                $payment->id,
+                                $profit,
+                                "Profit dari {$user->name} - Paket {$payment->plan->name}"
+                            );
+                        }
+                    }
+                }
+            }
+        } elseif (in_array($status, ['FAILED', 'EXPIRED'])) {
+            $payment->update(['status' => 'failed']);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Handle Xendit Webhook
+     */
+    public function xenditWebhook(Request $request)
+    {
+        $callbackToken = $request->header('x-callback-token') ?: $request->header('X-Callback-Token');
+        $payload = $request->all();
+
+        $orderId = $payload['external_id'] ?? null;
+        if (!$orderId) {
+            \Illuminate\Support\Facades\Log::warning('Xendit Webhook: missing external_id');
+            return response()->json(['status' => 'failed', 'message' => 'Missing external_id'], 400);
+        }
+
+        $payment = Payment::where('external_id', $orderId)->first();
+        if (!$payment) {
+            \Illuminate\Support\Facades\Log::warning('Xendit Webhook: payment not found', ['external_id' => $orderId]);
+            return response()->json(['status' => 'failed', 'message' => 'Payment not found'], 400);
+        }
+
+        // Load correct credentials for signature verification
+        $user = $payment->user;
+        $resellerSetting = null;
+        if ($user && $user->reseller_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+        }
+
+        $xendit = new XenditService($resellerSetting);
+        if (!$xendit->verifyWebhookSignature($callbackToken)) {
+            \Illuminate\Support\Facades\Log::warning('Xendit Webhook: callback token mismatch', ['external_id' => $orderId]);
+            return response()->json(['status' => 'failed', 'message' => 'Invalid callback token'], 400);
+        }
+
+        $status = strtoupper($payload['status'] ?? 'PENDING');
+
+        if ($status === 'PAID') {
+            if ($payment->status !== 'paid') {
+                $payment->update([
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'payment_method' => $payload['payment_method'] ?? ($payload['payment_channel'] ?? 'xendit'),
+                    'metadata' => array_merge($payment->metadata ?? [], [
+                        'xendit_status' => $status,
+                        'xendit_response' => $payload,
+                    ]),
+                ]);
+
+                // check if it's a reseller modal payment
+                if ($payment->parent_payment_id) {
+                    $parent = $payment->parentPayment;
+                    if ($parent && $parent->status !== 'paid') {
+                        $parent->update([
+                            'status' => 'paid',
+                            'paid_at' => now(),
+                            'payment_method' => $payment->payment_method ?: 'xendit',
+                            'reviewed_by' => $payment->user_id, // reseller user id
+                            'reviewed_at' => now(),
+                            'admin_notes' => 'Pembayaran modal lunas via gateway online Xendit.',
+                        ]);
+
+                        // Activate subscription for the customer
+                        if ($parent->greeting_card_id) {
+                            $parent->greetingCard()->update(['is_active' => true]);
+                            \App\Models\Subscription::create([
+                                'user_id' => $parent->user_id,
+                                'greeting_card_id' => $parent->greeting_card_id,
+                                'plan_id' => $parent->plan_id,
+                                'payment_id' => $parent->id,
+                                'starts_at' => now(),
+                                'expires_at' => $parent->plan ? now()->addDays($parent->plan->duration_days) : null,
+                                'status' => 'active',
+                            ]);
+                        } else {
+                            \App\Models\Subscription::create([
+                                'user_id' => $parent->user_id,
+                                'plan_id' => $parent->plan_id,
+                                'invitation_id' => $parent->invitation_id,
+                                'payment_id' => $parent->id,
+                                'starts_at' => now(),
+                                'expires_at' => $parent->plan ? now()->addDays($parent->plan->duration_days) : null,
+                                'status' => 'active',
+                            ]);
+                        }
+                    }
+                    \Illuminate\Support\Facades\Log::info('Xendit Webhook: reseller modal payment successful', ['payment_id' => $payment->id]);
                     return response()->json(['success' => true]);
                 }
 

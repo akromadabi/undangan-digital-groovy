@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
-export default function ImageEditor({ settings = {}, activeBreakpoint = 'desktop', onChange }) {
+export default function ImageEditor({ settings = {}, activeBreakpoint = 'desktop', onChange, mode = 'content' }) {
     const handleUpdate = (key, value) => {
         onChange({ [key]: value });
     };
@@ -22,9 +22,8 @@ export default function ImageEditor({ settings = {}, activeBreakpoint = 'desktop
         return val || fallback;
     };
 
-    return (
-        <div className="space-y-6">
-            {/* CONTENT TAB */}
+    if (mode === 'content') {
+        return (
             <div className="space-y-4">
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Konten Gambar</h3>
                 
@@ -51,7 +50,15 @@ export default function ImageEditor({ settings = {}, activeBreakpoint = 'desktop
                         placeholder="Deskripsi gambar..."
                     />
                 </div>
+            </div>
+        );
+    }
 
+    return (
+        <div className="space-y-6">
+            {/* ALIGNMENT */}
+            <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Penyelarasan</h3>
                 {/* Alignment */}
                 <div className="space-y-1">
                     <div className="flex items-center justify-between">

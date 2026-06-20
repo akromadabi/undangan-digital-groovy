@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
-export default function ButtonEditor({ settings = {}, activeBreakpoint = 'desktop', onChange }) {
+export default function ButtonEditor({ settings = {}, activeBreakpoint = 'desktop', onChange, mode = 'content' }) {
     const handleUpdate = (key, value) => {
         onChange({ [key]: value });
     };
@@ -22,9 +22,8 @@ export default function ButtonEditor({ settings = {}, activeBreakpoint = 'deskto
         return val || fallback;
     };
 
-    return (
-        <div className="space-y-6">
-            {/* CONTENT TAB */}
+    if (mode === 'content') {
+        return (
             <div className="space-y-4">
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Konten Tombol</h3>
                 
@@ -63,7 +62,15 @@ export default function ButtonEditor({ settings = {}, activeBreakpoint = 'deskto
                     />
                     <label htmlFor="isExternal" className="text-xs font-semibold text-gray-700">Buka di Tab Baru</label>
                 </div>
+            </div>
+        );
+    }
 
+    return (
+        <div className="space-y-6">
+            {/* ALIGNMENT */}
+            <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Penyelarasan</h3>
                 {/* Alignment */}
                 <div className="space-y-1">
                     <div className="flex items-center justify-between">

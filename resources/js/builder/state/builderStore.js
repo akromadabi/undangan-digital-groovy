@@ -61,6 +61,7 @@ const storeCreator = (set, get) => ({
     activeBreakpoint: 'desktop',
     isSaving: false,
     lastSaved: null,
+    leftPanelTab: 'widget', // 'widget' | 'navigator'
 
     // Document loader
     setDocument: (doc) => {
@@ -70,6 +71,7 @@ const storeCreator = (set, get) => ({
 
     // UI state actions
     setSelectedId: (id) => set({ selectedId: id }),
+    setLeftPanelTab: (tab) => set({ leftPanelTab: tab }),
     setActiveBreakpoint: (bp) => set({ activeBreakpoint: bp }),
     setIsSaving: (saving) => set({ isSaving: saving }),
     setLastSaved: (time) => set({ lastSaved: time }),
@@ -106,13 +108,26 @@ const storeCreator = (set, get) => ({
         });
     },
 
-    addColumn: (sectionId, width = '50%') => {
+    addColumn: (sectionId) => {
         set((state) => {
             const document = clone(state.document);
             const target = findNodeAndParent(document.content, sectionId);
             if (target && target.node.type === 'section') {
-                const newCol = createColumn(width);
-                target.node.columns.push(newCol);
+                const section = target.node;
+                const newCol = createColumn();
+                section.columns.push(newCol);
+
+                // Auto-redistribute all column widths equally
+                const colCount = section.columns.length;
+                const equalWidth = parseFloat((100 / colCount).toFixed(4)) + '%';
+                section.columns.forEach((col) => {
+                    // If the column width is a responsive object, update desktop; otherwise set flat string
+                    if (col.settings.width && typeof col.settings.width === 'object') {
+                        col.settings.width = { ...col.settings.width, desktop: equalWidth };
+                    } else {
+                        col.settings.width = equalWidth;
+                    }
+                });
             }
             return { document };
         });
