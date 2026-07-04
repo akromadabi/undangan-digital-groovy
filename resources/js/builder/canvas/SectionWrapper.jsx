@@ -3,8 +3,9 @@ import { useBuilderStore } from '../state/builderStore';
 import ColumnWrapper from './ColumnWrapper';
 import { Copy, Trash2, ArrowUp, ArrowDown, Plus, Layout } from 'lucide-react';
 import { getResponsiveSetting } from '../core/deepMergeResponsive';
+import { compileNodeCss } from '../core/styleCompiler';
 
-export default function SectionWrapper({ section, index, activeBreakpoint }) {
+export default function SectionWrapper({ section, index, activeBreakpoint, onNodeContextMenu }) {
     const selectedId = useBuilderStore((state) => state.selectedId);
     const setSelectedId = useBuilderStore((state) => state.setSelectedId);
     const deleteNode = useBuilderStore((state) => state.deleteNode);
@@ -55,6 +56,12 @@ export default function SectionWrapper({ section, index, activeBreakpoint }) {
         setSelectedId(section.id);
     };
 
+    const handleContextMenu = (e) => {
+        if (onNodeContextMenu) {
+            onNodeContextMenu(e, section.id, 'section', 'Section');
+        }
+    };
+
     const handleDelete = (e) => {
         e.stopPropagation();
         if (confirm('Hapus section ini beserta seluruh kolom & widget di dalamnya?')) {
@@ -88,9 +95,13 @@ export default function SectionWrapper({ section, index, activeBreakpoint }) {
         }
     };
 
+    const nodeCss = compileNodeCss(section, activeBreakpoint);
+
     return (
         <div 
+            id={section.id}
             onClick={handleSelect}
+            onContextMenu={handleContextMenu}
             style={style}
             className={`group/section border-2 border-transparent ${
                 isSelected 
@@ -98,8 +109,9 @@ export default function SectionWrapper({ section, index, activeBreakpoint }) {
                     : 'hover:border-indigo-300/60'
             }`}
         >
+            {nodeCss && <style dangerouslySetInnerHTML={{ __html: nodeCss }} />}
             {/* SECTION TOOLBAR (Visible on hover or when selected) */}
-            <div className={`absolute -top-7 left-0 bg-indigo-600 text-white text-[10px] font-bold rounded-t-md px-2.5 py-1 z-40 items-center gap-2.5 transition-all shadow-sm ${
+            <div className={`absolute bottom-full left-0 bg-indigo-600 text-white text-[10px] font-bold rounded-t-md px-2.5 py-1 z-40 items-center gap-2.5 transition-all shadow-sm ${
                 isSelected ? 'flex' : 'hidden group-hover/section:flex'
             }`}>
                 <div className="flex items-center gap-1">
@@ -162,6 +174,7 @@ export default function SectionWrapper({ section, index, activeBreakpoint }) {
                         index={cIndex}
                         section={section}
                         activeBreakpoint={activeBreakpoint}
+                        onNodeContextMenu={onNodeContextMenu}
                     />
                 ))}
             </div>

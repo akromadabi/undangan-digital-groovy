@@ -278,13 +278,21 @@ class PaymentController extends Controller
      */
     private function processOnlineCheckout(Payment $payment, $resellerSetting, $methodCode = null)
     {
-        $gatewayType = 'midtrans';
+        $gatewayType = 'siapppay';
 
         if ($resellerSetting && $resellerSetting->payment_mode === 'reseller_gateway') {
             $gatewayType = $resellerSetting->reseller_gateway_type;
+        } else {
+            $gatewayType = \App\Models\GlobalSetting::getValue('active_payment_gateway', 'siapppay');
         }
 
-        if ($gatewayType === 'tripay') {
+        if ($gatewayType === 'siapppay') {
+            $siappPay = new \App\Services\SiappPayService();
+            if (!$siappPay->isConfigured()) {
+                return ['success' => false, 'error' => 'SiappPay (pay.siapp.in) Secret Key belum dikonfigurasi di Pengaturan Super Admin.'];
+            }
+            return $siappPay->createTransaction($payment, $methodCode ?: 'QRIS');
+        } elseif ($gatewayType === 'tripay') {
             $tripay = new \App\Services\TripayService($resellerSetting);
             if (!$tripay->isConfigured()) {
                 return ['success' => false, 'error' => 'API TriPay belum dikonfigurasi oleh reseller.'];
@@ -756,6 +764,174 @@ class PaymentController extends Controller
                 }
             }
         } elseif (in_array($status, ['FAILED', 'EXPIRED'])) {
+            $payment->update(['status' => 'failed']);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Handle SiappPay (pay.siapp.in) Webhook Callback
+     */
+    public function siapppayWebhook(Request $request)
+    {
+        $rawJson = $request->getContent();
+        $payload = json_decode($rawJson, true) ?: $request->all();
+
+        $orderId = $payload['order_id'] ?? ($payload['merchant_ref'] ?? ($payload['external_id'] ?? null));
+        if (!$orderId) {
+            \Illuminate\Support\Facades\Log::warning('SiappPay Webhook: missing order_id');
+            return response()->json(['status' => 'failed', 'message' => 'Missing order_id'], 400);
+        }
+
+        $payment = Payment::where('external_id', $orderId)->orWhere('id', $orderId)->first();
+        if (!$payment) {
+            \Illuminate\Support\Facades\Log::warning('SiappPay Webhook: payment not found', ['order_id' => $orderId]);
+            return response()->json(['status' => 'failed', 'message' => 'Payment not found'], 400);
+        }
+
+        $siappPay = new \App\Services\SiappPayService();
+        $signature = $request->header('X-Callback-Signature') ?: $request->header('Callback-Signature');
+        $incomingSecret = $request->header('X-Secret-Key') ?: ($payload['secret'] ?? null);
+
+        if (!$siappPay->verifyWebhookSignature($rawJson, $signature, $incomingSecret)) {
+            \Illuminate\Support\Facades\Log::warning('SiappPay Webhook: invalid signature or secret', ['order_id' => $orderId]);
+            return response()->json(['status' => 'failed', 'message' => 'Invalid signature or secret'], 400);
+        }
+
+        $status = strtoupper($payload['status'] ?? 'UNPAID');
+
+        if (in_array($status, ['PAID', 'SUCCESS', 'COMPLETED', 'SETTLEMENT'])) {
+            if ($payment->status !== 'paid') {
+                $payment->update([
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'metadata' => array_merge($payment->metadata ?? [], [
+                        'siapppay_status' => $status,
+                        'siapppay_response' => $payload,
+                    ]),
+                ]);
+
+                // 1. Reseller Subscription Registration Payment
+                if ($payment->metadata && isset($payment->metadata['type']) && $payment->metadata['type'] === 'reseller_subscription') {
+                    $user = $payment->user;
+                    if ($user) {
+                        $durationDays = (int) ($payment->metadata['duration_days'] ?? 365);
+                        $user->update([
+                            'is_active' => true,
+                            'reseller_expires_at' => now()->addDays($durationDays),
+                        ]);
+                        \App\Models\ResellerSetting::where('user_id', $user->id)->update([
+                            'is_active' => true,
+                        ]);
+                    }
+                    \Illuminate\Support\Facades\Log::info('SiappPay Webhook: reseller subscription payment completed', ['payment_id' => $payment->id]);
+                    return response()->json(['success' => true]);
+                }
+
+                // 2. Reseller Modal Payment (parent_payment_id)
+                if ($payment->parent_payment_id) {
+                    $parent = $payment->parentPayment;
+                    if ($parent && $parent->status !== 'paid') {
+                        $parent->update([
+                            'status' => 'paid',
+                            'paid_at' => now(),
+                            'payment_method' => $payment->payment_method ?: 'siapppay',
+                            'reviewed_by' => $payment->user_id,
+                            'reviewed_at' => now(),
+                            'admin_notes' => 'Pembayaran modal lunas via gateway online QRIS pay.siapp.in.',
+                        ]);
+
+                        // Activate subscription for customer
+                        if ($parent->greeting_card_id) {
+                            $parent->greetingCard()->update(['is_active' => true]);
+                            \App\Models\Subscription::create([
+                                'user_id' => $parent->user_id,
+                                'greeting_card_id' => $parent->greeting_card_id,
+                                'plan_id' => $parent->plan_id,
+                                'payment_id' => $parent->id,
+                                'starts_at' => now(),
+                                'expires_at' => $parent->plan ? now()->addDays($parent->plan->duration_days) : null,
+                                'status' => 'active',
+                            ]);
+                        } else {
+                            \App\Models\Subscription::create([
+                                'user_id' => $parent->user_id,
+                                'plan_id' => $parent->plan_id,
+                                'invitation_id' => $parent->invitation_id,
+                                'payment_id' => $parent->id,
+                                'starts_at' => now(),
+                                'expires_at' => $parent->plan ? now()->addDays($parent->plan->duration_days) : null,
+                                'status' => 'active',
+                            ]);
+                        }
+                    }
+                    \Illuminate\Support\Facades\Log::info('SiappPay Webhook: reseller modal payment successful', ['payment_id' => $payment->id]);
+                    return response()->json(['success' => true]);
+                }
+
+                // 3. Direct Customer Payment (Invitation / Greeting Card)
+                if ($payment->greeting_card_id) {
+                    $payment->greetingCard()->update(['is_active' => true]);
+                    \App\Models\Subscription::create([
+                        'user_id' => $payment->user_id,
+                        'greeting_card_id' => $payment->greeting_card_id,
+                        'plan_id' => $payment->plan_id,
+                        'payment_id' => $payment->id,
+                        'starts_at' => now(),
+                        'expires_at' => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                        'status' => 'active',
+                    ]);
+                } elseif ($payment->invitation_id || $payment->plan_id) {
+                    \App\Models\Subscription::create([
+                        'user_id' => $payment->user_id,
+                        'plan_id' => $payment->plan_id,
+                        'invitation_id' => $payment->invitation_id,
+                        'payment_id' => $payment->id,
+                        'starts_at' => now(),
+                        'expires_at' => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                        'status' => 'active',
+                    ]);
+                }
+
+                // Credit profit to reseller wallet if client belongs to a reseller
+                $user = $payment->user;
+                if ($user && $user->reseller_id && $payment->plan_id) {
+                    $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+                    $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
+                    $basePrice = (float) $payment->plan->price;
+
+                    if ($paymentMode === 'reseller_gateway') {
+                        \App\Models\ResellerWallet::debitCost(
+                            $user->reseller_id,
+                            $payment->id,
+                            $basePrice,
+                            "Biaya modal paket {$payment->plan->name} - Pelanggan {$user->name}"
+                        );
+                    } else {
+                        $paidAmount = (float) $payment->amount;
+                        $profit = $paidAmount - $basePrice;
+
+                        if ($profit > 0) {
+                            \App\Models\ResellerWallet::creditProfit(
+                                $user->reseller_id,
+                                $payment->id,
+                                $profit,
+                                "Profit dari {$user->name} - Paket {$payment->plan->name}"
+                            );
+                        }
+                    }
+                }
+
+                // Trigger WA automatic notifications for Super Admin, Reseller, and Client
+                try {
+                    $waService = new \App\Services\WhatsAppService();
+                    $waService->triggerPaymentNotifications($payment, $profit ?? 0);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('WA Payment Notify Error: ' . $e->getMessage());
+                }
+            }
+        } elseif (in_array($status, ['FAILED', 'EXPIRED', 'CANCELLED'])) {
             $payment->update(['status' => 'failed']);
         }
 

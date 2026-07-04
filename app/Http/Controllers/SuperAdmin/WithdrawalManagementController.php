@@ -77,6 +77,14 @@ class WithdrawalManagementController extends Controller
 
         $withdrawal->update($data);
 
+        // Send WA notification to Reseller
+        try {
+            $waService = new \App\Services\WhatsAppService();
+            $waService->notifyResellerWithdrawalUpdated($withdrawal);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WA Withdrawal Update Notify Error: ' . $e->getMessage());
+        }
+
         $statusLabel = match($request->status) {
             'approved' => 'disetujui',
             'rejected' => 'ditolak',

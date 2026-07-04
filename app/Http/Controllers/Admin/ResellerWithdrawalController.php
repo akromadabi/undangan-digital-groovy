@@ -126,6 +126,14 @@ class ResellerWithdrawalController extends Controller
             "Penarikan dana #{$withdrawal->id} (Pending)"
         );
 
+        // Send WA notification to Super Admin
+        try {
+            $waService = new \App\Services\WhatsAppService();
+            $waService->notifySuperAdminWithdrawalRequest($withdrawal);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WA Withdrawal Request Notify Error: ' . $e->getMessage());
+        }
+
         return back()->with('success', 'Permohonan pencairan berhasil diajukan.');
     }
 

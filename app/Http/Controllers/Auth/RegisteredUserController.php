@@ -122,6 +122,22 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Send WA notifications for new user registration
+        try {
+            $waService = new \App\Services\WhatsAppService();
+            $resellerUser = User::find($resellerId);
+            
+            // 1. Notify Super Admin
+            $waService->notifySuperAdminNewUser($user, $resellerUser);
+
+            // 2. Notify Reseller (if registered under reseller)
+            if ($resellerUser) {
+                $waService->notifyResellerNewUser($resellerUser, $user);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WA Notify New User Error: ' . $e->getMessage());
+        }
+
         Auth::login($user);
 
         return redirect()->intended(route('wizard.link'));

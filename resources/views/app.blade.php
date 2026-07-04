@@ -193,6 +193,11 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+    <!-- Google Fonts for Themes & Builder -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Alex+Brush&family=Allura&family=Arapey:ital,wght@0,400;1,400&family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Cardo:ital,wght@0,400;0,700;1,400&family=Cherish&family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400..900&family=Clicker+Script&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Dancing+Script:wght@400..700&family=Gilda+Display&family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Inter:wght@300..900&family=Italianno&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=La+Belle+Aurore&family=Lora:ital,wght@0,400..700;1,400..700&family=Marcellus&family=Marcellus+SC&family=Meddon&family=Monsieur+La+Doulaise&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Mrs+Saint+Delafield&family=Niconne&family=Outfit:wght@100..900&family=Parisienne&family=Petit+Formal+Script&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poiret+One&family=Poppins:ital,wght@0,300..900;1,300..900&family=Prata&family=Quicksand:wght@300..700&family=Raleway:ital,wght@0,100..900;1,100..900&family=Rochester&family=Sacramento&family=Satisfy&family=Tangerine:wght@400;700&family=Whisper&family=WindSong:wght@400;500&family=Yesteryear&display=swap" rel="stylesheet">
+
     <!-- Scripts -->
     @routes
     @viteReactRefresh

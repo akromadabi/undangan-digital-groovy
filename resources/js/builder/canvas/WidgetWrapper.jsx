@@ -3,8 +3,9 @@ import { useBuilderStore } from '../state/builderStore';
 import { widgetRegistry } from '../widgets';
 import { Trash2, Copy, ArrowUp, ArrowDown, Settings } from 'lucide-react';
 import { getResponsiveSetting } from '../core/deepMergeResponsive';
+import { compileNodeCss } from '../core/styleCompiler';
 
-export default function WidgetWrapper({ widget, index, column, activeBreakpoint }) {
+export default function WidgetWrapper({ widget, index, column, activeBreakpoint, onNodeContextMenu }) {
     const selectedId = useBuilderStore((state) => state.selectedId);
     const setSelectedId = useBuilderStore((state) => state.setSelectedId);
     const deleteNode = useBuilderStore((state) => state.deleteNode);
@@ -57,9 +58,19 @@ export default function WidgetWrapper({ widget, index, column, activeBreakpoint 
         transition: 'all 0.15s ease-in-out'
     };
 
+    // Render the actual widget content
+    const widgetConfig = widgetRegistry[widget.type];
+    const Renderer = widgetConfig?.Renderer;
+
     const handleSelect = (e) => {
         e.stopPropagation();
         setSelectedId(widget.id);
+    };
+
+    const handleContextMenu = (e) => {
+        if (onNodeContextMenu) {
+            onNodeContextMenu(e, widget.id, 'widget', widgetConfig?.name || widget.type);
+        }
     };
 
     const handleDelete = (e) => {
@@ -90,13 +101,13 @@ export default function WidgetWrapper({ widget, index, column, activeBreakpoint 
         }
     };
 
-    // Render the actual widget content
-    const widgetConfig = widgetRegistry[widget.type];
-    const Renderer = widgetConfig?.Renderer;
+    const nodeCss = compileNodeCss(widget, activeBreakpoint);
 
     return (
         <div 
+            id={widget.id}
             onClick={handleSelect}
+            onContextMenu={handleContextMenu}
             style={style}
             className={`group/widget border border-transparent p-2 rounded-md ${
                 isSelected 
@@ -104,8 +115,9 @@ export default function WidgetWrapper({ widget, index, column, activeBreakpoint 
                     : 'hover:border-rose-300/40'
             }`}
         >
+            {nodeCss && <style dangerouslySetInnerHTML={{ __html: nodeCss }} />}
             {/* WIDGET TOOLBAR */}
-            <div className={`absolute -top-5 right-0 bg-rose-500 text-white text-[8.5px] font-bold rounded-t-md px-2 py-0.5 z-30 items-center gap-1.5 transition-all shadow-sm ${
+            <div className={`absolute bottom-full right-0 bg-rose-500 text-white text-[8.5px] font-bold rounded-t-md px-2 py-0.5 z-30 items-center gap-1.5 transition-all shadow-sm ${
                 isSelected ? 'flex' : 'hidden group-hover/widget:flex'
             }`}>
                 <span>{widgetConfig?.name || widget.type}</span>

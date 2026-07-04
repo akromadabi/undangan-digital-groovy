@@ -89,6 +89,15 @@ class ThemeBuilderController extends Controller
         $fileContent = file_get_contents($request->file('file')->getRealPath());
         $data = json_decode($fileContent, true);
 
+        // Auto-wrap raw template if it contains 'content' at root (e.g. Elementor JSON or raw theme JSON)
+        if ($data && isset($data['content']) && (!isset($data['type']) || $data['type'] !== 'wedding-theme-builder-template')) {
+            $data = [
+                'type'     => 'wedding-theme-builder-template',
+                'version'  => $data['version'] ?? '1.0.0',
+                'document' => $data,
+            ];
+        }
+
         if (!$data || !isset($data['type']) || $data['type'] !== 'wedding-theme-builder-template' || !isset($data['document'])) {
             return redirect()->back()->with('error', 'Format file JSON tidak valid untuk template builder.');
         }
@@ -185,6 +194,7 @@ class ThemeBuilderController extends Controller
                 'slug'       => $slug,
                 'category'   => $validated['category'] ?? 'Builder',
                 'type'       => ['wedding'],
+                'thumbnail'  => '',
                 'is_active'  => false,
                 'sort_order' => (Theme::max('sort_order') ?? 0) + 1,
             ]);

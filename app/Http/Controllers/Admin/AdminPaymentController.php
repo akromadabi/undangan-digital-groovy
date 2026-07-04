@@ -157,6 +157,14 @@ class AdminPaymentController extends Controller
             }
         }
 
+        // Trigger WA automatic notifications
+        try {
+            $waService = new \App\Services\WhatsAppService();
+            $waService->triggerPaymentNotifications($payment, $profit ?? 0);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WA Approve Payment Notify Error: ' . $e->getMessage());
+        }
+
         return back()->with('success', "Pembayaran disetujui.");
     }
 
@@ -289,20 +297,24 @@ class AdminPaymentController extends Controller
             'status' => 'pending',
         ]);
 
-        $midtrans = new \App\Services\MidtransService();
-        if (!$midtrans->isConfigured()) {
-            $modalPayment->delete();
-            return back()->with('error', 'Gateway pembayaran utama platform belum terkonfigurasi. Hubungi pemilik platform.');
+        $siappPay = new \App\Services\SiappPayService();
+        if ($siappPay->isConfigured()) {
+            $result = $siappPay->createTransaction($modalPayment, 'QRIS');
+            if ($result['success']) {
+                return Inertia::location($result['invoice_url']);
+            }
         }
 
-        $result = $midtrans->createInvoice($modalPayment);
-
-        if ($result['success']) {
-            return Inertia::location($result['invoice_url']);
+        $midtrans = new \App\Services\MidtransService();
+        if ($midtrans->isConfigured()) {
+            $result = $midtrans->createInvoice($modalPayment);
+            if ($result['success']) {
+                return Inertia::location($result['invoice_url']);
+            }
         }
 
         $modalPayment->delete();
-        return back()->with('error', 'Gagal membuat tagihan online: ' . ($result['error'] ?? 'Unknown error'));
+        return back()->with('error', 'Gerbang pembayaran online platform (pay.siapp.in / Midtrans) belum dikonfigurasi.');
     }
 
     /**

@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
+import FontPicker from '../../components/FontPicker';
 
 export default function TextEditorEditor({ settings = {}, activeBreakpoint = 'desktop', onChange, mode = 'content' }) {
     const handleUpdate = (key, value) => {
@@ -122,21 +123,10 @@ export default function TextEditorEditor({ settings = {}, activeBreakpoint = 'de
                 </div>
 
                 {/* Font Family */}
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-700">Keluarga Font (Font Family)</label>
-                    <select
-                        value={settings.fontFamily || 'default'}
-                        onChange={(e) => handleUpdate('fontFamily', e.target.value)}
-                        className="w-full text-sm border-gray-200 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                        <option value="default">Default Tema (Body)</option>
-                        <option value="Inter">Inter (Sans-serif Bersih)</option>
-                        <option value="Poppins">Poppins (Modern Dinamis)</option>
-                        <option value="Playfair Display">Playfair Display (Serif Elegan)</option>
-                        <option value="Montserrat">Montserrat (Geometris Bersih)</option>
-                        <option value="Outfit">Outfit (Minimalis Premium)</option>
-                    </select>
-                </div>
+                <FontPicker
+                    value={settings.fontFamily || 'default'}
+                    onChange={(val) => handleUpdate('fontFamily', val)}
+                />
 
                 {/* Font Weight */}
                 <div className="space-y-1">

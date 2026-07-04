@@ -43,14 +43,14 @@ export const createColumn = (width = '100%') => ({
 });
 
 // Generate default empty section
-export const createSection = () => ({
+export const createSection = (columnWidths = ['100%']) => ({
     id: `sec-${nanoid(8)}`,
     type: 'section',
     settings: {
         padding: { top: '30', bottom: '30', left: '20', right: '20' },
         backgroundColor: '#ffffff'
     },
-    columns: [createColumn('100%')],
+    columns: Array.isArray(columnWidths) ? columnWidths.map(w => createColumn(w)) : [createColumn('100%')],
     advanced: {}
 });
 
@@ -94,13 +94,23 @@ const storeCreator = (set, get) => ({
         });
     },
 
-    // Node operations
-    addSection: (index) => {
+    addSection: (widthsOrIndex, index) => {
         set((state) => {
             const document = clone(state.document);
-            const newSec = createSection();
-            if (typeof index === 'number') {
-                document.content.splice(index, 0, newSec);
+            
+            let widths = ['100%'];
+            let targetIndex = null;
+            
+            if (Array.isArray(widthsOrIndex)) {
+                widths = widthsOrIndex;
+                targetIndex = index;
+            } else if (typeof widthsOrIndex === 'number') {
+                targetIndex = widthsOrIndex;
+            }
+            
+            const newSec = createSection(widths);
+            if (typeof targetIndex === 'number') {
+                document.content.splice(targetIndex, 0, newSec);
             } else {
                 document.content.push(newSec);
             }
@@ -275,6 +285,108 @@ const storeCreator = (set, get) => ({
                 columnInfo.node.widgets.push(widgetInfo.node);
             }
 
+            return { document };
+        });
+    },
+
+    copyNode: (id) => {
+        const state = get();
+        const target = findNodeAndParent(state.document.content, id);
+        if (target) {
+            localStorage.setItem('builder_copied_node', JSON.stringify(target.node));
+        }
+    },
+
+    pasteNode: (targetId) => {
+        set((state) => {
+            const rawCopied = localStorage.getItem('builder_copied_node');
+            if (!rawCopied) return {};
+            
+            let copiedNode;
+            try {
+                copiedNode = JSON.parse(rawCopied);
+            } catch (e) {
+                return {};
+            }
+            
+            const document = clone(state.document);
+            const target = findNodeAndParent(document.content, targetId);
+            if (!target) return {};
+            
+            // Helper to reassign IDs
+            const reassignIds = (node) => {
+                const oldPrefix = node.id.split('-')[0];
+                node.id = `${oldPrefix}-${nanoid(8)}`;
+                if (node.columns) node.columns.forEach(reassignIds);
+                if (node.widgets) node.widgets.forEach(reassignIds);
+            };
+            
+            reassignIds(copiedNode);
+            
+            const copiedType = copiedNode.type;
+            const targetType = target.node.type;
+            
+            // 1. Pasting widget
+            if (copiedType !== 'section' && copiedType !== 'column') {
+                if (targetType === 'column') {
+                    // Paste into column (append to widgets list)
+                    target.node.widgets.push(copiedNode);
+                } else if (targetType !== 'section' && targetType !== 'column') {
+                    // Target is another widget. Paste after target widget in its column
+                    target.parent.splice(target.index + 1, 0, copiedNode);
+                } else {
+                    return {};
+                }
+            } 
+            // 2. Pasting section
+            else if (copiedType === 'section') {
+                if (targetType === 'section') {
+                    // Target is section. Paste after target section
+                    target.parent.splice(target.index + 1, 0, copiedNode);
+                } else {
+                    // Fallback: append to document content
+                    document.content.push(copiedNode);
+                }
+            }
+            // 3. Pasting column
+            else if (copiedType === 'column') {
+                if (targetType === 'section') {
+                    // Target is section. Add column to section columns
+                    target.node.columns.push(copiedNode);
+                } else if (targetType === 'column') {
+                    // Target is column. Paste after target column in its section
+                    target.parent.splice(target.index + 1, 0, copiedNode);
+                } else {
+                    return {};
+                }
+            }
+            
+            return { document, selectedId: copiedNode.id };
+        });
+    },
+
+    resetNodeStyle: (id) => {
+        set((state) => {
+            const document = clone(state.document);
+            const target = findNodeAndParent(document.content, id);
+            if (target) {
+                target.node.settings = {
+                    ...target.node.settings,
+                    borderType: 'none',
+                    borderWidth: '0px',
+                    borderColor: 'transparent',
+                    borderRadius: '0px',
+                    boxShadow: 'none',
+                    backgroundColor: '',
+                    textColor: '',
+                    backgroundImage: '',
+                };
+                target.node.advanced = {
+                    ...target.node.advanced,
+                    margin: {},
+                    padding: {},
+                };
+            }
             return { document };
         });
     }

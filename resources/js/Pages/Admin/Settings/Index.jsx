@@ -239,151 +239,157 @@ export default function Index({ settings }) {
                             </div>
                         )}
 
-
-
                         {/* ═══ TAB 3: GERBANG PEMBAYARAN ═══ */}
                         {activeTab === 'payment' && (
                             <div className="space-y-6">
                                 <div className="border-b border-gray-100 pb-3">
                                     <h3 className="font-bold text-gray-800 text-sm">Metode & Sistem Pembayaran</h3>
-                                    <p className="text-[10px] text-gray-400 mt-0.5">Konfigurasi Midtrans dan daftar rekening transfer bank manual untuk transaksi reseller.</p>
+                                    <p className="text-[10px] text-gray-400 mt-0.5">Konfigurasi gateway pembayaran online platform dan daftar rekening transfer bank manual.</p>
                                 </div>
 
-                                {/* Manual Transfer Section */}
-                                <div className="border border-gray-100 rounded-2xl p-4 bg-gray-50/20">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div>
-                                            <h4 className="font-bold text-gray-800 text-xs">Transfer Bank Manual (Reseller -{'>'} Super Admin)</h4>
-                                            <p className="text-[9px] text-gray-400">Aktifkan pembayaran manual dan kelola nomor rekening Anda.</p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => updateSettingValue('enable_bank_transfer', getSettingValue('enable_bank_transfer') === '1' ? '0' : '1')}
-                                            className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${getSettingValue('enable_bank_transfer') === '1' ? 'bg-emerald-500' : 'bg-gray-300'}`}
-                                        >
-                                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${getSettingValue('enable_bank_transfer') === '1' ? 'translate-x-5' : ''}`} />
-                                        </button>
+                                {/* Driver / Active Gateway Radio Selector */}
+                                <div className="border border-orange-200 bg-orange-50/20 rounded-2xl p-4 space-y-4">
+                                    <div>
+                                        <h4 className="font-bold text-gray-800 text-xs flex items-center gap-2">
+                                            <span className="px-2 py-0.5 bg-[#E5654B] text-white rounded text-[9px] font-extrabold uppercase">GATEWAY UTAMA</span>
+                                            Pilih Layanan Payment Gateway Platform
+                                        </h4>
+                                        <p className="text-[10px] text-gray-500 mt-0.5">Tentukan satu layanan gateway online yang aktif memproses transaksi platform Anda.</p>
                                     </div>
 
-                                    {getSettingValue('enable_bank_transfer') === '1' && (
-                                        <div className="space-y-4 pt-2 border-t border-gray-100 animate-in fade-in">
-                                            {/* Bank Accounts List */}
-                                            <div className="space-y-2">
-                                                <label className={labelClass}>Daftar Rekening Pembayaran</label>
-                                                {bankAccountsList.length === 0 ? (
-                                                    <div className="text-center py-4 border border-dashed border-gray-200 rounded-xl text-gray-400 text-[11px]">
-                                                        Belum ada rekening transfer manual.
-                                                    </div>
-                                                ) : (
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                        {bankAccountsList.map((acc, index) => (
-                                                            <div key={index} className="bg-white border border-gray-100 p-3 rounded-xl flex items-center justify-between shadow-xs">
-                                                                <div className="min-w-0">
-                                                                    <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
-                                                                        <span className="px-1.5 py-0.5 bg-orange-50 text-[#c24b33] rounded text-[9px] font-bold">{acc.bank_name}</span>
-                                                                        {acc.account_number}
-                                                                    </div>
-                                                                    <div className="text-[10px] text-gray-400 mt-0.5 truncate">{acc.account_name}</div>
-                                                                </div>
-                                                                <button type="button" onClick={() => removeBankAccount(index)} className="p-1 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors shrink-0">
-                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
+                                    <div className="flex flex-wrap gap-3">
+                                        <label className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border cursor-pointer transition-all ${ (getSettingValue('active_payment_gateway') === 'siapppay' || !getSettingValue('active_payment_gateway')) ? 'border-[#E5654B] bg-[#E5654B]/10 font-bold text-[#E5654B]' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium'}`}>
+                                            <input
+                                                type="radio"
+                                                name="active_payment_gateway"
+                                                value="siapppay"
+                                                checked={getSettingValue('active_payment_gateway') === 'siapppay' || !getSettingValue('active_payment_gateway')}
+                                                onChange={(e) => updateSettingValue('active_payment_gateway', e.target.value)}
+                                                className="text-[#E5654B] focus:ring-[#E5654B]"
+                                            />
+                                            <span className="text-xs">Pay.Siapp.in</span>
+                                        </label>
+
+                                        <label className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border cursor-pointer transition-all ${getSettingValue('active_payment_gateway') === 'midtrans' ? 'border-[#E5654B] bg-[#E5654B]/10 font-bold text-[#E5654B]' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium'}`}>
+                                            <input
+                                                type="radio"
+                                                name="active_payment_gateway"
+                                                value="midtrans"
+                                                checked={getSettingValue('active_payment_gateway') === 'midtrans'}
+                                                onChange={(e) => updateSettingValue('active_payment_gateway', e.target.value)}
+                                                className="text-[#E5654B] focus:ring-[#E5654B]"
+                                            />
+                                            <span className="text-xs">Midtrans Snap</span>
+                                        </label>
+
+                                        <label className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border cursor-pointer transition-all ${getSettingValue('active_payment_gateway') === 'xendit' ? 'border-[#E5654B] bg-[#E5654B]/10 font-bold text-[#E5654B]' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium'}`}>
+                                            <input
+                                                type="radio"
+                                                name="active_payment_gateway"
+                                                value="xendit"
+                                                checked={getSettingValue('active_payment_gateway') === 'xendit'}
+                                                onChange={(e) => updateSettingValue('active_payment_gateway', e.target.value)}
+                                                className="text-[#E5654B] focus:ring-[#E5654B]"
+                                            />
+                                            <span className="text-xs">Xendit Invoice</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* ═══ KREDENSIAL DEDIKASI GATEWAY TERPILIH ═══ */}
+
+                                {/* 1. SiappPay (pay.siapp.in) QRIS Config */}
+                                {(getSettingValue('active_payment_gateway') === 'siapppay' || !getSettingValue('active_payment_gateway')) && (
+                                    <div className="border border-orange-200 bg-orange-50/20 rounded-2xl p-4 space-y-4 animate-in fade-in">
+                                        <div className="flex items-center justify-between border-b border-orange-100 pb-2">
+                                            <h4 className="font-extrabold text-[#E5654B] text-xs tracking-wider uppercase">KREDENSIAL SIAPPPAY (PAY.SIAPP.IN)</h4>
+                                        </div>
+                                        <div>
+                                            <label className={labelClass}>SiappPay Secret Key</label>
+                                            <input type="password" value={getSettingValue('siapppay_secret_key')} onChange={(e) => updateSettingValue('siapppay_secret_key', e.target.value)} className={inputClass} placeholder="Secret key dari dashboard pay.siapp.in" />
+                                        </div>
+                                        <div className="text-xs text-[#666] leading-relaxed mt-2 p-3 bg-white border border-gray-100 rounded-xl">
+                                            <strong>Webhook Callback URL SiappPay:</strong> Silakan daftarkan URL berikut di dashboard pay.siapp.in Anda:<br />
+                                            <code className="text-[#E5654B] font-mono select-all bg-gray-50 px-1 rounded block mt-1 py-1 border">{window.location.origin}/webhooks/siapppay</code>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* 2. Midtrans Config */}
+                                {getSettingValue('active_payment_gateway') === 'midtrans' && (
+                                    <div className="border border-gray-100 rounded-2xl p-4 bg-gray-50/20 space-y-4 animate-in fade-in">
+                                        <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                                            <h4 className="font-extrabold text-[#E5654B] text-xs tracking-wider uppercase">KREDENSIAL MIDTRANS SNAP</h4>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className={labelClass}>Midtrans Mode</label>
+                                                <select value={getSettingValue('midtrans_mode')} onChange={(e) => updateSettingValue('midtrans_mode', e.target.value)} className={inputClass}>
+                                                    <option value="sandbox">Sandbox (Testing)</option>
+                                                    <option value="production">Production (Live)</option>
+                                                </select>
                                             </div>
-
-                                            {/* Add New Bank Account Form */}
-                                            <div className="bg-gray-50 border border-gray-100 p-3.5 rounded-xl space-y-3">
-                                                <div className="text-[10px] font-bold text-gray-600 uppercase tracking-wide">Tambah Rekening Baru</div>
-                                                <div className="grid grid-cols-3 gap-2">
-                                                    <input type="text" placeholder="Bank (cth: BCA)" value={newBankName} onChange={(e) => setNewBankName(e.target.value)} className={`${inputClass} !py-2`} />
-                                                    <input type="text" placeholder="No Rekening" value={newAccNum} onChange={(e) => setNewAccNum(e.target.value)} className={`${inputClass} !py-2`} />
-                                                    <input type="text" placeholder="Nama Pemilik" value={newAccHolder} onChange={(e) => setNewAccHolder(e.target.value)} className={`${inputClass} !py-2`} />
-                                                </div>
-                                                <button type="button" onClick={addBankAccount} className="w-full py-2 bg-[#E5654B] hover:bg-[#c24b33] text-white rounded-lg text-[10px] font-bold shadow-xs transition-colors flex items-center justify-center gap-1">
-                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                                                    Tambah Rekening
-                                                </button>
+                                            <div>
+                                                <label className={labelClass}>Midtrans Client Key</label>
+                                                <input type="text" value={getSettingValue('midtrans_client_key')} onChange={(e) => updateSettingValue('midtrans_client_key', e.target.value)} className={inputClass} placeholder="Client Key" />
                                             </div>
                                         </div>
-                                    )}
-                                </div>
+                                        <div>
+                                            <label className={labelClass}>Midtrans Server Key</label>
+                                            <input type="password" value={getSettingValue('midtrans_server_key')} onChange={(e) => updateSettingValue('midtrans_server_key', e.target.value)} className={inputClass} placeholder="Server Key" />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className={labelClass}>Success Redirect URL</label>
+                                                <input type="text" value={getSettingValue('midtrans_success_url')} onChange={(e) => updateSettingValue('midtrans_success_url', e.target.value)} className={inputClass} />
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>Failure Redirect URL</label>
+                                                <input type="text" value={getSettingValue('midtrans_failure_url')} onChange={(e) => updateSettingValue('midtrans_failure_url', e.target.value)} className={inputClass} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
-                                {/* Midtrans Config */}
-                                <div className="border border-gray-100 rounded-2xl p-4 bg-gray-50/20 space-y-4">
-                                    <div>
-                                        <h4 className="font-bold text-gray-800 text-xs">Midtrans Integration Settings</h4>
-                                        <p className="text-[9px] text-gray-400 mt-0.5">Integrasi pembayaran online Midtrans Snap.</p>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className={labelClass}>Midtrans Mode</label>
-                                            <select value={getSettingValue('midtrans_mode')} onChange={(e) => updateSettingValue('midtrans_mode', e.target.value)} className={inputClass}>
-                                                <option value="sandbox">Sandbox (Testing)</option>
-                                                <option value="production">Production (Live)</option>
-                                            </select>
+                                {/* 3. Xendit Config */}
+                                {getSettingValue('active_payment_gateway') === 'xendit' && (
+                                    <div className="border border-gray-100 rounded-2xl p-4 bg-gray-50/20 space-y-4 animate-in fade-in">
+                                        <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                                            <h4 className="font-extrabold text-[#E5654B] text-xs tracking-wider uppercase">KREDENSIAL XENDIT INVOICE</h4>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className={labelClass}>Xendit Mode</label>
+                                                <select value={getSettingValue('xendit_mode')} onChange={(e) => updateSettingValue('xendit_mode', e.target.value)} className={inputClass}>
+                                                    <option value="sandbox">Sandbox (Testing)</option>
+                                                    <option value="production">Production (Live)</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>Xendit Secret Key</label>
+                                                <input type="password" value={getSettingValue('xendit_secret_key')} onChange={(e) => updateSettingValue('xendit_secret_key', e.target.value)} className={inputClass} placeholder="xnd_development_... atau xnd_production_..." />
+                                            </div>
                                         </div>
                                         <div>
-                                            <label className={labelClass}>Midtrans Client Key</label>
-                                            <input type="text" value={getSettingValue('midtrans_client_key')} onChange={(e) => updateSettingValue('midtrans_client_key', e.target.value)} className={inputClass} placeholder="Client Key" />
+                                            <label className={labelClass}>Xendit Webhook Verification Token (Callback Token)</label>
+                                            <input type="password" value={getSettingValue('xendit_webhook_token')} onChange={(e) => updateSettingValue('xendit_webhook_token', e.target.value)} className={inputClass} placeholder="Callback Token dari Dashboard Xendit" />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className={labelClass}>Success Redirect URL</label>
+                                                <input type="text" value={getSettingValue('xendit_success_url')} onChange={(e) => updateSettingValue('xendit_success_url', e.target.value)} className={inputClass} />
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>Failure Redirect URL</label>
+                                                <input type="text" value={getSettingValue('xendit_failure_url')} onChange={(e) => updateSettingValue('xendit_failure_url', e.target.value)} className={inputClass} />
+                                            </div>
+                                        </div>
+                                        <div className="text-xs text-[#666] leading-relaxed mt-2 p-3 bg-white border border-gray-100 rounded-xl">
+                                            <strong>Webhook URL Xendit:</strong> Silakan tambahkan URL berikut ke pengaturan Callback di dashboard Xendit Anda (pada event **Invoice Paid** / **Tagihan Dibayar**):<br />
+                                            <code className="text-[#E5654B] font-mono select-all bg-gray-50 px-1 rounded block mt-1 py-1 border">{window.location.origin}/webhooks/xendit</code>
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className={labelClass}>Midtrans Server Key</label>
-                                        <input type="password" value={getSettingValue('midtrans_server_key')} onChange={(e) => updateSettingValue('midtrans_server_key', e.target.value)} className={inputClass} placeholder="Server Key" />
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className={labelClass}>Success Redirect URL</label>
-                                            <input type="text" value={getSettingValue('midtrans_success_url')} onChange={(e) => updateSettingValue('midtrans_success_url', e.target.value)} className={inputClass} />
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>Failure Redirect URL</label>
-                                            <input type="text" value={getSettingValue('midtrans_failure_url')} onChange={(e) => updateSettingValue('midtrans_failure_url', e.target.value)} className={inputClass} />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Xendit Config */}
-                                <div className="border border-gray-100 rounded-2xl p-4 bg-gray-50/20 space-y-4">
-                                    <div>
-                                        <h4 className="font-bold text-gray-800 text-xs">Xendit Integration Settings</h4>
-                                        <p className="text-[9px] text-gray-400 mt-0.5">Integrasi pembayaran online Xendit Invoice.</p>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className={labelClass}>Xendit Mode</label>
-                                            <select value={getSettingValue('xendit_mode')} onChange={(e) => updateSettingValue('xendit_mode', e.target.value)} className={inputClass}>
-                                                <option value="sandbox">Sandbox (Testing)</option>
-                                                <option value="production">Production (Live)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>Xendit Secret Key</label>
-                                            <input type="password" value={getSettingValue('xendit_secret_key')} onChange={(e) => updateSettingValue('xendit_secret_key', e.target.value)} className={inputClass} placeholder="xnd_development_... atau xnd_production_..." />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className={labelClass}>Xendit Webhook Verification Token (Callback Token)</label>
-                                        <input type="password" value={getSettingValue('xendit_webhook_token')} onChange={(e) => updateSettingValue('xendit_webhook_token', e.target.value)} className={inputClass} placeholder="Callback Token dari Dashboard Xendit" />
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className={labelClass}>Success Redirect URL</label>
-                                            <input type="text" value={getSettingValue('xendit_success_url')} onChange={(e) => updateSettingValue('xendit_success_url', e.target.value)} className={inputClass} />
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>Failure Redirect URL</label>
-                                            <input type="text" value={getSettingValue('xendit_failure_url')} onChange={(e) => updateSettingValue('xendit_failure_url', e.target.value)} className={inputClass} />
-                                        </div>
-                                    </div>
-                                    <div className="text-xs text-[#666] leading-relaxed mt-2 p-3 bg-white border border-gray-100 rounded-xl">
-                                        <strong>Webhook URL Xendit:</strong> Silakan tambahkan URL berikut ke pengaturan Callback di dashboard Xendit Anda (pada event **Invoice Paid** / **Tagihan Dibayar**):<br />
-                                        <code className="text-[#E5654B] font-mono select-all bg-gray-50 px-1 rounded block mt-1 py-1 border">{window.location.origin}/webhooks/xendit</code>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         )}
 

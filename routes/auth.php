@@ -25,6 +25,12 @@ Route::middleware('guest')->group(function () {
     Route::get('register/reseller/success', [\App\Http\Controllers\Auth\ResellerRegisterController::class, 'success'])
         ->name('register.reseller.success');
 
+    Route::get('register/reseller/payment/{payment}', [\App\Http\Controllers\Auth\ResellerRegisterController::class, 'showPayment'])
+        ->name('register.reseller.payment');
+
+    Route::get('register/reseller/payment/{payment}/check', [\App\Http\Controllers\Auth\ResellerRegisterController::class, 'checkPaymentStatus'])
+        ->name('register.reseller.payment.check');
+
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 

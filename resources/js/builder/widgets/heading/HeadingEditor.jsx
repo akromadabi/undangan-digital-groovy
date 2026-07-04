@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
+import FontPicker from '../../components/FontPicker';
 
 export default function HeadingEditor({ settings = {}, activeBreakpoint = 'desktop', onChange, mode = 'content' }) {
     const handleUpdate = (key, value) => {
@@ -145,23 +146,10 @@ export default function HeadingEditor({ settings = {}, activeBreakpoint = 'deskt
                 </div>
 
                 {/* Font Family */}
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-700">Keluarga Font (Font Family)</label>
-                    <select
-                        value={settings.fontFamily || 'default'}
-                        onChange={(e) => handleUpdate('fontFamily', e.target.value)}
-                        className="w-full text-sm border-gray-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2"
-                    >
-                        <option value="default">Default Tema</option>
-                        <option value="Playfair Display">Playfair Display (Serif Elegan)</option>
-                        <option value="Cinzel">Cinzel (Klasik Premium)</option>
-                        <option value="Great Vibes">Great Vibes (Kaligrafi Tradisional)</option>
-                        <option value="Sacramento">Sacramento (Kaligrafi Minimalis)</option>
-                        <option value="Inter">Inter (Sans-serif Bersih)</option>
-                        <option value="Montserrat">Montserrat (Modern Geometris)</option>
-                        <option value="Outfit">Outfit (Minimalis Premium)</option>
-                    </select>
-                </div>
+                <FontPicker
+                    value={settings.fontFamily || 'default'}
+                    onChange={(val) => handleUpdate('fontFamily', val)}
+                />
 
                 {/* Font Weight */}
                 <div className="space-y-1">

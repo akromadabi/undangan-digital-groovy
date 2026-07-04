@@ -486,8 +486,10 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->name('super-a
     Route::resource('greeting-card-templates', \App\Http\Controllers\Admin\AdminGreetingCardTemplateController::class);
     Route::post('/greeting-card-templates/{greetingCardTemplate}/toggle-active', [\App\Http\Controllers\Admin\AdminGreetingCardTemplateController::class, 'toggleActive'])->name('greeting-card-templates.toggle-active');
 
-    // Reseller Management
+    // Reseller Management & Paket Reseller
     Route::resource('resellers', \App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class);
+    Route::get('/reseller-plans', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerPlanController::class, 'index'])->name('reseller-plans.index');
+    Route::post('/reseller-plans', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerPlanController::class, 'update'])->name('reseller-plans.update');
     Route::post('/resellers/{reseller}/prices', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'updatePrices'])->name('resellers.prices');
     Route::post('/resellers/{reseller}/reset-password', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'resetPassword'])->name('resellers.resetPassword');
     Route::post('/resellers/{reseller}/toggle-status', [\App\Http\Controllers\SuperAdmin\SuperAdminResellerController::class, 'toggleStatus'])->name('resellers.toggleStatus');
@@ -596,6 +598,7 @@ Route::middleware(['auth', 'editor_or_super_admin'])->prefix('super-admin')->nam
 Route::post('/webhooks/midtrans', [PaymentController::class, 'webhook'])->name('webhook.midtrans')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::post('/webhooks/tripay', [PaymentController::class, 'tripayWebhook'])->name('webhook.tripay')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::post('/webhooks/xendit', [PaymentController::class, 'xenditWebhook'])->name('webhook.xendit')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('/webhooks/siapppay', [PaymentController::class, 'siapppayWebhook'])->name('webhook.siapppay')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/impersonate/leave', [\App\Http\Controllers\Auth\ImpersonateController::class, 'leave'])->name('impersonate.leave');

@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\GlobalSetting;
+use App\Models\Payment;
 use App\Models\ResellerSetting;
+use App\Models\User;
+use App\Services\SiappPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -19,8 +22,25 @@ class ResellerRegisterController extends Controller
     public function create(): Response
     {
         $centralHost = parse_url(config('app.url'), PHP_URL_HOST);
+        $annualFee = (float) GlobalSetting::getValue('reseller_annual_fee', 150000);
+        $rawBenefits = GlobalSetting::getValue('reseller_registration_benefits', null);
+        $registrationEnabled = GlobalSetting::getValue('reseller_registration_enabled', '1') === '1';
+
+        $defaultBenefits = [
+            'White-label Brand & Subdomain sendiri',
+            'Sistem Manajemen Client & Undangan Lengkap',
+            'Keuntungan Penjualan Masuk ke Dompet Reseller',
+            'Dukungan QRIS & Transfer Bank',
+            'Akses ke Seluruh Katalog Tema Undangan'
+        ];
+
+        $benefits = $rawBenefits ? json_decode($rawBenefits, true) : $defaultBenefits;
+
         return Inertia::render('Auth/ResellerRegister', [
             'centralHost' => $centralHost ?: 'undangan.com',
+            'annualFee' => $annualFee,
+            'benefits' => $benefits,
+            'registrationEnabled' => $registrationEnabled,
         ]);
     }
 
@@ -29,6 +49,11 @@ class ResellerRegisterController extends Controller
      */
     public function store(Request $request)
     {
+        $registrationEnabled = GlobalSetting::getValue('reseller_registration_enabled', '1') === '1';
+        if (!$registrationEnabled) {
+            return back()->with('error', 'Pendaftaran reseller baru saat ini sedang ditutup.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
@@ -44,27 +69,91 @@ class ResellerRegisterController extends Controller
             'password.min' => 'Password minimal terdiri dari 6 karakter.',
         ]);
 
-        // Create reseller user with role='admin' but is_active=false (requires superadmin approval)
+        $annualFee = (float) GlobalSetting::getValue('reseller_annual_fee', 150000);
+        $durationDays = (int) GlobalSetting::getValue('reseller_duration_days', 365);
+
+        // Create reseller user with role='admin' but is_active=false (pending payment)
         $reseller = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'role' => 'admin',
-            'is_active' => false, // Pendding activation
-            'onboarding_step' => 6, // Resellers skip client onboarding
+            'is_active' => $annualFee <= 0, // Automatically active if free
+            'onboarding_step' => 6,
             'email_verified_at' => now(),
         ]);
 
-        // Create reseller settings with is_active=false (subdomain will not resolve until active)
+        // Create reseller settings with is_active matching user
         ResellerSetting::create([
             'user_id' => $reseller->id,
             'brand_name' => $request->brand_name,
             'subdomain' => strtolower($request->subdomain),
-            'is_active' => false,
+            'is_active' => $annualFee <= 0,
         ]);
 
-        return redirect()->route('register.reseller.success');
+        if ($annualFee <= 0) {
+            return redirect()->route('register.reseller.success');
+        }
+
+        // Create Payment for annual subscription
+        $payment = Payment::create([
+            'user_id' => $reseller->id,
+            'amount' => $annualFee,
+            'status' => 'pending',
+            'payment_gateway' => 'siapppay',
+            'payment_method' => 'QRIS',
+            'metadata' => [
+                'type' => 'reseller_subscription',
+                'duration_days' => $durationDays,
+            ],
+        ]);
+
+        // Generate QRIS via SiappPay Service
+        $siappPay = new SiappPayService();
+        if ($siappPay->isConfigured()) {
+            $siappPay->createTransaction($payment, 'QRIS');
+        }
+
+        // Send WA notification to Super Admin about new reseller registration
+        try {
+            $waService = new \App\Services\WhatsAppService();
+            $waService->notifySuperAdminNewReseller($reseller, $annualFee);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WA Notify New Reseller Error: ' . $e->getMessage());
+        }
+
+        return redirect()->route('register.reseller.payment', $payment->id);
+    }
+
+    /**
+     * Show QRIS payment page for reseller registration.
+     */
+    public function showPayment(Payment $payment)
+    {
+        $payment->load('user');
+
+        if ($payment->status === 'paid') {
+            return redirect()->route('register.reseller.success');
+        }
+
+        $annualFee = $payment->amount;
+
+        return Inertia::render('Auth/ResellerRegisterPayment', [
+            'payment' => $payment,
+            'annualFee' => $annualFee,
+        ]);
+    }
+
+    /**
+     * Check payment status endpoint for polling in payment page.
+     */
+    public function checkPaymentStatus(Payment $payment)
+    {
+        return response()->json([
+            'status' => $payment->status,
+            'is_paid' => $payment->status === 'paid',
+        ]);
     }
 
     /**
@@ -72,8 +161,8 @@ class ResellerRegisterController extends Controller
      */
     public function success(): Response
     {
-        $adminWhatsapp = \App\Models\GlobalSetting::getValue('footer_whatsapp') ?: \App\Models\GlobalSetting::getValue('mpwav9_sender_number') ?: '6283132211830';
-        $adminEmail = \App\Models\GlobalSetting::getValue('footer_email') ?: 'admin@groovy.com';
+        $adminWhatsapp = GlobalSetting::getValue('footer_whatsapp') ?: GlobalSetting::getValue('mpwav9_sender_number') ?: '6283132211830';
+        $adminEmail = GlobalSetting::getValue('footer_email') ?: 'admin@groovy.com';
 
         return Inertia::render('Auth/ResellerRegisterSuccess', [
             'adminWhatsapp' => $adminWhatsapp,

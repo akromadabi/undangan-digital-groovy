@@ -3,8 +3,9 @@ import { useBuilderStore } from '../state/builderStore';
 import WidgetWrapper from './WidgetWrapper';
 import { Trash2, Copy, Plus, Columns } from 'lucide-react';
 import { getResponsiveSetting } from '../core/deepMergeResponsive';
+import { compileNodeCss } from '../core/styleCompiler';
 
-export default function ColumnWrapper({ column, index, section, activeBreakpoint }) {
+export default function ColumnWrapper({ column, index, section, activeBreakpoint, onNodeContextMenu }) {
     const selectedId = useBuilderStore((state) => state.selectedId);
     const setSelectedId = useBuilderStore((state) => state.setSelectedId);
     const deleteNode = useBuilderStore((state) => state.deleteNode);
@@ -43,6 +44,12 @@ export default function ColumnWrapper({ column, index, section, activeBreakpoint
     const handleSelect = (e) => {
         e.stopPropagation();
         setSelectedId(column.id);
+    };
+
+    const handleContextMenu = (e) => {
+        if (onNodeContextMenu) {
+            onNodeContextMenu(e, column.id, 'column', 'Kolom');
+        }
     };
 
     const handleDelete = (e) => {
@@ -86,9 +93,13 @@ export default function ColumnWrapper({ column, index, section, activeBreakpoint
         }
     };
 
+    const nodeCss = compileNodeCss(column, activeBreakpoint);
+
     return (
         <div 
+            id={column.id}
             onClick={handleSelect}
+            onContextMenu={handleContextMenu}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -101,8 +112,9 @@ export default function ColumnWrapper({ column, index, section, activeBreakpoint
                         : 'hover:border-amber-300/40'
             }`}
         >
+            {nodeCss && <style dangerouslySetInnerHTML={{ __html: nodeCss }} />}
             {/* COLUMN TOOLBAR */}
-            <div className={`absolute -top-6 left-0 bg-amber-500 text-white text-[9px] font-bold rounded-t-md px-2 py-0.5 z-30 items-center gap-1.5 transition-all shadow-sm ${
+            <div className={`absolute bottom-full left-0 bg-amber-500 text-white text-[9px] font-bold rounded-t-md px-2 py-0.5 z-30 items-center gap-1.5 transition-all shadow-sm ${
                 isSelected ? 'flex' : 'hidden group-hover/column:flex'
             }`}>
                 <div className="flex items-center gap-1">
@@ -156,6 +168,7 @@ export default function ColumnWrapper({ column, index, section, activeBreakpoint
                             index={wIndex}
                             column={column}
                             activeBreakpoint={activeBreakpoint}
+                            onNodeContextMenu={onNodeContextMenu}
                         />
                     ))
                 )}

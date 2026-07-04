@@ -79,7 +79,8 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
         custom_domain: settings?.custom_domain || '',
         hide_demo_plan_selector: settings?.hide_demo_plan_selector || false,
         payment_mode: settings?.payment_mode || 'admin',
-        reseller_gateway_type: settings?.reseller_gateway_type || 'midtrans',
+        reseller_gateway_type: settings?.reseller_gateway_type || 'siapppay',
+        reseller_siapppay_settings: settings?.reseller_siapppay_settings || { secret_key: '' },
         reseller_midtrans_settings: settings?.reseller_midtrans_settings || { mode: 'sandbox', client_key: '', server_key: '' },
         reseller_tripay_settings: settings?.reseller_tripay_settings || { mode: 'sandbox', api_key: '', private_key: '', merchant_code: '' },
         reseller_xendit_settings: settings?.reseller_xendit_settings || { mode: 'sandbox', secret_key: '', webhook_token: '' },
@@ -390,75 +391,73 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
 
                     {/* ═══ TAB 2: METODE PEMBAYARAN ═══ */}
                     {activeTab === 'payment' && (
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             <div>
-                                <h3 className="text-base font-bold text-[#1a1a1a]">Pengaturan Pembayaran Pelanggan</h3>
-                                <p className="text-xs text-[#999] mt-0.5">Tentukan bagaimana pelanggan Anda membayar ketika melakukan pemesanan undangan atau kartu ucapan.</p>
+                                <h3 className="text-sm font-bold text-[#1a1a1a]">Pengaturan Pembayaran Pelanggan</h3>
+                                <p className="text-[11px] text-[#888] mt-0.5">Tentukan bagaimana pelanggan Anda membayar ketika melakukan pemesanan undangan atau kartu ucapan.</p>
                             </div>
 
-                            {/* Pilihan Mode Pembayaran */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <label className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${data.payment_mode === 'admin' ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-[#e8e5e0] bg-[#faf9f6] hover:bg-[#f0ede8]'}`}>
-                                    <div className="flex items-start gap-3">
+                            {/* Pilihan Mode Pembayaran (Compact Cards) */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${data.payment_mode === 'admin' ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-[#e8e5e0] bg-[#faf9f6] hover:bg-[#f0ede8]'}`}>
+                                    <div className="flex items-start gap-2.5">
                                         <input
                                             type="radio"
                                             name="payment_mode"
                                             value="admin"
                                             checked={data.payment_mode === 'admin'}
                                             onChange={e => setData('payment_mode', e.target.value)}
-                                            className="mt-1 text-[#E5654B] focus:ring-[#E5654B]"
+                                            className="mt-0.5 text-[#E5654B] focus:ring-[#E5654B]"
                                         />
                                         <div>
-                                            <span className="block text-sm font-bold text-[#333]">Titip via Admin</span>
-                                            <span className="block text-xs text-[#777] mt-1">Pembayaran otomatis diproses via Midtrans Admin utama. Profit akan masuk otomatis ke Saldo Dompet Anda.</span>
+                                            <span className="block text-xs font-bold text-[#333]">Titip via Admin</span>
+                                            <span className="block text-[11px] text-[#777] mt-0.5 leading-snug">Pembayaran otomatis diproses via Gateway Super Admin. Profit masuk otomatis ke Saldo Dompet Anda.</span>
                                         </div>
                                     </div>
                                 </label>
 
-                                <label className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${data.payment_mode === 'reseller_gateway' ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-[#e8e5e0] bg-[#faf9f6] hover:bg-[#f0ede8]'}`}>
-                                    <div className="flex items-start gap-3">
+                                <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${data.payment_mode === 'reseller_gateway' ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-[#e8e5e0] bg-[#faf9f6] hover:bg-[#f0ede8]'}`}>
+                                    <div className="flex items-start gap-2.5">
                                         <input
                                             type="radio"
                                             name="payment_mode"
                                             value="reseller_gateway"
                                             checked={data.payment_mode === 'reseller_gateway'}
                                             onChange={e => setData('payment_mode', e.target.value)}
-                                            className="mt-1 text-[#E5654B] focus:ring-[#E5654B]"
+                                            className="mt-0.5 text-[#E5654B] focus:ring-[#E5654B]"
                                         />
                                         <div>
-                                            <span className="block text-sm font-bold text-[#333]">Gateway Otomatis Sendiri</span>
-                                            <span className="block text-xs text-[#777] mt-1">Pasang akun Midtrans atau Tripay Anda sendiri. Pelanggan membayar langsung ke Anda, saldo didebit biaya modal.</span>
+                                            <span className="block text-xs font-bold text-[#333]">Gateway Otomatis Sendiri</span>
+                                            <span className="block text-[11px] text-[#777] mt-0.5 leading-snug">Pasang akun Gateway (SiappPay/Midtrans/TriPay/Xendit) Anda. Pelanggan bayar langsung ke Anda, saldo didebit modal.</span>
                                         </div>
                                     </div>
                                 </label>
 
-                                <label className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${data.payment_mode === 'manual' ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-[#e8e5e0] bg-[#faf9f6] hover:bg-[#f0ede8]'}`}>
-                                    <div className="flex items-start gap-3">
+                                <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${data.payment_mode === 'manual' ? 'border-[#E5654B] bg-[#E5654B]/5' : 'border-[#e8e5e0] bg-[#faf9f6] hover:bg-[#f0ede8]'}`}>
+                                    <div className="flex items-start gap-2.5">
                                         <input
                                             type="radio"
                                             name="payment_mode"
                                             value="manual"
                                             checked={data.payment_mode === 'manual'}
                                             onChange={e => setData('payment_mode', e.target.value)}
-                                            className="mt-1 text-[#E5654B] focus:ring-[#E5654B]"
+                                            className="mt-0.5 text-[#E5654B] focus:ring-[#E5654B]"
                                         />
                                         <div>
-                                            <span className="block text-sm font-bold text-[#333]">Manual Transfer Bank</span>
-                                            <span className="block text-xs text-[#777] mt-1">Pelanggan mentransfer manual ke rekening bank pribadi Anda. Anda perlu menyetujui transfer & membayar modal ke admin.</span>
+                                            <span className="block text-xs font-bold text-[#333]">Manual Transfer Bank</span>
+                                            <span className="block text-[11px] text-[#777] mt-0.5 leading-snug">Pelanggan mentransfer manual ke bank pribadi Anda. Anda menyetujui transfer & bayar modal ke admin.</span>
                                         </div>
                                     </div>
                                 </label>
                             </div>
 
-                            <hr className="border-[#e8e5e0]" />
-
                             {/* Detil sesuai dengan Mode Pembayaran yang dipilih */}
 
                             {data.payment_mode === 'admin' && (
-                                <div className="p-4 bg-[#faf9f6] rounded-2xl border border-[#e8e5e0] space-y-2">
-                                    <h4 className="text-sm font-bold text-[#333]">💡 Informasi Titip Pembayaran</h4>
-                                    <p className="text-xs text-[#666] leading-relaxed">
-                                        Dengan metode ini, Anda tidak perlu mengkonfigurasi API apa pun. Pelanggan Anda akan membayar tagihan paket undangan secara online (Midtrans) atau manual transfer ke rekening Super Admin. Setelah pembayaran diverifikasi, akun pelanggan Anda otomatis aktif, dan **profit Anda (Harga Jual - Harga Modal Paket)** akan langsung masuk ke dompet digital reseller Anda. Anda dapat mengajukan pencairan dana kapan saja.
+                                <div className="p-3 bg-[#faf9f6] rounded-xl border border-[#e8e5e0] space-y-1">
+                                    <h4 className="text-xs font-bold text-[#333]">💡 Informasi Titip Pembayaran</h4>
+                                    <p className="text-[11px] text-[#666] leading-relaxed">
+                                        Dengan metode ini, Anda tidak perlu mengkonfigurasi API apa pun. Pelanggan Anda akan membayar tagihan paket undangan secara online melalui gateway Super Admin. Setelah pembayaran terverifikasi, akun pelanggan Anda langsung otomatis aktif, dan **profit Anda (Harga Jual - Harga Modal Paket)** otomatis masuk ke dompet digital reseller Anda.
                                     </p>
                                 </div>
                             )}
@@ -467,7 +466,18 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                                 <div className="space-y-6">
                                     <div>
                                         <label className="block text-xs font-semibold text-[#555] mb-1.5">Pilih Layanan Payment Gateway</label>
-                                        <div className="flex gap-4">
+                                        <div className="flex flex-wrap gap-4">
+                                            <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-[#333]">
+                                                <input
+                                                    type="radio"
+                                                    name="reseller_gateway_type"
+                                                    value="siapppay"
+                                                    checked={data.reseller_gateway_type === 'siapppay'}
+                                                    onChange={e => setData('reseller_gateway_type', e.target.value)}
+                                                    className="text-[#E5654B] focus:ring-[#E5654B]"
+                                                />
+                                                Pay.Siapp.in
+                                            </label>
                                             <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-[#333]">
                                                 <input
                                                     type="radio"
@@ -503,6 +513,32 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                                             </label>
                                         </div>
                                     </div>
+
+                                    {/* KREDENSIAL PAY.SIAPP.IN */}
+                                    {(data.reseller_gateway_type === 'siapppay' || !data.reseller_gateway_type) && (
+                                        <div className="p-3.5 bg-[#faf9f6] rounded-xl border border-[#e8e5e0] space-y-3">
+                                            <div className="flex items-center justify-between border-b border-[#e8e5e0] pb-2">
+                                                <span className="text-xs font-extrabold text-[#E5654B]">KREDENSIAL PAY.SIAPP.IN RESELLER</span>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-[#555] mb-1">Secret Key Pay.Siapp.in</label>
+                                                <input
+                                                    type="password"
+                                                    value={data.reseller_siapppay_settings?.secret_key || ''}
+                                                    onChange={e => setData('reseller_siapppay_settings', {
+                                                        ...data.reseller_siapppay_settings,
+                                                        secret_key: e.target.value
+                                                    })}
+                                                    placeholder="Secret Key dari dashboard pay.siapp.in Anda"
+                                                    className="w-full px-3.5 py-2 bg-white border border-[#e8e5e0] rounded-xl text-xs text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
+                                                />
+                                            </div>
+                                            <div className="text-[11px] text-[#888] leading-relaxed mt-1 p-2.5 bg-white border border-[#e8e5e0] rounded-lg">
+                                                <strong>Webhook Callback URL Pay.Siapp.in:</strong> Silakan daftarkan URL berikut di dashboard pay.siapp.in Anda:<br />
+                                                <code className="text-[#E5654B] font-mono select-all bg-[#faf9f6] px-1 rounded block mt-1 py-0.5 border">{window.location.origin}/webhooks/siapppay</code>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* KREDENSIAL MIDTRANS */}
                                     {data.reseller_gateway_type === 'midtrans' && (
