@@ -10,6 +10,8 @@ class Invitation extends Model
 {
     use LogsActivity;
 
+    protected $appends = ['url', 'live_url'];
+
     protected $fillable = [
         'user_id',
         'theme_id',
@@ -261,5 +263,15 @@ class Invitation extends Model
         } catch (\Exception $e) {
             return false;
         }
+    }
+
+    public function getUrlAttribute(): string
+    {
+        return $this->getUrl();
+    }
+
+    public function getLiveUrlAttribute(): string
+    {
+        return $this->getLiveUrl();
     }
 }

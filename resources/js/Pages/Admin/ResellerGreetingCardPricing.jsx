@@ -15,12 +15,19 @@ export default function ResellerGreetingCardPricing({ planPricing }) {
         prices: planPricing.map(p => ({
             plan_id: p.id,
             reseller_price: p.reseller_price,
+            normal_price: p.normal_price !== null ? p.normal_price : '',
         })),
     });
 
     const handlePriceChange = (index, value) => {
         const updated = [...data.prices];
         updated[index].reseller_price = value === '' ? '' : Number(value);
+        setData('prices', updated);
+    };
+
+    const handleNormalPriceChange = (index, value) => {
+        const updated = [...data.prices];
+        updated[index].normal_price = value === '' ? '' : Number(value);
         setData('prices', updated);
     };
 
@@ -132,30 +139,54 @@ export default function ResellerGreetingCardPricing({ planPricing }) {
                                         </div>
 
                                         <div className="space-y-3 pt-2">
-                                            <div>
-                                                <label className="block text-xs font-semibold text-gray-500 mb-1.5 tracking-wide uppercase">
-                                                    Harga Jual ke Pelanggan (Rp)
-                                                </label>
-                                                <div className="relative">
-                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">Rp</span>
-                                                    <input
-                                                        type="number"
-                                                        min={plan.base_price}
-                                                        step="1000"
-                                                        value={data.prices[index].reseller_price}
-                                                        onChange={(e) => handlePriceChange(index, e.target.value)}
-                                                        style={{ paddingLeft: '2.5rem' }}
-                                                        className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm font-bold focus:ring-1 transition-colors ${isBelowBase
-                                                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500 text-red-600'
-                                                            : 'border-[#e8e5e0] focus:border-[#E5654B] focus:ring-[#E5654B] text-gray-800'
-                                                            }`}
-                                                    />
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 tracking-wide uppercase">
+                                                        Harga Jual ke Pelanggan (Rp)
+                                                    </label>
+                                                    <div className="relative">
+                                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">Rp</span>
+                                                        <input
+                                                            type="number"
+                                                            min={plan.base_price}
+                                                            step="1000"
+                                                            value={data.prices[index].reseller_price}
+                                                            onChange={(e) => handlePriceChange(index, e.target.value)}
+                                                            style={{ paddingLeft: '2.5rem' }}
+                                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm font-bold focus:ring-1 transition-colors ${isBelowBase
+                                                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500 text-red-600'
+                                                                : 'border-[#e8e5e0] focus:border-[#E5654B] focus:ring-[#E5654B] text-gray-800'
+                                                                }`}
+                                                        />
+                                                    </div>
+                                                    {isBelowBase && (
+                                                        <p className="text-xs text-red-500 mt-1">
+                                                            Tidak boleh kurang dari base ({formatCurrency(plan.base_price)})
+                                                        </p>
+                                                    )}
                                                 </div>
-                                                {isBelowBase && (
-                                                    <p className="text-xs text-red-500 mt-1">
-                                                        Harga jual tidak boleh kurang dari harga dasar ({formatCurrency(plan.base_price)})
+
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 tracking-wide uppercase">
+                                                        Harga Coret (Rp)
+                                                    </label>
+                                                    <div className="relative">
+                                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">Rp</span>
+                                                        <input
+                                                            type="number"
+                                                            min={data.prices[index].reseller_price || plan.base_price}
+                                                            step="1000"
+                                                            placeholder="Contoh: 49000"
+                                                            value={data.prices[index].normal_price}
+                                                            onChange={(e) => handleNormalPriceChange(index, e.target.value)}
+                                                            style={{ paddingLeft: '2.5rem' }}
+                                                            className="w-full border border-[#e8e5e0] rounded-xl pl-10 pr-4 py-3 text-sm font-bold focus:ring-[#E5654B] focus:border-[#E5654B] text-gray-800"
+                                                        />
+                                                    </div>
+                                                    <p className="text-[10px] text-gray-400 mt-1">
+                                                        Biarkan kosong jika tanpa diskon
                                                     </p>
-                                                )}
+                                                </div>
                                             </div>
 
                                             <div className="bg-[#f8f7f4] rounded-xl p-3 flex items-center justify-between border border-[#e8e5e0]/30">

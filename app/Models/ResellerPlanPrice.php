@@ -10,12 +10,14 @@ class ResellerPlanPrice extends Model
         'reseller_id',
         'plan_id',
         'reseller_price',
+        'normal_price',
     ];
 
     protected function casts(): array
     {
         return [
             'reseller_price' => 'decimal:2',
+            'normal_price' => 'decimal:2',
         ];
     }
 

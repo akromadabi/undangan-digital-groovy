@@ -52,9 +52,14 @@ class SiappPayService
         }
 
         $payload = [
+            'token' => $this->secretKey,
+            'action' => 'create_order',
+            'order_id' => $orderId,
+            'base_amount' => (int) round($payment->amount),
+            
+            // Keep original fields for backward compatibility or other API patterns
             'secret' => $this->secretKey,
             'api_key' => $this->secretKey,
-            'order_id' => $orderId,
             'external_id' => $orderId,
             'amount' => (int) round($payment->amount),
             'channel' => $channelCode,
@@ -69,8 +74,8 @@ class SiappPayService
         ];
 
         try {
-            // Send request to pay.siapp.in (support multiple common endpoint path patterns)
-            $endpoint = $this->apiUrl . '/api/v1/payment/create';
+            // First try status.php (primary endpoint for pay.siapp.in)
+            $endpoint = $this->apiUrl . '/status.php';
             
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->secretKey,
@@ -78,30 +83,39 @@ class SiappPayService
                 'Accept' => 'application/json',
             ])->timeout(15)->post($endpoint, $payload);
 
-            // Fallback try alternate endpoint if 404
-            if ($response->status() === 404) {
-                $endpoint = $this->apiUrl . '/api/payment/create';
+            // Fallback try alternate endpoints if status is 404 or 405 (Method Not Allowed)
+            if ($response->status() === 404 || $response->status() === 405) {
+                $endpoint = $this->apiUrl . '/api/v1/payment/create';
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $this->secretKey,
                     'X-Api-Key' => $this->secretKey,
                     'Accept' => 'application/json',
                 ])->timeout(15)->post($endpoint, $payload);
+
+                if ($response->status() === 404) {
+                    $endpoint = $this->apiUrl . '/api/payment/create';
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer ' . $this->secretKey,
+                        'X-Api-Key' => $this->secretKey,
+                        'Accept' => 'application/json',
+                    ])->timeout(15)->post($endpoint, $payload);
+                }
             }
 
             if ($response->successful()) {
                 $resData = $response->json();
                 $data = $resData['data'] ?? $resData;
 
-                $invoiceUrl = $data['invoice_url'] ?? ($data['checkout_url'] ?? ($data['payment_url'] ?? null));
-                $qrUrl = $data['qr_url'] ?? ($data['qr_image_url'] ?? ($data['qr_code'] ?? null));
-                $qrString = $data['qr_string'] ?? ($data['qris_content'] ?? ($data['qr_raw'] ?? null));
+                $invoiceUrl = $data['invoice_url'] ?? ($data['checkout_url'] ?? ($data['payment_url'] ?? ($this->apiUrl . '/checkout.php?order_id=' . $orderId)));
+                $qrUrl = $data['qr_url'] ?? ($data['qr_image_url'] ?? ($data['qr_code'] ?? ($data['qris_qr_url'] ?? null)));
+                $qrString = $data['qr_string'] ?? ($data['qris_content'] ?? ($data['qr_raw'] ?? ($data['qris_payload'] ?? null)));
 
                 $payment->update([
                     'payment_gateway' => 'siapppay',
                     'payment_method' => $channelCode,
                     'metadata' => array_merge($payment->metadata ?? [], [
                         'siapppay_order_id' => $orderId,
-                        'invoice_url' => $invoiceUrl ?: url('/payment/qris/' . $payment->id),
+                        'invoice_url' => $invoiceUrl,
                         'qr_url' => $qrUrl,
                         'qr_string' => $qrString,
                         'raw_response' => $resData,
@@ -111,7 +125,7 @@ class SiappPayService
                 return [
                     'success' => true,
                     'order_id' => $orderId,
-                    'invoice_url' => $invoiceUrl ?: url('/payment/qris/' . $payment->id),
+                    'invoice_url' => $invoiceUrl,
                     'qr_url' => $qrUrl,
                     'qr_string' => $qrString,
                     'raw' => $resData,

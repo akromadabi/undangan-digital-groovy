@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -12,10 +12,23 @@ const formatCurrency = (a) => new Intl.NumberFormat('id-ID', { style: 'currency'
 
 export default function Index({ resellers, filters, centralHost }) {
     const [search, setSearch] = useState(filters?.search || '');
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        const delayDebounce = setTimeout(() => {
+            router.get('/super-admin/resellers', { search }, { preserveState: true, preserveScroll: true });
+        }, 400);
+
+        return () => clearTimeout(delayDebounce);
+    }, [search]);
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get('/super-admin/resellers', { search }, { preserveState: true });
     };
 
     const handleDelete = (id, name) => {
@@ -44,23 +57,27 @@ export default function Index({ resellers, filters, centralHost }) {
                         <p className="text-[#999] text-sm mt-1">Kelola semua reseller yang terdaftar</p>
                     </div>
                     <Link href="/super-admin/resellers/create"
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#E5654B] text-white text-sm font-medium rounded-xl shadow-sm hover:bg-[#d55a42] hover:-translate-y-0.5 transition-all">
+                        className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 bg-[#E5654B] text-white text-sm font-medium rounded-xl shadow-sm hover:bg-[#d55a42] hover:-translate-y-0.5 transition-all">
                         <Icon d="M12 4.5v15m7.5-7.5h-15" className="w-4 h-4" />
                         Tambah Reseller
                     </Link>
                 </div>
 
                 {/* Search */}
-                <form onSubmit={handleSearch} className="flex gap-2">
-                    <div className="relative flex-1 max-w-md">
+                <div className="flex gap-2 items-center">
+                    <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
                         <Icon d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" />
                         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
                             placeholder="Cari nama atau email..."
                             className="w-full !pl-10 pr-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
                             style={{ paddingLeft: '2.5rem' }} />
-                    </div>
-                    <button type="submit" className="px-4 py-2.5 bg-white border border-[#e8e5e0] text-[#555] text-sm rounded-xl hover:bg-[#f5f3f0] transition-colors">Cari</button>
-                </form>
+                    </form>
+                    <Link href="/super-admin/resellers/create"
+                        className="sm:hidden flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-[#E5654B] text-white text-xs font-semibold rounded-xl shadow-sm hover:bg-[#d55a42] active:scale-95 transition-all whitespace-nowrap">
+                        <Icon d="M12 4.5v15m7.5-7.5h-15" className="w-3.5 h-3.5" />
+                        Tambah
+                    </Link>
+                </div>
 
                 {/* Desktop and Mobile Container */}
                 <div className="space-y-4">

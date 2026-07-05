@@ -194,19 +194,21 @@ class InvitationController extends Controller
             $resellerPrices = [];
             if ($resellerSetting) {
                 $resellerPrices = \App\Models\ResellerPlanPrice::where('reseller_id', $resellerSetting->user_id)
-                    ->pluck('reseller_price', 'plan_id')
-                    ->toArray();
+                    ->get()
+                    ->keyBy('plan_id');
             }
 
             $subscriptionPlans = \App\Models\SubscriptionPlan::with(['features' => function($query) {
                 $query->wherePivot('is_enabled', true);
             }])->where('type', 'invitation')->orderBy('sort_order')->get()->map(function($plan) use ($resellerSetting, $resellerPrices) {
+                $price = 2.0 * (float)$plan->price;
+                $originalPrice = null;
+
                 if ($resellerSetting) {
-                    $price = isset($resellerPrices[$plan->id])
-                        ? (float)$resellerPrices[$plan->id]
-                        : 2.0 * (float)$plan->price;
-                } else {
-                    $price = 2.0 * (float)$plan->price;
+                    if (isset($resellerPrices[$plan->id])) {
+                        $price = (float)$resellerPrices[$plan->id]->reseller_price;
+                        $originalPrice = $resellerPrices[$plan->id]->normal_price !== null ? (float)$resellerPrices[$plan->id]->normal_price : null;
+                    }
                 }
 
                 return [
@@ -215,6 +217,7 @@ class InvitationController extends Controller
                     'name' => $plan->name,
                     'description' => $plan->description,
                     'price' => $price,
+                    'original_price' => $originalPrice,
                     'duration_days' => $plan->duration_days,
                     'max_guests' => $plan->max_guests,
                     'max_galleries' => $plan->max_galleries,
@@ -419,21 +422,21 @@ class InvitationController extends Controller
         $resellerPrices = [];
         if ($resellerSetting) {
             $resellerPrices = \App\Models\ResellerPlanPrice::where('reseller_id', $resellerSetting->user_id)
-                ->pluck('reseller_price', 'plan_id')
-                ->toArray();
+                ->get()
+                ->keyBy('plan_id');
         }
 
         $subscriptionPlans = \App\Models\SubscriptionPlan::with(['features' => function($query) {
             $query->wherePivot('is_enabled', true);
         }])->where('type', 'invitation')->orderBy('sort_order')->get()->map(function($plan) use ($resellerSetting, $resellerPrices) {
+            $price = 2.0 * (float)$plan->price;
+            $originalPrice = null;
+
             if ($resellerSetting) {
-                // If reseller demo, display custom retail price, fallback to 2x base price if not customized
-                $price = isset($resellerPrices[$plan->id])
-                    ? (float)$resellerPrices[$plan->id]
-                    : 2.0 * (float)$plan->price;
-            } else {
-                // If super admin demo, double the price
-                $price = 2.0 * (float)$plan->price;
+                if (isset($resellerPrices[$plan->id])) {
+                    $price = (float)$resellerPrices[$plan->id]->reseller_price;
+                    $originalPrice = $resellerPrices[$plan->id]->normal_price !== null ? (float)$resellerPrices[$plan->id]->normal_price : null;
+                }
             }
 
             return [
@@ -442,6 +445,7 @@ class InvitationController extends Controller
                 'name' => $plan->name,
                 'description' => $plan->description,
                 'price' => $price,
+                'original_price' => $originalPrice,
                 'duration_days' => $plan->duration_days,
                 'max_guests' => $plan->max_guests,
                 'max_galleries' => $plan->max_galleries,

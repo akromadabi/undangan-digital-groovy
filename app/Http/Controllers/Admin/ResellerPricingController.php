@@ -20,7 +20,8 @@ class ResellerPricingController extends Controller
             ->get();
 
         $resellerPrices = ResellerPlanPrice::where('reseller_id', $reseller->id)
-            ->pluck('reseller_price', 'plan_id');
+            ->get()
+            ->keyBy('plan_id');
 
         // Merge plan data with reseller prices and feature details
         $planPricing = $plans->map(fn($plan) => [
@@ -30,8 +31,11 @@ class ResellerPricingController extends Controller
             'base_price' => (float) $plan->price,
             'suggested_price' => $plan->suggested_price !== null ? (float) $plan->suggested_price : null,
             'reseller_price' => isset($resellerPrices[$plan->id])
-                ? (float) $resellerPrices[$plan->id]
+                ? (float) $resellerPrices[$plan->id]->reseller_price
                 : (float) $plan->price,
+            'normal_price' => isset($resellerPrices[$plan->id]) && $resellerPrices[$plan->id]->normal_price !== null
+                ? (float) $resellerPrices[$plan->id]->normal_price
+                : null,
             'duration_days' => $plan->duration_days,
             'max_guests' => $plan->max_guests,
             'max_galleries' => $plan->max_galleries,
@@ -66,6 +70,7 @@ class ResellerPricingController extends Controller
             'prices' => 'required|array',
             'prices.*.plan_id' => 'required|exists:subscription_plans,id',
             'prices.*.reseller_price' => 'required|numeric|min:0',
+            'prices.*.normal_price' => 'nullable|numeric|min:0',
         ]);
 
         foreach ($request->prices as $priceData) {
@@ -84,6 +89,7 @@ class ResellerPricingController extends Controller
                 ],
                 [
                     'reseller_price' => $priceData['reseller_price'],
+                    'normal_price' => isset($priceData['normal_price']) && $priceData['normal_price'] !== '' ? $priceData['normal_price'] : null,
                 ]
             );
         }

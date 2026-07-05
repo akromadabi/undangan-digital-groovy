@@ -342,4 +342,113 @@ class AdminPaymentController extends Controller
 
         return back()->with('success', 'Pembayaran telah ditolak.');
     }
+
+    /**
+     * Reseller/Admin debug approve that bypasses wallet/online checks (local only).
+     */
+    public function debugApprove(Payment $payment)
+    {
+        if (!app()->environment('local')) {
+            abort(403, 'Akses dibatasi hanya untuk lingkungan local.');
+        }
+
+        $user = auth()->user();
+        if ($user->isReseller() && $payment->user->reseller_id !== $user->id) {
+            abort(403, 'Akses ditolak. Transaksi ini bukan milik pelanggan Anda.');
+        }
+
+        $payment->update([
+            'status'      => 'paid',
+            'paid_at'     => now(),
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+            'admin_notes' => 'Diaktifkan via Reseller Local Debug Mode.',
+        ]);
+
+        if ($payment->greeting_card_id) {
+            $payment->greetingCard()->update(['is_active' => true]);
+            Subscription::create([
+                'user_id'          => $payment->user_id,
+                'greeting_card_id' => $payment->greeting_card_id,
+                'plan_id'          => $payment->plan_id,
+                'payment_id'       => $payment->id,
+                'starts_at'        => now(),
+                'expires_at'       => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                'status'           => 'active',
+            ]);
+        } else {
+            Subscription::create([
+                'user_id'       => $payment->user_id,
+                'plan_id'       => $payment->plan_id,
+                'invitation_id' => $payment->invitation_id,
+                'payment_id'    => $payment->id,
+                'starts_at'     => now(),
+                'expires_at'    => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                'status'        => 'active',
+            ]);
+        }
+
+        // Debit cost / credit profit if client belongs to a reseller
+        $client = $payment->user;
+        if ($client && $client->reseller_id && $payment->plan_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $client->reseller_id)->first();
+            $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
+            $basePrice = (float)$payment->plan->price;
+
+            if ($paymentMode === 'manual' || $paymentMode === 'reseller_gateway') {
+                \App\Models\ResellerWallet::debitCost(
+                    $client->reseller_id,
+                    $payment->id,
+                    $basePrice,
+                    "Biaya modal paket {$payment->plan->name} - Pelanggan {$client->name} (Reseller Debug Mode)"
+                );
+            } else {
+                $paidAmount = (float)$payment->amount;
+                $profit = $paidAmount - $basePrice;
+
+                if ($profit > 0) {
+                    \App\Models\ResellerWallet::creditProfit(
+                        $client->reseller_id,
+                        $payment->id,
+                        $profit,
+                        "Profit dari {$client->name} - Paket {$payment->plan->name} (Reseller Debug Mode)"
+                    );
+                }
+            }
+        }
+
+        return back()->with('success', '✅ [Debug Mode] Transaksi berhasil diaktifkan secara instan (bypass saldo/online).');
+    }
+
+    /**
+     * Reseller wallet top up for testing (local only).
+     */
+    public function debugTopupWallet(Request $request)
+    {
+        if (!app()->environment('local')) {
+            abort(403, 'Akses dibatasi hanya untuk lingkungan local.');
+        }
+
+        $user = auth()->user();
+        if (!$user->isReseller()) {
+            abort(403, 'Akses ditolak. Hanya reseller yang dapat mengisi saldo.');
+        }
+
+        $wallet = \App\Models\ResellerWallet::firstOrCreate(
+            ['reseller_id' => $user->id],
+            ['balance' => 0]
+        );
+
+        $wallet->increment('balance', 1000000);
+
+        \App\Models\ResellerWalletTransaction::create([
+            'reseller_id' => $user->id,
+            'type' => 'credit',
+            'amount' => 1000000,
+            'description' => 'Topup Saldo Uji Coba (Debug Mode)',
+            'balance_after' => $wallet->fresh()->balance,
+        ]);
+
+        return back()->with('success', '✅ [Debug Mode] Saldo dompet berhasil ditambah Rp 1.000.000.');
+    }
 }

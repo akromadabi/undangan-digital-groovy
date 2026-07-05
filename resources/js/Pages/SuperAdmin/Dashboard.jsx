@@ -770,77 +770,77 @@ export default function Dashboard({ stats, recentResellers, recentPayments }) {
                 </div>
 
                 {/* ═══ Stats Grid (Animated Counters + tilt hover effects) ═══ */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 stagger-children">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5 stagger-children">
                     {/* Total Reseller */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-5 hover-card-premium glow-card-violet group relative overflow-hidden">
+                    <Link href="/super-admin/resellers" className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover-card-premium glow-card-violet group relative overflow-hidden block">
                         <div className="absolute inset-0 bg-gradient-to-r from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                         <div className="flex items-start justify-between relative z-10">
                             <div className="flex-1">
-                                <p className="text-xs font-bold text-[#999] uppercase tracking-wider">Total Reseller</p>
-                                <p className="text-3xl font-extrabold text-[#1a1a1a] mt-2 tracking-tight">
+                                <p className="text-[10px] sm:text-xs font-bold text-[#999] uppercase tracking-wider">Total Reseller</p>
+                                <p className="text-2xl sm:text-3xl font-extrabold text-[#1a1a1a] mt-1.5 sm:mt-2 tracking-tight">
                                     <AnimatedCounter value={totalResellers} />
                                 </p>
-                                <p className="text-xs text-[#a1a1a1] mt-1.5 font-medium">Mitra reseller aktif</p>
+                                <p className="text-[10px] sm:text-xs text-[#a1a1a1] mt-1 sm:mt-1.5 font-medium">Mitra reseller aktif</p>
                             </div>
-                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-md shadow-violet-500/10 group-hover:scale-110 group-hover:rotate-6 transition-transform">
-                                <Icon d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197" className="w-5 h-5 text-white" />
+                            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-md shadow-violet-500/10 group-hover:scale-110 group-hover:rotate-6 transition-transform">
+                                <Icon d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197" className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
                             </div>
                         </div>
                         <div className="relative z-10">
                             <MiniBar value={totalResellers} max={Math.max(totalResellers, 6)} color="#8b5cf6" />
                         </div>
-                    </div>
+                    </Link>
 
                     {/* Total Users */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-5 hover-card-premium glow-card-blue group relative overflow-hidden">
+                    <Link href="/super-admin/users" className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover-card-premium glow-card-blue group relative overflow-hidden block">
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                         <div className="flex items-start justify-between relative z-10">
                             <div className="flex-1">
-                                <p className="text-xs font-bold text-[#999] uppercase tracking-wider">Total Users</p>
-                                <p className="text-3xl font-extrabold text-[#1a1a1a] mt-2 tracking-tight">
+                                <p className="text-[10px] sm:text-xs font-bold text-[#999] uppercase tracking-wider">Total Users</p>
+                                <p className="text-2xl sm:text-3xl font-extrabold text-[#1a1a1a] mt-1.5 sm:mt-2 tracking-tight">
                                     <AnimatedCounter value={totalUsers} />
                                 </p>
-                                <p className="text-xs text-[#a1a1a1] mt-1.5 font-medium">Pelanggan terdaftar</p>
+                                <p className="text-[10px] sm:text-xs text-[#a1a1a1] mt-1 sm:mt-1.5 font-medium">Pelanggan terdaftar</p>
                             </div>
-                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md shadow-blue-500/10 group-hover:scale-110 group-hover:-rotate-6 transition-transform">
-                                <Icon d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07" className="w-5 h-5 text-white" />
+                            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md shadow-blue-500/10 group-hover:scale-110 group-hover:-rotate-6 transition-transform">
+                                <Icon d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07" className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
                             </div>
                         </div>
                         <div className="relative z-10">
                             <MiniBar value={totalUsers} max={Math.max(totalUsers, 15)} color="#3b82f6" />
                         </div>
-                    </div>
+                    </Link>
 
                     {/* Revenue */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-5 hover-card-premium glow-card-orange group relative overflow-hidden">
+                    <Link href="/super-admin/transactions" className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover-card-premium glow-card-orange group relative overflow-hidden block">
                         <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                         <div className="flex items-start justify-between relative z-10">
                             <div className="flex-1">
-                                <p className="text-xs font-bold text-[#999] uppercase tracking-wider">Total Pendapatan</p>
-                                <p className="text-2xl font-extrabold text-[#1a1a1a] mt-2.5 tracking-tight">
+                                <p className="text-[10px] sm:text-xs font-bold text-[#999] uppercase tracking-wider">Total Pendapatan</p>
+                                <p className="text-xl sm:text-2xl font-extrabold text-[#1a1a1a] mt-2 sm:mt-2.5 tracking-tight">
                                     <AnimatedCounter value={totalRevenue} formatter={formatCurrency} />
                                 </p>
-                                <p className="text-xs text-[#a1a1a1] mt-1.5 font-medium">Gross revenue platform</p>
+                                <p className="text-[10px] sm:text-xs text-[#a1a1a1] mt-1 sm:mt-1.5 font-medium">Gross revenue platform</p>
                             </div>
-                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/10 group-hover:scale-110 group-hover:bounce transition-transform">
-                                <Icon d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25" className="w-5 h-5 text-white" />
+                            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/10 group-hover:scale-110 group-hover:bounce transition-transform">
+                                <Icon d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25" className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
                             </div>
                         </div>
                         <div className="relative z-10">
                             <MiniBar value={totalRevenue} max={Math.max(totalRevenue, 1000000)} color="#f97316" />
                         </div>
-                    </div>
+                    </Link>
 
                     {/* Pending Payment */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-5 hover-card-premium glow-card-emerald group relative overflow-hidden">
+                    <Link href="/super-admin/transactions?status=waiting_review" className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover-card-premium glow-card-emerald group relative overflow-hidden block">
                         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                         <div className="flex items-start justify-between relative z-10">
                             <div className="flex-1">
-                                <p className="text-xs font-bold text-[#999] uppercase tracking-wider">Pending Payment</p>
-                                <p className="text-3xl font-extrabold text-[#1a1a1a] mt-2 tracking-tight">
+                                <p className="text-[10px] sm:text-xs font-bold text-[#999] uppercase tracking-wider">Pending Payment</p>
+                                <p className="text-2xl sm:text-3xl font-extrabold text-[#1a1a1a] mt-1.5 sm:mt-2 tracking-tight">
                                     <AnimatedCounter value={pendingPayments} />
                                 </p>
-                                <p className="text-xs mt-1.5">
+                                <p className="text-[10px] sm:text-xs mt-1 sm:mt-1.5">
                                     {pendingPayments > 0 ? (
                                         <span className="text-amber-600 font-semibold flex items-center gap-1">
                                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
@@ -854,14 +854,14 @@ export default function Dashboard({ stats, recentResellers, recentPayments }) {
                                     )}
                                 </p>
                             </div>
-                            <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${pendingPayments > 0 ? 'from-amber-500 to-amber-600 shadow-md shadow-amber-500/10' : 'from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/10'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                                <Icon d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" className="w-5 h-5 text-white" />
+                            <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${pendingPayments > 0 ? 'from-amber-500 to-amber-600 shadow-md shadow-amber-500/10' : 'from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/10'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                                <Icon d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
                             </div>
                         </div>
                         <div className="relative z-10">
                             <MiniBar value={pendingPayments} max={Math.max(pendingPayments + paidPayments, 1)} color={pendingPayments > 0 ? '#f59e0b' : '#10b981'} />
                         </div>
-                    </div>
+                    </Link>
                 </div>
 
                 {/* ═══ Charts & System Health Row ═══ */}

@@ -111,12 +111,12 @@ export default function InvitationsList({ invitations, activeInvitationId }) {
                                         <h3 className="font-bold text-gray-800 text-base line-clamp-1">{inv.title}</h3>
                                         <div className="text-xs text-gray-400 font-medium mt-0.5">Tipe Acara: {eventLabels[inv.type] || inv.type}</div>
                                         <a
-                                            href={`/u/${inv.slug}`}
+                                            href={inv.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-xs text-[#E5654B] hover:text-[#c24b33] hover:underline font-medium mt-2 inline-flex items-center gap-1"
                                         >
-                                            {window.location.origin}/u/{inv.slug}
+                                            {inv.url}
                                             <ExternalLink className="w-3.5 h-3.5" />
                                         </a>
                                     </div>

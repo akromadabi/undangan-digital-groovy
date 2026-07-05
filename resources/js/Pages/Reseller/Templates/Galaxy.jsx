@@ -1120,6 +1120,11 @@ export default function Galaxy({ reseller, plans = [], themes = [], greetingCard
                                 <div key={plan.id} className={`rl-plan-card ${isPopular ? 'rl-plan-card--popular' : ''}`}>
                                     {isPopular && <div className="rl-plan-card__popular-badge">REKOMENDASI</div>}
                                     <h3 className="rl-plan-card__name">{plan.name}</h3>
+                                    {plan.normal_price && (
+                                        <div className="rl-plan-card__original-price">
+                                            {formatRp(plan.normal_price)}
+                                        </div>
+                                    )}
                                     <div className="rl-plan-card__price">
                                         {plan.price === 0 ? 'GRATIS' : formatRp(plan.price)}
                                         {plan.price > 0 && <span className="rl-plan-card__duration">/{plan.duration_days} hari</span>}
@@ -1179,6 +1184,11 @@ export default function Galaxy({ reseller, plans = [], themes = [], greetingCard
                                 <div key={plan.id} className={`rl-plan-card ${isPopular ? 'rl-plan-card--popular' : ''}`}>
                                     {isPopular && <div className="rl-plan-card__popular-badge">REKOMENDASI</div>}
                                     <h3 className="rl-plan-card__name">{plan.name}</h3>
+                                    {plan.normal_price && (
+                                        <div className="rl-plan-card__original-price">
+                                            {formatRp(plan.normal_price)}
+                                        </div>
+                                    )}
                                     <div className="rl-plan-card__price">
                                         {plan.price === 0 ? 'GRATIS' : formatRp(plan.price)}
                                         {plan.price > 0 && <span className="rl-plan-card__duration">/{plan.duration_days} hari</span>}
@@ -2035,6 +2045,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
 .rl-plan-card__popular-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); padding: 0.35rem 1rem; background: var(--accent); color: #000; font-size: 0.7rem; font-weight: 800; border-radius: 100px; letter-spacing: 0.05em; }
 .rl-plan-card__name { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem; }
 .rl-plan-card__price { font-size: 2.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: baseline; }
+.rl-plan-card__original-price { font-size: 1rem; font-weight: 500; text-decoration: line-through; color: var(--text-muted); opacity: 0.7; margin-bottom: 0.25rem; }
 .rl-plan-card__duration { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
 .rl-plan-card__desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 2rem; }
 .rl-plan-card__btn { display: block; text-align: center; padding: 0.875rem; border-radius: 100px; font-size: 0.9rem; font-weight: 700; text-decoration: none; background: rgba(255,255,255,0.06); color: var(--text-primary); border: 1.5px solid rgba(255,255,255,0.12); margin-bottom: 2.5rem; transition: all 0.2s; }

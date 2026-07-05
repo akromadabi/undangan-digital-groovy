@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 
@@ -9,7 +9,7 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
 );
 
 export default function Index({ users, filters }) {
-    const { auth, adminRoutePrefix } = usePage().props;
+    const { auth, adminRoutePrefix, isLocal } = usePage().props;
     const userList = users?.data || [];
     const pagination = users?.links;
 
@@ -17,10 +17,23 @@ export default function Index({ users, filters }) {
 
     const [search, setSearch] = useState(filters?.search || '');
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        const delayDebounce = setTimeout(() => {
+            router.get(`${adminRoutePrefix}/users`, { search }, { preserveState: true, preserveScroll: true });
+        }, 400);
+
+        return () => clearTimeout(delayDebounce);
+    }, [search]);
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get(`${adminRoutePrefix}/users`, { search }, { preserveState: true });
     };
 
     const handleDelete = (id) => {
@@ -85,7 +98,7 @@ export default function Index({ users, filters }) {
                     </div>
                     {isSuperAdmin && (
                         <Link href={`${adminRoutePrefix}/users/create`}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#E5654B] text-white text-sm font-medium rounded-xl shadow-sm hover:bg-[#d55a42] hover:-translate-y-0.5 transition-all">
+                            className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 bg-[#E5654B] text-white text-sm font-medium rounded-xl shadow-sm hover:bg-[#d55a42] hover:-translate-y-0.5 transition-all">
                             <Icon d="M12 4.5v15m7.5-7.5h-15" className="w-4 h-4" />
                             Tambah User
                         </Link>
@@ -93,16 +106,22 @@ export default function Index({ users, filters }) {
                 </div>
 
                 {/* Search */}
-                <form onSubmit={handleSearch} className="flex gap-2">
-                    <div className="relative flex-1 max-w-md">
+                <div className="flex gap-2 items-center">
+                    <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
                         <Icon d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" />
                         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
                             placeholder="Cari nama atau email..."
                             className="w-full !pl-10 pr-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
                             style={{ paddingLeft: '2.5rem' }} />
-                    </div>
-                    <button type="submit" className="px-4 py-2.5 bg-white border border-[#e8e5e0] text-[#555] text-sm rounded-xl hover:bg-[#f5f3f0] transition-colors">Cari</button>
-                </form>
+                    </form>
+                    {isSuperAdmin && (
+                        <Link href={`${adminRoutePrefix}/users/create`}
+                            className="sm:hidden flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-[#E5654B] text-white text-xs font-semibold rounded-xl shadow-sm hover:bg-[#d55a42] active:scale-95 transition-all whitespace-nowrap">
+                            <Icon d="M12 4.5v15m7.5-7.5h-15" className="w-3.5 h-3.5" />
+                            Tambah
+                        </Link>
+                    )}
+                </div>
 
                 {/* Desktop and Mobile Container */}
                 <div className="space-y-4">
@@ -200,6 +219,21 @@ export default function Index({ users, filters }) {
                                             {/* Aksi */}
                                             <td className="px-4 py-3 text-right">
                                                 <div className="flex items-center justify-end gap-1">
+                                                    {isLocal && (
+                                                        <>
+                                                            {user.invitations?.some(inv => !inv.active_subscription) ? (
+                                                                <Link href={`${adminRoutePrefix}/users/${user.id}/debug-activate`} method="post" as="button"
+                                                                    className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-150 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap" title="Debug: Aktifkan Platinum Instan">
+                                                                    ⚡ Aktifkan
+                                                                </Link>
+                                                            ) : (
+                                                                <Link href={`${adminRoutePrefix}/users/${user.id}/debug-deactivate`} method="post" as="button"
+                                                                    className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap" title="Debug: Reset ke Free">
+                                                                    🔄 Reset Free
+                                                                </Link>
+                                                            )}
+                                                        </>
+                                                    )}
                                                     <Link href={`${adminRoutePrefix}/impersonate/user/${user.id}`} method="post" as="button"
                                                         className="p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 transition-colors" title="Masuk sebagai User (Impersonasi)">
                                                         <Icon d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" className="w-3.5 h-3.5" />

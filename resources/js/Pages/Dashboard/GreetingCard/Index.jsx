@@ -365,7 +365,7 @@ export default function GreetingCardIndex({ cards, cardPlans = [], templates = [
                                                 disabled={!isCompatible}
                                                 onClick={() => {
                                                     setActiveCardForCheckout(null);
-                                                    router.post('/checkout', {
+                                                    router.get('/checkout', {
                                                         greeting_card_id: activeCardForCheckout.id,
                                                         plan_id: plan.id
                                                     });

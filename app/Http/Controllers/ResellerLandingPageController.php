@@ -32,7 +32,8 @@ class ResellerLandingPageController extends Controller
             ->get();
 
         $resellerPrices = ResellerPlanPrice::where('reseller_id', $reseller->id)
-            ->pluck('reseller_price', 'plan_id');
+            ->get()
+            ->keyBy('plan_id');
 
         $plansData = $plans->map(function ($plan) use ($resellerPrices) {
             return [
@@ -41,8 +42,11 @@ class ResellerLandingPageController extends Controller
                 'slug' => $plan->slug,
                 'type' => $plan->type,
                 'price' => isset($resellerPrices[$plan->id])
-                    ? (float)$resellerPrices[$plan->id]
+                    ? (float)$resellerPrices[$plan->id]->reseller_price
                     : (float)$plan->price,
+                'normal_price' => isset($resellerPrices[$plan->id]) && $resellerPrices[$plan->id]->normal_price !== null
+                    ? (float)$resellerPrices[$plan->id]->normal_price
+                    : null,
                 'duration_days' => $plan->duration_days,
                 'max_guests' => $plan->max_guests,
                 'max_galleries' => $plan->max_galleries,
@@ -163,7 +167,8 @@ class ResellerLandingPageController extends Controller
             ->get();
 
         $resellerPrices = ResellerPlanPrice::where('reseller_id', $reseller->id)
-            ->pluck('reseller_price', 'plan_id');
+            ->get()
+            ->keyBy('plan_id');
 
         $plansData = $plans->map(function ($plan) use ($resellerPrices) {
             return [
@@ -172,8 +177,11 @@ class ResellerLandingPageController extends Controller
                 'slug' => $plan->slug,
                 'type' => $plan->type,
                 'price' => isset($resellerPrices[$plan->id])
-                    ? (float)$resellerPrices[$plan->id]
+                    ? (float)$resellerPrices[$plan->id]->reseller_price
                     : (float)$plan->price,
+                'normal_price' => isset($resellerPrices[$plan->id]) && $resellerPrices[$plan->id]->normal_price !== null
+                    ? (float)$resellerPrices[$plan->id]->normal_price
+                    : null,
                 'duration_days' => $plan->duration_days,
                 'max_guests' => $plan->max_guests,
                 'max_galleries' => $plan->max_galleries,

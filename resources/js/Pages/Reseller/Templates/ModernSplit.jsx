@@ -1622,6 +1622,11 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
                                 <div key={p.id} className={`rl-pricing-card ${isPopular ? 'rl-pricing-card--popular' : ''}`}>
                                     {isPopular && <div className="rl-pricing-card__popular-badge">Terpopuler</div>}
                                     <h3 className="rl-pricing-card__name">{p.name}</h3>
+                                    {p.normal_price && (
+                                        <div className="rl-pricing-card__original-price">
+                                            {formatRp(p.normal_price)}
+                                        </div>
+                                    )}
                                     <div className="rl-pricing-card__price">
                                         <span className="rl-pricing-card__price-amount">{formatRp(p.price)}</span>
                                         <span className="rl-pricing-card__price-period">/paket</span>
@@ -1673,6 +1678,11 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
                                 <div key={p.id} className={`rl-pricing-card ${isPopular ? 'rl-pricing-card--popular' : ''}`}>
                                     {isPopular && <div className="rl-pricing-card__popular-badge">Terpopuler</div>}
                                     <h3 className="rl-pricing-card__name">{p.name}</h3>
+                                    {p.normal_price && (
+                                        <div className="rl-pricing-card__original-price">
+                                            {formatRp(p.normal_price)}
+                                        </div>
+                                    )}
                                     <div className="rl-pricing-card__price">
                                         <span className="rl-pricing-card__price-amount">{formatRp(p.price)}</span>
                                         <span className="rl-pricing-card__price-period">/paket</span>
@@ -3287,6 +3297,7 @@ body { font-family: var(--font-family); background: var(--section-base); color: 
 }
 .rl-pricing-card__name { font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 1rem; }
 .rl-pricing-card__price { display: flex; align-items: baseline; gap: 0.25rem; margin-bottom: 1.25rem; }
+.rl-pricing-card__original-price { font-size: 1rem; font-weight: 500; text-decoration: line-through; color: var(--text-muted); opacity: 0.7; margin-bottom: 0.25rem; }
 .rl-pricing-card__price-amount {
     font-size: 2.75rem !important;
     font-weight: 800 !important;

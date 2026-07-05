@@ -267,6 +267,11 @@ export default function DemoPlanSelector({ plans = [], selectedPlanSlug = 'plati
                                                     ? 'text-emerald-950' 
                                                     : 'text-gray-800'
                                         }`}>
+                                            {plan.original_price && (
+                                                <span className="text-[11px] line-through text-gray-400 mr-1.5 font-normal">
+                                                    {formatPrice(plan.original_price)}
+                                                </span>
+                                            )}
                                             {formatPrice(plan.price)}
                                         </p>
                                     </div>

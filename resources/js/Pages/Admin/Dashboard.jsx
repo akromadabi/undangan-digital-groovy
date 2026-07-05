@@ -287,7 +287,7 @@ export default function Dashboard({ stats, recentUsers, recentPayments, onboardi
                 {/* ═══ Stats Grid ═══ */}
                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4">
                     {/* Total Users */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover:shadow-md transition-all group">
+                    <Link href="/admin/users" className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover:shadow-md transition-all group block">
                         <div className="flex items-start justify-between gap-1">
                             <div className="flex-1 min-w-0">
                                 <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wider truncate">Total Users</p>
@@ -302,10 +302,10 @@ export default function Dashboard({ stats, recentUsers, recentPayments, onboardi
                             </div>
                         </div>
                         <MiniBar value={totalUsers} max={Math.max(totalUsers, 10)} color="#3b82f6" />
-                    </div>
+                    </Link>
 
                     {/* Undangan Aktif */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover:shadow-md transition-all group">
+                    <Link href="/admin/users" className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover:shadow-md transition-all group block">
                         <div className="flex items-start justify-between gap-1">
                             <div className="flex-1 min-w-0">
                                 <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wider truncate">Undangan Aktif</p>
@@ -321,10 +321,10 @@ export default function Dashboard({ stats, recentUsers, recentPayments, onboardi
                             </div>
                         </div>
                         <MiniBar value={activeInvitations} max={Math.max(totalUsers, 1)} color="#10b981" />
-                    </div>
+                    </Link>
 
                     {/* Revenue */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover:shadow-md transition-all group">
+                    <Link href="/admin/pendapatan" className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover:shadow-md transition-all group block">
                         <div className="flex items-start justify-between gap-1">
                             <div className="flex-1 min-w-0">
                                 <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wider truncate">Revenue</p>
@@ -338,10 +338,10 @@ export default function Dashboard({ stats, recentUsers, recentPayments, onboardi
                                 <Icon d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" className="w-4 h-4 sm:w-5 h-5 text-white" />
                             </div>
                         </div>
-                    </div>
+                    </Link>
 
                     {/* Pending Payment */}
-                    <div className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover:shadow-md transition-all group">
+                    <Link href="/admin/transactions?status=waiting_review" className="block bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover:shadow-md hover:border-amber-300 transition-all group">
                         <div className="flex items-start justify-between gap-1">
                             <div className="flex-1 min-w-0">
                                 <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wider truncate">Pending Payment</p>
@@ -365,7 +365,7 @@ export default function Dashboard({ stats, recentUsers, recentPayments, onboardi
                             </div>
                         </div>
                         <MiniBar value={pendingPayments} max={Math.max(pendingPayments + paidPayments, 1)} color={pendingPayments > 0 ? '#f59e0b' : '#8b5cf6'} />
-                    </div>
+                    </Link>
 
                     {/* Website Dikunjungi */}
                     <div className="bg-white rounded-2xl border border-[#e8e5e0] p-3.5 sm:p-5 hover:shadow-md transition-all group col-span-2 lg:col-span-1 xl:col-span-1">

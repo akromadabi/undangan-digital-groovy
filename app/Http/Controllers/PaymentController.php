@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\ResellerPlanPrice;
 use App\Models\SubscriptionPlan;
+use App\Models\Coupon;
 use App\Services\MidtransService;
 use App\Services\XenditService;
 use Illuminate\Http\Request;
@@ -30,18 +31,20 @@ class PaymentController extends Controller
         $resellerPrices = [];
         if ($user->reseller_id) {
             $resellerPrices = ResellerPlanPrice::where('reseller_id', $user->reseller_id)
-                ->pluck('reseller_price', 'plan_id')
-                ->toArray();
+                ->get()
+                ->keyBy('plan_id');
         }
 
         // Override plan prices with reseller prices for display
-        $plansData = $plans->map(function ($plan) use ($resellerPrices) {
+        $plansData = $plans->map(function ($plan) use ($resellerPrices, $user) {
             $planArray = $plan->toArray();
-            if (isset($resellerPrices[$plan->id])) {
-                $planArray['display_price'] = (float)$resellerPrices[$plan->id];
-                $planArray['original_price'] = (float)$plan->price;
+            if ($user->reseller_id && isset($resellerPrices[$plan->id])) {
+                $rp = $resellerPrices[$plan->id];
+                $planArray['display_price'] = (float)$rp->reseller_price;
+                $planArray['original_price'] = $rp->normal_price !== null ? (float)$rp->normal_price : null;
             } else {
                 $planArray['display_price'] = (float)$plan->price;
+                $planArray['original_price'] = null;
             }
             return $planArray;
         });
@@ -75,6 +78,186 @@ class PaymentController extends Controller
      * Create payment and redirect to invoice.
      * Uses reseller custom price if applicable.
      */
+    /**
+     * Show Checkout Page with package and payment method selection.
+     */
+    public function showCheckout(Request $request)
+    {
+        $request->validate([
+            'plan_id' => 'required|exists:subscription_plans,id',
+            'greeting_card_id' => 'nullable|exists:greeting_cards,id',
+            'invitation_id' => 'nullable|exists:invitations,id',
+        ]);
+
+        $user = auth()->user();
+        $plan = SubscriptionPlan::findOrFail($request->plan_id);
+        
+        $price = (float)$plan->price;
+        $originalPrice = (float)$plan->price;
+        $hasResellerPrice = false;
+
+        if ($user->reseller_id) {
+            $resellerPrice = ResellerPlanPrice::where('reseller_id', $user->reseller_id)
+                ->where('plan_id', $plan->id)
+                ->first();
+            if ($resellerPrice) {
+                $price = (float)$resellerPrice->reseller_price;
+                $hasResellerPrice = true;
+            }
+        }
+
+        $paymentGatewayType = 'admin';
+        $tripayChannels = [];
+        $bankAccounts = [];
+        $resellerSetting = null;
+
+        if ($user->reseller_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+            if ($resellerSetting) {
+                $paymentGatewayType = $resellerSetting->payment_mode;
+                if ($paymentGatewayType === 'reseller_gateway' && $resellerSetting->reseller_gateway_type === 'tripay') {
+                    $tripay = new \App\Services\TripayService($resellerSetting);
+                    $tripayChannels = cache()->remember('reseller_tripay_channels_' . $user->reseller_id, 300, function () use ($tripay) {
+                        return $tripay->getPaymentChannels();
+                    });
+                }
+                
+                // Load reseller manual bank accounts if reseller uses manual payment
+                if ($paymentGatewayType === 'manual') {
+                    if (!empty($resellerSetting->bank_accounts) && is_array($resellerSetting->bank_accounts)) {
+                        $bankAccounts = $resellerSetting->bank_accounts;
+                    } elseif ($resellerSetting->bank_name) {
+                        $bankAccounts[] = [
+                            'bank_name' => $resellerSetting->bank_name,
+                            'account_number' => $resellerSetting->bank_account,
+                            'account_name' => $resellerSetting->bank_holder,
+                        ];
+                    }
+                }
+            }
+        }
+
+        if (empty($bankAccounts) && $paymentGatewayType === 'manual') {
+            // Fallback to admin bank accounts
+            $globalBankAccounts = \App\Models\GlobalSetting::getValue('bank_accounts', []);
+            if (!empty($globalBankAccounts) && is_array($globalBankAccounts)) {
+                $bankAccounts = $globalBankAccounts;
+            }
+        }
+
+        // Context details
+        $invitation = null;
+        if ($request->invitation_id) {
+            $invitation = \App\Models\Invitation::find($request->invitation_id);
+        } elseif (!$request->greeting_card_id) {
+            $activeId = session('active_invitation_id');
+            if ($activeId) {
+                $invitation = \App\Models\Invitation::find($activeId);
+            }
+        }
+
+        $greetingCard = null;
+        if ($request->greeting_card_id) {
+            $greetingCard = \App\Models\GreetingCard::find($request->greeting_card_id);
+        }
+
+        return Inertia::render('Dashboard/Checkout', [
+            'plan' => $plan,
+            'price' => $price,
+            'originalPrice' => $originalPrice,
+            'hasResellerPrice' => $hasResellerPrice,
+            'paymentGatewayType' => $paymentGatewayType,
+            'tripayChannels' => $tripayChannels,
+            'bankAccounts' => $bankAccounts,
+            'invitation' => $invitation,
+            'greetingCard' => $greetingCard,
+            'resellerSetting' => $resellerSetting ? [
+                'brand_name' => $resellerSetting->brand_name,
+                'footer_whatsapp' => $resellerSetting->footer_whatsapp,
+            ] : null,
+        ]);
+    }
+
+    /**
+     * Validate coupon code for checkout.
+     */
+    public function validateCoupon(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+            'plan_id' => 'required|exists:subscription_plans,id',
+            'greeting_card_id' => 'nullable|exists:greeting_cards,id',
+        ]);
+
+        $user = auth()->user();
+        if (!$user->reseller_id) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Kupon hanya dapat digunakan untuk pembelian melalui reseller.',
+            ]);
+        }
+
+        $plan = SubscriptionPlan::findOrFail($request->plan_id);
+
+        // Get checkout price
+        $price = (float)$plan->price;
+        $resellerPrice = ResellerPlanPrice::where('reseller_id', $user->reseller_id)
+            ->where('plan_id', $plan->id)
+            ->first();
+        if ($resellerPrice) {
+            $price = (float)$resellerPrice->reseller_price;
+        }
+
+        $code = strtoupper(trim($request->code));
+        $coupon = Coupon::where('reseller_id', $user->reseller_id)
+            ->where('code', $code)
+            ->first();
+
+        if (!$coupon) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Kode kupon tidak valid.',
+            ]);
+        }
+
+        if (!$coupon->isValidFor($price)) {
+            if (!$coupon->is_active) {
+                $msg = 'Kupon sedang tidak aktif.';
+            } elseif ($coupon->starts_at && now()->lt($coupon->starts_at)) {
+                $msg = 'Kupon belum dimulai.';
+            } elseif ($coupon->expires_at && now()->gt($coupon->expires_at)) {
+                $msg = 'Kupon sudah kedaluwarsa.';
+            } elseif ($coupon->usage_limit !== null && $coupon->used_count >= $coupon->usage_limit) {
+                $msg = 'Kuota penggunaan kupon sudah habis.';
+            } elseif ($price < $coupon->min_purchase) {
+                $msg = 'Minimal pembelian tidak terpenuhi (Min. Rp ' . number_format($coupon->min_purchase, 0, ',', '.') . ').';
+            } else {
+                $msg = 'Kupon tidak dapat digunakan.';
+            }
+
+            return response()->json([
+                'valid' => false,
+                'message' => $msg,
+            ]);
+        }
+
+        $discount = $coupon->calculateDiscount($price);
+        $finalAmount = max($price - $discount, 0);
+
+        return response()->json([
+            'valid' => true,
+            'coupon_id' => $coupon->id,
+            'code' => $coupon->code,
+            'discount_amount' => $discount,
+            'final_amount' => $finalAmount,
+            'message' => 'Kupon berhasil diterapkan!',
+        ]);
+    }
+
+    /**
+     * Create payment and redirect to invoice.
+     * Uses reseller custom price and coupon if applicable.
+     */
     public function checkout(Request $request)
     {
         $request->validate([
@@ -82,6 +265,7 @@ class PaymentController extends Controller
             'greeting_card_id' => 'nullable|exists:greeting_cards,id',
             'invitation_id' => 'nullable|exists:invitations,id',
             'payment_method_code' => 'nullable|string',
+            'coupon_code' => 'nullable|string',
         ]);
 
         $user = auth()->user();
@@ -90,6 +274,22 @@ class PaymentController extends Controller
         $resellerSetting = null;
         if ($user->reseller_id) {
             $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+        }
+
+        // Validate and load coupon if provided
+        $coupon = null;
+        $discount = 0;
+        if ($request->coupon_code) {
+            if (!$user->reseller_id) {
+                return back()->with('error', 'Kupon hanya dapat digunakan pada reseller.');
+            }
+            $code = strtoupper(trim($request->coupon_code));
+            $coupon = Coupon::where('reseller_id', $user->reseller_id)
+                ->where('code', $code)
+                ->first();
+            if (!$coupon) {
+                return back()->with('error', 'Kode kupon tidak valid.');
+            }
         }
 
         // ── KARTU UCAPAN CHECKOUT ──
@@ -121,9 +321,19 @@ class PaymentController extends Controller
                 }
             }
 
+            // Apply coupon discount if any
+            if ($coupon) {
+                if (!$coupon->isValidFor($price)) {
+                    return back()->with('error', 'Kupon tidak dapat digunakan.');
+                }
+                $discount = $coupon->calculateDiscount($price);
+                $price = max($price - $discount, 0);
+            }
+
             if ($price <= 0) {
-                // Gratis - langsung aktifkan!
+                // Gratis atau diskon 100% - langsung aktifkan!
                 $card->update(['is_active' => true]);
+                
                 \App\Models\Subscription::create([
                     'user_id' => $user->id,
                     'greeting_card_id' => $card->id,
@@ -132,7 +342,26 @@ class PaymentController extends Controller
                     'expires_at' => $plan->duration_days > 0 ? now()->addDays($plan->duration_days) : null,
                     'status' => 'active',
                 ]);
-                return redirect()->route('greeting-card.index')->with('success', 'Kartu ucapan gratis berhasil diaktifkan! 🎉');
+
+                if ($coupon) {
+                    $coupon->increment('used_count');
+                    
+                    // Create dummy paid payment record
+                    Payment::create([
+                        'user_id' => $user->id,
+                        'greeting_card_id' => $card->id,
+                        'plan_id' => $plan->id,
+                        'amount' => 0,
+                        'discount_amount' => $discount,
+                        'coupon_id' => $coupon->id,
+                        'payment_method' => 'coupon',
+                        'payment_gateway' => 'manual',
+                        'status' => 'paid',
+                        'paid_at' => now(),
+                    ]);
+                }
+
+                return redirect()->route('greeting-card.index')->with('success', 'Kartu ucapan berhasil diaktifkan! 🎉');
             }
 
             // Transfer Bank Manual (untuk user reseller yang mengaktifkan opsi manual)
@@ -154,10 +383,16 @@ class PaymentController extends Controller
                     'greeting_card_id' => $card->id,
                     'plan_id' => $plan->id,
                     'amount' => $price,
+                    'discount_amount' => $discount,
+                    'coupon_id' => $coupon ? $coupon->id : null,
                     'payment_method' => 'transfer',
                     'payment_gateway' => 'manual',
                     'status' => 'pending_manual',
                 ]);
+
+                if ($coupon) {
+                    $coupon->increment('used_count');
+                }
 
                 return redirect()->route('payment.manual.show', $payment->id);
             }
@@ -179,8 +414,14 @@ class PaymentController extends Controller
                 'greeting_card_id' => $card->id,
                 'plan_id' => $plan->id,
                 'amount' => $price,
+                'discount_amount' => $discount,
+                'coupon_id' => $coupon ? $coupon->id : null,
                 'status' => 'pending',
             ]);
+
+            if ($coupon) {
+                $coupon->increment('used_count');
+            }
 
             $result = $this->processOnlineCheckout($payment, $resellerSetting, $request->payment_method_code);
 
@@ -211,8 +452,61 @@ class PaymentController extends Controller
             }
         }
 
+        // Apply coupon discount if any
+        if ($coupon) {
+            if (!$coupon->isValidFor($price)) {
+                return back()->with('error', 'Kupon tidak dapat digunakan.');
+            }
+            $discount = $coupon->calculateDiscount($price);
+            $price = max($price - $discount, 0);
+        }
+
         if ($price <= 0) {
-            return back()->with('error', 'Paket ini gratis, tidak perlu pembayaran.');
+            // Gratis atau diskon 100% - langsung aktifkan!
+            $sub = \App\Models\Subscription::create([
+                'user_id' => $user->id,
+                'plan_id' => $plan->id,
+                'invitation_id' => $invitationId,
+                'starts_at' => now(),
+                'expires_at' => $plan->duration_days > 0 ? now()->addDays($plan->duration_days) : null,
+                'status' => 'active',
+            ]);
+
+            $payment = Payment::create([
+                'user_id' => $user->id,
+                'plan_id' => $plan->id,
+                'invitation_id' => $invitationId,
+                'amount' => 0,
+                'discount_amount' => $discount,
+                'coupon_id' => $coupon->id,
+                'payment_method' => 'coupon',
+                'payment_gateway' => 'manual',
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
+
+            $sub->update(['payment_id' => $payment->id]);
+
+            if ($coupon) {
+                $coupon->increment('used_count');
+            }
+
+            // Debit cost if reseller is on reseller gateway mode
+            if ($user->reseller_id) {
+                $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
+                $basePrice = (float)$plan->price;
+
+                if ($paymentMode === 'reseller_gateway') {
+                    \App\Models\ResellerWallet::debitCost(
+                        $user->reseller_id,
+                        $payment->id,
+                        $basePrice,
+                        "Biaya modal paket {$plan->name} - Pelanggan {$user->name} (Diskon Kupon 100%)"
+                    );
+                }
+            }
+
+            return redirect()->route('dashboard')->with('success', 'Paket undangan berhasil diaktifkan! 🎉');
         }
 
         // Intercept reseller checkout for manual bank transfer
@@ -234,10 +528,16 @@ class PaymentController extends Controller
                 'plan_id' => $plan->id,
                 'invitation_id' => $invitationId,
                 'amount' => $price,
+                'discount_amount' => $discount,
+                'coupon_id' => $coupon ? $coupon->id : null,
                 'payment_method' => 'transfer',
                 'payment_gateway' => 'manual',
                 'status' => 'pending_manual',
             ]);
+
+            if ($coupon) {
+                $coupon->increment('used_count');
+            }
 
             return redirect()->route('payment.manual.show', $payment->id);
         }
@@ -260,8 +560,14 @@ class PaymentController extends Controller
             'plan_id' => $plan->id,
             'invitation_id' => $invitationId,
             'amount' => $price,
+            'discount_amount' => $discount,
+            'coupon_id' => $coupon ? $coupon->id : null,
             'status' => 'pending',
         ]);
+
+        if ($coupon) {
+            $coupon->increment('used_count');
+        }
 
         $result = $this->processOnlineCheckout($payment, $resellerSetting, $request->payment_method_code);
 
@@ -936,5 +1242,186 @@ class PaymentController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Debug approve for existing payment (local only).
+     */
+    public function debugApprove(Payment $payment)
+    {
+        if (!app()->environment('local')) {
+            abort(403, 'Akses dibatasi hanya untuk lingkungan local.');
+        }
+
+        // Mark payment as paid
+        $payment->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+            'admin_notes' => 'Diaktifkan via Local Debug Mode.',
+        ]);
+
+        // Create subscription
+        if ($payment->greeting_card_id) {
+            $payment->greetingCard()->update(['is_active' => true]);
+            \App\Models\Subscription::create([
+                'user_id' => $payment->user_id,
+                'greeting_card_id' => $payment->greeting_card_id,
+                'plan_id' => $payment->plan_id,
+                'payment_id' => $payment->id,
+                'starts_at' => now(),
+                'expires_at' => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                'status' => 'active',
+            ]);
+        } else {
+            \App\Models\Subscription::create([
+                'user_id' => $payment->user_id,
+                'plan_id' => $payment->plan_id,
+                'invitation_id' => $payment->invitation_id,
+                'payment_id' => $payment->id,
+                'starts_at' => now(),
+                'expires_at' => $payment->plan ? now()->addDays($payment->plan->duration_days) : null,
+                'status' => 'active',
+            ]);
+        }
+
+        // Debit cost / credit profit if client belongs to a reseller
+        $client = $payment->user;
+        if ($client && $client->reseller_id && $payment->plan_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $client->reseller_id)->first();
+            $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
+            $basePrice = (float)$payment->plan->price;
+
+            if ($paymentMode === 'manual' || $paymentMode === 'reseller_gateway') {
+                \App\Models\ResellerWallet::debitCost(
+                    $client->reseller_id,
+                    $payment->id,
+                    $basePrice,
+                    "Biaya modal paket {$payment->plan->name} - Pelanggan {$client->name} (Debug Mode)"
+                );
+            } else {
+                $paidAmount = (float)$payment->amount;
+                $profit = $paidAmount - $basePrice;
+
+                if ($profit > 0) {
+                    \App\Models\ResellerWallet::creditProfit(
+                        $client->reseller_id,
+                        $payment->id,
+                        $profit,
+                        "Profit dari {$client->name} - Paket {$payment->plan->name} (Debug Mode)"
+                    );
+                }
+            }
+        }
+
+        if ($payment->greeting_card_id) {
+            return redirect()->route('greeting-card.index')->with('success', '✅ [Debug Mode] Pembayaran disetujui & Kartu ucapan aktif!');
+        }
+
+        return redirect()->route('dashboard')->with('success', '✅ [Debug Mode] Pembayaran disetujui & Undangan aktif!');
+    }
+
+    /**
+     * Debug approve direct mock payment from checkout page (local only).
+     */
+    public function debugApproveDirect(Request $request)
+    {
+        if (!app()->environment('local')) {
+            abort(403, 'Akses dibatasi hanya untuk lingkungan local.');
+        }
+
+        $request->validate([
+            'plan_id' => 'required|exists:subscription_plans,id',
+            'invitation_id' => 'nullable|exists:invitations,id',
+            'greeting_card_id' => 'nullable|exists:greeting_cards,id',
+        ]);
+
+        $user = auth()->user();
+        $invitationId = $request->input('invitation_id');
+        $greetingCardId = $request->input('greeting_card_id');
+        $planId = $request->input('plan_id');
+        
+        $plan = \App\Models\SubscriptionPlan::findOrFail($planId);
+
+        // Determine price
+        $price = (float)$plan->price;
+        if ($user->reseller_id) {
+            $resellerPrice = \App\Models\ResellerPlanPrice::where('reseller_id', $user->reseller_id)
+                ->where('plan_id', $planId)
+                ->first();
+            if ($resellerPrice) {
+                $price = (float)$resellerPrice->reseller_price;
+            }
+        }
+
+        // Create a mock paid payment
+        $payment = Payment::create([
+            'user_id' => $user->id,
+            'plan_id' => $planId,
+            'invitation_id' => $invitationId,
+            'greeting_card_id' => $greetingCardId,
+            'amount' => $price,
+            'discount_amount' => 0,
+            'payment_method' => 'debug_sandbox',
+            'payment_gateway' => 'manual',
+            'status' => 'paid',
+            'paid_at' => now(),
+            'admin_notes' => 'Diaktifkan instan via Checkout Debug Tool.',
+        ]);
+
+        // Create subscription
+        if ($greetingCardId) {
+            \App\Models\GreetingCard::where('id', $greetingCardId)->update(['is_active' => true]);
+            \App\Models\Subscription::create([
+                'user_id' => $user->id,
+                'greeting_card_id' => $greetingCardId,
+                'plan_id' => $planId,
+                'payment_id' => $payment->id,
+                'starts_at' => now(),
+                'expires_at' => $plan->duration_days > 0 ? now()->addDays($plan->duration_days) : null,
+                'status' => 'active',
+            ]);
+        } else {
+            \App\Models\Subscription::create([
+                'user_id' => $user->id,
+                'plan_id' => $planId,
+                'invitation_id' => $invitationId,
+                'payment_id' => $payment->id,
+                'starts_at' => now(),
+                'expires_at' => $plan->duration_days > 0 ? now()->addDays($plan->duration_days) : null,
+                'status' => 'active',
+            ]);
+        }
+
+        // Debit cost / credit profit if client belongs to a reseller
+        if ($user->reseller_id) {
+            $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
+            $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
+            $basePrice = (float)$plan->price;
+
+            if ($paymentMode === 'manual' || $paymentMode === 'reseller_gateway') {
+                \App\Models\ResellerWallet::debitCost(
+                    $user->reseller_id,
+                    $payment->id,
+                    $basePrice,
+                    "Biaya modal paket {$plan->name} - Pelanggan {$user->name} (Debug Sandbox)"
+                );
+            } else {
+                $profit = $price - $basePrice;
+                if ($profit > 0) {
+                    \App\Models\ResellerWallet::creditProfit(
+                        $user->reseller_id,
+                        $payment->id,
+                        $profit,
+                        "Profit dari {$user->name} - Paket {$plan->name} (Debug Sandbox)"
+                    );
+                }
+            }
+        }
+
+        if ($greetingCardId) {
+            return redirect()->route('greeting-card.index')->with('success', '✅ [Debug Sandbox] Kartu ucapan berhasil diaktifkan secara instan!');
+        }
+
+        return redirect()->route('dashboard')->with('success', '✅ [Debug Sandbox] Paket undangan berhasil diaktifkan secara instan!');
     }
 }

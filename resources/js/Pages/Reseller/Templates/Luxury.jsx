@@ -728,6 +728,11 @@ export default function Luxury({ reseller, plans = [], themes = [], greetingCard
                                     {isPopular && <div className="rl-plan-card__popular-badge">RECOMMENDED</div>}
                                     <h3 className="rl-plan-card__name">{plan.name}</h3>
                                     <div className="rl-plan-card__price">
+                                        {plan.normal_price && (
+                                            <span className="rl-plan-card__original-price">
+                                                {formatRp(plan.normal_price)}
+                                            </span>
+                                        )}
                                         {plan.price === 0 ? 'GRATIS' : formatRp(plan.price)}
                                         {plan.price > 0 && <span className="rl-plan-card__duration">/{plan.duration_days} hari</span>}
                                     </div>
@@ -764,6 +769,11 @@ export default function Luxury({ reseller, plans = [], themes = [], greetingCard
                                     {isPopular && <div className="rl-plan-card__popular-badge">RECOMMENDED</div>}
                                     <h3 className="rl-plan-card__name">{plan.name}</h3>
                                     <div className="rl-plan-card__price">
+                                        {plan.normal_price && (
+                                            <span className="rl-plan-card__original-price">
+                                                {formatRp(plan.normal_price)}
+                                            </span>
+                                        )}
                                         {plan.price === 0 ? 'GRATIS' : formatRp(plan.price)}
                                         {plan.price > 0 && <span className="rl-plan-card__duration">/{plan.duration_days} hari</span>}
                                     </div>
@@ -1575,6 +1585,7 @@ body {
 }
 .rl-plan-card__name { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.5rem; text-align: center; }
 .rl-plan-card__price { font-family: 'Playfair Display', serif; font-size: 2.25rem; font-weight: 800; color: var(--accent); text-align: center; margin-bottom: 2rem; }
+.rl-plan-card__original-price { font-family: var(--font-body); font-size: 1.15rem; font-weight: normal; text-decoration: line-through; color: #999; text-align: center; margin-bottom: 0.25rem; display: block; opacity: 0.7; }
 .rl-plan-card__duration { font-size: 0.85rem; color: var(--text-secondary); font-weight: 400; }
 .rl-plan-card__desc { font-size: 0.9rem; text-align: center; color: var(--text-secondary); line-height: 1.5; margin-bottom: 2.5rem; }
 .rl-plan-card__btn {

@@ -1155,6 +1155,11 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                         {meta.popular && <div className="rl-plan__popular-badge">⭐ Paling Populer</div>}
                                         <div className="rl-plan__name">{plan.name}</div>
                                         <div className="rl-plan__price">
+                                            {plan.normal_price && (
+                                                <span className="rl-plan__original-price">
+                                                    {formatRp(plan.normal_price)}
+                                                </span>
+                                            )}
                                             {plan.price > 0 ? formatRp(plan.price) : <span style={{ color: '#4ade80' }}>Gratis</span>}
                                             {(plan.duration_days > 0 || plan.slug === 'free') && <span className="rl-plan__duration"> / {plan.slug === 'free' ? '5 hari' : `${plan.duration_days} hari`}</span>}
                                         </div>
@@ -1511,6 +1516,11 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
                                         {meta.popular && <div className="rl-plan__popular-badge">⭐ Paling Populer</div>}
                                         <div className="rl-plan__name">{plan.name}</div>
                                         <div className="rl-plan__price">
+                                            {plan.normal_price && (
+                                                <span className="rl-plan__original-price">
+                                                    {formatRp(plan.normal_price)}
+                                                </span>
+                                            )}
                                             {plan.price > 0 ? formatRp(plan.price) : <span style={{ color: '#4ade80' }}>Gratis</span>}
                                             {(plan.duration_days > 0 || plan.slug === 'free') && <span className="rl-plan__duration"> / {plan.slug === 'free' ? '5 hari' : `${plan.duration_days} hari`}</span>}
                                         </div>
@@ -2171,6 +2181,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(
     color: var(--plan-color, var(--accent)); margin-bottom: 0.875rem;
 }
 .rl-plan__price { font-size: 1.625rem; font-weight: 900; color: var(--text-primary); margin-bottom: 0.25rem; }
+.rl-plan__original-price { font-size: 0.95rem; font-weight: 500; text-decoration: line-through; color: var(--text-muted); opacity: 0.7; display: block; margin-bottom: 0.125rem; }
 .rl-plan__duration { font-size: 0.875rem; font-weight: 400; color: var(--text-muted); }
 .rl-plan__divider { height: 1px; background: var(--card-border); margin: 1.125rem 0; }
 .rl-plan__features { list-style: none; display: flex; flex-direction: column; gap: 0.625rem; flex: 1; margin-bottom: 1.5rem; }

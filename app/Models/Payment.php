@@ -17,6 +17,8 @@ class Payment extends Model
         'greeting_card_id',
         'parent_payment_id',
         'amount',
+        'discount_amount',
+        'coupon_id',
         'payment_method',
         'payment_gateway',
         'gateway_order_id',
@@ -35,6 +37,7 @@ class Payment extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
             'paid_at' => 'datetime',
             'metadata' => 'array',
         ];
@@ -73,5 +76,10 @@ class Payment extends Model
     public function childPayments()
     {
         return $this->hasMany(Payment::class, 'parent_payment_id');
+    }
+
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
     }
 }

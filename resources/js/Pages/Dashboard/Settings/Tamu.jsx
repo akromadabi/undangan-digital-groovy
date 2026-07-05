@@ -129,19 +129,19 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
     };
 
     const copyLink = (slug) => {
-        const url = `${window.location.origin}/u/${slug}`;
+        const url = invitation?.url || `${window.location.origin}/u/${slug}`;
         navigator.clipboard.writeText(url);
     };
 
     const openGuestLink = (guest) => {
-        const slug = invitation?.slug || '';
-        const url = `${window.location.origin}/u/${slug}?to=${encodeURIComponent(guest.slug)}`;
+        const baseUrl = invitation?.url || `${window.location.origin}/u/${invitation?.slug || ''}`;
+        const url = `${baseUrl}?to=${encodeURIComponent(guest.slug)}`;
         window.open(url, '_blank');
     };
 
     const sendWaToGuest = (guest) => {
-        const slug = invitation?.slug || '';
-        const link = `${window.location.origin}/u/${slug}?to=${encodeURIComponent(guest.slug)}`;
+        const baseUrl = invitation?.url || `${window.location.origin}/u/${invitation?.slug || ''}`;
+        const link = `${baseUrl}?to=${encodeURIComponent(guest.slug)}`;
         const msg = template.replace('{nama}', guest.name).replace('{link}', link);
         if (guest.phone) {
             const phone = guest.phone.replace(/^0/, '62').replace(/[^0-9]/g, '');

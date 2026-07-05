@@ -131,6 +131,7 @@ class HandleInertiaRequests extends Middleware
             'appUrl' => config('app.url'),
             'urlMismatch' => (str_contains($request->getHost(), 'siapp.in') && str_contains(config('app.url'), 'siap.in') && !str_contains(config('app.url'), 'siapp.in')),
             'locale' => app()->getLocale(),
+            'isLocal' => app()->environment('local'),
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),
                 'error' => fn() => $request->session()->get('error'),

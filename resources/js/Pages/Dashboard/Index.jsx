@@ -131,8 +131,8 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                             </div>
                             <p className="text-orange-100 text-sm mt-1 flex items-center gap-1.5">
                                 <Icon d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-6.364-6.364L4.5 8.5" className="w-3.5 h-3.5 flex-shrink-0" />
-                                {invitation?.slug ? (
-                                    <span className="truncate">{window.location.origin}/u/{invitation.slug}</span>
+                                {invitation?.url ? (
+                                    <span className="truncate">{invitation.url}</span>
                                 ) : (
                                     'Undangan digital Anda belum dibuat'
                                 )}
@@ -150,8 +150,8 @@ export default function Index({ invitation, stats, features, dashboardSubscripti
                             )}
                         </div>
                         <div className="flex gap-2">
-                            {invitation?.slug && (
-                                <a href={`/u/${invitation.slug}`} target="_blank" className="px-4 py-2.5 bg-white/15 hover:bg-white/25 rounded-xl text-sm font-medium transition-all backdrop-blur-sm inline-flex items-center gap-2">
+                            {invitation?.url && (
+                                <a href={invitation.url} target="_blank" className="px-4 py-2.5 bg-white/15 hover:bg-white/25 rounded-xl text-sm font-medium transition-all backdrop-blur-sm inline-flex items-center gap-2">
                                     <Icon d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-4 h-4" />
                                     Preview
                                 </a>

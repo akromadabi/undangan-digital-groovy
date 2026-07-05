@@ -378,6 +378,8 @@ Route::middleware(['auth', 'onboarding', 'invitation.lock'])->group(function () 
 
     // Payment / Upgrade
     Route::get('/pricing', [PaymentController::class, 'pricing'])->name('payment.pricing');
+    Route::get('/checkout', [PaymentController::class, 'showCheckout'])->name('payment.checkout.page');
+    Route::post('/checkout/validate-coupon', [PaymentController::class, 'validateCoupon'])->name('payment.checkout.validate-coupon');
     Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
     Route::get('/payment-history', [PaymentController::class, 'history'])->name('payment.history');
     Route::get('/payment/manual/{payment}', [PaymentController::class, 'showManualPayment'])->name('payment.manual.show');
@@ -455,6 +457,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Reseller Greeting Card Pricing
     Route::get('/greeting-card-pricing', [\App\Http\Controllers\Admin\ResellerGreetingCardPricingController::class, 'index'])->name('greeting-card-pricing');
     Route::post('/greeting-card-pricing', [\App\Http\Controllers\Admin\ResellerGreetingCardPricingController::class, 'update'])->name('greeting-card-pricing.update');
+
+    // Reseller Coupons Management
+    Route::get('/coupons', [\App\Http\Controllers\Admin\ResellerCouponController::class, 'index'])->name('coupons.index');
+    Route::post('/coupons', [\App\Http\Controllers\Admin\ResellerCouponController::class, 'store'])->name('coupons.store');
+    Route::put('/coupons/{coupon}', [\App\Http\Controllers\Admin\ResellerCouponController::class, 'update'])->name('coupons.update');
+    Route::delete('/coupons/{coupon}', [\App\Http\Controllers\Admin\ResellerCouponController::class, 'destroy'])->name('coupons.destroy');
+    Route::post('/coupons/{coupon}/toggle', [\App\Http\Controllers\Admin\ResellerCouponController::class, 'toggleActive'])->name('coupons.toggle');
 
     // Reseller Withdrawal (pencairan)
     Route::get('/pencairan', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class, 'index'])->name('pencairan');
@@ -793,3 +802,17 @@ Route::prefix('api/admin/ai-promo')->group(function () {
         ->name('api.ai-promo.fail')
         ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 });
+
+// Local Debug Mode Testing Routes
+if (app()->environment('local')) {
+    Route::middleware(['auth'])->group(function () {
+        Route::post('/payment/debug-approve/{payment}', [\App\Http\Controllers\PaymentController::class, 'debugApprove'])->name('payment.debug-approve');
+        Route::post('/checkout/debug-approve', [\App\Http\Controllers\PaymentController::class, 'debugApproveDirect'])->name('payment.debug-approve-direct');
+        
+        Route::post('/admin/transactions/{payment}/debug-approve', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'debugApprove'])->name('admin.transactions.debug-approve');
+        Route::post('/admin/debug/topup-wallet', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'debugTopupWallet'])->name('admin.debug.topup-wallet');
+
+        Route::post('/admin/users/{user}/debug-activate', [\App\Http\Controllers\Admin\AdminUserController::class, 'debugActivate'])->name('admin.users.debug-activate');
+        Route::post('/admin/users/{user}/debug-deactivate', [\App\Http\Controllers\Admin\AdminUserController::class, 'debugDeactivate'])->name('admin.users.debug-deactivate');
+    });
+}
