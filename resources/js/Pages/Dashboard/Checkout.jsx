@@ -19,7 +19,7 @@ export default function Checkout({
     greetingCard,
     resellerSetting
 }) {
-    const { flash, isLocal } = usePage().props;
+    const { flash } = usePage().props;
     const [couponCode, setCouponCode] = useState('');
     const [isApplying, setIsApplying] = useState(false);
     const [couponError, setCouponError] = useState('');
@@ -120,19 +120,6 @@ export default function Checkout({
                 alert(Object.values(err).join('\n'));
             }
         });
-    };
-
-    const handleDebugApproveDirectly = () => {
-        if (confirm('Apakah Anda yakin ingin mengaktifkan paket ini secara instan via Debug Sandbox?')) {
-            setIsSubmitting(true);
-            router.post(route('payment.debug-approve-direct'), {
-                plan_id: plan.id,
-                greeting_card_id: greetingCard ? greetingCard.id : null,
-                invitation_id: invitation ? invitation.id : null,
-            }, {
-                onFinish: () => setIsSubmitting(false)
-            });
-        }
     };
 
     // Group TriPay Channels
@@ -456,25 +443,6 @@ export default function Checkout({
                                 </p>
                             )}
                         </div>
-
-                        {isLocal && (
-                            <div className="bg-red-50 border border-red-200 rounded-2xl p-5 space-y-3">
-                                <h4 className="font-bold text-red-800 text-xs flex items-center gap-1.5 uppercase tracking-wide">
-                                    🛠️ LOCAL DEBUG MODE
-                                </h4>
-                                <p className="text-xs text-red-700 leading-relaxed">
-                                    Gunakan tombol di bawah ini untuk mensimulasikan aktivasi instan tanpa memicu transaksi pembayaran real.
-                                </p>
-                                <button
-                                    type="button"
-                                    onClick={handleDebugApproveDirectly}
-                                    disabled={isSubmitting}
-                                    className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
-                                >
-                                    Debug: Aktifkan Instan Tanpa Bayar
-                                </button>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>

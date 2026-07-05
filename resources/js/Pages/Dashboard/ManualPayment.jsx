@@ -11,7 +11,7 @@ const statusConfig = {
 };
 
 export default function ManualPayment({ payment, bankAccounts = [], resellerContact = null }) {
-    const { flash, isLocal } = usePage().props;
+    const { flash } = usePage().props;
     const [dragOver, setDragOver] = useState(false);
     const [preview, setPreview] = useState(null);
     const fileRef = useRef(null);
@@ -46,12 +46,6 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
     const handleCancel = () => {
         if (confirm('Batalkan pembayaran ini?')) {
             router.post(route('payment.manual.cancel', payment.id));
-        }
-    };
-
-    const handleDebugApprove = () => {
-        if (confirm('Apakah Anda yakin ingin menyetujui pembayaran ini secara instan?')) {
-            router.post(route('payment.debug-approve', payment.id));
         }
     };
 
@@ -290,24 +284,6 @@ export default function ManualPayment({ payment, bankAccounts = [], resellerCont
                         className="w-full py-2.5 border border-red-200 text-red-500 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors">
                         Batalkan Pembayaran
                     </button>
-                )}
-
-                {isLocal && payment.status !== 'paid' && (
-                    <div className="bg-red-50 border border-red-200 rounded-2xl p-5 space-y-3">
-                        <h4 className="font-bold text-red-800 text-xs flex items-center gap-1.5 uppercase tracking-wide">
-                            🛠️ LOCAL DEBUG MODE
-                        </h4>
-                        <p className="text-xs text-red-700 leading-relaxed">
-                            Simulasikan aktivasi instan pembayaran manual ini.
-                        </p>
-                        <button
-                            type="button"
-                            onClick={handleDebugApprove}
-                            className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5"
-                        >
-                            Debug: Aktifkan Pembayaran Ini Instan
-                        </button>
-                    </div>
                 )}
             </div>
         </DashboardLayout>

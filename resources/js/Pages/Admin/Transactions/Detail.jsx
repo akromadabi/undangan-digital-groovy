@@ -15,7 +15,7 @@ const formatCurrency = a => new Intl.NumberFormat('id-ID', { style: 'currency', 
 const formatDate = d => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export default function TransactionDetail({ payment }) {
-    const { adminRoutePrefix, flash, auth, isLocal } = usePage().props;
+    const { adminRoutePrefix, flash, auth } = usePage().props;
     const user = auth?.user;
     const isReseller = user?.role === 'admin';
     const [showApprove, setShowApprove] = useState(false);
@@ -42,22 +42,6 @@ export default function TransactionDetail({ payment }) {
             { notes: rejectNotes },
             { onFinish: () => { setProcessing(false); setShowReject(false); } }
         );
-    };
-
-    const handleDebugApprove = () => {
-        if (confirm('Apakah Anda yakin ingin menyetujui transaksi ini secara instan? (Bypass Saldo/Online)')) {
-            setProcessing(true);
-            router.post(`${adminRoutePrefix}/transactions/${payment.id}/debug-approve`, {}, {
-                onFinish: () => setProcessing(false)
-            });
-        }
-    };
-
-    const handleDebugTopup = () => {
-        setProcessing(true);
-        router.post(`${adminRoutePrefix}/debug/topup-wallet`, {}, {
-            onFinish: () => setProcessing(false)
-        });
     };
 
     const handleApproveViaWallet = () => {
@@ -87,37 +71,6 @@ export default function TransactionDetail({ payment }) {
                 )}
                 {flash?.error && (
                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{flash.error}</div>
-                )}
-
-                {isLocal && (
-                    <div className="bg-red-50 border border-red-200 rounded-2xl p-5 space-y-3 shadow-3xs">
-                        <h4 className="font-bold text-red-800 text-xs flex items-center gap-1.5 uppercase tracking-wide">
-                            🛠️ LOCAL DEBUG MODE
-                        </h4>
-                        <p className="text-xs text-red-700 leading-relaxed">
-                            Simulasikan persetujuan cepat atau penambahan saldo reseller di lingkungan lokal untuk pengujian.
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {payment.status !== 'paid' && (
-                                <button
-                                    onClick={handleDebugApprove}
-                                    disabled={processing}
-                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-50"
-                                >
-                                    Debug: Setujui Instan (Bypass Saldo/Online)
-                                </button>
-                            )}
-                            {isReseller && (
-                                <button
-                                    onClick={handleDebugTopup}
-                                    disabled={processing}
-                                    className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-50"
-                                >
-                                    Debug: Tambah Saldo Dompet Rp 1.000.000
-                                </button>
-                            )}
-                        </div>
-                    </div>
                 )}
 
                 {/* Status + Actions */}

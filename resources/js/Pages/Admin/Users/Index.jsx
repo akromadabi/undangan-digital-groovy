@@ -9,7 +9,7 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
 );
 
 export default function Index({ users, filters }) {
-    const { auth, adminRoutePrefix, isLocal } = usePage().props;
+    const { auth, adminRoutePrefix } = usePage().props;
     const userList = users?.data || [];
     const pagination = users?.links;
 
@@ -216,24 +216,8 @@ export default function Index({ users, filters }) {
                                                 </span>
                                             </td>
 
-                                            {/* Aksi */}
                                             <td className="px-4 py-3 text-right">
                                                 <div className="flex items-center justify-end gap-1">
-                                                    {isLocal && (
-                                                        <>
-                                                            {user.invitations?.some(inv => !inv.active_subscription) ? (
-                                                                <Link href={`${adminRoutePrefix}/users/${user.id}/debug-activate`} method="post" as="button"
-                                                                    className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-150 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap" title="Debug: Aktifkan Platinum Instan">
-                                                                    ⚡ Aktifkan
-                                                                </Link>
-                                                            ) : (
-                                                                <Link href={`${adminRoutePrefix}/users/${user.id}/debug-deactivate`} method="post" as="button"
-                                                                    className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap" title="Debug: Reset ke Free">
-                                                                    🔄 Reset Free
-                                                                </Link>
-                                                            )}
-                                                        </>
-                                                    )}
                                                     <Link href={`${adminRoutePrefix}/impersonate/user/${user.id}`} method="post" as="button"
                                                         className="p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 transition-colors" title="Masuk sebagai User (Impersonasi)">
                                                         <Icon d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" className="w-3.5 h-3.5" />

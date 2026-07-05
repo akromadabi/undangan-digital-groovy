@@ -803,16 +803,3 @@ Route::prefix('api/admin/ai-promo')->group(function () {
         ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 });
 
-// Local Debug Mode Testing Routes
-if (app()->environment('local')) {
-    Route::middleware(['auth'])->group(function () {
-        Route::post('/payment/debug-approve/{payment}', [\App\Http\Controllers\PaymentController::class, 'debugApprove'])->name('payment.debug-approve');
-        Route::post('/checkout/debug-approve', [\App\Http\Controllers\PaymentController::class, 'debugApproveDirect'])->name('payment.debug-approve-direct');
-        
-        Route::post('/admin/transactions/{payment}/debug-approve', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'debugApprove'])->name('admin.transactions.debug-approve');
-        Route::post('/admin/debug/topup-wallet', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'debugTopupWallet'])->name('admin.debug.topup-wallet');
-
-        Route::post('/admin/users/{user}/debug-activate', [\App\Http\Controllers\Admin\AdminUserController::class, 'debugActivate'])->name('admin.users.debug-activate');
-        Route::post('/admin/users/{user}/debug-deactivate', [\App\Http\Controllers\Admin\AdminUserController::class, 'debugDeactivate'])->name('admin.users.debug-deactivate');
-    });
-}
