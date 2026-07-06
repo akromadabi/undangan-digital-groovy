@@ -56,6 +56,7 @@ class SiappPayService
             'action' => 'create_order',
             'order_id' => $orderId,
             'base_amount' => (int) round($payment->amount),
+            'merchant_name' => GlobalSetting::getValue('site_name', 'Undangan Digital'),
             
             // Keep original fields for backward compatibility or other API patterns
             'secret' => $this->secretKey,
@@ -106,11 +107,16 @@ class SiappPayService
                 $resData = $response->json();
                 $data = $resData['data'] ?? $resData;
 
-                $invoiceUrl = $data['invoice_url'] ?? ($data['checkout_url'] ?? ($data['payment_url'] ?? ($this->apiUrl . '/checkout.php?order_id=' . $orderId)));
-                $qrUrl = $data['qr_url'] ?? ($data['qr_image_url'] ?? ($data['qr_code'] ?? ($data['qris_qr_url'] ?? null)));
+                // Prioritize local checkout page if no external checkout page is returned,
+                // keeping the user experience premium and secure.
+                $invoiceUrl = $data['invoice_url'] ?? ($data['checkout_url'] ?? ($data['payment_url'] ?? url('/payment/siapppay/' . $payment->id)));
+                
+                // Prioritize qris_qr_url from the new SiappPay documentation
+                $qrUrl = $data['qris_qr_url'] ?? ($data['qr_url'] ?? ($data['qr_image_url'] ?? ($data['qr_code'] ?? null)));
                 $qrString = $data['qr_string'] ?? ($data['qris_content'] ?? ($data['qr_raw'] ?? ($data['qris_payload'] ?? null)));
+                $totalAmount = $data['total_amount'] ?? ($data['amount'] ?? null);
 
-                $payment->update([
+                $updateData = [
                     'payment_gateway' => 'siapppay',
                     'payment_method' => $channelCode,
                     'metadata' => array_merge($payment->metadata ?? [], [
@@ -118,9 +124,17 @@ class SiappPayService
                         'invoice_url' => $invoiceUrl,
                         'qr_url' => $qrUrl,
                         'qr_string' => $qrString,
+                        'total_amount' => $totalAmount,
                         'raw_response' => $resData,
                     ]),
-                ]);
+                ];
+
+                // Update the payment amount with the exact total_amount returned by Siapp Pay
+                if ($totalAmount && (int)$totalAmount > 0) {
+                    $updateData['amount'] = $totalAmount;
+                }
+
+                $payment->update($updateData);
 
                 return [
                     'success' => true,
@@ -128,6 +142,7 @@ class SiappPayService
                     'invoice_url' => $invoiceUrl,
                     'qr_url' => $qrUrl,
                     'qr_string' => $qrString,
+                    'total_amount' => $totalAmount,
                     'raw' => $resData,
                 ];
             }
@@ -143,6 +158,43 @@ class SiappPayService
             ];
         } catch (\Throwable $e) {
             Log::error('SiappPay Exception: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => 'Koneksi ke server pay.siapp.in gagal: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Check transaction status on pay.siapp.in
+     */
+    public function checkStatus(string $orderId): array
+    {
+        if (!$this->isConfigured()) {
+            return ['success' => false, 'error' => 'SiappPay Secret Key belum dikonfigurasi.'];
+        }
+
+        try {
+            $endpoint = $this->apiUrl . '/status.php';
+            
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+            ])->timeout(10)->get($endpoint, [
+                'token' => $this->secretKey,
+                'action' => 'check_status',
+                'order_id' => $orderId,
+            ]);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            return [
+                'success' => false,
+                'error' => 'Gagal mengecek status pembayaran. Status HTTP ' . $response->status(),
+            ];
+        } catch (\Throwable $e) {
+            Log::error('SiappPay Check Status Exception: ' . $e->getMessage());
             return [
                 'success' => false,
                 'error' => 'Koneksi ke server pay.siapp.in gagal: ' . $e->getMessage(),

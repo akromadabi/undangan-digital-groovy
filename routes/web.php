@@ -385,6 +385,8 @@ Route::middleware(['auth', 'onboarding', 'invitation.lock'])->group(function () 
     Route::get('/payment/manual/{payment}', [PaymentController::class, 'showManualPayment'])->name('payment.manual.show');
     Route::post('/payment/manual/{payment}/proof', [PaymentController::class, 'uploadProof'])->name('payment.manual.proof');
     Route::post('/payment/manual/{payment}/cancel', [PaymentController::class, 'cancelPayment'])->name('payment.manual.cancel');
+    Route::get('/payment/siapppay/{payment}', [PaymentController::class, 'showSiappPay'])->name('payment.siapppay.show');
+    Route::get('/payment/siapppay/{payment}/check', [PaymentController::class, 'checkSiappPayStatus'])->name('payment.siapppay.check');
 
     // Live Tamu
     Route::get('/live-tamu', [LiveTamuController::class, 'index'])->middleware('feature:layar_sapa')->name('live-tamu');

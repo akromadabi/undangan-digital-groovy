@@ -1084,29 +1084,69 @@ class PaymentController extends Controller
         $rawJson = $request->getContent();
         $payload = json_decode($rawJson, true) ?: $request->all();
 
-        $orderId = $payload['order_id'] ?? ($payload['merchant_ref'] ?? ($payload['external_id'] ?? null));
-        if (!$orderId) {
-            \Illuminate\Support\Facades\Log::warning('SiappPay Webhook: missing order_id');
-            return response()->json(['status' => 'failed', 'message' => 'Missing order_id'], 400);
-        }
-
-        $payment = Payment::where('external_id', $orderId)->orWhere('id', $orderId)->first();
-        if (!$payment) {
-            \Illuminate\Support\Facades\Log::warning('SiappPay Webhook: payment not found', ['order_id' => $orderId]);
-            return response()->json(['status' => 'failed', 'message' => 'Payment not found'], 400);
-        }
-
         $siappPay = new \App\Services\SiappPayService();
-        $signature = $request->header('X-Callback-Signature') ?: $request->header('Callback-Signature');
-        $incomingSecret = $request->header('X-Secret-Key') ?: ($payload['secret'] ?? null);
+        $token = $payload['token'] ?? null;
+        $message = $payload['message'] ?? null;
 
-        if (!$siappPay->verifyWebhookSignature($rawJson, $signature, $incomingSecret)) {
-            \Illuminate\Support\Facades\Log::warning('SiappPay Webhook: invalid signature or secret', ['order_id' => $orderId]);
-            return response()->json(['status' => 'failed', 'message' => 'Invalid signature or secret'], 400);
+        $payment = null;
+        $status = 'UNPAID';
+
+        // Check if this is a direct message webhook (from Android Listener)
+        if ($message) {
+            // 1. Verify token
+            if (!$siappPay->verifyWebhookSignature($rawJson, null, $token)) {
+                \Illuminate\Support\Facades\Log::warning('SiappPay Webhook (Listener): invalid token', ['token' => $token]);
+                return response()->json(['status' => 'failed', 'message' => 'Unauthorized'], 401);
+            }
+
+            // 2. Extract amount from SMS message
+            if (preg_match('/Rp\.?\s*([0-9.,]+)/i', $message, $matches)) {
+                $amountStr = preg_replace('/[^0-9]/', '', preg_replace('/[,.]00$/', '', $matches[1]));
+                $amountReceived = (int) $amountStr;
+
+                // 3. Find oldest pending payment with matching amount
+                $payment = Payment::where('status', 'pending')
+                    ->where('payment_gateway', 'siapppay')
+                    ->where('amount', $amountReceived)
+                    ->orderBy('created_at', 'asc')
+                    ->first();
+
+                if (!$payment) {
+                    \Illuminate\Support\Facades\Log::warning('SiappPay Webhook (Listener): payment not found for amount', ['amount' => $amountReceived]);
+                    return response()->json(['status' => 'failed', 'message' => 'Payment not found'], 400);
+                }
+
+                $status = 'PAID';
+            } else {
+                \Illuminate\Support\Facades\Log::warning('SiappPay Webhook (Listener): could not parse amount from message', ['message' => $message]);
+                return response()->json(['status' => 'failed', 'message' => 'Invalid message format'], 400);
+            }
+        } else {
+            // Standard webhook with order_id
+            $orderId = $payload['order_id'] ?? ($payload['merchant_ref'] ?? ($payload['external_id'] ?? null));
+            if (!$orderId) {
+                \Illuminate\Support\Facades\Log::warning('SiappPay Webhook: missing order_id');
+                return response()->json(['status' => 'failed', 'message' => 'Missing order_id'], 400);
+            }
+
+            $payment = Payment::where('external_id', $orderId)->orWhere('id', $orderId)->first();
+            if (!$payment) {
+                \Illuminate\Support\Facades\Log::warning('SiappPay Webhook: payment not found', ['order_id' => $orderId]);
+                return response()->json(['status' => 'failed', 'message' => 'Payment not found'], 400);
+            }
+
+            $signature = $request->header('X-Callback-Signature') ?: $request->header('Callback-Signature');
+            $incomingSecret = $request->header('X-Secret-Key') ?: ($payload['secret'] ?? null);
+
+            if (!$siappPay->verifyWebhookSignature($rawJson, $signature, $incomingSecret)) {
+                \Illuminate\Support\Facades\Log::warning('SiappPay Webhook: invalid signature or secret', ['order_id' => $orderId]);
+                return response()->json(['status' => 'failed', 'message' => 'Invalid signature or secret'], 400);
+            }
+
+            $status = strtoupper($payload['status'] ?? 'UNPAID');
         }
 
-        $status = strtoupper($payload['status'] ?? 'UNPAID');
-
+        // Process status update
         if (in_array($status, ['PAID', 'SUCCESS', 'COMPLETED', 'SETTLEMENT'])) {
             if ($payment->status !== 'paid') {
                 $payment->update([
@@ -1132,10 +1172,11 @@ class PaymentController extends Controller
                         ]);
                     }
                     \Illuminate\Support\Facades\Log::info('SiappPay Webhook: reseller subscription payment completed', ['payment_id' => $payment->id]);
-                    return response()->json(['success' => true]);
+                    return response()->json(['success' => true, 'status' => 'OK']);
                 }
 
                 // 2. Reseller Modal Payment (parent_payment_id)
+                $profit = 0;
                 if ($payment->parent_payment_id) {
                     $parent = $payment->parentPayment;
                     if ($parent && $parent->status !== 'paid') {
@@ -1173,7 +1214,7 @@ class PaymentController extends Controller
                         }
                     }
                     \Illuminate\Support\Facades\Log::info('SiappPay Webhook: reseller modal payment successful', ['payment_id' => $payment->id]);
-                    return response()->json(['success' => true]);
+                    return response()->json(['success' => true, 'status' => 'OK']);
                 }
 
                 // 3. Direct Customer Payment (Invitation / Greeting Card)
@@ -1200,31 +1241,36 @@ class PaymentController extends Controller
                     ]);
                 }
 
-                // Credit profit to reseller wallet if client belongs to a reseller
+                // Credit reseller wallet profit if applicable
                 $user = $payment->user;
-                if ($user && $user->reseller_id && $payment->plan_id) {
+                if ($user && $user->reseller_id && !$payment->parent_payment_id) {
                     $resellerSetting = \App\Models\ResellerSetting::where('user_id', $user->reseller_id)->first();
-                    $paymentMode = $resellerSetting ? $resellerSetting->payment_mode : 'admin';
-                    $basePrice = (float) $payment->plan->price;
+                    $basePrice = 0;
+                    if ($payment->plan_id) {
+                        $basePrice = (float) ($payment->plan->reseller_modal_price ?? $payment->plan->price);
+                    }
 
-                    if ($paymentMode === 'reseller_gateway') {
-                        \App\Models\ResellerWallet::debitCost(
-                            $user->reseller_id,
-                            $payment->id,
-                            $basePrice,
-                            "Biaya modal paket {$payment->plan->name} - Pelanggan {$user->name}"
-                        );
-                    } else {
-                        $paidAmount = (float) $payment->amount;
-                        $profit = $paidAmount - $basePrice;
-
-                        if ($profit > 0) {
-                            \App\Models\ResellerWallet::creditProfit(
+                    if ($resellerSetting) {
+                        $paymentMode = $resellerSetting->payment_mode;
+                        if ($paymentMode === 'reseller_gateway') {
+                            \App\Models\ResellerWallet::debitCost(
                                 $user->reseller_id,
                                 $payment->id,
-                                $profit,
-                                "Profit dari {$user->name} - Paket {$payment->plan->name}"
+                                $basePrice,
+                                "Biaya modal paket {$payment->plan->name} - Pelanggan {$user->name}"
                             );
+                        } else {
+                            $paidAmount = (float) $payment->amount;
+                            $profit = $paidAmount - $basePrice;
+
+                            if ($profit > 0) {
+                                \App\Models\ResellerWallet::creditProfit(
+                                    $user->reseller_id,
+                                    $payment->id,
+                                    $profit,
+                                    "Profit dari {$user->name} - Paket {$payment->plan->name}"
+                                );
+                            }
                         }
                     }
                 }
@@ -1241,6 +1287,66 @@ class PaymentController extends Controller
             $payment->update(['status' => 'failed']);
         }
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'status' => 'OK']);
+    }
+
+    /**
+     * Show beautiful local checkout page for SiappPay QRIS.
+     */
+    public function showSiappPay(Payment $payment)
+    {
+        // Security check: must belong to authenticated user
+        if ($payment->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($payment->status === 'paid') {
+            return redirect()->route('payment.history')->with('success', 'Pembayaran telah lunas!');
+        }
+
+        return \Inertia\Inertia::render('Dashboard/SiappPayPayment', [
+            'payment' => $payment,
+            'qrUrl' => $payment->metadata['qr_url'] ?? null,
+            'qrString' => $payment->metadata['qr_string'] ?? null,
+            'totalAmount' => (int) $payment->amount,
+        ]);
+    }
+
+    /**
+     * Secure endpoint for client polling to check SiappPay payment status on the backend.
+     */
+    public function checkSiappPayStatus(Payment $payment)
+    {
+        if ($payment->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if ($payment->status !== 'paid') {
+            $siappPay = new \App\Services\SiappPayService();
+            if ($siappPay->isConfigured()) {
+                $orderId = $payment->external_id;
+                if ($orderId) {
+                    $statusRes = $siappPay->checkStatus($orderId);
+                    if (isset($statusRes['success']) && $statusRes['success']) {
+                        $remoteStatus = strtoupper($statusRes['status'] ?? 'UNPAID');
+                        if (in_array($remoteStatus, ['PAID', 'SUCCESS', 'COMPLETED', 'SETTLEMENT'])) {
+                            // Update status to paid and trigger activation using our local handler logic
+                            $requestMock = Request::create('/webhooks/siapppay', 'POST', [
+                                'order_id' => $orderId,
+                                'status' => 'PAID',
+                                'secret' => \App\Models\GlobalSetting::getValue('siapppay_secret_key', '')
+                            ]);
+                            $this->siapppayWebhook($requestMock);
+                            $payment->refresh();
+                        }
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => $payment->status,
+            'is_paid' => $payment->status === 'paid',
+        ]);
     }
 }

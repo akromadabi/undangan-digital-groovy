@@ -150,6 +150,47 @@ class ResellerRegisterController extends Controller
      */
     public function checkPaymentStatus(Payment $payment)
     {
+        if ($payment->status !== 'paid') {
+            $siappPay = new SiappPayService();
+            if ($siappPay->isConfigured() && $payment->payment_gateway === 'siapppay') {
+                $orderId = $payment->external_id;
+                if ($orderId) {
+                    $statusRes = $siappPay->checkStatus($orderId);
+                    if (isset($statusRes['success']) && $statusRes['success']) {
+                        $remoteStatus = strtoupper($statusRes['status'] ?? 'UNPAID');
+                        if (in_array($remoteStatus, ['PAID', 'SUCCESS', 'COMPLETED', 'SETTLEMENT'])) {
+                            // Update payment to paid and run activation logic
+                            $payment->update([
+                                'status' => 'paid',
+                                'paid_at' => now(),
+                                'metadata' => array_merge($payment->metadata ?? [], [
+                                    'siapppay_status' => $remoteStatus,
+                                    'siapppay_response' => $statusRes,
+                                ]),
+                            ]);
+
+                            // Reseller subscription registration payment logic:
+                            if ($payment->metadata && isset($payment->metadata['type']) && $payment->metadata['type'] === 'reseller_subscription') {
+                                $user = $payment->user;
+                                if ($user) {
+                                    $durationDays = (int) ($payment->metadata['duration_days'] ?? 365);
+                                    $user->update([
+                                        'is_active' => true,
+                                        'reseller_expires_at' => now()->addDays($durationDays),
+                                    ]);
+                                    \App\Models\ResellerSetting::where('user_id', $user->id)->update([
+                                        'is_active' => true,
+                                    ]);
+                                }
+                                \Illuminate\Support\Facades\Log::info('SiappPay Poll check: reseller subscription payment completed', ['payment_id' => $payment->id]);
+                            }
+                            $payment->refresh();
+                        }
+                    }
+                }
+            }
+        }
+
         return response()->json([
             'status' => $payment->status,
             'is_paid' => $payment->status === 'paid',
