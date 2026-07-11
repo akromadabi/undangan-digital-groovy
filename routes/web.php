@@ -34,7 +34,7 @@ Route::get('/', function () {
 
     $themes = \App\Models\Theme::where('is_active', true)
         ->orderBy('sort_order')
-        ->get(['id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'preview_url', 'category', 'is_premium', 'base_likes', 'real_likes', 'allowed_plans'])
+        ->get(['id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'preview_url', 'category', 'type', 'is_premium', 'base_likes', 'real_likes', 'allowed_plans'])
         ->map(function ($theme) {
             $theme->preview_url = route('demo.theme', ['slug' => $theme->slug]);
             return $theme;
@@ -101,9 +101,8 @@ Route::get('/katalog-tema', function () {
         return app(\App\Http\Controllers\ResellerLandingPageController::class)->themes($resellerSetting->subdomain);
     }
 
-    // Domain utama: tampilkan katalog semua tema global
     $themes = \App\Models\Theme::where('is_active', true)
-        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'preview_url', 'base_likes', 'real_likes', 'allowed_plans')
+        ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'type', 'is_premium', 'preview_url', 'base_likes', 'real_likes', 'allowed_plans')
         ->orderBy('sort_order')
         ->get()
         ->map(function ($theme) {
@@ -424,7 +423,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/theme-builder/{theme}', function () {
         return Inertia::render('Admin/ThemeBuilderComingSoon');
     })->name('theme-builder.coming-soon');
-    Route::resource('users', AdminUserController::class)->only(['index', 'show']);
+    Route::resource('users', AdminUserController::class);
+    Route::post('/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.resetPassword');
     Route::get('/live-tamu', [AdminLiveTamuController::class, 'index'])->name('live-tamu');
     Route::get('/live-tamu/data', [AdminLiveTamuController::class, 'data'])->name('live-tamu.data');
 

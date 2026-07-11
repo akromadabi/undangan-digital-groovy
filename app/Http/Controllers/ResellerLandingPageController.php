@@ -71,7 +71,7 @@ class ResellerLandingPageController extends Controller
 
         // Get themes for gallery
         $themes = \App\Models\Theme::where('is_active', true)
-            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url', 'allowed_plans')
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'type', 'is_premium', 'base_likes', 'real_likes', 'preview_url', 'allowed_plans')
             ->latest()
             ->take(8)
             ->get();
@@ -202,7 +202,7 @@ class ResellerLandingPageController extends Controller
         });
  
         $themes = \App\Models\Theme::where('is_active', true)
-            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'is_premium', 'base_likes', 'real_likes', 'preview_url', 'allowed_plans')
+            ->select('id', 'name', 'slug', 'thumbnail', 'preview_images', 'preview_template', 'preview_bg_style', 'category', 'type', 'is_premium', 'base_likes', 'real_likes', 'preview_url', 'allowed_plans')
             ->orderBy('sort_order')
             ->get();
         $themes = \App\Models\Theme::applyResellerCustomizations($themes, $reseller->id);

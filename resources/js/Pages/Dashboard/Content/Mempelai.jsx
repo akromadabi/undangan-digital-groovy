@@ -35,6 +35,29 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
         bride_grooms: initial,
     });
 
+    const showSubjectTypeToggle = isSingleSubject && ['birthday', 'general'].includes(eventType);
+
+    // Check if the existing data already has child_order, father_name, or mother_name filled
+    const hasFamilyData = initial?.[0]
+        ? !!(initial[0].child_order || initial[0].father_name || initial[0].mother_name)
+        : true;
+
+    const [subjectType, setSubjectType] = useState(hasFamilyData ? 'person' : 'business');
+
+    const handleSubjectTypeChange = (type) => {
+        setSubjectType(type);
+        if (type === 'business') {
+            const updated = [...data.bride_grooms];
+            updated[activeTab] = {
+                ...updated[activeTab],
+                child_order: '',
+                father_name: '',
+                mother_name: '',
+            };
+            setData('bride_grooms', updated);
+        }
+    };
+
     const [visibleSocmed, setVisibleSocmed] = useState(() =>
         initial.map(bg => SOCMED_OPTIONS.filter(opt => bg[opt.key]).map(opt => opt.key))
     );
@@ -231,15 +254,15 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
             return {
                 title: 'Data Yang Berulang Tahun',
                 photo: 'Foto Profil',
-                full_name: 'Nama Lengkap *',
-                nickname: 'Nama Panggilan',
+                full_name: subjectType === 'business' ? 'Nama Instansi / Bisnis / Acara *' : 'Nama Lengkap *',
+                nickname: subjectType === 'business' ? 'Nama Singkat / Brand' : 'Nama Panggilan',
             };
         }
         return {
             title: 'Data Pemilik Acara',
             photo: 'Foto Profil',
-            full_name: 'Nama Lengkap *',
-            nickname: 'Nama Panggilan',
+            full_name: subjectType === 'business' ? 'Nama Instansi / Bisnis / Acara *' : 'Nama Lengkap *',
+            nickname: subjectType === 'business' ? 'Nama Singkat / Brand' : 'Nama Panggilan',
         };
     };
 
@@ -301,9 +324,38 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
                     </div>
                 )}
 
-                {/* Form */}
                 <form onSubmit={handleSubmit}>
                     <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4 shadow-sm">
+                        {showSubjectTypeToggle && (
+                            <div className="bg-gray-50 p-3 rounded-xl border border-gray-150 mb-2">
+                                <label className="block text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Tipe Penerima / Subjek</label>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSubjectTypeChange('person')}
+                                        className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                                            subjectType === 'person'
+                                                ? 'bg-[#E5654B] text-white shadow-sm'
+                                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        👤 Orang / Individu
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSubjectTypeChange('business')}
+                                        className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                                            subjectType === 'business'
+                                                ? 'bg-[#E5654B] text-white shadow-sm'
+                                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        🏢 Bisnis / Instansi / Kafe
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Premium Integrated Photo Selector */}
                         <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-50 flex-shrink-0 relative shadow-inner">
@@ -345,12 +397,29 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
 
                         {/* Name fields */}
                         <div className="grid grid-cols-2 gap-2">
-                            <Field label={labels.full_name} value={data.bride_grooms[idx].full_name}
-                                onChange={(v) => update(idx, 'full_name', v)} required
-                                error={errors[`bride_grooms.${idx}.full_name`]} />
-                            <Field label={labels.nickname} value={data.bride_grooms[idx].nickname}
+                            <Field 
+                                label={labels.full_name} 
+                                value={data.bride_grooms[idx].full_name}
+                                onChange={(v) => update(idx, 'full_name', v)} 
+                                required
+                                placeholder={
+                                    subjectType === 'business'
+                                        ? 'Contoh: GEBYAR HUT KE 29 TAPIAN NAULI CAFE'
+                                        : 'Nama Lengkap'
+                                }
+                                error={errors[`bride_grooms.${idx}.full_name`]} 
+                            />
+                            <Field 
+                                label={labels.nickname} 
+                                value={data.bride_grooms[idx].nickname}
                                 onChange={(v) => update(idx, 'nickname', v)}
-                                error={errors[`bride_grooms.${idx}.nickname`]} />
+                                placeholder={
+                                    subjectType === 'business'
+                                        ? 'Contoh: TAPIAN NAULI CAFE'
+                                        : 'Nama Panggilan'
+                                }
+                                error={errors[`bride_grooms.${idx}.nickname`]} 
+                            />
                         </div>
 
                         {/* Gender toggle */}
@@ -369,17 +438,19 @@ export default function Mempelai({ brideGrooms, mediaAssets = [], eventType = 'w
                         )}
 
                         {/* Parent info */}
-                        <div className="grid grid-cols-3 gap-2">
-                            <Field label="Putra/Putri ke-" value={data.bride_grooms[idx].child_order}
-                                onChange={(v) => update(idx, 'child_order', v)} placeholder="Pertama"
-                                error={errors[`bride_grooms.${idx}.child_order`]} />
-                            <Field label="Nama Ayah" value={data.bride_grooms[idx].father_name}
-                                onChange={(v) => update(idx, 'father_name', v)}
-                                error={errors[`bride_grooms.${idx}.father_name`]} />
-                            <Field label="Nama Ibu" value={data.bride_grooms[idx].mother_name}
-                                onChange={(v) => update(idx, 'mother_name', v)}
-                                error={errors[`bride_grooms.${idx}.mother_name`]} />
-                        </div>
+                        {(!showSubjectTypeToggle || subjectType === 'person') && (
+                            <div className="grid grid-cols-3 gap-2">
+                                <Field label="Putra/Putri ke-" value={data.bride_grooms[idx].child_order}
+                                    onChange={(v) => update(idx, 'child_order', v)} placeholder="Pertama"
+                                    error={errors[`bride_grooms.${idx}.child_order`]} />
+                                <Field label="Nama Ayah" value={data.bride_grooms[idx].father_name}
+                                    onChange={(v) => update(idx, 'father_name', v)}
+                                    error={errors[`bride_grooms.${idx}.father_name`]} />
+                                <Field label="Nama Ibu" value={data.bride_grooms[idx].mother_name}
+                                    onChange={(v) => update(idx, 'mother_name', v)}
+                                    error={errors[`bride_grooms.${idx}.mother_name`]} />
+                            </div>
+                        )}
 
                         {/* Bio */}
                         <div>

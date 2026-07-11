@@ -96,7 +96,7 @@ export default function Index({ users, filters }) {
                         <h2 className="text-xl font-bold text-[#1a1a1a]">Daftar User</h2>
                         <p className="text-[#999] text-sm mt-1">Kelola semua user yang terdaftar</p>
                     </div>
-                    {isSuperAdmin && (
+                    {(isSuperAdmin || auth.user.role === 'admin') && (
                         <Link href={`${adminRoutePrefix}/users/create`}
                             className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 bg-[#E5654B] text-white text-sm font-medium rounded-xl shadow-sm hover:bg-[#d55a42] hover:-translate-y-0.5 transition-all">
                             <Icon d="M12 4.5v15m7.5-7.5h-15" className="w-4 h-4" />
@@ -114,7 +114,7 @@ export default function Index({ users, filters }) {
                             className="w-full !pl-10 pr-4 py-2.5 bg-white border border-[#e8e5e0] rounded-xl text-sm text-[#333] placeholder-[#bbb] focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none"
                             style={{ paddingLeft: '2.5rem' }} />
                     </form>
-                    {isSuperAdmin && (
+                    {(isSuperAdmin || auth.user.role === 'admin') && (
                         <Link href={`${adminRoutePrefix}/users/create`}
                             className="sm:hidden flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-[#E5654B] text-white text-xs font-semibold rounded-xl shadow-sm hover:bg-[#d55a42] active:scale-95 transition-all whitespace-nowrap">
                             <Icon d="M12 4.5v15m7.5-7.5h-15" className="w-3.5 h-3.5" />
@@ -225,7 +225,7 @@ export default function Index({ users, filters }) {
                                                     <Link href={`${adminRoutePrefix}/users/${user.id}`} className="p-1.5 rounded-lg hover:bg-[#f5f3f0] text-[#999] hover:text-[#555] transition-colors" title="Detail">
                                                         <Icon d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-3.5 h-3.5" />
                                                     </Link>
-                                                    {isSuperAdmin && (
+                                                    {(isSuperAdmin || auth.user.role === 'admin' || auth.user.role === 'reseller') && (
                                                         <>
                                                             <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="p-1.5 rounded-lg hover:bg-[#f5f3f0] text-[#999] hover:text-[#555] transition-colors" title="Edit">
                                                                 <Icon d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" className="w-3.5 h-3.5" />
@@ -323,7 +323,7 @@ export default function Index({ users, filters }) {
                                             <Link href={`${adminRoutePrefix}/users/${user.id}`} className="p-1 rounded-md text-gray-500 hover:text-gray-700 bg-white border border-gray-200 transition-colors" title="Detail">
                                                 <Icon d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-3.5 h-3.5" />
                                             </Link>
-                                            {isSuperAdmin && (
+                                            {(isSuperAdmin || auth.user.role === 'admin' || auth.user.role === 'reseller') && (
                                                 <>
                                                     <Link href={`${adminRoutePrefix}/users/${user.id}/edit`} className="p-1 rounded-md text-gray-500 hover:text-gray-700 bg-white border border-gray-200 transition-colors" title="Edit">
                                                         <Icon d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" className="w-3.5 h-3.5" />

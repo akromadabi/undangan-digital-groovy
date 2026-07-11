@@ -4,9 +4,10 @@ import axios from 'axios';
 import { Info } from 'lucide-react';
 import WizardLayout from '@/Layouts/WizardLayout';
 
-export default function LinkStep({ step, currentSlug }) {
+export default function LinkStep({ step, currentSlug, defaultType = 'wedding' }) {
     const { data, setData, post, processing, errors } = useForm({
         slug: currentSlug || '',
+        type: defaultType,
     });
     
     const [checking, setChecking] = useState(false);
@@ -76,11 +77,36 @@ export default function LinkStep({ step, currentSlug }) {
         <WizardLayout currentStep={step} title="Pilih Link">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 max-w-lg mx-auto">
                 <div className="text-center mb-6">
-                    <h2 className="text-xl font-bold text-gray-800">Pilih Link Undangan</h2>
-                    <p className="text-gray-400 text-sm mt-1">Isi seperti contoh ini: "MiraRandi" atau "Mira-Randi"</p>
+                    <h2 className="text-xl font-bold text-gray-800">Buat Undangan Baru</h2>
+                    <p className="text-gray-400 text-sm mt-1">Pilih kategori acara dan tentukan link undangan Anda</p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
+                    <div className="mb-5 text-left">
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Jenis / Kategori Undangan</label>
+                        <select
+                            value={data.type}
+                            onChange={(e) => setData('type', e.target.value)}
+                            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-orange-400 focus:ring-0 focus:outline-none bg-white transition-colors text-gray-750 font-medium"
+                        >
+                            <option value="wedding">💍 Pernikahan (Wedding)</option>
+                            <option value="birthday">🎂 Ulang Tahun (Birthday / HUT)</option>
+                            <option value="graduation">🎓 Wisuda (Graduation)</option>
+                            <option value="aqiqah">👶 Aqiqah</option>
+                            <option value="circumcision">👦 Khitanan (Circumcision)</option>
+                            <option value="anniversary">💖 Hari Jadi (Anniversary)</option>
+                            <option value="general">✨ Umum / Acara Lainnya</option>
+                        </select>
+                        {errors.type && (
+                            <p className="text-xs text-red-500 font-medium mt-1">✗ {errors.type}</p>
+                        )}
+                    </div>
+
+                    <div className="mb-1.5 text-left">
+                        <label className="block text-sm font-semibold text-gray-700">Link Undangan</label>
+                        <p className="text-[11px] text-gray-400 font-normal">Isi seperti contoh: "mirarandi" atau "mira-randi"</p>
+                    </div>
+
                     <div className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors ${borderClass}`}>
                         <span className="bg-gray-50 px-4 py-3 text-sm text-gray-400 border-r whitespace-nowrap">
                             {typeof window !== 'undefined' ? window.location.origin.replace(/https?:\/\//, '') : 'undangan-digital.test'}/u/

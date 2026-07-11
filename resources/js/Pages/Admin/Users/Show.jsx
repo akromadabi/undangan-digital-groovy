@@ -51,7 +51,7 @@ export default function Show({ user, invitationsData = [], siteUrl }) {
             <div className="max-w-3xl space-y-6">
                 <div className="flex items-center justify-between">
                     <Link href={`${adminRoutePrefix}/users`} className="text-[#E5654B] hover:text-[#c94f3a] text-sm font-medium">← Kembali ke Users</Link>
-                    {isSuperAdmin && (
+                    {(isSuperAdmin || auth.user.role === 'admin' || auth.user.role === 'reseller') && (
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"

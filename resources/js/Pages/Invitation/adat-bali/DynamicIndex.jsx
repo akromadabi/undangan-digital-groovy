@@ -1850,8 +1850,8 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
 
     // Resolve labels dynamically
     const themeConfig = useMemo(() => {
-        return getThemeLabels(invitation?.event_type, lang, brideGrooms, invitation);
-    }, [invitation?.event_type, lang, brideGrooms, invitation]);
+        return getThemeLabels(invitation?.type || invitation?.event_type, lang, brideGrooms, invitation);
+    }, [invitation?.type, invitation?.event_type, lang, brideGrooms, invitation]);
 
     // Filter and resolve sections strictly
     const resolvedSections = useMemo(() => {
@@ -2145,7 +2145,14 @@ export default function DynamicIndex({ invitation, sections, brideGrooms, events
 
     return (
         <ErrorBoundary>
-            <Head title={invitation?.title || 'Undangan Pernikahan'} />
+            <Head title={invitation?.title || (
+                (invitation?.type || invitation?.event_type) === 'birthday' ? 'Undangan Ulang Tahun' :
+                (invitation?.type || invitation?.event_type) === 'graduation' ? 'Undangan Wisuda' :
+                (invitation?.type || invitation?.event_type) === 'aqiqah' ? 'Undangan Aqiqah' :
+                (invitation?.type || invitation?.event_type) === 'circumcision' ? 'Undangan Khitanan' :
+                (invitation?.type || invitation?.event_type) === 'anniversary' ? 'Undangan Anniversary' :
+                'Undangan Pernikahan'
+            )} />
             <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Montserrat:wght@200;300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet" />
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 

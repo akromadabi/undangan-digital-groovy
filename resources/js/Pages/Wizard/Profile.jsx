@@ -30,6 +30,29 @@ export default function Profile({ step, brideGrooms, eventType = 'wedding' }) {
         bride_grooms: initial,
     });
 
+    const showSubjectTypeToggle = isSingleSubject && ['birthday', 'general'].includes(eventType);
+
+    // Check if the existing data already has child_order, father_name, or mother_name filled
+    const hasFamilyData = initial?.[0]
+        ? !!(initial[0].child_order || initial[0].father_name || initial[0].mother_name)
+        : true;
+
+    const [subjectType, setSubjectType] = useState(hasFamilyData ? 'person' : 'business');
+
+    const handleSubjectTypeChange = (type) => {
+        setSubjectType(type);
+        if (type === 'business') {
+            const updated = [...data.bride_grooms];
+            updated[0] = {
+                ...updated[0],
+                child_order: '',
+                father_name: '',
+                mother_name: '',
+            };
+            setData('bride_grooms', updated);
+        }
+    };
+
     // Track which social media fields are visible per person
     const [visibleSocmed, setVisibleSocmed] = useState(() =>
         initial.map(bg => SOCMED_OPTIONS.filter(opt => bg[opt.key]).map(opt => opt.key))
@@ -123,45 +146,87 @@ export default function Profile({ step, brideGrooms, eventType = 'wedding' }) {
                         <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                             <h3 className="text-lg font-bold text-gray-800 mb-4">{getCardTitle(index)}</h3>
 
+                            {showSubjectTypeToggle && (
+                                <div className="mb-5 bg-gray-50 p-3.5 rounded-xl border border-gray-100">
+                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Tipe Penerima / Subjek</label>
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSubjectTypeChange('person')}
+                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                                                subjectType === 'person'
+                                                    ? 'bg-[#E5654B] text-white shadow-md'
+                                                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            👤 Orang / Individu
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSubjectTypeChange('business')}
+                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                                                subjectType === 'business'
+                                                    ? 'bg-[#E5654B] text-white shadow-md'
+                                                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            🏢 Bisnis / Instansi / Kafe
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="space-y-4">
                                 <InputField 
-                                    label="Nama Lengkap" 
+                                    label={subjectType === 'business' ? 'Nama Instansi / Bisnis / Acara' : 'Nama Lengkap'} 
                                     value={data.bride_grooms[index].full_name}
                                     onChange={(v) => updateField(index, 'full_name', v)} 
                                     required
+                                    placeholder={
+                                        subjectType === 'business'
+                                            ? 'Contoh: GEBYAR HUT KE 29 TAPIAN NAULI CAFE'
+                                            : 'Nama Lengkap'
+                                    }
                                     error={errors[`bride_grooms.${index}.full_name`]}
                                 />
                                 <InputField 
-                                    label="Nama Panggilan" 
+                                    label={subjectType === 'business' ? 'Nama Singkat / Brand' : 'Nama Panggilan'} 
                                     value={data.bride_grooms[index].nickname}
                                     onChange={(v) => updateField(index, 'nickname', v)}
+                                    placeholder={
+                                        subjectType === 'business'
+                                            ? 'Contoh: TAPIAN NAULI CAFE'
+                                            : 'Nama panggilan'
+                                    }
                                     error={errors[`bride_grooms.${index}.nickname`]}
                                 />
-                                <div className="space-y-3">
-                                    <InputField 
-                                        label="Putra/Putri ke-" 
-                                        value={data.bride_grooms[index].child_order}
-                                        placeholder="Contoh: Pertama, Kedua" 
-                                        onChange={(v) => updateField(index, 'child_order', v)}
-                                        error={errors[`bride_grooms.${index}.child_order`]}
-                                    />
-                                    <div className="grid grid-cols-2 gap-3">
+                                {(!showSubjectTypeToggle || subjectType === 'person') && (
+                                    <div className="space-y-3">
                                         <InputField 
-                                            label="Nama Ayah" 
-                                            value={data.bride_grooms[index].father_name}
-                                            placeholder="Nama Ayah" 
-                                            onChange={(v) => updateField(index, 'father_name', v)}
-                                            error={errors[`bride_grooms.${index}.father_name`]}
+                                            label="Putra/Putri ke-" 
+                                            value={data.bride_grooms[index].child_order}
+                                            placeholder="Contoh: Pertama, Kedua" 
+                                            onChange={(v) => updateField(index, 'child_order', v)}
+                                            error={errors[`bride_grooms.${index}.child_order`]}
                                         />
-                                        <InputField 
-                                            label="Nama Ibu" 
-                                            value={data.bride_grooms[index].mother_name}
-                                            placeholder="Nama Ibu" 
-                                            onChange={(v) => updateField(index, 'mother_name', v)}
-                                            error={errors[`bride_grooms.${index}.mother_name`]}
-                                        />
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <InputField 
+                                                label="Nama Ayah" 
+                                                value={data.bride_grooms[index].father_name}
+                                                placeholder="Nama Ayah" 
+                                                onChange={(v) => updateField(index, 'father_name', v)}
+                                                error={errors[`bride_grooms.${index}.father_name`]}
+                                            />
+                                            <InputField 
+                                                label="Nama Ibu" 
+                                                value={data.bride_grooms[index].mother_name}
+                                                placeholder="Nama Ibu" 
+                                                onChange={(v) => updateField(index, 'mother_name', v)}
+                                                error={errors[`bride_grooms.${index}.mother_name`]}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 {!isSingleSubject && (
                                     <div>

@@ -200,7 +200,7 @@ class DashboardController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:wedding,birthday,graduation,aqiqah,circumcision,anniversary',
+            'type' => 'required|string|in:wedding,birthday,graduation,aqiqah,circumcision,anniversary,general',
             'title' => 'required|string|max:100',
         ]);
 
@@ -209,14 +209,17 @@ class DashboardController extends Controller
         $type = $request->input('type');
         $title = $request->input('title');
         
-        $openingText = "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan acara tersebut.";
-        if ($type === 'wedding') {
-            $openingText = "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan kami.";
-        } elseif ($type === 'birthday') {
-            $openingText = "Halo teman-teman, datang ya ke acara ulang tahunku!";
-        } elseif ($type === 'graduation') {
-            $openingText = "Dengan memohon doa restu, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri syukuran wisuda kami.";
-        }
+        $defaultOpeningTexts = [
+            'wedding' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan putra-putri kami.",
+            'birthday' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran ulang tahun.",
+            'graduation' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran kelulusan/wisuda.",
+            'aqiqah' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran aqiqah putra-putri kami.",
+            'circumcision' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran khitanan putra kami.",
+            'anniversary' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan acara syukuran hari jadi / anniversary.",
+            'general' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran kami.",
+        ];
+
+        $openingText = $defaultOpeningTexts[$type] ?? $defaultOpeningTexts['general'];
 
         $invitation = $user->invitations()->create([
             'slug' => 'temp-slug-' . time() . '-' . rand(10, 99),

@@ -571,7 +571,14 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
 
     return (
         <>
-            <Head title={invitation.title || 'Undangan Pernikahan'} />
+            <Head title={invitation.title || (
+                invitation.type === 'birthday' ? 'Undangan Ulang Tahun' :
+                invitation.type === 'graduation' ? 'Undangan Wisuda' :
+                invitation.type === 'aqiqah' ? 'Undangan Aqiqah' :
+                invitation.type === 'circumcision' ? 'Undangan Khitanan' :
+                invitation.type === 'anniversary' ? 'Undangan Anniversary' :
+                'Undangan Pernikahan'
+            )} />
             <link href={googleFonts} rel="stylesheet" />
             <style dangerouslySetInnerHTML={{
                 __html: `

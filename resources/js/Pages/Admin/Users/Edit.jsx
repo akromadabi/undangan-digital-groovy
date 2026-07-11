@@ -26,6 +26,7 @@ const eventLabels = {
 
 export default function Edit({ user, plans }) {
     const { auth, adminRoutePrefix } = usePage().props;
+    const isSuperAdmin = auth.user.role === 'super_admin';
 
     const { data, setData, put, processing, errors } = useForm({
         name: user.name || '',
@@ -63,7 +64,7 @@ export default function Edit({ user, plans }) {
     const handleResetPassword = (e) => {
         e.preventDefault();
         setPwProcessing(true);
-        router.post(`/super-admin/users/${user.id}/reset-password`, pw, {
+        router.post(`${adminRoutePrefix}/users/${user.id}/reset-password`, pw, {
             preserveScroll: true,
             onSuccess: () => { setPw({ password: '', password_confirmation: '' }); setPwMsg('Password berhasil direset!'); },
             onError: (errs) => { setPwMsg('' + Object.values(errs).flat().join(', ')); },
@@ -220,120 +221,124 @@ export default function Edit({ user, plans }) {
                     </form>
                 </div>
 
-                {/* ═══ Change Plan / Kelas ═══ */}
-                <div className={cardClass}>
-                    <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2"><Package size={18} className="text-blue-500" /> Ubah Paket / Kelas</h3>
-                    <div className="flex items-center gap-2 text-sm text-[#999]">
-                        <span>Paket saat ini:</span>
-                        <span className="font-bold text-[#E5654B]">{subscription?.plan?.name || 'Belum ada'}</span>
-                    </div>
-                    <div className="max-w-md">
-                        <select
-                            value={selectedPlan}
-                            onChange={(e) => setSelectedPlan(e.target.value)}
-                            className={inputClass}
-                        >
-                            {plans.map(p => (
-                                <option key={p.id} value={p.id}>
-                                    {p.name} — {p.price > 0 ? `Rp ${Number(p.price).toLocaleString('id-ID')}` : 'Gratis'}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <button type="button" onClick={handleChangePlan} disabled={planProcessing}
-                            className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5">
-                            {planProcessing ? <><RotateCw size={14} className="animate-spin" /> Mengubah...</> : <><Package size={14} /> Ubah Paket</>}
-                        </button>
-                        {planMsg && <span className="text-sm font-medium">{planMsg}</span>}
-                    </div>
-                </div>
-
-                {/* ═══ Extend Subscription ═══ */}
-                <div className={cardClass}>
-                    <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2"><CalendarClock size={18} className="text-emerald-500" /> Perpanjang Masa Aktif</h3>
-                    <div className="flex items-center gap-2 text-sm text-[#999]">
-                        <span>Berakhir saat ini:</span>
-                        <span className="font-bold text-[#333]">
-                            {subscription?.expires_at ? new Date(subscription.expires_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tidak terbatas'}
-                        </span>
-                    </div>
-                    <div className="max-w-xs">
-                        <label className={labelClass}>Tambah Durasi (Cepat)</label>
-                        <select 
-                            onChange={(e) => {
-                                if (e.target.value) {
-                                    quickExtend(Number(e.target.value));
-                                }
-                            }}
-                            className={inputClass}
-                            defaultValue=""
-                        >
-                            <option value="">-- Pilih Durasi Tambahan --</option>
-                            <option value="1">+1 Bulan</option>
-                            <option value="3">+3 Bulan</option>
-                            <option value="6">+6 Bulan</option>
-                            <option value="12">+12 Bulan</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className={labelClass}>Tanggal Berakhir Baru</label>
-                        <input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)}
-                            min={new Date().toISOString().split('T')[0]} className={inputClass + ' max-w-xs'} />
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <button type="button" onClick={handleExtend} disabled={extProcessing || !expiresAt}
-                            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5">
-                            {extProcessing ? <><RotateCw size={14} className="animate-spin" /> Memperpanjang...</> : <><CalendarClock size={14} /> Perpanjang</>}
-                        </button>
-                        {extMsg && <span className="text-sm font-medium">{extMsg}</span>}
-                    </div>
-                </div>
-
-                {/* ═══ Kelola Kartu Ucapan ═══ */}
-                {user.greeting_cards && user.greeting_cards.length > 0 && (
-                    <div className={cardClass}>
-                        <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2">
-                            <FileText size={18} className="text-pink-500" /> Kelola Kartu Ucapan
-                        </h3>
-                        <p className="text-xs text-[#999] -mt-2">
-                            Aktifkan atau nonaktifkan kartu ucapan milik user secara manual.
-                        </p>
-                        
-                        <div className="space-y-3">
-                            {user.greeting_cards.map((card) => (
-                                <div key={card.id} className="flex items-center justify-between p-4 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl hover:shadow-sm transition-all">
-                                    <div>
-                                        <div className="font-bold text-gray-800 text-sm">{card.title || 'Tanpa Judul'}</div>
-                                        <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
-                                            <span>Template: <strong className="text-gray-700">{card.template}</strong></span>
-                                            <span>•</span>
-                                            <span>Tipe: <strong className="text-gray-700">{card.type}</strong></span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4 bg-[#fcfbfa] border border-[#e8e5e0]/60 px-4 py-2 rounded-xl">
-                                        <span className={`text-xs font-bold transition-colors ${card.is_active ? 'text-emerald-600' : 'text-gray-400'}`}>
-                                            {card.is_active ? 'Aktif' : 'Tidak Aktif'}
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                router.post(`/super-admin/greeting-cards/${card.id}/toggle-active`, {}, {
-                                                    preserveScroll: true
-                                                });
-                                            }}
-                                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none ${card.is_active ? 'bg-emerald-500' : 'bg-gray-200'}`}
-                                            style={{ padding: '2px' }}
-                                        >
-                                            <span
-                                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${card.is_active ? 'translate-x-5' : 'translate-x-0'}`}
-                                            />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                {isSuperAdmin && (
+                    <>
+                        {/* ═══ Change Plan / Kelas ═══ */}
+                        <div className={cardClass}>
+                            <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2"><Package size={18} className="text-blue-500" /> Ubah Paket / Kelas</h3>
+                            <div className="flex items-center gap-2 text-sm text-[#999]">
+                                <span>Paket saat ini:</span>
+                                <span className="font-bold text-[#E5654B]">{subscription?.plan?.name || 'Belum ada'}</span>
+                            </div>
+                            <div className="max-w-md">
+                                <select
+                                    value={selectedPlan}
+                                    onChange={(e) => setSelectedPlan(e.target.value)}
+                                    className={inputClass}
+                                >
+                                    {plans.map(p => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.name} — {p.price > 0 ? `Rp ${Number(p.price).toLocaleString('id-ID')}` : 'Gratis'}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button type="button" onClick={handleChangePlan} disabled={planProcessing}
+                                    className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5">
+                                    {planProcessing ? <><RotateCw size={14} className="animate-spin" /> Mengubah...</> : <><Package size={14} /> Ubah Paket</>}
+                                </button>
+                                {planMsg && <span className="text-sm font-medium">{planMsg}</span>}
+                            </div>
                         </div>
-                    </div>
+
+                        {/* ═══ Extend Subscription ═══ */}
+                        <div className={cardClass}>
+                            <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2"><CalendarClock size={18} className="text-emerald-500" /> Perpanjang Masa Aktif</h3>
+                            <div className="flex items-center gap-2 text-sm text-[#999]">
+                                <span>Berakhir saat ini:</span>
+                                <span className="font-bold text-[#333]">
+                                    {subscription?.expires_at ? new Date(subscription.expires_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tidak terbatas'}
+                                </span>
+                            </div>
+                            <div className="max-w-xs">
+                                <label className={labelClass}>Tambah Durasi (Cepat)</label>
+                                <select 
+                                    onChange={(e) => {
+                                        if (e.target.value) {
+                                            quickExtend(Number(e.target.value));
+                                        }
+                                    }}
+                                    className={inputClass}
+                                    defaultValue=""
+                                >
+                                    <option value="">-- Pilih Durasi Tambahan --</option>
+                                    <option value="1">+1 Bulan</option>
+                                    <option value="3">+3 Bulan</option>
+                                    <option value="6">+6 Bulan</option>
+                                    <option value="12">+12 Bulan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className={labelClass}>Tanggal Berakhir Baru</label>
+                                <input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)}
+                                    min={new Date().toISOString().split('T')[0]} className={inputClass + ' max-w-xs'} />
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button type="button" onClick={handleExtend} disabled={extProcessing || !expiresAt}
+                                    className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5">
+                                    {extProcessing ? <><RotateCw size={14} className="animate-spin" /> Memperpanjang...</> : <><CalendarClock size={14} /> Perpanjang</>}
+                                </button>
+                                {extMsg && <span className="text-sm font-medium">{extMsg}</span>}
+                            </div>
+                        </div>
+
+                        {/* ═══ Kelola Kartu Ucapan ═══ */}
+                        {user.greeting_cards && user.greeting_cards.length > 0 && (
+                            <div className={cardClass}>
+                                <h3 className="font-bold text-[#1a1a1a] text-lg flex items-center gap-2">
+                                    <FileText size={18} className="text-pink-500" /> Kelola Kartu Ucapan
+                                </h3>
+                                <p className="text-xs text-[#999] -mt-2">
+                                    Aktifkan atau nonaktifkan kartu ucapan milik user secara manual.
+                                </p>
+                                
+                                <div className="space-y-3">
+                                    {user.greeting_cards.map((card) => (
+                                        <div key={card.id} className="flex items-center justify-between p-4 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl hover:shadow-sm transition-all">
+                                            <div>
+                                                <div className="font-bold text-gray-800 text-sm">{card.title || 'Tanpa Judul'}</div>
+                                                <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                                    <span>Template: <strong className="text-gray-700">{card.template}</strong></span>
+                                                    <span>•</span>
+                                                    <span>Tipe: <strong className="text-gray-700">{card.type}</strong></span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4 bg-[#fcfbfa] border border-[#e8e5e0]/60 px-4 py-2 rounded-xl">
+                                                <span className={`text-xs font-bold transition-colors ${card.is_active ? 'text-emerald-600' : 'text-gray-400'}`}>
+                                                    {card.is_active ? 'Aktif' : 'Tidak Aktif'}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        router.post(`/super-admin/greeting-cards/${card.id}/toggle-active`, {}, {
+                                                            preserveScroll: true
+                                                        });
+                                                    }}
+                                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none ${card.is_active ? 'bg-emerald-500' : 'bg-gray-200'}`}
+                                                    style={{ padding: '2px' }}
+                                                >
+                                                    <span
+                                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${card.is_active ? 'translate-x-5' : 'translate-x-0'}`}
+                                                    />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 <hr className="border-[#e8e5e0]" />

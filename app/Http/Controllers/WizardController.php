@@ -35,6 +35,7 @@ class WizardController extends Controller
         return Inertia::render('Wizard/Link', [
             'step' => 1,
             'currentSlug' => $invitation?->slug,
+            'defaultType' => $invitation?->type ?? $request->query('type') ?? $request->query('category') ?? 'wedding',
         ]);
     }
 
@@ -59,10 +60,14 @@ class WizardController extends Controller
 
     public function saveLink(Request $request)
     {
-        $request->validate(['slug' => 'required|string|min:3|max:50']);
+        $request->validate([
+            'slug' => 'required|string|min:3|max:50',
+            'type' => 'required|string|in:wedding,birthday,graduation,aqiqah,circumcision,anniversary,general',
+        ]);
 
         $user = $request->user();
         $slug = Str::slug($request->slug);
+        $type = $request->type;
 
         // Check availability again
         $exists = Invitation::where('slug', $slug)
@@ -73,15 +78,32 @@ class WizardController extends Controller
             return back()->withErrors(['slug' => 'Link sudah dipakai. Silakan pilih link lain.']);
         }
 
+        // Determine default opening text based on chosen type
+        $defaultOpeningTexts = [
+            'wedding' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan putra-putri kami.",
+            'birthday' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran ulang tahun.",
+            'graduation' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran kelulusan/wisuda.",
+            'aqiqah' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran aqiqah putra-putri kami.",
+            'circumcision' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran khitanan putra kami.",
+            'anniversary' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan acara syukuran hari jadi / anniversary.",
+            'general' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara syukuran kami.",
+        ];
+
+        $openingText = $defaultOpeningTexts[$type] ?? $defaultOpeningTexts['general'];
+
         $invitation = $user->invitation;
         if ($invitation) {
-            $invitation->update(['slug' => $slug]);
+            $invitation->update([
+                'slug' => $slug,
+                'type' => $type,
+            ]);
         } else {
             Invitation::create([
                 'user_id' => $user->id,
                 'slug' => $slug,
+                'type' => $type,
                 'opening_title' => 'Bismillahirrahmanirrahim',
-                'opening_text' => "Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nDengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan acara pernikahan putra-putri kami.",
+                'opening_text' => $openingText,
                 'opening_ayat' => 'وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً',
                 'closing_text' => "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu.\n\nAtas kehadiran dan doa restunya, kami mengucapkan terima kasih.\n\nWassalamu'alaikum Warahmatullahi Wabarakatuh",
             ]);

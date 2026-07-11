@@ -39,7 +39,8 @@ class AdminUserController extends Controller
 
     public function create()
     {
-        if (!auth()->user()->isSuperAdmin()) {
+        $currentUser = auth()->user();
+        if (!$currentUser->isSuperAdmin() && !$currentUser->isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -48,30 +49,43 @@ class AdminUserController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->user()->isSuperAdmin()) {
+        $currentUser = auth()->user();
+        if (!$currentUser->isSuperAdmin() && !$currentUser->isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|string|in:user,editor',
             'is_active' => 'boolean',
-        ]);
+        ];
+
+        if ($currentUser->isSuperAdmin()) {
+            $rules['role'] = 'required|string|in:user,editor';
+        } else {
+            $rules['role'] = 'nullable|string|in:user';
+        }
+
+        $request->validate($rules);
+
+        $role = $currentUser->isSuperAdmin() ? $request->role : 'user';
+        $resellerId = $currentUser->isSuperAdmin() ? null : $currentUser->id;
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'role' => $role,
             'is_active' => $request->is_active ?? true,
-            'onboarding_step' => $request->role === 'editor' ? 6 : 2,
+            'onboarding_step' => $role === 'editor' ? 6 : 2,
+            'reseller_id' => $resellerId,
         ]);
 
-        return redirect()->route('super-admin.users.index')->with('success', 'User berhasil ditambahkan.');
+        $routePrefix = $currentUser->isSuperAdmin() ? 'super-admin' : 'admin';
+        return redirect()->route($routePrefix . '.users.index')->with('success', 'User berhasil ditambahkan.');
     }
 
     public function show(User $user)
@@ -120,8 +134,11 @@ class AdminUserController extends Controller
 
     public function edit(User $user)
     {
-        if (!auth()->user()->isSuperAdmin()) {
-            abort(403, 'Unauthorized action.');
+        $currentUser = auth()->user();
+        if (!$currentUser->isSuperAdmin()) {
+            if (!$currentUser->isAdmin() || $user->reseller_id !== $currentUser->id) {
+                abort(403, 'Unauthorized action.');
+            }
         }
 
         $user->load([
@@ -140,16 +157,18 @@ class AdminUserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        if (!auth()->user()->isSuperAdmin()) {
-            abort(403, 'Unauthorized action.');
+        $currentUser = auth()->user();
+        if (!$currentUser->isSuperAdmin()) {
+            if (!$currentUser->isAdmin() || $user->reseller_id !== $currentUser->id) {
+                abort(403, 'Unauthorized action.');
+            }
         }
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
-            'role' => 'required|string|in:user,editor',
             // Multiple invitations validation
             'invitations' => 'nullable|array',
             'invitations.*.id' => 'required|exists:invitations,id',
@@ -162,10 +181,22 @@ class AdminUserController extends Controller
             'invitations.*.closing_text' => 'nullable|string',
             'invitations.*.cover_title' => 'nullable|string|max:255',
             'invitations.*.cover_subtitle' => 'nullable|string|max:255',
-        ]);
+        ];
+
+        if ($currentUser->isSuperAdmin()) {
+            $rules['role'] = 'required|string|in:user,editor';
+        } else {
+            $rules['role'] = 'nullable|string|in:user';
+        }
+
+        $request->validate($rules);
 
         // Update user
-        $user->update($request->only(['name', 'email', 'phone', 'is_active', 'role']));
+        $updateData = $request->only(['name', 'email', 'phone', 'is_active']);
+        if ($currentUser->isSuperAdmin() && $request->has('role')) {
+            $updateData['role'] = $request->role;
+        }
+        $user->update($updateData);
 
         // Update invitations
         if ($request->has('invitations')) {
@@ -182,8 +213,11 @@ class AdminUserController extends Controller
 
     public function destroy(User $user)
     {
-        if (!auth()->user()->isSuperAdmin()) {
-            abort(403, 'Unauthorized action.');
+        $currentUser = auth()->user();
+        if (!$currentUser->isSuperAdmin()) {
+            if (!$currentUser->isAdmin() || $user->reseller_id !== $currentUser->id) {
+                abort(403, 'Unauthorized action.');
+            }
         }
 
         $user->delete();
@@ -192,8 +226,11 @@ class AdminUserController extends Controller
 
     public function resetPassword(Request $request, User $user)
     {
-        if (!auth()->user()->isSuperAdmin()) {
-            abort(403, 'Unauthorized action.');
+        $currentUser = auth()->user();
+        if (!$currentUser->isSuperAdmin()) {
+            if (!$currentUser->isAdmin() || $user->reseller_id !== $currentUser->id) {
+                abort(403, 'Unauthorized action.');
+            }
         }
 
         $request->validate([
