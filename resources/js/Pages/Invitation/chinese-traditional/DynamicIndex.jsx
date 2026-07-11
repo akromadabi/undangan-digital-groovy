@@ -857,7 +857,7 @@ export default function DynamicIndex({
     }, [invitation]);
 
     const resolvedCoverTitle = useMemo(() => {
-        if (invitation?.cover_title && invitation.cover_title.trim() !== '') {
+        if (invitation?.cover_title && invitation.cover_title.trim() !== '' && invitation.cover_title !== 'Zhao & Lin') {
             return invitation.cover_title;
         }
         
@@ -870,6 +870,10 @@ export default function DynamicIndex({
                 const name2 = subjects[1].nickname || subjects[1].full_name?.split(' ')[0] || '';
                 return `${name1} & ${name2}`;
             }
+        }
+        
+        if (invitation?.cover_title === 'Zhao & Lin') {
+            return invitation.cover_title;
         }
         
         if (invitation?.type === 'birthday') return 'Happy Birthday';

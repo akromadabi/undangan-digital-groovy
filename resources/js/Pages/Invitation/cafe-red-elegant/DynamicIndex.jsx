@@ -109,12 +109,25 @@ function useCountdown(targetDate, startTime) {
     return cd;
 }
 
+// Title Case helper for latin/script font fields
+function toTitleCase(str) {
+    if (!str) return '';
+    return str
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
 // Title Case conversion to prevent cursive capital text issue
 function formatScriptTitle(title) {
     if (!title) return '';
     const clean = String(title).trim().toUpperCase();
     if (clean === 'THANK YOU') return 'Thank You';
     if (clean === 'TERIMA KASIH') return 'Terima Kasih';
+    if (title === title.toUpperCase()) {
+        return toTitleCase(title);
+    }
     return title;
 }
 
@@ -346,7 +359,7 @@ function BrideGroomSection({ brideGrooms, invitation, locale }) {
                     )}
                 </div>
                 <h3 className="cre-card-title">{person.full_name}</h3>
-                {person.nickname && <div className="cre-card-sub">{person.nickname}</div>}
+                {person.nickname && <div className="cre-card-sub">{toTitleCase(person.nickname)}</div>}
                 {person.bio && <p className="cre-card-bio">"{person.bio}"</p>}
                 
                 {/* Parents names (hide for business/cafe types) */}
