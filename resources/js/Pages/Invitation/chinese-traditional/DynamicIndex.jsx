@@ -187,6 +187,7 @@ function CoverSection({ invitation, isOpened, onOpen, coverImages, guest, resolv
     const isWedding = invitation?.type !== 'birthday' && invitation?.type !== 'general' && invitation?.type !== 'anniversary';
     const coverBadge = invitation?.type === 'birthday' ? 'Birthday Invitation' : (invitation?.type === 'anniversary' ? 'Anniversary Invitation' : (isWedding ? 'The Wedding Invitation' : 'Special Invitation'));
     const emblem = invitation?.type === 'birthday' ? '壽' : (invitation?.type === 'general' || invitation?.type === 'anniversary' ? '福' : '囍');
+    const defaultTitle = invitation?.type === 'birthday' ? 'Happy Birthday' : (invitation?.type === 'anniversary' ? 'Happy Anniversary' : (invitation?.type === 'general' ? 'Celebration' : 'Zhao & Lin'));
     
     return (
         <div className={`chi-cover ${isOpened ? 'opened' : ''}`} style={{
@@ -216,7 +217,7 @@ function CoverSection({ invitation, isOpened, onOpen, coverImages, guest, resolv
                 <div className="chi-cover-center">
                     <div className="chi-double-happiness-logo">{emblem}</div>
                     <h1 className="chi-cover-title">
-                        {invitation?.cover_title || 'Zhao & Lin'}
+                        {invitation?.cover_title || defaultTitle}
                     </h1>
                     <p className="chi-cover-subtitle">
                         {resolvedContent.coverSubtitle}
@@ -298,6 +299,10 @@ function OpeningSection({ invitation, resolvedContent }) {
 // 3. MEMPELAI / SUBJEK SECTION
 function BrideGroomSection({ invitation, brideGrooms, isSingleSubject }) {
     const safeSubjects = safeArr(brideGrooms);
+    const isWedding = invitation?.type !== 'birthday' && invitation?.type !== 'general' && invitation?.type !== 'anniversary';
+    const sectionTitle = isWedding 
+        ? (isSingleSubject ? 'Profil Penyelenggara' : 'Mempelai / Profil')
+        : (isSingleSubject ? 'Profil Yang Berbahagia' : 'Profil Penyelenggara');
     
     return (
         <section id="bride_groom" className="chi-section chi-section-dark-red">
@@ -310,7 +315,7 @@ function BrideGroomSection({ invitation, brideGrooms, isSingleSubject }) {
             <div className="chi-section-content">
                 <Reveal variant="zoom">
                     <h2 className="chi-heading-gold">
-                        {isSingleSubject ? 'Profil Penyelenggara' : 'Mempelai / Profil'}
+                        {sectionTitle}
                     </h2>
                 </Reveal>
                 <div className="chi-section-subtitle">Meet the Celebrants</div>
@@ -455,10 +460,12 @@ function LoveStorySection({ loveStories }) {
     );
 }
 
-// 6. AGENDA ACARA SECTION
-function EventSection({ events }) {
+// 6. AGENDA / EVENT SECTION
+function EventSection({ events, invitation }) {
     const safeEvents = safeArr(events);
     if (safeEvents.length === 0) return null;
+    
+    const isWedding = invitation?.type !== 'birthday' && invitation?.type !== 'general' && invitation?.type !== 'anniversary';
     
     return (
         <section id="event" className="chi-section chi-section-light">
@@ -484,7 +491,12 @@ function EventSection({ events }) {
                                 <div className="chi-corner-gold chi-corner-bottom-right" style={{ width: 25, height: 25 }} />
 
                                 <div className="chi-event-card-header">
-                                    <div className="chi-event-badge">{evt.event_type === 'utama' ? 'Utama' : 'Resepsi'}</div>
+                                    <div className="chi-event-badge">
+                                        {isWedding 
+                                            ? (evt.event_type === 'utama' ? 'Akad / Pemberkatan' : 'Resepsi')
+                                            : (evt.event_type === 'utama' ? 'Acara Utama' : 'Pesta / Perayaan')
+                                        }
+                                    </div>
                                     <h3 className="chi-event-name">{evt.event_name}</h3>
                                 </div>
                                 
@@ -1020,7 +1032,7 @@ export default function DynamicIndex({
                                 element = <LoveStorySection loveStories={loveStories} />;
                                 break;
                             case 'event':
-                                element = <EventSection events={events} />;
+                                element = <EventSection events={events} invitation={invitation} />;
                                 break;
                             case 'gallery':
                                 element = <GallerySection galleries={galleries} />;
