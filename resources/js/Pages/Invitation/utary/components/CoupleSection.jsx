@@ -42,10 +42,20 @@ export default function CoupleSection({ RevealDiv, brideGrooms }) {
                                 />
                             </div>
                             <h3 className="utary-profile__name">{bg.full_name?.toUpperCase()}</h3>
-                            <p className="utary-profile__role">{bg.gender === 'wanita' ? 'PUTRI' : 'PUTRA'} {bg.child_order && `KEDUA`} DARI</p>
-                            <p className="utary-profile__parents">
-                                Bapak {bg.father_name || 'Bapak'}<br />&amp; Ibu {bg.mother_name || 'Ibu'}
-                            </p>
+                            {((bg.father_name && bg.father_name.trim() !== '' && bg.father_name !== 'Bapak') || (bg.mother_name && bg.mother_name.trim() !== '' && bg.mother_name !== 'Ibu')) && (
+                                <>
+                                    <p className="utary-profile__role">{bg.gender === 'wanita' ? 'PUTRI' : 'PUTRA'} {bg.child_order ? `${String(bg.child_order).toUpperCase()}` : ''} DARI</p>
+                                    <p className="utary-profile__parents">
+                                        {bg.father_name && bg.mother_name && bg.father_name !== 'Bapak' && bg.mother_name !== 'Ibu' ? (
+                                            <>Bapak {bg.father_name}<br />&amp; Ibu {bg.mother_name}</>
+                                        ) : (bg.father_name && bg.father_name !== 'Bapak') ? (
+                                            <>Bapak {bg.father_name}</>
+                                        ) : (
+                                            <>Ibu {bg.mother_name}</>
+                                        )}
+                                    </p>
+                                </>
+                            )}
                             {bg.instagram && (
                                 <a href={`https://www.instagram.com/${bg.instagram}`} className="utary-profile__social" target="_blank" rel="noopener noreferrer">
                                     <i className="fab fa-instagram" /> {bg.instagram?.toUpperCase()}

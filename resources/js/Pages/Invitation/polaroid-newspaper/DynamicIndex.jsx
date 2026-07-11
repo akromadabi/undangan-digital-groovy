@@ -485,15 +485,27 @@ function BrideGroomSection({ brideGrooms, showPhotos, invitation }) {
                         )}
 
                         <h3 className="pn-couple-fullname">{groom.full_name}</h3>
-                        <p className="pn-couple-parent">
-                            {translateChildOrder(groom.child_order, 'pria', activeLang).toUpperCase()} {isEn ? 'OF' : 'DARI'}
-                            <br />
-                            <span className="font-semibold">{groom.father_name && `${isEn ? 'MR. ' : 'BAPAK '}${String(groom.father_name).toUpperCase()}`}</span>
-                            <br />
-                            {isEn ? 'AND' : '&'}
-                            <br />
-                            <span className="font-semibold">{groom.mother_name && `${isEn ? 'MRS. ' : 'IBU '}${String(groom.mother_name).toUpperCase()}`}</span>
-                        </p>
+                        {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                            <p className="pn-couple-parent">
+                                {translateChildOrder(groom.child_order, 'pria', activeLang).toUpperCase()} {isEn ? 'OF' : 'DARI'}
+                                <br />
+                                {groom.father_name && (
+                                    <>
+                                        <span className="font-semibold">{`${isEn ? 'MR. ' : 'BAPAK '}${String(groom.father_name).toUpperCase()}`}</span>
+                                        {groom.mother_name && <br />}
+                                    </>
+                                )}
+                                {groom.father_name && groom.mother_name && (
+                                    <>
+                                        {isEn ? 'AND' : '&'}
+                                        <br />
+                                    </>
+                                )}
+                                {groom.mother_name && (
+                                    <span className="font-semibold">{`${isEn ? 'MRS. ' : 'IBU '}${String(groom.mother_name).toUpperCase()}`}</span>
+                                )}
+                            </p>
+                        )}
 
                         {groom.bio && <p className="pn-couple-bio">"{groom.bio}"</p>}
 
@@ -529,15 +541,27 @@ function BrideGroomSection({ brideGrooms, showPhotos, invitation }) {
                         )}
 
                         <h3 className="pn-couple-fullname">{bride.full_name}</h3>
-                        <p className="pn-couple-parent">
-                            {translateChildOrder(bride.child_order, 'wanita', activeLang).toUpperCase()} {isEn ? 'OF' : 'DARI'}
-                            <br />
-                            <span className="font-semibold">{bride.father_name && `${isEn ? 'MR. ' : 'BAPAK '}${String(bride.father_name).toUpperCase()}`}</span>
-                            <br />
-                            {isEn ? 'AND' : '&'}
-                            <br />
-                            <span className="font-semibold">{bride.mother_name && `${isEn ? 'MRS. ' : 'IBU '}${String(bride.mother_name).toUpperCase()}`}</span>
-                        </p>
+                        {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                            <p className="pn-couple-parent">
+                                {translateChildOrder(bride.child_order, 'wanita', activeLang).toUpperCase()} {isEn ? 'OF' : 'DARI'}
+                                <br />
+                                {bride.father_name && (
+                                    <>
+                                        <span className="font-semibold">{`${isEn ? 'MR. ' : 'BAPAK '}${String(bride.father_name).toUpperCase()}`}</span>
+                                        {bride.mother_name && <br />}
+                                    </>
+                                )}
+                                {bride.father_name && groom.mother_name && (
+                                    <>
+                                        {isEn ? 'AND' : '&'}
+                                        <br />
+                                    </>
+                                )}
+                                {bride.mother_name && (
+                                    <span className="font-semibold">{`${isEn ? 'MRS. ' : 'IBU '}${String(bride.mother_name).toUpperCase()}`}</span>
+                                )}
+                            </p>
+                        )}
 
                         {bride.bio && <p className="pn-couple-bio">"{bride.bio}"</p>}
 

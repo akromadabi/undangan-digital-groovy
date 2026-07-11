@@ -616,7 +616,9 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
                     </div>
                 )}
                 <p className="nf-couple__full-name">{person.full_name}</p>
-                <p className="nf-couple__child-info">
+                {((person.father_name && person.father_name.trim() !== '') || (person.mother_name && person.mother_name.trim() !== '') || person.parents_name) && (
+                        <>
+                            <p className="nf-couple__child-info">
                     {translateChildOrder(person.child_order, person.gender === 'wanita' ? 'wanita' : 'pria') || 
                      (person.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of'))}
                 </p>
@@ -624,6 +626,8 @@ function BrideGroomSection({ invitation, brideGrooms, events, id }) {
                     {[person.father_name, person.mother_name].filter(Boolean).join(' & ')
                         || person.parents_name || ''}
                 </p>
+                        </>
+                    )}
                 {person.instagram && (
                     <a href={`https://www.instagram.com/${person.instagram.replace('@','')}`}
                         target="_blank" rel="noreferrer" className="nf-couple__ig">

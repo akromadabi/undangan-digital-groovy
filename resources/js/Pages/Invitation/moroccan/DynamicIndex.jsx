@@ -599,17 +599,27 @@ function CoupleSection({ brideGrooms, language, id, themeConfig }) {
                 <Reveal variant="up" delay={100}>
                     <h3 className="mc-profile-name">{m.full_name}</h3>
                 </Reveal>
-                <Reveal variant="up" delay={200}>
-                    <div className="mc-profile-child-order">
-                        {translateChildOrder(m.child_order, m.gender, isEn)}
-                    </div>
-                </Reveal>
-                <Reveal variant="up" delay={300}>
-                    <div className="mc-profile-parents">
-                        {isEn ? 'Beloved offspring of:' : 'Putra/Putri tercinta dari Bapak & Ibu:'} <br />
-                        <strong>{m.father_name || '...'}</strong> &amp; <strong>{m.mother_name || '...'}</strong>
-                    </div>
-                </Reveal>
+                {((m.father_name && m.father_name.trim() !== '' && m.father_name !== '...') || (m.mother_name && m.mother_name.trim() !== '' && m.mother_name !== '...')) && (
+                    <>
+                        <Reveal variant="up" delay={200}>
+                            <div className="mc-profile-child-order">
+                                {translateChildOrder(m.child_order, m.gender, isEn)}
+                            </div>
+                        </Reveal>
+                        <Reveal variant="up" delay={300}>
+                            <div className="mc-profile-parents">
+                                {isEn ? 'Beloved offspring of:' : 'Putra/Putri tercinta dari Bapak & Ibu:'} <br />
+                                {m.father_name && m.mother_name && m.father_name !== '...' && m.mother_name !== '...' ? (
+                                    <><strong>{m.father_name}</strong> &amp; <strong>{m.mother_name}</strong></>
+                                ) : m.father_name && m.father_name !== '...' ? (
+                                    <strong>{m.father_name}</strong>
+                                ) : (
+                                    <strong>{m.mother_name}</strong>
+                                )}
+                            </div>
+                        </Reveal>
+                    </>
+                )}
                 {(m.instagram || m.instagram_username) && (
                     <Reveal variant="zoom" delay={400}>
                         <a

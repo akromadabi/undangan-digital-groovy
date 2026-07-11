@@ -633,10 +633,20 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                             <div className="spty-artist-card__info">
                                 <span className="spty-artist-card__role">{locale === 'en' ? 'Featured Artist' : 'Profil Utama'}</span>
                                 <h4 className="spty-artist-card__name">{groom.full_name}</h4>
-                                <p className="spty-artist-card__parents">
-                                    {translateChildOrder(groom.child_order, groom.gender)}<br />
-                                    <strong>{locale === 'en' ? 'Mr.' : 'Bapak'} {groom.father_name} & {locale === 'en' ? 'Mrs.' : 'Ibu'} {groom.mother_name}</strong>
-                                </p>
+                                {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                                    <p className="spty-artist-card__parents">
+                                        {translateChildOrder(groom.child_order, groom.gender)}<br />
+                                        <strong>
+                                            {groom.father_name && groom.mother_name ? (
+                                                `${locale === 'en' ? 'Mr.' : 'Bapak'} ${groom.father_name} & ${locale === 'en' ? 'Mrs.' : 'Ibu'} ${groom.mother_name}`
+                                            ) : groom.father_name ? (
+                                                `${locale === 'en' ? 'Mr.' : 'Bapak'} ${groom.father_name}`
+                                            ) : (
+                                                `${locale === 'en' ? 'Mrs.' : 'Ibu'} ${groom.mother_name}`
+                                            )}
+                                        </strong>
+                                    </p>
+                                )}
                                 {groom.instagram && (
                                     <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
                                         <i className="fab fa-instagram" /> Instagram
@@ -669,10 +679,20 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                                 <div className="spty-artist-card__info">
                                     <span className="spty-artist-card__role">{locale === 'en' ? 'Groom / Artist' : 'Mempelai Pria'}</span>
                                     <h4 className="spty-artist-card__name">{groom.full_name}</h4>
-                                    <p className="spty-artist-card__parents">
-                                        {translateChildOrder(groom.child_order, 'pria')}<br />
-                                        <strong>{locale === 'en' ? 'Mr.' : 'Bapak'} {groom.father_name} & {locale === 'en' ? 'Mrs.' : 'Ibu'} {groom.mother_name}</strong>
-                                    </p>
+                                    {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                                        <p className="spty-artist-card__parents">
+                                            {translateChildOrder(groom.child_order, 'pria')}<br />
+                                            <strong>
+                                                {groom.father_name && groom.mother_name ? (
+                                                    `${locale === 'en' ? 'Mr.' : 'Bapak'} ${groom.father_name} & ${locale === 'en' ? 'Mrs.' : 'Ibu'} ${groom.mother_name}`
+                                                ) : groom.father_name ? (
+                                                    `${locale === 'en' ? 'Mr.' : 'Bapak'} ${groom.father_name}`
+                                                ) : (
+                                                    `${locale === 'en' ? 'Mrs.' : 'Ibu'} ${groom.mother_name}`
+                                                )}
+                                            </strong>
+                                        </p>
+                                    )}
                                     {groom.instagram && (
                                         <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
                                             <i className="fab fa-instagram" /> Instagram
@@ -704,10 +724,20 @@ function BrideGroomSection({ brideGrooms, invitation, language }) {
                                 <div className="spty-artist-card__info">
                                     <span className="spty-artist-card__role">{locale === 'en' ? 'Bride / Artist' : 'Mempelai Wanita'}</span>
                                     <h4 className="spty-artist-card__name">{bride.full_name}</h4>
-                                    <p className="spty-artist-card__parents">
-                                        {translateChildOrder(bride.child_order, 'wanita')}<br />
-                                        <strong>{locale === 'en' ? 'Mr.' : 'Bapak'} {bride.father_name} & {locale === 'en' ? 'Mrs.' : 'Ibu'} {bride.mother_name}</strong>
-                                    </p>
+                                    {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                                        <p className="spty-artist-card__parents">
+                                            {translateChildOrder(bride.child_order, 'wanita')}<br />
+                                            <strong>
+                                                {bride.father_name && bride.mother_name ? (
+                                                    `${locale === 'en' ? 'Mr.' : 'Bapak'} ${bride.father_name} & ${locale === 'en' ? 'Mrs.' : 'Ibu'} ${bride.mother_name}`
+                                                ) : bride.father_name ? (
+                                                    `${locale === 'en' ? 'Mr.' : 'Bapak'} ${bride.father_name}`
+                                                ) : (
+                                                    `${locale === 'en' ? 'Mrs.' : 'Ibu'} ${bride.mother_name}`
+                                                )}
+                                            </strong>
+                                        </p>
+                                    )}
                                     {bride.instagram && (
                                         <a href={`https://instagram.com/${bride.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="spty-artist-card__ig">
                                             <i className="fab fa-instagram" /> Instagram

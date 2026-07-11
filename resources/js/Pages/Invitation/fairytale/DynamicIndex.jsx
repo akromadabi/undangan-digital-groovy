@@ -617,7 +617,9 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
                 
                 <h3 className="ft-mempelai-name">{groom.full_name || 'Nama Lengkap Pria'}</h3>
                 <div className="ft-mempelai-divider" />
-                <p className="ft-mempelai-parent-label">
+                {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                    <>
+                        <p className="ft-mempelai-parent-label">
                     {translateChildOrder(groom.child_order, 'pria')}
                 </p>
                 <p className="ft-mempelai-parents">
@@ -625,6 +627,8 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
                         ? (locale === 'en' ? `Mr. ${groom.father_name} & Mrs. ${groom.mother_name}` : `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`)
                         : (groom.father_name || groom.mother_name || '')}
                 </p>
+                    </>
+                )}
 
                 {/* Decorative card footer */}
                 <div className="ft-card-footer-ornament">
@@ -682,7 +686,9 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
                 
                 <h3 className="ft-mempelai-name">{bride.full_name || 'Nama Lengkap Wanita'}</h3>
                 <div className="ft-mempelai-divider" />
-                <p className="ft-mempelai-parent-label">
+                {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                    <>
+                        <p className="ft-mempelai-parent-label">
                     {translateChildOrder(bride.child_order, 'wanita')}
                 </p>
                 <p className="ft-mempelai-parents">
@@ -690,6 +696,8 @@ function BrideGroomSection({ brideGrooms, showPhotos }) {
                         ? (locale === 'en' ? `Mr. ${bride.father_name} & Mrs. ${bride.mother_name}` : `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`)
                         : (bride.father_name || bride.mother_name || '')}
                 </p>
+                    </>
+                )}
 
                 {/* Decorative card footer */}
                 <div className="ft-card-footer-ornament">

@@ -237,6 +237,8 @@ class DatabaseSeeder extends Seeder
             PolaroidThemeSeeder::class,
             PolaroidNewspaperThemeSeeder::class,
             SageMinimalistThemeSeeder::class,
+            CafeRedElegantThemeSeeder::class,
+            ChineseTraditionalThemeSeeder::class,
         ]);
 
         // Restore custom fields (like uploaded thumbnails) after seeders have run

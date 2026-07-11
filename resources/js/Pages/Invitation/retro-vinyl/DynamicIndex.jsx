@@ -459,22 +459,23 @@ function BrideGroomSection({ brideGrooms, language, showPhotos }) {
                     <span className="rv-polaroid-nickname">{person.nickname}</span>
                     <h4 className="rv-polaroid-fullname">{person.full_name}</h4>
                     
-                    {childOrderStr && (
-                        <p className="text-xs uppercase tracking-wider text-slate-500 font-bold mt-1">
-                            {childOrderStr}
-                        </p>
-                    )}
-
-                    {(person.father_name || person.mother_name) && (
-                        <p className="rv-polaroid-parents">
-                            {locale === 'en' ? 'Child of ' : 'Anak dari '}<br/>
-                            {person.father_name && person.mother_name
-                                ? `${locale === 'en' ? 'Mr.' : 'Bapak'} ${person.father_name} & ${locale === 'en' ? 'Mrs.' : 'Ibu'} ${person.mother_name}`
-                                : person.father_name
-                                ? `${locale === 'en' ? 'Mr.' : 'Bapak'} ${person.father_name}`
-                                : `${locale === 'en' ? 'Mrs.' : 'Ibu'} ${person.mother_name}`
-                            }
-                        </p>
+                    {((person.father_name && person.father_name.trim() !== '') || (person.mother_name && person.mother_name.trim() !== '')) && (
+                        <>
+                            {childOrderStr && (
+                                <p className="text-xs uppercase tracking-wider text-slate-500 font-bold mt-1">
+                                    {childOrderStr}
+                                </p>
+                            )}
+                            <p className="rv-polaroid-parents">
+                                {locale === 'en' ? 'Child of ' : 'Anak dari '}<br/>
+                                {person.father_name && person.mother_name
+                                    ? `${locale === 'en' ? 'Mr.' : 'Bapak'} ${person.father_name} & ${locale === 'en' ? 'Mrs.' : 'Ibu'} ${person.mother_name}`
+                                    : person.father_name
+                                    ? `${locale === 'en' ? 'Mr.' : 'Bapak'} ${person.father_name}`
+                                    : `${locale === 'en' ? 'Mrs.' : 'Ibu'} ${person.mother_name}`
+                                }
+                            </p>
+                        </>
                     )}
 
                     {person.instagram && (

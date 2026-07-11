@@ -530,9 +530,11 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
                 </div>
                 
                 <h2 className="candy-kid-name">{person.full_name}</h2>
-                <p className="candy-kid-order">
-                    {translateChildOrder(person.child_order, person.gender) || (locale === 'en' ? labels.kidOrderFallback : 'PUTRA/PUTRI TERCINTA')}
-                </p>
+                {((person.father_name && person.father_name.trim() !== '' && person.father_name !== '...') || (person.mother_name && person.mother_name.trim() !== '' && person.mother_name !== '...')) && (
+                    <p className="candy-kid-order">
+                        {translateChildOrder(person.child_order, person.gender) || (locale === 'en' ? labels.kidOrderFallback : 'PUTRA/PUTRI TERCINTA')}
+                    </p>
+                )}
                 
                 {person.bio && (
                     <p className="candy-kid-bio">{person.bio}</p>
@@ -550,7 +552,7 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
                     </a>
                 )}
 
-                {(person.father_name || person.mother_name) && (
+                {((person.father_name && person.father_name.trim() !== '' && person.father_name !== '...') || (person.mother_name && person.mother_name.trim() !== '' && person.mother_name !== '...')) && (
                     <div className="bg-rose-50/30 border border-rose-100/10 rounded-2xl p-4 mt-2">
                         <p className="text-[11px] font-bold opacity-50 mb-1">{locale === 'en' ? 'BELOVED CHILD OF' : 'PUTRA/PUTRI TERCINTA DARI'}</p>
                         <p className="font-bold text-[14px] text-rose-700">

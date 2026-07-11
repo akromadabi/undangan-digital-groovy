@@ -750,8 +750,8 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
         }
     };
 
-    const hasFather = !!celebrant.father_name;
-    const hasMother = !!celebrant.mother_name;
+    const hasFather = !!(celebrant.father_name && celebrant.father_name.trim() !== '' && celebrant.father_name !== '...');
+    const hasMother = !!(celebrant.mother_name && celebrant.mother_name.trim() !== '' && celebrant.mother_name !== '...');
     const persInitials = (celebrant.nickname || celebrant.full_name || 'C')
         .substring(0, 2)
         .toUpperCase();
@@ -788,9 +788,11 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
 
                     <h2 className="ast-celebrant-name">{celebrant.full_name}</h2>
                     
-                    <p className="ast-celebrant-order">
-                        {translateChildOrder(celebrant.child_order, celebrant.gender) || (locale === 'en' ? labels.kidOrderFallback : 'PUTRA/PUTRI TERCINTA')}
-                    </p>
+                    {(hasFather || hasMother) && (
+                        <p className="ast-celebrant-order">
+                            {translateChildOrder(celebrant.child_order, celebrant.gender) || (locale === 'en' ? labels.kidOrderFallback : 'PUTRA/PUTRI TERCINTA')}
+                        </p>
+                    )}
 
                     {celebrant.bio && (
                         <p className="ast-celebrant-bio">{celebrant.bio}</p>

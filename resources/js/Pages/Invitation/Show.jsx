@@ -1082,12 +1082,20 @@ export default function Show({ invitation, sections, brideGrooms, events, galler
                                                                         <h3 className="text-3xl" style={{ fontFamily: fonts.script, color: colors.primary }}>{bg.full_name}</h3>
                                                                     )}
                                                                 </AnimateIn>
-                                                                <AnimateIn type="fadeUp" delay={500 + i * 400}>
-                                                                    <p className="text-sm opacity-70 mt-2">
-                                                                        {translateChildOrder(bg.child_order, bg.gender === 'wanita' ? 'wanita' : 'pria') || (bg.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of'))}<br />
-                                                                        Bapak {bg.father_name} & Ibu {bg.mother_name}
-                                                                    </p>
-                                                                </AnimateIn>
+                                                                {((bg.father_name && bg.father_name.trim() !== '') || (bg.mother_name && bg.mother_name.trim() !== '')) && (
+                                                                    <AnimateIn type="fadeUp" delay={500 + i * 400}>
+                                                                        <p className="text-sm opacity-70 mt-2">
+                                                                            {translateChildOrder(bg.child_order, bg.gender === 'wanita' ? 'wanita' : 'pria') || (bg.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of'))}<br />
+                                                                            {bg.father_name && bg.mother_name ? (
+                                                                                `Bapak ${bg.father_name} & Ibu ${bg.mother_name}`
+                                                                            ) : bg.father_name ? (
+                                                                                `Bapak ${bg.father_name}`
+                                                                            ) : (
+                                                                                `Ibu ${bg.mother_name}`
+                                                                            )}
+                                                                        </p>
+                                                                    </AnimateIn>
+                                                                )}
                                                                 {bg.instagram && (
                                                                     <AnimateIn type="fadeIn" delay={600 + i * 400}>
                                                                         <a href={`https://instagram.com/${bg.instagram}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1 mt-1 text-xs font-medium" style={{ color: colors.primary }}>

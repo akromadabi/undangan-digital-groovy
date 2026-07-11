@@ -102,9 +102,9 @@ class WizardController extends Controller
                 'user_id' => $user->id,
                 'slug' => $slug,
                 'type' => $type,
-                'opening_title' => 'Bismillahirrahmanirrahim',
+                'opening_title' => $type === 'wedding' ? 'Bismillahirrahmanirrahim' : null,
                 'opening_text' => $openingText,
-                'opening_ayat' => 'وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً',
+                'opening_ayat' => $type === 'wedding' ? 'وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً' : null,
                 'closing_text' => "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu.\n\nAtas kehadiran dan doa restunya, kami mengucapkan terima kasih.\n\nWassalamu'alaikum Warahmatullahi Wabarakatuh",
             ]);
         }

@@ -329,10 +329,20 @@ function BrideGroomSection({ brideGrooms, invitation }) {
                 <Reveal delay={150}>
                     <h3 className="sgm-couple__nickname">{groom.nickname}</h3>
                     <h4 className="sgm-couple__fullname">{groom.full_name}</h4>
-                    <p className="sgm-couple__parents">
-                        {translateChildOrder(groom.child_order, 'pria', locale)} <br />
-                        <strong>Bpk. {groom.father_name} & Ibu {groom.mother_name}</strong>
-                    </p>
+                    {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                        <p className="sgm-couple__parents">
+                            {translateChildOrder(groom.child_order, 'pria', locale)} <br />
+                            <strong>
+                                {groom.father_name && groom.mother_name ? (
+                                    `Bpk. ${groom.father_name} & Ibu ${groom.mother_name}`
+                                ) : groom.father_name ? (
+                                    `Bpk. ${groom.father_name}`
+                                ) : (
+                                    `Ibu ${groom.mother_name}`
+                                )}
+                            </strong>
+                        </p>
+                    )}
                     {groom.instagram && (
                         <a 
                             href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
@@ -370,10 +380,20 @@ function BrideGroomSection({ brideGrooms, invitation }) {
                 <Reveal delay={150}>
                     <h3 className="sgm-couple__nickname">{bride.nickname}</h3>
                     <h4 className="sgm-couple__fullname">{bride.full_name}</h4>
-                    <p className="sgm-couple__parents">
-                        {translateChildOrder(bride.child_order, 'wanita', locale)} <br />
-                        <strong>Bpk. {bride.father_name} & Ibu {bride.mother_name}</strong>
-                    </p>
+                    {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                        <p className="sgm-couple__parents">
+                            {translateChildOrder(bride.child_order, 'wanita', locale)} <br />
+                            <strong>
+                                {bride.father_name && bride.mother_name ? (
+                                    `Bpk. ${bride.father_name} & Ibu ${bride.mother_name}`
+                                ) : bride.father_name ? (
+                                    `Bpk. ${bride.father_name}`
+                                ) : (
+                                    `Ibu ${bride.mother_name}`
+                                )}
+                            </strong>
+                        </p>
+                    )}
                     {bride.instagram && (
                         <a 
                             href={`https://instagram.com/${bride.instagram.replace('@', '')}`}

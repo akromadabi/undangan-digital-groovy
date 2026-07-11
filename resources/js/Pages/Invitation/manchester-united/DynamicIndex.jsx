@@ -748,13 +748,17 @@ function BrideGroomSection({ invitation, brideGrooms, id, themeConfig }) {
                         <i className="fas fa-check-circle mu-verified-icon" /> {pos || (isWanita ? (locale === 'en' ? 'BRIDE' : 'MEMPELAI WANITA') : (locale === 'en' ? 'GROOM' : 'MEMPELAI PRIA'))}
                     </span>
                     <h3 className="mu-player-name">{person.full_name}</h3>
-                    <p className="mu-player-child-order">
+                    {((person.father_name && person.father_name.trim() !== '') || (person.mother_name && person.mother_name.trim() !== '') || person.parents_name) && (
+                        <>
+                            <p className="mu-player-child-order">
                         {translateChildOrder(person.child_order, person.gender) || 
                          (person.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of'))}
                     </p>
                     <p className="mu-player-parents">
                         {[person.father_name, person.mother_name].filter(Boolean).join(' & ') || person.parents_name || ''}
                     </p>
+                        </>
+                    )}
                     
                     {person.instagram && (
                         <a href={`https://www.instagram.com/${person.instagram.replace('@','')}`}

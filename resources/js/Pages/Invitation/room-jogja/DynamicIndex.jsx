@@ -159,9 +159,19 @@ function AboutUsContent({ invitation, brideGrooms }) {
                             <div className="rj-person-card__photo-placeholder">{(person.nickname || person.full_name || 'R').charAt(0)}</div>
                         )}
                         <div className="rj-person-card__name">{person.nickname || person.full_name}</div>
-                        {person.child_order && <div className="rj-person-card__order">{translateChildOrder(person.child_order, person.gender)}</div>}
-                        {(person.father_name || person.mother_name) && (
-                            <div className="rj-person-card__parents">Bapak {person.father_name}<br />&amp; Ibu {person.mother_name}</div>
+                        {((person.father_name && person.father_name.trim() !== '') || (person.mother_name && person.mother_name.trim() !== '')) && (
+                            <>
+                                {person.child_order && <div className="rj-person-card__order">{translateChildOrder(person.child_order, person.gender)}</div>}
+                                <div className="rj-person-card__parents">
+                                    {person.father_name && person.mother_name ? (
+                                        <>Bapak {person.father_name}<br />&amp; Ibu {person.mother_name}</>
+                                    ) : person.father_name ? (
+                                        <>Bapak {person.father_name}</>
+                                    ) : (
+                                        <>Ibu {person.mother_name}</>
+                                    )}
+                                </div>
+                            </>
                         )}
                         {person.instagram && (
                             <a href={`https://instagram.com/${person.instagram.replace('@','')}`} target="_blank" rel="noopener noreferrer" className="rj-person-card__ig">

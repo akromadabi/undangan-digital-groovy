@@ -872,13 +872,17 @@ function BrideGroomSection({ brideGrooms, language, guest, isTyping, themeConfig
                                     <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#10a37f' }}>{host.full_name}</h4>
                                     <span style={{ fontSize: '0.78rem', color: '#8e8ea0', fontWeight: 600 }}>@{host.nickname?.toLowerCase()}</span>
                                     
-                                    {(host.father_name || host.mother_name) && (
+                                    {((host.father_name && host.father_name.trim() !== '') || (host.mother_name && host.mother_name.trim() !== '')) && (
                                         <div className="gpt-couple-parent-box">
                                             <span style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', color: '#b4b4b4', fontWeight: 700 }}>
                                                 {translateOrder(host.child_order, host.gender || 'pria')}
                                             </span>
                                             <p style={{ fontSize: '0.8rem', color: '#ececf1', fontWeight: 600, marginTop: '2px' }}>
-                                                {host.father_name} {host.mother_name ? `& ${host.mother_name}` : ''}
+                                                {host.father_name && host.mother_name ? (
+                                                    `${host.father_name} & ${host.mother_name}`
+                                                ) : (
+                                                    host.father_name || host.mother_name
+                                                )}
                                             </p>
                                         </div>
                                     )}
@@ -937,14 +941,20 @@ function BrideGroomSection({ brideGrooms, language, guest, isTyping, themeConfig
                                 <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#10a37f' }}>{groom.full_name}</h4>
                                 <span style={{ fontSize: '0.78rem', color: '#8e8ea0', fontWeight: 600 }}>@{groom.nickname?.toLowerCase()}</span>
                                 
-                                <div className="gpt-couple-parent-box">
-                                    <span style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', color: '#b4b4b4', fontWeight: 700 }}>
-                                        {translateOrder(groom.child_order, 'pria')}
-                                    </span>
-                                    <p style={{ fontSize: '0.8rem', color: '#ececf1', fontWeight: 600, marginTop: '2px' }}>
-                                        {groom.father_name} & {groom.mother_name}
-                                    </p>
-                                </div>
+                                {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                                    <div className="gpt-couple-parent-box">
+                                        <span style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', color: '#b4b4b4', fontWeight: 700 }}>
+                                            {translateOrder(groom.child_order, 'pria')}
+                                        </span>
+                                        <p style={{ fontSize: '0.8rem', color: '#ececf1', fontWeight: 600, marginTop: '2px' }}>
+                                            {groom.father_name && groom.mother_name ? (
+                                                `${groom.father_name} & ${groom.mother_name}`
+                                            ) : (
+                                                groom.father_name || groom.mother_name
+                                            )}
+                                        </p>
+                                    </div>
+                                )}
                                 <p style={{ fontSize: '0.78rem', color: '#8e8ea0', lineHeight: 1.4, margin: '8px 0' }}>
                                     {groom.bio || 'Blessed & happy.'}
                                 </p>
@@ -979,14 +989,20 @@ function BrideGroomSection({ brideGrooms, language, guest, isTyping, themeConfig
                                 <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#10a37f' }}>{bride.full_name}</h4>
                                 <span style={{ fontSize: '0.78rem', color: '#8e8ea0', fontWeight: 600 }}>@{bride.nickname?.toLowerCase()}</span>
                                 
-                                <div className="gpt-couple-parent-box">
-                                    <span style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', color: '#b4b4b4', fontWeight: 700 }}>
-                                        {translateOrder(bride.child_order, 'wanita')}
-                                    </span>
-                                    <p style={{ fontSize: '0.8rem', color: '#ececf1', fontWeight: 600, marginTop: '2px' }}>
-                                        {bride.father_name} & {bride.mother_name}
-                                    </p>
-                                </div>
+                                {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                                    <div className="gpt-couple-parent-box">
+                                        <span style={{ fontSize: '0.72rem', letterSpacing: '0.5px', textTransform: 'uppercase', color: '#b4b4b4', fontWeight: 700 }}>
+                                            {translateOrder(bride.child_order, 'wanita')}
+                                        </span>
+                                        <p style={{ fontSize: '0.8rem', color: '#ececf1', fontWeight: 600, marginTop: '2px' }}>
+                                            {bride.father_name && bride.mother_name ? (
+                                                `${bride.father_name} & ${bride.mother_name}`
+                                            ) : (
+                                                bride.father_name || bride.mother_name
+                                            )}
+                                        </p>
+                                    </div>
+                                )}
                                 <p style={{ fontSize: '0.78rem', color: '#8e8ea0', lineHeight: 1.4, margin: '8px 0' }}>
                                     {bride.bio || 'Thankful & excited.'}
                                 </p>

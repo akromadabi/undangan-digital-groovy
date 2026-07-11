@@ -865,7 +865,18 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language, onToa
                                         <i className="fas fa-check-circle ttk-gallery-verified-badge" />
                                     </div>
                                     <p className="ttk-gallery-desc">
-                                        {groom.full_name}, {translateChildOrder(groom.child_order, groom.gender, language)} dari {formatParentName(groom.father_name, isEn ? 'Mr.' : 'Bapak')} &amp; {formatParentName(groom.mother_name, isEn ? 'Mrs.' : 'Ibu')}. 💍✨
+                                        {groom.full_name}
+                                        {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                                            <>
+                                                , {translateChildOrder(groom.child_order, groom.gender, language)} dari {groom.father_name && groom.mother_name ? (
+                                                    `${isEn ? 'Mr.' : 'Bapak'} ${groom.father_name} & ${isEn ? 'Mrs.' : 'Ibu'} ${groom.mother_name}`
+                                                ) : groom.father_name ? (
+                                                    `${isEn ? 'Mr.' : 'Bapak'} ${groom.father_name}`
+                                                ) : (
+                                                    `${isEn ? 'Mrs.' : 'Ibu'} ${groom.mother_name}`
+                                                )}
+                                            </>
+                                        )}. 💍✨
                                     </p>
                                     <div className="ttk-gallery-tags">#groom #weddingday #happycouple</div>
                                     <div className="ttk-gallery-music-row">
@@ -923,7 +934,18 @@ function BrideGroomSection({ brideGrooms, invitation, galleries, language, onToa
                                         <i className="fas fa-check-circle ttk-gallery-verified-badge" />
                                     </div>
                                     <p className="ttk-gallery-desc">
-                                        {bride.full_name}, {translateChildOrder(bride.child_order, bride.gender, language)} dari {formatParentName(bride.father_name, isEn ? 'Mr.' : 'Bapak')} &amp; {formatParentName(bride.mother_name, isEn ? 'Mrs.' : 'Ibu')}. 💐✨
+                                        {bride.full_name}
+                                        {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                                            <>
+                                                , {translateChildOrder(bride.child_order, bride.gender, language)} dari {bride.father_name && bride.mother_name ? (
+                                                    `${isEn ? 'Mr.' : 'Bapak'} ${bride.father_name} & ${isEn ? 'Mrs.' : 'Ibu'} ${bride.mother_name}`
+                                                ) : bride.father_name ? (
+                                                    `${isEn ? 'Mr.' : 'Bapak'} ${bride.father_name}`
+                                                ) : (
+                                                    `${isEn ? 'Mrs.' : 'Ibu'} ${bride.mother_name}`
+                                                )}
+                                            </>
+                                        )}. 💐✨
                                     </p>
                                     <div className="ttk-gallery-tags">#bride #weddingday #beautifulinwhite</div>
                                     <div className="ttk-gallery-music-row">

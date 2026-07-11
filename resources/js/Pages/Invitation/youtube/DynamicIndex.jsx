@@ -621,13 +621,17 @@ function BrideGroomSection({ invitation, brideGrooms, events, id, galleries }) {
                     <span className="yt-shorts-handle">@{person.instagram ? person.instagram.replace('@','') : (person.nickname || 'celebrant')}</span>
                     <h3 className="yt-shorts-name">{person.full_name}</h3>
                     
-                    <p className="yt-shorts-parents-info">
+                    {((person.father_name && person.father_name.trim() !== '') || (person.mother_name && person.mother_name.trim() !== '') || person.parents_name) && (
+                        <>
+                            <p className="yt-shorts-parents-info">
                         {translateChildOrder(person.child_order, person.gender === 'wanita' ? 'wanita' : 'pria', locale) || 
                          (person.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of'))}
                     </p>
                     <p className="yt-shorts-parents-names">
                         {[person.father_name, person.mother_name].filter(Boolean).join(' & ') || person.parents_name || ''}
                     </p>
+                        </>
+                    )}
 
                     {person.instagram && (
                         <a href={`https://www.instagram.com/${person.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="yt-shorts-link-btn">

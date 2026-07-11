@@ -668,11 +668,13 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                                         <span className="sp-couple-label">{themeConfig.labels.profileBadge}</span>
                                     </div>
                                     <h4 className="sp-couple-fullname">{bgs[0].full_name}</h4>
-                                    <p className="sp-couple-son-daughter">
-                                        {isEn 
-                                            ? `${bgs[0].gender === 'pria' || bgs[0].gender === 'male' ? 'Son' : 'Daughter'} number ${bgs[0].child_order || '1'} of Mr. ${bgs[0].father_name || '...'} & Mrs. ${bgs[0].mother_name || '...'}`
-                                            : `${bgs[0].gender === 'pria' || bgs[0].gender === 'male' ? 'Putra' : 'Putri'} ${bgs[0].child_order || 'Pertama'} dari Bapak ${bgs[0].father_name || '...'} & Ibu ${bgs[0].mother_name || '...'}`}
-                                    </p>
+                                    {((bgs[0].father_name && bgs[0].father_name.trim() !== '' && bgs[0].father_name !== '...') || (bgs[0].mother_name && bgs[0].mother_name.trim() !== '' && bgs[0].mother_name !== '...')) && (
+                                        <p className="sp-couple-son-daughter">
+                                            {isEn 
+                                                ? `${bgs[0].gender === 'pria' || bgs[0].gender === 'male' ? 'Son' : 'Daughter'} number ${bgs[0].child_order || '1'} of Mr. ${bgs[0].father_name || '...'} & Mrs. ${bgs[0].mother_name || '...'}`
+                                                : `${bgs[0].gender === 'pria' || bgs[0].gender === 'male' ? 'Putra' : 'Putri'} ${bgs[0].child_order || 'Pertama'} dari Bapak ${bgs[0].father_name || '...'} & Ibu ${bgs[0].mother_name || '...'}`}
+                                        </p>
+                                    )}
                                     {bgs[0].instagram && (
                                         <a href={`https://instagram.com/${bgs[0].instagram}`} target="_blank" rel="noreferrer" className="sp-couple-ig">
                                             {isEn ? "Instagram >" : "Kunjungi IG >"}
@@ -706,9 +708,11 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                                             <span className="sp-couple-label">{isEn ? "GROOM" : "PRIA"}</span>
                                         </div>
                                         <h4 className="sp-couple-fullname">{groom.full_name}</h4>
-                                        <p className="sp-couple-son-daughter">
-                                            {isEn ? `Son number ${groom.child_order || '1'} of Mr. ${groom.father_name || '...'} & Mrs. ${groom.mother_name || '...'}` : `Putra ${groom.child_order || 'Pertama'} dari Bapak ${groom.father_name || '...'} & Ibu ${groom.mother_name || '...'}`}
-                                        </p>
+                                        {((groom.father_name && groom.father_name.trim() !== '' && groom.father_name !== '...') || (groom.mother_name && groom.mother_name.trim() !== '' && groom.mother_name !== '...')) && (
+                                            <p className="sp-couple-son-daughter">
+                                                {isEn ? `Son number ${groom.child_order || '1'} of Mr. ${groom.father_name || '...'} & Mrs. ${groom.mother_name || '...'}` : `Putra ${groom.child_order || 'Pertama'} dari Bapak ${groom.father_name || '...'} & Ibu ${groom.mother_name || '...'}`}
+                                            </p>
+                                        )}
                                         {groom.instagram && (
                                             <a href={`https://instagram.com/${groom.instagram}`} target="_blank" rel="noreferrer" className="sp-couple-ig">
                                                 {isEn ? "Instagram >" : "Kunjungi IG >"}
@@ -741,9 +745,11 @@ function HomeTab({ invitation, brideGrooms, events, loveStories, setActiveTab, f
                                             <span className="sp-couple-label">{isEn ? "BRIDE" : "WANITA"}</span>
                                         </div>
                                         <h4 className="sp-couple-fullname">{bride.full_name}</h4>
-                                        <p className="sp-couple-son-daughter">
-                                            {isEn ? `Daughter number ${bride.child_order || '1'} of Mr. ${bride.father_name || '...'} & Mrs. ${bride.mother_name || '...'}` : `Putri ${bride.child_order || 'Pertama'} dari Bapak ${bride.father_name || '...'} & Ibu ${bride.mother_name || '...'}`}
-                                        </p>
+                                        {((bride.father_name && bride.father_name.trim() !== '' && bride.father_name !== '...') || (bride.mother_name && bride.mother_name.trim() !== '' && bride.mother_name !== '...')) && (
+                                            <p className="sp-couple-son-daughter">
+                                                {isEn ? `Daughter number ${bride.child_order || '1'} of Mr. ${bride.father_name || '...'} & Mrs. ${bride.mother_name || '...'}` : `Putri ${bride.child_order || 'Pertama'} dari Bapak ${bride.father_name || '...'} & Ibu ${bride.mother_name || '...'}`}
+                                            </p>
+                                        )}
                                         {bride.instagram && (
                                             <a href={`https://instagram.com/${bride.instagram}`} target="_blank" rel="noreferrer" className="sp-couple-ig">
                                                 {isEn ? "Instagram >" : "Kunjungi IG >"}

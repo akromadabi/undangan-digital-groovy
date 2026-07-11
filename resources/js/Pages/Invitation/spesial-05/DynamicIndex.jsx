@@ -595,14 +595,14 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos, invitation }) {
                     <h3 className="text-3xl font-bold text-[var(--sp05-primary)] sp05-font-heading-style leading-none">
                         {groom.full_name || 'Sandy Rahardian'}
                     </h3>
-                    <p className="text-xs text-[var(--sp05-primary)] font-semibold mt-2 max-w-xs px-4 leading-relaxed">
+                    {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                            <p className="text-xs text-[var(--sp05-primary)] font-semibold mt-2 max-w-xs px-4 leading-relaxed">
                         {translateChildOrder(groom.child_order, 'pria')}{' '}
                         <span className="font-bold border-b border-[var(--sp05-primary)]/20 pb-0.5">
-                            {groom.father_name && groom.mother_name 
-                                ? `${groom.father_name} & ${groom.mother_name}` 
-                                : 'Bapak Lorem Ipsum & Ibu Lipsum'}
+                            {groom.father_name && groom.mother_name ? `${groom.father_name} & ${groom.mother_name}` : (groom.father_name || groom.mother_name)}
                         </span>
                     </p>
+                        )}
                     {groom.instagram && (
                         <a 
                             href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
@@ -650,14 +650,14 @@ function BrideGroomSection({ brideGrooms, locale, showPhotos, invitation }) {
                     <h3 className="text-3xl font-bold text-[var(--sp05-primary)] sp05-font-heading-style leading-none">
                         {bride.full_name || 'Artie Dinanti'}
                     </h3>
-                    <p className="text-xs text-[var(--sp05-primary)] font-semibold mt-2 max-w-xs px-4 leading-relaxed">
+                    {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                            <p className="text-xs text-[var(--sp05-primary)] font-semibold mt-2 max-w-xs px-4 leading-relaxed">
                         {translateChildOrder(bride.child_order, 'wanita')}{' '}
                         <span className="font-bold border-b border-[var(--sp05-primary)]/20 pb-0.5">
-                            {bride.father_name && bride.mother_name 
-                                ? `${bride.father_name} & ${bride.mother_name}` 
-                                : 'Bapak Lorem Ipsum & Ibu Lipsum'}
+                            {bride.father_name && bride.mother_name ? `${bride.father_name} & ${bride.mother_name}` : (bride.father_name || bride.mother_name)}
                         </span>
                     </p>
+                        )}
                     {bride.instagram && (
                         <a 
                             href={`https://instagram.com/${bride.instagram.replace('@', '')}`}

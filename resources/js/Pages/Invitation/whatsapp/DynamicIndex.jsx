@@ -1128,10 +1128,20 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                                             <p className="wa-profile-desc">({groom.nickname})</p>
                                         </div>
                                         
-                                        <p className="wa-profile-parent">
-                                            {translateChildOrder(groom.child_order, 'pria')}<br />
-                                            <strong>Bapak {groom.father_name} & Ibu {groom.mother_name}</strong>
-                                        </p>
+                                        {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                                            <p className="wa-profile-parent">
+                                                {translateChildOrder(groom.child_order, 'pria')}<br />
+                                                <strong>
+                                                    {groom.father_name && groom.mother_name ? (
+                                                        `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`
+                                                    ) : groom.father_name ? (
+                                                        `Bapak ${groom.father_name}`
+                                                    ) : (
+                                                        `Ibu ${groom.mother_name}`
+                                                    )}
+                                                </strong>
+                                            </p>
+                                        )}
 
                                         {groom.bio && (
                                             <p style={{ margin: '8px 0 0 0', fontSize: '0.8rem', color: 'var(--wa-text-muted)', fontStyle: 'italic' }}>
@@ -1182,10 +1192,20 @@ function WhatsappThemeContent({ invitation, sections, brideGrooms, events, galle
                                             <p className="wa-profile-desc">({bride.nickname})</p>
                                         </div>
                                         
-                                        <p className="wa-profile-parent">
-                                            {translateChildOrder(bride.child_order, 'wanita')}<br />
-                                            <strong>Bapak {bride.father_name} & Ibu {bride.mother_name}</strong>
-                                        </p>
+                                        {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                                            <p className="wa-profile-parent">
+                                                {translateChildOrder(bride.child_order, 'wanita')}<br />
+                                                <strong>
+                                                    {bride.father_name && bride.mother_name ? (
+                                                        `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`
+                                                    ) : bride.father_name ? (
+                                                        `Bapak ${bride.father_name}`
+                                                    ) : (
+                                                        `Ibu ${bride.mother_name}`
+                                                    )}
+                                                </strong>
+                                            </p>
+                                        )}
 
                                         {bride.bio && (
                                             <p style={{ margin: '8px 0 0 0', fontSize: '0.8rem', color: 'var(--wa-text-muted)', fontStyle: 'italic' }}>

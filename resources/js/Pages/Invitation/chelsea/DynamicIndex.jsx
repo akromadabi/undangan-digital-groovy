@@ -569,13 +569,17 @@ function BrideGroomSection({ invitation, brideGrooms, id }) {
                         {pos || (isWanita ? (locale === 'en' ? 'BRIDE' : 'MEMPELAI WANITA') : (locale === 'en' ? 'GROOM' : 'MEMPELAI PRIA'))}
                     </span>
                     <h3 className="ch-player-name">{person.full_name}</h3>
-                    <p className="ch-player-child-order">
+                    {((person.father_name && person.father_name.trim() !== '') || (person.mother_name && person.mother_name.trim() !== '') || person.parents_name) && (
+                        <>
+                            <p className="ch-player-child-order">
                         {translateChildOrder(person.child_order, person.gender) ||
                             (isWanita ? t('invitation.daughter_of') : t('invitation.son_of'))}
                     </p>
                     <p className="ch-player-parents">
                         {[person.father_name, person.mother_name].filter(Boolean).join(' & ') || person.parents_name || ''}
                     </p>
+                        </>
+                    )}
                     {person.instagram && (
                         <a href={`https://www.instagram.com/${person.instagram.replace('@', '')}`}
                             target="_blank" rel="noreferrer" className="ch-player-ig">

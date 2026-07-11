@@ -452,7 +452,9 @@ function BrideGroomSection({ brideGrooms }) {
                 </div>
                 <div className="hw-mempelai-details">
                     <h3 className="hw-mempelai-name">{groom.full_name || 'Nama Lengkap Pria'}</h3>
-                    <p className="hw-mempelai-parent-label">
+                    {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                    <>
+                        <p className="hw-mempelai-parent-label">
                         {translateChildOrder(groom.child_order, 'pria')}
                     </p>
                     <p className="hw-mempelai-parents">
@@ -460,6 +462,8 @@ function BrideGroomSection({ brideGrooms }) {
                             ? (locale === 'en' ? `Mr. ${groom.father_name} & Mrs. ${groom.mother_name}` : `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`)
                             : (groom.father_name || groom.mother_name || '')}
                     </p>
+                    </>
+                )}
                     {groom.instagram && (
                         <a
                             href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
@@ -503,7 +507,9 @@ function BrideGroomSection({ brideGrooms }) {
                 </div>
                 <div className="hw-mempelai-details">
                     <h3 className="hw-mempelai-name">{bride.full_name || 'Nama Lengkap Wanita'}</h3>
-                    <p className="hw-mempelai-parent-label">
+                    {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                    <>
+                        <p className="hw-mempelai-parent-label">
                         {translateChildOrder(bride.child_order, 'wanita')}
                     </p>
                     <p className="hw-mempelai-parents">
@@ -511,6 +517,8 @@ function BrideGroomSection({ brideGrooms }) {
                             ? (locale === 'en' ? `Mr. ${bride.father_name} & Mrs. ${bride.mother_name}` : `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`)
                             : (bride.father_name || bride.mother_name || '')}
                     </p>
+                    </>
+                )}
                     {bride.instagram && (
                         <a
                             href={`https://instagram.com/${bride.instagram.replace('@', '')}`}

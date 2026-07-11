@@ -619,14 +619,22 @@ function BrideGroomSection({ brideGrooms }) {
                 )}
                 <div className="lx3-mempelai-details">
                     <h3 className="lx3-mempelai-name">{groom.full_name || 'Nama Lengkap Pria'}</h3>
-                    <p className="lx3-mempelai-parent-label">
-                        {translateChildOrder(groom.child_order, 'pria')}
-                    </p>
-                    <p className="lx3-mempelai-parents">
-                        {groom.father_name && groom.mother_name
-                            ? (locale === 'en' ? `Mr. ${groom.father_name} & Mrs. ${groom.mother_name}` : `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`)
-                            : (groom.father_name || groom.mother_name || (locale === 'en' ? 'Parents Name' : 'Nama Orang Tua'))}
-                    </p>
+                    {((groom.father_name && groom.father_name.trim() !== '' && groom.father_name !== 'Nama Orang Tua') || (groom.mother_name && groom.mother_name.trim() !== '' && groom.mother_name !== 'Nama Orang Tua')) && (
+                        <>
+                            <p className="lx3-mempelai-parent-label">
+                                {translateChildOrder(groom.child_order, 'pria')}
+                            </p>
+                            <p className="lx3-mempelai-parents">
+                                {groom.father_name && groom.mother_name ? (
+                                    (locale === 'en' ? `Mr. ${groom.father_name} & Mrs. ${groom.mother_name}` : `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`)
+                                ) : groom.father_name ? (
+                                    (locale === 'en' ? `Mr. ${groom.father_name}` : `Bapak ${groom.father_name}`)
+                                ) : (
+                                    (locale === 'en' ? `Mrs. ${groom.mother_name}` : `Ibu ${groom.mother_name}`)
+                                )}
+                            </p>
+                        </>
+                    )}
                     {groom.instagram && (
                         <a
                             href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
@@ -662,14 +670,22 @@ function BrideGroomSection({ brideGrooms }) {
                 )}
                 <div className="lx3-mempelai-details">
                     <h3 className="lx3-mempelai-name">{bride.full_name || 'Nama Lengkap Wanita'}</h3>
-                    <p className="lx3-mempelai-parent-label">
-                        {translateChildOrder(bride.child_order, 'wanita')}
-                    </p>
-                    <p className="lx3-mempelai-parents">
-                        {bride.father_name && bride.mother_name
-                            ? (locale === 'en' ? `Mr. ${bride.father_name} & Mrs. ${bride.mother_name}` : `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`)
-                            : (bride.father_name || bride.mother_name || (locale === 'en' ? 'Parents Name' : 'Nama Orang Tua'))}
-                    </p>
+                    {((bride.father_name && bride.father_name.trim() !== '' && bride.father_name !== 'Nama Orang Tua') || (bride.mother_name && bride.mother_name.trim() !== '' && bride.mother_name !== 'Nama Orang Tua')) && (
+                        <>
+                            <p className="lx3-mempelai-parent-label">
+                                {translateChildOrder(bride.child_order, 'wanita')}
+                            </p>
+                            <p className="lx3-mempelai-parents">
+                                {bride.father_name && bride.mother_name ? (
+                                    (locale === 'en' ? `Mr. ${bride.father_name} & Mrs. ${bride.mother_name}` : `Bapak ${bride.father_name} & Ibu ${bride.mother_name}`)
+                                ) : bride.father_name ? (
+                                    (locale === 'en' ? `Mr. ${bride.father_name}` : `Bapak ${bride.father_name}`)
+                                ) : (
+                                    (locale === 'en' ? `Mrs. ${bride.mother_name}` : `Ibu ${bride.mother_name}`)
+                                )}
+                            </p>
+                        </>
+                    )}
                     {bride.instagram && (
                         <a
                             href={`https://instagram.com/${bride.instagram.replace('@', '')}`}

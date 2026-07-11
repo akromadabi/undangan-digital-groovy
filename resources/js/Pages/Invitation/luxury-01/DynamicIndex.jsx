@@ -926,10 +926,17 @@ export default function DynamicIndex({
                                     )}
                                     <div className="lx1-mempelai-details">
                                         <h2 className="lx1-mempelai-fullname">{groom.full_name}</h2>
-                                        <div className="lx1-mempelai-parents">
-                                            {groom.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of')} <strong>{groom.father_name}</strong><br />
-                                            &amp; <strong>{groom.mother_name}</strong>
-                                        </div>
+                                        {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                                            <div className="lx1-mempelai-parents">
+                                                {groom.gender === 'wanita' ? t('invitation.daughter_of') : t('invitation.son_of')} {groom.father_name && groom.mother_name ? (
+                                                    <><strong>{groom.father_name}</strong><br />&amp; <strong>{groom.mother_name}</strong></>
+                                                ) : groom.father_name ? (
+                                                    <strong>{groom.father_name}</strong>
+                                                ) : (
+                                                    <strong>{groom.mother_name}</strong>
+                                                )}
+                                            </div>
+                                        )}
                                         {groom.instagram && (
                                             <a href={`https://instagram.com/${groom.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="lx1-mempelai-ig">
                                                 <i className="fab fa-instagram" />
@@ -958,10 +965,17 @@ export default function DynamicIndex({
                                     )}
                                     <div className="lx1-mempelai-details">
                                         <h2 className="lx1-mempelai-fullname">{bride.full_name}</h2>
-                                        <div className="lx1-mempelai-parents">
-                                            {bride.gender === 'pria' ? t('invitation.son_of') : t('invitation.daughter_of')} <strong>{bride.father_name}</strong><br />
-                                            &amp; <strong>{bride.mother_name}</strong>
-                                        </div>
+                                        {((bride.father_name && bride.father_name.trim() !== '') || (bride.mother_name && bride.mother_name.trim() !== '')) && (
+                                            <div className="lx1-mempelai-parents">
+                                                {bride.gender === 'pria' ? t('invitation.son_of') : t('invitation.daughter_of')} {bride.father_name && bride.mother_name ? (
+                                                    <><strong>{bride.father_name}</strong><br />&amp; <strong>{bride.mother_name}</strong></>
+                                                ) : bride.father_name ? (
+                                                    <strong>{bride.father_name}</strong>
+                                                ) : (
+                                                    <strong>{bride.mother_name}</strong>
+                                                )}
+                                            </div>
+                                        )}
                                         {bride.instagram && (
                                             <a href={`https://instagram.com/${bride.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="lx1-mempelai-ig">
                                                 <i className="fab fa-instagram" />

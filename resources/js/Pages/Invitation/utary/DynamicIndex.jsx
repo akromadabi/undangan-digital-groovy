@@ -475,10 +475,20 @@ function CoupleSection({ invitation, brideGrooms, id }) {
                         </div>
                     )}
                     <h3 className="utary-profile__name">{(bride.full_name || bride.nickname || 'UTARY ADHITA').toUpperCase()}</h3>
-                    <p className="utary-profile__role">{translateChildOrder(bride.child_order, 'wanita')}</p>
-                    <p className="utary-profile__parents">
-                        {t('invitation.save_the_date') === 'Save The Date' ? 'Mr.' : 'Bapak'} {bride.father_name || 'Nama Bapak'}<br />&amp; {t('invitation.save_the_date') === 'Save The Date' ? 'Mrs.' : 'Ibu'} {bride.mother_name || 'Nama Ibu'}
-                    </p>
+                    {((bride.father_name && bride.father_name.trim() !== '' && bride.father_name !== 'Nama Bapak') || (bride.mother_name && bride.mother_name.trim() !== '' && bride.mother_name !== 'Nama Ibu')) && (
+                        <>
+                            <p className="utary-profile__role">{translateChildOrder(bride.child_order, 'wanita')}</p>
+                            <p className="utary-profile__parents">
+                                {bride.father_name && bride.mother_name && bride.father_name !== 'Nama Bapak' && bride.mother_name !== 'Nama Ibu' ? (
+                                    <>{t('invitation.save_the_date') === 'Save The Date' ? 'Mr.' : 'Bapak'} {bride.father_name}<br />&amp; {t('invitation.save_the_date') === 'Save The Date' ? 'Mrs.' : 'Ibu'} {bride.mother_name}</>
+                                ) : (bride.father_name && bride.father_name !== 'Nama Bapak') ? (
+                                    <>{t('invitation.save_the_date') === 'Save The Date' ? 'Mr.' : 'Bapak'} {bride.father_name}</>
+                                ) : (
+                                    <>{t('invitation.save_the_date') === 'Save The Date' ? 'Mrs.' : 'Ibu'} {bride.mother_name}</>
+                                )}
+                            </p>
+                        </>
+                    )}
                     {(bride.instagram || bride.instagram_username) && (
                         <a href={`https://www.instagram.com/${(bride.instagram || bride.instagram_username).replace('@', '')}`} className="utary-profile__social" target="_blank" rel="noopener noreferrer">
                             <i className="fab fa-instagram" /> @{(bride.instagram || bride.instagram_username).replace('@', '').toUpperCase()}
@@ -519,10 +529,20 @@ function CoupleSection({ invitation, brideGrooms, id }) {
                         </div>
                     )}
                     <h3 className="utary-profile__name">{(groom.full_name || groom.nickname || 'FACHRUL ROZI').toUpperCase()}</h3>
-                    <p className="utary-profile__role">{translateChildOrder(groom.child_order, 'pria')}</p>
-                    <p className="utary-profile__parents">
-                        {t('invitation.save_the_date') === 'Save The Date' ? 'Mr.' : 'Bapak'} {groom.father_name || 'Nama Bapak'}<br />&amp; {t('invitation.save_the_date') === 'Save The Date' ? 'Mrs.' : 'Ibu'} {groom.mother_name || 'Nama Ibu'}
-                    </p>
+                    {((groom.father_name && groom.father_name.trim() !== '' && groom.father_name !== 'Nama Bapak') || (groom.mother_name && groom.mother_name.trim() !== '' && groom.mother_name !== 'Nama Ibu')) && (
+                        <>
+                            <p className="utary-profile__role">{translateChildOrder(groom.child_order, 'pria')}</p>
+                            <p className="utary-profile__parents">
+                                {groom.father_name && groom.mother_name && groom.father_name !== 'Nama Bapak' && groom.mother_name !== 'Nama Ibu' ? (
+                                    <>{t('invitation.save_the_date') === 'Save The Date' ? 'Mr.' : 'Bapak'} {groom.father_name}<br />&amp; {t('invitation.save_the_date') === 'Save The Date' ? 'Mrs.' : 'Ibu'} {groom.mother_name}</>
+                                ) : (groom.father_name && groom.father_name !== 'Nama Bapak') ? (
+                                    <>{t('invitation.save_the_date') === 'Save The Date' ? 'Mr.' : 'Bapak'} {groom.father_name}</>
+                                ) : (
+                                    <>{t('invitation.save_the_date') === 'Save The Date' ? 'Mrs.' : 'Ibu'} {groom.mother_name}</>
+                                )}
+                            </p>
+                        </>
+                    )}
                     {(groom.instagram || groom.instagram_username) && (
                         <a href={`https://www.instagram.com/${(groom.instagram || groom.instagram_username).replace('@', '')}`} className="utary-profile__social" target="_blank" rel="noopener noreferrer">
                             <i className="fab fa-instagram" /> @{(groom.instagram || groom.instagram_username).replace('@', '').toUpperCase()}

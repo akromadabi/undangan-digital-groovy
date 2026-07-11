@@ -701,10 +701,20 @@ function BrideGroomSection({ brideGrooms, invitation, language, onOpenStory }) {
                             </div>
                             <div className="ig-card-bio-info">
                                 <h4 className="ig-card-fullname">{bgs[0].full_name}</h4>
-                                <p className="ig-card-parents-line">
-                                    {translateChildOrder(bgs[0].child_order, bgs[0].gender)}<br />
-                                    <strong>Bapak {bgs[0].father_name} & Ibu {bgs[0].mother_name}</strong>
-                                </p>
+                                {((bgs[0].father_name && bgs[0].father_name.trim() !== '') || (bgs[0].mother_name && bgs[0].mother_name.trim() !== '')) && (
+                                    <p className="ig-card-parents-line">
+                                        {translateChildOrder(bgs[0].child_order, bgs[0].gender)}<br />
+                                        <strong>
+                                            {bgs[0].father_name && bgs[0].mother_name ? (
+                                                `Bapak ${bgs[0].father_name} & Ibu ${bgs[0].mother_name}`
+                                            ) : bgs[0].father_name ? (
+                                                `Bapak ${bgs[0].father_name}`
+                                            ) : (
+                                                `Ibu ${bgs[0].mother_name}`
+                                            )}
+                                        </strong>
+                                    </p>
+                                )}
                                 <p className="ig-card-short-bio">{bgs[0].bio || 'Blessed & grateful.'}</p>
                             </div>
                             {bgs[0].instavite && (
@@ -746,10 +756,20 @@ function BrideGroomSection({ brideGrooms, invitation, language, onOpenStory }) {
                                 </div>
                                 <div className="ig-card-bio-info">
                                     <h4 className="ig-card-fullname">{groom.full_name}</h4>
-                                    <p className="ig-card-parents-line">
-                                        {translateChildOrder(groom.child_order, 'pria')}<br />
-                                        <strong>Bapak {groom.father_name} & Ibu {groom.mother_name}</strong>
-                                    </p>
+                                    {((groom.father_name && groom.father_name.trim() !== '') || (groom.mother_name && groom.mother_name.trim() !== '')) && (
+                                        <p className="ig-card-parents-line">
+                                            {translateChildOrder(groom.child_order, 'pria')}<br />
+                                            <strong>
+                                                {groom.father_name && groom.mother_name ? (
+                                                    `Bapak ${groom.father_name} & Ibu ${groom.mother_name}`
+                                                ) : groom.father_name ? (
+                                                    `Bapak ${groom.father_name}`
+                                                ) : (
+                                                    `Ibu ${groom.mother_name}`
+                                                )}
+                                            </strong>
+                                        </p>
+                                    )}
                                     <p className="ig-card-short-bio">{groom.bio || 'Blessed & grateful.'}</p>
                                 </div>
                                 {groom.instavite && (

@@ -593,9 +593,11 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
                     <h2 className="spy-kids-name" style={{ margin: 0 }}>{person.full_name}</h2>
                 </div>
                 
-                <p className="spy-kids-order" style={{ marginTop: '5px' }}>
-                    {translateChildOrder(person.child_order, person.gender) || (locale === 'en' ? labels.kidOrderFallback : 'PUTRA/PUTRI TERCINTA')}
-                </p>
+                {((person.father_name && person.father_name.trim() !== '') || (person.mother_name && person.mother_name.trim() !== '')) && (
+                    <p className="spy-kids-order" style={{ marginTop: '5px' }}>
+                        {translateChildOrder(person.child_order, person.gender) || (locale === 'en' ? labels.kidOrderFallback : 'PUTRA/PUTRI TERCINTA')}
+                    </p>
+                )}
                 
                 {person.bio && (
                     <p className="spy-kids-bio">{person.bio}</p>
@@ -613,7 +615,7 @@ function BrideGroomSection({ brideGrooms, id, locale, invitation }) {
                     </a>
                 )}
 
-                {(person.father_name || person.mother_name) && (
+                {((person.father_name && person.father_name.trim() !== '') || (person.mother_name && person.mother_name.trim() !== '')) && (
                     <div className="spy-parents-box">
                         <p className="spy-parents-label">{locale === 'en' ? 'BELOVED CHILD OF' : 'PUTRA/PUTRI TERCINTA DARI'}</p>
                         <p className="spy-parents-names">
