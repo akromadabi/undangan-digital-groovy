@@ -183,11 +183,10 @@ function SectionSeparator({ emblem }) {
 /* ─── SECTIONS MODULES ─── */
 
 // 1. COVER SECTION
-function CoverSection({ invitation, isOpened, onOpen, coverImages, guest, resolvedContent }) {
+function CoverSection({ invitation, isOpened, onOpen, coverImages, guest, resolvedContent, resolvedCoverTitle }) {
     const isWedding = invitation?.type !== 'birthday' && invitation?.type !== 'general' && invitation?.type !== 'anniversary';
     const coverBadge = invitation?.type === 'birthday' ? 'Birthday Invitation' : (invitation?.type === 'anniversary' ? 'Anniversary Invitation' : (isWedding ? 'The Wedding Invitation' : 'Special Invitation'));
     const emblem = invitation?.type === 'birthday' ? '壽' : (invitation?.type === 'general' || invitation?.type === 'anniversary' ? '福' : '囍');
-    const defaultTitle = invitation?.type === 'birthday' ? 'Happy Birthday' : (invitation?.type === 'anniversary' ? 'Happy Anniversary' : (invitation?.type === 'general' ? 'Celebration' : 'Zhao & Lin'));
     
     return (
         <div className={`chi-cover ${isOpened ? 'opened' : ''}`} style={{
@@ -217,7 +216,7 @@ function CoverSection({ invitation, isOpened, onOpen, coverImages, guest, resolv
                 <div className="chi-cover-center">
                     <div className="chi-double-happiness-logo">{emblem}</div>
                     <h1 className="chi-cover-title">
-                        {invitation?.cover_title || defaultTitle}
+                        {resolvedCoverTitle}
                     </h1>
                     <p className="chi-cover-subtitle">
                         {resolvedContent.coverSubtitle}
@@ -857,6 +856,28 @@ export default function DynamicIndex({
         };
     }, [invitation]);
 
+    const resolvedCoverTitle = useMemo(() => {
+        if (invitation?.cover_title && invitation.cover_title.trim() !== '') {
+            return invitation.cover_title;
+        }
+        
+        const subjects = safeArr(brideGrooms);
+        if (subjects.length > 0) {
+            if (subjects.length === 1) {
+                return subjects[0].nickname || subjects[0].full_name;
+            } else {
+                const name1 = subjects[0].nickname || subjects[0].full_name?.split(' ')[0] || '';
+                const name2 = subjects[1].nickname || subjects[1].full_name?.split(' ')[0] || '';
+                return `${name1} & ${name2}`;
+            }
+        }
+        
+        if (invitation?.type === 'birthday') return 'Happy Birthday';
+        if (invitation?.type === 'anniversary') return 'Happy Anniversary';
+        if (invitation?.type === 'general') return 'Special Celebration';
+        return 'Zhao & Lin';
+    }, [invitation, brideGrooms]);
+
     // Audio file configuration
     const musicUrl = useMemo(() => {
         return getStorageUrl(invitation?.music_url, '/audio/backsound.mp3');
@@ -1009,6 +1030,7 @@ export default function DynamicIndex({
                 coverImages={coverImages} 
                 guest={guest} 
                 resolvedContent={resolvedContent}
+                resolvedCoverTitle={resolvedCoverTitle}
             />
 
             {/* Main scrollable body */}
