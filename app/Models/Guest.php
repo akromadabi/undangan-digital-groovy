@@ -39,6 +39,21 @@ class Guest extends Model
         ];
     }
 
+    public function setPhoneAttribute($value)
+    {
+        if (empty($value)) {
+            $this->attributes['phone'] = null;
+            return;
+        }
+
+        $cleaned = preg_replace('/[^0-9]/', '', $value);
+        if (str_starts_with($cleaned, '62')) {
+            $cleaned = '0' . substr($cleaned, 2);
+        }
+
+        $this->attributes['phone'] = $cleaned ?: null;
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Guest $guest) {

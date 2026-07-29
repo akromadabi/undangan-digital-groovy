@@ -94,6 +94,14 @@ class RegisteredUserController extends Controller
             return redirect('/')->with('error', 'Pendaftaran tidak dapat dilakukan melalui domain utama. Silakan mendaftar melalui website reseller kami.');
         }
 
+        if ($request->has('phone')) {
+            $cleanedPhone = preg_replace('/[^0-9]/', '', $request->phone);
+            if (str_starts_with($cleanedPhone, '62')) {
+                $cleanedPhone = '0' . substr($cleanedPhone, 2);
+            }
+            $request->merge(['phone' => $cleanedPhone]);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => [

@@ -1,6 +1,7 @@
 import { Head, useForm, Link, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
+import { sanitizePhoneNumber } from '@/utils/phone';
 import {
     Key, Package, CalendarClock, User, FileText, Users as UsersIcon,
     Save, ArrowLeft, CheckCircle, XCircle, RotateCw
@@ -360,7 +361,7 @@ export default function Edit({ user, plans }) {
                             </div>
                             <div>
                                 <label className={labelClass}>Phone</label>
-                                <input type="text" value={data.phone} onChange={e => setData('phone', e.target.value)} className={inputClass} />
+                                <input type="text" value={data.phone} onChange={e => setData('phone', sanitizePhoneNumber(e.target.value))} className={inputClass} />
                             </div>
                             {auth.user.role === 'super_admin' && (
                                 <div>

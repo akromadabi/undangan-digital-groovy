@@ -19,7 +19,7 @@ export default function ResellerRegisterPayment({ payment, annualFee }) {
                 const res = await axios.get(`/register/reseller/payment/${payment.id}/check`);
                 if (res.data && res.data.is_paid) {
                     setStatus('paid');
-                    window.location.href = '/register/reseller/success';
+                    window.location.href = res.data.redirect_url || '/admin';
                 }
             } catch (err) {
                 console.error('Error checking payment status:', err);

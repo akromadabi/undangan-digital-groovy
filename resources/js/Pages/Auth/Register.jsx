@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Phone, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
+import { sanitizePhoneNumber } from '@/utils/phone';
 
 export default function Register({ reseller }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -62,7 +63,7 @@ export default function Register({ reseller }) {
                             <label className="block text-sm font-semibold text-[#333] mb-1.5">No. WhatsApp</label>
                             <div className="relative">
                                 <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#bbb]" />
-                                <input type="tel" value={data.phone} onChange={e => setData('phone', e.target.value)}
+                                <input type="tel" value={data.phone} onChange={e => setData('phone', sanitizePhoneNumber(e.target.value))}
                                     placeholder="08xxxxxxxxxx"
                                     className="w-full pl-10 pr-4 py-3 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-sm focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] transition-all"
                                     required />

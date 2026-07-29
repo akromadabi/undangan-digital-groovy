@@ -2,6 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { Phone, Mail, Lock, User, Eye, EyeOff, Globe, Building2, Check, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { sanitizePhoneNumber } from '@/utils/phone';
 
 export default function ResellerRegister({ centralHost = 'undangan.com' }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -116,7 +117,7 @@ export default function ResellerRegister({ centralHost = 'undangan.com' }) {
                                     <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">No. WhatsApp</label>
                                     <div className="relative">
                                         <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#bbb]" />
-                                        <input type="tel" value={data.phone} onChange={e => setData('phone', e.target.value)}
+                                        <input type="tel" value={data.phone} onChange={e => setData('phone', sanitizePhoneNumber(e.target.value))}
                                             placeholder="Contoh: 08123456789"
                                             className="w-full pl-10 pr-4 py-3 bg-[#faf9f6] border border-[#e8e5e0] rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#E5654B]/30 focus:border-[#E5654B] outline-none transition-all"
                                             required />

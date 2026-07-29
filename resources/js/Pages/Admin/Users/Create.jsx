@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import DynamicAdminLayout from '@/Layouts/DynamicAdminLayout';
 import { User, Save, ArrowLeft, Key } from 'lucide-react';
+import { sanitizePhoneNumber } from '@/utils/phone';
 
 export default function Create() {
     const { auth, adminRoutePrefix } = usePage().props;
@@ -53,7 +54,7 @@ export default function Create() {
                             </div>
                             <div>
                                 <label className={labelClass}>No. Telepon / WhatsApp</label>
-                                <input type="text" value={data.phone} onChange={e => setData('phone', e.target.value)} placeholder="Contoh: 62812345678" className={inputClass} />
+                                <input type="text" value={data.phone} onChange={e => setData('phone', sanitizePhoneNumber(e.target.value))} placeholder="Contoh: 08123456789" className={inputClass} />
                                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                             </div>
                             {auth.user.role === 'super_admin' && (

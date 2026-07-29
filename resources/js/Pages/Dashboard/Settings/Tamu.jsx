@@ -1,6 +1,7 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import { sanitizePhoneNumber } from '@/utils/phone';
 
 const defaultTemplate = `Assalamu'alaikum Warahmatullahi Wabarakatuh
 
@@ -119,7 +120,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
         const lines = importText.trim().split('\n').filter(l => l.trim());
         const guestsData = lines.map(line => {
             const parts = line.split(',').map(p => p.trim());
-            return { name: parts[0] || '', phone: parts[1] || '', group_name: parts[2] || '' };
+            return { name: parts[0] || '', phone: sanitizePhoneNumber(parts[1] || ''), group_name: parts[2] || '' };
         }).filter(g => g.name);
         if (guestsData.length === 0) return;
         router.post(route('settings.tamu.import'), { guests: guestsData }, {
@@ -287,7 +288,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 mb-1">No. WhatsApp (Opsional)</label>
-                                        <input type="text" value={data.phone} onChange={(e) => setData('phone', e.target.value)}
+                                        <input type="text" value={data.phone} onChange={(e) => setData('phone', sanitizePhoneNumber(e.target.value))}
                                             placeholder="08xxxxxxxxxx"
                                             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300" />
                                     </div>
@@ -705,7 +706,7 @@ export default function Tamu({ guests, maxGuests, rsvps, rsvpStats, wishes, allG
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 mb-1">No. WhatsApp (Opsional)</label>
-                                <input type="text" value={editGuest.phone || ''} onChange={(e) => setEditGuest({ ...editGuest, phone: e.target.value })}
+                                <input type="text" value={editGuest.phone || ''} onChange={(e) => setEditGuest({ ...editGuest, phone: sanitizePhoneNumber(e.target.value) })}
                                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-300" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">

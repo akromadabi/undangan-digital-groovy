@@ -54,6 +54,14 @@ class ResellerRegisterController extends Controller
             return back()->with('error', 'Pendaftaran reseller baru saat ini sedang ditutup.');
         }
 
+        if ($request->has('phone')) {
+            $cleanedPhone = preg_replace('/[^0-9]/', '', $request->phone);
+            if (str_starts_with($cleanedPhone, '62')) {
+                $cleanedPhone = '0' . substr($cleanedPhone, 2);
+            }
+            $request->merge(['phone' => $cleanedPhone]);
+        }
+
         $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
@@ -93,7 +101,8 @@ class ResellerRegisterController extends Controller
         ]);
 
         if ($annualFee <= 0) {
-            return redirect()->route('register.reseller.success');
+            \Illuminate\Support\Facades\Auth::login($reseller);
+            return redirect($this->getResellerDashboardUrl($reseller));
         }
 
         // Create Payment for annual subscription
@@ -127,6 +136,25 @@ class ResellerRegisterController extends Controller
     }
 
     /**
+     * Helper to get reseller dashboard URL (subdomain or custom domain).
+     */
+    private function getResellerDashboardUrl(User $user): string
+    {
+        $setting = ResellerSetting::where('user_id', $user->id)->first();
+        if ($setting) {
+            if (!empty($setting->custom_domain)) {
+                return request()->getScheme() . '://' . $setting->custom_domain . '/admin';
+            }
+            if (!empty($setting->subdomain)) {
+                $centralHost = parse_url(config('app.url'), PHP_URL_HOST) ?: request()->getHost();
+                $port = request()->getPort() && !in_array(request()->getPort(), [80, 443]) ? ':' . request()->getPort() : '';
+                return request()->getScheme() . '://' . $setting->subdomain . '.' . $centralHost . $port . '/admin';
+            }
+        }
+        return '/admin';
+    }
+
+    /**
      * Show QRIS payment page for reseller registration.
      */
     public function showPayment(Payment $payment)
@@ -134,6 +162,10 @@ class ResellerRegisterController extends Controller
         $payment->load('user');
 
         if ($payment->status === 'paid') {
+            if ($payment->user && $payment->user->is_active) {
+                \Illuminate\Support\Facades\Auth::login($payment->user);
+                return redirect($this->getResellerDashboardUrl($payment->user));
+            }
             return redirect()->route('register.reseller.success');
         }
 
@@ -191,17 +223,30 @@ class ResellerRegisterController extends Controller
             }
         }
 
+        $redirectUrl = '/admin';
+        if ($payment->status === 'paid' && $payment->user) {
+            if (!\Illuminate\Support\Facades\Auth::check()) {
+                \Illuminate\Support\Facades\Auth::login($payment->user);
+            }
+            $redirectUrl = $this->getResellerDashboardUrl($payment->user);
+        }
+
         return response()->json([
             'status' => $payment->status,
             'is_paid' => $payment->status === 'paid',
+            'redirect_url' => $redirectUrl,
         ]);
     }
 
     /**
      * Display the successful registration landing page.
      */
-    public function success(): Response
+    public function success()
     {
+        if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->role === 'admin' && \Illuminate\Support\Facades\Auth::user()->is_active) {
+            return redirect($this->getResellerDashboardUrl(\Illuminate\Support\Facades\Auth::user()));
+        }
+
         $adminWhatsapp = GlobalSetting::getValue('footer_whatsapp') ?: GlobalSetting::getValue('mpwav9_sender_number') ?: '6283132211830';
         $adminEmail = GlobalSetting::getValue('footer_email') ?: 'admin@groovy.com';
 

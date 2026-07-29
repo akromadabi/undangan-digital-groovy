@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
+import { sanitizePhoneNumber } from '@/utils/phone';
 import CustomDomainTutorialModal from '@/Components/CustomDomainTutorialModal';
 import axios from 'axios';
 
@@ -119,7 +120,7 @@ export default function Create({ centralHost = 'undangan.com' }) {
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-[#999] mb-1.5">Telepon</label>
-                                <input type="text" value={data.phone} onChange={e => setData('phone', e.target.value)} className={inputClass('phone')} placeholder="08xx" />
+                                <input type="text" value={data.phone} onChange={e => setData('phone', sanitizePhoneNumber(e.target.value))} className={inputClass('phone')} placeholder="08xx" />
                             </div>
                         </div>
                     </div>
