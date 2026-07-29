@@ -90,11 +90,60 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
 
     const handleLogo = (e) => {
         const file = e.target.files[0];
-        if (file) {
+        if (!file) return;
+
+        // If SVG or small file (< 500KB), use as-is
+        if (file.type === 'image/svg+xml' || file.size < 500 * 1024) {
             setData('brand_logo', file);
             setData('remove_logo', false);
             setPreview(URL.createObjectURL(file));
+            return;
         }
+
+        // Compress large raster images (JPEG, PNG, WebP) on client side
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const maxDim = 800; // 800px max dimension is ideal for brand logos
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", {
+                            type: 'image/png',
+                            lastModified: Date.now(),
+                        });
+                        setData('brand_logo', compressedFile);
+                        setData('remove_logo', false);
+                        setPreview(URL.createObjectURL(compressedFile));
+                    } else {
+                        setData('brand_logo', file);
+                        setData('remove_logo', false);
+                        setPreview(URL.createObjectURL(file));
+                    }
+                }, 'image/png', 0.9);
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
     };
 
     const removeLogo = () => {

@@ -1,0 +1,1 @@
+import{u as m,j as s}from"./app-BDtXLbpF.js";import{A as i}from"./AdminLayout-D43cZX8B.js";import{S as n}from"./SuperAdminLayout-C7_uLZLy.js";function d({children:o,title:t}){const{adminRoutePrefix:r}=m().props,a=r==="/super-admin"?n:i;return s.jsx(a,{title:t,children:o})}export{d as D};

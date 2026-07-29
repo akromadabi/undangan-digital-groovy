@@ -33,14 +33,13 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, $request) {
+            return back()->with('error', 'Ukuran file yang diunggah terlalu besar untuk server. Silakan pilih foto dengan ukuran lebih kecil.');
+        });
+
         $exceptions->respond(function ($response, $exception, $request) {
             if ($response->getStatusCode() === 419) {
-                // If accessing admin/dashboard routes, redirect to login page with a friendly message
-                if ($request->is('dashboard*') || $request->is('admin*') || $request->is('super-admin*') || $request->is('wizard*')) {
-                    return redirect()->route('login')->with('error', 'Sesi Anda telah berakhir karena tidak ada aktivitas. Silakan masuk kembali.');
-                }
-                // For public/invitation pages, redirect back to refresh the CSRF token automatically
-                return back()->with('error', 'Sesi halaman telah kedaluwarsa. Silakan coba kembali.');
+                return back()->with('error', 'Sesi halaman telah kedaluwarsa atau file terlalu besar. Silakan coba simpan kembali.');
             }
             return $response;
         });
