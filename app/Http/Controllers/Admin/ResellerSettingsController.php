@@ -40,7 +40,7 @@ class ResellerSettingsController extends Controller
     {
         $request->validate([
             'brand_name' => 'required|string|max:100',
-            'brand_logo' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
+            'brand_logo' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:10240',
             'site_title' => 'nullable|string|max:255',
             'site_motto' => 'nullable|string|max:1000',
             'footer_whatsapp' => 'nullable|string|max:30',
@@ -131,21 +131,29 @@ class ResellerSettingsController extends Controller
         }
 
         if ($request->hasFile('brand_logo')) {
-            // Delete old logo
-            if ($settings->brand_logo && Storage::disk('public')->exists($settings->brand_logo)) {
-                Storage::disk('public')->delete($settings->brand_logo);
-            }
-            
             $file = $request->file('brand_logo');
-            \App\Helpers\ImageCompressor::compress($file);
-            
-            $ext = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'jpg';
-            if ($ext === 'jpeg') { $ext = 'jpg'; }
-            $filename = 'logo-reseller-' . time() . '-' . rand(100, 999) . '.' . $ext;
-            $settings->brand_logo = $file->storeAs('reseller/logos', $filename, 'public');
+            if ($file->isValid()) {
+                // Delete old logo
+                if ($settings->brand_logo && Storage::disk('public')->exists($settings->brand_logo)) {
+                    Storage::disk('public')->delete($settings->brand_logo);
+                }
+                
+                $ext = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'jpg';
+                if ($ext === 'jpeg') { $ext = 'jpg'; }
+                $filename = 'logo-reseller-' . time() . '-' . rand(100, 999) . '.' . $ext;
+                $path = $file->storeAs('reseller/logos', $filename, 'public');
+
+                try {
+                    \App\Helpers\ImageCompressor::compress(Storage::disk('public')->path($path));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Logo compression failed: ' . $e->getMessage());
+                }
+
+                $settings->brand_logo = $path;
+            }
         }
 
-        if ($request->has('remove_logo') && $request->remove_logo) {
+        if ($request->boolean('remove_logo')) {
             if ($settings->brand_logo && Storage::disk('public')->exists($settings->brand_logo)) {
                 Storage::disk('public')->delete($settings->brand_logo);
             }

@@ -259,7 +259,7 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                                                 Hapus logo
                                             </button>
                                         )}
-                                        <p className="text-xs text-[#bbb]">PNG, JPG, SVG, WebP. Max 2MB.</p>
+                                        <p className="text-xs text-[#bbb]">PNG, JPG, SVG, WebP. Max 10MB.</p>
                                         {errors.brand_logo && <p className="text-xs text-red-500">{errors.brand_logo}</p>}
                                     </div>
                                 </div>
