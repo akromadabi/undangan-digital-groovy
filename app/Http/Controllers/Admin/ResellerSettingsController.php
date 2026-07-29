@@ -56,7 +56,7 @@ class ResellerSettingsController extends Controller
             'custom_domain' => 'nullable|string|max:255|unique:reseller_settings,custom_domain,' . $this->getSettings()->id,
             'hide_demo_plan_selector' => 'nullable|boolean',
             'payment_mode' => 'nullable|string|in:admin,reseller_gateway,manual',
-            'reseller_gateway_type' => 'nullable|string|in:midtrans,tripay,xendit',
+            'reseller_gateway_type' => 'nullable|string|in:siapppay,midtrans,tripay,xendit',
             'reseller_midtrans_settings' => 'nullable|array',
             'reseller_tripay_settings' => 'nullable|array',
             'reseller_xendit_settings' => 'nullable|array',
@@ -78,6 +78,7 @@ class ResellerSettingsController extends Controller
         $settings->hide_demo_plan_selector = $request->boolean('hide_demo_plan_selector');
         $settings->payment_mode = $request->payment_mode ?? 'admin';
         $settings->reseller_gateway_type = $request->reseller_gateway_type;
+        // Note: reseller_siapppay_settings column doesn't exist in DB yet — skip saving it
         $settings->reseller_midtrans_settings = $request->reseller_midtrans_settings;
         $settings->reseller_tripay_settings = $request->reseller_tripay_settings;
         $settings->reseller_xendit_settings = $request->reseller_xendit_settings;

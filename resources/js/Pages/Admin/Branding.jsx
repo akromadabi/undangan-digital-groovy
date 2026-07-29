@@ -94,8 +94,8 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
 
         // If SVG or small file (< 500KB), use as-is
         if (file.type === 'image/svg+xml' || file.size < 500 * 1024) {
-            setData('brand_logo', file);
-            setData('remove_logo', false);
+            // Use object form to avoid race condition with consecutive setData calls in Inertia v2
+            setData(prev => ({ ...prev, brand_logo: file, remove_logo: false }));
             setPreview(URL.createObjectURL(file));
             return;
         }
@@ -131,12 +131,11 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
                             type: 'image/png',
                             lastModified: Date.now(),
                         });
-                        setData('brand_logo', compressedFile);
-                        setData('remove_logo', false);
+                        // Single setData call to prevent Inertia v2 batch override losing the File object
+                        setData(prev => ({ ...prev, brand_logo: compressedFile, remove_logo: false }));
                         setPreview(URL.createObjectURL(compressedFile));
                     } else {
-                        setData('brand_logo', file);
-                        setData('remove_logo', false);
+                        setData(prev => ({ ...prev, brand_logo: file, remove_logo: false }));
                         setPreview(URL.createObjectURL(file));
                     }
                 }, 'image/png', 0.9);
@@ -147,8 +146,8 @@ export default function Branding({ settings, centralHost = 'undangan.com' }) {
     };
 
     const removeLogo = () => {
-        setData('brand_logo', null);
-        setData('remove_logo', true);
+        // Single setData call to avoid race condition
+        setData(prev => ({ ...prev, brand_logo: null, remove_logo: true }));
         setPreview(null);
     };
 
