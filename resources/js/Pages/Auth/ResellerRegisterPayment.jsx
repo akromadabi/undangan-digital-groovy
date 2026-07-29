@@ -9,6 +9,7 @@ export default function ResellerRegisterPayment({ payment, annualFee }) {
     const metadata = payment.metadata || {};
     const qrUrl = metadata.qr_url || null;
     const qrString = metadata.qr_string || null;
+    const displayAmount = metadata.total_amount || payment.amount || annualFee;
 
     useEffect(() => {
         if (status === 'paid') return;
@@ -59,7 +60,7 @@ export default function ResellerRegisterPayment({ payment, annualFee }) {
                     {/* Ringkasan Biaya */}
                     <div className="bg-orange-50/50 border border-orange-100 rounded-2xl p-4 text-center">
                         <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Tagihan Registrasi</div>
-                        <div className="text-3xl font-black text-[#E5654B] mt-1">{formatRupiah(annualFee)}</div>
+                        <div className="text-3xl font-black text-[#E5654B] mt-1">{formatRupiah(displayAmount)}</div>
                         <div className="text-[10px] text-gray-400 mt-0.5">ID Transaksi: #{payment.external_id || payment.id}</div>
                     </div>
 

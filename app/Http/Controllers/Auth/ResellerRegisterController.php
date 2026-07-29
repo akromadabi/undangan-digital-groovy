@@ -169,7 +169,7 @@ class ResellerRegisterController extends Controller
             return redirect()->route('register.reseller.success');
         }
 
-        $annualFee = $payment->amount;
+        $annualFee = (float) ($payment->metadata['total_amount'] ?? $payment->amount);
 
         return Inertia::render('Auth/ResellerRegisterPayment', [
             'payment' => $payment,

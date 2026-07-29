@@ -1308,7 +1308,7 @@ class PaymentController extends Controller
             'payment' => $payment,
             'qrUrl' => $payment->metadata['qr_url'] ?? null,
             'qrString' => $payment->metadata['qr_string'] ?? null,
-            'totalAmount' => (int) $payment->amount,
+            'totalAmount' => (int) ($payment->metadata['total_amount'] ?? $payment->amount),
         ]);
     }
 
