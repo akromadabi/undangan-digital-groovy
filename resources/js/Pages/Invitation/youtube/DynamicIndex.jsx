@@ -161,7 +161,7 @@ function CountdownTimer({ targetDate, startTime }) {
         if (!targetDate) return;
         const ds = String(targetDate).substring(0, 10);
         const timeStr = startTime ? String(startTime).substring(0, 5) : '08:00';
-        const target = parseSafeDate(targetDate, primaryEvent?.start_time);
+        const target = parseSafeDate(targetDate, startTime);
         if (isNaN(target.getTime())) return;
         const tick = () => {
             const diff = target - new Date();
