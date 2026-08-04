@@ -3,7 +3,7 @@ import { Link } from '@inertiajs/react';
 import AnimatedLikeButton from './AnimatedLikeButton';
 
 const getImageUrl = (path) => {
-    if (!path) return '';
+    if (!path || typeof path !== 'string') return '';
     if (path.startsWith('http') || path.startsWith('/') || path.startsWith('data:')) return path;
     return `/storage/${path}`;
 };

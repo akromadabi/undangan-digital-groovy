@@ -266,12 +266,13 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
 
     const getThemePreviewImage = (theme) => {
         if (!theme) return null;
-        if (theme.preview_images && theme.preview_images.length > 0) {
-            return theme.preview_images[0].startsWith('http') || theme.preview_images[0].startsWith('/')
-                ? theme.preview_images[0]
-                : `/storage/${theme.preview_images[0]}`;
+        const img0 = (theme.preview_images && Array.isArray(theme.preview_images) && theme.preview_images.length > 0) ? theme.preview_images[0] : null;
+        if (img0 && typeof img0 === 'string') {
+            return img0.startsWith('http') || img0.startsWith('/')
+                ? img0
+                : `/storage/${img0}`;
         }
-        if (theme.thumbnail) {
+        if (theme.thumbnail && typeof theme.thumbnail === 'string') {
             return theme.thumbnail.startsWith('http') || theme.thumbnail.startsWith('/')
                 ? theme.thumbnail
                 : `/storage/${theme.thumbnail}`;
@@ -573,7 +574,7 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
     );
 
     const getWhatsappLink = (number, text = 'Halo, saya ingin bertanya tentang undangan digital.') => {
-        if (!number) return '#';
+        if (!number || typeof number !== 'string') return '#';
         let cleaned = number.replace(/\D/g, '');
         if (cleaned.startsWith('0')) {
             cleaned = '62' + cleaned.slice(1);
@@ -584,14 +585,18 @@ export default function ModernSplit({ reseller, plans = [], themes = [], greetin
     };
 
     const getSocialLinkInfo = (platform, value) => {
-        let href = value;
-        let label = platform.toUpperCase();
-        let displayValue = value;
+        let href = value || '#';
+        let label = (platform || '').toUpperCase();
+        let displayValue = value || '';
         let iconSvg = null;
+
+        if (!value || typeof value !== 'string') {
+            return { href: '#', label, displayValue: '', iconSvg: null };
+        }
 
         const cleanValue = value.startsWith('@') ? value.slice(1) : value;
 
-        switch (platform.toLowerCase()) {
+        switch ((platform || '').toLowerCase()) {
             case 'instagram':
                 href = value.startsWith('http') ? value : `https://instagram.com/${cleanValue}`;
                 label = 'Instagram';

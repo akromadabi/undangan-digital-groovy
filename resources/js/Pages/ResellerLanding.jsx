@@ -416,7 +416,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
     );
 
     const getWhatsappLink = (number, text = 'Halo, saya ingin bertanya tentang undangan digital.') => {
-        if (!number) return '#';
+        if (!number || typeof number !== 'string') return '#';
         let cleaned = number.replace(/\D/g, '');
         if (cleaned.startsWith('0')) {
             cleaned = '62' + cleaned.slice(1);
@@ -427,14 +427,18 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
     };
 
     const getSocialLinkInfo = (platform, value) => {
-        let href = value;
-        let label = platform.toUpperCase();
-        let displayValue = value;
+        let href = value || '#';
+        let label = (platform || '').toUpperCase();
+        let displayValue = value || '';
         let iconSvg = null;
+
+        if (!value || typeof value !== 'string') {
+            return { href: '#', label, displayValue: '', iconSvg: null };
+        }
 
         const cleanValue = value.startsWith('@') ? value.slice(1) : value;
 
-        switch (platform.toLowerCase()) {
+        switch ((platform || '').toLowerCase()) {
             case 'instagram':
                 href = value.startsWith('http') ? value : `https://instagram.com/${cleanValue}`;
                 label = 'Instagram';
@@ -588,7 +592,7 @@ export default function ResellerLanding({ reseller, plans = [], themes = [], gre
     };
 
     const getThumbnailUrl = (path) => {
-        if (!path) return '';
+        if (!path || typeof path !== 'string') return '';
         if (path.startsWith('http') || path.startsWith('/') || path.startsWith('data:')) return path;
         return `/storage/${path}`;
     };
