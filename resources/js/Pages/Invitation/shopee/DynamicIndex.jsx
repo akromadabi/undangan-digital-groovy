@@ -1722,7 +1722,7 @@ function ShopinvityThemeContent({ invitation, sections, brideGrooms, events, gal
         if (!primaryEvent?.event_date) return;
         const ds = String(primaryEvent.event_date).substring(0, 10);
         const timeStr = primaryEvent.start_time ? primaryEvent.start_time.substring(0, 5) : '08:00';
-        const target = parseSafeDate(targetDate, primaryEvent?.start_time);
+        const target = parseSafeDate(primaryEvent.event_date, primaryEvent?.start_time);
         if (isNaN(target.getTime())) return;
 
         const tick = () => {
